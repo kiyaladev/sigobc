@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Déclaration de Recettes</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 10mm;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+        padding: 5px;
+      }
+
+      .container {
+        max-width: 210mm;
+        margin: 0 auto;
+        background-color: white;
+        padding: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .declaration {
+        border: 2px solid #333;
+        padding: 12px;
+        margin-bottom: 8px;
+        position: relative;
+        page-break-inside: avoid;
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+      }
+
+      .left-header {
+        font-size: 9px;
+        line-height: 1.4;
+      }
+
+      .right-header {
+        text-align: right;
+        font-size: 9px;
+        line-height: 1.4;
+      }
+
+      .title {
+        text-align: center;
+        font-size: 14px;
+        font-weight: bold;
+        margin: 8px 0 12px 0;
+        letter-spacing: 1px;
+      }
+
+      .field {
+        margin-bottom: 6px;
+        font-size: 10px;
+        line-height: 1.4;
+      }
+
+      .field-label {
+        display: inline-block;
+        min-width: 180px;
+      }
+
+      .field-value {
+        display: inline-block;
+        border-bottom: 1px dotted #666;
+        min-width: 200px;
+        padding: 0 5px;
+      }
+
+      .field-inline {
+        display: inline-block;
+        margin-right: 20px;
+      }
+
+      .amount {
+        text-align: right;
+        margin: 8px 0;
+        font-size: 10px;
+      }
+
+      .signature-section {
+        margin-top: 10px;
+        text-align: right;
+        font-size: 9px;
+        line-height: 1.6;
+      }
+
+      .footer {
+        margin-top: 10px;
+        font-size: 8px;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .underline {
+        border-bottom: 1px dotted #333;
+        display: inline-block;
+        min-width: 100px;
+        padding: 0 5px;
+      }
+
+      input[type='text'],
+      input[type='number'],
+      input[type='date'] {
+        border: none;
+        border-bottom: 1px dotted #666;
+        padding: 2px 5px;
+        font-family: Arial, sans-serif;
+        font-size: 10px;
+        background: transparent;
+      }
+
+      input:focus {
+        outline: none;
+        border-bottom: 1px solid #333;
+      }
+
+      textarea {
+        border: 1px solid #ccc;
+        padding: 3px;
+        font-family: Arial, sans-serif;
+        font-size: 10px;
+        width: 100%;
+        resize: vertical;
+      }
+
+      .nature-recette {
+        margin: 8px 0;
+      }
+
+      .montant-section {
+        margin: 8px 0;
+        line-height: 1.6;
+      }
+
+      @media print {
+        body {
+          background-color: white;
+          padding: 0;
+        }
+
+        .container {
+          max-width: 100%;
+          padding: 0;
+          box-shadow: none;
+        }
+
+        .declaration {
+          page-break-inside: avoid;
+          margin-bottom: 5mm;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Première déclaration -->
+      <div class="declaration">
+        <div class="header">
+          <div class="left-header">
+            <strong>RECETTE MUNICIPALE</strong><br />
+            DE <span class="underline">Vavaua</span><br />
+            COMMUNE<br />
+            DE <span class="underline">Vavaua</span>
+          </div>
+          <div class="right-header">
+            Code Commune : <span class="underline">433</span><br />
+            Exercice : <span class="underline">2025</span><br />
+            Article : <span class="underline">401</span><br />
+            Pièce n° : <span class="underline">661</span>
+          </div>
+        </div>
+
+        <div class="title">DÉCLARATION<br />DE RECETTES</div>
+
+        <div class="field">
+          <span class="field-label">NOM et Adresse de la partie versante :</span>
+          <input type="text" value="PGSF" style="width: 300px" />
+        </div>
+
+        <div class="field">
+          <span class="field-label">ABIDJAN</span>
+        </div>
+
+        <div class="field">
+          <span class="field-inline">
+            <span class="field-label">Date d'encaissement :</span>
+            <input type="text" value="170 FN° 63" style="width: 120px" />
+          </span>
+          <span class="field-inline"
+            >du <input type="date" value="2025-10-31" style="width: 150px"
+          /></span>
+        </div>
+
+        <div class="nature-recette">
+          <div class="field-label">Nature de la recette :</div>
+          <textarea rows="2" style="margin-top: 5px">
+Subventions d'équipement de l'Etat
+cent dix-neuf millions quatre-vingt-neuf mille huit cent quatre-vingt-dix-sept FCFA</textarea
+          >
+        </div>
+
+        <div class="montant-section">
+          <div class="field">
+            <span class="field-label">Montant de la recette :</span>
+            <input type="text" value="119 089 897" style="width: 150px; text-align: right" />
+            <span style="margin-left: 10px">FCFA</span>
+          </div>
+
+          <div class="signature-section">
+            <div>CT 53 du <input type="date" value="2025-10-31" style="width: 150px" /></div>
+            <div>À Vavaua , le <input type="date" value="2025-10-31" style="width: 150px" /></div>
+            <div style="margin-top: 10px">L'ordonnateur,</div>
+          </div>
+        </div>
+
+        <div class="footer">
+          <div>CL 12</div>
+          <div>Original : chambre de Comptes</div>
+        </div>
+      </div>
+
+      <!-- Deuxième déclaration -->
+      <div class="declaration">
+        <div class="header">
+          <div class="left-header">
+            <strong>RECETTE MUNICIPALE</strong><br />
+            DE <span class="underline">Vavaua</span><br />
+            COMMUNE<br />
+            DE <span class="underline">Vavaua</span>
+          </div>
+          <div class="right-header">
+            Code Commune : <span class="underline">433</span><br />
+            Exercice : <span class="underline">2025</span><br />
+            Article : <span class="underline">401</span><br />
+            Pièce n° : <span class="underline">661</span>
+          </div>
+        </div>
+
+        <div class="title">DÉCLARATION<br />DE RECETTES</div>
+
+        <div class="field">
+          <span class="field-label">NOM et Adresse de la partie versante :</span>
+          <input type="text" value="PGSF" style="width: 300px" />
+        </div>
+
+        <div class="field">
+          <span class="field-label">ABIDJAN</span>
+        </div>
+
+        <div class="field">
+          <span class="field-inline">
+            <span class="field-label">Date d'encaissement :</span>
+            <input type="text" value="170 FN° 63" style="width: 120px" />
+          </span>
+          <span class="field-inline"
+            >du <input type="date" value="2025-10-31" style="width: 150px"
+          /></span>
+        </div>
+
+        <div class="nature-recette">
+          <div class="field-label">Nature de la recette :</div>
+          <textarea rows="2" style="margin-top: 5px">
+Subventions d'équipement de l'Etat
+Cent dix-neuf millions quatre-vingt-neuf mille huit cent quatre-vingt-dix-sept FCFA</textarea
+          >
+        </div>
+
+        <div class="montant-section">
+          <div class="field">
+            <span class="field-label">Montant de la recette :</span>
+            <input type="text" value="119 089 897" style="width: 150px; text-align: right" />
+            <span style="margin-left: 10px">FCFA</span>
+          </div>
+
+          <div class="signature-section">
+            <div>CT 53 du <input type="date" value="2025-10-31" style="width: 150px" /></div>
+            <div>À Vavaua , le <input type="date" value="2025-10-31" style="width: 150px" /></div>
+            <div style="margin-top: 10px">L'ordonnateur,</div>
+          </div>
+        </div>
+
+        <div class="footer">
+          <div>CL 13</div>
+          <div>Duplicata : Mairie</div>
+        </div>
+      </div>
+    </div>
+
+    <script src="/vue.global.js"></script>
+    <script>
+      // Fonction pour convertir un nombre en lettres (français)
+      function numberToWords(num) {
+        const units = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf'];
+        const teens = [
+          'dix',
+          'onze',
+          'douze',
+          'treize',
+          'quatorze',
+          'quinze',
+          'seize',
+          'dix-sept',
+          'dix-huit',
+          'dix-neuf',
+        ];
+        const tens = [
+          '',
+          '',
+          'vingt',
+          'trente',
+          'quarante',
+          'cinquante',
+          'soixante',
+          'soixante-dix',
+          'quatre-vingt',
+          'quatre-vingt-dix',
+        ];
+
+        if (num === 0) return 'zéro';
+        if (num < 10) return units[num];
+        if (num < 20) return teens[num - 10];
+        if (num < 100) {
+          const ten = Math.floor(num / 10);
+          const unit = num % 10;
+          if (ten === 7 || ten === 9) {
+            return tens[ten] + '-' + (unit === 0 ? 'dix' : teens[unit]);
+          }
+          return tens[ten] + (unit ? '-' + units[unit] : '');
+        }
+        if (num < 1000) {
+          const hundred = Math.floor(num / 100);
+          const rest = num % 100;
+          return (
+            (hundred > 1 ? units[hundred] + ' ' : '') +
+            'cent' +
+            (rest ? ' ' + numberToWords(rest) : '')
+          );
+        }
+        if (num < 1000000) {
+          const thousand = Math.floor(num / 1000);
+          const rest = num % 1000;
+          return (
+            (thousand > 1 ? numberToWords(thousand) + ' ' : '') +
+            'mille' +
+            (rest ? ' ' + numberToWords(rest) : '')
+          );
+        }
+        const million = Math.floor(num / 1000000);
+        const rest = num % 1000000;
+        return (
+          numberToWords(million) +
+          ' million' +
+          (million > 1 ? 's' : '') +
+          (rest ? ' ' + numberToWords(rest) : '')
+        );
+      }
+
+      // Écouter les messages de la fenêtre parent
+      window.addEventListener('message', (event) => {
+        if (event.data.type === 'FILL_DECLARATION' || event.data.type === 'FILL_AND_PRINT') {
+          const data = event.data.data;
+          const declarations = document.querySelectorAll('.declaration');
+
+          declarations.forEach((decl) => {
+            // Remplir les champs
+            decl.querySelectorAll('.underline').forEach((el) => {
+              const text = el.previousSibling?.textContent?.trim() || '';
+              if (text.includes('DE')) {
+                el.textContent = data.mairie;
+              } else if (text.includes('Code Commune')) {
+                el.textContent = data.codeCommune;
+              } else if (text.includes('Exercice')) {
+                el.textContent = data.exercice;
+              } else if (text.includes('Article')) {
+                el.textContent = data.article;
+              } else if (text.includes('Pièce')) {
+                el.textContent = data.numeroPiece;
+              }
+            });
+
+            // Remplir les inputs
+            const inputs = decl.querySelectorAll('input');
+            inputs.forEach((input) => {
+              const label =
+                input.previousElementSibling?.textContent || input.parentElement?.textContent || '';
+
+              if (
+                label.includes('NOM et Adresse') ||
+                input.previousElementSibling?.classList.contains('field-label')
+              ) {
+                input.value = data.nomPartieVersante;
+              } else if (label.includes("Date d'encaissement") && input.type === 'text') {
+                input.value = data.numeroEncaissement;
+              } else if (input.type === 'date' && label.includes('du')) {
+                input.value = data.dateEncaissement;
+              } else if (label.includes('Montant de la recette')) {
+                input.value = new Intl.NumberFormat('fr-FR').format(data.montantRecette);
+              } else if (
+                label.includes('CT 53 du') ||
+                label.includes('À ' + data.mairie + ' , le')
+              ) {
+                input.value = data.dateEncaissement;
+              }
+            });
+
+            // Remplir l'adresse
+            const adresseFields = decl.querySelectorAll('.field-label');
+            adresseFields.forEach((field) => {
+              if (
+                field.textContent.trim() === data.adresse ||
+                field.parentElement?.querySelector('input')
+              ) {
+                const nextSibling = field.nextElementSibling;
+                if (!nextSibling || nextSibling.tagName !== 'INPUT') {
+                  field.textContent = data.adresse;
+                }
+              }
+            });
+
+            // Remplir la nature de la recette avec montant en lettres
+            const textarea = decl.querySelector('textarea');
+            if (textarea) {
+              const montantEnLettres = numberToWords(data.montantRecette);
+              textarea.value = `${data.natureRecette}\n${montantEnLettres} FCFA`;
+              textarea.style.height = 'auto';
+              textarea.style.height = textarea.scrollHeight + 'px';
+            }
+          });
+
+          // Si demande d'impression
+          if (event.data.type === 'FILL_AND_PRINT') {
+            setTimeout(() => {
+              window.print();
+            }, 500);
+          }
+        }
+      });
+
+      // Auto-resize textarea
+      document.querySelectorAll('textarea').forEach((textarea) => {
+        textarea.addEventListener('input', function () {
+          this.style.height = 'auto';
+          this.style.height = this.scrollHeight + 'px';
+        });
+      });
+    </script>
+  </body>
+</html>

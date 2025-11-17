@@ -116,12 +116,33 @@ export default defineConfig((ctx) => {
       // directives: [],
 
       // Quasar plugins
-      plugins: [],
+      plugins: [
+        'Notify',
+        'Dialog',
+        'LocalStorage',
+        'SessionStorage',
+        'Loading',
+        'LoadingBar',
+        'Meta',
+      ],
     },
 
     // animations: 'all', // --- includes all animations
     // https://v2.quasar.dev/options/animations
-    animations: [],
+    animations: [
+      'fadeIn',
+      'fadeOut',
+      'fadeInUp',
+      'fadeInDown',
+      'fadeInLeft',
+      'fadeInRight',
+      'slideInUp',
+      'slideInDown',
+      'slideInLeft',
+      'slideInRight',
+      'zoomIn',
+      'zoomOut',
+    ],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#sourcefiles
     // sourceFiles: {

@@ -41,3 +41,13 @@ quasar build
 ### Customize the configuration
 
 See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-vite/quasar-config-js).
+
+je veux faire deux applications avec 
+
+LOGICIEL 1
+
+une Table Mairie
+Une Table Personnel
+Une Table Taxe
+Une Table Declaration ou Paiement 
+Une Table Borderau
