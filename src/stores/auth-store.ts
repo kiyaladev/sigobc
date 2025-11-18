@@ -10,24 +10,60 @@ export const useAuthStore = defineStore('auth', () => {
 
   // Getters
   const userName = computed(() =>
-    currentUser.value ? `${currentUser.value.prenom} ${currentUser.value.nom}` : ''
+    currentUser.value ? `${currentUser.value.prenom} ${currentUser.value.nom}` : '',
   );
 
   const userRole = computed(() => currentUser.value?.role || 'operateur');
 
   const isAdmin = computed(() => currentUser.value?.role === 'admin');
 
-  const isGestionnaire = computed(() =>
-    currentUser.value?.role === 'admin' || currentUser.value?.role === 'gestionnaire'
+  const isGestionnaire = computed(
+    () => currentUser.value?.role === 'admin' || currentUser.value?.role === 'gestionnaire',
   );
 
   // Actions
+  async function ensureAdminExists(): Promise<void> {
+    try {
+      const adminUser = await db.utilisateurs.where('username').equals('admin').first();
+
+      if (!adminUser) {
+        console.log('🔧 Création du compte admin par défaut...');
+        await db.utilisateurs.add({
+          username: 'admin',
+          password: 'admin123',
+          nom: 'Administrateur',
+          prenom: 'Système',
+          email: 'admin@tresor.gov',
+          role: 'admin',
+          actif: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+        console.log('✅ Compte admin créé avec succès');
+      }
+    } catch (error) {
+      console.error('Erreur lors de la création du compte admin:', error);
+    }
+  }
+
   async function login(username: string, password: string): Promise<boolean> {
     try {
-      const user = await db.utilisateurs
-        .where('username')
-        .equals(username)
-        .first();
+      console.log('🔍 Tentative de connexion pour:', username);
+
+      // Vérifier si le compte admin existe, sinon le créer
+      await ensureAdminExists();
+
+      const user = await db.utilisateurs.where('username').equals(username).first();
+
+      console.log('👤 Utilisateur trouvé:', user ? 'Oui' : 'Non');
+      if (user) {
+        console.log('📋 Détails:', {
+          username: user.username,
+          actif: user.actif,
+          role: user.role,
+          passwordMatch: user.password === password,
+        });
+      }
 
       if (user && user.password === password && user.actif) {
         // En production, utiliser un vrai système de hash et JWT
@@ -45,9 +81,11 @@ export const useAuthStore = defineStore('auth', () => {
           updatedAt: new Date(),
         });
 
+        console.log('✅ Connexion réussie');
         return true;
       }
 
+      console.log('❌ Échec de connexion');
       return false;
     } catch (error) {
       console.error('Erreur lors de la connexion:', error);
@@ -81,10 +119,7 @@ export const useAuthStore = defineStore('auth', () => {
         return false;
       }
 
-      const user = await db.utilisateurs
-        .where('username')
-        .equals(username)
-        .first();
+      const user = await db.utilisateurs.where('username').equals(username).first();
 
       if (user && user.actif) {
         currentUser.value = user;
@@ -96,7 +131,7 @@ export const useAuthStore = defineStore('auth', () => {
       logout();
       return false;
     } catch (error) {
-      console.error('Erreur lors de la vérification de l\'authentification:', error);
+      console.error("Erreur lors de la vérification de l'authentification:", error);
       logout();
       return false;
     }
@@ -168,5 +203,6 @@ export const useAuthStore = defineStore('auth', () => {
     checkAuth,
     updateProfile,
     changePassword,
+    ensureAdminExists,
   };
 });

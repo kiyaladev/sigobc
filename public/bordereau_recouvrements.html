@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bordereau des Recouvrements - Commune de Vayoua</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 10mm;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            background: #f5f5dc;
+            padding: 20px;
+        }
+        
+        .page {
+            width: 297mm;
+            min-height: 210mm;
+            background: #fffff0;
+            margin: 0 auto;
+            padding: 15mm;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        
+        .header-left {
+            font-weight: bold;
+        }
+        
+        .header-center {
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .header-right {
+            font-weight: bold;
+        }
+        
+        .sub-header {
+            display: flex;
+            margin-bottom: 5px;
+        }
+        
+        .commune-info {
+            font-weight: bold;
+            margin-right: 50px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        th, td {
+            border: 1px solid #000;
+            padding: 4px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        
+        th {
+            background: #f0f0f0;
+            font-weight: bold;
+            font-size: 10px;
+        }
+        
+        .col-numero {
+            width: 50px;
+        }
+        
+        .col-nature {
+            width: 200px;
+            text-align: left;
+        }
+        
+        .col-nom {
+            width: 100px;
+        }
+        
+        .col-fonctionnelle {
+            width: 80px;
+        }
+        
+        .col-patrimoine {
+            width: 80px;
+        }
+        
+        .col-montant {
+            width: 100px;
+        }
+        
+        .col-date {
+            width: 100px;
+        }
+        
+        .col-recoupre {
+            width: 80px;
+        }
+        
+        .col-montant-ctrl {
+            width: 80px;
+        }
+        
+        td.nature-text {
+            text-align: left;
+            font-size: 10px;
+        }
+        
+        .empty-row td {
+            height: 25px;
+        }
+        
+        .handwritten {
+            font-family: 'Segoe Script', cursive;
+            color: #1a1a8a;
+        }
+        
+        .crossed {
+            position: relative;
+        }
+        
+        .crossed::after {
+            content: '×';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+            color: #1a1a8a;
+        }
+        
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        .footer-left {
+            width: 45%;
+            border: 1px solid #000;
+            padding: 15px;
+        }
+        
+        .footer-right {
+            width: 45%;
+            border: 1px solid #000;
+            padding: 15px;
+        }
+        
+        .signature-line {
+            margin-top: 20px;
+        }
+        
+        .ct-number {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        
+        .bordereau-info {
+            position: absolute;
+            right: 15mm;
+            top: 60px;
+        }
+        
+        .relative-container {
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <div class="page relative-container">
+        <div class="header">
+            <div class="header-left">
+                RECEITE MUNICIPALE<br>
+                DE : Vayoua
+            </div>
+            <div class="header-center">
+                BORDEREAU DES RECOUVREMENTS AVANT EMISSION DES ORDERS
+            </div>
+            <div class="header-right">
+                EXERCICE : <span class="handwritten">2025</span>
+            </div>
+        </div>
+        
+        <div class="sub-header">
+            <div class="commune-info">
+                COMMUNE DE : Vayoua<br>
+                CODE COMMUNE : 433
+            </div>
+        </div>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th rowspan="2" class="col-numero">N°</th>
+                    <th rowspan="2" class="col-nature">NATURE DE LA RECETTE</th>
+                    <th style="border-bottom: none; vertical-align: top; padding-bottom: 0;">BORDEEAU N°<br><span class="handwritten" style="font-size: 20px;">86</span></th>
+                    <th colspan="2">NUMERO DECOMPTE</th>
+                    <th rowspan="2" class="col-montant">MONTANT<br>RECOUVRER C/457</th>
+                    <th rowspan="2" class="col-date">DATE<br>D'ENCAISSEMENT<br>RESTE A<br>RECOUVRER</th>
+                    <th colspan="2">CONTROLE DES PRISES EN CHARGES</th>
+                </tr>
+                <tr>
+                    <th style="padding-top: 0;">NOM</th>
+                    <th class="col-fonctionnelle">Fonctionnelle</th>
+                    <th class="col-patrimoine">Patrimoine</th>
+                    <th class="col-recoupre">NUMERO<br>RECOUPRE</th>
+                    <th class="col-montant-ctrl">MONTANT</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>627</td>
+                    <td class="nature-text">Légalisation, signature, certification</td>
+                    <td>REGISSEUR</td>
+                    <td class="crossed"><span class="handwritten">71160</span></td>
+                    <td class="crossed"></td>
+                    <td><span class="handwritten">100 000</span> <span class="crossed"></span></td>
+                    <td><span class="handwritten">14/10/2025</span></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>458</td>
+                    <td class="nature-text">Délivrance de livret de famille et autres documents</td>
+                    <td>REGISSEUR</td>
+                    <td class="crossed"><span class="handwritten">71261</span></td>
+                    <td class="crossed"></td>
+                    <td><span class="handwritten">35 000</span> <span class="crossed"></span></td>
+                    <td><span class="handwritten">14/10/2025</span></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>439</td>
+                    <td class="nature-text">Taxe forfaitaire des petits commerçants et artisons</td>
+                    <td>REGISSEUR</td>
+                    <td class="crossed"><span class="handwritten">70000</span></td>
+                    <td class="crossed"></td>
+                    <td><span class="handwritten">266 000</span> <span class="crossed"></span></td>
+                    <td><span class="handwritten">14/10/2025</span></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>430</td>
+                    <td class="nature-text">Taxe sur de taxis</td>
+                    <td>REGISSEUR</td>
+                    <td class="crossed"><span class="handwritten">7041</span></td>
+                    <td class="crossed"></td>
+                    <td><span class="handwritten">86 000</span> <span class="crossed"></span></td>
+                    <td><span class="handwritten">14/10/2025</span></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>431</td>
+                    <td class="nature-text">Boue d'loyer</td>
+                    <td>REGISSEUR</td>
+                    <td class="crossed"><span class="handwritten">73802</span></td>
+                    <td class="crossed"></td>
+                    <td><span class="handwritten">87 000</span> <span class="crossed"></span></td>
+                    <td><span class="handwritten">14/10/2025</span></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>622</td>
+                    <td class="nature-text">Transport pur route, gares routières morin des taxis</td>
+                    <td>REGISSEUR</td>
+                    <td class="crossed"><span class="handwritten">71301</span></td>
+                    <td class="crossed"></td>
+                    <td><span class="handwritten">16 000</span> <span class="crossed"></span></td>
+                    <td><span class="handwritten">14/10/2025</span></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>433</td>
+                    <td class="nature-text">Marchés</td>
+                    <td>REGISSEUR</td>
+                    <td class="crossed"><span class="handwritten">71344</span></td>
+                    <td class="crossed"></td>
+                    <td><span class="handwritten">205 000</span> <span class="crossed"></span></td>
+                    <td><span class="handwritten">14/10/2025</span></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr class="empty-row">
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td class="crossed"></td>
+                    <td class="crossed"></td>
+                    <td class="crossed"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr class="empty-row">
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td class="crossed"></td>
+                    <td class="crossed"></td>
+                    <td class="crossed"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr class="empty-row">
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td class="crossed"></td>
+                    <td class="crossed"></td>
+                    <td class="crossed"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr class="empty-row">
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td class="crossed"></td>
+                    <td class="crossed"></td>
+                    <td class="crossed"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr class="empty-row">
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td class="crossed"></td>
+                    <td class="crossed"></td>
+                    <td class="crossed"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="footer">
+            <div class="footer-left">
+                Anêté à la somme de: <span class="handwritten">sept cent quatre-vingt six mille FCIA</span>
+                <div class="signature-line">
+                    <br>
+                    Voroua , le............./................/ 2025
+                    <br><br>
+                    <div style="text-align: center; font-weight: bold;">Le Receveur</div>
+                </div>
+            </div>
+            <div class="footer-right">
+                <div style="font-weight: bold;">DATE DE VISA DU MAIRE</div>
+                <br>
+                <div style="text-align: center;">
+                    ................/................/ 2025
+                </div>
+                <br>
+                <div style="text-align: center; font-weight: bold;">SIGNATURE ET CACHET DU MAIRE</div>
+            </div>
+        </div>
+        
+        <div class="ct-number">CT 53</div>
+    </div>
+</body>
+</html>

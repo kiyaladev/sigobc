@@ -66,6 +66,19 @@ export async function seedUtilisateurs(count: number = 10) {
   const utilisateurs: Utilisateur[] = [];
   const now = new Date();
 
+  // Créer d'abord le compte admin par défaut
+  utilisateurs.push({
+    username: 'admin',
+    password: 'admin123',
+    nom: 'Administrateur',
+    prenom: 'Système',
+    email: 'admin@tresor.gov',
+    role: 'admin',
+    actif: true,
+    createdAt: new Date(2023, 0, 1),
+    updatedAt: now,
+  });
+
   for (let i = 0; i < count; i++) {
     const prenom = randomChoice(prenoms);
     const nom = randomChoice(noms);

@@ -115,9 +115,15 @@
         Comptes de démonstration
       </div>
       <div class="text-caption text-grey-7">
-        <div class="q-mb-xs">
+        <div
+          class="q-mb-xs demo-account"
+          @click="fillAdminCredentials"
+          role="button"
+          tabindex="0"
+        >
           <q-chip size="sm" color="primary" text-color="white" dense> Admin </q-chip>
           <span class="q-ml-sm">admin / admin123</span>
+          <q-icon name="edit" size="16px" class="q-ml-xs" />
         </div>
       </div>
     </q-card>
@@ -190,6 +196,18 @@ async function onSubmit() {
   } finally {
     loading.value = false;
   }
+}
+
+function fillAdminCredentials() {
+  username.value = 'admin';
+  password.value = 'admin123';
+  $q.notify({
+    type: 'info',
+    message: 'Identifiants admin pré-remplis',
+    icon: 'info',
+    position: 'top',
+    timeout: 1500,
+  });
 }
 
 function onForgotPassword() {
@@ -419,6 +437,30 @@ function onForgotPassword() {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
   position: relative;
   z-index: 1;
+}
+
+.demo-account {
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+
+  &:hover {
+    background: rgba(255, 102, 0, 0.1);
+    transform: translateX(4px);
+
+    .q-icon {
+      opacity: 1;
+      transform: scale(1.2);
+    }
+  }
+
+  .q-icon {
+    opacity: 0.6;
+    transition: all 0.3s ease;
+  }
 }
 
 // Footer

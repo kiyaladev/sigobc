@@ -2,151 +2,69 @@
   <q-page class="q-pa-md">
     <div class="row q-mb-md justify-between items-center">
       <div class="text-h5">Statistiques des Tickets</div>
-      <q-btn-dropdown color="primary" icon="download" label="Exporter">
-        <q-list>
-          <q-item clickable v-close-popup @click="exportPDF">
-            <q-item-section avatar>
-              <q-icon name="picture_as_pdf" color="red" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>Exporter en PDF</q-item-label>
-            </q-item-section>
-          </q-item>
-          <q-item clickable v-close-popup @click="exportExcel">
-            <q-item-section avatar>
-              <q-icon name="grid_on" color="green" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>Exporter en Excel</q-item-label>
-            </q-item-section>
-          </q-item>
-        </q-list>
-      </q-btn-dropdown>
+      <ExportButtons @export-pdf="exportPDF" @export-excel="exportExcel" />
     </div>
 
     <!-- Filtres de période -->
-    <q-card class="q-mb-md">
-      <q-card-section>
-        <div class="row q-col-gutter-md items-center">
-          <div class="col-12 col-sm-3">
-            <q-select
-              v-model="periodFilter"
-              filled
-              dense
-              :options="periodOptions"
-              label="Période"
-              @update:model-value="onPeriodChange"
-            />
-          </div>
-          <div class="col-12 col-sm-3">
-            <q-input
-              v-model="dateDebut"
-              filled
-              dense
-              type="date"
-              label="Date début"
-              @update:model-value="loadStatistics"
-            />
-          </div>
-          <div class="col-12 col-sm-3">
-            <q-input
-              v-model="dateFin"
-              filled
-              dense
-              type="date"
-              label="Date fin"
-              @update:model-value="loadStatistics"
-            />
-          </div>
-          <div class="col-12 col-sm-3">
-            <q-btn
-              color="primary"
-              icon="refresh"
-              label="Actualiser"
-              @click="loadStatistics"
-              :loading="loading"
-              no-caps
-              class="full-width"
-            />
-          </div>
-        </div>
-      </q-card-section>
-    </q-card>
+    <FilterBar
+      v-model:period="periodFilter"
+      v-model:date-debut="dateDebut"
+      v-model:date-fin="dateFin"
+      :period-options="periodOptions"
+      show-period
+      show-date-range
+      show-refresh
+      :loading="loading"
+      @period-change="onPeriodChange"
+      @refresh="loadStatistics"
+      @reset="resetFilters"
+    />
 
     <!-- Cartes de statistiques principales -->
     <div class="row q-col-gutter-md q-mb-md">
       <div class="col-12 col-sm-6 col-md-3">
-        <q-card class="stat-card" style="border-left: 4px solid var(--q-blue)">
-          <q-card-section>
-            <div class="row items-center">
-              <div class="col">
-                <div class="text-h4 text-grey-8">{{ formatNumber(stats.stockTotal) }}</div>
-                <div class="text-subtitle2 text-grey-6">Stock Total</div>
-                <div class="text-caption text-grey-5 q-mt-xs">
-                  {{ stats.typesTickets }} types de tickets
-                </div>
-              </div>
-              <div class="col-auto">
-                <q-icon name="confirmation_number" size="56px" color="blue" style="opacity: 0.2" />
-              </div>
-            </div>
-          </q-card-section>
-        </q-card>
+        <StatisticsCard
+          :value="stats.stockTotal"
+          title="Stock Total"
+          :subtitle="`${stats.typesTickets} types de tickets`"
+          icon="confirmation_number"
+          icon-color="blue"
+          border-color="var(--q-blue)"
+        />
       </div>
 
       <div class="col-12 col-sm-6 col-md-3">
-        <q-card class="stat-card" style="border-left: 4px solid var(--q-green)">
-          <q-card-section>
-            <div class="row items-center">
-              <div class="col">
-                <div class="text-h4 text-grey-8">{{ formatMontant(stats.valeurTotale) }}</div>
-                <div class="text-subtitle2 text-grey-6">Valeur Totale</div>
-                <div class="text-caption text-grey-5 q-mt-xs">En stock actuellement</div>
-              </div>
-              <div class="col-auto">
-                <q-icon name="payments" size="56px" color="green" style="opacity: 0.2" />
-              </div>
-            </div>
-          </q-card-section>
-        </q-card>
+        <StatisticsCard
+          :value="stats.valeurTotale"
+          title="Valeur Totale"
+          subtitle="En stock actuellement"
+          icon="payments"
+          icon-color="green"
+          border-color="var(--q-green)"
+          format="currency"
+        />
       </div>
 
       <div class="col-12 col-sm-6 col-md-3">
-        <q-card class="stat-card" style="border-left: 4px solid var(--q-orange)">
-          <q-card-section>
-            <div class="row items-center">
-              <div class="col">
-                <div class="text-h4 text-grey-8">{{ formatNumber(stats.approvisionnements) }}</div>
-                <div class="text-subtitle2 text-grey-6">Appros Période</div>
-                <div class="text-caption text-grey-5 q-mt-xs">
-                  {{ formatMontant(stats.montantAppros) }}
-                </div>
-              </div>
-              <div class="col-auto">
-                <q-icon name="inventory" size="56px" color="orange" style="opacity: 0.2" />
-              </div>
-            </div>
-          </q-card-section>
-        </q-card>
+        <StatisticsCard
+          :value="stats.approvisionnements"
+          title="Appros Période"
+          :subtitle="formatMontant(stats.montantAppros)"
+          icon="inventory"
+          icon-color="orange"
+          border-color="var(--q-orange)"
+        />
       </div>
 
       <div class="col-12 col-sm-6 col-md-3">
-        <q-card class="stat-card" style="border-left: 4px solid var(--q-purple)">
-          <q-card-section>
-            <div class="row items-center">
-              <div class="col">
-                <div class="text-h4 text-grey-8">{{ formatNumber(stats.versements) }}</div>
-                <div class="text-subtitle2 text-grey-6">Versements Période</div>
-                <div class="text-caption text-grey-5 q-mt-xs">
-                  {{ formatMontant(stats.montantVersements) }}
-                </div>
-              </div>
-              <div class="col-auto">
-                <q-icon name="upload" size="56px" color="purple" style="opacity: 0.2" />
-              </div>
-            </div>
-          </q-card-section>
-        </q-card>
+        <StatisticsCard
+          :value="stats.versements"
+          title="Versements Période"
+          :subtitle="formatMontant(stats.montantVersements)"
+          icon="upload"
+          icon-color="purple"
+          border-color="var(--q-purple)"
+        />
       </div>
     </div>
 
@@ -154,44 +72,30 @@
     <div class="row q-col-gutter-md">
       <!-- Stock par valeur -->
       <div class="col-12 col-md-6">
-        <q-card>
-          <q-card-section class="bg-primary text-white">
-            <div class="text-h6">Répartition du Stock par Valeur</div>
-          </q-card-section>
-          <q-card-section>
-            <div class="chart-container">
-              <canvas ref="stockChartRef"></canvas>
-            </div>
-          </q-card-section>
-        </q-card>
+        <ChartCard
+          title="Répartition du Stock par Valeur"
+          :chart-config="stockChartConfig"
+          header-class="bg-primary text-white"
+        />
       </div>
 
-      <!-- Évolution du stock -->
+      <!-- Valeur du stock -->
       <div class="col-12 col-md-6">
-        <q-card>
-          <q-card-section class="bg-secondary text-white">
-            <div class="text-h6">Valeur du Stock par Type</div>
-          </q-card-section>
-          <q-card-section>
-            <div class="chart-container">
-              <canvas ref="valeurChartRef"></canvas>
-            </div>
-          </q-card-section>
-        </q-card>
+        <ChartCard
+          title="Valeur du Stock par Type"
+          :chart-config="valeurChartConfig"
+          header-class="bg-secondary text-white"
+        />
       </div>
 
       <!-- Évolution mensuelle -->
       <div class="col-12">
-        <q-card>
-          <q-card-section class="bg-info text-white">
-            <div class="text-h6">Évolution des Opérations</div>
-          </q-card-section>
-          <q-card-section>
-            <div class="chart-container-large">
-              <canvas ref="evolutionChartRef"></canvas>
-            </div>
-          </q-card-section>
-        </q-card>
+        <ChartCard
+          title="Évolution des Opérations"
+          :chart-config="evolutionChartConfig"
+          header-class="bg-info text-white"
+          container-class="chart-container-large"
+        />
       </div>
 
       <!-- Tableau détaillé par type de ticket -->
@@ -372,12 +276,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
-import { Chart, registerables, type ChartTypeRegistry, type TooltipItem } from 'chart.js';
-
-// Enregistrer tous les composants Chart.js
-Chart.register(...registerables);
+import { type ChartConfiguration, type TooltipItem, type ChartTypeRegistry } from 'chart.js';
+import FilterBar from 'src/components/FilterBar.vue';
+import StatisticsCard from 'src/components/StatisticsCard.vue';
+import ChartCard from 'src/components/ChartCard.vue';
+import ExportButtons from 'src/components/ExportButtons.vue';
 
 const $q = useQuasar();
 
@@ -386,16 +291,6 @@ const loading = ref(false);
 const periodFilter = ref('mois');
 const dateDebut = ref('');
 const dateFin = ref('');
-
-// Refs pour les canvas des graphiques
-const stockChartRef = ref<HTMLCanvasElement | null>(null);
-const valeurChartRef = ref<HTMLCanvasElement | null>(null);
-const evolutionChartRef = ref<HTMLCanvasElement | null>(null);
-
-// Instances des graphiques
-let stockChart: Chart | null = null;
-let valeurChart: Chart | null = null;
-let evolutionChart: Chart | null = null;
 
 // Options de période
 const periodOptions = [
@@ -583,6 +478,21 @@ function getTauxColor(taux: number): string {
   return 'negative';
 }
 
+// Fonctions d'export
+function exportPDF() {
+  $q.notify({
+    type: 'info',
+    message: 'Export PDF en cours de développement...',
+  });
+}
+
+function exportExcel() {
+  $q.notify({
+    type: 'info',
+    message: 'Export Excel en cours de développement...',
+  });
+}
+
 // Gestion des périodes
 function onPeriodChange() {
   const today = new Date();
@@ -622,15 +532,17 @@ function onPeriodChange() {
   void loadStatistics();
 }
 
+function resetFilters() {
+  periodFilter.value = 'mois';
+  onPeriodChange();
+}
+
 // Chargement des statistiques
 async function loadStatistics() {
   loading.value = true;
   try {
     // Ici, charger les vraies données depuis la base de données
     await new Promise((resolve) => setTimeout(resolve, 500));
-
-    // Mettre à jour les graphiques
-    updateCharts();
   } catch (error) {
     console.error('Erreur:', error);
     $q.notify({
@@ -642,225 +554,133 @@ async function loadStatistics() {
   }
 }
 
-// Création des graphiques
-function createCharts() {
-  // Graphique de répartition du stock
-  if (stockChartRef.value) {
-    const ctx = stockChartRef.value.getContext('2d');
-    if (ctx) {
-      stockChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: detailsTickets.value.map((t) => `${t.valeur} FCFA`),
-          datasets: [
-            {
-              label: 'Stock',
-              data: detailsTickets.value.map((t) => t.stock),
-              backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726', '#AB47BC', '#26C6DA', '#EF5350'],
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: true,
-          plugins: {
-            legend: {
-              position: 'bottom',
-            },
-            tooltip: {
-              callbacks: {
-                label: function (context: TooltipItem<keyof ChartTypeRegistry>) {
-                  const label = context.label || '';
-                  const value = context.parsed || 0;
-                  return `${label}: ${formatNumber(value)} tickets`;
-                },
-              },
-            },
+// Configuration des graphiques
+const stockChartConfig = computed<ChartConfiguration>(() => ({
+  type: 'doughnut',
+  data: {
+    labels: detailsTickets.value.map((t) => `${t.valeur} FCFA`),
+    datasets: [
+      {
+        label: 'Stock',
+        data: detailsTickets.value.map((t) => t.stock),
+        backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726', '#AB47BC', '#26C6DA', '#EF5350'],
+      },
+    ],
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: { position: 'bottom' },
+      tooltip: {
+        callbacks: {
+          label: function (context: TooltipItem<keyof ChartTypeRegistry>) {
+            const label = context.label || '';
+            const value = context.parsed || 0;
+            return `${label}: ${formatNumber(value)} tickets`;
           },
         },
-      });
-    }
-  }
+      },
+    },
+  },
+}));
 
-  // Graphique de valeur du stock
-  if (valeurChartRef.value) {
-    const ctx = valeurChartRef.value.getContext('2d');
-    if (ctx) {
-      valeurChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: detailsTickets.value.map((t) => `${t.valeur} FCFA`),
-          datasets: [
-            {
-              label: 'Valeur du stock',
-              data: detailsTickets.value.map((t) => t.valeurStock),
-              backgroundColor: '#66BB6A',
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: true,
-          plugins: {
-            legend: {
-              display: false,
-            },
-            tooltip: {
-              callbacks: {
-                label: function (context: TooltipItem<keyof ChartTypeRegistry>) {
-                  const value = context.parsed.y || 0;
-                  return `Valeur: ${formatMontant(value)}`;
-                },
-              },
-            },
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                callback: function (tickValue: string | number) {
-                  return formatMontant(Number(tickValue));
-                },
-              },
-            },
+const valeurChartConfig = computed<ChartConfiguration>(() => ({
+  type: 'bar',
+  data: {
+    labels: detailsTickets.value.map((t) => `${t.valeur} FCFA`),
+    datasets: [
+      {
+        label: 'Valeur du stock',
+        data: detailsTickets.value.map((t) => t.valeurStock),
+        backgroundColor: '#66BB6A',
+      },
+    ],
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: function (context: TooltipItem<keyof ChartTypeRegistry>) {
+            const value = context.parsed.y || 0;
+            return `Valeur: ${formatMontant(value)}`;
           },
         },
-      });
-    }
-  }
-
-  // Graphique d'évolution
-  if (evolutionChartRef.value) {
-    const ctx = evolutionChartRef.value.getContext('2d');
-    if (ctx) {
-      evolutionChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: ['Janv', 'Févr', 'Mars', 'Avr', 'Mai', 'Juin'],
-          datasets: [
-            {
-              label: 'Approvisionnements',
-              data: [1200, 1900, 1500, 2200, 1800, 2500],
-              borderColor: '#42A5F5',
-              backgroundColor: 'rgba(66, 165, 245, 0.1)',
-              tension: 0.4,
-            },
-            {
-              label: 'Remises',
-              data: [800, 1200, 1000, 1500, 1300, 1800],
-              borderColor: '#FFA726',
-              backgroundColor: 'rgba(255, 167, 38, 0.1)',
-              tension: 0.4,
-            },
-            {
-              label: 'Versements',
-              data: [700, 1100, 900, 1400, 1200, 1600],
-              borderColor: '#AB47BC',
-              backgroundColor: 'rgba(171, 71, 188, 0.1)',
-              tension: 0.4,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: true,
-          plugins: {
-            legend: {
-              position: 'bottom',
-            },
-            tooltip: {
-              callbacks: {
-                label: function (context: TooltipItem<keyof ChartTypeRegistry>) {
-                  const label = context.dataset.label || '';
-                  const value = context.parsed.y || 0;
-                  return `${label}: ${formatNumber(value)} tickets`;
-                },
-              },
-            },
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-            },
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: function (tickValue: string | number) {
+            return formatMontant(Number(tickValue));
           },
         },
-      });
-    }
-  }
-}
+      },
+    },
+  },
+}));
 
-// Mise à jour des graphiques
-function updateCharts() {
-  if (stockChart && stockChart.data.datasets[0]) {
-    stockChart.data.datasets[0].data = detailsTickets.value.map((t) => t.stock);
-    stockChart.update();
-  }
-
-  if (valeurChart && valeurChart.data.datasets[0]) {
-    valeurChart.data.datasets[0].data = detailsTickets.value.map((t) => t.valeurStock);
-    valeurChart.update();
-  }
-}
-
-// Destruction des graphiques
-function destroyCharts() {
-  if (stockChart) {
-    stockChart.destroy();
-    stockChart = null;
-  }
-  if (valeurChart) {
-    valeurChart.destroy();
-    valeurChart = null;
-  }
-  if (evolutionChart) {
-    evolutionChart.destroy();
-    evolutionChart = null;
-  }
-}
-
-// Fonctions d'export
-function exportPDF() {
-  $q.notify({
-    type: 'info',
-    message: 'Export PDF en cours de développement...',
-  });
-}
-
-function exportExcel() {
-  $q.notify({
-    type: 'info',
-    message: 'Export Excel en cours de développement...',
-  });
-}
+const evolutionChartConfig = computed<ChartConfiguration>(() => ({
+  type: 'line',
+  data: {
+    labels: ['Janv', 'Févr', 'Mars', 'Avr', 'Mai', 'Juin'],
+    datasets: [
+      {
+        label: 'Approvisionnements',
+        data: [1200, 1900, 1500, 2200, 1800, 2500],
+        borderColor: '#42A5F5',
+        backgroundColor: 'rgba(66, 165, 245, 0.1)',
+        tension: 0.4,
+      },
+      {
+        label: 'Remises',
+        data: [800, 1200, 1000, 1500, 1300, 1800],
+        borderColor: '#FFA726',
+        backgroundColor: 'rgba(255, 167, 38, 0.1)',
+        tension: 0.4,
+      },
+      {
+        label: 'Versements',
+        data: [700, 1100, 900, 1400, 1200, 1600],
+        borderColor: '#AB47BC',
+        backgroundColor: 'rgba(171, 71, 188, 0.1)',
+        tension: 0.4,
+      },
+    ],
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: { position: 'bottom' },
+      tooltip: {
+        callbacks: {
+          label: function (context: TooltipItem<keyof ChartTypeRegistry>) {
+            const label = context.dataset.label || '';
+            const value = context.parsed.y || 0;
+            return `${label}: ${formatNumber(value)} tickets`;
+          },
+        },
+      },
+    },
+    scales: {
+      y: { beginAtZero: true },
+    },
+  },
+}));
 
 // Lifecycle hooks
 onMounted(() => {
   // Initialiser les dates par défaut
   onPeriodChange();
-
-  // Créer les graphiques après un court délai pour s'assurer que les canvas sont rendus
-  setTimeout(() => {
-    createCharts();
-  }, 100);
-});
-
-onBeforeUnmount(() => {
-  destroyCharts();
 });
 </script>
 
 <style scoped lang="scss">
-.stat-card {
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s;
-
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-  }
-}
-
 .chart-container {
   position: relative;
   height: 300px;

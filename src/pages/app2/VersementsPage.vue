@@ -1,8 +1,16 @@
 <template>
   <q-page class="q-pa-md">
-    <div class="row q-mb-md justify-between items-center">
-      <div class="text-h5">Gestion des Versements</div>
-      <q-btn color="accent" icon="add" label="Nouveau Versement" @click="openDialog()" />
+    <div class="row q-mb-md">
+      <div class="col">
+        <div class="text-h5">Gestion des Versements</div>
+        <div class="text-caption text-grey-7 q-mt-xs">
+          <q-icon name="info" size="16px" color="negative" />
+          Arrêté de tout ce qui a été vendu <span class="text-negative text-weight-bold">(- Diminue le stock)</span>
+        </div>
+      </div>
+      <div class="col-auto">
+        <q-btn color="negative" icon="remove_circle" label="Nouveau Versement" @click="openDialog()" />
+      </div>
     </div>
 
     <!-- Recherche et filtres -->
@@ -45,7 +53,9 @@
       >
         <template v-slot:body-cell-type="props">
           <q-td :props="props">
-            <q-badge color="accent" :label="props.row.type" />
+            <q-badge color="negative" :label="props.row.type">
+              <q-icon name="remove" size="xs" class="q-ml-xs" />
+            </q-badge>
           </q-td>
         </template>
 
@@ -53,7 +63,7 @@
           <q-td :props="props">
             <div class="row q-gutter-xs">
               <div v-for="(value, key) in props.row.timbres" :key="key">
-                <q-chip v-if="value > 0" dense color="accent" text-color="white">
+                <q-chip v-if="value > 0" dense color="negative" text-color="white">
                   {{ key }}: {{ value }}
                 </q-chip>
               </div>
@@ -74,12 +84,12 @@
               round
               dense
               icon="visibility"
-              color="accent"
+              color="grey-8"
               @click="viewDetails(props.row)"
             >
               <q-tooltip>Voir détails</q-tooltip>
             </q-btn>
-            <q-btn flat round dense icon="edit" color="accent" @click="openDialog(props.row)">
+            <q-btn flat round dense icon="edit" color="grey-8" @click="openDialog(props.row)">
               <q-tooltip>Modifier</q-tooltip>
             </q-btn>
             <q-btn
@@ -100,8 +110,12 @@
     <!-- Dialog de création/modification -->
     <q-dialog v-model="dialogVisible" persistent>
       <q-card style="min-width: 700px">
-        <q-card-section class="bg-accent text-white">
-          <div class="text-h6">{{ isEditing ? 'Modifier' : 'Ajouter un' }} Versement</div>
+        <q-card-section class="bg-negative text-white">
+          <div class="text-h6">
+            <q-icon name="remove_circle" class="q-mr-sm" />
+            {{ isEditing ? 'Modifier' : 'Ajouter un' }} Versement
+          </div>
+          <div class="text-caption">Arrêté des ventes - Diminue le stock</div>
         </q-card-section>
 
         <q-card-section>
@@ -159,14 +173,14 @@
 
               <!-- Total calculé -->
               <div class="col-12">
-                <q-card flat bordered class="bg-teal-1">
+                <q-card flat bordered class="bg-red-1">
                   <q-card-section>
                     <div class="row items-center justify-between">
                       <div class="col">
-                        <div class="text-subtitle2 text-grey-7">Total</div>
+                        <div class="text-subtitle2 text-grey-7">Total (- Stock)</div>
                       </div>
                       <div class="col-auto">
-                        <div class="text-h6 text-accent">{{ formatMontant(form.total) }}</div>
+                        <div class="text-h6 text-negative">{{ formatMontant(form.total) }}</div>
                       </div>
                     </div>
                   </q-card-section>
@@ -187,7 +201,7 @@
 
             <div class="row q-gutter-sm justify-end">
               <q-btn label="Fermer" color="grey-7" flat @click="dialogVisible = false" />
-              <q-btn label="OK" color="accent" type="submit" :loading="saving" />
+              <q-btn label="OK" color="negative" type="submit" :loading="saving" />
             </div>
           </q-form>
         </q-card-section>

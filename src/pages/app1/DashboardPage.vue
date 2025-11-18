@@ -58,7 +58,7 @@
 
             <div class="row q-col-gutter-md">
               <div
-                class="col-6 col-sm-4 col-md-2"
+                class="col-6 col-sm-4 col-md-3"
                 v-for="(action, index) in quickActions"
                 :key="index"
               >
@@ -125,7 +125,16 @@
               <q-item v-if="recentDeclarations.length === 0" class="empty-state">
                 <q-item-section class="text-center">
                   <q-icon name="inbox" size="48px" color="grey-4" class="q-mb-sm" />
-                  <div class="text-grey-5">Aucune déclaration récente</div>
+                  <div class="text-grey-5 q-mb-sm">Aucune déclaration récente</div>
+                  <q-btn
+                    flat
+                    dense
+                    color="primary"
+                    label="Générer des données de test"
+                    icon="science"
+                    size="sm"
+                    @click="$router.push('/admin/seeders')"
+                  />
                 </q-item-section>
               </q-item>
             </q-list>
@@ -184,7 +193,16 @@
               <q-item v-if="openBordereaux.length === 0" class="empty-state">
                 <q-item-section class="text-center">
                   <q-icon name="inbox" size="48px" color="grey-4" class="q-mb-sm" />
-                  <div class="text-grey-5">Aucun bordereau ouvert</div>
+                  <div class="text-grey-5 q-mb-sm">Aucun bordereau ouvert</div>
+                  <q-btn
+                    flat
+                    dense
+                    color="primary"
+                    label="Générer des données de test"
+                    icon="science"
+                    size="sm"
+                    @click="$router.push('/admin/seeders')"
+                  />
                 </q-item-section>
               </q-item>
             </q-list>
@@ -254,8 +272,6 @@ const statsCards = computed(() => [
 
 // Actions rapides
 const quickActions = [
-  { label: 'Mairies', icon: 'location_city', color: 'primary', route: '/mairies' },
-  { label: 'Personnel', icon: 'people', color: 'secondary', route: '/personnels' },
   { label: 'Taxes', icon: 'calculate', color: 'accent', route: '/taxes' },
   { label: 'Déclarations', icon: 'description', color: 'positive', route: '/declarations' },
   { label: 'Bordereaux', icon: 'receipt_long', color: 'warning', route: '/bordereaux' },
@@ -293,13 +309,18 @@ async function loadStats() {
     const declarations = await db.declarations.toArray();
     stats.value.montantTotal = declarations.reduce((sum, d) => sum + (d.montantRecette || 0), 0);
 
+    // Correction: utiliser dateEncaissement au lieu de dateDeclaration
     recentDeclarations.value = await db.declarations
-      .orderBy('dateDeclaration')
+      .orderBy('dateEncaissement')
       .reverse()
       .limit(5)
       .toArray();
 
+    console.log('Déclarations récentes:', recentDeclarations.value.length);
+
     openBordereaux.value = await db.bordereaux.where('statut').equals('ouvert').toArray();
+
+    console.log('Bordereaux ouverts:', openBordereaux.value.length);
   } catch (error) {
     console.error('Erreur lors du chargement des statistiques:', error);
   }

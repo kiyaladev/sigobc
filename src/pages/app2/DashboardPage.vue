@@ -3,8 +3,10 @@
     <div class="row q-col-gutter-md">
       <!-- En-tête avec titre -->
       <div class="col-12">
-        <div class="text-h4 q-mb-md">Gestion des Stocks de Tickets</div>
-        <div class="text-subtitle1 text-grey-7 q-mb-md">Tableau de bord des timbres fiscaux</div>
+        <div class="text-h4 q-mb-md">Gestion des Stocks de Timbres Fiscaux</div>
+        <div class="text-subtitle1 text-grey-7 q-mb-md">
+          Suivi des approvisionnements, remises et versements
+        </div>
       </div>
 
       <!-- Statistiques des stocks par valeur -->
@@ -82,11 +84,12 @@
               <q-card-section>
                 <div class="row items-center">
                   <div class="col">
-                    <div class="text-h6 text-grey-8">{{ stats.approvisionnementsJour }}</div>
-                    <div class="text-caption text-grey-6">Appros Aujourd'hui</div>
+                    <div class="text-h6 text-grey-8">{{ stats.remisesJour }}</div>
+                    <div class="text-caption text-grey-6">Remises Aujourd'hui</div>
+                    <div class="text-caption text-positive">+ Stock</div>
                   </div>
                   <div class="col-auto">
-                    <q-icon name="inventory" size="48px" color="orange" style="opacity: 0.3" />
+                    <q-icon name="add_box" size="48px" color="orange" style="opacity: 0.3" />
                   </div>
                 </div>
               </q-card-section>
@@ -100,9 +103,10 @@
                   <div class="col">
                     <div class="text-h6 text-grey-8">{{ stats.versementsJour }}</div>
                     <div class="text-caption text-grey-6">Versements Aujourd'hui</div>
+                    <div class="text-caption text-negative">- Stock</div>
                   </div>
                   <div class="col-auto">
-                    <q-icon name="upload" size="48px" color="purple" style="opacity: 0.3" />
+                    <q-icon name="remove_circle" size="48px" color="purple" style="opacity: 0.3" />
                   </div>
                 </div>
               </q-card-section>
@@ -123,37 +127,15 @@
                   color="primary"
                   class="full-width q-py-lg"
                   style="background: white; border-width: 2px"
-                  icon="add_shopping_cart"
-                  label="Approvisionnements"
                   stack
                   @click="$router.push('/app2/approvisionnements')"
-                />
-              </div>
-
-              <div class="col-6 col-sm-4 col-md-3">
-                <q-btn
-                  outline
-                  color="secondary"
-                  class="full-width q-py-lg"
-                  style="background: white; border-width: 2px"
-                  icon="local_shipping"
-                  label="Remises"
-                  stack
-                  @click="$router.push('/app2/remises')"
-                />
-              </div>
-
-              <div class="col-6 col-sm-4 col-md-3">
-                <q-btn
-                  outline
-                  color="accent"
-                  class="full-width q-py-lg"
-                  style="background: white; border-width: 2px"
-                  icon="account_balance"
-                  label="Versements"
-                  stack
-                  @click="$router.push('/app2/versements')"
-                />
+                >
+                  <q-icon name="inventory_2" size="32px" class="q-mb-sm" />
+                  <div class="text-caption text-weight-medium">Approvisionnement</div>
+                  <div class="text-caption text-grey-6" style="font-size: 0.65rem">
+                    Stock initial annuel
+                  </div>
+                </q-btn>
               </div>
 
               <div class="col-6 col-sm-4 col-md-3">
@@ -162,11 +144,49 @@
                   color="positive"
                   class="full-width q-py-lg"
                   style="background: white; border-width: 2px"
-                  icon="balance"
-                  label="Balance Entrée"
+                  stack
+                  @click="$router.push('/app2/remises')"
+                >
+                  <q-icon name="add_box" size="32px" class="q-mb-sm" />
+                  <div class="text-caption text-weight-medium">Remises</div>
+                  <div class="text-caption text-positive" style="font-size: 0.65rem">
+                    + Augmente le stock
+                  </div>
+                </q-btn>
+              </div>
+
+              <div class="col-6 col-sm-4 col-md-3">
+                <q-btn
+                  outline
+                  color="negative"
+                  class="full-width q-py-lg"
+                  style="background: white; border-width: 2px"
+                  stack
+                  @click="$router.push('/app2/versements')"
+                >
+                  <q-icon name="remove_circle" size="32px" class="q-mb-sm" />
+                  <div class="text-caption text-weight-medium">Versements</div>
+                  <div class="text-caption text-negative" style="font-size: 0.65rem">
+                    - Diminue le stock
+                  </div>
+                </q-btn>
+              </div>
+
+              <div class="col-6 col-sm-4 col-md-3">
+                <q-btn
+                  outline
+                  color="info"
+                  class="full-width q-py-lg"
+                  style="background: white; border-width: 2px"
                   stack
                   @click="$router.push('/app2/balance-entree')"
-                />
+                >
+                  <q-icon name="balance" size="32px" class="q-mb-sm" />
+                  <div class="text-caption text-weight-medium">Balance</div>
+                  <div class="text-caption text-grey-6" style="font-size: 0.65rem">
+                    État du stock
+                  </div>
+                </q-btn>
               </div>
 
               <div class="col-6 col-sm-4 col-md-3">
@@ -286,7 +306,7 @@ const stats = computed(() => {
   return {
     totalTimbres,
     valeurTotale,
-    approvisionnementsJour: 3,
+    remisesJour: 3,
     versementsJour: 2,
   };
 });

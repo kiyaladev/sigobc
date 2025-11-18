@@ -1,8 +1,17 @@
 <template>
   <q-page class="q-pa-md">
-    <div class="row q-mb-md justify-between items-center">
-      <div class="text-h5">Gestion des Remises</div>
-      <q-btn color="secondary" icon="add" label="Nouvelle Remise" @click="openDialog()" />
+    <div class="row q-mb-md">
+      <div class="col">
+        <div class="text-h5">Gestion des Remises</div>
+        <div class="text-caption text-grey-7 q-mt-xs">
+          <q-icon name="info" size="16px" color="positive" />
+          Envoi de timbres par l'imprimerie nationale
+          <span class="text-positive text-weight-bold">(+ Augmente le stock)</span>
+        </div>
+      </div>
+      <div class="col-auto">
+        <q-btn color="positive" icon="add_box" label="Nouvelle Remise" @click="openDialog()" />
+      </div>
     </div>
 
     <!-- Recherche et filtres -->
@@ -45,7 +54,9 @@
       >
         <template v-slot:body-cell-type="props">
           <q-td :props="props">
-            <q-badge color="secondary" :label="props.row.type" />
+            <q-badge color="positive" :label="props.row.type">
+              <q-icon name="add" size="xs" class="q-ml-xs" />
+            </q-badge>
           </q-td>
         </template>
 
@@ -53,7 +64,7 @@
           <q-td :props="props">
             <div class="row q-gutter-xs">
               <div v-for="(value, key) in props.row.timbres" :key="key">
-                <q-chip v-if="value > 0" dense color="secondary" text-color="white">
+                <q-chip v-if="value > 0" dense color="positive" text-color="white">
                   {{ key }}: {{ value }}
                 </q-chip>
               </div>
@@ -74,12 +85,12 @@
               round
               dense
               icon="visibility"
-              color="secondary"
+              color="positive"
               @click="viewDetails(props.row)"
             >
               <q-tooltip>Voir détails</q-tooltip>
             </q-btn>
-            <q-btn flat round dense icon="edit" color="secondary" @click="openDialog(props.row)">
+            <q-btn flat round dense icon="edit" color="positive" @click="openDialog(props.row)">
               <q-tooltip>Modifier</q-tooltip>
             </q-btn>
             <q-btn
@@ -100,8 +111,12 @@
     <!-- Dialog de création/modification -->
     <q-dialog v-model="dialogVisible" persistent>
       <q-card style="min-width: 700px">
-        <q-card-section class="bg-secondary text-white">
-          <div class="text-h6">{{ isEditing ? 'Modifier' : 'Ajouter une' }} Remise</div>
+        <q-card-section class="bg-positive text-white">
+          <div class="text-h6">
+            <q-icon name="add_box" class="q-mr-sm" />
+            {{ isEditing ? 'Modifier' : 'Ajouter une' }} Remise
+          </div>
+          <div class="text-caption">Envoi de timbres - Augmente le stock</div>
         </q-card-section>
 
         <q-card-section>
@@ -159,14 +174,14 @@
 
               <!-- Total calculé -->
               <div class="col-12">
-                <q-card flat bordered class="bg-orange-1">
+                <q-card flat bordered class="bg-green-1">
                   <q-card-section>
                     <div class="row items-center justify-between">
                       <div class="col">
-                        <div class="text-subtitle2 text-grey-7">Total</div>
+                        <div class="text-subtitle2 text-grey-7">Total (+ Stock)</div>
                       </div>
                       <div class="col-auto">
-                        <div class="text-h6 text-secondary">{{ formatMontant(form.total) }}</div>
+                        <div class="text-h6 text-positive">{{ formatMontant(form.total) }}</div>
                       </div>
                     </div>
                   </q-card-section>
@@ -199,7 +214,7 @@
 
             <div class="row q-gutter-sm justify-end">
               <q-btn label="Fermer" color="grey-7" flat @click="dialogVisible = false" />
-              <q-btn label="OK" color="secondary" type="submit" :loading="saving" />
+              <q-btn label="OK" color="positive" type="submit" :loading="saving" />
             </div>
           </q-form>
         </q-card-section>

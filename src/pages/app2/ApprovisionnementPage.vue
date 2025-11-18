@@ -1,8 +1,16 @@
 <template>
   <q-page class="q-pa-md">
-    <div class="row q-mb-md justify-between items-center">
-      <div class="text-h5">Gestion des Approvisionnements</div>
-      <q-btn color="primary" icon="add" label="Nouvel Approvisionnement" @click="openDialog()" />
+    <div class="row q-mb-md">
+      <div class="col">
+        <div class="text-h5">Approvisionnement Initial</div>
+        <div class="text-caption text-grey-7 q-mt-xs">
+          <q-icon name="info" size="16px" color="primary" />
+          Stock initial de l'année (une seule entrée par année)
+        </div>
+      </div>
+      <div class="col-auto">
+        <q-btn color="primary" icon="add" label="Nouvel Approvisionnement" @click="openDialog()" />
+      </div>
     </div>
 
     <!-- Recherche et filtres -->
@@ -229,7 +237,7 @@ interface Approvisionnement {
 const $q = useQuasar();
 
 const valeursTimbre = [100, 200, 300, 500, 600, 1000];
-const typeOptions = ['appro.ddian', 'Versement', 'Remise'];
+const typeOptions = ['Approvisionnement Initial'];
 
 const search = ref('');
 const filterType = ref<string | null>(null);

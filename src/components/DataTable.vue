@@ -1,0 +1,117 @@
+<template>
+  <q-card>
+    <q-table
+      :rows="rows"
+      :columns="columns"
+      :row-key="rowKey"
+      :loading="loading"
+      :pagination="pagination"
+      v-bind="$attrs"
+    >
+      <!-- Forward all custom column slots -->
+      <template v-for="(_, slot) in $slots" v-slot:[slot]="props">
+        <slot :name="slot" v-bind="props"></slot>
+      </template>
+
+      <!-- Actions column with standard actions -->
+      <template v-if="showActions" v-slot:body-cell-actions="props">
+        <q-td :props="props" class="no-print">
+          <q-btn
+            v-if="showView"
+            flat
+            round
+            dense
+            icon="visibility"
+            color="info"
+            @click="$emit('view', props.row)"
+          >
+            <q-tooltip>Voir</q-tooltip>
+          </q-btn>
+          <q-btn
+            v-if="showPrint"
+            flat
+            round
+            dense
+            icon="print"
+            color="primary"
+            @click="$emit('print', props.row)"
+          >
+            <q-tooltip>Imprimer</q-tooltip>
+          </q-btn>
+          <q-btn
+            v-if="showDownload"
+            flat
+            round
+            dense
+            icon="download"
+            color="secondary"
+            @click="$emit('download', props.row)"
+          >
+            <q-tooltip>Télécharger PDF</q-tooltip>
+          </q-btn>
+          <q-btn
+            v-if="showEdit"
+            flat
+            round
+            dense
+            icon="edit"
+            color="primary"
+            @click="$emit('edit', props.row)"
+          >
+            <q-tooltip>Modifier</q-tooltip>
+          </q-btn>
+          <q-btn
+            v-if="showDelete"
+            flat
+            round
+            dense
+            icon="delete"
+            color="negative"
+            @click="$emit('delete', props.row)"
+          >
+            <q-tooltip>Supprimer</q-tooltip>
+          </q-btn>
+
+          <!-- Slot pour actions personnalisées -->
+          <slot name="custom-actions" :row="props.row"></slot>
+        </q-td>
+      </template>
+    </q-table>
+  </q-card>
+</template>
+
+<script setup lang="ts">
+interface Props {
+  rows: any[];
+  columns: any[];
+  rowKey?: string;
+  loading?: boolean;
+  pagination?: Record<string, any>;
+  showActions?: boolean;
+  showView?: boolean;
+  showPrint?: boolean;
+  showDownload?: boolean;
+  showEdit?: boolean;
+  showDelete?: boolean;
+}
+
+withDefaults(defineProps<Props>(), {
+  rowKey: 'id',
+  loading: false,
+  pagination: () => ({ rowsPerPage: 10 }),
+  showActions: true,
+  showView: false,
+  showPrint: false,
+  showDownload: false,
+  showEdit: true,
+  showDelete: true,
+});
+
+defineEmits<{
+  view: [row: any];
+  print: [row: any];
+  download: [row: any];
+  edit: [row: any];
+  delete: [row: any];
+}>();
+</script>

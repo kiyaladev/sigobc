@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Déclaration de Recettes</title>
+    <script src="vue.global.js"></script>
+    <style>
+      @page {
+        size: A4;
+        margin: 15mm;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        font-size: 12px;
+        line-height: 1.4;
+        background: #f5f5f5;
+        padding: 20px;
+      }
+
+      .page {
+        width: 210mm;
+        height: 297mm;
+        background: white;
+        margin: 0 auto;
+        padding: 10mm;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .declaration {
+        border: 1px solid #000;
+        padding: 15px;
+        margin-bottom: 0;
+        height: calc(50% - 8mm);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .declaration:first-child {
+        margin-bottom: 8mm;
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 5px;
+      }
+
+      .header-left {
+        flex: 1;
+      }
+
+      .header-center {
+        flex: 1;
+        text-align: center;
+        border-left: 1px solid #000;
+        border-right: 1px solid #000;
+        padding: 0 10px;
+        margin: 0 10px;
+      }
+
+      .header-right {
+        flex: 1;
+        text-align: right;
+      }
+
+      .title {
+        font-size: 16px;
+        font-weight: bold;
+        text-align: center;
+      }
+
+      .field-row {
+        margin-bottom: 8px;
+      }
+
+      .field-label {
+        display: inline;
+      }
+
+      .field-value {
+        border-bottom: 1px dotted #000;
+        padding: 0 5px;
+      }
+
+      .code-box {
+        font-size: 10px;
+      }
+
+      .code-box div {
+        margin-bottom: 3px;
+      }
+
+      .separator {
+        border-top: 1px solid #000;
+        margin: 0 0 10px 0;
+      }
+
+      .signature-section {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 15px;
+      }
+
+      .signature-left,
+      .signature-right {
+        text-align: center;
+      }
+
+      .footer {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 35px;
+        font-size: 10px;
+      }
+
+      .underline {
+        text-decoration: underline;
+      }
+
+      @media print {
+        body {
+          background: white;
+          padding: 0;
+        }
+
+        .page {
+          box-shadow: none;
+          padding: 0;
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <!-- PREMIÈRE DÉCLARATION - Original : chambre de Comptes -->
+      <div class="declaration">
+        <div class="header">
+          <div class="header-left">
+            <div>RECETTE MUNICIPALE</div>
+            <div>DE<span class="field-value">..............Yavoua..............</span></div>
+            <div>COMMUNE</div>
+            <div>DE<span class="field-value">..............Yavoua..............</span></div>
+          </div>
+          <div class="header-center">
+            <div class="title">DÉCLARATION</div>
+            <div class="title">DE RECETTES</div>
+          </div>
+          <div class="header-right">
+            <div class="code-box">
+              <div>Code Commune : <span class="field-value">...433...</span></div>
+              <div>Exercice : <span class="field-value">...2025...</span></div>
+              <div>Article : <span class="field-value">...401...</span></div>
+              <div>Pièce n° : <span class="field-value">...651...</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="separator"></div>
+
+        <div class="field-row">
+          NOM et Adresse de la partie versante : <span class="field-value">PGSP</span>
+        </div>
+        <div class="field-row">ABIDJAN</div>
+
+        <div class="field-row" style="margin-top: 10px">
+          Date d'encaissement : <span class="field-value">T70 P N°</span>
+          <span class="field-value">63</span>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;du
+          :
+          <span class="field-value"
+            >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;31/10/2025&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span
+          >
+        </div>
+
+        <div class="field-row">
+          Nature de la recette : <span class="field-value">Subventions d'équipement de l'Etat</span>
+        </div>
+
+        <div class="field-row">
+          Montant de la recette :
+          <span class="field-value"
+            >cent dix-neuf millions quatre-vingt-neuf mille huit cent quatre-vingt-dix-sept
+            FCFA</span
+          >
+        </div>
+
+        <div class="field-row">
+          Montant de la recette : <span class="field-value">119 089 897</span> FCFA
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CT S3 du :
+          <span class="field-value">31/10/2025</span>
+        </div>
+
+        <div class="signature-section">
+          <div class="signature-left">L'ordonnateur.</div>
+          <div class="signature-right">
+            <div>A Yavoua , le <span class="field-value">31/10/2025</span></div>
+            <div>Le Receveur.</div>
+          </div>
+        </div>
+
+        <div class="footer">
+          <div>CL 92</div>
+          <div>Original : chambre de Comptes</div>
+        </div>
+      </div>
+
+      <!-- DEUXIÈME DÉCLARATION - Duplicata : Mairie -->
+      <div class="declaration">
+        <div class="header">
+          <div class="header-left">
+            <div>RECETTE MUNICIPALE</div>
+            <div>DE<span class="field-value">..............Yavoua..............</span></div>
+            <div>COMMUNE</div>
+            <div>DE<span class="field-value">..............Yavoua..............</span></div>
+          </div>
+          <div class="header-center">
+            <div class="title">DÉCLARATION</div>
+            <div class="title">DE RECETTES</div>
+          </div>
+          <div class="header-right">
+            <div class="code-box">
+              <div>Code Commune : <span class="field-value">...433...</span></div>
+              <div>Exercice : <span class="field-value">...2025...</span></div>
+              <div>Article : <span class="field-value">...401...</span></div>
+              <div>Pièce n° : <span class="field-value">...651...</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="separator"></div>
+
+        <div class="field-row">
+          NOM et Adresse de la partie versante : <span class="field-value">PGSP</span>
+        </div>
+        <div class="field-row">ABIDJAN</div>
+
+        <div class="field-row" style="margin-top: 10px">
+          Date d'encaissement : <span class="field-value">T70 P N°</span>
+          <span class="field-value">63</span>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;du
+          :
+          <span class="field-value"
+            >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;31/10/2025&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span
+          >
+        </div>
+
+        <div class="field-row">
+          Nature de la recette : <span class="field-value">Subventions d'équipement de l'Etat</span>
+        </div>
+
+        <div class="field-row">
+          Montant de la recette :
+          <span class="field-value"
+            >cent dix-neuf millions quatre-vingt-neuf mille huit cent quatre-vingt-dix-sept</span
+          >
+        </div>
+
+        <div class="field-row">
+          Montant de la recette : <span class="field-value">119 089 897</span> FCFA
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CT S3 du :
+          <span class="field-value">31/10/2025</span>
+        </div>
+
+        <div class="signature-section">
+          <div class="signature-left">L'ordonnateur.</div>
+          <div class="signature-right">
+            <div>A Yavoua , le <span class="field-value">31/10/2025</span></div>
+            <div>Le Receveur.</div>
+          </div>
+        </div>
+
+        <div class="footer">
+          <div>CL 32</div>
+          <div>Duplicata : Mairie</div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const { createApp } = Vue;
+
+      createApp({
+        data() {
+          return {
+            commune: 'Yavoua',
+            codeCommune: '433',
+            exercice: '2025',
+            article: '401',
+            pieceNo: '651',
+            partieVersante: 'PGSP',
+            adressePartie: 'ABIDJAN',
+            typeEncaissement: 'T70 P N°',
+            numeroEncaissement: '63',
+            dateEncaissement: '31/10/2025',
+            natureRecette: "Subventions d'équipement de l'Etat",
+            montantChiffres: '119 089 897',
+            montantLettres:
+              'cent dix-neuf millions quatre-vingt-neuf mille huit cent quatre-vingt-dix-sept',
+            dateCT: '31/10/2025',
+            dateSignature: '31/10/2025',
+          };
+        },
+        mounted() {
+          console.log('Application Vue montée avec succès');
+        },
+      }).mount('body');
+    </script>
+  </body>
+</html>
