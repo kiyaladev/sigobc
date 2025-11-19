@@ -9,7 +9,7 @@
     <style>
       @page {
         size: A4 landscape;
-        margin: 10mm;
+        margin: 5mm;
       }
 
       * {
@@ -22,7 +22,7 @@
         font-family: Arial, sans-serif;
         font-size: 11px;
         background: #f5f5dc;
-        padding: 20px;
+        padding: 10px;
       }
 
       .page {
@@ -30,7 +30,7 @@
         min-height: 210mm;
         background: #fffff0;
         margin: 0 auto;
-        padding: 15mm;
+        padding: 5mm;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
       }
 
@@ -38,7 +38,7 @@
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        margin-bottom: 10px;
+        margin-bottom: 5px;
       }
 
       .header-left {
@@ -90,7 +90,7 @@
       }
 
       .col-nature {
-        width: 200px;
+        width: 300px;
         text-align: left;
       }
 
@@ -195,7 +195,7 @@
           RECETTE MUNICIPALE<br />
           DE : {{ mairie?.ville || 'Non spécifié' }}
         </div>
-        <div class="header-center">BORDEREAU DES RECOUVREMENTS AVANT EMISSION DES ORDERS</div>
+        <div class="header-center">BORDEREAU DES RECOUVREMENTS AVANT EMISSION DES ORDRES</div>
         <div class="header-right">
           EXERCICE : <span class="handwritten">{{ bordereau.annee }}</span>
         </div>
@@ -264,23 +264,30 @@
       </table>
 
       <div class="footer">
-        <div class="footer-left">
+        <div class="footer-left" style="text-align: left; font-weight: bold">
           Arrêté à la somme de: <span class="handwritten">{{ montantEnLettres }}</span>
           <div class="signature-line">
-            <br />
             {{ mairie?.ville || 'Ville' }}, le............./................/ {{ bordereau.annee }}
+            <br />
+            <br />
+            <br />
             <br /><br />
-            <div style="text-align: center; font-weight: bold">Le Receveur</div>
+            <br /><br />
+            <div style="text-align: left; font-weight: bold">Le Receveur</div>
           </div>
         </div>
-        <div class="footer-right">
-          <div style="font-weight: bold">DATE DE VISA DU MAIRE</div>
+        <div class="footer-right" style="text-align: right">
+          <div style="font-weight: bold; text-align: right">DATE DE VISA DU MAIRE</div>
           <br />
-          <div style="text-align: center">
+          <div style="text-align: right">
             ................/................/ {{ bordereau.annee }}
           </div>
           <br />
-          <div style="text-align: center; font-weight: bold">SIGNATURE ET CACHET DU MAIRE</div>
+          <br />
+          <br />
+          <br /><br />
+          <br /><br />
+          <div style="text-align: right; font-weight: bold">SIGNATURE ET CACHET DU MAIRE</div>
         </div>
       </div>
 
