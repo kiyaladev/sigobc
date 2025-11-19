@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mandat de Dépense</title>
+    <script src="dexie.min.js"></script>
+    <script src="vue.global.js"></script>
+    <style>
+      @page {
+        size: A4;
+        margin: 15mm;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        font-size: 12px;
+        line-height: 1.4;
+        background: #f5f5f5;
+        padding: 20px;
+      }
+
+      .page {
+        width: 210mm;
+        min-height: 297mm;
+        background: white;
+        margin: 0 auto;
+        padding: 15mm;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #000;
+      }
+
+      .header-left {
+        flex: 1;
+      }
+
+      .header-center {
+        flex: 1;
+        text-align: center;
+      }
+
+      .header-right {
+        flex: 1;
+        text-align: right;
+      }
+
+      .title {
+        font-size: 18px;
+        font-weight: bold;
+        text-align: center;
+        margin: 20px 0;
+        text-decoration: underline;
+      }
+
+      .info-box {
+        border: 1px solid #000;
+        padding: 10px;
+        margin: 10px 0;
+      }
+
+      .info-row {
+        display: flex;
+        margin-bottom: 8px;
+      }
+
+      .info-label {
+        font-weight: bold;
+        min-width: 150px;
+      }
+
+      .info-value {
+        flex: 1;
+        border-bottom: 1px dotted #000;
+        padding: 0 5px;
+      }
+
+      .section-title {
+        font-weight: bold;
+        font-size: 14px;
+        margin: 15px 0 10px 0;
+        padding: 5px;
+        background: #f0f0f0;
+        border-left: 4px solid #333;
+      }
+
+      .montant-box {
+        border: 2px solid #000;
+        padding: 15px;
+        margin: 20px 0;
+        text-align: center;
+      }
+
+      .montant-label {
+        font-weight: bold;
+        font-size: 14px;
+      }
+
+      .montant-value {
+        font-size: 20px;
+        font-weight: bold;
+        margin: 10px 0;
+      }
+
+      .signature-section {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 40px;
+      }
+
+      .signature-box {
+        width: 45%;
+        text-align: center;
+      }
+
+      .signature-line {
+        margin-top: 60px;
+        border-top: 1px solid #000;
+        padding-top: 5px;
+      }
+
+      .footer {
+        margin-top: 30px;
+        font-size: 10px;
+        text-align: center;
+        border-top: 1px solid #ccc;
+        padding-top: 10px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 10px 0;
+      }
+
+      table td {
+        padding: 5px;
+        border: 1px solid #ccc;
+      }
+
+      table td.label {
+        font-weight: bold;
+        background: #f9f9f9;
+        width: 30%;
+      }
+
+      @media print {
+        body {
+          background: white;
+          padding: 0;
+        }
+
+        .page {
+          box-shadow: none;
+          padding: 0;
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page" v-if="mandat">
+      <div class="header">
+        <div class="header-left">
+          <div><strong>MAIRIE DE</strong></div>
+          <div>{{ mairie?.ville || '........................' }}</div>
+          <div>COMMUNE DE</div>
+          <div>{{ mairie?.nom || '........................' }}</div>
+        </div>
+        <div class="header-center">
+          <div style="font-size: 16px; font-weight: bold">MANDAT DE DÉPENSE</div>
+        </div>
+        <div class="header-right">
+          <div>Exercice : <strong>{{ mandat.exercice }}</strong></div>
+          <div>N° Mandat : <strong>{{ mandat.numeroMandat }}</strong></div>
+          <div>Date : <strong>{{ formatDate(mandat.dateMandat) }}</strong></div>
+        </div>
+      </div>
+
+      <div class="section-title">INFORMATIONS BUDGÉTAIRES</div>
+      <table>
+        <tr>
+          <td class="label">Chapitre budgétaire :</td>
+          <td>{{ getChapitre() }}</td>
+        </tr>
+        <tr>
+          <td class="label">Code chapitre :</td>
+          <td>{{ getChapitre('code') }}</td>
+        </tr>
+      </table>
+
+      <div class="section-title">BÉNÉFICIAIRE</div>
+      <table>
+        <tr>
+          <td class="label">Nom / Raison sociale :</td>
+          <td>{{ mandat.beneficiaire }}</td>
+        </tr>
+      </table>
+
+      <div class="section-title">OBJET DE LA DÉPENSE</div>
+      <div class="info-box">
+        <div style="min-height: 60px">{{ mandat.objet }}</div>
+      </div>
+
+      <div class="section-title">RÉFÉRENCES FACTURE</div>
+      <table>
+        <tr>
+          <td class="label">N° Facture :</td>
+          <td>{{ mandat.numeroFacture || 'Non spécifié' }}</td>
+        </tr>
+        <tr>
+          <td class="label">Date facture :</td>
+          <td>{{ mandat.dateFacture ? formatDate(mandat.dateFacture) : 'Non spécifiée' }}</td>
+        </tr>
+      </table>
+
+      <div class="section-title">MONTANT</div>
+      <div class="montant-box">
+        <div class="montant-label">Montant en lettres :</div>
+        <div style="margin: 10px 0; font-size: 14px">{{ montantEnLettres }}</div>
+        <div class="montant-label">Montant en chiffres :</div>
+        <div class="montant-value">{{ formatMontant(mandat.montant) }} FCFA</div>
+      </div>
+
+      <table>
+        <tr>
+          <td class="label">Mode de paiement :</td>
+          <td>{{ formatModePaiement(mandat.modePaiement) }}</td>
+        </tr>
+        <tr>
+          <td class="label">Statut :</td>
+          <td>{{ formatStatut(mandat.statut) }}</td>
+        </tr>
+      </table>
+
+      <div v-if="mandat.observations" style="margin-top: 15px">
+        <div class="section-title">OBSERVATIONS</div>
+        <div class="info-box">{{ mandat.observations }}</div>
+      </div>
+
+      <div class="signature-section">
+        <div class="signature-box">
+          <div><strong>L'Ordonnateur</strong></div>
+          <div class="signature-line">Le Maire</div>
+        </div>
+        <div class="signature-box">
+          <div>À {{ mairie?.ville || '............' }}, le {{ formatDate(mandat.dateMandat) }}</div>
+          <div style="margin-top: 20px"><strong>Le Comptable</strong></div>
+          <div class="signature-line">Le Receveur Municipal</div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div>Document généré le {{ new Date().toLocaleDateString('fr-FR') }}</div>
+        <div>Mandat N° {{ mandat.numeroMandat }} - Exercice {{ mandat.exercice }}</div>
+      </div>
+    </div>
+
+    <script type="module">
+      const { createApp } = Vue;
+
+      // Initialiser Dexie
+      const db = new Dexie('TresorDatabase');
+      db.version(2).stores({
+        mairies: '++id, nom, code, ville',
+        taxes: '++id, code, libelle, mairieId, type, actif',
+        declarations:
+          '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
+        bordereaux: '++id, numero, annee, mairieId, statut, personnelId',
+        utilisateurs: '++id, username, email, role, mairieId, actif',
+        // App3
+        chapitres: '++id, code, libelle, mairieId, actif',
+        previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
+        mandats:
+          '++id, numeroMandat, dateMandat, exercice, chapitreId, previsionId, mairieId, statut, personnelId',
+      });
+
+      createApp({
+        data() {
+          return {
+            mandat: null,
+            mairie: null,
+            chapitre: null,
+            loading: true,
+            error: null,
+          };
+        },
+        computed: {
+          montantEnLettres() {
+            if (!this.mandat) return '';
+            return this.nombreEnLettres(this.mandat.montant);
+          },
+        },
+        methods: {
+          formatDate(dateValue) {
+            if (!dateValue) return '';
+            const date = new Date(dateValue);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+          },
+          formatMontant(montant) {
+            if (!montant) return '0';
+            return new Intl.NumberFormat('fr-FR').format(montant);
+          },
+          formatModePaiement(mode) {
+            const modes = {
+              virement: 'Virement bancaire',
+              cheque: 'Chèque',
+              especes: 'Espèces',
+              autre: 'Autre',
+            };
+            return modes[mode] || mode;
+          },
+          formatStatut(statut) {
+            const statuts = {
+              brouillon: 'Brouillon',
+              emis: 'Émis',
+              paye: 'Payé',
+              annule: 'Annulé',
+            };
+            return statuts[statut] || statut;
+          },
+          getChapitre(field = 'full') {
+            if (!this.chapitre) return 'Non spécifié';
+            if (field === 'code') return this.chapitre.code;
+            return `${this.chapitre.code} - ${this.chapitre.libelle}`;
+          },
+          nombreEnLettres(nombre) {
+            if (nombre === 0) return 'zéro';
+
+            const unites = [
+              '',
+              'un',
+              'deux',
+              'trois',
+              'quatre',
+              'cinq',
+              'six',
+              'sept',
+              'huit',
+              'neuf',
+            ];
+            const dizaines = [
+              '',
+              '',
+              'vingt',
+              'trente',
+              'quarante',
+              'cinquante',
+              'soixante',
+              'soixante',
+              'quatre-vingt',
+              'quatre-vingt',
+            ];
+            const dizainesSpeciales = [
+              'dix',
+              'onze',
+              'douze',
+              'treize',
+              'quatorze',
+              'quinze',
+              'seize',
+              'dix-sept',
+              'dix-huit',
+              'dix-neuf',
+            ];
+
+            function convertirMoinsDeMillions(n) {
+              if (n === 0) return '';
+              if (n < 10) return unites[n];
+              if (n < 20) return dizainesSpeciales[n - 10];
+              if (n < 100) {
+                const d = Math.floor(n / 10);
+                const u = n % 10;
+                if (d === 7 || d === 9) {
+                  return (
+                    dizaines[d] + (u === 0 ? (d === 9 ? 's' : '') : '-' + dizainesSpeciales[u])
+                  );
+                }
+                return (
+                  dizaines[d] +
+                  (u === 0 ? (d === 8 ? 's' : '') : u === 1 && d < 8 ? ' et un' : '-' + unites[u])
+                );
+              }
+              if (n < 1000) {
+                const c = Math.floor(n / 100);
+                const r = n % 100;
+                return (
+                  (c === 1 ? 'cent' : unites[c] + ' cent') +
+                  (r === 0 ? (c > 1 ? 's' : '') : ' ' + convertirMoinsDeMillions(r))
+                );
+              }
+              if (n < 1000000) {
+                const m = Math.floor(n / 1000);
+                const r = n % 1000;
+                return (
+                  (m === 1 ? 'mille' : convertirMoinsDeMillions(m) + ' mille') +
+                  (r === 0 ? '' : ' ' + convertirMoinsDeMillions(r))
+                );
+              }
+              const millions = Math.floor(n / 1000000);
+              const reste = n % 1000000;
+              return (
+                (millions === 1 ? 'un million' : convertirMoinsDeMillions(millions) + ' millions') +
+                (reste === 0 ? '' : ' ' + convertirMoinsDeMillions(reste))
+              );
+            }
+
+            return convertirMoinsDeMillions(Math.floor(nombre));
+          },
+          async loadMandat() {
+            try {
+              this.loading = true;
+              const urlParams = new URLSearchParams(window.location.search);
+              const mandatId = urlParams.get('mandatId');
+
+              if (!mandatId) {
+                this.error = 'Aucun ID de mandat fourni';
+                return;
+              }
+
+              // Charger le mandat
+              this.mandat = await db.mandats.get(parseInt(mandatId));
+
+              if (!this.mandat) {
+                this.error = 'Mandat non trouvé';
+                return;
+              }
+
+              // Charger la mairie associée
+              if (this.mandat.mairieId) {
+                this.mairie = await db.mairies.get(this.mandat.mairieId);
+              }
+
+              // Charger le chapitre associé
+              if (this.mandat.chapitreId) {
+                this.chapitre = await db.chapitres.get(this.mandat.chapitreId);
+              }
+
+              console.log('Mandat chargé:', this.mandat);
+              console.log('Mairie:', this.mairie);
+              console.log('Chapitre:', this.chapitre);
+            } catch (err) {
+              console.error('Erreur lors du chargement:', err);
+              this.error = 'Erreur lors du chargement du mandat';
+            } finally {
+              this.loading = false;
+            }
+          },
+        },
+        async mounted() {
+          console.log('Application Vue montée');
+          await this.loadMandat();
+
+          // Auto-print après le chargement si demandé
+          const urlParams = new URLSearchParams(window.location.search);
+          if (urlParams.get('print') === 'true' && !this.error) {
+            setTimeout(() => window.print(), 500);
+          }
+        },
+      }).mount('body');
+    </script>
+  </body>
+</html>

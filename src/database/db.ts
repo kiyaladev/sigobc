@@ -80,6 +80,72 @@ export interface Utilisateur {
   updatedAt: Date;
 }
 
+// ========== Interfaces pour App3 - Gestion des Dépenses ==========
+
+export interface Chapitre {
+  id?: number;
+  code: string; // Ex: 60, 61, 62, etc.
+  libelle: string; // Ex: "Charges de personnel"
+  description?: string;
+  mairieId: number;
+  actif: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Prevision {
+  id?: number;
+  exercice: number; // Année budgétaire
+  chapitreId: number; // Référence au chapitre
+  mairieId: number;
+  montantPrevu: number; // Montant total prévu pour ce chapitre
+  montantEngage: number; // Montant déjà engagé (mandats)
+  montantDisponible: number; // Reste à mandater
+  observations?: string;
+  statut: 'brouillon' | 'validee' | 'cloturee';
+  personnelId: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Mandat {
+  id?: number;
+  numeroOrdre?: number; // Numéro d'ordre du mandat
+  exercice: number; // Année
+  numeroMandat: string; // Numéro unique du mandat
+  dateMandat: Date; // Date d'émission du mandat
+  chapitreId: number; // Chapitre budgétaire
+  previsionId?: number; // Lien vers la prévision
+  bordereauMandatId?: number; // ID du bordereau d'émission des mandats
+  mairieId: number;
+  beneficiaire: string; // Nom du bénéficiaire
+  objet: string; // Objet de la dépense
+  montant: number; // Montant du mandat
+  numeroFacture?: string; // Numéro de facture
+  dateFacture?: Date;
+  modePaiement: 'virement' | 'cheque' | 'especes' | 'autre';
+  statut: 'brouillon' | 'emis' | 'paye' | 'annule';
+  observations?: string;
+  personnelId: number; // Agent qui a créé le mandat
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface BordereauMandat {
+  id?: number;
+  numero: number; // Numéro incrémental (1, 2, 3...)
+  exercice: number; // Exercice budgétaire
+  dateEmission?: Date; // Date d'émission du bordereau
+  mairieId: number;
+  montantTotal: number;
+  nombreMandats: number;
+  statut: 'ouvert' | 'ferme';
+  observations?: string;
+  personnelId: number; // Agent responsable
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // Classe Dexie pour la base de données
 class TresorDatabase extends Dexie {
   mairies!: EntityTable<Mairie, 'id'>;
@@ -87,17 +153,28 @@ class TresorDatabase extends Dexie {
   declarations!: EntityTable<Declaration, 'id'>;
   bordereaux!: EntityTable<Bordereau, 'id'>;
   utilisateurs!: EntityTable<Utilisateur, 'id'>;
+  // App3 - Gestion des Dépenses
+  chapitres!: EntityTable<Chapitre, 'id'>;
+  previsions!: EntityTable<Prevision, 'id'>;
+  mandats!: EntityTable<Mandat, 'id'>;
+  bordereauMandats!: EntityTable<BordereauMandat, 'id'>;
 
   constructor() {
     super('TresorDatabase');
 
-    this.version(1).stores({
+    this.version(3).stores({
       mairies: '++id, nom, code, ville',
       taxes: '++id, code, libelle, mairieId, type, actif',
       declarations:
         '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
       bordereaux: '++id, numero, annee, mairieId, statut, personnelId',
       utilisateurs: '++id, username, email, role, mairieId, actif',
+      // App3
+      chapitres: '++id, code, libelle, mairieId, actif',
+      previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
+      mandats:
+        '++id, numeroMandat, dateMandat, exercice, chapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
+      bordereauMandats: '++id, numero, exercice, mairieId, statut, personnelId',
     });
   }
 }

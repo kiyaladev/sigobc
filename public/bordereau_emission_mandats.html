@@ -1,0 +1,625 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bordereau d'Émission des Mandats</title>
+    <script src="dexie.min.js"></script>
+    <script src="vue.global.js"></script>
+    <style>
+      @page {
+        size: A4 landscape;
+        margin: 5mm;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        font-size: 10px;
+        line-height: 1.2;
+        background: #f5f5f5;
+        padding: 10px;
+      }
+
+      .page {
+        width: 297mm;
+        min-height: 210mm;
+        background: white;
+        margin: 0 auto;
+        padding: 10mm;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .header {
+        border: 2px solid #000;
+        margin-bottom: 5px;
+      }
+
+      .header-row {
+        display: grid;
+        grid-template-columns: 1fr 2fr 2fr;
+        border-bottom: 1px solid #000;
+      }
+
+      .header-row:last-child {
+        border-bottom: none;
+      }
+
+      .header-cell {
+        padding: 5px;
+        border-right: 1px solid #000;
+      }
+
+      .header-cell:last-child {
+        border-right: none;
+      }
+
+      .header-title {
+        grid-column: 2;
+        text-align: center;
+        font-weight: bold;
+        font-size: 12px;
+      }
+
+      .header-info {
+        text-align: center;
+        font-weight: bold;
+      }
+
+      .sub-header {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        border: 1px solid #000;
+        border-top: none;
+      }
+
+      .sub-header-cell {
+        padding: 3px 5px;
+        border-right: 1px solid #000;
+      }
+
+      .sub-header-cell:last-child {
+        border-right: none;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 3px;
+        font-size: 9px;
+      }
+
+      table th,
+      table td {
+        border: 1px solid #000;
+        padding: 3px;
+        text-align: left;
+      }
+
+      table th {
+        background: #fff;
+        font-weight: bold;
+        text-align: center;
+        font-size: 8px;
+      }
+
+      table td {
+        vertical-align: top;
+      }
+
+      table td.center {
+        text-align: center;
+      }
+
+      table td.right {
+        text-align: right;
+      }
+
+      .total-row {
+        font-weight: bold;
+        background: #f0f0f0;
+      }
+
+      .montant-lettres {
+        margin-top: 10px;
+        padding: 5px;
+        border: 1px solid #000;
+      }
+
+      .footer {
+        margin-top: 10px;
+        padding: 5px;
+        border: 1px solid #000;
+      }
+
+      .signature-section {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        margin-top: 5px;
+        border: 1px solid #000;
+        border-top: none;
+      }
+
+      .signature-box {
+        padding: 30px 5px 5px 5px;
+        text-align: center;
+        border-right: 1px solid #000;
+        min-height: 80px;
+      }
+
+      .signature-box:last-child {
+        border-right: none;
+      }
+
+      .folio-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+        padding: 5px;
+        border: 1px solid #000;
+      }
+
+      .folio-box {
+        border: 2px solid #000;
+        padding: 10px 20px;
+        font-size: 14px;
+        font-weight: bold;
+      }
+
+      @media print {
+        body {
+          background: white;
+          padding: 0;
+        }
+
+        .page {
+          box-shadow: none;
+          padding: 5mm;
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page" v-if="bordereauData">
+      <!-- En-tête -->
+      <div class="header">
+        <div class="header-row">
+          <div class="header-cell">
+            <div><strong>RÉPUBLIQUE DE CÔTE D'IVOIRE</strong></div>
+            <div style="margin-top: 5px">
+              <strong>COMMUNE DE {{ mairie?.ville?.toUpperCase() || 'VAVOUA' }}</strong>
+            </div>
+            <div style="margin-top: 5px"><strong>CODE : {{ mairie?.code || '433' }}</strong></div>
+          </div>
+          <div class="header-cell header-title">
+            <div>BORDEREAU D' ÉMISSION DES MANDATS</div>
+          </div>
+          <div class="header-cell">
+            <div style="text-align: center">
+              <strong>PARTIE RESERVEE AU RECEVEUR MUNICIPAL</strong>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; margin-top: 5px">
+              <div style="border-right: 1px solid #000; padding-right: 5px">
+                <div><strong>DATES</strong></div>
+                <div>de Paiement</div>
+              </div>
+              <div style="padding-left: 5px">
+                <div><strong>AUTRES OPERATIONS</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="header-row">
+          <div class="header-cell"></div>
+          <div class="header-cell header-info">
+            <div>
+              <strong style="text-decoration: underline">EXERCICE</strong>
+            </div>
+            <div style="margin-top: 5px">
+              <strong style="font-size: 16px">{{ bordereauData.exercice }}</strong>
+            </div>
+          </div>
+          <div class="header-cell">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr">
+              <div style="border-right: 1px solid #000; padding: 5px">
+                <div><strong>CREDITEURS</strong></div>
+              </div>
+              <div style="border-right: 1px solid #000; padding: 5px">
+                <div><strong>DIVERS</strong></div>
+                <div style="margin-top: 5px">Montants</div>
+              </div>
+              <div style="padding: 5px">
+                <div>N° de compte</div>
+                <div>autres comptes</div>
+                <div>de tiers</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="header-row">
+          <div class="header-cell">
+            <div>N°</div>
+          </div>
+          <div class="header-cell">
+            <div><strong>Nature de la Dépense</strong></div>
+          </div>
+          <div class="header-cell">
+            <div><strong>Nom et adresse du Créancier</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sous en-tête avec imputation -->
+      <div class="sub-header">
+        <div class="sub-header-cell"></div>
+        <div class="sub-header-cell">
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr">
+            <div style="text-align: center; border-right: 1px solid #000; padding: 5px">
+              <div><strong>IMPUTATION</strong></div>
+            </div>
+            <div style="text-align: center; padding: 5px" colspan="3"></div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; border-top: 1px solid #000">
+            <div style="text-align: center; border-right: 1px solid #000; padding: 3px">
+              Fonction-<br />nelle
+            </div>
+            <div style="text-align: center; border-right: 1px solid #000; padding: 3px">
+              Patrimo-<br />niale
+            </div>
+            <div style="text-align: center; border-right: 1px solid #000; padding: 3px">
+              <strong>SOMME</strong><br />MANDATEE
+            </div>
+            <div style="text-align: center; padding: 3px">
+              Reste à Payer<br />C/ 4690
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tableau des mandats -->
+      <table>
+        <tbody>
+          <tr v-for="(mandat, index) in mandats" :key="mandat.id">
+            <td style="width: 30px" class="center">{{ index + 1 }}</td>
+            <td style="width: 150px">{{ mandat.objet }}</td>
+            <td style="width: 150px">{{ mandat.beneficiaire }}</td>
+            <td style="width: 60px" class="center">{{ getChapitreFonctionnelle(mandat) }}</td>
+            <td style="width: 60px" class="center">{{ getChapitrePatrimoniale(mandat) }}</td>
+            <td style="width: 100px" class="right">{{ formatMontant(mandat.montant) }}</td>
+            <td style="width: 80px"></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+          <!-- Lignes vides pour compléter le tableau -->
+          <tr v-for="i in emptyRows" :key="'empty-' + i">
+            <td style="height: 20px"></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Totaux -->
+      <div style="border: 1px solid #000; border-top: none">
+        <div style="display: grid; grid-template-columns: 1fr 2fr; border-bottom: 1px solid #000">
+          <div style="padding: 5px"></div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr">
+            <div style="padding: 5px; text-align: center; border-left: 1px solid #000">
+              <strong>TOTAL DU PRESENT BORDEREAU</strong>
+            </div>
+            <div style="padding: 5px; text-align: center; border-left: 1px solid #000">
+              <strong>{{ formatMontant(bordereauData.montantTotal) }}</strong>
+            </div>
+            <div style="padding: 5px; border-left: 1px solid #000"></div>
+            <div style="padding: 5px"></div>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 2fr; border-bottom: 1px solid #000">
+          <div style="padding: 5px"></div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr">
+            <div style="padding: 5px; text-align: center; border-left: 1px solid #000">
+              TOTAL DU PRECEDENT BORDEREAU
+            </div>
+            <div style="padding: 5px; text-align: center; border-left: 1px solid #000"></div>
+            <div style="padding: 5px; border-left: 1px solid #000"></div>
+            <div style="padding: 5px"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Folio -->
+      <div class="folio-section">
+        <div>
+          <strong>FOLIO N°</strong>
+        </div>
+        <div class="folio-box">{{ bordereauData.exercice }}</div>
+        <div style="flex: 1; padding: 0 20px">
+          <div>
+            <strong>TOTAL GENERAL DU PRESENT BORDEREAU</strong>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px">
+          <div style="border: 1px solid #000; padding: 5px; text-align: center"></div>
+          <div style="border: 1px solid #000; padding: 5px; text-align: center"></div>
+          <div style="border: 1px solid #000; padding: 5px; text-align: center"></div>
+          <div style="border: 1px solid #000; padding: 5px; text-align: center"></div>
+        </div>
+      </div>
+
+      <!-- Montant en lettres -->
+      <div class="montant-lettres">
+        <div>
+          <strong>Arrêté à la somme de :</strong>
+          {{ montantEnLettres.toUpperCase() }} FRANCS
+        </div>
+        <div style="margin-top: 10px; text-align: right">
+          <div>
+            À {{ mairie?.ville || 'VAVOUA' }}, le {{ formatDate(bordereauData.dateEmission) }}
+          </div>
+          <div style="margin-top: 5px"><em>L' Ordonnateur,</em></div>
+          <div style="margin-top: 5px">P/ LE MAIRE & P.D.</div>
+        </div>
+      </div>
+
+      <!-- Signatures -->
+      <div class="footer">
+        <div style="text-align: center; border-bottom: 1px solid #000; padding: 5px">
+          <strong>CONTRÔLE DES PRISES EN CHARGE</strong>
+        </div>
+        <div class="signature-section">
+          <div class="signature-box">
+            <div style="transform: rotate(-90deg); font-size: 11px; font-weight: bold">
+              Sommes
+            </div>
+          </div>
+          <div class="signature-box">
+            <div style="transform: rotate(-90deg); font-size: 11px; font-weight: bold">
+              Numérote Comptant
+            </div>
+          </div>
+          <div class="signature-box">
+            <div style="font-size: 11px; font-weight: bold">TOTAUX</div>
+          </div>
+          <div class="signature-box">
+            <div style="transform: rotate(-90deg); font-size: 11px; font-weight: bold">
+              Numéro de Comptes
+            </div>
+          </div>
+          <div class="signature-box">
+            <div style="font-size: 11px; font-weight: bold">TOTAUX</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      const { createApp } = Vue;
+
+      // Initialiser Dexie
+      const db = new Dexie('TresorDatabase');
+      db.version(2).stores({
+        mairies: '++id, nom, code, ville',
+        taxes: '++id, code, libelle, mairieId, type, actif',
+        declarations:
+          '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
+        bordereaux: '++id, numero, annee, mairieId, statut, personnelId',
+        utilisateurs: '++id, username, email, role, mairieId, actif',
+        // App3
+        chapitres: '++id, code, libelle, mairieId, actif',
+        previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
+        mandats:
+          '++id, numeroMandat, dateMandat, exercice, chapitreId, previsionId, mairieId, statut, personnelId',
+      });
+
+      createApp({
+        data() {
+          return {
+            bordereauData: null,
+            mandats: [],
+            mairie: null,
+            chapitres: [],
+            loading: true,
+            error: null,
+          };
+        },
+        computed: {
+          emptyRows() {
+            const minRows = 8;
+            const currentRows = this.mandats.length;
+            return Math.max(0, minRows - currentRows);
+          },
+          montantEnLettres() {
+            if (!this.bordereauData) return '';
+            return this.nombreEnLettres(this.bordereauData.montantTotal);
+          },
+        },
+        methods: {
+          formatDate(dateValue) {
+            if (!dateValue) return '';
+            const date = new Date(dateValue);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+          },
+          formatMontant(montant) {
+            if (!montant) return '0';
+            return new Intl.NumberFormat('fr-FR').format(montant);
+          },
+          getChapitreFonctionnelle(mandat) {
+            const chapitre = this.chapitres.find((c) => c.id === mandat.chapitreId);
+            return chapitre ? chapitre.code : '';
+          },
+          getChapitrePatrimoniale(mandat) {
+            const chapitre = this.chapitres.find((c) => c.id === mandat.chapitreId);
+            return chapitre ? chapitre.code : '';
+          },
+          nombreEnLettres(nombre) {
+            if (nombre === 0) return 'zéro';
+
+            const unites = [
+              '',
+              'un',
+              'deux',
+              'trois',
+              'quatre',
+              'cinq',
+              'six',
+              'sept',
+              'huit',
+              'neuf',
+            ];
+            const dizaines = [
+              '',
+              '',
+              'vingt',
+              'trente',
+              'quarante',
+              'cinquante',
+              'soixante',
+              'soixante',
+              'quatre-vingt',
+              'quatre-vingt',
+            ];
+            const dizainesSpeciales = [
+              'dix',
+              'onze',
+              'douze',
+              'treize',
+              'quatorze',
+              'quinze',
+              'seize',
+              'dix-sept',
+              'dix-huit',
+              'dix-neuf',
+            ];
+
+            function convertirMoinsDeMillions(n) {
+              if (n === 0) return '';
+              if (n < 10) return unites[n];
+              if (n < 20) return dizainesSpeciales[n - 10];
+              if (n < 100) {
+                const d = Math.floor(n / 10);
+                const u = n % 10;
+                if (d === 7 || d === 9) {
+                  return (
+                    dizaines[d] + (u === 0 ? (d === 9 ? 's' : '') : '-' + dizainesSpeciales[u])
+                  );
+                }
+                return (
+                  dizaines[d] +
+                  (u === 0 ? (d === 8 ? 's' : '') : u === 1 && d < 8 ? ' et un' : '-' + unites[u])
+                );
+              }
+              if (n < 1000) {
+                const c = Math.floor(n / 100);
+                const r = n % 100;
+                return (
+                  (c === 1 ? 'cent' : unites[c] + ' cent') +
+                  (r === 0 ? (c > 1 ? 's' : '') : ' ' + convertirMoinsDeMillions(r))
+                );
+              }
+              if (n < 1000000) {
+                const m = Math.floor(n / 1000);
+                const r = n % 1000;
+                return (
+                  (m === 1 ? 'mille' : convertirMoinsDeMillions(m) + ' mille') +
+                  (r === 0 ? '' : ' ' + convertirMoinsDeMillions(r))
+                );
+              }
+              const millions = Math.floor(n / 1000000);
+              const reste = n % 1000000;
+              return (
+                (millions === 1 ? 'un million' : convertirMoinsDeMillions(millions) + ' millions') +
+                (reste === 0 ? '' : ' ' + convertirMoinsDeMillions(reste))
+              );
+            }
+
+            return convertirMoinsDeMillions(Math.floor(nombre));
+          },
+          async loadBordereau() {
+            try {
+              this.loading = true;
+              const urlParams = new URLSearchParams(window.location.search);
+              const exercice = urlParams.get('exercice') || new Date().getFullYear();
+              const mairieId = urlParams.get('mairieId');
+
+              if (!exercice) {
+                this.error = 'Aucun exercice fourni';
+                return;
+              }
+
+              // Charger tous les mandats pour cet exercice
+              let query = db.mandats.where('exercice').equals(parseInt(exercice));
+
+              if (mairieId) {
+                this.mandats = await query
+                  .filter((m) => m.mairieId === parseInt(mairieId))
+                  .toArray();
+              } else {
+                this.mandats = await query.toArray();
+              }
+
+              // Trier par date
+              this.mandats.sort((a, b) => new Date(a.dateMandat) - new Date(b.dateMandat));
+
+              // Calculer le montant total
+              const montantTotal = this.mandats.reduce((sum, m) => sum + m.montant, 0);
+
+              // Créer l'objet bordereau
+              this.bordereauData = {
+                exercice: parseInt(exercice),
+                montantTotal,
+                nombreMandats: this.mandats.length,
+                dateEmission: new Date(),
+              };
+
+              // Charger la mairie
+              if (this.mandats.length > 0) {
+                const premierMandat = this.mandats[0];
+                this.mairie = await db.mairies.get(premierMandat.mairieId);
+              }
+
+              // Charger tous les chapitres
+              this.chapitres = await db.chapitres.toArray();
+
+              console.log('Bordereau chargé:', this.bordereauData);
+              console.log('Mandats:', this.mandats.length);
+              console.log('Mairie:', this.mairie);
+            } catch (err) {
+              console.error('Erreur lors du chargement:', err);
+              this.error = 'Erreur lors du chargement du bordereau';
+            } finally {
+              this.loading = false;
+            }
+          },
+        },
+        async mounted() {
+          console.log('Application Vue montée');
+          await this.loadBordereau();
+
+          // Auto-print après le chargement si demandé
+          const urlParams = new URLSearchParams(window.location.search);
+          if (urlParams.get('print') === 'true' && !this.error) {
+            setTimeout(() => window.print(), 500);
+          }
+        },
+      }).mount('body');
+    </script>
+  </body>
+</html>

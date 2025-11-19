@@ -265,6 +265,103 @@
             </q-item-section>
           </q-item>
 
+          <q-separator class="q-my-md" />
+
+          <q-item-label header class="text-grey-7 text-weight-medium q-px-md">
+            <q-icon name="receipt" size="18px" class="q-mr-xs" />
+            Gestion des Dépenses
+          </q-item-label>
+
+          <q-item
+            clickable
+            v-ripple
+            to="/app3/dashboard"
+            class="nav-item q-mb-xs"
+            active-class="nav-item-active"
+          >
+            <q-item-section avatar>
+              <q-icon name="dashboard" color="purple" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Dashboard Dépenses</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item
+            clickable
+            v-ripple
+            to="/app3/chapitres"
+            class="nav-item q-mb-xs"
+            active-class="nav-item-active"
+          >
+            <q-item-section avatar>
+              <q-icon name="category" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Chapitres</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item
+            clickable
+            v-ripple
+            to="/app3/previsions"
+            class="nav-item q-mb-xs"
+            active-class="nav-item-active"
+          >
+            <q-item-section avatar>
+              <q-icon name="pie_chart" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Prévisions</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item
+            clickable
+            v-ripple
+            to="/app3/mandats"
+            class="nav-item q-mb-xs"
+            active-class="nav-item-active"
+          >
+            <q-item-section avatar>
+              <q-icon name="receipt" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Mandats</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item
+            clickable
+            v-ripple
+            to="/app3/bordereaux-mandats"
+            class="nav-item q-mb-xs"
+            active-class="nav-item-active"
+          >
+            <q-item-section avatar>
+              <q-icon name="description" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Bordereaux</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item
+            clickable
+            v-ripple
+            to="/app3/statistiques"
+            class="nav-item q-mb-xs"
+            active-class="nav-item-active"
+          >
+            <q-item-section avatar>
+              <q-icon name="bar_chart" color="indigo" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Statistiques</q-item-label>
+            </q-item-section>
+          </q-item>
+
           <template v-if="authStore.isAdmin">
             <q-separator class="q-my-md" />
 
