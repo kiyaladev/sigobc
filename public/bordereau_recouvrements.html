@@ -1,389 +1,501 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bordereau des Recouvrements - Commune de Vayoua</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bordereau des Recouvrements</title>
+    <script src="dexie.min.js"></script>
+    <script src="vue.global.js"></script>
     <style>
-        @page {
-            size: A4 landscape;
-            margin: 10mm;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: Arial, sans-serif;
-            font-size: 11px;
-            background: #f5f5dc;
-            padding: 20px;
-        }
-        
-        .page {
-            width: 297mm;
-            min-height: 210mm;
-            background: #fffff0;
-            margin: 0 auto;
-            padding: 15mm;
-            box-shadow: 0 0 10px rgba(0,0,0,0.3);
-        }
-        
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 10px;
-        }
-        
-        .header-left {
-            font-weight: bold;
-        }
-        
-        .header-center {
-            text-align: center;
-            font-weight: bold;
-            font-size: 14px;
-        }
-        
-        .header-right {
-            font-weight: bold;
-        }
-        
-        .sub-header {
-            display: flex;
-            margin-bottom: 5px;
-        }
-        
-        .commune-info {
-            font-weight: bold;
-            margin-right: 50px;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        
-        th, td {
-            border: 1px solid #000;
-            padding: 4px;
-            text-align: center;
-            vertical-align: middle;
-        }
-        
-        th {
-            background: #f0f0f0;
-            font-weight: bold;
-            font-size: 10px;
-        }
-        
-        .col-numero {
-            width: 50px;
-        }
-        
-        .col-nature {
-            width: 200px;
-            text-align: left;
-        }
-        
-        .col-nom {
-            width: 100px;
-        }
-        
-        .col-fonctionnelle {
-            width: 80px;
-        }
-        
-        .col-patrimoine {
-            width: 80px;
-        }
-        
-        .col-montant {
-            width: 100px;
-        }
-        
-        .col-date {
-            width: 100px;
-        }
-        
-        .col-recoupre {
-            width: 80px;
-        }
-        
-        .col-montant-ctrl {
-            width: 80px;
-        }
-        
-        td.nature-text {
-            text-align: left;
-            font-size: 10px;
-        }
-        
-        .empty-row td {
-            height: 25px;
-        }
-        
-        .handwritten {
-            font-family: 'Segoe Script', cursive;
-            color: #1a1a8a;
-        }
-        
-        .crossed {
-            position: relative;
-        }
-        
-        .crossed::after {
-            content: '×';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 20px;
-            color: #1a1a8a;
-        }
-        
-        .footer {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 30px;
-        }
-        
-        .footer-left {
-            width: 45%;
-            border: 1px solid #000;
-            padding: 15px;
-        }
-        
-        .footer-right {
-            width: 45%;
-            border: 1px solid #000;
-            padding: 15px;
-        }
-        
-        .signature-line {
-            margin-top: 20px;
-        }
-        
-        .ct-number {
-            margin-top: 20px;
-            font-weight: bold;
-        }
-        
-        .bordereau-info {
-            position: absolute;
-            right: 15mm;
-            top: 60px;
-        }
-        
-        .relative-container {
-            position: relative;
-        }
+      @page {
+        size: A4 landscape;
+        margin: 10mm;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        font-size: 11px;
+        background: #f5f5dc;
+        padding: 20px;
+      }
+
+      .page {
+        width: 297mm;
+        min-height: 210mm;
+        background: #fffff0;
+        margin: 0 auto;
+        padding: 15mm;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 10px;
+      }
+
+      .header-left {
+        font-weight: bold;
+      }
+
+      .header-center {
+        text-align: center;
+        font-weight: bold;
+        font-size: 14px;
+      }
+
+      .header-right {
+        font-weight: bold;
+      }
+
+      .sub-header {
+        display: flex;
+        margin-bottom: 5px;
+      }
+
+      .commune-info {
+        font-weight: bold;
+        margin-right: 50px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+      }
+
+      th,
+      td {
+        border: 1px solid #000;
+        padding: 4px;
+        text-align: center;
+        vertical-align: middle;
+      }
+
+      th {
+        background: #f0f0f0;
+        font-weight: bold;
+        font-size: 10px;
+      }
+
+      .col-numero {
+        width: 50px;
+      }
+
+      .col-nature {
+        width: 200px;
+        text-align: left;
+      }
+
+      .col-nom {
+        width: 100px;
+      }
+
+      .col-fonctionnelle {
+        width: 80px;
+      }
+
+      .col-patrimoine {
+        width: 80px;
+      }
+
+      .col-montant {
+        width: 100px;
+      }
+
+      .col-date {
+        width: 100px;
+      }
+
+      .col-recoupre {
+        width: 80px;
+      }
+
+      .col-montant-ctrl {
+        width: 80px;
+      }
+
+      td.nature-text {
+        text-align: left;
+        font-size: 10px;
+      }
+
+      .empty-row td {
+        height: 25px;
+      }
+
+      .handwritten {
+        font-family: 'Segoe Script', cursive;
+        color: #1a1a8a;
+      }
+
+      .crossed {
+        position: relative;
+      }
+
+      .crossed::after {
+        content: '×';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 20px;
+        color: #1a1a8a;
+      }
+
+      .footer {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 30px;
+      }
+
+      .footer-left {
+        width: 45%;
+        border: 1px solid #000;
+        padding: 15px;
+      }
+
+      .footer-right {
+        width: 45%;
+        border: 1px solid #000;
+        padding: 15px;
+      }
+
+      .signature-line {
+        margin-top: 20px;
+      }
+
+      .ct-number {
+        margin-top: 20px;
+        font-weight: bold;
+      }
+
+      .bordereau-info {
+        position: absolute;
+        right: 15mm;
+        top: 60px;
+      }
+
+      .relative-container {
+        position: relative;
+      }
     </style>
-</head>
-<body>
-    <div class="page relative-container">
-        <div class="header">
-            <div class="header-left">
-                RECEITE MUNICIPALE<br>
-                DE : Vayoua
-            </div>
-            <div class="header-center">
-                BORDEREAU DES RECOUVREMENTS AVANT EMISSION DES ORDERS
-            </div>
-            <div class="header-right">
-                EXERCICE : <span class="handwritten">2025</span>
-            </div>
+  </head>
+  <body>
+    <div class="page relative-container" v-if="bordereau">
+      <div class="header">
+        <div class="header-left">
+          RECETTE MUNICIPALE<br />
+          DE : {{ mairie?.ville || 'Non spécifié' }}
         </div>
-        
-        <div class="sub-header">
-            <div class="commune-info">
-                COMMUNE DE : Vayoua<br>
-                CODE COMMUNE : 433
-            </div>
+        <div class="header-center">BORDEREAU DES RECOUVREMENTS AVANT EMISSION DES ORDERS</div>
+        <div class="header-right">
+          EXERCICE : <span class="handwritten">{{ bordereau.annee }}</span>
         </div>
-        
-        <table>
-            <thead>
-                <tr>
-                    <th rowspan="2" class="col-numero">N°</th>
-                    <th rowspan="2" class="col-nature">NATURE DE LA RECETTE</th>
-                    <th style="border-bottom: none; vertical-align: top; padding-bottom: 0;">BORDEEAU N°<br><span class="handwritten" style="font-size: 20px;">86</span></th>
-                    <th colspan="2">NUMERO DECOMPTE</th>
-                    <th rowspan="2" class="col-montant">MONTANT<br>RECOUVRER C/457</th>
-                    <th rowspan="2" class="col-date">DATE<br>D'ENCAISSEMENT<br>RESTE A<br>RECOUVRER</th>
-                    <th colspan="2">CONTROLE DES PRISES EN CHARGES</th>
-                </tr>
-                <tr>
-                    <th style="padding-top: 0;">NOM</th>
-                    <th class="col-fonctionnelle">Fonctionnelle</th>
-                    <th class="col-patrimoine">Patrimoine</th>
-                    <th class="col-recoupre">NUMERO<br>RECOUPRE</th>
-                    <th class="col-montant-ctrl">MONTANT</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>627</td>
-                    <td class="nature-text">Légalisation, signature, certification</td>
-                    <td>REGISSEUR</td>
-                    <td class="crossed"><span class="handwritten">71160</span></td>
-                    <td class="crossed"></td>
-                    <td><span class="handwritten">100 000</span> <span class="crossed"></span></td>
-                    <td><span class="handwritten">14/10/2025</span></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>458</td>
-                    <td class="nature-text">Délivrance de livret de famille et autres documents</td>
-                    <td>REGISSEUR</td>
-                    <td class="crossed"><span class="handwritten">71261</span></td>
-                    <td class="crossed"></td>
-                    <td><span class="handwritten">35 000</span> <span class="crossed"></span></td>
-                    <td><span class="handwritten">14/10/2025</span></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>439</td>
-                    <td class="nature-text">Taxe forfaitaire des petits commerçants et artisons</td>
-                    <td>REGISSEUR</td>
-                    <td class="crossed"><span class="handwritten">70000</span></td>
-                    <td class="crossed"></td>
-                    <td><span class="handwritten">266 000</span> <span class="crossed"></span></td>
-                    <td><span class="handwritten">14/10/2025</span></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>430</td>
-                    <td class="nature-text">Taxe sur de taxis</td>
-                    <td>REGISSEUR</td>
-                    <td class="crossed"><span class="handwritten">7041</span></td>
-                    <td class="crossed"></td>
-                    <td><span class="handwritten">86 000</span> <span class="crossed"></span></td>
-                    <td><span class="handwritten">14/10/2025</span></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>431</td>
-                    <td class="nature-text">Boue d'loyer</td>
-                    <td>REGISSEUR</td>
-                    <td class="crossed"><span class="handwritten">73802</span></td>
-                    <td class="crossed"></td>
-                    <td><span class="handwritten">87 000</span> <span class="crossed"></span></td>
-                    <td><span class="handwritten">14/10/2025</span></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>622</td>
-                    <td class="nature-text">Transport pur route, gares routières morin des taxis</td>
-                    <td>REGISSEUR</td>
-                    <td class="crossed"><span class="handwritten">71301</span></td>
-                    <td class="crossed"></td>
-                    <td><span class="handwritten">16 000</span> <span class="crossed"></span></td>
-                    <td><span class="handwritten">14/10/2025</span></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>433</td>
-                    <td class="nature-text">Marchés</td>
-                    <td>REGISSEUR</td>
-                    <td class="crossed"><span class="handwritten">71344</span></td>
-                    <td class="crossed"></td>
-                    <td><span class="handwritten">205 000</span> <span class="crossed"></span></td>
-                    <td><span class="handwritten">14/10/2025</span></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr class="empty-row">
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td class="crossed"></td>
-                    <td class="crossed"></td>
-                    <td class="crossed"></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr class="empty-row">
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td class="crossed"></td>
-                    <td class="crossed"></td>
-                    <td class="crossed"></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr class="empty-row">
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td class="crossed"></td>
-                    <td class="crossed"></td>
-                    <td class="crossed"></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr class="empty-row">
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td class="crossed"></td>
-                    <td class="crossed"></td>
-                    <td class="crossed"></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr class="empty-row">
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td class="crossed"></td>
-                    <td class="crossed"></td>
-                    <td class="crossed"></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-            </tbody>
-        </table>
-        
-        <div class="footer">
-            <div class="footer-left">
-                Anêté à la somme de: <span class="handwritten">sept cent quatre-vingt six mille FCIA</span>
-                <div class="signature-line">
-                    <br>
-                    Voroua , le............./................/ 2025
-                    <br><br>
-                    <div style="text-align: center; font-weight: bold;">Le Receveur</div>
-                </div>
-            </div>
-            <div class="footer-right">
-                <div style="font-weight: bold;">DATE DE VISA DU MAIRE</div>
-                <br>
-                <div style="text-align: center;">
-                    ................/................/ 2025
-                </div>
-                <br>
-                <div style="text-align: center; font-weight: bold;">SIGNATURE ET CACHET DU MAIRE</div>
-            </div>
+      </div>
+
+      <div class="sub-header">
+        <div class="commune-info">
+          COMMUNE DE : {{ mairie?.ville || 'Non spécifié' }}<br />
+          CODE COMMUNE : {{ mairie?.code || 'N/A' }}
         </div>
-        
-        <div class="ct-number">CT 53</div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th rowspan="2" class="col-numero">N°</th>
+            <th rowspan="2" class="col-nature">NATURE DE LA RECETTE</th>
+            <th style="border-bottom: none; vertical-align: top; padding-bottom: 0">
+              BORDEREAU N°<br /><span class="handwritten" style="font-size: 20px"
+                >{{ formatNumeroBordereau(bordereau.numero, bordereau.annee) }}</span
+              >
+            </th>
+            <th colspan="2">NUMERO DECOMPTE</th>
+            <th rowspan="2" class="col-montant">MONTANT<br />RECOUVRER C/457</th>
+            <th rowspan="2" class="col-date">
+              DATE<br />D'ENCAISSEMENT<br />RESTE A<br />RECOUVRER
+            </th>
+            <th colspan="2">CONTROLE DES PRISES EN CHARGES</th>
+          </tr>
+          <tr>
+            <th style="padding-top: 0">NOM</th>
+            <th class="col-fonctionnelle">Fonctionnelle</th>
+            <th class="col-patrimoine">Patrimoine</th>
+            <th class="col-recoupre">NUMERO<br />RECOUPRE</th>
+            <th class="col-montant-ctrl">MONTANT</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(decl, index) in declarations" :key="decl.id">
+            <td>{{ decl.numeroPiece }}</td>
+            <td class="nature-text">{{ getTaxeLibelle(decl.taxeId) }}</td>
+            <td>{{ decl.nomPartieVersante }}</td>
+            <td><span class="handwritten">{{ getTaxeCode(decl.taxeId) }}</span></td>
+            <td></td>
+            <td>
+              <span class="handwritten">{{ formatMontant(decl.montantRecette) }}</span>
+              <span></span>
+            </td>
+            <td><span class="handwritten">{{ formatDate(decl.dateEncaissement) }}</span></td>
+            <td></td>
+            <td></td>
+          </tr>
+          <!-- Lignes vides pour compléter le tableau -->
+          <tr class="empty-row" v-for="n in emptyRows" :key="'empty-' + n">
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="footer">
+        <div class="footer-left">
+          Arrêté à la somme de: <span class="handwritten">{{ montantEnLettres }}</span>
+          <div class="signature-line">
+            <br />
+            {{ mairie?.ville || 'Ville' }}, le............./................/ {{ bordereau.annee }}
+            <br /><br />
+            <div style="text-align: center; font-weight: bold">Le Receveur</div>
+          </div>
+        </div>
+        <div class="footer-right">
+          <div style="font-weight: bold">DATE DE VISA DU MAIRE</div>
+          <br />
+          <div style="text-align: center">
+            ................/................/ {{ bordereau.annee }}
+          </div>
+          <br />
+          <div style="text-align: center; font-weight: bold">SIGNATURE ET CACHET DU MAIRE</div>
+        </div>
+      </div>
+
+      <div class="ct-number">CT {{ bordereau.numero }}</div>
     </div>
-</body>
+
+    <script type="module">
+      const { createApp } = Vue;
+
+      // Initialiser Dexie
+      const db = new Dexie('TresorDatabase');
+      db.version(1).stores({
+        mairies: '++id, nom, code, ville',
+        taxes: '++id, code, libelle, mairieId, type, actif',
+        declarations:
+          '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
+        bordereaux: '++id, numero, annee, mairieId, statut, personnelId',
+        utilisateurs: '++id, username, email, role, mairieId, actif',
+      });
+
+      createApp({
+        data() {
+          return {
+            bordereau: null,
+            mairie: null,
+            declarations: [],
+            taxes: [],
+            loading: true,
+            error: null,
+          };
+        },
+        computed: {
+          emptyRows() {
+            const minRows = 12;
+            const currentRows = this.declarations.length;
+            return Math.max(0, minRows - currentRows);
+          },
+          montantTotal() {
+            return this.declarations.reduce((sum, decl) => sum + (decl.montantRecette || 0), 0);
+          },
+          montantEnLettres() {
+            return this.nombreEnLettres(this.montantTotal) + ' FCFA';
+          },
+        },
+        methods: {
+          formatDate(dateValue) {
+            if (!dateValue) return '';
+            const date = new Date(dateValue);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+          },
+          formatMontant(montant) {
+            if (!montant) return '0';
+            return new Intl.NumberFormat('fr-FR').format(montant);
+          },
+          formatNumeroBordereau(numero, annee) {
+            const anneeShort = annee % 100;
+            return `${numero}-${anneeShort.toString().padStart(2, '0')}`;
+          },
+          getTaxeLibelle(taxeId) {
+            const taxe = this.taxes.find((t) => t.id === taxeId);
+            return taxe ? taxe.libelle : 'Non spécifié';
+          },
+          getTaxeCode(taxeId) {
+            const taxe = this.taxes.find((t) => t.id === taxeId);
+            return taxe ? taxe.code : '';
+          },
+          nombreEnLettres(nombre) {
+            if (nombre === 0) return 'zéro';
+
+            const unites = [
+              '',
+              'un',
+              'deux',
+              'trois',
+              'quatre',
+              'cinq',
+              'six',
+              'sept',
+              'huit',
+              'neuf',
+            ];
+            const dizaines = [
+              '',
+              '',
+              'vingt',
+              'trente',
+              'quarante',
+              'cinquante',
+              'soixante',
+              'soixante',
+              'quatre-vingt',
+              'quatre-vingt',
+            ];
+            const dizainesSpeciales = [
+              'dix',
+              'onze',
+              'douze',
+              'treize',
+              'quatorze',
+              'quinze',
+              'seize',
+              'dix-sept',
+              'dix-huit',
+              'dix-neuf',
+            ];
+
+            function convertirMoinsDeMillions(n) {
+              if (n === 0) return '';
+              if (n < 10) return unites[n];
+              if (n < 20) return dizainesSpeciales[n - 10];
+              if (n < 100) {
+                const d = Math.floor(n / 10);
+                const u = n % 10;
+                if (d === 7 || d === 9) {
+                  return (
+                    dizaines[d] + (u === 0 ? (d === 9 ? 's' : '') : '-' + dizainesSpeciales[u])
+                  );
+                }
+                return (
+                  dizaines[d] +
+                  (u === 0 ? (d === 8 ? 's' : '') : u === 1 && d < 8 ? ' et un' : '-' + unites[u])
+                );
+              }
+              if (n < 1000) {
+                const c = Math.floor(n / 100);
+                const r = n % 100;
+                return (
+                  (c === 1 ? 'cent' : unites[c] + ' cent') +
+                  (r === 0 ? (c > 1 ? 's' : '') : ' ' + convertirMoinsDeMillions(r))
+                );
+              }
+              if (n < 1000000) {
+                const m = Math.floor(n / 1000);
+                const r = n % 1000;
+                return (
+                  (m === 1 ? 'mille' : convertirMoinsDeMillions(m) + ' mille') +
+                  (r === 0 ? '' : ' ' + convertirMoinsDeMillions(r))
+                );
+              }
+              const millions = Math.floor(n / 1000000);
+              const reste = n % 1000000;
+              return (
+                (millions === 1 ? 'un million' : convertirMoinsDeMillions(millions) + ' millions') +
+                (reste === 0 ? '' : ' ' + convertirMoinsDeMillions(reste))
+              );
+            }
+
+            return convertirMoinsDeMillions(Math.floor(nombre));
+          },
+          async loadBordereau() {
+            try {
+              this.loading = true;
+              const urlParams = new URLSearchParams(window.location.search);
+              const bordereauId = urlParams.get('bordereauId');
+
+              if (!bordereauId) {
+                this.error = 'Aucun ID de bordereau fourni';
+                return;
+              }
+
+              // Charger le bordereau
+              this.bordereau = await db.bordereaux.get(parseInt(bordereauId));
+
+              if (!this.bordereau) {
+                this.error = 'Bordereau non trouvé';
+                return;
+              }
+
+              // Charger la mairie associée
+              if (this.bordereau.mairieId) {
+                this.mairie = await db.mairies.get(this.bordereau.mairieId);
+              }
+
+              // Charger les déclarations du bordereau
+              this.declarations = await db.declarations
+                .where('bordereauId')
+                .equals(parseInt(bordereauId))
+                .toArray();
+
+              // Si pas de mairie depuis le bordereau, prendre celle de la première déclaration
+              if (!this.mairie && this.declarations.length > 0) {
+                const firstDecl = this.declarations[0];
+                if (firstDecl.mairieId) {
+                  this.mairie = await db.mairies.get(firstDecl.mairieId);
+                }
+              }
+
+              // Charger toutes les taxes pour affichage
+              this.taxes = await db.taxes.toArray();
+
+              console.log('Bordereau chargé:', this.bordereau);
+              console.log('Mairie:', this.mairie);
+              console.log('Déclarations:', this.declarations);
+            } catch (err) {
+              console.error('Erreur lors du chargement:', err);
+              this.error = 'Erreur lors du chargement du bordereau';
+            } finally {
+              this.loading = false;
+            }
+          },
+        },
+        async mounted() {
+          console.log('Application Vue montée');
+          await this.loadBordereau();
+
+          // Auto-print après le chargement si demandé
+          const urlParams = new URLSearchParams(window.location.search);
+          if (urlParams.get('print') === 'true' && !this.error) {
+            setTimeout(() => window.print(), 500);
+          }
+        },
+      }).mount('body');
+    </script>
+  </body>
 </html>

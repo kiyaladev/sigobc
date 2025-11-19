@@ -22,7 +22,19 @@
     />
 
     <!-- Table des bordereaux -->
-    <DataTable :rows="filteredBordereaux" :columns="columns" :loading="loading" show-custom-actions>
+    <DataTable
+      :rows="filteredBordereaux"
+      :columns="columns"
+      :loading="loading"
+      show-view
+      show-print
+      show-download
+      @view="viewDeclarations"
+      @print="printBordereau"
+      @download="downloadBordereauPDF"
+      @edit="openDialog"
+      @delete="confirmDelete"
+    >
       <template v-slot:body-cell-numero="props">
         <q-td :props="props">
           {{ formatNumeroBordereau(props.row.numero, props.row.annee) }}
@@ -42,40 +54,6 @@
           {{ formatMontant(props.row.montantTotal) }}
         </q-td>
       </template>
-
-      <template v-slot:body-cell-actions="props">
-        <q-td :props="props" class="no-print">
-          <q-btn
-            flat
-            round
-            dense
-            icon="visibility"
-            color="info"
-            @click="viewDeclarations(props.row)"
-          >
-            <q-tooltip>Voir les déclarations</q-tooltip>
-          </q-btn>
-          <q-btn flat round dense icon="print" color="primary" @click="printBordereau(props.row)">
-            <q-tooltip>Imprimer</q-tooltip>
-          </q-btn>
-          <q-btn
-            flat
-            round
-            dense
-            icon="download"
-            color="secondary"
-            @click="downloadBordereauPDF(props.row)"
-          >
-            <q-tooltip>Télécharger PDF</q-tooltip>
-          </q-btn>
-          <q-btn flat round dense icon="edit" color="primary" @click="openDialog(props.row)">
-            <q-tooltip>Modifier</q-tooltip>
-          </q-btn>
-          <q-btn flat round dense icon="delete" color="negative" @click="confirmDelete(props.row)">
-            <q-tooltip>Supprimer</q-tooltip>
-          </q-btn>
-        </q-td>
-      </template>
     </DataTable>
 
     <!-- Dialog de création/modification -->
@@ -88,6 +66,7 @@
       :readonly="!authStore.isAdmin"
       :loading="saving"
       :default-mairie-id="authStore.currentUser?.mairieId || 0"
+      :next-numero="nextNumeroBordereau"
       @submit="onSubmit"
     />
 
@@ -168,6 +147,7 @@ const bordereaux = ref<Bordereau[]>([]);
 const mairies = ref<Mairie[]>([]);
 const taxes = ref<Taxe[]>([]);
 const loading = ref(false);
+const nextNumeroBordereau = ref<number>(1);
 const saving = ref(false);
 const dialogVisible = ref(false);
 const isEditing = ref(false);
@@ -299,6 +279,18 @@ function resetFilters() {
   filterDateFin.value = '';
 }
 
+async function calculateNextNumeroBordereau() {
+  const currentYear = new Date().getFullYear();
+  const bordereauxThisYear = await db.bordereaux.where('annee').equals(currentYear).toArray();
+
+  if (bordereauxThisYear.length === 0) {
+    nextNumeroBordereau.value = 1;
+  } else {
+    const maxNumero = Math.max(...bordereauxThisYear.map((b) => b.numero));
+    nextNumeroBordereau.value = maxNumero + 1;
+  }
+}
+
 function formatMontant(montant: number): string {
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
@@ -366,9 +358,12 @@ async function loadData() {
   }
 }
 
-function openDialog(bordereau?: Bordereau) {
+async function openDialog(bordereau?: Bordereau) {
   isEditing.value = !!bordereau;
   currentBordereau.value = bordereau || null;
+  if (!bordereau) {
+    await calculateNextNumeroBordereau();
+  }
   dialogVisible.value = true;
 }
 
@@ -418,84 +413,14 @@ function confirmDelete(bordereau: Bordereau) {
   });
 }
 
-async function printBordereau(bordereau: Bordereau) {
-  // Récupérer les déclarations du bordereau
-  const declarations = await db.declarations.where('bordereauId').equals(bordereau.id!).toArray();
-  const mairie = mairies.value.find((m) => m.id === bordereau.mairieId);
-
-  // Ouvrir la page HTML dans une nouvelle fenêtre
-  const printWindow = window.open('/bordereau.html', '_blank');
-
-  if (printWindow) {
-    printWindow.addEventListener('load', () => {
-      // Envoyer les données à la fenêtre
-      printWindow.postMessage(
-        {
-          type: 'FILL_BORDEREAU',
-          data: {
-            mairie: mairie?.nom || '',
-            numero: formatNumeroBordereau(bordereau.numero, bordereau.annee),
-            annee: bordereau.annee,
-            mois: bordereau.mois,
-            dateTransmission: bordereau.dateTransmission
-              ? date.formatDate(bordereau.dateTransmission, 'DD/MM/YYYY')
-              : '',
-            declarations: declarations.map((d) => {
-              const taxe = taxes.value.find((t) => t.id === d.taxeId);
-              return {
-                nomContribuable: d.nomPartieVersante,
-                montant: d.montantRecette,
-                taxe: taxe?.libelle || '',
-                dateEncaissement: date.formatDate(d.dateEncaissement, 'DD/MM/YYYY'),
-              };
-            }),
-            montantTotal: bordereau.montantTotal,
-          },
-        },
-        '*',
-      );
-    });
-  }
+function printBordereau(bordereau: Bordereau) {
+  // Ouvrir la page HTML directement avec l'ID du bordereau
+  window.open(`/bordereau_recouvrements.html?bordereauId=${bordereau.id}`, '_blank');
 }
 
-async function downloadBordereauPDF(bordereau: Bordereau) {
-  // Récupérer les déclarations du bordereau
-  const declarations = await db.declarations.where('bordereauId').equals(bordereau.id!).toArray();
-  const mairie = mairies.value.find((m) => m.id === bordereau.mairieId);
-
-  // Ouvrir la page HTML dans une nouvelle fenêtre
-  const printWindow = window.open('/bordereau.html', '_blank');
-
-  if (printWindow) {
-    printWindow.addEventListener('load', () => {
-      // Envoyer les données et demander l'impression
-      printWindow.postMessage(
-        {
-          type: 'FILL_AND_PRINT',
-          data: {
-            mairie: mairie?.nom || '',
-            numero: formatNumeroBordereau(bordereau.numero, bordereau.annee),
-            annee: bordereau.annee,
-            mois: bordereau.mois,
-            dateTransmission: bordereau.dateTransmission
-              ? date.formatDate(bordereau.dateTransmission, 'DD/MM/YYYY')
-              : '',
-            declarations: declarations.map((d) => {
-              const taxe = taxes.value.find((t) => t.id === d.taxeId);
-              return {
-                nomContribuable: d.nomPartieVersante,
-                montant: d.montantRecette,
-                taxe: taxe?.libelle || '',
-                dateEncaissement: date.formatDate(d.dateEncaissement, 'DD/MM/YYYY'),
-              };
-            }),
-            montantTotal: bordereau.montantTotal,
-          },
-        },
-        '*',
-      );
-    });
-  }
+function downloadBordereauPDF(bordereau: Bordereau) {
+  // Ouvrir la page HTML directement avec l'ID du bordereau et auto-print
+  window.open(`/bordereau_recouvrements.html?bordereauId=${bordereau.id}&print=true`, '_blank');
 }
 
 onMounted(() => {

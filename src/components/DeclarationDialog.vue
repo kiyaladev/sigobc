@@ -202,6 +202,7 @@ interface Props {
   declaration?: Declaration | null;
   isEditing?: boolean;
   mairieOptions: Array<{ label: string; value: number }>;
+  nextNumeroPiece?: number;
   taxeOptions: Array<{ label: string; value: number }>;
   bordereauOptions: Array<{ label: string; value: number }>;
   statutOptions: string[];
@@ -236,18 +237,23 @@ watch(
           ? date.formatDate(props.declaration.dateEncaissement, 'YYYY-MM-DD')
           : '';
       } else {
+        // Première mairie par défaut
+        const firstMairieId =
+          (props.mairieOptions.length > 0
+            ? props.mairieOptions[0]?.value
+            : props.defaultMairieId) || 0;
         localForm.value = {
-          mairieId: props.defaultMairieId,
+          mairieId: firstMairieId,
           exercice: new Date().getFullYear(),
           taxeId: 0,
-          numeroPiece: `DEC-${Date.now()}`,
+          numeroPiece: String(props.nextNumeroPiece || 1),
           nomPartieVersante: '',
           adresse: '',
           dateEncaissement: new Date(),
           numeroLivre: 'T31T',
           numeroEncaissement: '',
           montantRecette: 0,
-          statut: 'brouillon',
+          statut: 'validee' as const,
           observations: '',
         };
         dateStr.value = date.formatDate(new Date(), 'YYYY-MM-DD');

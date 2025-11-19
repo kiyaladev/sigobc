@@ -318,7 +318,7 @@ async function loadStats() {
 
     console.log('Déclarations récentes:', recentDeclarations.value.length);
 
-    openBordereaux.value = await db.bordereaux.where('statut').equals('ouvert').toArray();
+    openBordereaux.value = await db.bordereaux.where('statut').equals('ouvert').limit(5).toArray();
 
     console.log('Bordereaux ouverts:', openBordereaux.value.length);
   } catch (error) {

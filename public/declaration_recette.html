@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Déclaration de Recettes</title>
+    <script src="https://unpkg.com/dexie@latest/dist/dexie.min.js"></script>
     <script src="vue.global.js"></script>
     <style>
       @page {
@@ -19,7 +20,7 @@
 
       body {
         font-family: Arial, sans-serif;
-        font-size: 12px;
+        font-size: 13px;
         line-height: 1.4;
         background: #f5f5f5;
         padding: 20px;
@@ -146,13 +147,17 @@
   <body>
     <div class="page">
       <!-- PREMIÈRE DÉCLARATION - Original : chambre de Comptes -->
-      <div class="declaration">
+      <div class="declaration" v-if="declaration">
         <div class="header">
           <div class="header-left">
             <div>RECETTE MUNICIPALE</div>
-            <div>DE<span class="field-value">..............Yavoua..............</span></div>
+            <div>
+              DE<span class="field-value">{{ mairie?.nom || '.....................' }}</span>
+            </div>
             <div>COMMUNE</div>
-            <div>DE<span class="field-value">..............Yavoua..............</span></div>
+            <div>
+              DE<span class="field-value">{{ mairie?.ville || '.....................' }}</span>
+            </div>
           </div>
           <div class="header-center">
             <div class="title">DÉCLARATION</div>
@@ -160,10 +165,12 @@
           </div>
           <div class="header-right">
             <div class="code-box">
-              <div>Code Commune : <span class="field-value">...433...</span></div>
-              <div>Exercice : <span class="field-value">...2025...</span></div>
-              <div>Article : <span class="field-value">...401...</span></div>
-              <div>Pièce n° : <span class="field-value">...651...</span></div>
+              <div>
+                Code Commune : <span class="field-value">{{ mairie?.code || '......' }}</span>
+              </div>
+              <div>Exercice : <span class="field-value">{{ declaration.exercice }}</span></div>
+              <div>Article : <span class="field-value">{{ taxe?.code || '......' }}</span></div>
+              <div>Pièce n° : <span class="field-value">{{ declaration.numeroPiece }}</span></div>
             </div>
           </div>
         </div>
@@ -171,42 +178,46 @@
         <div class="separator"></div>
 
         <div class="field-row">
-          NOM et Adresse de la partie versante : <span class="field-value">PGSP</span>
+          NOM et Adresse de la partie versante :
+          <span class="field-value">{{ declaration.nomPartieVersante }}</span>
         </div>
-        <div class="field-row">ABIDJAN</div>
+        <div class="field-row">{{ declaration.adresse }}</div>
 
         <div class="field-row" style="margin-top: 10px">
-          Date d'encaissement : <span class="field-value">T70 P N°</span>
-          <span class="field-value">63</span>
+          Date d'encaissement : <span class="field-value">{{ declaration.numeroLivre }}</span>
+          <span class="field-value">{{ declaration.numeroEncaissement }}</span>
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;du
           :
           <span class="field-value"
-            >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;31/10/2025&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span
+            >&nbsp;&nbsp;&nbsp;&nbsp;{{ formatDate(declaration.dateEncaissement)
+            }}&nbsp;&nbsp;&nbsp;&nbsp;</span
           >
         </div>
 
         <div class="field-row">
-          Nature de la recette : <span class="field-value">Subventions d'équipement de l'Etat</span>
+          Nature de la recette :
+          <span class="field-value">{{ taxe?.libelle || 'Non spécifiée' }}</span>
         </div>
 
         <div class="field-row">
           Montant de la recette :
-          <span class="field-value"
-            >cent dix-neuf millions quatre-vingt-neuf mille huit cent quatre-vingt-dix-sept
-            FCFA</span
-          >
+          <span class="field-value">{{ montantEnLettres }}</span> FCFA
         </div>
 
         <div class="field-row">
-          Montant de la recette : <span class="field-value">119 089 897</span> FCFA
+          Montant de la recette :
+          <span class="field-value">{{ formatMontant(declaration.montantRecette) }}</span> FCFA
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CT S3 du :
-          <span class="field-value">31/10/2025</span>
+          <span class="field-value">{{ formatDate(declaration.dateEncaissement) }}</span>
         </div>
 
         <div class="signature-section">
           <div class="signature-left">L'ordonnateur.</div>
           <div class="signature-right">
-            <div>A Yavoua , le <span class="field-value">31/10/2025</span></div>
+            <div>
+              A {{ mairie?.ville || '........' }} , le
+              <span class="field-value">{{ formatDate(declaration.dateEncaissement) }}</span>
+            </div>
             <div>Le Receveur.</div>
           </div>
         </div>
@@ -218,13 +229,17 @@
       </div>
 
       <!-- DEUXIÈME DÉCLARATION - Duplicata : Mairie -->
-      <div class="declaration">
+      <div class="declaration" v-if="declaration">
         <div class="header">
           <div class="header-left">
             <div>RECETTE MUNICIPALE</div>
-            <div>DE<span class="field-value">..............Yavoua..............</span></div>
+            <div>
+              DE<span class="field-value">{{ mairie?.nom || '.....................' }}</span>
+            </div>
             <div>COMMUNE</div>
-            <div>DE<span class="field-value">..............Yavoua..............</span></div>
+            <div>
+              DE<span class="field-value">{{ mairie?.ville || '.....................' }}</span>
+            </div>
           </div>
           <div class="header-center">
             <div class="title">DÉCLARATION</div>
@@ -232,10 +247,12 @@
           </div>
           <div class="header-right">
             <div class="code-box">
-              <div>Code Commune : <span class="field-value">...433...</span></div>
-              <div>Exercice : <span class="field-value">...2025...</span></div>
-              <div>Article : <span class="field-value">...401...</span></div>
-              <div>Pièce n° : <span class="field-value">...651...</span></div>
+              <div>
+                Code Commune : <span class="field-value">{{ mairie?.code || '......' }}</span>
+              </div>
+              <div>Exercice : <span class="field-value">{{ declaration.exercice }}</span></div>
+              <div>Article : <span class="field-value">{{ taxe?.code || '......' }}</span></div>
+              <div>Pièce n° : <span class="field-value">{{ declaration.numeroPiece }}</span></div>
             </div>
           </div>
         </div>
@@ -243,41 +260,46 @@
         <div class="separator"></div>
 
         <div class="field-row">
-          NOM et Adresse de la partie versante : <span class="field-value">PGSP</span>
+          NOM et Adresse de la partie versante :
+          <span class="field-value">{{ declaration.nomPartieVersante }}</span>
         </div>
-        <div class="field-row">ABIDJAN</div>
+        <div class="field-row">{{ declaration.adresse }}</div>
 
         <div class="field-row" style="margin-top: 10px">
-          Date d'encaissement : <span class="field-value">T70 P N°</span>
-          <span class="field-value">63</span>
+          Date d'encaissement : <span class="field-value">{{ declaration.numeroLivre }}</span>
+          <span class="field-value">{{ declaration.numeroEncaissement }}</span>
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;du
           :
           <span class="field-value"
-            >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;31/10/2025&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span
+            >&nbsp;&nbsp;&nbsp;&nbsp;{{ formatDate(declaration.dateEncaissement)
+            }}&nbsp;&nbsp;&nbsp;&nbsp;</span
           >
         </div>
 
         <div class="field-row">
-          Nature de la recette : <span class="field-value">Subventions d'équipement de l'Etat</span>
+          Nature de la recette :
+          <span class="field-value">{{ taxe?.libelle || 'Non spécifiée' }}</span>
         </div>
 
         <div class="field-row">
           Montant de la recette :
-          <span class="field-value"
-            >cent dix-neuf millions quatre-vingt-neuf mille huit cent quatre-vingt-dix-sept</span
-          >
+          <span class="field-value">{{ montantEnLettres }}</span>
         </div>
 
         <div class="field-row">
-          Montant de la recette : <span class="field-value">119 089 897</span> FCFA
+          Montant de la recette :
+          <span class="field-value">{{ formatMontant(declaration.montantRecette) }}</span> FCFA
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CT S3 du :
-          <span class="field-value">31/10/2025</span>
+          <span class="field-value">{{ formatDate(declaration.dateEncaissement) }}</span>
         </div>
 
         <div class="signature-section">
           <div class="signature-left">L'ordonnateur.</div>
           <div class="signature-right">
-            <div>A Yavoua , le <span class="field-value">31/10/2025</span></div>
+            <div>
+              A {{ mairie?.ville || '........' }} , le
+              <span class="field-value">{{ formatDate(declaration.dateEncaissement) }}</span>
+            </div>
             <div>Le Receveur.</div>
           </div>
         </div>
@@ -289,32 +311,181 @@
       </div>
     </div>
 
-    <script>
+    <script type="module">
       const { createApp } = Vue;
+
+      // Initialiser Dexie
+      const db = new Dexie('TresorDatabase');
+      db.version(1).stores({
+        mairies: '++id, nom, code, ville',
+        taxes: '++id, code, libelle, mairieId, type, actif',
+        declarations:
+          '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
+        bordereaux: '++id, numero, annee, mairieId, statut, personnelId',
+        utilisateurs: '++id, username, email, role, mairieId, actif',
+      });
 
       createApp({
         data() {
           return {
-            commune: 'Yavoua',
-            codeCommune: '433',
-            exercice: '2025',
-            article: '401',
-            pieceNo: '651',
-            partieVersante: 'PGSP',
-            adressePartie: 'ABIDJAN',
-            typeEncaissement: 'T70 P N°',
-            numeroEncaissement: '63',
-            dateEncaissement: '31/10/2025',
-            natureRecette: "Subventions d'équipement de l'Etat",
-            montantChiffres: '119 089 897',
-            montantLettres:
-              'cent dix-neuf millions quatre-vingt-neuf mille huit cent quatre-vingt-dix-sept',
-            dateCT: '31/10/2025',
-            dateSignature: '31/10/2025',
+            declaration: null,
+            mairie: null,
+            taxe: null,
+            loading: true,
+            error: null,
           };
         },
-        mounted() {
-          console.log('Application Vue montée avec succès');
+        computed: {
+          montantEnLettres() {
+            if (!this.declaration) return '';
+            return this.nombreEnLettres(this.declaration.montantRecette);
+          },
+        },
+        methods: {
+          formatDate(dateValue) {
+            if (!dateValue) return '';
+            const date = new Date(dateValue);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+          },
+          formatMontant(montant) {
+            if (!montant) return '0';
+            return new Intl.NumberFormat('fr-FR').format(montant);
+          },
+          nombreEnLettres(nombre) {
+            if (nombre === 0) return 'zéro';
+
+            const unites = [
+              '',
+              'un',
+              'deux',
+              'trois',
+              'quatre',
+              'cinq',
+              'six',
+              'sept',
+              'huit',
+              'neuf',
+            ];
+            const dizaines = [
+              '',
+              '',
+              'vingt',
+              'trente',
+              'quarante',
+              'cinquante',
+              'soixante',
+              'soixante',
+              'quatre-vingt',
+              'quatre-vingt',
+            ];
+            const dizainesSpeciales = [
+              'dix',
+              'onze',
+              'douze',
+              'treize',
+              'quatorze',
+              'quinze',
+              'seize',
+              'dix-sept',
+              'dix-huit',
+              'dix-neuf',
+            ];
+
+            function convertirMoinsDeMillions(n) {
+              if (n === 0) return '';
+              if (n < 10) return unites[n];
+              if (n < 20) return dizainesSpeciales[n - 10];
+              if (n < 100) {
+                const d = Math.floor(n / 10);
+                const u = n % 10;
+                if (d === 7 || d === 9) {
+                  return (
+                    dizaines[d] + (u === 0 ? (d === 9 ? 's' : '') : '-' + dizainesSpeciales[u])
+                  );
+                }
+                return (
+                  dizaines[d] +
+                  (u === 0 ? (d === 8 ? 's' : '') : u === 1 && d < 8 ? ' et un' : '-' + unites[u])
+                );
+              }
+              if (n < 1000) {
+                const c = Math.floor(n / 100);
+                const r = n % 100;
+                return (
+                  (c === 1 ? 'cent' : unites[c] + ' cent') +
+                  (r === 0 ? (c > 1 ? 's' : '') : ' ' + convertirMoinsDeMillions(r))
+                );
+              }
+              if (n < 1000000) {
+                const m = Math.floor(n / 1000);
+                const r = n % 1000;
+                return (
+                  (m === 1 ? 'mille' : convertirMoinsDeMillions(m) + ' mille') +
+                  (r === 0 ? '' : ' ' + convertirMoinsDeMillions(r))
+                );
+              }
+              const millions = Math.floor(n / 1000000);
+              const reste = n % 1000000;
+              return (
+                (millions === 1 ? 'un million' : convertirMoinsDeMillions(millions) + ' millions') +
+                (reste === 0 ? '' : ' ' + convertirMoinsDeMillions(reste))
+              );
+            }
+
+            return convertirMoinsDeMillions(Math.floor(nombre));
+          },
+          async loadDeclaration() {
+            try {
+              this.loading = true;
+              const urlParams = new URLSearchParams(window.location.search);
+              const declarationId = urlParams.get('declarationId');
+
+              if (!declarationId) {
+                this.error = 'Aucun ID de déclaration fourni';
+                return;
+              }
+
+              // Charger la déclaration
+              this.declaration = await db.declarations.get(parseInt(declarationId));
+
+              if (!this.declaration) {
+                this.error = 'Déclaration non trouvée';
+                return;
+              }
+
+              // Charger la mairie associée
+              if (this.declaration.mairieId) {
+                this.mairie = await db.mairies.get(this.declaration.mairieId);
+              }
+
+              // Charger la taxe associée
+              if (this.declaration.taxeId) {
+                this.taxe = await db.taxes.get(this.declaration.taxeId);
+              }
+
+              console.log('Déclaration chargée:', this.declaration);
+              console.log('Mairie:', this.mairie);
+              console.log('Taxe:', this.taxe);
+            } catch (err) {
+              console.error('Erreur lors du chargement:', err);
+              this.error = 'Erreur lors du chargement de la déclaration';
+            } finally {
+              this.loading = false;
+            }
+          },
+        },
+        async mounted() {
+          console.log('Application Vue montée');
+          await this.loadDeclaration();
+
+          // Auto-print après le chargement si demandé
+          const urlParams = new URLSearchParams(window.location.search);
+          if (urlParams.get('print') === 'true' && !this.error) {
+            setTimeout(() => window.print(), 500);
+          }
         },
       }).mount('body');
     </script>

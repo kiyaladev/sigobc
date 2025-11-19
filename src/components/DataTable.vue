@@ -73,26 +73,29 @@
           </q-btn>
 
           <!-- Slot pour actions personnalisées -->
-          <slot name="custom-actions" :row="props.row"></slot>
+          <slot v-if="showCustomActions" name="custom-actions" :row="props.row"></slot>
         </q-td>
       </template>
     </q-table>
   </q-card>
 </template>
 
-<script setup lang="ts">
+<script setup lang="ts" generic="T extends Record<string, unknown>">
+import type { QTableColumn } from 'quasar';
+
 interface Props {
-  rows: any[];
-  columns: any[];
+  rows: T[];
+  columns: QTableColumn[];
   rowKey?: string;
   loading?: boolean;
-  pagination?: Record<string, any>;
+  pagination?: Record<string, number | string>;
   showActions?: boolean;
   showView?: boolean;
   showPrint?: boolean;
   showDownload?: boolean;
   showEdit?: boolean;
   showDelete?: boolean;
+  showCustomActions?: boolean;
 }
 
 withDefaults(defineProps<Props>(), {
@@ -105,13 +108,14 @@ withDefaults(defineProps<Props>(), {
   showDownload: false,
   showEdit: true,
   showDelete: true,
+  showCustomActions: false,
 });
 
 defineEmits<{
-  view: [row: any];
-  print: [row: any];
-  download: [row: any];
-  edit: [row: any];
-  delete: [row: any];
+  view: [row: T];
+  print: [row: T];
+  download: [row: T];
+  edit: [row: T];
+  delete: [row: T];
 }>();
 </script>

@@ -38,6 +38,12 @@
       @edit="openDialog"
       @delete="confirmDelete"
     >
+      <template v-slot:body-cell-bordereauNumero="props">
+        <q-td :props="props">
+          {{ getBordereauNumero(props.row.bordereauId) }}
+        </q-td>
+      </template>
+
       <template v-slot:body-cell-statut="props">
         <q-td :props="props">
           <q-chip :color="getStatutColor(props.row.statut)" text-color="white" size="sm">
@@ -71,6 +77,7 @@
       :readonly="!authStore.isAdmin"
       :loading="saving"
       :default-mairie-id="authStore.currentUser?.mairieId || 0"
+      :next-numero-piece="nextNumeroPiece"
       @submit="onSubmit"
     />
   </q-page>
@@ -93,6 +100,7 @@ const mairies = ref<Mairie[]>([]);
 const taxes = ref<Taxe[]>([]);
 const bordereaux = ref<Bordereau[]>([]);
 const loading = ref(false);
+const nextNumeroPiece = ref<number>(1);
 const saving = ref(false);
 const dialogVisible = ref(false);
 const isEditing = ref(false);
@@ -113,6 +121,13 @@ const columns = [
     label: 'N° Pièce',
     field: 'numeroPiece',
     align: 'left' as const,
+    sortable: true,
+  },
+  {
+    name: 'bordereauNumero',
+    label: 'N° Bordereau',
+    field: 'bordereauId',
+    align: 'center' as const,
     sortable: true,
   },
   {
@@ -221,6 +236,21 @@ function resetFilters() {
   filterDateFin.value = '';
 }
 
+async function calculateNextNumeroPiece() {
+  const currentYear = new Date().getFullYear();
+  const declarationsThisYear = await db.declarations
+    .where('exercice')
+    .equals(currentYear)
+    .toArray();
+
+  if (declarationsThisYear.length === 0) {
+    nextNumeroPiece.value = 1;
+  } else {
+    const maxNumero = Math.max(...declarationsThisYear.map((d) => parseInt(d.numeroPiece) || 0));
+    nextNumeroPiece.value = maxNumero + 1;
+  }
+}
+
 function formatMontant(montant: number): string {
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
@@ -241,6 +271,14 @@ function getStatutColor(statut: string): string {
   return colors[statut] || 'grey';
 }
 
+function getBordereauNumero(bordereauId?: number): string {
+  if (!bordereauId) return '-';
+  const bordereau = bordereaux.value.find((b) => b.id === bordereauId);
+  if (!bordereau) return '-';
+  const anneeShort = bordereau.annee % 100;
+  return `${bordereau.numero}-${anneeShort.toString().padStart(2, '0')}`;
+}
+
 async function loadData() {
   loading.value = true;
   try {
@@ -258,9 +296,12 @@ async function loadData() {
   }
 }
 
-function openDialog(declaration?: Declaration) {
+async function openDialog(declaration?: Declaration) {
   isEditing.value = !!declaration;
   currentDeclaration.value = declaration || null;
+  if (!declaration) {
+    await calculateNextNumeroPiece();
+  }
   dialogVisible.value = true;
 }
 

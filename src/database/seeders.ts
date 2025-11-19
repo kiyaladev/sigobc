@@ -224,8 +224,6 @@ export async function seedDeclarations(
 ) {
   console.log(`🌱 Seeding ${count} déclarations...`);
 
-  const statutsDeclaration: Array<'brouillon' | 'validee'> = ['brouillon', 'validee'];
-
   const declarations: Partial<Declaration>[] = [];
   const now = new Date();
   const startDate = new Date(2023, 0, 1);
@@ -244,14 +242,14 @@ export async function seedDeclarations(
       mairieId: randomChoice(mairieIds),
       taxeId: randomChoice(taxeIds),
       exercice: new Date(dateEncaissement).getFullYear(),
-      numeroPiece: `DEC-${new Date(dateEncaissement).getFullYear()}-${String(i + 1).padStart(5, '0')}`,
+      numeroPiece: String(i + 1),
       nomPartieVersante: `Contribuable ${String(i + 1).padStart(4, '0')}`,
       adresse: `${randomChoice(['Rue', 'Avenue', 'Boulevard'])} ${Math.floor(Math.random() * 100)} ${randomChoice(['Dakar', 'Thiès', 'Saint-Louis'])}`,
       dateEncaissement,
       numeroLivre: 'T31T',
       numeroEncaissement: `ENC-${String(i + 1).padStart(6, '0')}`,
       montantRecette: montantTTC,
-      statut: randomChoice(statutsDeclaration),
+      statut: 'validee',
       createdAt: dateEncaissement,
       updatedAt: now,
     };

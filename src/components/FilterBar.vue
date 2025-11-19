@@ -187,19 +187,19 @@ const props = withDefaults(defineProps<Props>(), {
   filterColClass: 'col-12 col-sm-4 col-md-3',
 });
 
-const emit = defineEmits<{
-  (e: 'update:search', value: string): void;
-  (e: 'update:statut', value: string): void;
-  (e: 'update:mairie', value: number | null): void;
-  (e: 'update:exercice', value: number | null): void;
-  (e: 'update:taxe', value: number | null): void;
-  (e: 'update:dateDebut', value: string): void;
-  (e: 'update:dateFin', value: string): void;
-  (e: 'update:period', value: string): void;
-  (e: 'reset'): void;
-  (e: 'refresh'): void;
-  (e: 'period-change'): void;
-}>();
+const emit = defineEmits([
+  'update:search',
+  'update:statut',
+  'update:mairie',
+  'update:exercice',
+  'update:taxe',
+  'update:dateDebut',
+  'update:dateFin',
+  'update:period',
+  'reset',
+  'refresh',
+  'period-change',
+]);
 
 const searchModel = computed({
   get: () => props.search,

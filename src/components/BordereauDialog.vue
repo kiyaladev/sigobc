@@ -121,6 +121,7 @@ interface Props {
   bordereau?: Bordereau | null;
   isEditing?: boolean;
   mairieOptions: Array<{ label: string; value: number }>;
+  nextNumero?: number;
   statutOptions: string[];
   readonly?: boolean;
   loading?: boolean;
@@ -152,16 +153,22 @@ watch(
         localNumeroInput.value = props.bordereau.numero;
       } else {
         const currentYear = new Date().getFullYear();
+        const nextNum = props.nextNumero || 1;
+        // Première mairie par défaut
+        const firstMairieId =
+          (props.mairieOptions.length > 0
+            ? props.mairieOptions[0]?.value
+            : props.defaultMairieId) || 0;
         localForm.value = {
-          numero: 1,
+          numero: nextNum,
           annee: currentYear,
-          mairieId: props.defaultMairieId,
+          mairieId: firstMairieId,
           montantTotal: 0,
           nombreDeclarations: 0,
-          statut: 'ouvert',
+          statut: 'ouvert' as const,
           observations: '',
         };
-        localNumeroInput.value = 1;
+        localNumeroInput.value = nextNum;
       }
     }
   },
