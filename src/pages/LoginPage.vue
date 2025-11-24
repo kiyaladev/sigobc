@@ -115,12 +115,7 @@
         Comptes de démonstration
       </div>
       <div class="text-caption text-grey-7">
-        <div
-          class="q-mb-xs demo-account"
-          @click="fillAdminCredentials"
-          role="button"
-          tabindex="0"
-        >
+        <div class="q-mb-xs demo-account" @click="fillAdminCredentials" role="button" tabindex="0">
           <q-chip size="sm" color="primary" text-color="white" dense> Admin </q-chip>
           <span class="q-ml-sm">admin / admin123</span>
           <q-icon name="edit" size="16px" class="q-ml-xs" />

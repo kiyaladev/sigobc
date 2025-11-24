@@ -115,6 +115,11 @@ const routes: RouteRecordRaw[] = [
         name: 'app3-chapitres',
       },
       {
+        path: 'app3/rubriques',
+        component: () => import('pages/app3/RubriquesPage.vue'),
+        name: 'app3-rubriques',
+      },
+      {
         path: 'app3/previsions',
         component: () => import('pages/app3/PrevisionPage.vue'),
         name: 'app3-previsions',
@@ -128,6 +133,11 @@ const routes: RouteRecordRaw[] = [
         path: 'app3/bordereaux-mandats',
         component: () => import('pages/app3/BordereauxMandatsPage.vue'),
         name: 'app3-bordereaux-mandats',
+      },
+      {
+        path: 'app3/bordereaux-mandats-gestion',
+        component: () => import('pages/app3/BordereauxMandatsGestionPage.vue'),
+        name: 'app3-bordereaux-mandats-gestion',
       },
       {
         path: 'app3/statistiques',

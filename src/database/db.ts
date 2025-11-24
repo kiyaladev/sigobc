@@ -80,9 +80,76 @@ export interface Utilisateur {
   updatedAt: Date;
 }
 
+// ========== Interfaces pour App2 - Gestion de la Trésorerie ==========
+
+export interface Timbres {
+  100: number;
+  200: number;
+  300: number;
+  500: number;
+  600: number;
+  1000: number;
+}
+
+export interface Approvisionnement {
+  id?: number;
+  mairieId: number;
+  exercice: number; // Année
+  date: Date;
+  type: 'initial' | 'complementaire'; // Type d'approvisionnement
+  timbres: Timbres; // Stock de timbres par valeur
+  total: number; // Montant total
+  exo: number; // Exonération
+  observations?: string;
+  personnelId: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Remise {
+  id?: number;
+  mairieId: number;
+  exercice: number;
+  date: Date;
+  numeroRemise: string; // Numéro de la remise
+  timbres: Timbres; // Quantité de timbres reçus
+  total: number; // Montant total
+  observations?: string;
+  personnelId: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Versement {
+  id?: number;
+  mairieId: number;
+  exercice: number;
+  date: Date;
+  numeroVersement: string; // Numéro du versement
+  timbres: Timbres; // Quantité de timbres vendus
+  total: number; // Montant total
+  exo: number; // Exonération
+  observations?: string;
+  personnelId: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // ========== Interfaces pour App3 - Gestion des Dépenses ==========
 
 export interface Chapitre {
+  id?: number;
+  code: string; // Ex: 6011
+  libelle: string; // Ex: "Fournitures de bureau"
+  description?: string;
+  rubriqueId: number; // Lien vers la rubrique
+  mairieId: number;
+  actif: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Rubrique {
   id?: number;
   code: string; // Ex: 60, 61, 62, etc.
   libelle: string; // Ex: "Charges de personnel"
@@ -96,7 +163,7 @@ export interface Chapitre {
 export interface Prevision {
   id?: number;
   exercice: number; // Année budgétaire
-  chapitreId: number; // Référence au chapitre
+  rubriqueId: number; // Référence à la rubrique
   mairieId: number;
   montantPrevu: number; // Montant total prévu pour ce chapitre
   montantEngage: number; // Montant déjà engagé (mandats)
@@ -114,6 +181,7 @@ export interface Mandat {
   exercice: number; // Année
   numeroMandat: string; // Numéro unique du mandat
   dateMandat: Date; // Date d'émission du mandat
+  rubriqueId: number; // Rubrique budgétaire
   chapitreId: number; // Chapitre budgétaire
   previsionId?: number; // Lien vers la prévision
   bordereauMandatId?: number; // ID du bordereau d'émission des mandats
@@ -153,8 +221,13 @@ class TresorDatabase extends Dexie {
   declarations!: EntityTable<Declaration, 'id'>;
   bordereaux!: EntityTable<Bordereau, 'id'>;
   utilisateurs!: EntityTable<Utilisateur, 'id'>;
+  // App2 - Gestion de la Trésorerie
+  approvisionnements!: EntityTable<Approvisionnement, 'id'>;
+  remises!: EntityTable<Remise, 'id'>;
+  versements!: EntityTable<Versement, 'id'>;
   // App3 - Gestion des Dépenses
   chapitres!: EntityTable<Chapitre, 'id'>;
+  rubriques!: EntityTable<Rubrique, 'id'>;
   previsions!: EntityTable<Prevision, 'id'>;
   mandats!: EntityTable<Mandat, 'id'>;
   bordereauMandats!: EntityTable<BordereauMandat, 'id'>;
@@ -162,18 +235,23 @@ class TresorDatabase extends Dexie {
   constructor() {
     super('TresorDatabase');
 
-    this.version(3).stores({
+    this.version(7).stores({
       mairies: '++id, nom, code, ville',
       taxes: '++id, code, libelle, mairieId, type, actif',
       declarations:
         '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
       bordereaux: '++id, numero, annee, mairieId, statut, personnelId',
       utilisateurs: '++id, username, email, role, mairieId, actif',
+      // App2
+      approvisionnements: '++id, date, exercice, mairieId, type, personnelId',
+      remises: '++id, numeroRemise, date, exercice, mairieId, personnelId',
+      versements: '++id, numeroVersement, date, exercice, mairieId, personnelId',
       // App3
-      chapitres: '++id, code, libelle, mairieId, actif',
-      previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
+      chapitres: '++id, code, libelle, rubriqueId, mairieId, actif',
+      rubriques: '++id, code, libelle, mairieId, actif',
+      previsions: '++id, exercice, rubriqueId, mairieId, statut, personnelId',
       mandats:
-        '++id, numeroMandat, dateMandat, exercice, chapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
+        '++id, numeroMandat, dateMandat, exercice, rubriqueId, chapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
       bordereauMandats: '++id, numero, exercice, mairieId, statut, personnelId',
     });
   }
@@ -192,9 +270,9 @@ export async function initializeDatabase() {
 
     // Créer une mairie par défaut
     const mairieId = await db.mairies.add({
-      nom: 'Mairie de Dakar',
-      code: 'MDK001',
-      adresse: "Place de l'Indépendance",
+      nom: "Mairie d'Azaguie",
+      code: '422',
+      adresse: 'Azaguie',
       ville: 'Dakar',
       codePostal: '10000',
       telephone: '+221 33 889 40 00',
@@ -246,6 +324,37 @@ export async function initializeDatabase() {
         description: 'Taxe pour le service de collecte des ordures',
         montant: 15000,
         type: 'fixe',
+        mairieId: mairieId as number,
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+    ]);
+
+    // Créer quelques rubriques et chapitres par défaut pour App3
+    const rubriqueId = await db.rubriques.add({
+      code: '60',
+      libelle: 'Achats de matières et fournitures',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    await db.chapitres.bulkAdd([
+      {
+        code: '6011',
+        libelle: 'Fournitures de bureau',
+        rubriqueId: rubriqueId as number,
+        mairieId: mairieId as number,
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        code: '6012',
+        libelle: 'Fournitures informatiques',
+        rubriqueId: rubriqueId as number,
         mairieId: mairieId as number,
         actif: true,
         createdAt: now,

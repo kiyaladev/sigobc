@@ -5,9 +5,15 @@ import {
   type Declaration,
   type Bordereau,
   type Utilisateur,
+  type Approvisionnement,
+  type Remise,
+  type Versement,
+  type Timbres,
+  type Rubrique,
   type Chapitre,
   type Prevision,
   type Mandat,
+  type BordereauMandat,
 } from './db';
 
 /**
@@ -318,67 +324,253 @@ export async function seedBordereaux(
 }
 
 /**
- * Seeder pour les Chapitres budgétaires (App3)
+ * ========== SEEDERS APP2 - GESTION DE LA TRÉSORERIE ==========
  */
-export async function seedChapitres(mairieIds: number[], count: number = 15) {
-  console.log(`🌱 Seeding ${count} chapitres budgétaires...`);
+
+/**
+ * Seeder pour les Approvisionnements (App2)
+ */
+export async function seedApprovisionnements(
+  mairieIds: number[],
+  personnelIds: number[],
+  count: number = 20,
+) {
+  console.log(`🌱 Seeding ${count} approvisionnements...`);
+
+  const approvisionnements: Partial<Approvisionnement>[] = [];
+  const now = new Date();
+  const exercices = [2023, 2024, 2025];
+
+  for (let i = 0; i < count; i++) {
+    const exercice = randomChoice(exercices);
+    const date = randomDate(
+      new Date(exercice, 0, 1),
+      exercice === 2025 ? now : new Date(exercice, 11, 31),
+    );
+    const type =
+      i === 0
+        ? ('initial' as const)
+        : randomChoice(['initial' as const, 'complementaire' as const]);
+
+    // Générer des quantités aléatoires pour chaque valeur de timbre
+    const timbres: Timbres = {
+      100: randomAmount(100, 1000),
+      200: randomAmount(80, 800),
+      300: randomAmount(50, 500),
+      500: randomAmount(30, 300),
+      600: randomAmount(20, 200),
+      1000: randomAmount(10, 100),
+    };
+
+    // Calculer le total
+    const total =
+      timbres[100] * 100 +
+      timbres[200] * 200 +
+      timbres[300] * 300 +
+      timbres[500] * 500 +
+      timbres[600] * 600 +
+      timbres[1000] * 1000;
+
+    const exo = randomAmount(0, 10000);
+    const obs =
+      Math.random() > 0.7 ? `Approvisionnement ${type} de l'exercice ${exercice}` : undefined;
+
+    const approvisionnement: Partial<Approvisionnement> = {
+      mairieId: randomChoice(mairieIds),
+      exercice,
+      date,
+      type,
+      timbres,
+      total,
+      exo,
+      personnelId: randomChoice(personnelIds),
+      createdAt: date,
+      updatedAt: now,
+    };
+
+    if (obs) {
+      approvisionnement.observations = obs;
+    }
+
+    approvisionnements.push(approvisionnement);
+  }
+
+  await db.approvisionnements.bulkAdd(approvisionnements as unknown as Approvisionnement[]);
+  console.log(`✅ ${count} approvisionnements créés`);
+  return approvisionnements;
+}
+
+/**
+ * Seeder pour les Remises (App2)
+ */
+export async function seedRemises(mairieIds: number[], personnelIds: number[], count: number = 50) {
+  console.log(`🌱 Seeding ${count} remises...`);
+
+  const remises: Partial<Remise>[] = [];
+  const now = new Date();
+  const exercices = [2023, 2024, 2025];
+
+  for (let i = 0; i < count; i++) {
+    const exercice = randomChoice(exercices);
+    const date = randomDate(
+      new Date(exercice, 0, 1),
+      exercice === 2025 ? now : new Date(exercice, 11, 31),
+    );
+    const numeroRemise = `REM-${exercice}-${String(i + 1).padStart(4, '0')}`;
+
+    // Générer des quantités aléatoires pour chaque valeur de timbre
+    const timbres: Timbres = {
+      100: randomAmount(50, 500),
+      200: randomAmount(40, 400),
+      300: randomAmount(30, 300),
+      500: randomAmount(20, 200),
+      600: randomAmount(10, 100),
+      1000: randomAmount(5, 50),
+    };
+
+    // Calculer le total
+    const total =
+      timbres[100] * 100 +
+      timbres[200] * 200 +
+      timbres[300] * 300 +
+      timbres[500] * 500 +
+      timbres[600] * 600 +
+      timbres[1000] * 1000;
+
+    const obs = Math.random() > 0.6 ? `Remise de l'imprimerie nationale` : undefined;
+
+    const remise: Partial<Remise> = {
+      mairieId: randomChoice(mairieIds),
+      exercice,
+      date,
+      numeroRemise,
+      timbres,
+      total,
+      personnelId: randomChoice(personnelIds),
+      createdAt: date,
+      updatedAt: now,
+    };
+
+    if (obs) {
+      remise.observations = obs;
+    }
+
+    remises.push(remise);
+  }
+
+  await db.remises.bulkAdd(remises as unknown as Remise[]);
+  console.log(`✅ ${count} remises créées`);
+  return remises;
+}
+
+/**
+ * Seeder pour les Versements (App2)
+ */
+export async function seedVersements(
+  mairieIds: number[],
+  personnelIds: number[],
+  count: number = 60,
+) {
+  console.log(`🌱 Seeding ${count} versements...`);
+
+  const versements: Partial<Versement>[] = [];
+  const now = new Date();
+  const exercices = [2023, 2024, 2025];
+
+  for (let i = 0; i < count; i++) {
+    const exercice = randomChoice(exercices);
+    const date = randomDate(
+      new Date(exercice, 0, 1),
+      exercice === 2025 ? now : new Date(exercice, 11, 31),
+    );
+    const numeroVersement = `VERS-${exercice}-${String(i + 1).padStart(4, '0')}`;
+
+    // Générer des quantités aléatoires pour chaque valeur de timbre (vendus)
+    const timbres: Timbres = {
+      100: randomAmount(20, 200),
+      200: randomAmount(15, 150),
+      300: randomAmount(10, 100),
+      500: randomAmount(8, 80),
+      600: randomAmount(5, 50),
+      1000: randomAmount(2, 20),
+    };
+
+    // Calculer le total
+    const total =
+      timbres[100] * 100 +
+      timbres[200] * 200 +
+      timbres[300] * 300 +
+      timbres[500] * 500 +
+      timbres[600] * 600 +
+      timbres[1000] * 1000;
+
+    const exo = randomAmount(0, 5000);
+    const obs = Math.random() > 0.7 ? `Versement journalier` : undefined;
+
+    const versement: Partial<Versement> = {
+      mairieId: randomChoice(mairieIds),
+      exercice,
+      date,
+      numeroVersement,
+      timbres,
+      total,
+      exo,
+      personnelId: randomChoice(personnelIds),
+      createdAt: date,
+      updatedAt: now,
+    };
+
+    if (obs) {
+      versement.observations = obs;
+    }
+
+    versements.push(versement);
+  }
+
+  await db.versements.bulkAdd(versements as unknown as Versement[]);
+  console.log(`✅ ${count} versements créés`);
+  return versements;
+}
+
+/**
+ * ========== SEEDERS APP3 - GESTION DES DÉPENSES ==========
+ */
+
+/**
+ * Seeder pour les Rubriques budgétaires (App3)
+ */
+export async function seedRubriques(mairieIds: number[], count: number = 15) {
+  console.log(`🌱 Seeding ${count} rubriques budgétaires...`);
 
   const chapitresData = [
+    { code: '01', libelle: 'SALAIRE ET INDEM', description: 'Salaires et indemnités' },
+    { code: '02', libelle: 'CHARGES SOCIALES', description: 'Charges sociales' },
     {
-      code: '60',
-      libelle: 'Achats et variations de stocks',
-      description: 'Achats de marchandises, matières premières',
+      code: '03',
+      libelle: 'TRANSP. & FRAIS DE MISS.',
+      description: 'Transport et frais de mission',
+    },
+    { code: '04', libelle: 'CARBUR. ET LUBRIF.', description: 'Carburant et lubrifiants' },
+    { code: '05', libelle: 'MATERIEL ET FOURNIT', description: 'Matériel et fournitures' },
+    {
+      code: '06',
+      libelle: 'ABONN. EAU, ELEC, TELEPH',
+      description: 'Abonnements eau, électricité, téléphone',
     },
     {
-      code: '6011',
-      libelle: 'Achats de matières et fournitures',
-      description: 'Matériel de bureau, fournitures diverses',
+      code: '07',
+      libelle: "TRAVAUX & SCES A L'ENTREP",
+      description: "Travaux et services à l'entreprise",
     },
-    {
-      code: '6013',
-      libelle: 'Variations de stocks',
-      description: 'Variation des stocks de matières',
-    },
-    { code: '61', libelle: 'Services extérieurs', description: 'Services fournis par des tiers' },
-    {
-      code: '6010',
-      libelle: 'Transport et déplacement',
-      description: 'Frais de transport et missions',
-    },
-    {
-      code: '6020',
-      libelle: 'Loyers et charges locatives',
-      description: 'Loyers des locaux et équipements',
-    },
-    {
-      code: '62',
-      libelle: 'Autres services extérieurs',
-      description: 'Honoraires, assurances, publicité',
-    },
-    { code: '63', libelle: 'Impôts et taxes', description: 'Impôts et taxes diverses' },
-    { code: '64', libelle: 'Charges de personnel', description: 'Salaires, charges sociales' },
-    { code: '6400', libelle: 'Rémunérations du personnel', description: 'Salaires et primes' },
-    {
-      code: '65',
-      libelle: 'Autres charges de gestion courante',
-      description: 'Redevances, subventions versées',
-    },
-    { code: '66', libelle: 'Charges financières', description: 'Intérêts et frais bancaires' },
-    { code: '67', libelle: 'Charges exceptionnelles', description: 'Charges non courantes' },
-    {
-      code: '68',
-      libelle: 'Dotations aux amortissements',
-      description: 'Amortissements des immobilisations',
-    },
-    { code: '69', libelle: 'Impôt sur les bénéfices', description: 'Impôt sur les résultats' },
+    { code: '08', libelle: 'INTERVEN ET TRANSF.', description: 'Interventions et transferts' },
   ];
 
-  const chapitres: Chapitre[] = [];
+  const rubriques: Rubrique[] = [];
   const now = new Date();
 
   for (let i = 0; i < Math.min(count, chapitresData.length); i++) {
     const data = chapitresData[i]!;
-    chapitres.push({
+    rubriques.push({
       code: data.code,
       libelle: data.libelle,
       description: data.description,
@@ -389,9 +581,200 @@ export async function seedChapitres(mairieIds: number[], count: number = 15) {
     });
   }
 
-  await db.chapitres.bulkAdd(chapitres);
-  console.log(`✅ ${chapitres.length} chapitres créés`);
-  return chapitres;
+  await db.rubriques.bulkAdd(rubriques);
+  console.log(`✅ ${rubriques.length} rubriques créées`);
+  return rubriques;
+}
+
+/**
+ * Seeder pour les Chapitres budgétaires (App3)
+ */
+export async function seedChapitres(
+  mairieIds: number[],
+  rubriqueIds: number[],
+  count: number = 60,
+) {
+  console.log(`🌱 Seeding ${count} chapitres budgétaires...`);
+
+  const comptesData = [
+    { code: '6000', libelle: 'Administration', description: 'Administration' },
+    {
+      code: '60010',
+      libelle: 'Fonctionnement du Conseil et des commissions',
+      description: 'Fonctionnement du Conseil et des commissions',
+    },
+    {
+      code: '60011',
+      libelle: 'Fonctionnement de la municipalité',
+      description: 'Fonctionnement de la municipalité',
+    },
+    {
+      code: '60012',
+      libelle: 'Fonctionnement du Cabinet du Maire',
+      description: 'Fonctionnement du Cabinet du Maire',
+    },
+    {
+      code: '60013',
+      libelle: 'Indemnités de fonction et de représentation',
+      description: 'Indemnités de fonction et de représentation',
+    },
+    {
+      code: '60015',
+      libelle: 'Frais de missions en dehors du territoire national',
+      description: 'Frais de missions en dehors du territoire national',
+    },
+    {
+      code: '60016',
+      libelle: 'Autres dépenses au titre des autorités municipales',
+      description: 'Autres dépenses au titre des autorités municipales',
+    },
+    { code: '6002', libelle: 'État civil et population', description: 'État civil et population' },
+    {
+      code: '6006',
+      libelle: "Autres dépenses d'Administration générale",
+      description: "Autres dépenses d'Administration générale",
+    },
+    { code: '6010', libelle: 'Administration', description: 'Administration' },
+    { code: '6020', libelle: 'Administration', description: 'Administration' },
+    { code: '6031', libelle: 'Gardes municipaux', description: 'Gardes municipaux' },
+    {
+      code: '6033',
+      libelle: 'Programmes spéciaux et Opérations diverses',
+      description: 'Programmes spéciaux et Opérations diverses',
+    },
+    { code: '6100', libelle: 'Administration', description: 'Administration' },
+    {
+      code: '6101',
+      libelle: 'Voiries - Routes - Chemins',
+      description: 'Voiries - Routes - Chemins',
+    },
+    {
+      code: '6133',
+      libelle: 'Nettoiement de la voirie - Enlèvement des ordures',
+      description: 'Nettoiement de la voirie - Enlèvement des ordures',
+    },
+    {
+      code: '6141',
+      libelle: 'Autres dettes de la commune',
+      description: 'Autres dettes de la commune',
+    },
+    {
+      code: '6142',
+      libelle: 'Autres dettes de la commune',
+      description: 'Autres dettes de la commune',
+    },
+    {
+      code: '6152',
+      libelle: 'Autres dettes de la commune',
+      description: 'Autres dettes de la commune',
+    },
+    {
+      code: '6201',
+      libelle: "Autres dépenses d'éducation",
+      description: "Autres dépenses d'éducation",
+    },
+    {
+      code: '6206',
+      libelle: "Autres dépenses d'éducation",
+      description: "Autres dépenses d'éducation",
+    },
+    {
+      code: '6224',
+      libelle: 'Aide aux familiale, sociale',
+      description: 'Aide aux familiale, sociale',
+    },
+    { code: '6225', libelle: 'Aide aux indigents', description: 'Aide aux indigents' },
+    {
+      code: '6226',
+      libelle: "Autres dépenses d'Assistance Sociales",
+      description: "Autres dépenses d'Assistance Sociales",
+    },
+    { code: '6242', libelle: 'Manifestations sportives', description: 'Manifestations sportives' },
+    {
+      code: '6246',
+      libelle: 'Autres dépenses au titre des sports et loisirs',
+      description: 'Autres dépenses au titre des sports et loisirs',
+    },
+    { code: '6250', libelle: 'Administration', description: 'Administration' },
+    {
+      code: '6256',
+      libelle: 'Autres dépenses au titre des activités culturelles',
+      description: 'Autres dépenses au titre des activités culturelles',
+    },
+    { code: '6301', libelle: 'Projets agricoles', description: 'Projets agricoles' },
+    { code: '6306', libelle: 'Projets agricoles', description: 'Projets agricoles' },
+    {
+      code: '6336',
+      libelle: 'Autres dépenses de transports et communications',
+      description: 'Autres dépenses de transports et communications',
+    },
+    {
+      code: '6341',
+      libelle: 'Abattoir - conservation / Transport de viande',
+      description: 'Abattoir - conservation / Transport de viande',
+    },
+    {
+      code: '6406',
+      libelle: 'Autres dettes de la commune',
+      description: 'Autres dettes de la commune',
+    },
+    {
+      code: '6415',
+      libelle: 'Conférences intercommunales - Association des villes et communes',
+      description: 'Conférences intercommunales - Association des villes et communes',
+    },
+    {
+      code: '6416',
+      libelle: 'Autres contributions et Transferts',
+      description: 'Autres contributions et Transferts',
+    },
+    { code: '6420', libelle: 'Responsabilité civile', description: 'Responsabilité civile' },
+    { code: '6421', libelle: 'Assurance du personnel', description: 'Assurance du personnel' },
+    { code: '6422', libelle: 'Assurances des véhicules', description: 'Assurances des véhicules' },
+    {
+      code: '6426',
+      libelle: 'Autres assurances (Assurances des élus)',
+      description: 'Autres assurances (Assurances des élus)',
+    },
+    { code: '6430', libelle: 'Cérémonies publiques', description: 'Cérémonies publiques' },
+    {
+      code: '6431',
+      libelle: 'Fêtes et réceptions officielles',
+      description: 'Fêtes et réceptions officielles',
+    },
+    {
+      code: '6440',
+      libelle: 'Fonds de réserve ordinaire',
+      description: 'Fonds de réserve ordinaire',
+    },
+    { code: '6441', libelle: "Fonds d'investissement", description: "Fonds d'investissement" },
+    {
+      code: '6451',
+      libelle: 'Indemnités, Frais et dommages et Intérêts culturels et de promotion humaine',
+      description: 'Indemnités, Frais et dommages et Intérêts culturels et de promotion humaine',
+    },
+  ];
+
+  const comptes: Chapitre[] = [];
+  const now = new Date();
+
+  for (let i = 0; i < Math.min(count, comptesData.length); i++) {
+    const data = comptesData[i]!;
+    comptes.push({
+      code: data.code,
+      libelle: data.libelle,
+      description: data.description,
+      rubriqueId: randomChoice(rubriqueIds),
+      mairieId: randomChoice(mairieIds),
+      actif: true,
+      createdAt: randomDate(new Date(2020, 0, 1), now),
+      updatedAt: now,
+    });
+  }
+
+  await db.chapitres.bulkAdd(comptes);
+  console.log(`✅ ${comptes.length} chapitres créés`);
+  return comptes;
 }
 
 /**
@@ -399,7 +782,7 @@ export async function seedChapitres(mairieIds: number[], count: number = 15) {
  */
 export async function seedPrevisions(
   mairieIds: number[],
-  chapitreIds: number[],
+  rubriqueIds: number[],
   personnelIds: number[],
   count: number = 30,
 ) {
@@ -429,7 +812,7 @@ export async function seedPrevisions(
 
     const prevision: Partial<Prevision> = {
       exercice,
-      chapitreId: randomChoice(chapitreIds),
+      rubriqueId: randomChoice(rubriqueIds),
       mairieId: randomChoice(mairieIds),
       montantPrevu,
       montantEngage,
@@ -447,7 +830,7 @@ export async function seedPrevisions(
     previsions.push(prevision);
   }
 
-  await db.previsions.bulkAdd(previsions);
+  await db.previsions.bulkAdd(previsions as unknown as Prevision[]);
   console.log(`✅ ${count} prévisions créées`);
   return previsions;
 }
@@ -457,7 +840,7 @@ export async function seedPrevisions(
  */
 export async function seedMandats(
   mairieIds: number[],
-  chapitreIds: number[],
+  rubriqueIds: number[],
   previsionIds: number[],
   personnelIds: number[],
   count: number = 100,
@@ -537,7 +920,7 @@ export async function seedMandats(
       exercice,
       numeroMandat,
       dateMandat,
-      chapitreId: randomChoice(chapitreIds),
+      rubriqueId: randomChoice(rubriqueIds),
       mairieId: randomChoice(mairieIds),
       beneficiaire: randomChoice(beneficiaires),
       objet: randomChoice(objets),
@@ -568,9 +951,63 @@ export async function seedMandats(
     mandats.push(mandat);
   }
 
-  await db.mandats.bulkAdd(mandats);
+  await db.mandats.bulkAdd(mandats as unknown as Mandat[]);
   console.log(`✅ ${count} mandats créés`);
   return mandats;
+}
+
+/**
+ * Seeder pour les Bordereaux d'émission des mandats (App3)
+ */
+export async function seedBordereauMandats(
+  mairieIds: number[],
+  personnelIds: number[],
+  count: number = 20,
+) {
+  console.log(`🌱 Seeding ${count} bordereaux d'émission des mandats...`);
+
+  const bordereauMandats: Partial<BordereauMandat>[] = [];
+  const now = new Date();
+
+  for (let i = 0; i < count; i++) {
+    const exercice = randomAmount(2023, 2025);
+    const dateEmission = randomDate(
+      new Date(exercice, 0, 1),
+      exercice === 2025 ? now : new Date(exercice, 11, 31),
+    );
+
+    const numero = i + 1;
+    const nombreMandats = randomAmount(3, 15);
+    const montantTotal = randomAmount(100000, 2000000);
+
+    const statuts: Array<'ouvert' | 'ferme'> = ['ouvert', 'ferme'];
+    const statut = exercice < 2025 ? 'ferme' : randomChoice(statuts);
+
+    const obs = Math.random() > 0.6 ? 'Bordereau conforme' : undefined;
+
+    const bordereauMandat: Partial<BordereauMandat> = {
+      numero,
+      exercice,
+      dateEmission,
+      mairieId: randomChoice(mairieIds),
+      montantTotal,
+      nombreMandats,
+      statut,
+      personnelId: randomChoice(personnelIds),
+      createdAt: dateEmission,
+      updatedAt: now,
+    };
+
+    if (obs) {
+      bordereauMandat.observations = obs;
+    }
+
+    bordereauMandats.push(bordereauMandat);
+  }
+
+  await db.bordereauMandats.bulkAdd(bordereauMandats as unknown as BordereauMandat[]);
+  console.log(`✅ ${count} bordereaux mandats créés`);
+  return bordereauMandats;
 }
 
 /**
@@ -583,10 +1020,15 @@ export async function runAllSeeders(
     taxes?: number;
     declarations?: number;
     bordereaux?: number;
+    // App2
+    approvisionnements?: number;
+    remises?: number;
+    versements?: number;
     // App3
     chapitres?: number;
     previsions?: number;
     mandats?: number;
+    bordereauMandats?: number;
   } = {},
 ) {
   console.log('🚀 Démarrage des seeders...');
@@ -597,10 +1039,15 @@ export async function runAllSeeders(
     taxes = 25,
     declarations = 100,
     bordereaux = 80,
+    // App2
+    approvisionnements = 20,
+    remises = 50,
+    versements = 60,
     // App3
     chapitres = 15,
     previsions = 30,
     mandats = 100,
+    bordereauMandats = 20,
   } = options;
 
   try {
@@ -612,10 +1059,15 @@ export async function runAllSeeders(
       db.taxes.clear(),
       db.declarations.clear(),
       db.bordereaux.clear(),
+      // App2
+      db.approvisionnements.clear(),
+      db.remises.clear(),
+      db.versements.clear(),
       // App3
       db.chapitres.clear(),
       db.previsions.clear(),
       db.mandats.clear(),
+      db.bordereauMandats.clear(),
     ]);
 
     // Créer les utilisateurs
@@ -636,24 +1088,42 @@ export async function runAllSeeders(
     // Créer les bordereaux
     await seedBordereaux(mairieIds, utilisateurIds, bordereaux);
 
+    // App2 - Gestion de la Trésorerie
+    console.log('\n💰 Seeders App2 - Gestion de la Trésorerie');
+
+    // Créer les approvisionnements
+    await seedApprovisionnements(mairieIds, utilisateurIds, approvisionnements);
+
+    // Créer les remises
+    await seedRemises(mairieIds, utilisateurIds, remises);
+
+    // Créer les versements
+    await seedVersements(mairieIds, utilisateurIds, versements);
+
     // App3 - Gestion des Dépenses
     console.log('\n📦 Seeders App3 - Gestion des Dépenses');
 
-    // Créer les chapitres budgétaires
-    const chapitresCreated = await seedChapitres(mairieIds, chapitres);
-    const chapitreIds = chapitresCreated.map((c) => c.id!);
+    // Créer les rubriques budgétaires (ex-chapitres)
+    const rubriquesCreated = await seedRubriques(mairieIds, chapitres);
+    const rubriqueIds = rubriquesCreated.map((c) => c.id!);
+
+    // Créer les chapitres budgétaires (ex-comptes)
+    const chapitresCreated = await seedChapitres(mairieIds, rubriqueIds, chapitres);
 
     // Créer les prévisions budgétaires
     const previsionsCreated = await seedPrevisions(
       mairieIds,
-      chapitreIds,
+      rubriqueIds,
       utilisateurIds,
       previsions,
     );
     const previsionIds = previsionsCreated.map((p) => p.id!);
 
     // Créer les mandats de dépense
-    await seedMandats(mairieIds, chapitreIds, previsionIds, utilisateurIds, mandats);
+    await seedMandats(mairieIds, rubriqueIds, previsionIds, utilisateurIds, mandats);
+
+    // Créer les bordereaux d'émission des mandats
+    await seedBordereauMandats(mairieIds, utilisateurIds, bordereauMandats);
 
     console.log('\n✨ Tous les seeders ont été exécutés avec succès !');
     console.log('📊 Statistiques :');
@@ -663,10 +1133,16 @@ export async function runAllSeeders(
     console.log(`   - Taxes: ${taxesCreated.length}`);
     console.log(`   - Déclarations: ${declarations}`);
     console.log(`   - Bordereaux: ${bordereaux}`);
+    console.log('   App2 - Gestion de la Trésorerie:');
+    console.log(`   - Approvisionnements: ${approvisionnements}`);
+    console.log(`   - Remises: ${remises}`);
+    console.log(`   - Versements: ${versements}`);
     console.log('   App3 - Gestion des Dépenses:');
+    console.log(`   - Rubriques: ${rubriquesCreated.length}`);
     console.log(`   - Chapitres: ${chapitresCreated.length}`);
     console.log(`   - Prévisions: ${previsions}`);
     console.log(`   - Mandats: ${mandats}`);
+    console.log(`   - Bordereaux Mandats: ${bordereauMandats}`);
 
     return {
       success: true,
@@ -676,9 +1152,14 @@ export async function runAllSeeders(
         taxes: taxesCreated.length,
         declarations,
         bordereaux,
+        approvisionnements,
+        remises,
+        versements,
+        rubriques: rubriquesCreated.length,
         chapitres: chapitresCreated.length,
         previsions,
         mandats,
+        bordereauMandats,
       },
     };
   } catch (error) {
@@ -697,9 +1178,14 @@ export async function seedTable(
     | 'taxes'
     | 'declarations'
     | 'bordereaux'
+    | 'approvisionnements'
+    | 'remises'
+    | 'versements'
+    | 'rubriques'
     | 'chapitres'
     | 'previsions'
-    | 'mandats',
+    | 'mandats'
+    | 'bordereauMandats',
   count?: number,
 ) {
   switch (table) {
@@ -708,15 +1194,6 @@ export async function seedTable(
 
     case 'mairies':
       return seedMairies(count);
-
-    case 'taxes': {
-      const mairies = await db.mairies.toArray();
-      const mairieIds = mairies.map((m: Mairie) => m.id!);
-      if (mairieIds.length === 0) {
-        throw new Error("Aucune mairie trouvée. Créez d'abord des mairies.");
-      }
-      return seedTaxes(mairieIds, count);
-    }
 
     case 'declarations': {
       const [mairies, taxes, utilisateurs] = await Promise.all([
@@ -746,48 +1223,115 @@ export async function seedTable(
       return seedBordereaux(mairieIds, utilisateurIds, count);
     }
 
+    // App2 - Gestion de la Trésorerie
+    case 'approvisionnements': {
+      const [mairies, utilisateurs] = await Promise.all([
+        db.mairies.toArray(),
+        db.utilisateurs.toArray(),
+      ]);
+      const mairieIds = mairies.map((m: Mairie) => m.id!);
+      const utilisateurIds = utilisateurs.map((u: Utilisateur) => u.id!);
+      if (mairieIds.length === 0 || utilisateurIds.length === 0) {
+        throw new Error("Mairies et utilisateurs requis. Créez-les d'abord.");
+      }
+      return seedApprovisionnements(mairieIds, utilisateurIds, count);
+    }
+
+    case 'remises': {
+      const [mairies, utilisateurs] = await Promise.all([
+        db.mairies.toArray(),
+        db.utilisateurs.toArray(),
+      ]);
+      const mairieIds = mairies.map((m: Mairie) => m.id!);
+      const utilisateurIds = utilisateurs.map((u: Utilisateur) => u.id!);
+      if (mairieIds.length === 0 || utilisateurIds.length === 0) {
+        throw new Error("Mairies et utilisateurs requis. Créez-les d'abord.");
+      }
+      return seedRemises(mairieIds, utilisateurIds, count);
+    }
+
+    case 'versements': {
+      const [mairies, utilisateurs] = await Promise.all([
+        db.mairies.toArray(),
+        db.utilisateurs.toArray(),
+      ]);
+      const mairieIds = mairies.map((m: Mairie) => m.id!);
+      const utilisateurIds = utilisateurs.map((u: Utilisateur) => u.id!);
+      if (mairieIds.length === 0 || utilisateurIds.length === 0) {
+        throw new Error("Mairies et utilisateurs requis. Créez-les d'abord.");
+      }
+      return seedVersements(mairieIds, utilisateurIds, count);
+    }
+
     // App3 - Gestion des Dépenses
+    case 'rubriques': {
+      const mairies = await db.mairies.toArray();
+      const mairieIds = mairies.map((m: Mairie) => m.id!);
+      if (mairieIds.length === 0) {
+        throw new Error("Aucune mairie trouvée. Créez d'abord des mairies.");
+      }
+      return seedRubriques(mairieIds, count);
+    }
+
     case 'chapitres': {
       const mairies = await db.mairies.toArray();
       const mairieIds = mairies.map((m: Mairie) => m.id!);
       if (mairieIds.length === 0) {
         throw new Error("Aucune mairie trouvée. Créez d'abord des mairies.");
       }
-      return seedChapitres(mairieIds, count);
+      const rubriques = await db.rubriques.toArray();
+      const rubriqueIds = rubriques.map((r: Rubrique) => r.id!);
+      if (mairieIds.length === 0 || rubriqueIds.length === 0) {
+        throw new Error("Mairies et rubriques requises. Créez-les d'abord.");
+      }
+      return seedChapitres(mairieIds, rubriqueIds, count);
     }
 
     case 'previsions': {
-      const [mairies, chapitres, utilisateurs] = await Promise.all([
+      const [mairies, rubriques, utilisateurs] = await Promise.all([
         db.mairies.toArray(),
-        db.chapitres.toArray(),
+        db.rubriques.toArray(),
         db.utilisateurs.toArray(),
       ]);
       const mairieIds = mairies.map((m: Mairie) => m.id!);
-      const chapitreIds = chapitres.map((c: Chapitre) => c.id!);
+      const rubriqueIds = rubriques.map((c: Rubrique) => c.id!);
       const utilisateurIds = utilisateurs.map((u: Utilisateur) => u.id!);
-      if (mairieIds.length === 0 || chapitreIds.length === 0 || utilisateurIds.length === 0) {
-        throw new Error("Mairies, chapitres et utilisateurs requis. Créez-les d'abord.");
+      if (mairieIds.length === 0 || rubriqueIds.length === 0 || utilisateurIds.length === 0) {
+        throw new Error("Mairies, rubriques et utilisateurs requis. Créez-les d'abord.");
       }
-      return seedPrevisions(mairieIds, chapitreIds, utilisateurIds, count);
+      return seedPrevisions(mairieIds, rubriqueIds, utilisateurIds, count);
     }
 
     case 'mandats': {
-      const [mairies, chapitres, previsions, utilisateurs] = await Promise.all([
+      const [mairies, rubriques, previsions, utilisateurs] = await Promise.all([
         db.mairies.toArray(),
-        db.chapitres.toArray(),
+        db.rubriques.toArray(),
         db.previsions.toArray(),
         db.utilisateurs.toArray(),
       ]);
       const mairieIds = mairies.map((m: Mairie) => m.id!);
-      const chapitreIds = chapitres.map((c: Chapitre) => c.id!);
+      const rubriqueIds = rubriques.map((c: Rubrique) => c.id!);
       const previsionIds = previsions.map((p: Prevision) => p.id!);
       const utilisateurIds = utilisateurs.map((u: Utilisateur) => u.id!);
-      if (mairieIds.length === 0 || chapitreIds.length === 0 || utilisateurIds.length === 0) {
+      if (mairieIds.length === 0 || rubriqueIds.length === 0 || utilisateurIds.length === 0) {
         throw new Error(
-          "Mairies, chapitres, prévisions et utilisateurs requis. Créez-les d'abord.",
+          "Mairies, rubriques, prévisions et utilisateurs requis. Créez-les d'abord.",
         );
       }
-      return seedMandats(mairieIds, chapitreIds, previsionIds, utilisateurIds, count);
+      return seedMandats(mairieIds, rubriqueIds, previsionIds, utilisateurIds, count);
+    }
+
+    case 'bordereauMandats': {
+      const [mairies, utilisateurs] = await Promise.all([
+        db.mairies.toArray(),
+        db.utilisateurs.toArray(),
+      ]);
+      const mairieIds = mairies.map((m: Mairie) => m.id!);
+      const utilisateurIds = utilisateurs.map((u: Utilisateur) => u.id!);
+      if (mairieIds.length === 0 || utilisateurIds.length === 0) {
+        throw new Error("Mairies et utilisateurs requis. Créez-les d'abord.");
+      }
+      return seedBordereauMandats(mairieIds, utilisateurIds, count);
     }
   }
 }

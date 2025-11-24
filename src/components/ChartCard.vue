@@ -17,7 +17,7 @@ import { Chart, type ChartConfiguration } from 'chart.js';
 
 interface Props {
   title: string;
-  chartConfig: ChartConfiguration;
+  chartConfig?: ChartConfiguration;
   headerClass?: string;
   containerClass?: string;
   height?: string;
@@ -35,7 +35,7 @@ let chartInstance: Chart | null = null;
 const createChart = () => {
   if (canvasRef.value) {
     const ctx = canvasRef.value.getContext('2d');
-    if (ctx) {
+    if (ctx && props.chartConfig) {
       chartInstance = new Chart(ctx, props.chartConfig);
     }
   }
@@ -49,7 +49,7 @@ const destroyChart = () => {
 };
 
 const updateChart = () => {
-  if (chartInstance) {
+  if (chartInstance && props.chartConfig) {
     // Mettre à jour les données du graphique
     chartInstance.data = props.chartConfig.data;
     chartInstance.update();

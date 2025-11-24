@@ -266,7 +266,13 @@
             </div>
             <div style="text-align: center; padding: 5px" colspan="3"></div>
           </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; border-top: 1px solid #000">
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1fr 1fr 1fr 1fr;
+              border-top: 1px solid #000;
+            "
+          >
             <div style="text-align: center; border-right: 1px solid #000; padding: 3px">
               Fonction-<br />nelle
             </div>
@@ -276,9 +282,7 @@
             <div style="text-align: center; border-right: 1px solid #000; padding: 3px">
               <strong>SOMME</strong><br />MANDATEE
             </div>
-            <div style="text-align: center; padding: 3px">
-              Reste à Payer<br />C/ 4690
-            </div>
+            <div style="text-align: center; padding: 3px">Reste à Payer<br />C/ 4690</div>
           </div>
         </div>
       </div>
@@ -383,9 +387,7 @@
         </div>
         <div class="signature-section">
           <div class="signature-box">
-            <div style="transform: rotate(-90deg); font-size: 11px; font-weight: bold">
-              Sommes
-            </div>
+            <div style="transform: rotate(-90deg); font-size: 11px; font-weight: bold">Sommes</div>
           </div>
           <div class="signature-box">
             <div style="transform: rotate(-90deg); font-size: 11px; font-weight: bold">
@@ -412,7 +414,7 @@
 
       // Initialiser Dexie
       const db = new Dexie('TresorDatabase');
-      db.version(2).stores({
+      db.version(7).stores({
         mairies: '++id, nom, code, ville',
         taxes: '++id, code, libelle, mairieId, type, actif',
         declarations:
@@ -420,10 +422,12 @@
         bordereaux: '++id, numero, annee, mairieId, statut, personnelId',
         utilisateurs: '++id, username, email, role, mairieId, actif',
         // App3
-        chapitres: '++id, code, libelle, mairieId, actif',
-        previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
+        chapitres: '++id, code, libelle, rubriqueId, mairieId, actif',
+        rubriques: '++id, code, libelle, mairieId, actif',
+        previsions: '++id, exercice, rubriqueId, mairieId, statut, personnelId',
         mandats:
-          '++id, numeroMandat, dateMandat, exercice, chapitreId, previsionId, mairieId, statut, personnelId',
+          '++id, numeroMandat, dateMandat, exercice, rubriqueId, chapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
+        bordereauMandats: '++id, numero, exercice, mairieId, statut, personnelId',
       });
 
       createApp({
@@ -556,41 +560,59 @@
             try {
               this.loading = true;
               const urlParams = new URLSearchParams(window.location.search);
-              const exercice = urlParams.get('exercice') || new Date().getFullYear();
+              const bordereauId = urlParams.get('bordereauId');
+              const exercice = urlParams.get('exercice');
               const mairieId = urlParams.get('mairieId');
 
-              if (!exercice) {
-                this.error = 'Aucun exercice fourni';
+              // Si un bordereauId est fourni, charger ce bordereau spécifique
+              if (bordereauId) {
+                // Charger le bordereau depuis la base de données
+                this.bordereauData = await db.bordereauMandats.get(parseInt(bordereauId));
+
+                if (!this.bordereauData) {
+                  this.error = 'Bordereau non trouvé';
+                  return;
+                }
+
+                // Charger les mandats associés à ce bordereau
+                this.mandats = await db.mandats
+                  .where('bordereauMandatId')
+                  .equals(parseInt(bordereauId))
+                  .toArray();
+              } else if (exercice) {
+                // Mode legacy: charger par exercice
+                let query = db.mandats.where('exercice').equals(parseInt(exercice));
+
+                if (mairieId) {
+                  this.mandats = await query
+                    .filter((m) => m.mairieId === parseInt(mairieId))
+                    .toArray();
+                } else {
+                  this.mandats = await query.toArray();
+                }
+
+                // Trier par date
+                this.mandats.sort((a, b) => new Date(a.dateMandat) - new Date(b.dateMandat));
+
+                // Calculer le montant total
+                const montantTotal = this.mandats.reduce((sum, m) => sum + m.montant, 0);
+
+                // Créer l'objet bordereau
+                this.bordereauData = {
+                  exercice: parseInt(exercice),
+                  montantTotal,
+                  nombreMandats: this.mandats.length,
+                  dateEmission: new Date(),
+                };
+              } else {
+                this.error = 'Aucun bordereau ou exercice fourni';
                 return;
               }
 
-              // Charger tous les mandats pour cet exercice
-              let query = db.mandats.where('exercice').equals(parseInt(exercice));
-
-              if (mairieId) {
-                this.mandats = await query
-                  .filter((m) => m.mairieId === parseInt(mairieId))
-                  .toArray();
-              } else {
-                this.mandats = await query.toArray();
-              }
-
-              // Trier par date
-              this.mandats.sort((a, b) => new Date(a.dateMandat) - new Date(b.dateMandat));
-
-              // Calculer le montant total
-              const montantTotal = this.mandats.reduce((sum, m) => sum + m.montant, 0);
-
-              // Créer l'objet bordereau
-              this.bordereauData = {
-                exercice: parseInt(exercice),
-                montantTotal,
-                nombreMandats: this.mandats.length,
-                dateEmission: new Date(),
-              };
-
               // Charger la mairie
-              if (this.mandats.length > 0) {
+              if (this.bordereauData.mairieId) {
+                this.mairie = await db.mairies.get(this.bordereauData.mairieId);
+              } else if (this.mandats.length > 0) {
                 const premierMandat = this.mandats[0];
                 this.mairie = await db.mairies.get(premierMandat.mairieId);
               }

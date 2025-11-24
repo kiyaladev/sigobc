@@ -343,7 +343,22 @@
               <q-icon name="description" />
             </q-item-section>
             <q-item-section>
-              <q-item-label>Bordereaux</q-item-label>
+              <q-item-label>Bordereaux (Impression)</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item
+            clickable
+            v-ripple
+            to="/app3/bordereaux-mandats-gestion"
+            class="nav-item q-mb-xs"
+            active-class="nav-item-active"
+          >
+            <q-item-section avatar>
+              <q-icon name="folder_open" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Gestion Bordereaux</q-item-label>
             </q-item-section>
           </q-item>
 

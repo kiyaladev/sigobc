@@ -1,15 +1,13 @@
-// Variables personnalisées
+// Variables personnalisées - Version Entreprise
 :root {
-  --transition-speed: 0.3s;
-  --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.12);
-  --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.15);
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
+  --transition-speed: 0.2s;
+  --transition-smooth: ease-in-out;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.1);
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
 }
 
 .q-col-gutter-x-md,
@@ -17,15 +15,13 @@
   margin-left: 0;
 }
 
-// Transitions et animations globales
+// Transitions simplifiées (uniquement couleurs et opacité)
 * {
   transition:
     background-color var(--transition-speed) var(--transition-smooth),
     color var(--transition-speed) var(--transition-smooth),
     border-color var(--transition-speed) var(--transition-smooth),
-    transform var(--transition-speed) var(--transition-smooth),
-    opacity var(--transition-speed) var(--transition-smooth),
-    box-shadow var(--transition-speed) var(--transition-smooth);
+    opacity var(--transition-speed) var(--transition-smooth);
 }
 
 // Désactiver les transitions lors du chargement initial
@@ -33,110 +29,19 @@
   transition: none !important;
 }
 
-// Animations keyframes
+// Animation simple
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
-@keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -1000px 0;
-  }
-  100% {
-    background-position: 1000px 0;
-  }
-}
-
-// Classes d'animation utilitaires
+// Classe d'animation utilitaire
 .fade-in {
-  animation: fadeIn 0.5s var(--transition-smooth);
-}
-
-.slide-in-right {
-  animation: slideInRight 0.5s var(--transition-smooth);
-}
-
-.scale-in {
-  animation: scaleIn 0.4s var(--transition-smooth);
-}
-
-// Effets de hover améliorés
-.hover-lift {
-  transition:
-    transform 0.3s var(--transition-smooth),
-    box-shadow 0.3s var(--transition-smooth);
-
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
-  }
-}
-
-.hover-scale {
-  transition: transform 0.3s var(--transition-smooth);
-
-  &:hover {
-    transform: scale(1.05);
-  }
-}
-
-.hover-glow {
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s;
-  }
-
-  &:hover::before {
-    left: 100%;
-  }
+  animation: fadeIn 0.3s ease-in-out;
 }
 
 // Layout principal

@@ -1,91 +1,131 @@
 <template>
-  <q-page class="chapitres-page q-pa-md">
+  <q-page class="q-pa-md">
     <PageHeader
-      title="Chapitres Budgétaires"
-      subtitle="Gestion des chapitres de dépenses"
-      icon="category"
-    />
+      title="Gestion des Chapitres Budgétaires"
+      subtitle="Chapitres budgétaires pour les mandats de dépense"
+      icon="account_balance_wallet"
+    >
+      <template #actions>
+        <q-btn color="primary" icon="add" label="Nouveau Chapitre" @click="openDialog()" />
+      </template>
+    </PageHeader>
 
-    <q-card class="main-card">
-      <q-card-section>
-        <div class="row items-center justify-between q-mb-md">
-          <div class="col-12 col-md-6">
-            <q-input
-              v-model="filter"
-              placeholder="Rechercher un chapitre..."
-              outlined
-              dense
-              clearable
-            >
-              <template v-slot:prepend>
-                <q-icon name="search" />
-              </template>
-            </q-input>
-          </div>
-          <div class="col-12 col-md-auto q-mt-sm q-mt-md-none">
-            <q-btn
-              color="primary"
-              icon="add"
-              label="Nouveau Chapitre"
-              unelevated
-              @click="showAddDialog = true"
-            />
-          </div>
+    <!-- Filtres -->
+    <FilterBar class="q-mb-md">
+      <template #filters>
+        <div class="col-12 col-sm-6 col-md-3">
+          <q-input v-model="filters.search" filled dense placeholder="Rechercher...">
+            <template v-slot:prepend>
+              <q-icon name="search" />
+            </template>
+          </q-input>
         </div>
+        <div class="col-12 col-sm-6 col-md-3">
+          <q-select
+            v-model="filters.actif"
+            filled
+            dense
+            label="Statut"
+            :options="statutOptions"
+            emit-value
+            map-options
+            clearable
+          />
+        </div>
+      </template>
+    </FilterBar>
 
-        <DataTable
-          :rows="filteredChapitres"
-          :columns="columns"
-          :loading="loading"
-          @edit="editChapitre"
-          @delete="deleteChapitre"
-        />
-      </q-card-section>
-    </q-card>
+    <!-- Table des chapitres -->
+    <DataTable
+      :rows="filteredChapitres"
+      :columns="columns"
+      :loading="loading"
+      row-key="id"
+      @row-click="openDialog"
+    >
+      <template v-slot:body-cell-code="props">
+        <q-td :props="props">
+          <q-badge color="primary" :label="props.row.code" />
+        </q-td>
+      </template>
+
+      <template v-slot:body-cell-actif="props">
+        <q-td :props="props">
+          <q-badge :color="props.row.actif ? 'positive' : 'negative'">
+            {{ props.row.actif ? 'Actif' : 'Inactif' }}
+          </q-badge>
+        </q-td>
+      </template>
+
+      <template v-slot:body-cell-actions="props">
+        <q-td :props="props">
+          <q-btn flat round dense icon="edit" color="primary" @click.stop="openDialog(props.row)">
+            <q-tooltip>Modifier</q-tooltip>
+          </q-btn>
+          <q-btn
+            flat
+            round
+            dense
+            icon="delete"
+            color="negative"
+            @click.stop="confirmDelete(props.row)"
+          >
+            <q-tooltip>Supprimer</q-tooltip>
+          </q-btn>
+        </q-td>
+      </template>
+    </DataTable>
 
     <!-- Dialog d'ajout/modification -->
-    <q-dialog v-model="showAddDialog" persistent>
+    <q-dialog v-model="dialogVisible" persistent>
       <q-card style="min-width: 500px">
-        <q-card-section class="row items-center q-pb-none">
-          <div class="text-h6">
-            {{ editingId ? 'Modifier le chapitre' : 'Nouveau chapitre' }}
-          </div>
-          <q-space />
-          <q-btn icon="close" flat round dense v-close-popup />
+        <q-card-section class="bg-primary text-white">
+          <div class="text-h6">{{ isEditing ? 'Modifier' : 'Nouveau' }} Chapitre</div>
         </q-card-section>
 
         <q-card-section>
-          <q-form @submit="saveChapitre" class="q-gutter-md">
-            <q-input
-              v-model="formData.code"
-              label="Code *"
+          <q-form @submit="saveChaptre" class="q-gutter-md">
+            <q-select
+              v-model="form.rubriqueId"
+              :options="rubriqueOptions"
+              label="Rubrique *"
               outlined
               dense
+              emit-value
+              map-options
+              :rules="[(val) => !!val || 'La rubrique est requise']"
+            />
+
+            <q-input
+              v-model="form.code"
+              filled
+              label="Code du chapitre *"
+              hint="Ex: 6011, 6013, 6020, etc."
               :rules="[(val) => !!val || 'Le code est requis']"
             />
 
             <q-input
-              v-model="formData.libelle"
+              v-model="form.libelle"
+              filled
               label="Libellé *"
-              outlined
-              dense
+              hint="Ex: Achats de matières et fournitures"
               :rules="[(val) => !!val || 'Le libellé est requis']"
             />
 
             <q-input
-              v-model="formData.description"
-              label="Description"
-              outlined
-              dense
+              v-model="form.description"
+              filled
               type="textarea"
+              label="Description"
               rows="3"
+              hint="Description détaillée du chapitre"
             />
 
-            <q-toggle v-model="formData.actif" label="Actif" color="positive" />
+            <q-toggle v-model="form.actif" label="Chapitre actif" color="positive" />
 
-            <div class="row justify-end q-gutter-sm q-mt-md">
-              <q-btn label="Annuler" flat color="grey-7" v-close-popup />
-              <q-btn label="Enregistrer" type="submit" color="primary" unelevated />
+            <div class="row q-gutter-sm justify-end">
+              <q-btn label="Annuler" color="grey-7" flat @click="dialogVisible = false" />
+              <q-btn label="Enregistrer" color="primary" type="submit" :loading="saving" />
             </div>
           </q-form>
         </q-card-section>
@@ -97,105 +137,157 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
-import { db, type Chapitre } from 'src/database/db';
+import { db, type Chapitre, type Rubrique } from 'src/database/db';
 import PageHeader from 'src/components/PageHeader.vue';
+import FilterBar from 'src/components/FilterBar.vue';
 import DataTable from 'src/components/DataTable.vue';
 
 const $q = useQuasar();
+
 const loading = ref(false);
-const filter = ref('');
-const showAddDialog = ref(false);
-const editingId = ref<number | null>(null);
+const saving = ref(false);
+const dialogVisible = ref(false);
+const isEditing = ref(false);
 
 const chapitres = ref<Chapitre[]>([]);
+const rubriques = ref<Rubrique[]>([]);
 
-const formData = ref({
+const filters = ref({
+  search: '',
+  actif: null as boolean | null,
+});
+
+interface ChapitreForm {
+  id?: number;
+  code: string;
+  libelle: string;
+  description: string;
+  rubriqueId: number | null;
+  actif: boolean;
+}
+
+const form = ref<ChapitreForm>({
+  rubriqueId: null,
   code: '',
   libelle: '',
   description: '',
   actif: true,
 });
 
+const statutOptions = [
+  { label: 'Actif', value: true },
+  { label: 'Inactif', value: false },
+];
+
+const rubriqueOptions = computed(() =>
+  rubriques.value.map((r) => ({
+    label: `${r.code} - ${r.libelle}`,
+    value: r.id,
+  })),
+);
+
 const columns = [
+  { name: 'code', label: 'Code', field: 'code', align: 'left' as const, sortable: true },
   {
-    name: 'code',
-    label: 'Code',
+    name: 'rubrique',
+    label: 'Rubrique',
     align: 'left' as const,
-    field: 'code',
+    field: (row: Chapitre) => {
+      const rubrique = rubriques.value.find((r) => r.id === row.rubriqueId);
+      return rubrique ? `${rubrique.code} - ${rubrique.libelle}` : '';
+    },
     sortable: true,
   },
-  {
-    name: 'libelle',
-    label: 'Libellé',
-    align: 'left' as const,
-    field: 'libelle',
-    sortable: true,
-  },
+  { name: 'libelle', label: 'Libellé', field: 'libelle', align: 'left' as const, sortable: true },
   {
     name: 'description',
     label: 'Description',
-    align: 'left' as const,
     field: 'description',
+    align: 'left' as const,
+    sortable: true,
   },
-  {
-    name: 'actif',
-    label: 'Statut',
-    align: 'center' as const,
-    field: 'actif',
-    format: (val: boolean) => (val ? 'Actif' : 'Inactif'),
-  },
-  {
-    name: 'actions',
-    label: 'Actions',
-    align: 'center' as const,
-    field: 'id',
-  },
+  { name: 'actif', label: 'Statut', field: 'actif', align: 'center' as const, sortable: true },
+  { name: 'actions', label: 'Actions', field: 'actions', align: 'center' as const },
 ];
 
 const filteredChapitres = computed(() => {
-  if (!filter.value) return chapitres.value;
-  const searchTerm = filter.value.toLowerCase();
-  return chapitres.value.filter(
-    (c) =>
-      c.code.toLowerCase().includes(searchTerm) ||
-      c.libelle.toLowerCase().includes(searchTerm) ||
-      c.description?.toLowerCase().includes(searchTerm),
-  );
+  let result = chapitres.value;
+
+  if (filters.value.search) {
+    const searchLower = filters.value.search.toLowerCase();
+    result = result.filter(
+      (c) =>
+        c.code.toLowerCase().includes(searchLower) ||
+        c.libelle.toLowerCase().includes(searchLower) ||
+        c.description?.toLowerCase().includes(searchLower),
+    );
+  }
+
+  if (filters.value.actif !== null) {
+    result = result.filter((c) => c.actif === filters.value.actif);
+  }
+
+  return result;
 });
 
 async function loadChapitres() {
   loading.value = true;
   try {
     chapitres.value = await db.chapitres.toArray();
+    rubriques.value = await db.rubriques.toArray();
   } catch (error) {
     console.error('Erreur lors du chargement des chapitres:', error);
     $q.notify({
       type: 'negative',
-      message: 'Erreur lors du chargement des données',
+      message: 'Erreur lors du chargement des chapitres',
     });
   } finally {
     loading.value = false;
   }
 }
 
-function resetForm() {
-  formData.value = {
-    code: '',
-    libelle: '',
-    description: '',
-    actif: true,
-  };
-  editingId.value = null;
+function openDialog(chapitre?: Chapitre) {
+  if (chapitre?.id) {
+    isEditing.value = true;
+    form.value = {
+      id: chapitre.id,
+      rubriqueId: chapitre.rubriqueId,
+      code: chapitre.code,
+      libelle: chapitre.libelle,
+      description: chapitre.description || '',
+      actif: chapitre.actif,
+    };
+  } else {
+    isEditing.value = false;
+    form.value = {
+      rubriqueId: null,
+      code: '',
+      libelle: '',
+      description: '',
+      actif: true,
+    };
+  }
+  dialogVisible.value = true;
 }
 
-async function saveChapitre() {
+async function saveChaptre() {
+  saving.value = true;
   try {
     const now = new Date();
-    const mairieId = 1; // À remplacer par l'ID de la mairie de l'utilisateur connecté
+    const chapitreData: Chapitre = {
+      ...form.value,
+      rubriqueId: form.value.rubriqueId!,
+      code: form.value.code,
+      libelle: form.value.libelle,
+      actif: form.value.actif,
+      mairieId: 1, // À remplacer par l'ID de la mairie connectée
+      createdAt: now,
+      updatedAt: now,
+    };
 
-    if (editingId.value) {
-      await db.chapitres.update(editingId.value, {
-        ...formData.value,
+    if (isEditing.value && form.value.id) {
+      await db.chapitres.update(form.value.id, {
+        ...chapitreData,
         updatedAt: now,
       });
       $q.notify({
@@ -203,62 +295,60 @@ async function saveChapitre() {
         message: 'Chapitre modifié avec succès',
       });
     } else {
-      await db.chapitres.add({
-        ...formData.value,
-        mairieId,
-        createdAt: now,
-        updatedAt: now,
-      });
+      chapitreData.createdAt = now;
+      await db.chapitres.add(chapitreData);
       $q.notify({
         type: 'positive',
-        message: 'Chapitre ajouté avec succès',
+        message: 'Chapitre créé avec succès',
       });
     }
 
-    showAddDialog.value = false;
-    resetForm();
+    dialogVisible.value = false;
     await loadChapitres();
   } catch (error) {
     console.error('Erreur lors de la sauvegarde:', error);
     $q.notify({
       type: 'negative',
-      message: "Erreur lors de l'enregistrement",
+      message: "Erreur lors de l'enregistrement du chapitre",
     });
+  } finally {
+    saving.value = false;
   }
 }
 
-async function editChapitre(row: Chapitre) {
-  editingId.value = row.id!;
-  formData.value = {
-    code: row.code,
-    libelle: row.libelle,
-    description: row.description || '',
-    actif: row.actif,
-  };
-  showAddDialog.value = true;
-}
+function confirmDelete(chapitre: Chapitre) {
+  if (!chapitre.id) {
+    $q.notify({
+      type: 'negative',
+      message: 'Impossible de supprimer ce chapitre (ID manquant)',
+    });
+    return;
+  }
 
-async function deleteChapitre(row: Chapitre) {
   $q.dialog({
     title: 'Confirmation',
-    message: `Voulez-vous vraiment supprimer le chapitre "${row.libelle}" ?`,
+    message: `Voulez-vous vraiment supprimer le chapitre "${chapitre.code} - ${chapitre.libelle}" ?`,
     cancel: true,
     persistent: true,
-  }).onOk(async () => {
-    try {
-      await db.chapitres.delete(row.id!);
-      $q.notify({
-        type: 'positive',
-        message: 'Chapitre supprimé avec succès',
-      });
-      await loadChapitres();
-    } catch (error) {
-      console.error('Erreur lors de la suppression:', error);
-      $q.notify({
-        type: 'negative',
-        message: 'Erreur lors de la suppression',
-      });
-    }
+  }).onOk(() => {
+    void (async () => {
+      try {
+        if (chapitre.id) {
+          await db.chapitres.delete(chapitre.id);
+          $q.notify({
+            type: 'positive',
+            message: 'Chapitre supprimé avec succès',
+          });
+          await loadChapitres();
+        }
+      } catch (error) {
+        console.error('Erreur lors de la suppression:', error);
+        $q.notify({
+          type: 'negative',
+          message: 'Erreur lors de la suppression du chapitre',
+        });
+      }
+    })();
   });
 }
 
@@ -266,15 +356,3 @@ onMounted(() => {
   void loadChapitres();
 });
 </script>
-
-<style scoped lang="scss">
-.chapitres-page {
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-.main-card {
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-</style>

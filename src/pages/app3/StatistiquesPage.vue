@@ -10,7 +10,7 @@
       <!-- Cartes de résumé -->
       <div class="col-12 col-sm-6 col-md-3" v-for="(stat, index) in stats" :key="index">
         <StatCard
-          :title="stat.title"
+          :label="stat.title"
           :value="stat.value"
           :icon="stat.icon"
           :color="stat.color"
@@ -76,7 +76,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { db } from 'src/database/db';
 import PageHeader from 'src/components/PageHeader.vue';
 import StatCard from 'src/components/StatCard.vue';
@@ -88,35 +88,35 @@ const stats = ref([
     value: '0 XOF',
     icon: 'account_balance_wallet',
     color: 'primary',
-    trend: '+12%',
+    trend: 12,
   },
   {
     title: 'Mandats Émis',
     value: '0',
     icon: 'receipt',
     color: 'positive',
-    trend: '+5%',
+    trend: 5,
   },
   {
     title: 'En Attente',
     value: '0',
     icon: 'schedule',
     color: 'warning',
-    trend: '-3%',
+    trend: -3,
   },
   {
     title: 'Taux Exécution',
     value: '0%',
     icon: 'trending_up',
     color: 'info',
-    trend: '+8%',
+    trend: 8,
   },
 ]);
 
 const previsionsStats = ref<
   Array<{
     id: number;
-    chapitre: string;
+    rubrique: string;
     prevu: string;
     engage: string;
     disponible: string;
@@ -126,10 +126,10 @@ const previsionsStats = ref<
 
 const tableColumns = [
   {
-    name: 'chapitre',
-    label: 'Chapitre',
+    name: 'rubrique',
+    label: 'Rubrique',
     align: 'left' as const,
-    field: 'chapitre',
+    field: 'rubrique',
   },
   {
     name: 'prevu',
@@ -175,34 +175,34 @@ async function loadStatistics() {
   try {
     // Charger les prévisions
     const previsions = await db.previsions.toArray();
-    const chapitres = await db.chapitres.toArray();
+    const rubriques = await db.rubriques.toArray();
     const mandats = await db.mandats.toArray();
 
     // Calculer le budget total
     const budgetTotal = previsions.reduce((sum, p) => sum + p.montantPrevu, 0);
-    stats.value[0].value = formatMontant(budgetTotal);
+    stats.value[0]!.value = formatMontant(budgetTotal);
 
     // Compter les mandats émis
     const mandatsEmis = mandats.filter((m) => m.statut === 'emis' || m.statut === 'paye');
-    stats.value[1].value = mandatsEmis.length.toString();
+    stats.value[1]!.value = mandatsEmis.length.toString();
 
     // Compter les mandats en attente
     const mandatsAttente = mandats.filter((m) => m.statut === 'brouillon');
-    stats.value[2].value = mandatsAttente.length.toString();
+    stats.value[2]!.value = mandatsAttente.length.toString();
 
     // Calculer le taux d'exécution
     const montantEngage = previsions.reduce((sum, p) => sum + p.montantEngage, 0);
     const tauxExecution = budgetTotal > 0 ? Math.round((montantEngage / budgetTotal) * 100) : 0;
-    stats.value[3].value = `${tauxExecution}%`;
+    stats.value[3]!.value = `${tauxExecution}%`;
 
     // Préparer les données du tableau
     previsionsStats.value = previsions.map((p) => {
-      const chapitre = chapitres.find((c) => c.id === p.chapitreId);
+      const rubrique = rubriques.find((r) => r.id === p.rubriqueId);
       const taux = p.montantPrevu > 0 ? Math.round((p.montantEngage / p.montantPrevu) * 100) : 0;
 
       return {
         id: p.id!,
-        chapitre: chapitre ? `${chapitre.code} - ${chapitre.libelle}` : 'N/A',
+        rubrique: rubrique ? `${rubrique.code} - ${rubrique.libelle}` : 'N/A',
         prevu: formatMontant(p.montantPrevu),
         engage: formatMontant(p.montantEngage),
         disponible: formatMontant(p.montantDisponible),

@@ -66,14 +66,14 @@
             />
 
             <q-select
-              v-model="formData.chapitreId"
-              :options="chapitreOptions"
-              label="Chapitre *"
+              v-model="formData.rubriqueId"
+              :options="rubriqueOptions"
+              label="Rubrique *"
               outlined
               dense
               emit-value
               map-options
-              :rules="[(val) => !!val || 'Chapitre requis']"
+              :rules="[(val) => !!val || 'Rubrique requise']"
             />
 
             <q-input
@@ -117,7 +117,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
-import { db, type Prevision, type Chapitre } from 'src/database/db';
+import { db, type Prevision, type Rubrique } from 'src/database/db';
 import PageHeader from 'src/components/PageHeader.vue';
 import DataTable from 'src/components/DataTable.vue';
 
@@ -128,20 +128,20 @@ const showAddDialog = ref(false);
 const editingId = ref<number | null>(null);
 
 const previsions = ref<Prevision[]>([]);
-const chapitres = ref<Chapitre[]>([]);
+const rubriques = ref<Rubrique[]>([]);
 
 const formData = ref({
   exercice: new Date().getFullYear(),
-  chapitreId: null as number | null,
+  rubriqueId: null as number | null,
   montantPrevu: 0,
   statut: 'brouillon' as 'brouillon' | 'validee' | 'cloturee',
   observations: '',
 });
 
-const chapitreOptions = computed(() =>
-  chapitres.value.map((c) => ({
-    label: `${c.code} - ${c.libelle}`,
-    value: c.id,
+const rubriqueOptions = computed(() =>
+  rubriques.value.map((r) => ({
+    label: `${r.code} - ${r.libelle}`,
+    value: r.id,
   })),
 );
 
@@ -154,12 +154,12 @@ const columns = [
     sortable: true,
   },
   {
-    name: 'chapitre',
-    label: 'Chapitre',
+    name: 'rubrique',
+    label: 'Rubrique',
     align: 'left' as const,
     field: (row: Prevision) => {
-      const chapitre = chapitres.value.find((c) => c.id === row.chapitreId);
-      return chapitre ? `${chapitre.code} - ${chapitre.libelle}` : '';
+      const rubrique = rubriques.value.find((r) => r.id === row.rubriqueId);
+      return rubrique ? `${rubrique.code} - ${rubrique.libelle}` : '';
     },
   },
   {
@@ -215,7 +215,7 @@ async function loadData() {
   loading.value = true;
   try {
     previsions.value = await db.previsions.toArray();
-    chapitres.value = await db.chapitres.where('actif').equals(true).toArray();
+    rubriques.value = await db.rubriques.filter((r) => r.actif).toArray();
   } catch (error) {
     console.error('Erreur lors du chargement:', error);
     $q.notify({
@@ -230,7 +230,7 @@ async function loadData() {
 function resetForm() {
   formData.value = {
     exercice: new Date().getFullYear(),
-    chapitreId: null,
+    rubriqueId: null,
     montantPrevu: 0,
     statut: 'brouillon',
     observations: '',
@@ -250,6 +250,7 @@ async function savePrevision() {
       montantDisponible: formData.value.montantPrevu,
       mairieId,
       personnelId,
+      rubriqueId: formData.value.rubriqueId!,
     };
 
     if (editingId.value) {
@@ -285,11 +286,11 @@ async function savePrevision() {
   }
 }
 
-async function editPrevision(row: Prevision) {
+function editPrevision(row: Prevision) {
   editingId.value = row.id!;
   formData.value = {
     exercice: row.exercice,
-    chapitreId: row.chapitreId,
+    rubriqueId: row.rubriqueId,
     montantPrevu: row.montantPrevu,
     statut: row.statut,
     observations: row.observations || '',
@@ -297,27 +298,29 @@ async function editPrevision(row: Prevision) {
   showAddDialog.value = true;
 }
 
-async function deletePrevision(row: Prevision) {
+function deletePrevision(row: Prevision) {
   $q.dialog({
     title: 'Confirmation',
     message: 'Voulez-vous vraiment supprimer cette prévision ?',
     cancel: true,
     persistent: true,
-  }).onOk(async () => {
-    try {
-      await db.previsions.delete(row.id!);
-      $q.notify({
-        type: 'positive',
-        message: 'Prévision supprimée avec succès',
-      });
-      await loadData();
-    } catch (error) {
-      console.error('Erreur lors de la suppression:', error);
-      $q.notify({
-        type: 'negative',
-        message: 'Erreur lors de la suppression',
-      });
-    }
+  }).onOk(() => {
+    void (async () => {
+      try {
+        await db.previsions.delete(row.id);
+        $q.notify({
+          type: 'positive',
+          message: 'Prévision supprimée avec succès',
+        });
+        await loadData();
+      } catch (error) {
+        console.error('Erreur lors de la suppression:', error);
+        $q.notify({
+          type: 'negative',
+          message: 'Erreur lors de la suppression',
+        });
+      }
+    })();
   });
 }
 
