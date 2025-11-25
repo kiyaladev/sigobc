@@ -11,12 +11,13 @@
 
       <q-card-section>
         <q-form @submit="handleSubmit" class="q-gutter-md">
-          <div class="row q-col-gutter-md">
+          <div class="row q-col-gutter-sm">
             <!-- Mairie -->
             <div class="col-12 col-sm-6">
               <q-select
                 v-model="localForm.mairieId"
                 filled
+                dense
                 :options="mairieOptions"
                 option-value="value"
                 option-label="label"
@@ -33,6 +34,7 @@
               <q-input
                 v-model.number="localForm.exercice"
                 filled
+                dense
                 type="number"
                 label="Exercice (Année) *"
                 :rules="[(val) => !!val || 'Requis']"
@@ -44,6 +46,7 @@
               <q-select
                 v-model="localForm.taxeId"
                 filled
+                dense
                 :options="taxeOptions"
                 option-value="value"
                 option-label="label"
@@ -67,6 +70,7 @@
               <q-input
                 v-model="localForm.numeroPiece"
                 filled
+                dense
                 label="Numéro de la pièce *"
                 :rules="[(val) => !!val || 'Requis']"
               />
@@ -77,6 +81,7 @@
               <q-input
                 v-model="localForm.nomPartieVersante"
                 filled
+                dense
                 label="Nom de la partie versante *"
                 :rules="[(val) => !!val || 'Requis']"
               />
@@ -87,6 +92,7 @@
               <q-input
                 v-model="localForm.adresse"
                 filled
+                dense
                 label="Adresse *"
                 :rules="[(val) => !!val || 'Requis']"
               />
@@ -97,6 +103,7 @@
               <q-input
                 v-model="dateStr"
                 filled
+                dense
                 type="date"
                 label="Date encaissement *"
                 :rules="[(val) => !!val || 'Requis']"
@@ -108,6 +115,7 @@
               <q-input
                 v-model="localForm.numeroLivre"
                 filled
+                dense
                 label="N° Livre *"
                 :rules="[(val) => !!val || 'Requis']"
               />
@@ -118,6 +126,7 @@
               <q-input
                 v-model="localForm.numeroEncaissement"
                 filled
+                dense
                 label="N° Encaissement *"
                 :rules="[(val) => !!val || 'Requis']"
               />
@@ -128,6 +137,7 @@
               <q-input
                 v-model.number="localForm.montantRecette"
                 filled
+                dense
                 type="number"
                 label="Montant de la recette *"
                 :rules="[(val) => val > 0 || 'Requis']"
@@ -140,6 +150,7 @@
               <q-select
                 v-model="localForm.bordereauId"
                 filled
+                dense
                 :options="bordereauOptions"
                 option-value="value"
                 option-label="label"
@@ -164,6 +175,7 @@
               <q-select
                 v-model="localForm.statut"
                 filled
+                dense
                 :options="statutOptions"
                 label="Statut *"
                 :rules="[(val) => !!val || 'Requis']"
@@ -175,6 +187,7 @@
               <q-input
                 v-model="localForm.observations"
                 filled
+                dense
                 type="textarea"
                 label="Observations"
                 rows="3"

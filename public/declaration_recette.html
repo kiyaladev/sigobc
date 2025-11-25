@@ -28,13 +28,17 @@
 
       .page {
         width: 210mm;
-        height: 297mm;
+        min-height: 297mm;
         background: white;
-        margin: 0 auto;
+        margin: 0 auto 20px auto;
         padding: 10mm;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         display: flex;
         flex-direction: column;
+      }
+
+      .page:last-child {
+        margin-bottom: 0;
       }
 
       .declaration {
@@ -49,6 +53,16 @@
 
       .declaration:first-child {
         margin-bottom: 8mm;
+      }
+
+      .declaration.full-page {
+        height: auto;
+        min-height: calc(100% - 20mm);
+      }
+
+      .page-break {
+        page-break-after: always;
+        break-after: page;
       }
 
       .header {
@@ -138,15 +152,22 @@
 
         .page {
           box-shadow: none;
-          padding: 0;
+          padding: 10mm;
+          margin: 0;
           width: 100%;
+          height: 297mm;
+        }
+
+        .page-break {
+          page-break-after: always;
         }
       }
     </style>
   </head>
   <body>
-    <div class="page">
-      <!-- PREMIÈRE DÉCLARATION - Original : chambre de Comptes -->
+    <!-- PAGE 1 : Deux premières déclarations -->
+    <div class="page page-break">
+      <!-- PREMIÈRE DÉCLARATION - Original : Cours des Comptes -->
       <div class="declaration" v-if="declaration">
         <div class="header">
           <div class="header-left">
@@ -224,11 +245,11 @@
 
         <div class="footer">
           <div>CL 92</div>
-          <div>Original : chambre de Comptes</div>
+          <div>Original : Cours des Comptes</div>
         </div>
       </div>
 
-      <!-- DEUXIÈME DÉCLARATION - Duplicata : Mairie -->
+      <!-- DEUXIÈME DÉCLARATION - Le Receveur Municipal -->
       <div class="declaration" v-if="declaration">
         <div class="header">
           <div class="header-left">
@@ -283,7 +304,92 @@
 
         <div class="field-row">
           Montant de la recette :
-          <span class="field-value">{{ montantEnLettres }}</span>
+          <span class="field-value">{{ montantEnLettres }}</span> FCFA
+        </div>
+
+        <div class="field-row">
+          Montant de la recette :
+          <span class="field-value">{{ formatMontant(declaration.montantRecette) }}</span> FCFA
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CT S3 du :
+          <span class="field-value">{{ formatDate(declaration.dateEncaissement) }}</span>
+        </div>
+
+        <div class="signature-section">
+          <div class="signature-left">L'ordonnateur.</div>
+          <div class="signature-right">
+            <div>
+              A {{ mairie?.ville || '........' }} , le
+              <span class="field-value">{{ formatDate(declaration.dateEncaissement) }}</span>
+            </div>
+            <div>Le Receveur.</div>
+          </div>
+        </div>
+
+        <div class="footer">
+          <div>CL 32</div>
+          <div>Le Receveur Municipal</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE 2 : Troisième déclaration -->
+    <div class="page">
+      <!-- TROISIÈME DÉCLARATION - Duplicata : Mairie -->
+      <div class="declaration full-page" v-if="declaration">
+        <div class="header">
+          <div class="header-left">
+            <div>RECETTE MUNICIPALE</div>
+            <div>
+              DE<span class="field-value">{{ mairie?.nom || '.....................' }}</span>
+            </div>
+            <div>COMMUNE</div>
+            <div>
+              DE<span class="field-value">{{ mairie?.ville || '.....................' }}</span>
+            </div>
+          </div>
+          <div class="header-center">
+            <div class="title">DÉCLARATION</div>
+            <div class="title">DE RECETTES</div>
+          </div>
+          <div class="header-right">
+            <div class="code-box">
+              <div>
+                Code Commune : <span class="field-value">{{ mairie?.code || '......' }}</span>
+              </div>
+              <div>Exercice : <span class="field-value">{{ declaration.exercice }}</span></div>
+              <div>Article : <span class="field-value">{{ taxe?.code || '......' }}</span></div>
+              <div>Pièce n° : <span class="field-value">{{ declaration.numeroPiece }}</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="separator"></div>
+
+        <div class="field-row">
+          NOM et Adresse de la partie versante :
+          <span class="field-value">{{ declaration.nomPartieVersante }}</span>
+        </div>
+        <div class="field-row">{{ declaration.adresse }}</div>
+
+        <div class="field-row" style="margin-top: 10px">
+          Date d'encaissement : <span class="field-value">{{ declaration.numeroLivre }}</span>
+          <span class="field-value">{{ declaration.numeroEncaissement }}</span>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;du
+          :
+          <span class="field-value"
+            >&nbsp;&nbsp;&nbsp;&nbsp;{{ formatDate(declaration.dateEncaissement)
+            }}&nbsp;&nbsp;&nbsp;&nbsp;</span
+          >
+        </div>
+
+        <div class="field-row">
+          Nature de la recette :
+          <span class="field-value">{{ taxe?.libelle || 'Non spécifiée' }}</span>
+        </div>
+
+        <div class="field-row">
+          Montant de la recette :
+          <span class="field-value">{{ montantEnLettres }}</span> FCFA
         </div>
 
         <div class="field-row">

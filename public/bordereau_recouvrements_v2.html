@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bordereau des Recouvrements</title>
+    <style>
+      @page {
+        size: A4 landscape;
+        margin: 10mm;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        font-size: 11px;
+        background: #f5f5dc;
+        padding: 20px;
+      }
+
+      .page {
+        width: 297mm;
+        min-height: 210mm;
+        background: #fffff0;
+        margin: 0 auto;
+        padding: 15mm;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 10px;
+      }
+
+      .header-left {
+        font-weight: bold;
+      }
+
+      .header-center {
+        text-align: center;
+        font-weight: bold;
+        font-size: 14px;
+      }
+
+      .header-right {
+        font-weight: bold;
+      }
+
+      .sub-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 5px;
+      }
+
+      .commune-info {
+        font-weight: bold;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+      }
+
+      th,
+      td {
+        border: 1px solid #000;
+        padding: 4px;
+        text-align: center;
+        vertical-align: middle;
+      }
+
+      th {
+        background: #f0f0f0;
+        font-weight: bold;
+        font-size: 10px;
+      }
+
+      .col-numero {
+        width: 40px;
+      }
+
+      .col-nature {
+        width: 200px;
+        text-align: left;
+      }
+
+      .col-nom {
+        width: 80px;
+      }
+
+      .col-fonctionnelle {
+        width: 70px;
+      }
+
+      .col-patrimoine {
+        width: 70px;
+      }
+
+      .col-montant {
+        width: 90px;
+      }
+
+      .col-date {
+        width: 90px;
+      }
+
+      .col-recoupre {
+        width: 70px;
+      }
+
+      .col-montant-ctrl {
+        width: 70px;
+      }
+
+      td.nature-text {
+        text-align: left;
+        font-size: 10px;
+      }
+
+      .empty-row td {
+        height: 25px;
+      }
+
+      .handwritten {
+        font-family: 'Segoe Script', cursive;
+        color: #1a1a8a;
+      }
+
+      .crossed {
+        position: relative;
+      }
+
+      /*.crossed::after {
+            content: '×';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+            color: #1a1a8a;
+        }*/
+
+      .footer {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 30px;
+        height: 200px;
+      }
+
+      .signature-line {
+        margin-top: 10px;
+        text-align: right;
+      }
+
+      .ct-number {
+        margin-top: 20px;
+        font-weight: bold;
+      }
+
+      @media print {
+        body {
+          background: none;
+          padding: 0;
+        }
+        .page {
+          box-shadow: none;
+          margin: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="header">
+        <div class="header-left">
+          RECETTE MUNICIPALE<br />
+          DE : <span data-field="ville">Vavoua</span>
+        </div>
+        <div class="header-center">BORDEREAU DES RECOUVREMENTS AVANT EMISSION DES ORDRES</div>
+        <div class="header-right">EXERCICE : <span data-field="exercice">2025</span></div>
+      </div>
+
+      <div class="sub-header">
+        <div class="commune-info">
+          COMMUNE DE : <span data-field="mairie">Vavoua</span><br />
+          CODE COMMUNE : <span data-field="codeCommune">433</span>
+        </div>
+        <div>BORDEREAU N° : <span data-field="numeroBordereau">001/2025</span></div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th rowspan="2" class="col-numero">N°</th>
+            <th rowspan="2" class="col-nature">NATURE DE LA RECETTE</th>
+            <th style="border-bottom: none; vertical-align: top; padding-bottom: 0">
+              BORDEREAU N°<br />
+              <span style="font-size: 16px" data-field="numeroSimple">86</span>
+            </th>
+            <th colspan="2">NUMERO DÉCOMPTE</th>
+            <th rowspan="2" class="col-montant">MONTANT<br />À RECOUVRER C/457</th>
+            <th rowspan="2" class="col-date">
+              DATE<br />D'ENCAISSEMENT<br />RESTE À<br />RECOUVRER
+            </th>
+            <th colspan="2">CONTRÔLE DES PRISES EN CHARGES</th>
+          </tr>
+          <tr>
+            <th style="padding-top: 0">NOM</th>
+            <th class="col-fonctionnelle">Fonctionnelle</th>
+            <th class="col-patrimoine">Patrimoine</th>
+            <th class="col-recoupre">NUMÉRO<br />RECOUVRÉ</th>
+            <th class="col-montant-ctrl">MONTANT</th>
+          </tr>
+        </thead>
+        <tbody id="declarations-tbody">
+          <!-- Les lignes seront insérées ici dynamiquement -->
+        </tbody>
+      </table>
+
+      <div class="footer">
+        <div style="width: 40%; border: 1px solid #000; padding: 15px">
+          Arrêté à la somme de:
+          <span data-field="montantLettres">zéro FCFA</span>
+          <div class="signature-line">
+            <br />
+            <span data-field="ville">Vavoua</span>, le
+            <span data-field="dateBordereau">__/__/____</span>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <br /><br />
+            <div style="text-align: center; font-weight: bold">Le Receveur</div>
+          </div>
+        </div>
+        <div style="width: 28%; border: 1px solid #000; border-left: none; padding: 15px">
+          <div style="display: flex; margin-bottom: 10px">
+            <div
+              style="
+                border: 1px solid #000;
+                padding: 5px;
+                flex: 1;
+                font-weight: bold;
+                font-size: 9px;
+              "
+            >
+              TOTAL DU PRÉSENT<br />RELEVÉ
+            </div>
+            <div
+              style="
+                border: 1px solid #000;
+                border-left: none;
+                padding: 5px;
+                flex: 1;
+                text-align: center;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              "
+            >
+              <span data-field="montantTotalChiffres">0</span>
+            </div>
+          </div>
+          <div style="display: flex; margin-bottom: 10px">
+            <div
+              style="
+                border: 1px solid #000;
+                padding: 5px;
+                flex: 1;
+                font-weight: bold;
+                font-size: 9px;
+              "
+            >
+              TOTAL GÉNÉRAL DU<br />PRÉCÉDENT ARRÊTÉ
+            </div>
+            <div style="border: 1px solid #000; border-left: none; padding: 5px; flex: 1"></div>
+          </div>
+          <div style="display: flex">
+            <div
+              style="
+                border: 1px solid #000;
+                padding: 5px;
+                flex: 1;
+                font-weight: bold;
+                font-size: 9px;
+              "
+            >
+              TOTAL GÉNÉRAL DU<br />PRÉSENT ARRÊTÉ
+            </div>
+            <div style="border: 1px solid #000; border-left: none; padding: 5px; flex: 1"></div>
+          </div>
+        </div>
+        <div style="width: 32%; border: 1px solid #000; border-left: none; padding: 15px">
+          <div style="font-weight: bold">DATE DE VISA DU MAIRE</div>
+          <br />
+          <div>
+            <span data-field="dateBordereau">__/__/____</span>
+          </div>
+          <br />
+          <div style="font-weight: bold">SIGNATURE ET CACHET DU MAIRE</div>
+        </div>
+      </div>
+
+      <div class="ct-number">CT 53</div>
+    </div>
+
+    <script>
+      // Fonction pour convertir un nombre en lettres (français)
+      function nombreEnLettres(nombre) {
+        if (nombre === 0) return 'zéro';
+
+        const unites = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf'];
+        const dizaines = [
+          '',
+          '',
+          'vingt',
+          'trente',
+          'quarante',
+          'cinquante',
+          'soixante',
+          'soixante',
+          'quatre-vingt',
+          'quatre-vingt',
+        ];
+        const special = [
+          'dix',
+          'onze',
+          'douze',
+          'treize',
+          'quatorze',
+          'quinze',
+          'seize',
+          'dix-sept',
+          'dix-huit',
+          'dix-neuf',
+        ];
+
+        function convertirCentaines(n) {
+          if (n === 0) return '';
+          if (n < 10) return unites[n];
+          if (n < 20) return special[n - 10];
+          if (n < 100) {
+            const d = Math.floor(n / 10);
+            const u = n % 10;
+            let result = dizaines[d];
+            if (d === 7 || d === 9) {
+              result = dizaines[d - 1] + '-' + special[u];
+            } else if (u === 1 && d === 8) {
+              result = 'quatre-vingt-un';
+            } else if (u > 0) {
+              result += '-' + unites[u];
+            } else if (d === 8) {
+              result += 's';
+            }
+            return result;
+          }
+          const c = Math.floor(n / 100);
+          const reste = n % 100;
+          let result = c === 1 ? 'cent' : unites[c] + ' cent';
+          if (c > 1 && reste === 0) result += 's';
+          if (reste > 0) result += ' ' + convertirCentaines(reste);
+          return result;
+        }
+
+        function convertirMilliers(n) {
+          if (n < 1000) return convertirCentaines(n);
+          const m = Math.floor(n / 1000);
+          const reste = n % 1000;
+          let result = m === 1 ? 'mille' : convertirCentaines(m) + ' mille';
+          if (reste > 0) result += ' ' + convertirCentaines(reste);
+          return result;
+        }
+
+        function convertirMillions(n) {
+          if (n < 1000000) return convertirMilliers(n);
+          const m = Math.floor(n / 1000000);
+          const reste = n % 1000000;
+          let result = convertirCentaines(m) + ' million';
+          if (m > 1) result += 's';
+          if (reste > 0) result += ' ' + convertirMilliers(reste);
+          return result;
+        }
+
+        return convertirMillions(nombre);
+      }
+
+      // Fonction pour formater un nombre avec espaces
+      function formatMontant(montant) {
+        return new Intl.NumberFormat('fr-FR').format(montant);
+      }
+
+      // Fonction pour remplir le bordereau
+      function remplirBordereau(data) {
+        // Remplir les champs de l'en-tête
+        document
+          .querySelectorAll('[data-field="mairie"]')
+          .forEach((el) => (el.textContent = data.mairie));
+        document
+          .querySelectorAll('[data-field="ville"]')
+          .forEach((el) => (el.textContent = data.ville));
+        document
+          .querySelectorAll('[data-field="codeCommune"]')
+          .forEach((el) => (el.textContent = data.codeCommune));
+        document
+          .querySelectorAll('[data-field="exercice"]')
+          .forEach((el) => (el.textContent = data.exercice));
+        document
+          .querySelectorAll('[data-field="numeroBordereau"]')
+          .forEach((el) => (el.textContent = data.numeroBordereau));
+        document
+          .querySelectorAll('[data-field="numeroSimple"]')
+          .forEach((el) => (el.textContent = data.numeroSimple));
+        document
+          .querySelectorAll('[data-field="dateBordereau"]')
+          .forEach((el) => (el.textContent = data.dateBordereau));
+
+        // Montants
+        const montantLettres = nombreEnLettres(data.montantTotal) + ' FCFA';
+        const montantChiffres = formatMontant(data.montantTotal);
+
+        document
+          .querySelectorAll('[data-field="montantLettres"]')
+          .forEach((el) => (el.textContent = montantLettres));
+        document
+          .querySelectorAll('[data-field="montantTotalChiffres"]')
+          .forEach((el) => (el.textContent = montantChiffres));
+
+        // Remplir le tableau des déclarations
+        const tbody = document.getElementById('declarations-tbody');
+        tbody.innerHTML = '';
+
+        data.declarations.forEach((decl, index) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+                <td>${index + 1}</td>
+                <td class="nature-text">${decl.natureRecette}</td>
+                <td>${decl.nomPartieVersante || 'RÉGISSEUR'}</td>
+                <td class="crossed"><span>${decl.article || ''}</span></td>
+                <td class="crossed"></td>
+                <td class="crossed"><span>${formatMontant(decl.montant)}</span></td>
+                <td><span>${decl.dateEncaissement}</span></td>
+                <td></td>
+                <td></td>
+            `;
+          tbody.appendChild(tr);
+        });
+
+        // Ajouter des lignes vides si nécessaire (minimum 10 lignes)
+        const lignesManquantes = Math.max(0, 10 - data.declarations.length);
+        for (let i = 0; i < lignesManquantes; i++) {
+          const tr = document.createElement('tr');
+          tr.className = 'empty-row';
+          tr.innerHTML = `
+                <td></td>
+                <td></td>
+                <td></td>
+                <td class="crossed"></td>
+                <td class="crossed"></td>
+                <td class="crossed"></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            `;
+          tbody.appendChild(tr);
+        }
+      }
+
+      // Écouter les messages de la fenêtre parent
+      window.addEventListener('message', (event) => {
+        if (event.data.type === 'FILL_BORDEREAU') {
+          remplirBordereau(event.data.data);
+        } else if (event.data.type === 'FILL_AND_PRINT') {
+          remplirBordereau(event.data.data);
+          setTimeout(() => {
+            window.print();
+          }, 500);
+        }
+      });
+
+      // Au chargement
+      document.addEventListener('DOMContentLoaded', () => {
+        console.log('Page de bordereau chargée et prête');
+      });
+    </script>
+  </body>
+</html>

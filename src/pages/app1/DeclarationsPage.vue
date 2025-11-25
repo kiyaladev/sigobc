@@ -86,7 +86,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useQuasar, date } from 'quasar';
-import { db, type Declaration, type Mairie, type Taxe, type Bordereau } from 'src/database/db';
+import {
+  db,
+  type Declaration,
+  type Mairie,
+  type Taxe,
+  type BordereauRecette,
+} from 'src/database/db';
 import { useAuthStore } from 'src/stores/auth-store';
 import FilterBar from 'src/components/FilterBar.vue';
 import DataTable from 'src/components/DataTable.vue';
@@ -98,7 +104,7 @@ const authStore = useAuthStore();
 const declarations = ref<Declaration[]>([]);
 const mairies = ref<Mairie[]>([]);
 const taxes = ref<Taxe[]>([]);
-const bordereaux = ref<Bordereau[]>([]);
+const bordereaux = ref<BordereauRecette[]>([]);
 const loading = ref(false);
 const nextNumeroPiece = ref<number>(1);
 const saving = ref(false);
@@ -286,8 +292,15 @@ async function loadData() {
       db.declarations.toArray(),
       db.mairies.toArray(),
       db.taxes.toArray(),
-      db.bordereaux.toArray(),
+      db.bordereauxRecette.toArray(),
     ]);
+
+    // Trier les déclarations par date d'encaissement décroissante (plus récent en premier)
+    declarations.value.sort((a, b) => {
+      const dateA = new Date(a.dateEncaissement).getTime();
+      const dateB = new Date(b.dateEncaissement).getTime();
+      return dateB - dateA; // Ordre décroissant
+    });
   } catch (error) {
     console.error('Erreur:', error);
     $q.notify({ type: 'negative', message: 'Erreur lors du chargement' });
@@ -370,15 +383,15 @@ function printDeclaration(declaration: Declaration) {
   const mairie = mairies.value.find((m) => m.id === declaration.mairieId);
   const taxe = taxes.value.find((t) => t.id === declaration.taxeId);
 
-  // Ouvrir la page HTML dans une nouvelle fenêtre avec les données
+  // Ouvrir le nouveau template HTML
   const printWindow = window.open(
-    `/declaration_recette.html?declarationId=${declaration.id}`,
+    '/declaration_recette_new.html?declarationId=' + declaration.id,
     '_blank',
   );
 
   if (printWindow) {
     printWindow.addEventListener('load', () => {
-      // Envoyer les données à la fenêtre
+      // Envoyer toutes les données nécessaires
       printWindow.postMessage(
         {
           type: 'FILL_DECLARATION',
@@ -390,12 +403,13 @@ function printDeclaration(declaration: Declaration) {
             numeroPiece: declaration.numeroPiece,
             nomPartieVersante: declaration.nomPartieVersante,
             adresse: declaration.adresse,
+            numeroLivre: declaration.numeroLivre || 'T31T',
             numeroEncaissement: declaration.numeroEncaissement,
             dateEncaissement: date.formatDate(declaration.dateEncaissement, 'DD/MM/YYYY'),
             natureRecette: taxe?.libelle || '',
             montantRecette: declaration.montantRecette,
-            numeroLivre: declaration.numeroLivre,
-            declaration,
+            ville: mairie?.ville || 'Vavoua',
+            observations: declaration.observations || '',
           },
         },
         '*',
@@ -408,9 +422,9 @@ function downloadDeclarationPDF(declaration: Declaration) {
   const mairie = mairies.value.find((m) => m.id === declaration.mairieId);
   const taxe = taxes.value.find((t) => t.id === declaration.taxeId);
 
-  // Ouvrir la page HTML dans une nouvelle fenêtre
+  // Ouvrir le template et lancer l'impression automatiquement
   const printWindow = window.open(
-    `/declaration_recette.html?declarationId=${declaration.id}`,
+    '/declaration_recette_new.html?declarationId=' + declaration.id,
     '_blank',
   );
 
@@ -428,11 +442,13 @@ function downloadDeclarationPDF(declaration: Declaration) {
             numeroPiece: declaration.numeroPiece,
             nomPartieVersante: declaration.nomPartieVersante,
             adresse: declaration.adresse,
+            numeroLivre: declaration.numeroLivre || 'T31T',
             numeroEncaissement: declaration.numeroEncaissement,
             dateEncaissement: date.formatDate(declaration.dateEncaissement, 'DD/MM/YYYY'),
             natureRecette: taxe?.libelle || '',
             montantRecette: declaration.montantRecette,
-            numeroLivre: declaration.numeroLivre,
+            ville: mairie?.ville || 'Vavoua',
+            observations: declaration.observations || '',
           },
         },
         '*',
@@ -463,7 +479,7 @@ async function updateBordereauCounts(
     );
 
     // Mettre à jour le bordereau
-    await db.bordereaux.update(bordereauId, {
+    await db.bordereauxRecette.update(bordereauId, {
       nombreDeclarations,
       montantTotal,
       updatedAt: new Date(),

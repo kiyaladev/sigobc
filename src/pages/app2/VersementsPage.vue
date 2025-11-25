@@ -4,12 +4,13 @@
       <div class="col">
         <div class="text-h5">Gestion des Versements</div>
         <div class="text-caption text-grey-7 q-mt-xs">
-          <q-icon name="info" size="16px" color="negative" />
-          Arrêté de tout ce qui a été vendu <span class="text-negative text-weight-bold">(- Diminue le stock)</span>
+          <q-icon name="info" size="16px" color="blue" />
+          Le régisseur de mairie vient verser ce qu'il a vendu
+          <span class="text-grey-8">(Enregistrement des recettes)</span>
         </div>
       </div>
       <div class="col-auto">
-        <q-btn color="negative" icon="remove_circle" label="Nouveau Versement" @click="openDialog()" />
+        <q-btn color="blue" icon="payments" label="Nouveau Versement" @click="openDialog()" />
       </div>
     </div>
 
@@ -53,8 +54,8 @@
       >
         <template v-slot:body-cell-type="props">
           <q-td :props="props">
-            <q-badge color="negative" :label="props.row.type">
-              <q-icon name="remove" size="xs" class="q-ml-xs" />
+            <q-badge color="blue" :label="props.row.type">
+              <q-icon name="money" size="xs" class="q-ml-xs" />
             </q-badge>
           </q-td>
         </template>
@@ -63,7 +64,7 @@
           <q-td :props="props">
             <div class="row q-gutter-xs">
               <div v-for="(value, key) in props.row.timbres" :key="key">
-                <q-chip v-if="value > 0" dense color="negative" text-color="white">
+                <q-chip v-if="value > 0" dense color="blue" text-color="white">
                   {{ key }}: {{ value }}
                 </q-chip>
               </div>
@@ -121,7 +122,7 @@
         <q-card-section>
           <q-form @submit="onSubmit" class="q-gutter-md">
             <div class="row q-col-gutter-md">
-              <div class="col-12 col-sm-6">
+              <div class="col-12 col-sm-4">
                 <q-select
                   v-model="form.type"
                   filled
@@ -132,9 +133,20 @@
                 />
               </div>
 
-              <div class="col-12 col-sm-6">
+              <div class="col-12 col-sm-4">
                 <q-input
                   v-model="form.date"
+                  filled
+                  type="date"
+                  label="Date d'opération *"
+                  lazy-rules
+                  :rules="[(val) => !!val || 'La date est requise']"
+                />
+              </div>
+
+              <div class="col-12 col-sm-4">
+                <q-input
+                  v-model="form.exercice"
                   filled
                   type="date"
                   label="Date d'opération *"
@@ -201,7 +213,7 @@
 
             <div class="row q-gutter-sm justify-end">
               <q-btn label="Fermer" color="grey-7" flat @click="dialogVisible = false" />
-              <q-btn label="OK" color="negative" type="submit" :loading="saving" />
+              <q-btn label="OK" color="primary" type="submit" :loading="saving" />
             </div>
           </q-form>
         </q-card-section>
@@ -222,6 +234,7 @@ interface Versement {
   id?: number;
   type: string;
   date: string;
+  exercice: number;
   timbres: Timbres;
   total: number;
   commentaires: string;
@@ -240,27 +253,29 @@ const dialogVisible = ref(false);
 const isEditing = ref(false);
 
 const versements = ref<Versement[]>([
-  {
-    id: 1,
-    type: 'Versement',
-    date: '2025-11-07',
-    timbres: { 100: 300, 200: 200, 300: 150, 500: 100, 600: 80, 1000: 50 },
-    total: 315000,
-    commentaires: 'Versement journalier - Matin',
-  },
-  {
-    id: 2,
-    type: 'Versement',
-    date: '2025-11-06',
-    timbres: { 100: 250, 200: 180, 300: 120, 500: 80, 600: 60, 1000: 40 },
-    total: 255000,
-    commentaires: 'Versement journalier - Soir',
-  },
+  // {
+  //   id: 1,
+  //   type: 'Versement',
+  //   date: '2025-11-07',
+  //   timbres: { 100: 300, 200: 200, 300: 150, 500: 100, 600: 80, 1000: 50 },
+  //   total: 315000,
+  //
+  //   commentaires: 'Versement journalier - Matin',
+  // },
+  // {
+  //   id: 2,
+  //   type: 'Versement',
+  //   date: '2025-11-06',
+  //   timbres: { 100: 250, 200: 180, 300: 120, 500: 80, 600: 60, 1000: 40 },
+  //   total: 255000,
+  //   commentaires: 'Versement journalier - Soir',
+  // },
 ]);
 
 const form = ref<Versement>({
   type: 'Versement',
   date: new Date().toISOString().split('T')[0] as string,
+  exercice: new Date().getFullYear(),
   timbres: {
     100: 0,
     200: 0,
@@ -338,6 +353,7 @@ const openDialog = (versement?: Versement) => {
         600: 0,
         1000: 0,
       },
+      exercice: new Date().getFullYear(),
       total: 0,
       commentaires: '',
     };

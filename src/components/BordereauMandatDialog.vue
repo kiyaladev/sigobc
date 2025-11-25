@@ -93,7 +93,14 @@
             <!-- Date d'émission -->
             <div class="col-12">
               <q-input
-                v-model="localForm.dateEmission"
+                :model-value="localForm.dateEmission ? quasarDate.formatDate(localForm.dateEmission, 'YYYY-MM-DD') : ''"
+                @update:model-value="(val: string | number | null) => {
+                  if (val && typeof val === 'string') {
+                    localForm.dateEmission = new Date(val);
+                  } else {
+                    delete localForm.dateEmission;
+                  }
+                }"
                 filled
                 type="date"
                 label="Date d'émission"
@@ -197,10 +204,6 @@ function updateNumero() {
 }
 
 function handleSubmit() {
-  // Convertir la date en objet Date si elle est un string
-  if (localForm.value.dateEmission && typeof localForm.value.dateEmission === 'string') {
-    localForm.value.dateEmission = new Date(localForm.value.dateEmission);
-  }
   emit('submit', localForm.value);
 }
 </script>

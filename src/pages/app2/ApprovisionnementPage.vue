@@ -2,14 +2,15 @@
   <q-page class="q-pa-md">
     <div class="row q-mb-md">
       <div class="col">
-        <div class="text-h5">Approvisionnement Initial</div>
+        <div class="text-h5">Approvisionnement</div>
         <div class="text-caption text-grey-7 q-mt-xs">
-          <q-icon name="info" size="16px" color="primary" />
-          Stock initial de l'année (une seule entrée par année)
+          <q-icon name="info" size="16px" color="positive" />
+          L'imprimerie envoie des valeurs au trésor
+          <span class="text-positive text-weight-bold">(+ Augmente le stock du trésor - Section 1)</span>
         </div>
       </div>
       <div class="col-auto">
-        <q-btn color="primary" icon="add" label="Nouvel Approvisionnement" @click="openDialog()" />
+        <q-btn color="positive" icon="add_box" label="Nouvel Approvisionnement" @click="openDialog()" />
       </div>
     </div>
 
@@ -51,9 +52,19 @@
         :pagination="{ rowsPerPage: 10 }"
         binary-state-sort
       >
+        <template v-slot:body-cell-date="props">
+          <q-td :props="props">
+            {{ new Date(props.row.date).toLocaleDateString('fr-FR', {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit'
+            }) }}
+          </q-td>
+        </template>
+
         <template v-slot:body-cell-type="props">
           <q-td :props="props">
-            <q-badge :color="getTypeColor(props.row.type)" :label="props.row.type" />
+            <q-badge :color="getTypeColor()" :label="props.row.type" />
           </q-td>
         </template>
 
@@ -61,7 +72,7 @@
           <q-td :props="props">
             <div class="row q-gutter-xs">
               <div v-for="(value, key) in props.row.timbres" :key="key">
-                <q-chip v-if="value > 0" dense color="primary" text-color="white">
+                <q-chip v-if="value > 0" dense color="green" text-color="white">
                   {{ key }}: {{ value }}
                 </q-chip>
               </div>
@@ -82,12 +93,12 @@
               round
               dense
               icon="visibility"
-              color="primary"
+              color="positive"
               @click="viewDetails(props.row)"
             >
               <q-tooltip>Voir détails</q-tooltip>
             </q-btn>
-            <q-btn flat round dense icon="edit" color="primary" @click="openDialog(props.row)">
+            <q-btn flat round dense icon="edit" color="positive" @click="openDialog(props.row)">
               <q-tooltip>Modifier</q-tooltip>
             </q-btn>
             <q-btn
@@ -115,7 +126,20 @@
         <q-card-section>
           <q-form @submit="onSubmit" class="q-gutter-md">
             <div class="row q-col-gutter-md">
-              <div class="col-12 col-sm-6">
+
+
+              <div class="col-12 col-sm-4">
+                <q-input
+                  v-model.number="form.exercice"
+                  filled
+                  type="number"
+                  label="EXO (Exonération)"
+                  min="0"
+                  dense
+                />
+              </div>
+
+              <div class="col-12 col-sm-4">
                 <q-select
                   v-model="form.type"
                   filled
@@ -126,9 +150,14 @@
                 />
               </div>
 
-              <div class="col-12 col-sm-6">
+              <div class="col-12 col-sm-4">
                 <q-input
-                  v-model="form.date"
+                  :model-value="form.date ? new Date(form.date).toISOString().split('T')[0] : ''"
+                  @update:model-value="(val: string | number | null) => {
+                    if (val && typeof val === 'string') {
+                      form.date = new Date(val);
+                    }
+                  }"
                   filled
                   type="date"
                   label="Date d'opération *"
@@ -149,7 +178,7 @@
                     :key="valeur"
                   >
                     <q-input
-                      v-model.number="form.timbres[valeur]"
+                      v-model.number="form.timbres![valeur]"
                       filled
                       type="number"
                       :label="`t_${valeur}`"
@@ -174,32 +203,22 @@
                         <div class="text-subtitle2 text-grey-7">Total</div>
                       </div>
                       <div class="col-auto">
-                        <div class="text-h6 text-primary">{{ formatMontant(form.total) }}</div>
+                        <div class="text-h6 text-primary">{{ formatMontant(form.total || 0) }}</div>
                       </div>
                     </div>
                   </q-card-section>
                 </q-card>
               </div>
 
-              <!-- EXO (Exonération) -->
-              <div class="col-12">
-                <q-input
-                  v-model.number="form.exo"
-                  filled
-                  type="number"
-                  label="EXO (Exonération)"
-                  min="0"
-                  dense
-                />
-              </div>
 
-              <!-- Commentaires -->
+
+              <!-- Observations -->
               <div class="col-12">
                 <q-input
-                  v-model="form.commentaires"
+                  v-model="form.observations"
                   filled
                   type="textarea"
-                  label="Commentaires"
+                  label="Observations"
                   rows="3"
                 />
               </div>
@@ -207,7 +226,7 @@
 
             <div class="row q-gutter-sm justify-end">
               <q-btn label="Fermer" color="grey-7" flat @click="dialogVisible = false" />
-              <q-btn label="OK" color="primary" type="submit" :loading="saving" />
+              <q-btn label="OK" color="positive" type="submit" :loading="saving" />
             </div>
           </q-form>
         </q-card-section>
@@ -219,25 +238,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
-
-interface Timbres {
-  [key: number]: number;
-}
-
-interface Approvisionnement {
-  id?: number;
-  type: string;
-  date: string;
-  timbres: Timbres;
-  total: number;
-  exo: number;
-  commentaires: string;
-}
+import { db, type Approvisionnement } from 'src/database/db';
 
 const $q = useQuasar();
 
 const valeursTimbre = [100, 200, 300, 500, 600, 1000];
-const typeOptions = ['Approvisionnement Initial'];
+const typeOptions = ['approvisionnement'];
 
 const search = ref('');
 const filterType = ref<string | null>(null);
@@ -246,31 +252,13 @@ const loading = ref(false);
 const saving = ref(false);
 const dialogVisible = ref(false);
 const isEditing = ref(false);
+const editingId = ref<number | undefined>(undefined);
 
-const approvisionnements = ref<Approvisionnement[]>([
-  {
-    id: 1,
-    type: 'appro.ddian',
-    date: '2025-11-07',
-    timbres: { 100: 500, 200: 300, 300: 200, 500: 150, 600: 100, 1000: 50 },
-    total: 545000,
-    exo: 0,
-    commentaires: 'Approvisionnement mensuel',
-  },
-  {
-    id: 2,
-    type: 'Versement',
-    date: '2025-11-06',
-    timbres: { 100: 200, 200: 150, 300: 100, 500: 80, 600: 50, 1000: 30 },
-    total: 235000,
-    exo: 5000,
-    commentaires: 'Versement journalier',
-  },
-]);
+const approvisionnements = ref<Approvisionnement[]>([]);
 
-const form = ref<Approvisionnement>({
-  type: '',
-  date: new Date().toISOString().split('T')[0] as string,
+const form = ref<Partial<Approvisionnement>>({
+  type: 'approvisionnement',
+  date: new Date(),
   timbres: {
     100: 0,
     200: 0,
@@ -280,8 +268,8 @@ const form = ref<Approvisionnement>({
     1000: 0,
   },
   total: 0,
-  exo: 0,
-  commentaires: '',
+  exercice: new Date().getFullYear(),
+  observations: '',
 });
 
 const columns = [
@@ -289,9 +277,24 @@ const columns = [
   { name: 'type', label: 'Type', field: 'type', align: 'left' as const, sortable: true },
   { name: 'details', label: 'Détails', field: 'timbres', align: 'left' as const },
   { name: 'total', label: 'Total', field: 'total', align: 'right' as const, sortable: true },
-  { name: 'exo', label: 'EXO', field: 'exo', align: 'right' as const, sortable: true },
   { name: 'actions', label: 'Actions', field: 'actions', align: 'center' as const },
 ];
+
+// Charger les données depuis la base
+async function loadData() {
+  loading.value = true;
+  try {
+    approvisionnements.value = await db.approvisionnements.toArray();
+  } catch (error) {
+    console.error('Erreur lors du chargement:', error);
+    $q.notify({
+      type: 'negative',
+      message: 'Erreur lors du chargement des données',
+    });
+  } finally {
+    loading.value = false;
+  }
+}
 
 const filteredAppros = computed(() => {
   let result = approvisionnements.value;
@@ -301,7 +304,7 @@ const filteredAppros = computed(() => {
     result = result.filter(
       (a) =>
         a.type.toLowerCase().includes(searchLower) ||
-        a.commentaires.toLowerCase().includes(searchLower),
+        (a.observations && a.observations.toLowerCase().includes(searchLower)),
     );
   }
 
@@ -310,7 +313,11 @@ const filteredAppros = computed(() => {
   }
 
   if (filterDate.value) {
-    result = result.filter((a) => a.date === filterDate.value);
+    const filterDateStr = new Date(filterDate.value).toISOString().split('T')[0];
+    result = result.filter((a) => {
+      const dateStr = new Date(a.date).toISOString().split('T')[0];
+      return dateStr === filterDateStr;
+    });
   }
 
   return result;
@@ -324,33 +331,38 @@ const formatMontant = (montant: number) => {
   }).format(montant);
 };
 
-const getTypeColor = (type: string) => {
-  const colors: Record<string, string> = {
-    'appro.ddian': 'primary',
-    Versement: 'positive',
-    Remise: 'secondary',
-  };
-  return colors[type] || 'grey';
+const getTypeColor = () => {
+  // Toujours vert pour les approvisionnements (augmente le stock)
+  return 'positive';
 };
 
 const calculateTotal = () => {
   let total = 0;
-  for (const valeur of valeursTimbre) {
-    const quantite = form.value.timbres[valeur] || 0;
-    total += valeur * quantite;
+  if (form.value.timbres) {
+    for (const valeur of valeursTimbre) {
+      const quantite = form.value.timbres[valeur] || 0;
+      total += valeur * quantite;
+    }
   }
   form.value.total = total;
 };
 
 const openDialog = (appro?: Approvisionnement) => {
-  if (appro) {
+  if (appro && appro.id) {
     isEditing.value = true;
-    form.value = { ...appro };
+    editingId.value = appro.id;
+    // Cloner proprement l'objet avec de nouvelles instances de Date
+    form.value = {
+      ...appro,
+      date: new Date(appro.date),
+      timbres: { ...appro.timbres },
+    };
   } else {
     isEditing.value = false;
+    editingId.value = undefined;
     form.value = {
-      type: '',
-      date: new Date().toISOString().split('T')[0] as string,
+      type: 'approvisionnement',
+      date: new Date(),
       timbres: {
         100: 0,
         200: 0,
@@ -360,8 +372,8 @@ const openDialog = (appro?: Approvisionnement) => {
         1000: 0,
       },
       total: 0,
-      exo: 0,
-      commentaires: '',
+      exercice: new Date().getFullYear(),
+      observations: '',
     };
   }
   dialogVisible.value = true;
@@ -370,21 +382,37 @@ const openDialog = (appro?: Approvisionnement) => {
 const onSubmit = async () => {
   saving.value = true;
   try {
-    // Simuler une sauvegarde
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    const now = new Date();
+    const mairieId = 1; // À adapter selon l'utilisateur connecté
+    const personnelId = 1; // À adapter selon l'utilisateur connecté
 
-    if (isEditing.value) {
-      const index = approvisionnements.value.findIndex((a) => a.id === form.value.id);
-      if (index !== -1) {
-        approvisionnements.value[index] = { ...form.value };
-      }
+    // S'assurer que la date est un nouvel objet Date pour éviter les problèmes de clonage
+    const dateValue = form.value.date ? new Date(form.value.date) : now;
+
+    const data = {
+      mairieId,
+      exercice: form.value.exercice || new Date().getFullYear(),
+      date: dateValue,
+      type: form.value.type || 'initial',
+      timbres: { ...form.value.timbres! }, // Cloner l'objet timbres
+      total: form.value.total || 0,
+      observations: form.value.observations || '',
+      personnelId,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    if (isEditing.value && editingId.value) {
+      await db.approvisionnements.update(editingId.value, {
+        ...data,
+        updatedAt: now,
+      });
       $q.notify({
         type: 'positive',
         message: 'Approvisionnement modifié avec succès',
       });
     } else {
-      const newId = Math.max(...approvisionnements.value.map((a) => a.id || 0)) + 1;
-      approvisionnements.value.unshift({ ...form.value, id: newId });
+      await db.approvisionnements.add(data);
       $q.notify({
         type: 'positive',
         message: 'Approvisionnement ajouté avec succès',
@@ -392,7 +420,9 @@ const onSubmit = async () => {
     }
 
     dialogVisible.value = false;
-  } catch {
+    await loadData();
+  } catch (error) {
+    console.error('Erreur:', error);
     $q.notify({
       type: 'negative',
       message: "Erreur lors de l'enregistrement",
@@ -402,20 +432,6 @@ const onSubmit = async () => {
   }
 };
 
-const viewDetails = (appro: Approvisionnement) => {
-  $q.dialog({
-    title: "Détails de l'approvisionnement",
-    message: `
-      Date: ${appro.date}
-      Type: ${appro.type}
-      Total: ${formatMontant(appro.total)}
-      EXO: ${formatMontant(appro.exo)}
-      Commentaires: ${appro.commentaires}
-    `,
-    html: true,
-  });
-};
-
 const confirmDelete = (appro: Approvisionnement) => {
   $q.dialog({
     title: 'Confirmation',
@@ -423,18 +439,32 @@ const confirmDelete = (appro: Approvisionnement) => {
     cancel: true,
     persistent: true,
   }).onOk(() => {
-    const index = approvisionnements.value.findIndex((a) => a.id === appro.id);
-    if (index !== -1) {
-      approvisionnements.value.splice(index, 1);
-      $q.notify({
-        type: 'positive',
-        message: 'Approvisionnement supprimé avec succès',
-      });
-    }
+    void (async () => {
+      try {
+        if (appro.id) {
+          await db.approvisionnements.delete(appro.id);
+          $q.notify({
+            type: 'positive',
+            message: 'Approvisionnement supprimé avec succès',
+          });
+          await loadData();
+        }
+      } catch (error) {
+        console.error('Erreur:', error);
+        $q.notify({
+          type: 'negative',
+          message: 'Erreur lors de la suppression',
+        });
+      }
+    })();
   });
 };
 
+const viewDetails = (appro: Approvisionnement) => {
+  openDialog(appro);
+};
+
 onMounted(() => {
-  // Charger les données depuis la base de données
+  void loadData();
 });
 </script>

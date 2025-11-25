@@ -1,11 +1,30 @@
 <template>
   <q-page class="q-pa-md">
     <div class="row q-col-gutter-md">
-      <!-- En-tête avec titre -->
+      <!-- En-tête avec titre et filtre -->
       <div class="col-12">
-        <div class="text-h4 q-mb-md">Gestion des Stocks de Timbres Fiscaux</div>
-        <div class="text-subtitle1 text-grey-7 q-mb-md">
-          Suivi des approvisionnements, remises et versements
+        <div class="row items-center justify-between q-mb-md">
+          <div class="col">
+            <div class="text-h4">Gestion des Stocks de Timbres Fiscaux</div>
+            <div class="text-subtitle1 text-grey-7">
+              Suivi des approvisionnements, remises et versements
+            </div>
+          </div>
+          <div class="col-auto">
+            <q-select
+              v-model="selectedYear"
+              :options="yearOptions"
+              label="Exercice"
+              outlined
+              dense
+              style="min-width: 150px"
+              @update:model-value="loadData"
+            >
+              <template v-slot:prepend>
+                <q-icon name="event" />
+              </template>
+            </q-select>
+          </div>
         </div>
       </div>
 
@@ -14,9 +33,23 @@
         <q-card>
           <q-card-section class="bg-primary text-white">
             <div class="text-h6">Stock Actuel des Timbres</div>
+            <div class="text-caption">Exercice {{ selectedYear }}</div>
           </q-card-section>
           <q-card-section>
-            <div class="row q-col-gutter-md">
+            <q-inner-loading :showing="loading">
+              <q-spinner-gears size="50px" color="primary" />
+            </q-inner-loading>
+            <div
+              v-if="!loading && stats.totalTimbres === 0"
+              class="text-center q-pa-lg text-grey-6"
+            >
+              <q-icon name="inventory_2" size="64px" />
+              <div class="text-h6 q-mt-md">Aucun stock disponible</div>
+              <div class="text-caption">
+                Créez une balance d'entrée ou un approvisionnement pour commencer
+              </div>
+            </div>
+            <div v-else class="row q-col-gutter-md">
               <div class="col-12 col-sm-6 col-md-4" v-for="timbre in timbres" :key="timbre.valeur">
                 <q-card flat bordered>
                   <q-card-section class="text-center">
@@ -43,7 +76,7 @@
       <div class="col-12">
         <div class="row q-col-gutter-md">
           <div class="col-12 col-sm-6 col-md-3">
-            <q-card class="stat-card" style="border-left: 4px solid var(--q-blue)">
+            <q-card class="stat-card" style="border-left: 4px solid #2196f3">
               <q-card-section>
                 <div class="row items-center">
                   <div class="col">
@@ -64,7 +97,7 @@
           </div>
 
           <div class="col-12 col-sm-6 col-md-3">
-            <q-card class="stat-card" style="border-left: 4px solid var(--q-green)">
+            <q-card class="stat-card" style="border-left: 4px solid #4caf50">
               <q-card-section>
                 <div class="row items-center">
                   <div class="col">
@@ -80,16 +113,16 @@
           </div>
 
           <div class="col-12 col-sm-6 col-md-3">
-            <q-card class="stat-card" style="border-left: 4px solid var(--q-orange)">
+            <q-card class="stat-card" style="border-left: 4px solid #4caf50">
               <q-card-section>
                 <div class="row items-center">
                   <div class="col">
-                    <div class="text-h6 text-grey-8">{{ stats.remisesJour }}</div>
-                    <div class="text-caption text-grey-6">Remises Aujourd'hui</div>
+                    <div class="text-h6 text-grey-8">{{ stats.approsJour }}</div>
+                    <div class="text-caption text-grey-6">Appros Aujourd'hui</div>
                     <div class="text-caption text-positive">+ Stock</div>
                   </div>
                   <div class="col-auto">
-                    <q-icon name="add_box" size="48px" color="orange" style="opacity: 0.3" />
+                    <q-icon name="add_box" size="48px" color="green" style="opacity: 0.3" />
                   </div>
                 </div>
               </q-card-section>
@@ -97,16 +130,33 @@
           </div>
 
           <div class="col-12 col-sm-6 col-md-3">
-            <q-card class="stat-card" style="border-left: 4px solid var(--q-purple)">
+            <q-card class="stat-card" style="border-left: 4px solid #f44336">
+              <q-card-section>
+                <div class="row items-center">
+                  <div class="col">
+                    <div class="text-h6 text-grey-8">{{ stats.remisesJour }}</div>
+                    <div class="text-caption text-grey-6">Remises Aujourd'hui</div>
+                    <div class="text-caption text-negative">- Stock</div>
+                  </div>
+                  <div class="col-auto">
+                    <q-icon name="remove_circle" size="48px" color="red" style="opacity: 0.3" />
+                  </div>
+                </div>
+              </q-card-section>
+            </q-card>
+          </div>
+
+          <div class="col-12 col-sm-6 col-md-3">
+            <q-card class="stat-card" style="border-left: 4px solid #2196f3">
               <q-card-section>
                 <div class="row items-center">
                   <div class="col">
                     <div class="text-h6 text-grey-8">{{ stats.versementsJour }}</div>
                     <div class="text-caption text-grey-6">Versements Aujourd'hui</div>
-                    <div class="text-caption text-negative">- Stock</div>
+                    <div class="text-caption text-grey-7">Recettes</div>
                   </div>
                   <div class="col-auto">
-                    <q-icon name="remove_circle" size="48px" color="purple" style="opacity: 0.3" />
+                    <q-icon name="payments" size="48px" color="primary" style="opacity: 0.3" />
                   </div>
                 </div>
               </q-card-section>
@@ -124,31 +174,14 @@
               <div class="col-6 col-sm-4 col-md-3">
                 <q-btn
                   outline
-                  color="primary"
-                  class="full-width q-py-lg"
-                  style="background: white; border-width: 2px"
-                  stack
-                  @click="$router.push('/app2/approvisionnements')"
-                >
-                  <q-icon name="inventory_2" size="32px" class="q-mb-sm" />
-                  <div class="text-caption text-weight-medium">Approvisionnement</div>
-                  <div class="text-caption text-grey-6" style="font-size: 0.65rem">
-                    Stock initial annuel
-                  </div>
-                </q-btn>
-              </div>
-
-              <div class="col-6 col-sm-4 col-md-3">
-                <q-btn
-                  outline
                   color="positive"
                   class="full-width q-py-lg"
                   style="background: white; border-width: 2px"
                   stack
-                  @click="$router.push('/app2/remises')"
+                  @click="navigateTo('/app2/approvisionnements')"
                 >
                   <q-icon name="add_box" size="32px" class="q-mb-sm" />
-                  <div class="text-caption text-weight-medium">Remises</div>
+                  <div class="text-caption text-weight-medium">Approvisionnement</div>
                   <div class="text-caption text-positive" style="font-size: 0.65rem">
                     + Augmente le stock
                   </div>
@@ -162,12 +195,29 @@
                   class="full-width q-py-lg"
                   style="background: white; border-width: 2px"
                   stack
-                  @click="$router.push('/app2/versements')"
+                  @click="navigateTo('/app2/remises')"
                 >
                   <q-icon name="remove_circle" size="32px" class="q-mb-sm" />
-                  <div class="text-caption text-weight-medium">Versements</div>
+                  <div class="text-caption text-weight-medium">Remises</div>
                   <div class="text-caption text-negative" style="font-size: 0.65rem">
                     - Diminue le stock
+                  </div>
+                </q-btn>
+              </div>
+
+              <div class="col-6 col-sm-4 col-md-3">
+                <q-btn
+                  outline
+                  color="primary"
+                  class="full-width q-py-lg"
+                  style="background: white; border-width: 2px"
+                  stack
+                  @click="navigateTo('/app2/versements')"
+                >
+                  <q-icon name="payments" size="32px" class="q-mb-sm" />
+                  <div class="text-caption text-weight-medium">Versements</div>
+                  <div class="text-caption text-grey-7" style="font-size: 0.65rem">
+                    Recettes mairie
                   </div>
                 </q-btn>
               </div>
@@ -179,7 +229,7 @@
                   class="full-width q-py-lg"
                   style="background: white; border-width: 2px"
                   stack
-                  @click="$router.push('/app2/balance-entree')"
+                  @click="navigateTo('/app2/balance-entree')"
                 >
                   <q-icon name="balance" size="32px" class="q-mb-sm" />
                   <div class="text-caption text-weight-medium">Balance</div>
@@ -198,7 +248,7 @@
                   icon="bar_chart"
                   label="Statistiques"
                   stack
-                  @click="$router.push('/app2/statistiques')"
+                  @click="navigateTo('/app2/statistiques')"
                 />
               </div>
             </div>
@@ -211,11 +261,24 @@
         <q-card>
           <q-card-section>
             <div class="text-h6 q-mb-md">Dernières Opérations</div>
+            <q-inner-loading :showing="loading">
+              <q-spinner-gears size="50px" color="primary" />
+            </q-inner-loading>
+            <div
+              v-if="!loading && dernieresOperations.length === 0"
+              class="text-center q-pa-lg text-grey-6"
+            >
+              <q-icon name="history" size="64px" />
+              <div class="text-h6 q-mt-md">Aucune opération</div>
+              <div class="text-caption">Les opérations apparaîtront ici une fois créées</div>
+            </div>
             <q-table
+              v-else
               :rows="dernieresOperations"
               :columns="operationsColumns"
               row-key="id"
-              :rows-per-page-options="[5]"
+              :rows-per-page-options="[5, 10]"
+              :loading="loading"
               flat
             >
               <template v-slot:body-cell-type="props">
@@ -238,6 +301,17 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { db } from 'src/database/db';
+import type { Approvisionnement, Remise, Versement, BalanceEntree } from 'src/database/db';
+import { useQuasar } from 'quasar';
+
+const router = useRouter();
+const $q = useQuasar();
+
+const navigateTo = (path: string) => {
+  void router.push(path);
+};
 
 interface Timbre {
   valeur: number;
@@ -252,62 +326,62 @@ interface Operation {
   montant: number;
 }
 
+// Filtre par année
+const currentYear = new Date().getFullYear();
+const selectedYear = ref(currentYear);
+const yearOptions = ref<number[]>([]);
+
+// Données
 const timbres = ref<Timbre[]>([
-  { valeur: 100, stock: 450 },
-  { valeur: 200, stock: 320 },
-  { valeur: 300, stock: 280 },
-  { valeur: 500, stock: 150 },
-  { valeur: 600, stock: 180 },
-  { valeur: 1000, stock: 95 },
+  { valeur: 100, stock: 0 },
+  { valeur: 200, stock: 0 },
+  { valeur: 300, stock: 0 },
+  { valeur: 500, stock: 0 },
+  { valeur: 600, stock: 0 },
+  { valeur: 1000, stock: 0 },
 ]);
 
-const dernieresOperations = ref<Operation[]>([
-  {
-    id: 1,
-    date: '2025-11-07 10:30',
-    type: 'Approvisionnement',
-    description: 'Approvisionnement timbres 100 FCFA',
-    montant: 50000,
-  },
-  {
-    id: 2,
-    date: '2025-11-07 09:15',
-    type: 'Versement',
-    description: 'Versement journalier',
-    montant: 125000,
-  },
-  {
-    id: 3,
-    date: '2025-11-06 16:45',
-    type: 'Remise',
-    description: 'Remise timbres 500 FCFA',
-    montant: 75000,
-  },
-  {
-    id: 4,
-    date: '2025-11-06 14:20',
-    type: 'Approvisionnement',
-    description: 'Approvisionnement timbres 1000 FCFA',
-    montant: 100000,
-  },
-  {
-    id: 5,
-    date: '2025-11-06 11:30',
-    type: 'Balance Entrée',
-    description: "Balance d'entrée du jour",
-    montant: 0,
-  },
-]);
+const dernieresOperations = ref<Operation[]>([]);
+const loading = ref(false);
 
+const approvisionnements = ref<Approvisionnement[]>([]);
+const remises = ref<Remise[]>([]);
+const versements = ref<Versement[]>([]);
+const balanceEntree = ref<BalanceEntree | null>(null);
+
+// Calculer les statistiques
 const stats = computed(() => {
   const totalTimbres = timbres.value.reduce((sum, t) => sum + t.stock, 0);
   const valeurTotale = timbres.value.reduce((sum, t) => sum + t.stock * t.valeur, 0);
 
+  // Compter les opérations du jour
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const approsJour = approvisionnements.value.filter((a) => {
+    const date = new Date(a.date);
+    date.setHours(0, 0, 0, 0);
+    return date.getTime() === today.getTime();
+  }).length;
+
+  const remisesJour = remises.value.filter((r) => {
+    const date = new Date(r.date);
+    date.setHours(0, 0, 0, 0);
+    return date.getTime() === today.getTime();
+  }).length;
+
+  const versementsJour = versements.value.filter((v) => {
+    const date = new Date(v.date);
+    date.setHours(0, 0, 0, 0);
+    return date.getTime() === today.getTime();
+  }).length;
+
   return {
     totalTimbres,
     valeurTotale,
-    remisesJour: 3,
-    versementsJour: 2,
+    approsJour,
+    remisesJour,
+    versementsJour,
   };
 });
 
@@ -334,16 +408,209 @@ const getStockColor = (stock: number) => {
 
 const getTypeColor = (type: string) => {
   const colors: Record<string, string> = {
-    Approvisionnement: 'primary',
-    Versement: 'positive',
-    Remise: 'secondary',
-    'Balance Entrée': 'info',
+    Approvisionnement: 'positive',
+    Versement: 'primary',
+    Remise: 'negative',
+    'Balance Entree': 'info',
   };
   return colors[type] || 'grey';
 };
 
-onMounted(() => {
-  // Charger les données depuis la base de données
+// Calculer le stock actuel
+const calculateStock = () => {
+  const valeursTimbre: (100 | 200 | 300 | 500 | 600 | 1000)[] = [100, 200, 300, 500, 600, 1000];
+  const stockActuel: Record<number, number> = {};
+
+  // Initialiser à zéro
+  valeursTimbre.forEach((valeur) => {
+    stockActuel[valeur] = 0;
+  });
+
+  // 1. Ajouter la balance d'entrée si elle existe
+  if (balanceEntree.value?.timbres) {
+    valeursTimbre.forEach((valeur) => {
+      stockActuel[valeur] =
+        (stockActuel[valeur] ?? 0) + (balanceEntree.value?.timbres[valeur] || 0);
+    });
+  }
+
+  // 2. Ajouter les approvisionnements
+  approvisionnements.value.forEach((appro) => {
+    if (appro?.timbres) {
+      valeursTimbre.forEach((valeur) => {
+        stockActuel[valeur] = (stockActuel[valeur] ?? 0) + (appro.timbres[valeur] || 0);
+      });
+    }
+  });
+
+  // 3. Soustraire les remises
+  remises.value.forEach((remise) => {
+    if (remise?.timbres) {
+      valeursTimbre.forEach((valeur) => {
+        stockActuel[valeur] = (stockActuel[valeur] ?? 0) - (remise.timbres[valeur] || 0);
+      });
+    }
+  });
+
+  // 4. Soustraire les versements
+  versements.value.forEach((versement) => {
+    if (versement?.timbres) {
+      valeursTimbre.forEach((valeur) => {
+        stockActuel[valeur] = (stockActuel[valeur] ?? 0) - (versement.timbres[valeur] || 0);
+      });
+    }
+  });
+
+  // Mettre à jour l'affichage
+  timbres.value = valeursTimbre.map((valeur) => ({
+    valeur,
+    stock: stockActuel[valeur] || 0,
+  }));
+};
+
+// Charger les dernières opérations
+const loadDernieresOperations = () => {
+  const operations: Operation[] = [];
+
+  // Ajouter la balance d'entrée
+  if (balanceEntree.value) {
+    operations.push({
+      id: balanceEntree.value.id!,
+      date: new Date(balanceEntree.value.date).toLocaleString('fr-FR'),
+      type: 'Balance Entree',
+      description: balanceEntree.value.type || "Balance d'entrée",
+      montant: balanceEntree.value.total,
+    });
+  }
+
+  // Ajouter les approvisionnements
+  approvisionnements.value.forEach((appro) => {
+    operations.push({
+      id: appro.id!,
+      date: new Date(appro.date).toLocaleString('fr-FR'),
+      type: 'Approvisionnement',
+      description: appro.type || 'Approvisionnement',
+      montant: appro.total,
+    });
+  });
+
+  // Ajouter les remises
+  remises.value.forEach((remise) => {
+    operations.push({
+      id: remise.id!,
+      date: new Date(remise.date).toLocaleString('fr-FR'),
+      type: 'Remise',
+      description: `Remise ${remise.numeroRemise}`,
+      montant: remise.total,
+    });
+  });
+
+  // Ajouter les versements
+  versements.value.forEach((versement) => {
+    operations.push({
+      id: versement.id!,
+      date: new Date(versement.date).toLocaleString('fr-FR'),
+      type: 'Versement',
+      description: `Versement ${versement.numeroVersement}`,
+      montant: versement.total,
+    });
+  });
+
+  // Trier par date (plus récentes en premier)
+  operations.sort((a, b) => {
+    const dateA = new Date(a.date);
+    const dateB = new Date(b.date);
+    return dateB.getTime() - dateA.getTime();
+  });
+
+  // Garder seulement les 10 dernières
+  dernieresOperations.value = operations.slice(0, 10);
+};
+
+// Charger les données depuis la base de données
+const loadData = async () => {
+  loading.value = true;
+  try {
+    const mairieId = 1; // À adapter selon l'utilisateur connecté
+    const exercice = selectedYear.value;
+
+    // Charger toutes les données pour l'exercice sélectionné
+    const [appros, remisesList, versementsList, balance] = await Promise.all([
+      db.approvisionnements
+        .where('exercice')
+        .equals(exercice)
+        .and((a) => a.mairieId === mairieId)
+        .toArray(),
+      db.remises
+        .where('exercice')
+        .equals(exercice)
+        .and((r) => r.mairieId === mairieId)
+        .toArray(),
+      db.versements
+        .where('exercice')
+        .equals(exercice)
+        .and((v) => v.mairieId === mairieId)
+        .toArray(),
+      db.balancesEntree
+        .where('exercice')
+        .equals(exercice)
+        .and((b) => b.mairieId === mairieId)
+        .first(),
+    ]);
+
+    approvisionnements.value = appros;
+    remises.value = remisesList;
+    versements.value = versementsList;
+    balanceEntree.value = balance ?? null;
+
+    // Calculer le stock actuel
+    calculateStock();
+
+    // Charger les dernières opérations
+    loadDernieresOperations();
+  } catch (error) {
+    console.error('Erreur lors du chargement des données:', error);
+    $q.notify({
+      type: 'negative',
+      message: 'Erreur lors du chargement des données',
+    });
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Générer les options d'années
+const generateYearOptions = async () => {
+  try {
+    // Récupérer les années disponibles dans la base de données
+    const years = new Set<number>();
+
+    const [appros, remisesList, versementsList, balances] = await Promise.all([
+      db.approvisionnements.toArray(),
+      db.remises.toArray(),
+      db.versements.toArray(),
+      db.balancesEntree.toArray(),
+    ]);
+
+    appros.forEach((a) => years.add(a.exercice));
+    remisesList.forEach((r) => years.add(r.exercice));
+    versementsList.forEach((v) => years.add(v.exercice));
+    balances.forEach((b) => years.add(b.exercice));
+
+    // Ajouter l'année courante si elle n'existe pas
+    years.add(currentYear);
+
+    // Convertir en tableau et trier
+    yearOptions.value = Array.from(years).sort((a, b) => b - a);
+  } catch (error) {
+    console.error('Erreur lors de la génération des années:', error);
+    yearOptions.value = [currentYear];
+  }
+};
+
+onMounted(async () => {
+  await generateYearOptions();
+  await loadData();
 });
 </script>
 

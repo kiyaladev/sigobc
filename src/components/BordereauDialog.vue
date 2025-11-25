@@ -114,11 +114,11 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import type { Bordereau } from 'src/database/db';
+import type { BordereauRecette } from 'src/database/db';
 
 interface Props {
   modelValue: boolean;
-  bordereau?: Bordereau | null;
+  bordereau?: BordereauRecette | null;
   isEditing?: boolean;
   mairieOptions: Array<{ label: string; value: number }>;
   nextNumero?: number;
@@ -137,10 +137,10 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean];
-  submit: [form: Partial<Bordereau>];
+  submit: [form: Partial<BordereauRecette>];
 }>();
 
-const localForm = ref<Partial<Bordereau>>({});
+const localForm = ref<Partial<BordereauRecette>>({});
 const localNumeroInput = ref(1);
 
 // Initialiser le formulaire quand la dialog s'ouvre

@@ -134,7 +134,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useQuasar, date } from 'quasar';
-import { db, type Bordereau, type Mairie, type Declaration, type Taxe } from 'src/database/db';
+import {
+  db,
+  type BordereauRecette,
+  type Mairie,
+  type Declaration,
+  type Taxe,
+} from 'src/database/db';
 import { useAuthStore } from 'src/stores/auth-store';
 import FilterBar from 'src/components/FilterBar.vue';
 import DataTable from 'src/components/DataTable.vue';
@@ -143,7 +149,7 @@ import BordereauDialog from 'src/components/BordereauDialog.vue';
 const $q = useQuasar();
 const authStore = useAuthStore();
 
-const bordereaux = ref<Bordereau[]>([]);
+const bordereaux = ref<BordereauRecette[]>([]);
 const mairies = ref<Mairie[]>([]);
 const taxes = ref<Taxe[]>([]);
 const loading = ref(false);
@@ -151,7 +157,7 @@ const nextNumeroBordereau = ref<number>(1);
 const saving = ref(false);
 const dialogVisible = ref(false);
 const isEditing = ref(false);
-const currentBordereau = ref<Bordereau | null>(null);
+const currentBordereau = ref<BordereauRecette | null>(null);
 const search = ref('');
 const filterStatut = ref('');
 const filterMairie = ref<number | null>(null);
@@ -160,7 +166,7 @@ const filterDateFin = ref('');
 const declarationsDialogVisible = ref(false);
 const bordereauDeclarations = ref<Declaration[]>([]);
 const loadingDeclarations = ref(false);
-const selectedBordereau = ref<Bordereau | null>(null);
+const selectedBordereau = ref<BordereauRecette | null>(null);
 
 const statutOptions = ['ouvert', 'ferme'];
 
@@ -281,7 +287,10 @@ function resetFilters() {
 
 async function calculateNextNumeroBordereau() {
   const currentYear = new Date().getFullYear();
-  const bordereauxThisYear = await db.bordereaux.where('annee').equals(currentYear).toArray();
+  const bordereauxThisYear = await db.bordereauxRecette
+    .where('annee')
+    .equals(currentYear)
+    .toArray();
 
   if (bordereauxThisYear.length === 0) {
     nextNumeroBordereau.value = 1;
@@ -319,16 +328,27 @@ function formatDate(dateValue: Date): string {
   return date.formatDate(dateValue, 'DD/MM/YYYY');
 }
 
-async function viewDeclarations(bordereau: Bordereau) {
+async function viewDeclarations(bordereau: BordereauRecette) {
   selectedBordereau.value = bordereau;
   loadingDeclarations.value = true;
   declarationsDialogVisible.value = true;
 
   try {
+    if (!bordereau.id) {
+      bordereauDeclarations.value = [];
+      return;
+    }
     bordereauDeclarations.value = await db.declarations
       .where('bordereauId')
-      .equals(bordereau.id!)
+      .equals(bordereau.id)
       .toArray();
+
+    // Trier les déclarations par date d'encaissement décroissante (plus récent en premier)
+    bordereauDeclarations.value.sort((a, b) => {
+      const dateA = new Date(a.dateEncaissement).getTime();
+      const dateB = new Date(b.dateEncaissement).getTime();
+      return dateB - dateA; // Ordre décroissant
+    });
   } catch (error) {
     console.error('Erreur:', error);
     $q.notify({ type: 'negative', message: 'Erreur lors du chargement des déclarations' });
@@ -346,10 +366,20 @@ async function loadData() {
   loading.value = true;
   try {
     [bordereaux.value, mairies.value, taxes.value] = await Promise.all([
-      db.bordereaux.toArray(),
+      db.bordereauxRecette.toArray(),
       db.mairies.toArray(),
       db.taxes.toArray(),
     ]);
+
+    // Trier les bordereaux par année puis par numéro, ordre décroissant (plus récent en premier)
+    bordereaux.value.sort((a, b) => {
+      // D'abord par année
+      if (a.annee !== b.annee) {
+        return b.annee - a.annee; // Année décroissante
+      }
+      // Puis par numéro si même année
+      return b.numero - a.numero; // Numéro décroissant
+    });
   } catch (error) {
     console.error('Erreur:', error);
     $q.notify({ type: 'negative', message: 'Erreur lors du chargement' });
@@ -358,7 +388,7 @@ async function loadData() {
   }
 }
 
-async function openDialog(bordereau?: Bordereau) {
+async function openDialog(bordereau?: BordereauRecette) {
   isEditing.value = !!bordereau;
   currentBordereau.value = bordereau || null;
   if (!bordereau) {
@@ -367,7 +397,7 @@ async function openDialog(bordereau?: Bordereau) {
   dialogVisible.value = true;
 }
 
-async function onSubmit(formData: Partial<Bordereau>) {
+async function onSubmit(formData: Partial<BordereauRecette>) {
   saving.value = true;
   try {
     const now = new Date();
@@ -377,10 +407,14 @@ async function onSubmit(formData: Partial<Bordereau>) {
     };
 
     if (isEditing.value && formData.id) {
-      await db.bordereaux.update(formData.id, { ...data, updatedAt: now });
+      await db.bordereauxRecette.update(formData.id, { ...data, updatedAt: now });
       $q.notify({ type: 'positive', message: 'Bordereau modifié' });
     } else {
-      await db.bordereaux.add({ ...data, createdAt: now, updatedAt: now } as Bordereau);
+      await db.bordereauxRecette.add({
+        ...data,
+        createdAt: now,
+        updatedAt: now,
+      } as BordereauRecette);
       $q.notify({ type: 'positive', message: 'Bordereau créé' });
     }
     dialogVisible.value = false;
@@ -393,7 +427,7 @@ async function onSubmit(formData: Partial<Bordereau>) {
   }
 }
 
-function confirmDelete(bordereau: Bordereau) {
+function confirmDelete(bordereau: BordereauRecette) {
   $q.dialog({
     title: 'Confirmation',
     message: `Supprimer le bordereau "${bordereau.numero}" ?`,
@@ -402,7 +436,7 @@ function confirmDelete(bordereau: Bordereau) {
   }).onOk(() => {
     void (async () => {
       try {
-        await db.bordereaux.delete(bordereau.id);
+        await db.bordereauxRecette.delete(bordereau.id);
         $q.notify({ type: 'positive', message: 'Bordereau supprimé' });
         await loadData();
       } catch (error) {
@@ -413,14 +447,128 @@ function confirmDelete(bordereau: Bordereau) {
   });
 }
 
-function printBordereau(bordereau: Bordereau) {
-  // Ouvrir la page HTML directement avec l'ID du bordereau
-  window.open(`/bordereau_recouvrements.html?bordereauId=${bordereau.id}`, '_blank');
+async function printBordereau(bordereau: BordereauRecette) {
+  try {
+    // Récupérer la mairie
+    const mairie = mairies.value.find((m) => m.id === bordereau.mairieId);
+
+    // Récupérer toutes les déclarations du bordereau
+    if (!bordereau.id) return;
+    const declarations = await db.declarations.where('bordereauId').equals(bordereau.id).toArray();
+
+    // Récupérer les taxes pour chaque déclaration
+    const declarationsAvecTaxes = await Promise.all(
+      declarations.map(async (decl) => {
+        const taxe = await db.taxes.get(decl.taxeId);
+        return {
+          natureRecette: taxe?.libelle || '',
+          montant: decl.montantRecette,
+          dateEncaissement: date.formatDate(decl.dateEncaissement, 'DD/MM/YYYY'),
+          nomPartieVersante: decl.nomPartieVersante,
+          article: taxe?.code || '',
+        };
+      }),
+    );
+
+    // Ouvrir la page HTML
+    const printWindow = window.open(
+      '/bordereau_recouvrements_v2.html?bordereauId=' + bordereau.id,
+      '_blank',
+    );
+
+    if (printWindow) {
+      printWindow.addEventListener('load', () => {
+        // Envoyer les données via postMessage
+        printWindow.postMessage(
+          {
+            type: 'FILL_BORDEREAU',
+            data: {
+              mairie: mairie?.nom || '',
+              ville: mairie?.ville || 'Vavoua',
+              codeCommune: mairie?.code || '',
+              exercice: bordereau.annee || new Date().getFullYear(),
+              numeroBordereau: formatNumeroBordereau(bordereau.numero, bordereau.annee),
+              numeroSimple: bordereau.numero,
+              dateBordereau: bordereau.dateTransmission
+                ? date.formatDate(bordereau.dateTransmission, 'DD/MM/YYYY')
+                : date.formatDate(new Date(), 'DD/MM/YYYY'),
+              montantTotal: bordereau.montantTotal || 0,
+              declarations: declarationsAvecTaxes,
+            },
+          },
+          '*',
+        );
+      });
+    }
+  } catch (error) {
+    console.error("Erreur lors de l'impression du bordereau:", error);
+    $q.notify({
+      type: 'negative',
+      message: "Erreur lors de l'impression du bordereau",
+    });
+  }
 }
 
-function downloadBordereauPDF(bordereau: Bordereau) {
-  // Ouvrir la page HTML directement avec l'ID du bordereau et auto-print
-  window.open(`/bordereau_recouvrements.html?bordereauId=${bordereau.id}&print=true`, '_blank');
+async function downloadBordereauPDF(bordereau: BordereauRecette) {
+  try {
+    // Récupérer la mairie
+    const mairie = mairies.value.find((m) => m.id === bordereau.mairieId);
+
+    // Récupérer toutes les déclarations du bordereau
+    if (!bordereau.id) return;
+    const declarations = await db.declarations.where('bordereauId').equals(bordereau.id).toArray();
+
+    // Récupérer les taxes pour chaque déclaration
+    const declarationsAvecTaxes = await Promise.all(
+      declarations.map(async (decl) => {
+        const taxe = await db.taxes.get(decl.taxeId);
+        return {
+          natureRecette: taxe?.libelle || '',
+          montant: decl.montantRecette,
+          dateEncaissement: date.formatDate(decl.dateEncaissement, 'DD/MM/YYYY'),
+          nomPartieVersante: decl.nomPartieVersante,
+          article: taxe?.code || '',
+        };
+      }),
+    );
+
+    // Ouvrir la page HTML et lancer l'impression automatiquement
+    const printWindow = window.open(
+      '/bordereau_recouvrements_v2.html?bordereauId=' + bordereau.id,
+      '_blank',
+    );
+
+    if (printWindow) {
+      printWindow.addEventListener('load', () => {
+        // Envoyer les données et demander l'impression
+        printWindow.postMessage(
+          {
+            type: 'FILL_AND_PRINT',
+            data: {
+              mairie: mairie?.nom || '',
+              ville: mairie?.ville || 'Vavoua',
+              codeCommune: mairie?.code || '',
+              exercice: bordereau.annee || new Date().getFullYear(),
+              numeroBordereau: formatNumeroBordereau(bordereau.numero, bordereau.annee),
+              numeroSimple: bordereau.numero,
+              dateBordereau: bordereau.dateTransmission
+                ? date.formatDate(bordereau.dateTransmission, 'DD/MM/YYYY')
+                : date.formatDate(new Date(), 'DD/MM/YYYY'),
+              montantTotal: bordereau.montantTotal || 0,
+              declarations: declarationsAvecTaxes,
+            },
+          },
+          '*',
+        );
+      });
+    }
+  } catch (error) {
+    console.error('Erreur lors du téléchargement PDF:', error);
+    $q.notify({
+      type: 'negative',
+      message: 'Erreur lors du téléchargement PDF',
+    });
+  }
 }
 
 onMounted(() => {

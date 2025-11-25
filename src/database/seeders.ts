@@ -3,11 +3,12 @@ import {
   type Mairie,
   type Taxe,
   type Declaration,
-  type Bordereau,
+  type BordereauRecette,
   type Utilisateur,
   type Approvisionnement,
   type Remise,
   type Versement,
+  type BalanceEntree,
   type Timbres,
   type Rubrique,
   type Chapitre,
@@ -287,7 +288,7 @@ export async function seedBordereaux(
 
   const statutsBordereau: Array<'ouvert' | 'ferme'> = ['ouvert', 'ferme'];
 
-  const bordereaux: Partial<Bordereau>[] = [];
+  const bordereaux: Partial<BordereauRecette>[] = [];
   const now = new Date();
   const startDate = new Date(2023, 0, 1);
 
@@ -299,7 +300,7 @@ export async function seedBordereaux(
 
     const obs = Math.random() > 0.6 ? 'Bordereau conforme' : undefined;
 
-    const bordereau: Partial<Bordereau> = {
+    const bordereau: Partial<BordereauRecette> = {
       personnelId,
       mairieId: randomChoice(mairieIds),
       numero: i + 1,
@@ -318,7 +319,7 @@ export async function seedBordereaux(
     bordereaux.push(bordereau);
   }
 
-  await db.bordereaux.bulkAdd(bordereaux as Bordereau[]);
+  await db.bordereauxRecette.bulkAdd(bordereaux as BordereauRecette[]);
   console.log(`✅ ${count} bordereaux créés`);
   return bordereaux;
 }
@@ -347,11 +348,7 @@ export async function seedApprovisionnements(
       new Date(exercice, 0, 1),
       exercice === 2025 ? now : new Date(exercice, 11, 31),
     );
-    const type =
-      i === 0
-        ? ('initial' as const)
-        : randomChoice(['initial' as const, 'complementaire' as const]);
-
+    const type = 'appro';
     // Générer des quantités aléatoires pour chaque valeur de timbre
     const timbres: Timbres = {
       100: randomAmount(100, 1000),
@@ -371,7 +368,6 @@ export async function seedApprovisionnements(
       timbres[600] * 600 +
       timbres[1000] * 1000;
 
-    const exo = randomAmount(0, 10000);
     const obs =
       Math.random() > 0.7 ? `Approvisionnement ${type} de l'exercice ${exercice}` : undefined;
 
@@ -382,7 +378,6 @@ export async function seedApprovisionnements(
       type,
       timbres,
       total,
-      exo,
       personnelId: randomChoice(personnelIds),
       createdAt: date,
       updatedAt: now,
@@ -504,7 +499,6 @@ export async function seedVersements(
       timbres[600] * 600 +
       timbres[1000] * 1000;
 
-    const exo = randomAmount(0, 5000);
     const obs = Math.random() > 0.7 ? `Versement journalier` : undefined;
 
     const versement: Partial<Versement> = {
@@ -514,7 +508,6 @@ export async function seedVersements(
       numeroVersement,
       timbres,
       total,
-      exo,
       personnelId: randomChoice(personnelIds),
       createdAt: date,
       updatedAt: now,
@@ -530,6 +523,65 @@ export async function seedVersements(
   await db.versements.bulkAdd(versements as unknown as Versement[]);
   console.log(`✅ ${count} versements créés`);
   return versements;
+}
+
+/**
+ * Seeder pour les Balances d'Entrée (App2)
+ */
+export async function seedBalancesEntree(
+  mairieIds: number[],
+  personnelIds: number[],
+  count: number = 5,
+) {
+  console.log(`🌱 Seeding ${count} balances d'entrée...`);
+
+  const balances: Partial<BalanceEntree>[] = [];
+  const now = new Date();
+  const exercices = [2023, 2024, 2025];
+
+  for (let i = 0; i < count; i++) {
+    const exercice = randomChoice(exercices);
+    const date = new Date(exercice, 0, 1); // 1er janvier de l'exercice
+    const type = i === 0 ? 'Balance' : randomChoice(['Balance', 'Balance Entrée', 'Solde Initial']);
+
+    // Générer des quantités aléatoires pour le stock initial
+    const timbres: Timbres = {
+      100: randomAmount(500, 2000),
+      200: randomAmount(400, 1500),
+      300: randomAmount(300, 1000),
+      500: randomAmount(200, 800),
+      600: randomAmount(100, 500),
+      1000: randomAmount(50, 300),
+    };
+
+    // Calculer le total
+    const total =
+      timbres[100] * 100 +
+      timbres[200] * 200 +
+      timbres[300] * 300 +
+      timbres[500] * 500 +
+      timbres[600] * 600 +
+      timbres[1000] * 1000;
+
+    const balance: Partial<BalanceEntree> = {
+      mairieId: randomChoice(mairieIds),
+      exercice,
+      date,
+      type,
+      timbres,
+      total,
+      commentaires: `Stock initial de l'exercice ${exercice}`,
+      personnelId: randomChoice(personnelIds),
+      createdAt: date,
+      updatedAt: now,
+    };
+
+    balances.push(balance);
+  }
+
+  await db.balancesEntree.bulkAdd(balances as unknown as BalanceEntree[]);
+  console.log(`✅ ${count} balances d'entrée créées`);
+  return balances;
 }
 
 /**
@@ -1024,6 +1076,7 @@ export async function runAllSeeders(
     approvisionnements?: number;
     remises?: number;
     versements?: number;
+    balancesEntree?: number;
     // App3
     chapitres?: number;
     previsions?: number;
@@ -1043,6 +1096,7 @@ export async function runAllSeeders(
     approvisionnements = 20,
     remises = 50,
     versements = 60,
+    balancesEntree = 2,
     // App3
     chapitres = 15,
     previsions = 30,
@@ -1058,11 +1112,12 @@ export async function runAllSeeders(
       db.mairies.clear(),
       db.taxes.clear(),
       db.declarations.clear(),
-      db.bordereaux.clear(),
+      db.bordereauxRecette.clear(),
       // App2
       db.approvisionnements.clear(),
       db.remises.clear(),
       db.versements.clear(),
+      db.balancesEntree.clear(),
       // App3
       db.chapitres.clear(),
       db.previsions.clear(),
@@ -1097,8 +1152,11 @@ export async function runAllSeeders(
     // Créer les remises
     await seedRemises(mairieIds, utilisateurIds, remises);
 
-    // Créer les versements
+    //  Créer les versements
     await seedVersements(mairieIds, utilisateurIds, versements);
+
+    // Créer les balances d'entrée
+    await seedBalancesEntree(mairieIds, utilisateurIds, balancesEntree);
 
     // App3 - Gestion des Dépenses
     console.log('\n📦 Seeders App3 - Gestion des Dépenses');

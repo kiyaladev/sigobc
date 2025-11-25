@@ -200,7 +200,13 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, nextTick } from 'vue';
-import { db, type Declaration, type Taxe, type Mairie, type Bordereau } from 'src/database/db';
+import {
+  db,
+  type Declaration,
+  type Taxe,
+  type Mairie,
+  type BordereauRecette,
+} from 'src/database/db';
 import Chart from 'chart.js/auto';
 
 const loading = ref(false);
@@ -211,7 +217,7 @@ const dateFin = ref('');
 const mairies = ref<Mairie[]>([]);
 const declarations = ref<Declaration[]>([]);
 const taxes = ref<Taxe[]>([]);
-const bordereaux = ref<Bordereau[]>([]);
+const bordereaux = ref<BordereauRecette[]>([]);
 
 const statutChartRef = ref<HTMLCanvasElement | null>(null);
 const taxeChartRef = ref<HTMLCanvasElement | null>(null);
@@ -311,7 +317,7 @@ async function loadData() {
       db.declarations.toArray(),
       db.taxes.toArray(),
       db.mairies.toArray(),
-      db.bordereaux.toArray(),
+      db.bordereauxRecette.toArray(),
     ]);
   } catch (error) {
     console.error('Erreur lors du chargement:', error);

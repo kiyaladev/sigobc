@@ -42,14 +42,14 @@ export interface Declaration {
   numeroEncaissement: string; // N° Encaissement
   montantRecette: number; // Montant de la recette
   bordereauId?: number; // ID du Bordereau (optionnel)
-  statut: 'brouillon' | 'validee';
+  statut: 'validee' | 'brouillon';
   observations?: string;
   personnelId: number; // Agent qui a créé la déclaration
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface Bordereau {
+export interface BordereauRecette {
   id?: number;
   numero: number; // Numéro incrémental (1, 2, 3...)
   annee: number; // Année du bordereau
@@ -89,6 +89,7 @@ export interface Timbres {
   500: number;
   600: number;
   1000: number;
+  [key: number]: number; // Index signature pour permettre l'accès par number
 }
 
 export interface Approvisionnement {
@@ -96,10 +97,9 @@ export interface Approvisionnement {
   mairieId: number;
   exercice: number; // Année
   date: Date;
-  type: 'initial' | 'complementaire'; // Type d'approvisionnement
+  type: string; // Type d'approvisionnement (initial, complementaire, etc.)
   timbres: Timbres; // Stock de timbres par valeur
   total: number; // Montant total
-  exo: number; // Exonération
   observations?: string;
   personnelId: number;
   createdAt: Date;
@@ -111,6 +111,7 @@ export interface Remise {
   mairieId: number;
   exercice: number;
   date: Date;
+  type: string; // Type de la remise
   numeroRemise: string; // Numéro de la remise
   timbres: Timbres; // Quantité de timbres reçus
   total: number; // Montant total
@@ -128,8 +129,21 @@ export interface Versement {
   numeroVersement: string; // Numéro du versement
   timbres: Timbres; // Quantité de timbres vendus
   total: number; // Montant total
-  exo: number; // Exonération
   observations?: string;
+  personnelId: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface BalanceEntree {
+  id?: number;
+  mairieId: number;
+  exercice: number; // Année
+  date: Date;
+  type: string; // Type de balance (Balance, Balance Entrée, Solde Initial)
+  timbres: Timbres; // Stock de timbres par valeur
+  total: number; // Montant total du stock
+  commentaires?: string;
   personnelId: number;
   createdAt: Date;
   updatedAt: Date;
@@ -219,12 +233,13 @@ class TresorDatabase extends Dexie {
   mairies!: EntityTable<Mairie, 'id'>;
   taxes!: EntityTable<Taxe, 'id'>;
   declarations!: EntityTable<Declaration, 'id'>;
-  bordereaux!: EntityTable<Bordereau, 'id'>;
+  bordereauxRecette!: EntityTable<BordereauRecette, 'id'>;
   utilisateurs!: EntityTable<Utilisateur, 'id'>;
   // App2 - Gestion de la Trésorerie
   approvisionnements!: EntityTable<Approvisionnement, 'id'>;
   remises!: EntityTable<Remise, 'id'>;
   versements!: EntityTable<Versement, 'id'>;
+  balancesEntree!: EntityTable<BalanceEntree, 'id'>;
   // App3 - Gestion des Dépenses
   chapitres!: EntityTable<Chapitre, 'id'>;
   rubriques!: EntityTable<Rubrique, 'id'>;
@@ -235,17 +250,18 @@ class TresorDatabase extends Dexie {
   constructor() {
     super('TresorDatabase');
 
-    this.version(7).stores({
+    this.version(9).stores({
       mairies: '++id, nom, code, ville',
       taxes: '++id, code, libelle, mairieId, type, actif',
       declarations:
         '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
-      bordereaux: '++id, numero, annee, mairieId, statut, personnelId',
+      bordereauxRecette: '++id, numero, annee, mairieId, statut, personnelId',
       utilisateurs: '++id, username, email, role, mairieId, actif',
       // App2
       approvisionnements: '++id, date, exercice, mairieId, type, personnelId',
       remises: '++id, numeroRemise, date, exercice, mairieId, personnelId',
       versements: '++id, numeroVersement, date, exercice, mairieId, personnelId',
+      balancesEntree: '++id, date, exercice, mairieId, type, personnelId, [exercice+mairieId]',
       // App3
       chapitres: '++id, code, libelle, rubriqueId, mairieId, actif',
       rubriques: '++id, code, libelle, mairieId, actif',

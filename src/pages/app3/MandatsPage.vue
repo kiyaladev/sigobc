@@ -662,25 +662,30 @@ async function saveMandat() {
       chapitreId: formData.value.chapitreId!,
       dateMandat: new Date(formData.value.dateMandat),
       ...(dateFacture ? { dateFacture: new Date(dateFacture) } : {}),
+      ...(formData.value.bordereauMandatId ? { bordereauMandatId: formData.value.bordereauMandatId } : {}),
       mairieId,
       personnelId,
     };
 
     if (editingId.value) {
-      await db.mandats.update(editingId.value, {
+      const updateData = {
         ...data,
         updatedAt: now,
-      });
+      };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await db.mandats.update(editingId.value, updateData as any);
       $q.notify({
         type: 'positive',
         message: 'Mandat modifié avec succès',
       });
     } else {
-      await db.mandats.add({
+      type MandatInsert = Omit<Mandat, 'id'>;
+      const insertData: MandatInsert = {
         ...data,
         createdAt: now,
         updatedAt: now,
-      });
+      } as MandatInsert;
+      await db.mandats.add(insertData);
       $q.notify({
         type: 'positive',
         message: 'Mandat ajouté avec succès',

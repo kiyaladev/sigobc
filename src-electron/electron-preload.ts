@@ -27,3 +27,16 @@
  *   }
  * }
  */
+
+import { contextBridge, ipcRenderer } from 'electron';
+
+contextBridge.exposeInMainWorld('licenseAPI', {
+  getMachineId: () => ipcRenderer.invoke('license:getMachineId'),
+  activateLicense: (licenseKey: string) => ipcRenderer.invoke('license:activate', licenseKey),
+  validateLicense: () => ipcRenderer.invoke('license:validate'),
+  getLicenseInfo: () => ipcRenderer.invoke('license:getInfo'),
+  deactivateLicense: () => ipcRenderer.invoke('license:deactivate'),
+  generateTrialLicense: (companyName: string, email: string) =>
+    ipcRenderer.invoke('license:generateTrial', companyName, email),
+});
+

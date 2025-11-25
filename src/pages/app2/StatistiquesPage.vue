@@ -70,8 +70,21 @@
 
     <!-- Graphiques et analyses -->
     <div class="row q-col-gutter-md">
+      <q-inner-loading :showing="loading">
+        <q-spinner-gears size="50px" color="primary" />
+      </q-inner-loading>
+
+      <!-- Message si aucune donnée -->
+      <div v-if="!loading && stats.stockTotal === 0" class="col-12 text-center q-pa-xl">
+        <q-icon name="bar_chart" size="64px" color="grey-5" />
+        <div class="text-h6 text-grey-6 q-mt-md">Aucune donnée disponible</div>
+        <div class="text-caption text-grey-5">
+          Créez une balance d'entrée ou un approvisionnement pour l'exercice {{ selectedYear }}
+        </div>
+      </div>
+
       <!-- Stock par valeur -->
-      <div class="col-12 col-md-6">
+      <div v-if="!loading && stats.stockTotal > 0" class="col-12 col-md-6">
         <ChartCard
           title="Répartition du Stock par Valeur"
           :chart-config="stockChartConfig"
@@ -80,7 +93,7 @@
       </div>
 
       <!-- Valeur du stock -->
-      <div class="col-12 col-md-6">
+      <div v-if="!loading && stats.stockTotal > 0" class="col-12 col-md-6">
         <ChartCard
           title="Valeur du Stock par Type"
           :chart-config="valeurChartConfig"
@@ -89,7 +102,7 @@
       </div>
 
       <!-- Évolution mensuelle -->
-      <div class="col-12">
+      <div v-if="!loading && stats.stockTotal > 0" class="col-12">
         <ChartCard
           title="Évolution des Opérations"
           :chart-config="evolutionChartConfig"
@@ -99,7 +112,7 @@
       </div>
 
       <!-- Tableau détaillé par type de ticket -->
-      <div class="col-12">
+      <div v-if="!loading && stats.stockTotal > 0" class="col-12">
         <q-card>
           <q-card-section class="bg-accent text-white">
             <div class="text-h6">Détails par Type de Ticket</div>
@@ -167,7 +180,7 @@
       </div>
 
       <!-- Statistiques d'activité -->
-      <div class="col-12 col-md-6">
+      <div v-if="!loading && stats.stockTotal > 0" class="col-12 col-md-6">
         <q-card>
           <q-card-section class="bg-positive text-white">
             <div class="text-h6">Activité de la Période</div>
@@ -242,7 +255,7 @@
       </div>
 
       <!-- Alertes et recommandations -->
-      <div class="col-12 col-md-6">
+      <div v-if="!loading && stats.stockTotal > 0" class="col-12 col-md-6">
         <q-card>
           <q-card-section class="bg-warning text-white">
             <div class="text-h6">Alertes et Recommandations</div>
@@ -283,14 +296,27 @@ import FilterBar from 'src/components/FilterBar.vue';
 import StatisticsCard from 'src/components/StatisticsCard.vue';
 import ChartCard from 'src/components/ChartCard.vue';
 import ExportButtons from 'src/components/ExportButtons.vue';
+import { db } from 'src/database/db';
+import type { Approvisionnement, Remise, Versement, BalanceEntree } from 'src/database/db';
 
 const $q = useQuasar();
+
+// Filtre par année
+const currentYear = new Date().getFullYear();
+const selectedYear = ref(currentYear);
+const yearOptions = ref<number[]>([]);
 
 // Refs
 const loading = ref(false);
 const periodFilter = ref('mois');
 const dateDebut = ref('');
 const dateFin = ref('');
+
+// Données brutes de la base
+const approvisionnements = ref<Approvisionnement[]>([]);
+const remises = ref<Remise[]>([]);
+const versements = ref<Versement[]>([]);
+const balanceEntree = ref<BalanceEntree | null>(null);
 
 // Options de période
 const periodOptions = [
@@ -302,78 +328,181 @@ const periodOptions = [
   { label: 'Personnalisé', value: 'custom' },
 ];
 
-// Données des statistiques
-const stats = ref({
-  stockTotal: 1475,
-  typesTickets: 6,
-  valeurTotale: 682500,
-  approvisionnements: 45,
-  montantAppros: 1250000,
-  versements: 38,
-  montantVersements: 985000,
-  totalEntrees: 2500,
-  totalRemises: 1800,
-  totalVersementsTickets: 1600,
-  tauxRotation: 68,
+// Calcul du stock actuel
+const stockActuel = computed(() => {
+  const valeursTimbre: (100 | 200 | 300 | 500 | 600 | 1000)[] = [100, 200, 300, 500, 600, 1000];
+  const stock: Record<number, number> = {};
+
+  // Initialiser à zéro
+  valeursTimbre.forEach((valeur) => {
+    stock[valeur] = 0;
+  });
+
+  // Ajouter la balance d'entrée
+  if (balanceEntree.value?.timbres) {
+    valeursTimbre.forEach((valeur) => {
+      stock[valeur] = (stock[valeur] ?? 0) + (balanceEntree.value?.timbres[valeur] || 0);
+    });
+  }
+
+  // Ajouter les approvisionnements
+  approvisionnements.value.forEach((appro) => {
+    if (appro?.timbres) {
+      valeursTimbre.forEach((valeur) => {
+        stock[valeur] = (stock[valeur] ?? 0) + (appro.timbres[valeur] || 0);
+      });
+    }
+  });
+
+  // Soustraire les remises
+  remises.value.forEach((remise) => {
+    if (remise?.timbres) {
+      valeursTimbre.forEach((valeur) => {
+        stock[valeur] = (stock[valeur] ?? 0) - (remise.timbres[valeur] || 0);
+      });
+    }
+  });
+
+  // Soustraire les versements
+  versements.value.forEach((versement) => {
+    if (versement?.timbres) {
+      valeursTimbre.forEach((valeur) => {
+        stock[valeur] = (stock[valeur] ?? 0) - (versement.timbres[valeur] || 0);
+      });
+    }
+  });
+
+  return stock;
 });
 
-// Détails par type de ticket
-const detailsTickets = ref([
-  {
-    valeur: 100,
-    stock: 450,
-    valeurStock: 45000,
-    appros: 800,
-    remises: 350,
-    versements: 320,
-    taux: 72,
-  },
-  {
-    valeur: 200,
-    stock: 320,
-    valeurStock: 64000,
-    appros: 600,
-    remises: 280,
-    versements: 250,
-    taux: 65,
-  },
-  {
-    valeur: 300,
-    stock: 280,
-    valeurStock: 84000,
-    appros: 500,
-    remises: 220,
-    versements: 200,
-    taux: 60,
-  },
-  {
-    valeur: 500,
-    stock: 150,
-    valeurStock: 75000,
-    appros: 400,
-    remises: 250,
-    versements: 230,
-    taux: 80,
-  },
-  {
-    valeur: 600,
-    stock: 180,
-    valeurStock: 108000,
-    appros: 350,
-    remises: 170,
-    versements: 160,
-    taux: 58,
-  },
-  {
-    valeur: 1000,
-    stock: 95,
-    valeurStock: 95000,
-    appros: 300,
-    remises: 205,
-    versements: 190,
-    taux: 75,
-  },
-]);
+// Données des statistiques (calculées depuis les vraies données)
+const stats = computed(() => {
+  const valeursTimbre: (100 | 200 | 300 | 500 | 600 | 1000)[] = [100, 200, 300, 500, 600, 1000];
+
+  // Stock total
+  const stockTotal = valeursTimbre.reduce(
+    (sum, valeur) => sum + (stockActuel.value[valeur] || 0),
+    0,
+  );
+
+  // Valeur totale du stock
+  const valeurTotale = valeursTimbre.reduce(
+    (sum, valeur) => sum + (stockActuel.value[valeur] || 0) * valeur,
+    0,
+  );
+
+  // Nombre d'approvisionnements et montant total
+  const nbAppros = approvisionnements.value.length;
+  const montantAppros = approvisionnements.value.reduce((sum, a) => sum + (a.total || 0), 0);
+
+  // Nombre de versements et montant total
+  const nbVersements = versements.value.length;
+  const montantVersements = versements.value.reduce((sum, v) => sum + (v.total || 0), 0);
+
+  // Total des tickets entrés (approvisionnements + balance)
+  let totalEntrees = 0;
+  if (balanceEntree.value?.timbres) {
+    valeursTimbre.forEach((valeur) => {
+      totalEntrees += balanceEntree.value?.timbres[valeur] || 0;
+    });
+  }
+  approvisionnements.value.forEach((appro) => {
+    if (appro?.timbres) {
+      valeursTimbre.forEach((valeur) => {
+        totalEntrees += appro.timbres[valeur] || 0;
+      });
+    }
+  });
+
+  // Total des remises
+  let totalRemises = 0;
+  remises.value.forEach((remise) => {
+    if (remise?.timbres) {
+      valeursTimbre.forEach((valeur) => {
+        totalRemises += remise.timbres[valeur] || 0;
+      });
+    }
+  });
+
+  // Total des versements (tickets)
+  let totalVersementsTickets = 0;
+  versements.value.forEach((versement) => {
+    if (versement?.timbres) {
+      valeursTimbre.forEach((valeur) => {
+        totalVersementsTickets += versement.timbres[valeur] || 0;
+      });
+    }
+  });
+
+  // Taux de rotation (sorties / entrées * 100)
+  const tauxRotation =
+    totalEntrees > 0
+      ? Math.round(((totalRemises + totalVersementsTickets) / totalEntrees) * 100)
+      : 0;
+
+  return {
+    stockTotal,
+    typesTickets: 6,
+    valeurTotale,
+    approvisionnements: nbAppros,
+    montantAppros,
+    versements: nbVersements,
+    montantVersements,
+    totalEntrees,
+    totalRemises,
+    totalVersementsTickets,
+    tauxRotation,
+  };
+});
+
+// Détails par type de ticket (calculés dynamiquement)
+const detailsTickets = computed(() => {
+  const valeursTimbre: (100 | 200 | 300 | 500 | 600 | 1000)[] = [100, 200, 300, 500, 600, 1000];
+
+  return valeursTimbre.map((valeur) => {
+    const stock = stockActuel.value[valeur] || 0;
+    const valeurStock = stock * valeur;
+
+    // Calculer les appros pour cette valeur
+    let appros = 0;
+    approvisionnements.value.forEach((appro) => {
+      if (appro?.timbres) {
+        appros += appro.timbres[valeur] || 0;
+      }
+    });
+
+    // Calculer les remises pour cette valeur
+    let remisesQte = 0;
+    remises.value.forEach((remise) => {
+      if (remise?.timbres) {
+        remisesQte += remise.timbres[valeur] || 0;
+      }
+    });
+
+    // Calculer les versements pour cette valeur
+    let versementsQte = 0;
+    versements.value.forEach((versement) => {
+      if (versement?.timbres) {
+        versementsQte += versement.timbres[valeur] || 0;
+      }
+    });
+
+    // Calculer le taux de rotation pour cette valeur
+    const totalEntrees = appros + (balanceEntree.value?.timbres[valeur] || 0);
+    const totalSorties = remisesQte + versementsQte;
+    const taux = totalEntrees > 0 ? Math.round((totalSorties / totalEntrees) * 100) : 0;
+
+    return {
+      valeur,
+      stock,
+      valeurStock,
+      appros,
+      remises: remisesQte,
+      versements: versementsQte,
+      taux,
+    };
+  });
+});
 
 // Alertes
 const alertes = computed(() => {
@@ -554,6 +683,31 @@ async function loadStatistics() {
   }
 }
 
+// Générer les options d'années
+async function generateYearOptions() {
+  try {
+    const years = new Set<number>();
+
+    const [appros, remisesList, versementsList, balances] = await Promise.all([
+      db.approvisionnements.toArray(),
+      db.remises.toArray(),
+      db.versements.toArray(),
+      db.balancesEntree.toArray(),
+    ]);
+
+    appros.forEach((a) => years.add(a.exercice));
+    remisesList.forEach((r) => years.add(r.exercice));
+    versementsList.forEach((v) => years.add(v.exercice));
+    balances.forEach((b) => years.add(b.exercice));
+
+    years.add(currentYear);
+    yearOptions.value = Array.from(years).sort((a, b) => b - a);
+  } catch (error) {
+    console.error('Erreur lors de la génération des années:', error);
+    yearOptions.value = [currentYear];
+  }
+}
+
 // Configuration des graphiques
 const stockChartConfig = computed<ChartConfiguration>(() => ({
   type: 'doughnut',
@@ -674,9 +828,13 @@ const evolutionChartConfig = computed<ChartConfiguration>(() => ({
 }));
 
 // Lifecycle hooks
-onMounted(() => {
+onMounted(async () => {
   // Initialiser les dates par défaut
   onPeriodChange();
+  // Générer les options d'années
+  await generateYearOptions();
+  // Charger les statistiques
+  await loadStatistics();
 });
 </script>
 

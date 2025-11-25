@@ -29,5 +29,14 @@ yarn-error.log*
 *.njsproj
 *.sln
 
+# License generation tools (DO NOT COMMIT)
+license-generator.ts
+generate-license.simple.js
+package-license-gen.json
+
+# License files
+*.dat
+license.dat
+
 # local .env files
 .env.local*

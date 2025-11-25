@@ -1,7 +1,8 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import path from 'path';
 import os from 'os';
-import { fileURLToPath } from 'url'
+import { fileURLToPath } from 'url';
+import { LicenseManager } from './license-manager';
 
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform();
@@ -9,6 +10,34 @@ const platform = process.platform || os.platform();
 const currentDir = fileURLToPath(new URL('.', import.meta.url));
 
 let mainWindow: BrowserWindow | undefined;
+const licenseManager = LicenseManager.getInstance();
+
+// Configurer les handlers IPC pour la licence
+function setupLicenseHandlers() {
+  ipcMain.handle('license:getMachineId', () => {
+    return licenseManager.getMachineId();
+  });
+
+  ipcMain.handle('license:activate', (_event: Electron.IpcMainInvokeEvent, licenseKey: string) => {
+    return licenseManager.activateLicense(licenseKey);
+  });
+
+  ipcMain.handle('license:validate', () => {
+    return licenseManager.validateLicense();
+  });
+
+  ipcMain.handle('license:getInfo', () => {
+    return licenseManager.getLicenseInfo();
+  });
+
+  ipcMain.handle('license:deactivate', () => {
+    return licenseManager.deactivateLicense();
+  });
+
+  ipcMain.handle('license:generateTrial', (_event: Electron.IpcMainInvokeEvent, companyName: string, email: string) => {
+    return licenseManager.generateTrialLicense(companyName, email);
+  });
+}
 
 async function createWindow() {
   /**
@@ -28,6 +57,36 @@ async function createWindow() {
       ),
     },
   });
+
+  // Vérification de la licence
+  const validation = licenseManager.validateLicense();
+
+  if (!validation.valid && !process.env.DEV) {
+    // En production, afficher un message d'erreur si la licence est invalide
+    const choice = await dialog.showMessageBox(mainWindow, {
+      type: 'warning',
+      title: 'Licence requise',
+      message: validation.error || 'Aucune licence valide trouvée',
+      detail: 'L\'application nécessite une licence valide pour fonctionner. Veuillez activer votre licence.',
+      buttons: ['Activer', 'Quitter'],
+      defaultId: 0,
+      cancelId: 1,
+    });
+
+    if (choice.response === 1) {
+      app.quit();
+      return;
+    }
+  } else if (validation.valid && validation.daysRemaining && validation.daysRemaining <= 30) {
+    // Avertissement si la licence expire bientôt
+    void dialog.showMessageBox(mainWindow, {
+      type: 'info',
+      title: 'Licence expire bientôt',
+      message: `Votre licence expire dans ${validation.daysRemaining} jour(s)`,
+      detail: 'Veuillez renouveler votre licence pour continuer à utiliser l\'application.',
+      buttons: ['OK'],
+    });
+  }
 
   if (process.env.DEV) {
     await mainWindow.loadURL(process.env.APP_URL);
@@ -50,7 +109,10 @@ async function createWindow() {
   });
 }
 
-void app.whenReady().then(createWindow);
+void app.whenReady().then(() => {
+  setupLicenseHandlers();
+  void createWindow();
+});
 
 app.on('window-all-closed', () => {
   if (platform !== 'darwin') {

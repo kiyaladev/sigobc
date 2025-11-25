@@ -7,6 +7,10 @@
           <q-icon name="info" size="16px" color="info" />
           État du stock entre le 1er janvier et une date donnée
         </div>
+        <div class="text-caption text-orange-7 q-mt-xs">
+          <q-icon name="warning" size="16px" color="warning" />
+          <strong>Important :</strong> Une seule balance d'entrée est autorisée par exercice
+        </div>
       </div>
       <div class="col-auto">
         <q-btn color="info" icon="balance" label="Nouvelle Balance" @click="openDialog()" />
@@ -41,6 +45,16 @@
         :pagination="{ rowsPerPage: 10 }"
         binary-state-sort
       >
+        <template v-slot:body-cell-date="props">
+          <q-td :props="props">
+            {{ new Date(props.row.date).toLocaleDateString('fr-FR', {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit'
+            }) }}
+          </q-td>
+        </template>
+
         <template v-slot:body-cell-details="props">
           <q-td :props="props">
             <div class="row q-gutter-xs">
@@ -56,12 +70,6 @@
         <template v-slot:body-cell-total="props">
           <q-td :props="props">
             <strong>{{ formatMontant(props.row.total) }}</strong>
-          </q-td>
-        </template>
-
-        <template v-slot:body-cell-exo="props">
-          <q-td :props="props">
-            {{ formatMontant(props.row.exo) }}
           </q-td>
         </template>
 
@@ -99,10 +107,17 @@
           <div class="text-caption">État du stock à une date précise</div>
         </q-card-section>
 
+        <q-banner v-if="!isEditing" class="bg-orange-1 text-orange-9">
+          <template v-slot:avatar>
+            <q-icon name="warning" color="warning" />
+          </template>
+          <strong>Attention :</strong> Une seule balance d'entrée est autorisée par exercice. Si une balance existe déjà pour cet exercice, la création sera refusée.
+        </q-banner>
+
         <q-card-section>
           <q-form @submit="onSubmit" class="q-gutter-md">
             <div class="row q-col-gutter-md">
-              <div class="col-12 col-sm-6">
+              <div class="col-12 col-sm-4">
                 <q-select
                   v-model="form.type"
                   filled
@@ -113,14 +128,30 @@
                 />
               </div>
 
-              <div class="col-12 col-sm-6">
+              <div class="col-12 col-sm-4">
                 <q-input
-                  v-model="form.date"
+                  :model-value="form.date ? new Date(form.date).toISOString().split('T')[0] : ''"
+                  @update:model-value="(val: string | number | null) => {
+                    if (val && typeof val === 'string') {
+                      form.date = new Date(val);
+                    }
+                  }"
                   filled
                   type="date"
                   label="Date d'opération *"
                   lazy-rules
                   :rules="[(val) => !!val || 'La date est requise']"
+                />
+              </div>
+
+              <div class="col-12 col-sm-4">
+                <q-input
+                  v-model.number="form.exercice"
+                  filled
+                  type="number"
+                  label="Exercice"
+                  min="0"
+                  dense
                 />
               </div>
 
@@ -136,7 +167,7 @@
                     :key="valeur"
                   >
                     <q-input
-                      v-model.number="form.timbres[valeur]"
+                      v-model.number="form.timbres![valeur]"
                       filled
                       type="number"
                       :label="`t_${valeur}`"
@@ -161,24 +192,13 @@
                         <div class="text-subtitle2 text-grey-7">Total Stock</div>
                       </div>
                       <div class="col-auto">
-                        <div class="text-h6 text-info">{{ formatMontant(form.total) }}</div>
+                        <div class="text-h6 text-info">{{ formatMontant(form.total || 0) }}</div>
                       </div>
                     </div>
                   </q-card-section>
                 </q-card>
               </div>
 
-              <!-- EXO (Exonération) -->
-              <div class="col-12">
-                <q-input
-                  v-model.number="form.exo"
-                  filled
-                  type="number"
-                  label="EXO (Exonération)"
-                  min="0"
-                  dense
-                />
-              </div>
 
               <!-- Commentaires -->
               <div class="col-12">
@@ -206,20 +226,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
-
-interface Timbres {
-  [key: number]: number;
-}
-
-interface BalanceEntree {
-  id?: number;
-  type: string;
-  date: string;
-  timbres: Timbres;
-  total: number;
-  exo: number;
-  commentaires: string;
-}
+import { db, type BalanceEntree } from 'src/database/db';
 
 const $q = useQuasar();
 
@@ -232,31 +239,13 @@ const loading = ref(false);
 const saving = ref(false);
 const dialogVisible = ref(false);
 const isEditing = ref(false);
+const editingId = ref<number | undefined>(undefined);
 
-const balances = ref<BalanceEntree[]>([
-  {
-    id: 1,
-    type: 'Balance Entrée',
-    date: '2025-11-07',
-    timbres: { 100: 500, 200: 400, 300: 350, 500: 250, 600: 200, 1000: 150 },
-    total: 685000,
-    exo: 0,
-    commentaires: "Balance d'ouverture journalière",
-  },
-  {
-    id: 2,
-    type: 'Solde Initial',
-    date: '2025-11-01',
-    timbres: { 100: 1000, 200: 800, 300: 600, 500: 400, 600: 300, 1000: 200 },
-    total: 1240000,
-    exo: 0,
-    commentaires: 'Solde initial du mois',
-  },
-]);
+const balances = ref<BalanceEntree[]>([]);
 
-const form = ref<BalanceEntree>({
+const form = ref<Partial<BalanceEntree>>({
   type: '',
-  date: new Date().toISOString().split('T')[0] as string,
+  date: new Date(),
   timbres: {
     100: 0,
     200: 0,
@@ -266,7 +255,7 @@ const form = ref<BalanceEntree>({
     1000: 0,
   },
   total: 0,
-  exo: 0,
+  exercice: new Date().getFullYear(),
   commentaires: '',
 });
 
@@ -275,9 +264,24 @@ const columns = [
   { name: 'type', label: 'Type', field: 'type', align: 'left' as const, sortable: true },
   { name: 'details', label: 'Détails', field: 'timbres', align: 'left' as const },
   { name: 'total', label: 'Total', field: 'total', align: 'right' as const, sortable: true },
-  { name: 'exo', label: 'EXO', field: 'exo', align: 'right' as const, sortable: true },
   { name: 'actions', label: 'Actions', field: 'actions', align: 'center' as const },
 ];
+
+// Charger les données depuis la base
+async function loadData() {
+  loading.value = true;
+  try {
+    balances.value = await db.balancesEntree.toArray();
+  } catch (error) {
+    console.error('Erreur lors du chargement:', error);
+    $q.notify({
+      type: 'negative',
+      message: 'Erreur lors du chargement des données',
+    });
+  } finally {
+    loading.value = false;
+  }
+}
 
 const filteredBalances = computed(() => {
   let result = balances.value;
@@ -287,12 +291,16 @@ const filteredBalances = computed(() => {
     result = result.filter(
       (b) =>
         b.type.toLowerCase().includes(searchLower) ||
-        b.commentaires.toLowerCase().includes(searchLower),
+        (b.commentaires && b.commentaires.toLowerCase().includes(searchLower)),
     );
   }
 
   if (filterDate.value) {
-    result = result.filter((b) => b.date === filterDate.value);
+    const filterDateStr = new Date(filterDate.value).toISOString().split('T')[0];
+    result = result.filter((b) => {
+      const dateStr = new Date(b.date).toISOString().split('T')[0];
+      return dateStr === filterDateStr;
+    });
   }
 
   return result;
@@ -308,22 +316,31 @@ const formatMontant = (montant: number) => {
 
 const calculateTotal = () => {
   let total = 0;
-  for (const valeur of valeursTimbre) {
-    const quantite = form.value.timbres[valeur] || 0;
-    total += valeur * quantite;
+  if (form.value.timbres) {
+    for (const valeur of valeursTimbre) {
+      const quantite = form.value.timbres[valeur] || 0;
+      total += valeur * quantite;
+    }
   }
   form.value.total = total;
 };
 
 const openDialog = (balance?: BalanceEntree) => {
-  if (balance) {
+  if (balance && balance.id) {
     isEditing.value = true;
-    form.value = { ...balance };
+    editingId.value = balance.id;
+    // Cloner proprement l'objet avec de nouvelles instances de Date
+    form.value = {
+      ...balance,
+      date: new Date(balance.date),
+      timbres: { ...balance.timbres },
+    };
   } else {
     isEditing.value = false;
+    editingId.value = undefined;
     form.value = {
       type: '',
-      date: new Date().toISOString().split('T')[0] as string,
+      date: new Date(),
       timbres: {
         100: 0,
         200: 0,
@@ -333,7 +350,7 @@ const openDialog = (balance?: BalanceEntree) => {
         1000: 0,
       },
       total: 0,
-      exo: 0,
+      exercice: new Date().getFullYear(),
       commentaires: '',
     };
   }
@@ -343,20 +360,56 @@ const openDialog = (balance?: BalanceEntree) => {
 const onSubmit = async () => {
   saving.value = true;
   try {
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    const now = new Date();
+    const mairieId = 1; // À adapter selon l'utilisateur connecté
+    const personnelId = 1; // À adapter selon l'utilisateur connecté
 
-    if (isEditing.value) {
-      const index = balances.value.findIndex((b) => b.id === form.value.id);
-      if (index !== -1) {
-        balances.value[index] = { ...form.value };
-      }
+    // S'assurer que la date est un nouvel objet Date pour éviter les problèmes de clonage
+    const dateValue = form.value.date ? new Date(form.value.date) : now;
+
+    const exerciceValue = form.value.exercice || new Date().getFullYear();
+
+    // Vérifier qu'il n'existe pas déjà une balance d'entrée pour cet exercice
+    const existingBalance = await db.balancesEntree
+      .where('exercice')
+      .equals(exerciceValue)
+      .and((balance) => balance.mairieId === mairieId)
+      .first();
+
+    if (existingBalance && (!isEditing.value || existingBalance.id !== editingId.value)) {
+      $q.notify({
+        type: 'warning',
+        message: `Une balance d'entrée existe déjà pour l'exercice ${exerciceValue}. Il ne peut y avoir qu'une seule balance d'entrée par exercice.`,
+        timeout: 3000,
+      });
+      saving.value = false;
+      return;
+    }
+
+    const data = {
+      mairieId,
+      exercice: exerciceValue,
+      date: dateValue,
+      type: form.value.type || '',
+      timbres: { ...form.value.timbres! }, // Cloner l'objet timbres
+      total: form.value.total || 0,
+      commentaires: form.value.commentaires || '',
+      personnelId,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    if (isEditing.value && editingId.value) {
+      await db.balancesEntree.update(editingId.value, {
+        ...data,
+        updatedAt: now,
+      });
       $q.notify({
         type: 'positive',
         message: 'Balance modifiée avec succès',
       });
     } else {
-      const newId = Math.max(...balances.value.map((b) => b.id || 0)) + 1;
-      balances.value.unshift({ ...form.value, id: newId });
+      await db.balancesEntree.add(data);
       $q.notify({
         type: 'positive',
         message: 'Balance ajoutée avec succès',
@@ -364,7 +417,9 @@ const onSubmit = async () => {
     }
 
     dialogVisible.value = false;
-  } catch {
+    await loadData();
+  } catch (error) {
+    console.error('Erreur:', error);
     $q.notify({
       type: 'negative',
       message: "Erreur lors de l'enregistrement",
@@ -375,14 +430,19 @@ const onSubmit = async () => {
 };
 
 const viewDetails = (balance: BalanceEntree) => {
+  const dateFormatted = new Date(balance.date).toLocaleDateString('fr-FR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+
   $q.dialog({
     title: 'Détails de la balance',
     message: `
-      Date: ${balance.date}
-      Type: ${balance.type}
-      Total: ${formatMontant(balance.total)}
-      EXO: ${formatMontant(balance.exo)}
-      Commentaires: ${balance.commentaires}
+      <div><strong>Date:</strong> ${dateFormatted}</div>
+      <div><strong>Type:</strong> ${balance.type}</div>
+      <div><strong>Total:</strong> ${formatMontant(balance.total)}</div>
+      <div><strong>Commentaires:</strong> ${balance.commentaires || 'Aucun'}</div>
     `,
     html: true,
   });
@@ -395,18 +455,28 @@ const confirmDelete = (balance: BalanceEntree) => {
     cancel: true,
     persistent: true,
   }).onOk(() => {
-    const index = balances.value.findIndex((b) => b.id === balance.id);
-    if (index !== -1) {
-      balances.value.splice(index, 1);
-      $q.notify({
-        type: 'positive',
-        message: 'Balance supprimée avec succès',
-      });
-    }
+    void (async () => {
+      try {
+        if (balance.id) {
+          await db.balancesEntree.delete(balance.id);
+          $q.notify({
+            type: 'positive',
+            message: 'Balance supprimée avec succès',
+          });
+          await loadData();
+        }
+      } catch (error) {
+        console.error('Erreur:', error);
+        $q.notify({
+          type: 'negative',
+          message: 'Erreur lors de la suppression',
+        });
+      }
+    })();
   });
 };
 
 onMounted(() => {
-  // Charger les données depuis la base de données
+  void loadData();
 });
 </script>

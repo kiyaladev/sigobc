@@ -225,7 +225,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
-import { db, type Declaration, type Bordereau } from 'src/database/db';
+import { db, type Declaration, type BordereauRecette } from 'src/database/db';
 import { date } from 'quasar';
 
 const stats = ref({
@@ -236,7 +236,7 @@ const stats = ref({
 });
 
 const recentDeclarations = ref<Declaration[]>([]);
-const openBordereaux = ref<Bordereau[]>([]);
+const openBordereaux = ref<BordereauRecette[]>([]);
 
 // Cartes de statistiques avec animations
 const statsCards = computed(() => [
@@ -262,8 +262,8 @@ const statsCards = computed(() => [
     progress: 0.6,
   },
   {
-    value: formatMontant(stats.value.montantTotal),
-    label: 'Montant Total',
+    value: stats.value.montantTotal,
+    label: 'Montant Total (CFA)',
     icon: 'payments',
     color: 'purple',
     progress: 0.9,
@@ -272,7 +272,7 @@ const statsCards = computed(() => [
 
 // Actions rapides
 const quickActions = [
-  { label: 'Taxes', icon: 'calculate', color: 'accent', route: '/taxes' },
+  { label: 'Taxes', icon: 'calculate', color: 'grey', route: '/taxes' },
   { label: 'Déclarations', icon: 'description', color: 'positive', route: '/declarations' },
   { label: 'Bordereaux', icon: 'receipt_long', color: 'warning', route: '/bordereaux' },
   { label: 'Statistiques', icon: 'bar_chart', color: 'info', route: '/statistiques' },
@@ -304,7 +304,7 @@ async function loadStats() {
   try {
     stats.value.totalMairies = await db.mairies.count();
     stats.value.totalDeclarations = await db.declarations.count();
-    stats.value.totalBordereaux = await db.bordereaux.count();
+    stats.value.totalBordereaux = await db.bordereauxRecette.count();
 
     const declarations = await db.declarations.toArray();
     stats.value.montantTotal = declarations.reduce((sum, d) => sum + (d.montantRecette || 0), 0);
@@ -318,7 +318,11 @@ async function loadStats() {
 
     console.log('Déclarations récentes:', recentDeclarations.value.length);
 
-    openBordereaux.value = await db.bordereaux.where('statut').equals('ouvert').limit(5).toArray();
+    openBordereaux.value = await db.bordereauxRecette
+      .where('statut')
+      .equals('ouvert')
+      .limit(5)
+      .toArray();
 
     console.log('Bordereaux ouverts:', openBordereaux.value.length);
   } catch (error) {

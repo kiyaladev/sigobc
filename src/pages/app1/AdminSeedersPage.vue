@@ -295,22 +295,23 @@ const selectedApp = ref('all');
 
 const fullSeederOptions = ref({
   // Commun
-  utilisateurs: 10,
-  mairies: 15,
+  utilisateurs: 5,
+  mairies: 1,
   // App1
   taxes: 25,
   declarations: 100,
-  bordereaux: 80,
+  bordereaux: 12,
   // App2
   approvisionnements: 20,
   remises: 50,
   versements: 60,
+  balancesEntree: 5,
   // App3
   rubriques: 8,
   chapitres: 47,
-  previsions: 30,
+  previsions: 10,
   mandats: 100,
-  bordereauMandats: 20,
+  bordereauMandats: 12,
 });
 
 const tables = ref([
@@ -361,6 +362,13 @@ const tables = ref([
     count: 60,
     app: 'app2',
   },
+  {
+    name: 'balancesEntree',
+    label: 'Balances Entrée',
+    description: 'Stock initial de timbres par exercice',
+    count: 5,
+    app: 'app2',
+  },
   // App3 - Gestion des Dépenses
   {
     name: 'rubriques',
@@ -406,6 +414,7 @@ const stats = ref([
   { label: 'Approvisionnements', count: 0, app: 'app2' },
   { label: 'Remises', count: 0, app: 'app2' },
   { label: 'Versements', count: 0, app: 'app2' },
+  { label: 'Balances Entrée', count: 0, app: 'app2' },
   // App3
   { label: 'Rubriques', count: 0, app: 'app3' },
   { label: 'Chapitres', count: 0, app: 'app3' },
@@ -478,15 +487,17 @@ async function loadStats() {
       previsions,
       mandats,
       bordereauMandats,
+      balancesEntree,
     ] = await Promise.all([
       db.utilisateurs.count(),
       db.mairies.count(),
       db.taxes.count(),
       db.declarations.count(),
-      db.bordereaux.count(),
+      db.bordereauxRecette.count(),
       db.approvisionnements.count(),
       db.remises.count(),
       db.versements.count(),
+      db.balancesEntree.count(),
       db.rubriques.count(),
       db.chapitres.count(),
       db.previsions.count(),
@@ -505,12 +516,13 @@ async function loadStats() {
     stats.value[5]!.count = approvisionnements;
     stats.value[6]!.count = remises;
     stats.value[7]!.count = versements;
+    stats.value[8]!.count = balancesEntree;
     // App3
-    stats.value[8]!.count = rubriques;
-    stats.value[9]!.count = chapitres;
-    stats.value[10]!.count = previsions;
-    stats.value[11]!.count = mandats;
-    stats.value[12]!.count = bordereauMandats;
+    stats.value[9]!.count = rubriques;
+    stats.value[10]!.count = chapitres;
+    stats.value[11]!.count = previsions;
+    stats.value[12]!.count = mandats;
+    stats.value[13]!.count = bordereauMandats;
   } catch (error) {
     console.error('Erreur lors du chargement des statistiques:', error);
   }
@@ -631,10 +643,11 @@ function confirmClearAll() {
           db.mairies.clear(),
           db.taxes.clear(),
           db.declarations.clear(),
-          db.bordereaux.clear(),
+          db.bordereauxRecette.clear(),
           db.approvisionnements.clear(),
           db.remises.clear(),
           db.versements.clear(),
+          db.balancesEntree.clear(),
           db.rubriques.clear(),
           db.chapitres.clear(),
           db.previsions.clear(),
@@ -678,15 +691,17 @@ async function exportDatabase() {
       previsions,
       mandats,
       bordereauMandats,
+      balancesEntree,
     ] = await Promise.all([
       db.utilisateurs.toArray(),
       db.mairies.toArray(),
       db.taxes.toArray(),
       db.declarations.toArray(),
-      db.bordereaux.toArray(),
+      db.bordereauxRecette.toArray(),
       db.approvisionnements.toArray(),
       db.remises.toArray(),
       db.versements.toArray(),
+      db.balancesEntree.toArray(),
       db.rubriques.toArray(),
       db.chapitres.toArray(),
       db.previsions.toArray(),
@@ -707,6 +722,7 @@ async function exportDatabase() {
         approvisionnements,
         remises,
         versements,
+        balancesEntree,
         rubriques,
         chapitres,
         previsions,
@@ -781,10 +797,11 @@ function importDatabase() {
                 db.mairies.clear(),
                 db.taxes.clear(),
                 db.declarations.clear(),
-                db.bordereaux.clear(),
+                db.bordereauxRecette.clear(),
                 db.approvisionnements.clear(),
                 db.remises.clear(),
                 db.versements.clear(),
+                db.balancesEntree.clear(),
                 db.rubriques.clear(),
                 db.chapitres.clear(),
                 db.previsions.clear(),
@@ -806,7 +823,7 @@ function importDatabase() {
                 await db.declarations.bulkAdd(backup.data.declarations);
               }
               if (backup.data.bordereaux?.length) {
-                await db.bordereaux.bulkAdd(backup.data.bordereaux);
+                await db.bordereauxRecette.bulkAdd(backup.data.bordereaux);
               }
               if (backup.data.approvisionnements?.length) {
                 await db.approvisionnements.bulkAdd(backup.data.approvisionnements);
@@ -816,6 +833,9 @@ function importDatabase() {
               }
               if (backup.data.versements?.length) {
                 await db.versements.bulkAdd(backup.data.versements);
+              }
+              if (backup.data.balancesEntree?.length) {
+                await db.balancesEntree.bulkAdd(backup.data.balancesEntree);
               }
               if (backup.data.rubriques?.length) {
                 await db.rubriques.bulkAdd(backup.data.rubriques);

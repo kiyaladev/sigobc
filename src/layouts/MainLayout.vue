@@ -46,7 +46,7 @@
 
               <q-separator class="q-my-sm" />
 
-              <q-item clickable v-close-popup @click="$router.push('/profile')" class="menu-item">
+              <q-item clickable v-close-popup @click="router.push('/profile')" class="menu-item">
                 <q-item-section avatar>
                   <q-icon name="person" color="primary" />
                 </q-item-section>
@@ -61,6 +61,28 @@
                 </q-item-section>
                 <q-item-section>
                   <q-item-label>Paramètres</q-item-label>
+                </q-item-section>
+              </q-item>
+
+              <q-item clickable v-close-popup @click="openLicenseDialog" class="menu-item">
+                <q-item-section avatar>
+                  <q-icon name="verified" :color="licenseStore.isLicensed ? 'positive' : 'warning'" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>
+                    Licence
+                    <q-chip
+                      v-if="licenseStore.licenseType"
+                      size="sm"
+                      dense
+                      class="q-ml-xs"
+                    >
+                      {{ licenseStore.licenseType }}
+                    </q-chip>
+                  </q-item-label>
+                  <q-item-label caption v-if="licenseStore.daysRemaining">
+                    {{ licenseStore.daysRemaining }} jours restants
+                  </q-item-label>
                 </q-item-section>
               </q-item>
 
@@ -193,6 +215,21 @@
           <q-item
             clickable
             v-ripple
+            to="/app2/balance-entree"
+            class="nav-item q-mb-xs"
+            active-class="nav-item-active"
+          >
+            <q-item-section avatar>
+              <q-icon name="balance" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Balance d'Entrée</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item
+            clickable
+            v-ripple
             to="/app2/approvisionnements"
             class="nav-item q-mb-xs"
             active-class="nav-item-active"
@@ -235,20 +272,7 @@
             </q-item-section>
           </q-item>
 
-          <q-item
-            clickable
-            v-ripple
-            to="/app2/balance-entree"
-            class="nav-item q-mb-xs"
-            active-class="nav-item-active"
-          >
-            <q-item-section avatar>
-              <q-icon name="balance" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>Balance d'Entrée</q-item-label>
-            </q-item-section>
-          </q-item>
+
 
           <q-item
             clickable
@@ -476,24 +500,63 @@
         </transition>
       </router-view>
     </q-page-container>
+
+    <!-- Dialog de gestion de licence -->
+    <LicenseDialog
+      v-model="showLicenseDialog"
+      @close="showLicenseDialog = false"
+      @activated="licenseStore.checkLicense()"
+    />
   </q-layout>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useAuthStore } from 'src/stores/auth-store';
+import { useLicenseStore } from 'src/stores/license-store';
 import ThemeToggle from 'src/components/ThemeToggle.vue';
+import LicenseDialog from 'src/components/LicenseDialog.vue';
 
 const router = useRouter();
 const $q = useQuasar();
 const authStore = useAuthStore();
+const licenseStore = useLicenseStore();
 
 const leftDrawerOpen = ref(false);
+const showLicenseDialog = ref(false);
+
+onMounted(async () => {
+  // Vérifier la licence au démarrage
+  await licenseStore.checkLicense();
+
+  // Afficher un avertissement si la licence expire bientôt
+  if (licenseStore.isExpiringSoon && licenseStore.daysRemaining) {
+    $q.notify({
+      type: 'warning',
+      message: `Votre licence expire dans ${licenseStore.daysRemaining} jour(s)`,
+      caption: 'Veuillez renouveler votre licence',
+      timeout: 5000,
+      actions: [
+        {
+          label: 'Voir',
+          color: 'white',
+          handler: () => {
+            showLicenseDialog.value = true;
+          },
+        },
+      ],
+    });
+  }
+});
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
+}
+
+function openLicenseDialog() {
+  showLicenseDialog.value = true;
 }
 
 function onLogout() {

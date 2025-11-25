@@ -217,7 +217,7 @@ async function loadStats() {
       db.mairies.count(),
       db.taxes.count(),
       db.declarations.count(),
-      db.bordereaux.count(),
+      db.bordereauxRecette.count(),
     ]);
 
     stats.value = {
@@ -271,7 +271,7 @@ async function exportDatabase() {
       db.mairies.toArray(),
       db.taxes.toArray(),
       db.declarations.toArray(),
-      db.bordereaux.toArray(),
+      db.bordereauxRecette.toArray(),
     ]);
 
     // Créer l'objet de sauvegarde
@@ -389,7 +389,7 @@ function importDatabase() {
                   db.mairies.clear(),
                   db.taxes.clear(),
                   db.declarations.clear(),
-                  db.bordereaux.clear(),
+                  db.bordereauxRecette.clear(),
                 ]);
 
                 // Restaurer les données
@@ -411,7 +411,7 @@ function importDatabase() {
                   restored += backup.data.declarations.length;
                 }
                 if (backup.data.bordereaux?.length) {
-                  await db.bordereaux.bulkAdd(backup.data.bordereaux);
+                  await db.bordereauxRecette.bulkAdd(backup.data.bordereaux);
                   restored += backup.data.bordereaux.length;
                 }
 
