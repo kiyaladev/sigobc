@@ -1,526 +1,591 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Déclaration de Recettes - A4</title>
     <style>
-        /* Configuration générale pour l'impression A4 */
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+      /* Configuration générale pour l'impression A4 */
+      @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
-        :root {
-            --bg-color: #ffffff;
-            --text-color: #1a1a1a;
-            --line-color: #333;
-            --dotted-color: #555;
-        }
+      :root {
+        --bg-color: #ffffff;
+        --text-color: #1a1a1a;
+        --line-color: #333;
+        --dotted-color: #555;
+      }
 
-        * {
-            box-sizing: border-box;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
+      * {
+        box-sizing: border-box;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
 
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #f0f0f0;
+        font-family: 'Roboto', Helvetica, Arial, sans-serif;
+        font-size: 10pt;
+        color: var(--text-color);
+      }
+
+      .page {
+        width: 210mm;
+        min-height: 297mm;
+        padding: 5mm;
+        margin: 10px auto;
+        background: white;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        position: relative;
+      }
+
+      .receipt-container {
+        min-height: 48%;
+        display: flex;
+        flex-direction: column;
+        padding-bottom: 2mm;
+        margin-bottom: 5mm;
+      }
+
+      .cut-line {
+        width: 100%;
+        border-top: 1px dashed #999;
+        margin: 5mm 0 10mm 0;
+        position: relative;
+        flex-shrink: 0;
+      }
+      .cut-line::after {
+        content: '✂';
+        position: absolute;
+        left: -15px;
+        top: -10px;
+        font-size: 14px;
+        color: #999;
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 10px;
+      }
+
+      .header-left {
+        width: 30%;
+        font-size: 0.85em;
+      }
+
+      .header-center {
+        width: 35%;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-left: 1px solid grey;
+        border-right: 1px solid grey;
+      }
+
+      .header-center h1 {
+        margin: 0;
+        font-size: 1.4em;
+        font-weight: 700;
+        line-height: 1.3;
+      }
+
+      .header-right {
+        width: 30%;
+        font-size: 0.85em;
+      }
+
+      .field-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 5px;
+      }
+
+      .field-label {
+        font-size: 0.9em;
+        font-weight: 500;
+        color: #444;
+        margin-right: 5px;
+        white-space: nowrap;
+      }
+
+      .field-value {
+        flex: 1;
+        padding: 2px 5px;
+        min-height: 18px;
+        border-bottom: 1px dotted var(--dotted-color);
+        font-size: 0.95em;
+      }
+
+      .field-value.filled {
+        font-weight: 500;
+        color: var(--text-color);
+        border-bottom: none;
+        background-color: #f9f9f9;
+        padding: 3px 6px;
+        border-radius: 2px;
+      }
+
+      .field-value.right-align {
+        text-align: right;
+      }
+
+      .body-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .body-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 5px;
+      }
+
+      .money-text {
+        font-style: italic;
+        color: #1565c0;
+        font-weight: 500;
+      }
+
+      .highlight-bg {
+        background-color: #e3f2fd !important;
+        font-weight: 700;
+        font-size: 1.05em;
+        color: #1565c0;
+      }
+
+      .footer {
+        margin-top: 15px;
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+      }
+
+      .footer-col {
+        flex: 1;
+      }
+
+      .signature-box {
+        margin-top: 30px;
+        text-align: center;
+        font-weight: 500;
+        font-size: 0.9em;
+        padding-top: 40px;
+        border-top: 1px solid #aaa;
+      }
+
+      .meta-footer {
+        margin-top: auto;
+        padding-top: 5px;
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.75em;
+        color: #666;
+        font-style: italic;
+      }
+
+      @media print {
         body {
-            margin: 0;
-            padding: 0;
-            background-color: #f0f0f0;
-            font-family: 'Roboto', Helvetica, Arial, sans-serif;
-            font-size: 10pt;
-            color: var(--text-color);
+          background-color: white;
         }
-
         .page {
-            width: 210mm;
-            min-height: 297mm;
-            padding: 5mm;
-            margin: 10px auto;
-            background: white;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-
-        .receipt-container {
-            min-height: 48%;
-            display: flex;
-            flex-direction: column;
-            padding-bottom: 2mm;
-            margin-bottom: 5mm;
-        }
-
-        .cut-line {
-            width: 100%;
-            border-top: 1px dashed #999;
-            margin: 5mm 0 10mm 0;
-            position: relative;
-            flex-shrink: 0;
+          width: 210mm;
+          height: 297mm;
+          margin: 0;
+          padding: 5mm;
+          box-shadow: none;
         }
         .cut-line::after {
-            content: '✂';
-            position: absolute;
-            left: -15px;
-            top: -10px;
-            font-size: 14px;
-            color: #999;
+          color: #999;
         }
+      }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 15px;
-            border-bottom: 1px solid #ccc;
-            padding-bottom: 10px;
-        }
-
-        .header-left {
-            width: 30%;
-            font-size: 0.85em;
-        }
-
-        .header-center {
-            width: 35%;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-left: 1px solid grey;
-            border-right: 1px solid grey;
-        }
-
-        .header-center h1 {
-            margin: 0;
-            font-size: 1.4em;
-            font-weight: 700;
-            line-height: 1.3;
-        }
-
-        .header-right {
-            width: 30%;
-            font-size: 0.85em;
-        }
-
-        .field-row {
-            display: flex;
-            align-items: center;
-            margin-bottom: 5px;
-        }
-
-        .field-label {
-            font-size: 0.9em;
-            font-weight: 500;
-            color: #444;
-            margin-right: 5px;
-            white-space: nowrap;
-        }
-
-        .field-value {
-            flex: 1;
-            padding: 2px 5px;
-            min-height: 18px;
-            border-bottom: 1px dotted var(--dotted-color);
-            font-size: 0.95em;
-        }
-
-        .field-value.filled {
-            font-weight: 500;
-            color: var(--text-color);
-            border-bottom: none;
-            background-color: #f9f9f9;
-            padding: 3px 6px;
-            border-radius: 2px;
-        }
-
-        .field-value.right-align {
-            text-align: right;
-        }
-
-        .body-section {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .body-row {
-            display: flex;
-            align-items: center;
-            margin-bottom: 5px;
-        }
-
-        .money-text {
-            font-style: italic;
-            color: #1565C0;
-            font-weight: 500;
-        }
-
-        .highlight-bg {
-            background-color: #E3F2FD !important;
-            font-weight: 700;
-            font-size: 1.05em;
-            color: #1565C0;
-        }
-
-        .footer {
-            margin-top: 15px;
-            display: flex;
-            justify-content: space-between;
-            gap: 20px;
-        }
-
-        .footer-col {
-            flex: 1;
-        }
-
-        .signature-box {
-            margin-top: 30px;
-            text-align: center;
-            font-weight: 500;
-            font-size: 0.9em;
-            padding-top: 40px;
-            border-top: 1px solid #aaa;
-        }
-
-        .meta-footer {
-            margin-top: auto;
-            padding-top: 5px;
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.75em;
-            color: #666;
-            font-style: italic;
-        }
-
-        @media print {
-            body {
-                background-color: white;
-            }
-            .page {
-                width: 210mm;
-                height: 297mm;
-                margin: 0;
-                padding: 5mm;
-                box-shadow: none;
-            }
-            .cut-line::after {
-                color: #999;
-            }
-        }
-
-        @page {
-            size: A4;
-            margin: 0;
-        }
+      @page {
+        size: A4;
+        margin: 0;
+      }
     </style>
-</head>
-<body>
-
-<div class="page">
-    <!-- EXEMPLAIRE 1 (DUPLICATA) -->
-    <div class="receipt-container">
+  </head>
+  <body>
+    <div class="page">
+      <!-- EXEMPLAIRE 1 (DUPLICATA) -->
+      <div class="receipt-container">
         <div class="header">
-            <div class="header-left">
-                <div class="field-row">
-                    <span class="field-label">RECETTE MUNICIPALE DE:</span>
-                </div>
-                <div class="field-row">
-                    <span class="field-value filled" data-field="mairie">COMMUNE DE VAVOUA</span>
-                </div>
+          <div class="header-left">
+            <div class="field-row">
+              <span class="field-label">RECETTE MUNICIPALE DE:</span>
             </div>
+            <div class="field-row">
+              <span class="field-value filled" data-field="mairie"
+                >COMMUNE DE MAIRIE D'AZAGUIÉ</span
+              >
+            </div>
+          </div>
 
-            <div class="header-center">
-                <h1>DÉCLARATION<br>DE RECETTES</h1>
-            </div>
+          <div class="header-center">
+            <h1>DÉCLARATION<br />DE RECETTES</h1>
+          </div>
 
-            <div class="header-right">
-                <div class="field-row">
-                    <span class="field-label" style="width: 120px;">Code Commune :</span>
-                    <span class="field-value filled right-align" data-field="codeCommune">433</span>
-                </div>
-                <div class="field-row">
-                    <span class="field-label" style="width: 120px;">Exercice :</span>
-                    <span class="field-value filled right-align" data-field="exercice">2025</span>
-                </div>
-                <div class="field-row">
-                    <span class="field-label" style="width: 120px;">Article :</span>
-                    <span class="field-value filled right-align" data-field="article">401</span>
-                </div>
-                <div class="field-row">
-                    <span class="field-label" style="width: 120px;">Pièce n° :</span>
-                    <span class="field-value filled right-align" data-field="numeroPiece">651</span>
-                </div>
+          <div class="header-right">
+            <div class="field-row">
+              <span class="field-label" style="width: 120px">Code Commune :</span>
+              <span class="field-value filled right-align" data-field="codeCommune">422</span>
             </div>
+            <div class="field-row">
+              <span class="field-label" style="width: 120px">Exercice :</span>
+              <span class="field-value filled right-align" data-field="exercice">2025</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label" style="width: 120px">Article :</span>
+              <span class="field-value filled right-align" data-field="article">401</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label" style="width: 120px">Pièce n° :</span>
+              <span class="field-value filled right-align" data-field="numeroPiece">651</span>
+            </div>
+          </div>
         </div>
 
         <div class="body-section">
-            <div class="body-row">
-                <span class="field-label">NOM et Adresse de la partie versante :</span>
-                <span class="field-value filled" data-field="nomPartieVersante">PGSP</span>
-            </div>
-            <div class="body-row">
-                <span class="field-value filled" data-field="adresse">ABIDJAN</span>
-            </div>
+          <div class="body-row">
+            <span class="field-label">NOM et Adresse de la partie versante :</span>
+            <span class="field-value filled" data-field="nomPartieVersante">PGSP</span>
+          </div>
+          <div class="body-row">
+            <span class="field-value filled" data-field="adresse">ABIDJAN</span>
+          </div>
 
-            <div class="body-row" style="margin-top: 15px;">
-                <span class="field-label">Date d'encaissement :</span>
-                <span class="field-value filled" style="flex: 0 0 200px;" data-field="numeroLivre">T31T N° 63</span>
-                <span class="field-label" style="margin-left: 20px;">N° :</span>
-                <span class="field-value filled" style="flex: 0 0 100px;" data-field="numeroEncaissement">63</span>
-                <span class="field-label" style="margin-left: 20px;">du :</span>
-                <span class="field-value filled right-align" data-field="dateEncaissement">31/10/2025</span>
-            </div>
+          <div class="body-row" style="margin-top: 15px">
+            <span class="field-label">Date d'encaissement :</span>
+            <span class="field-value filled" style="flex: 0 0 200px" data-field="numeroLivre"
+              >T31T N° 63</span
+            >
+            <span class="field-label" style="margin-left: 20px">N° :</span>
+            <span class="field-value filled" style="flex: 0 0 100px" data-field="numeroEncaissement"
+              >63</span
+            >
+            <span class="field-label" style="margin-left: 20px">du :</span>
+            <span class="field-value filled right-align" data-field="dateEncaissement"
+              >31/10/2025</span
+            >
+          </div>
 
-            <div class="body-row">
-                <span class="field-label">Nature de la recette :</span>
-                <span class="field-value filled" data-field="natureRecette">Subventions d'équipement de l'Etat</span>
-            </div>
+          <div class="body-row">
+            <span class="field-label">Nature de la recette :</span>
+            <span class="field-value filled" data-field="natureRecette"
+              >Subventions d'équipement de l'Etat</span
+            >
+          </div>
 
-            <div class="body-row">
+          <div class="body-row">
+            <span class="field-label">Montant de la recette :</span>
+            <span class="field-value filled money-text" data-field="montantLettres"
+              >cent dix-neuf millions quatre-vingt-neuf mille huit cent quatre-vingt-dix-sept
+              FCFA</span
+            >
+          </div>
+
+          <div class="footer">
+            <div class="footer-col">
+              <div class="field-row">
                 <span class="field-label">Montant de la recette :</span>
-                <span class="field-value filled money-text" data-field="montantLettres">cent dix-neuf millions quatre-vingt-neuf mille huit cent quatre-vingt-dix-sept FCFA</span>
+                <span class="field-value filled highlight-bg" data-field="montantChiffres"
+                  >119 089 897 FCFA</span
+                >
+              </div>
+              <div class="signature-box">L'ordonnateur.</div>
             </div>
 
-            <div class="footer">
-                <div class="footer-col">
-                    <div class="field-row">
-                        <span class="field-label">Montant de la recette :</span>
-                        <span class="field-value filled highlight-bg" data-field="montantChiffres">119 089 897 FCFA</span>
-                    </div>
-                    <div class="signature-box">
-                        L'ordonnateur.
-                    </div>
-                </div>
-
-                <div class="footer-col">
-                    <div class="field-row">
-                        <span class="field-label">CT du :</span>
-                        <span class="field-value filled right-align" data-field="dateEncaissement">31/10/2025</span>
-                    </div>
-                    <div class="field-row">
-                        <span class="field-label">A <span data-field="ville">Vavoua</span>, le :</span>
-                        <span class="field-value filled right-align" data-field="dateEncaissement">31/10/2025</span>
-                    </div>
-                    <div class="signature-box">
-                        Le Receveur.
-                    </div>
-                </div>
+            <div class="footer-col">
+              <div class="field-row">
+                <span class="field-label">CT du :</span>
+                <span class="field-value filled right-align" data-field="dateEncaissement"
+                  >31/10/2025</span
+                >
+              </div>
+              <div class="field-row">
+                <span class="field-label">A <span data-field="ville">Azaguié</span>, le :</span>
+                <span class="field-value filled right-align" data-field="dateEncaissement"
+                  >31/10/2025</span
+                >
+              </div>
+              <div class="signature-box">Le Receveur.</div>
             </div>
+          </div>
         </div>
 
         <div class="meta-footer">
-            <span>Cl. 52</span>
-            <span>Duplicata : Pièces à comptabiliser</span>
+          <span>Cl. 52</span>
+          <span>Duplicata : Pièces à comptabiliser</span>
         </div>
-    </div>
+      </div>
 
-    <!-- Ligne de découpe -->
-    <div class="cut-line"></div>
+      <!-- Ligne de découpe -->
+      <div class="cut-line"></div>
 
-    <!-- EXEMPLAIRE 2 (TRIPLICATA) -->
-    <div class="receipt-container">
+      <!-- EXEMPLAIRE 2 (TRIPLICATA) -->
+      <div class="receipt-container">
         <div class="header">
-            <div class="header-left">
-                <div class="field-row">
-                    <span class="field-label">RECETTE MUNICIPALE DE:</span>
-                </div>
-                <div class="field-row">
-                    <span class="field-value filled" data-field="mairie">COMMUNE DE VAVOUA</span>
-                </div>
+          <div class="header-left">
+            <div class="field-row">
+              <span class="field-label">RECETTE MUNICIPALE DE:</span>
             </div>
+            <div class="field-row">
+              <span class="field-value filled" data-field="mairie"
+                >COMMUNE DE MAIRIE D'AZAGUIÉ</span
+              >
+            </div>
+          </div>
 
-            <div class="header-center">
-                <h1>DÉCLARATION<br>DE RECETTES</h1>
-            </div>
+          <div class="header-center">
+            <h1>DÉCLARATION<br />DE RECETTES</h1>
+          </div>
 
-            <div class="header-right">
-                <div class="field-row">
-                    <span class="field-label" style="width: 120px;">Code Commune :</span>
-                    <span class="field-value filled right-align" data-field="codeCommune">433</span>
-                </div>
-                <div class="field-row">
-                    <span class="field-label" style="width: 120px;">Exercice :</span>
-                    <span class="field-value filled right-align" data-field="exercice">2025</span>
-                </div>
-                <div class="field-row">
-                    <span class="field-label" style="width: 120px;">Article :</span>
-                    <span class="field-value filled right-align" data-field="article">401</span>
-                </div>
-                <div class="field-row">
-                    <span class="field-label" style="width: 120px;">Pièce n° :</span>
-                    <span class="field-value filled right-align" data-field="numeroPiece">651</span>
-                </div>
+          <div class="header-right">
+            <div class="field-row">
+              <span class="field-label" style="width: 120px">Code Commune :</span>
+              <span class="field-value filled right-align" data-field="codeCommune">422</span>
             </div>
+            <div class="field-row">
+              <span class="field-label" style="width: 120px">Exercice :</span>
+              <span class="field-value filled right-align" data-field="exercice">2025</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label" style="width: 120px">Article :</span>
+              <span class="field-value filled right-align" data-field="article">401</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label" style="width: 120px">Pièce n° :</span>
+              <span class="field-value filled right-align" data-field="numeroPiece">651</span>
+            </div>
+          </div>
         </div>
 
         <div class="body-section">
-            <div class="body-row">
-                <span class="field-label">NOM et Adresse de la partie versante :</span>
-                <span class="field-value filled" data-field="nomPartieVersante">PGSP</span>
-            </div>
-            <div class="body-row">
-                <span class="field-value filled" data-field="adresse">ABIDJAN</span>
-            </div>
+          <div class="body-row">
+            <span class="field-label">NOM et Adresse de la partie versante :</span>
+            <span class="field-value filled" data-field="nomPartieVersante">PGSP</span>
+          </div>
+          <div class="body-row">
+            <span class="field-value filled" data-field="adresse">ABIDJAN</span>
+          </div>
 
-            <div class="body-row" style="margin-top: 15px;">
-                <span class="field-label">Date d'encaissement :</span>
-                <span class="field-value filled" style="flex: 0 0 200px;" data-field="numeroLivre">T31T N° 63</span>
-                <span class="field-label" style="margin-left: 20px;">N° :</span>
-                <span class="field-value filled" style="flex: 0 0 100px;" data-field="numeroEncaissement">63</span>
-                <span class="field-label" style="margin-left: 20px;">du :</span>
-                <span class="field-value filled right-align" data-field="dateEncaissement">31/10/2025</span>
-            </div>
+          <div class="body-row" style="margin-top: 15px">
+            <span class="field-label">Date d'encaissement :</span>
+            <span class="field-value filled" style="flex: 0 0 200px" data-field="numeroLivre"
+              >T31T N° 63</span
+            >
+            <span class="field-label" style="margin-left: 20px">N° :</span>
+            <span class="field-value filled" style="flex: 0 0 100px" data-field="numeroEncaissement"
+              >63</span
+            >
+            <span class="field-label" style="margin-left: 20px">du :</span>
+            <span class="field-value filled right-align" data-field="dateEncaissement"
+              >31/10/2025</span
+            >
+          </div>
 
-            <div class="body-row">
-                <span class="field-label">Nature de la recette :</span>
-                <span class="field-value filled" data-field="natureRecette">Subventions d'équipement de l'Etat</span>
-            </div>
+          <div class="body-row">
+            <span class="field-label">Nature de la recette :</span>
+            <span class="field-value filled" data-field="natureRecette"
+              >Subventions d'équipement de l'Etat</span
+            >
+          </div>
 
-            <div class="body-row">
+          <div class="body-row">
+            <span class="field-label">Montant de la recette :</span>
+            <span class="field-value filled money-text" data-field="montantLettres"
+              >cent dix-neuf millions quatre-vingt-neuf mille huit cent quatre-vingt-dix-sept
+              FCFA</span
+            >
+          </div>
+
+          <div class="footer">
+            <div class="footer-col">
+              <div class="field-row">
                 <span class="field-label">Montant de la recette :</span>
-                <span class="field-value filled money-text" data-field="montantLettres">cent dix-neuf millions quatre-vingt-neuf mille huit cent quatre-vingt-dix-sept FCFA</span>
+                <span class="field-value filled highlight-bg" data-field="montantChiffres"
+                  >119 089 897 FCFA</span
+                >
+              </div>
+              <div class="signature-box">L'ordonnateur.</div>
             </div>
 
-            <div class="footer">
-                <div class="footer-col">
-                    <div class="field-row">
-                        <span class="field-label">Montant de la recette :</span>
-                        <span class="field-value filled highlight-bg" data-field="montantChiffres">119 089 897 FCFA</span>
-                    </div>
-                    <div class="signature-box">
-                        L'ordonnateur.
-                    </div>
-                </div>
-
-                <div class="footer-col">
-                    <div class="field-row">
-                        <span class="field-label">CT du :</span>
-                        <span class="field-value filled right-align" data-field="dateEncaissement">31/10/2025</span>
-                    </div>
-                    <div class="field-row">
-                        <span class="field-label">A <span data-field="ville">Vavoua</span>, le :</span>
-                        <span class="field-value filled right-align" data-field="dateEncaissement">31/10/2025</span>
-                    </div>
-                    <div class="signature-box">
-                        Le Receveur.
-                    </div>
-                </div>
-            </div>
+            <div class="footer-col">
+              <div class="field-row">
+                <span class="field-label">CT du :</span>
+          </div>
         </div>
 
         <div class="meta-footer">
-            <span>Cl. 52</span>
-            <span>Triplicata : Archives</span>
+          <span>Cl. 52</span>
+          <span>Triplicata : Archives</span>
         </div>
+      </div>
     </div>
-</div>
 
-<script>
-    // Fonction pour convertir un nombre en lettres (français)
-    function nombreEnLettres(nombre) {
+    <script>
+      // Fonction pour convertir un nombre en lettres (français)
+      function nombreEnLettres(nombre) {
         if (nombre === 0) return 'zéro';
 
         const unites = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf'];
-        const dizaines = ['', '', 'vingt', 'trente', 'quarante', 'cinquante', 'soixante', 'soixante', 'quatre-vingt', 'quatre-vingt'];
-        const special = ['dix', 'onze', 'douze', 'treize', 'quatorze', 'quinze', 'seize', 'dix-sept', 'dix-huit', 'dix-neuf'];
+        const dizaines = [
+          '',
+          '',
+          'vingt',
+          'trente',
+          'quarante',
+          'cinquante',
+          'soixante',
+          'soixante',
+          'quatre-vingt',
+          'quatre-vingt',
+        ];
+        const special = [
+          'dix',
+          'onze',
+          'douze',
+          'treize',
+          'quatorze',
+          'quinze',
+          'seize',
+          'dix-sept',
+          'dix-huit',
+          'dix-neuf',
+        ];
 
         function convertirCentaines(n) {
-            if (n === 0) return '';
-            if (n < 10) return unites[n];
-            if (n < 20) return special[n - 10];
-            if (n < 100) {
-                const d = Math.floor(n / 10);
-                const u = n % 10;
-                let result = dizaines[d];
-                if (d === 7 || d === 9) {
-                    result = dizaines[d - 1] + '-' + special[u];
-                } else if (u === 1 && d === 8) {
-                    result = 'quatre-vingt-un';
-                } else if (u > 0) {
-                    result += '-' + unites[u];
-                } else if (d === 8) {
-                    result += 's';
-                }
-                return result;
+          if (n === 0) return '';
+          if (n < 10) return unites[n];
+          if (n < 20) return special[n - 10];
+          if (n < 100) {
+            const d = Math.floor(n / 10);
+            const u = n % 10;
+            let result = dizaines[d];
+            if (d === 7 || d === 9) {
+              result = dizaines[d - 1] + '-' + special[u];
+            } else if (u === 1 && d === 8) {
+              result = 'quatre-vingt-un';
+            } else if (u > 0) {
+              result += '-' + unites[u];
+            } else if (d === 8) {
+              result += 's';
             }
-            const c = Math.floor(n / 100);
-            const reste = n % 100;
-            let result = c === 1 ? 'cent' : unites[c] + ' cent';
-            if (c > 1 && reste === 0) result += 's';
-            if (reste > 0) result += ' ' + convertirCentaines(reste);
             return result;
+          }
+          const c = Math.floor(n / 100);
+          const reste = n % 100;
+          let result = c === 1 ? 'cent' : unites[c] + ' cent';
+          if (c > 1 && reste === 0) result += 's';
+          if (reste > 0) result += ' ' + convertirCentaines(reste);
+          return result;
         }
 
         function convertirMilliers(n) {
-            if (n < 1000) return convertirCentaines(n);
-            const m = Math.floor(n / 1000);
-            const reste = n % 1000;
-            let result = m === 1 ? 'mille' : convertirCentaines(m) + ' mille';
-            if (reste > 0) result += ' ' + convertirCentaines(reste);
-            return result;
+          if (n < 1000) return convertirCentaines(n);
+          const m = Math.floor(n / 1000);
+          const reste = n % 1000;
+          let result = m === 1 ? 'mille' : convertirCentaines(m) + ' mille';
+          if (reste > 0) result += ' ' + convertirCentaines(reste);
+          return result;
         }
 
         function convertirMillions(n) {
-            if (n < 1000000) return convertirMilliers(n);
-            const m = Math.floor(n / 1000000);
-            const reste = n % 1000000;
-            let result = convertirCentaines(m) + ' million';
-            if (m > 1) result += 's';
-            if (reste > 0) result += ' ' + convertirMilliers(reste);
-            return result;
+          if (n < 1000000) return convertirMilliers(n);
+          const m = Math.floor(n / 1000000);
+          const reste = n % 1000000;
+          let result = convertirCentaines(m) + ' million';
+          if (m > 1) result += 's';
+          if (reste > 0) result += ' ' + convertirMilliers(reste);
+          return result;
         }
 
         return convertirMillions(nombre);
-    }
+      }
 
-    // Fonction pour formater un nombre avec espaces
-    function formatMontant(montant) {
+      // Fonction pour formater un nombre avec espaces
+      function formatMontant(montant) {
         return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
-    }
+      }
 
-    // Fonction pour remplir les deux formulaires
-    function remplirFormulaire(data) {
+      // Fonction pour remplir les deux formulaires
+      function remplirFormulaire(data) {
         // Calculer le montant en lettres
         const montantLettres = nombreEnLettres(data.montantRecette) + ' FCFA';
         const montantChiffres = formatMontant(data.montantRecette);
 
         // Remplir tous les champs (les deux exemplaires)
-        document.querySelectorAll('[data-field="mairie"]').forEach(el => el.textContent = data.mairie);
-        document.querySelectorAll('[data-field="codeCommune"]').forEach(el => el.textContent = data.codeCommune);
-        document.querySelectorAll('[data-field="exercice"]').forEach(el => el.textContent = data.exercice);
-        document.querySelectorAll('[data-field="article"]').forEach(el => el.textContent = data.article);
-        document.querySelectorAll('[data-field="numeroPiece"]').forEach(el => el.textContent = data.numeroPiece);
-        document.querySelectorAll('[data-field="nomPartieVersante"]').forEach(el => el.textContent = data.nomPartieVersante);
-        document.querySelectorAll('[data-field="adresse"]').forEach(el => el.textContent = data.adresse);
-        document.querySelectorAll('[data-field="numeroLivre"]').forEach(el => el.textContent = data.numeroLivre);
-        document.querySelectorAll('[data-field="numeroEncaissement"]').forEach(el => el.textContent = data.numeroEncaissement);
-        document.querySelectorAll('[data-field="dateEncaissement"]').forEach(el => el.textContent = data.dateEncaissement);
-        document.querySelectorAll('[data-field="natureRecette"]').forEach(el => el.textContent = data.natureRecette);
-        document.querySelectorAll('[data-field="montantLettres"]').forEach(el => el.textContent = montantLettres);
-        document.querySelectorAll('[data-field="montantChiffres"]').forEach(el => el.textContent = montantChiffres);
-        document.querySelectorAll('[data-field="ville"]').forEach(el => el.textContent = data.ville || 'Vavoua');
-    }
+        document
+          .querySelectorAll('[data-field="mairie"]')
+          .forEach((el) => (el.textContent = data.mairie));
+        document
+          .querySelectorAll('[data-field="codeCommune"]')
+          .forEach((el) => (el.textContent = data.codeCommune));
+        document
+          .querySelectorAll('[data-field="exercice"]')
+          .forEach((el) => (el.textContent = data.exercice));
+        document
+          .querySelectorAll('[data-field="article"]')
+          .forEach((el) => (el.textContent = data.article));
+        document
+          .querySelectorAll('[data-field="numeroPiece"]')
+          .forEach((el) => (el.textContent = data.numeroPiece));
+        document
+          .querySelectorAll('[data-field="nomPartieVersante"]')
+          .forEach((el) => (el.textContent = data.nomPartieVersante));
+        document
+          .querySelectorAll('[data-field="adresse"]')
+          .forEach((el) => (el.textContent = data.adresse));
+        document
+          .querySelectorAll('[data-field="numeroLivre"]')
+          .forEach((el) => (el.textContent = data.numeroLivre));
+        document
+          .querySelectorAll('[data-field="numeroEncaissement"]')
+          .forEach((el) => (el.textContent = data.numeroEncaissement));
+        document
+          .querySelectorAll('[data-field="dateEncaissement"]')
+          .forEach((el) => (el.textContent = data.dateEncaissement));
+        document
+          .querySelectorAll('[data-field="natureRecette"]')
+          .forEach((el) => (el.textContent = data.natureRecette));
+        document
+          .querySelectorAll('[data-field="montantLettres"]')
+          .forEach((el) => (el.textContent = montantLettres));
+        document
+          .querySelectorAll('[data-field="montantChiffres"]')
+          .forEach((el) => (el.textContent = montantChiffres));
+        document
+          .querySelectorAll('[data-field="ville"]')
+          .forEach((el) => (el.textContent = data.ville || 'Azaguié'));
+      }
 
-    // Écouter les messages de la fenêtre parent
-    window.addEventListener('message', (event) => {
+      // Écouter les messages de la fenêtre parent
+      window.addEventListener('message', (event) => {
         if (event.data.type === 'FILL_DECLARATION') {
-            remplirFormulaire(event.data.data);
+          remplirFormulaire(event.data.data);
         } else if (event.data.type === 'FILL_AND_PRINT') {
-            remplirFormulaire(event.data.data);
-            // Attendre un peu que le DOM soit mis à jour avant d'imprimer
-            setTimeout(() => {
-                window.print();
-            }, 500);
+          remplirFormulaire(event.data.data);
+          // Attendre un peu que le DOM soit mis à jour avant d'imprimer
+          setTimeout(() => {
+            window.print();
+          }, 500);
         }
-    });
+      });
 
-    // Au chargement de la page
-    document.addEventListener('DOMContentLoaded', () => {
+      // Au chargement de la page
+      document.addEventListener('DOMContentLoaded', () => {
         console.log('Page de déclaration chargée et prête');
-    });
-</script>
-
-</body>
+      });
+    </script>
+  </body>
 </html>
-

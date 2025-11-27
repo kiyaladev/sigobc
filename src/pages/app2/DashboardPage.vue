@@ -75,7 +75,7 @@
       <!-- Statistiques globales -->
       <div class="col-12">
         <div class="row q-col-gutter-md">
-          <div class="col-12 col-sm-6 col-md-3">
+          <div class="col-12 col-sm-6 col-md col-lg">
             <q-card class="stat-card" style="border-left: 4px solid #2196f3">
               <q-card-section>
                 <div class="row items-center">
@@ -96,7 +96,7 @@
             </q-card>
           </div>
 
-          <div class="col-12 col-sm-6 col-md-3">
+          <div class="col-12 col-sm-6 col-md col-lg">
             <q-card class="stat-card" style="border-left: 4px solid #4caf50">
               <q-card-section>
                 <div class="row items-center">
@@ -112,13 +112,13 @@
             </q-card>
           </div>
 
-          <div class="col-12 col-sm-6 col-md-3">
+          <div class="col-12 col-sm-6 col-md col-lg">
             <q-card class="stat-card" style="border-left: 4px solid #4caf50">
               <q-card-section>
                 <div class="row items-center">
                   <div class="col">
-                    <div class="text-h6 text-grey-8">{{ stats.approsJour }}</div>
-                    <div class="text-caption text-grey-6">Appros Aujourd'hui</div>
+                    <div class="text-h6 text-grey-8">{{ stats.approsMois }}</div>
+                    <div class="text-caption text-grey-6">Appros du Mois</div>
                     <div class="text-caption text-positive">+ Stock</div>
                   </div>
                   <div class="col-auto">
@@ -129,13 +129,13 @@
             </q-card>
           </div>
 
-          <div class="col-12 col-sm-6 col-md-3">
+          <div class="col-12 col-sm-6 col-md col-lg">
             <q-card class="stat-card" style="border-left: 4px solid #f44336">
               <q-card-section>
                 <div class="row items-center">
                   <div class="col">
-                    <div class="text-h6 text-grey-8">{{ stats.remisesJour }}</div>
-                    <div class="text-caption text-grey-6">Remises Aujourd'hui</div>
+                    <div class="text-h6 text-grey-8">{{ stats.remisesMois }}</div>
+                    <div class="text-caption text-grey-6">Remises du Mois</div>
                     <div class="text-caption text-negative">- Stock</div>
                   </div>
                   <div class="col-auto">
@@ -146,13 +146,13 @@
             </q-card>
           </div>
 
-          <div class="col-12 col-sm-6 col-md-3">
+          <div class="col-12 col-sm-6 col-md col-lg">
             <q-card class="stat-card" style="border-left: 4px solid #2196f3">
               <q-card-section>
                 <div class="row items-center">
                   <div class="col">
-                    <div class="text-h6 text-grey-8">{{ stats.versementsJour }}</div>
-                    <div class="text-caption text-grey-6">Versements Aujourd'hui</div>
+                    <div class="text-h6 text-grey-8">{{ stats.versementsMois }}</div>
+                    <div class="text-caption text-grey-6">Versements du Mois</div>
                     <div class="text-caption text-grey-7">Recettes</div>
                   </div>
                   <div class="col-auto">
@@ -171,7 +171,7 @@
           <q-card-section>
             <div class="text-h6 q-mb-md">Accès Rapide</div>
             <div class="row q-col-gutter-md">
-              <div class="col-6 col-sm-4 col-md-3">
+              <div class="col-12 col-sm-6 col-md col-lg">
                 <q-btn
                   outline
                   color="positive"
@@ -188,7 +188,7 @@
                 </q-btn>
               </div>
 
-              <div class="col-6 col-sm-4 col-md-3">
+              <div class="col-12 col-sm-6 col-md col-lg">
                 <q-btn
                   outline
                   color="negative"
@@ -205,7 +205,7 @@
                 </q-btn>
               </div>
 
-              <div class="col-6 col-sm-4 col-md-3">
+              <div class="col-12 col-sm-6 col-md col-lg">
                 <q-btn
                   outline
                   color="primary"
@@ -222,7 +222,7 @@
                 </q-btn>
               </div>
 
-              <div class="col-6 col-sm-4 col-md-3">
+              <div class="col-12 col-sm-6 col-md col-lg">
                 <q-btn
                   outline
                   color="info"
@@ -239,7 +239,7 @@
                 </q-btn>
               </div>
 
-              <div class="col-6 col-sm-4 col-md-3">
+              <div class="col-12 col-sm-6 col-md col-lg">
                 <q-btn
                   outline
                   color="deep-purple"
@@ -354,34 +354,32 @@ const stats = computed(() => {
   const totalTimbres = timbres.value.reduce((sum, t) => sum + t.stock, 0);
   const valeurTotale = timbres.value.reduce((sum, t) => sum + t.stock * t.valeur, 0);
 
-  // Compter les opérations du jour
+  // Compter les opérations du mois en cours
   const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const currentMonth = today.getMonth();
+  const currentYear = today.getFullYear();
 
-  const approsJour = approvisionnements.value.filter((a) => {
+  const approsMois = approvisionnements.value.filter((a) => {
     const date = new Date(a.date);
-    date.setHours(0, 0, 0, 0);
-    return date.getTime() === today.getTime();
+    return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
   }).length;
 
-  const remisesJour = remises.value.filter((r) => {
+  const remisesMois = remises.value.filter((r) => {
     const date = new Date(r.date);
-    date.setHours(0, 0, 0, 0);
-    return date.getTime() === today.getTime();
+    return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
   }).length;
 
-  const versementsJour = versements.value.filter((v) => {
+  const versementsMois = versements.value.filter((v) => {
     const date = new Date(v.date);
-    date.setHours(0, 0, 0, 0);
-    return date.getTime() === today.getTime();
+    return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
   }).length;
 
   return {
     totalTimbres,
     valeurTotale,
-    approsJour,
-    remisesJour,
-    versementsJour,
+    approsMois,
+    remisesMois,
+    versementsMois,
   };
 });
 

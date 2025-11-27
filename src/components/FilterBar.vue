@@ -23,22 +23,6 @@
           />
         </div>
 
-        <!-- Mairie -->
-        <div v-if="showMairie" :class="filterColClass">
-          <q-select
-            v-model="mairieModel"
-            filled
-            dense
-            :options="mairieOptions"
-            option-value="value"
-            option-label="label"
-            emit-value
-            map-options
-            label="Mairie"
-            clearable
-          />
-        </div>
-
         <!-- Exercice -->
         <div v-if="showExercice" :class="filterColClass">
           <q-input
@@ -135,11 +119,6 @@ interface Props {
   statutOptions?: string[];
   showStatut?: boolean;
 
-  // Mairie
-  mairie?: number | null;
-  mairieOptions?: Array<{ label: string; value: number }>;
-  showMairie?: boolean;
-
   // Exercice
   exercice?: number | null;
   showExercice?: boolean;
@@ -172,7 +151,7 @@ const props = withDefaults(defineProps<Props>(), {
   searchPlaceholder: 'Rechercher...',
   showSearch: true,
   showStatut: false,
-  showMairie: false,
+
   showExercice: false,
   showTaxe: false,
   showDateRange: false,
@@ -180,7 +159,7 @@ const props = withDefaults(defineProps<Props>(), {
   showRefresh: false,
   loading: false,
   statutOptions: () => [],
-  mairieOptions: () => [],
+
   taxeOptions: () => [],
   periodOptions: () => [],
   searchColClass: 'col-12 col-sm-4 col-md-3',
@@ -190,7 +169,7 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits([
   'update:search',
   'update:statut',
-  'update:mairie',
+
   'update:exercice',
   'update:taxe',
   'update:dateDebut',
@@ -209,11 +188,6 @@ const searchModel = computed({
 const statutModel = computed({
   get: () => props.statut,
   set: (value) => emit('update:statut', value || ''),
-});
-
-const mairieModel = computed({
-  get: () => props.mairie,
-  set: (value) => emit('update:mairie', value),
 });
 
 const exerciceModel = computed({

@@ -7,20 +7,6 @@
       <q-card-section>
         <div class="row q-col-gutter-md items-center">
           <div class="col-12 col-sm-3">
-            <q-select
-              v-model="selectedMairie"
-              filled
-              :options="mairieOptions"
-              option-value="value"
-              option-label="label"
-              emit-value
-              map-options
-              label="Mairie"
-              clearable
-              @update:model-value="loadStatistics"
-            />
-          </div>
-          <div class="col-12 col-sm-3">
             <q-input
               v-model="dateDebut"
               filled
@@ -210,7 +196,6 @@ import {
 import Chart from 'chart.js/auto';
 
 const loading = ref(false);
-const selectedMairie = ref<number | undefined>(undefined);
 const dateDebut = ref('');
 const dateFin = ref('');
 
@@ -227,8 +212,6 @@ let statutChart: Chart | null = null;
 let taxeChart: Chart | null = null;
 let evolutionChart: Chart | null = null;
 
-const mairieOptions = computed(() => mairies.value.map((m) => ({ label: m.nom, value: m.id! })));
-
 const stats = computed(() => {
   const filteredDecl = getFilteredDeclarations();
 
@@ -239,9 +222,7 @@ const stats = computed(() => {
   const tauxValidation =
     totalDeclarations > 0 ? Math.round((declarationsValidees / totalDeclarations) * 100) : 0;
 
-  const filteredBordereaux = selectedMairie.value
-    ? bordereaux.value.filter((b) => b.mairieId === selectedMairie.value)
-    : bordereaux.value;
+  const filteredBordereaux = bordereaux.value;
 
   const bordereauxFermes = filteredBordereaux.filter((b) => b.statut === 'ferme').length;
 
@@ -284,10 +265,6 @@ const topTaxes = computed(() => {
 
 function getFilteredDeclarations(): Declaration[] {
   let filtered = declarations.value;
-
-  if (selectedMairie.value) {
-    filtered = filtered.filter((d) => d.mairieId === selectedMairie.value);
-  }
 
   if (dateDebut.value) {
     const debut = new Date(dateDebut.value);

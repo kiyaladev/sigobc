@@ -9,16 +9,13 @@
     <FilterBar
       v-model:search="search"
       v-model:statut="filterStatut"
-      v-model:mairie="filterMairie"
       v-model:exercice="filterExercice"
       v-model:taxe="filterTaxe"
       v-model:date-debut="filterDateDebut"
       v-model:date-fin="filterDateFin"
       :statut-options="statutOptions"
-      :mairie-options="mairieOptions"
       :taxe-options="taxeOptions"
       show-statut
-      show-mairie
       show-exercice
       show-taxe
       show-date-range
@@ -70,13 +67,11 @@
       v-model="dialogVisible"
       :declaration="currentDeclaration"
       :is-editing="isEditing"
-      :mairie-options="mairieOptions"
       :taxe-options="taxeOptions"
       :bordereau-options="bordereauOptions"
       :statut-options="statutOptions"
       :readonly="!authStore.isAdmin"
       :loading="saving"
-      :default-mairie-id="authStore.currentUser?.mairieId || 0"
       :next-numero-piece="nextNumeroPiece"
       @submit="onSubmit"
     />
@@ -113,7 +108,6 @@ const isEditing = ref(false);
 const currentDeclaration = ref<Declaration | null>(null);
 const search = ref('');
 const filterStatut = ref('');
-const filterMairie = ref<number | null>(null);
 const filterExercice = ref<number | null>(null);
 const filterTaxe = ref<number | null>(null);
 const filterDateDebut = ref('');
@@ -122,6 +116,7 @@ const filterDateFin = ref('');
 const statutOptions = ['brouillon', 'validee'];
 
 const columns = [
+  { name: 'id', label: 'ID', field: 'id', align: 'center' as const, sortable: true },
   {
     name: 'numeroPiece',
     label: 'N° Pièce',
@@ -168,8 +163,6 @@ const columns = [
   { name: 'actions', label: 'Actions', field: 'actions', align: 'center' as const },
 ];
 
-const mairieOptions = computed(() => mairies.value.map((m) => ({ label: m.nom, value: m.id! })));
-
 const taxeOptions = computed(() =>
   taxes.value.map((t) => ({ label: `${t.code} - ${t.libelle}`, value: t.id! })),
 );
@@ -193,10 +186,6 @@ const filteredDeclarations = computed(() => {
 
   if (filterStatut.value) {
     result = result.filter((d) => d.statut === filterStatut.value);
-  }
-
-  if (filterMairie.value) {
-    result = result.filter((d) => d.mairieId === filterMairie.value);
   }
 
   if (filterExercice.value) {
@@ -235,7 +224,6 @@ const filteredDeclarations = computed(() => {
 function resetFilters() {
   search.value = '';
   filterStatut.value = '';
-  filterMairie.value = null;
   filterExercice.value = null;
   filterTaxe.value = null;
   filterDateDebut.value = '';
@@ -397,7 +385,7 @@ function printDeclaration(declaration: Declaration) {
           type: 'FILL_DECLARATION',
           data: {
             mairie: mairie?.nom || '',
-            codeCommune: mairie?.code || '',
+            codeCommune: mairie?.code || 422,
             exercice: declaration.exercice,
             article: taxe?.code || '',
             numeroPiece: declaration.numeroPiece,
@@ -408,7 +396,7 @@ function printDeclaration(declaration: Declaration) {
             dateEncaissement: date.formatDate(declaration.dateEncaissement, 'DD/MM/YYYY'),
             natureRecette: taxe?.libelle || '',
             montantRecette: declaration.montantRecette,
-            ville: mairie?.ville || 'Vavoua',
+            ville: mairie?.ville || 'Azaguié',
             observations: declaration.observations || '',
           },
         },
@@ -436,7 +424,7 @@ function downloadDeclarationPDF(declaration: Declaration) {
           type: 'FILL_AND_PRINT',
           data: {
             mairie: mairie?.nom || '',
-            codeCommune: mairie?.code || '',
+            codeCommune: mairie?.code || 422,
             exercice: declaration.exercice,
             article: taxe?.code || '',
             numeroPiece: declaration.numeroPiece,
@@ -447,7 +435,7 @@ function downloadDeclarationPDF(declaration: Declaration) {
             dateEncaissement: date.formatDate(declaration.dateEncaissement, 'DD/MM/YYYY'),
             natureRecette: taxe?.libelle || '',
             montantRecette: declaration.montantRecette,
-            ville: mairie?.ville || 'Vavoua',
+            ville: mairie?.ville || 'Azaguié',
             observations: declaration.observations || '',
           },
         },

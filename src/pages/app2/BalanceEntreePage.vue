@@ -231,7 +231,7 @@ import { db, type BalanceEntree } from 'src/database/db';
 const $q = useQuasar();
 
 const valeursTimbre = [100, 200, 300, 500, 600, 1000];
-const typeOptions = ['Balance', 'Balance Entrée', 'Solde Initial'];
+const typeOptions = ['Balance'];
 
 const search = ref('');
 const filterDate = ref<string | null>(null);

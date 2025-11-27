@@ -66,17 +66,15 @@
 
               <q-item clickable v-close-popup @click="openLicenseDialog" class="menu-item">
                 <q-item-section avatar>
-                  <q-icon name="verified" :color="licenseStore.isLicensed ? 'positive' : 'warning'" />
+                  <q-icon
+                    name="verified"
+                    :color="licenseStore.isLicensed ? 'positive' : 'warning'"
+                  />
                 </q-item-section>
                 <q-item-section>
                   <q-item-label>
                     Licence
-                    <q-chip
-                      v-if="licenseStore.licenseType"
-                      size="sm"
-                      dense
-                      class="q-ml-xs"
-                    >
+                    <q-chip v-if="licenseStore.licenseType" size="sm" dense class="q-ml-xs">
                       {{ licenseStore.licenseType }}
                     </q-chip>
                   </q-item-label>
@@ -215,6 +213,21 @@
           <q-item
             clickable
             v-ripple
+            to="/app2/sections"
+            class="nav-item q-mb-xs"
+            active-class="nav-item-active"
+          >
+            <q-item-section avatar>
+              <q-icon name="folder_open" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Sections</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item
+            clickable
+            v-ripple
             to="/app2/balance-entree"
             class="nav-item q-mb-xs"
             active-class="nav-item-active"
@@ -271,8 +284,6 @@
               <q-item-label>Versements</q-item-label>
             </q-item-section>
           </q-item>
-
-
 
           <q-item
             clickable
@@ -589,7 +600,8 @@ function onLogout() {
 <style scoped lang="scss">
 // Header moderne
 .modern-header {
-  background: linear-gradient(135deg, #ff6600 0%, #22c55e 100%);
+  /*background: linear-gradient(135deg, #ff6600 0%, #22c55e 100%);*/
+  background: gray;
   backdrop-filter: blur(10px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }

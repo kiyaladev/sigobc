@@ -38,22 +38,6 @@
               />
             </div>
 
-            <!-- Mairie -->
-            <div class="col-12 col-sm-6">
-              <q-select
-                v-model="localForm.mairieId"
-                filled
-                :options="mairieOptions"
-                option-value="value"
-                option-label="label"
-                emit-value
-                map-options
-                label="Mairie *"
-                :rules="[(val) => !!val || 'Requis']"
-                :readonly="readonly"
-              />
-            </div>
-
             <!-- Statut -->
             <div class="col-12 col-sm-6">
               <q-select
@@ -93,14 +77,20 @@
             <!-- Date d'émission -->
             <div class="col-12">
               <q-input
-                :model-value="localForm.dateEmission ? quasarDate.formatDate(localForm.dateEmission, 'YYYY-MM-DD') : ''"
-                @update:model-value="(val: string | number | null) => {
-                  if (val && typeof val === 'string') {
-                    localForm.dateEmission = new Date(val);
-                  } else {
-                    delete localForm.dateEmission;
+                :model-value="
+                  localForm.dateEmission
+                    ? quasarDate.formatDate(localForm.dateEmission, 'YYYY-MM-DD')
+                    : ''
+                "
+                @update:model-value="
+                  (val: string | number | null) => {
+                    if (val && typeof val === 'string') {
+                      localForm.dateEmission = new Date(val);
+                    } else {
+                      delete localForm.dateEmission;
+                    }
                   }
-                }"
+                "
                 filled
                 type="date"
                 label="Date d'émission"
@@ -132,6 +122,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
+import { DEFAULT_MAIRIE_ID } from 'src/database/db';
 import type { BordereauMandat } from 'src/database/db';
 import { date as quasarDate } from 'quasar';
 
@@ -139,19 +130,16 @@ interface Props {
   modelValue: boolean;
   bordereau?: BordereauMandat | null;
   isEditing?: boolean;
-  mairieOptions: Array<{ label: string; value: number }>;
   nextNumero?: number;
   statutOptions: string[];
   readonly?: boolean;
   loading?: boolean;
-  defaultMairieId?: number;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   isEditing: false,
   readonly: false,
   loading: false,
-  defaultMairieId: 0,
 });
 
 const emit = defineEmits<{
@@ -180,14 +168,11 @@ watch(
       } else {
         const currentYear = new Date().getFullYear();
         const nextNum = props.nextNumero || 1;
-        const firstMairieId =
-          (props.mairieOptions.length > 0
-            ? props.mairieOptions[0]?.value
-            : props.defaultMairieId) || 0;
+        // Auto-assigner la Mairie d'Azaguié
         localForm.value = {
           numero: nextNum,
           exercice: currentYear,
-          mairieId: firstMairieId,
+          mairieId: DEFAULT_MAIRIE_ID,
           montantTotal: 0,
           nombreMandats: 0,
           statut: 'ouvert' as const,

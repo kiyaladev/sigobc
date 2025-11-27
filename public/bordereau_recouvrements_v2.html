@@ -182,7 +182,7 @@
       <div class="header">
         <div class="header-left">
           RECETTE MUNICIPALE<br />
-          DE : <span data-field="ville">Vavoua</span>
+          DE : <span data-field="ville">Azaguié</span>
         </div>
         <div class="header-center">BORDEREAU DES RECOUVREMENTS AVANT EMISSION DES ORDRES</div>
         <div class="header-right">EXERCICE : <span data-field="exercice">2025</span></div>
@@ -190,8 +190,8 @@
 
       <div class="sub-header">
         <div class="commune-info">
-          COMMUNE DE : <span data-field="mairie">Vavoua</span><br />
-          CODE COMMUNE : <span data-field="codeCommune">433</span>
+          COMMUNE DE : <span data-field="mairie">Mairie d'Azaguié</span><br />
+          CODE COMMUNE : <span data-field="codeCommune">422</span>
         </div>
         <div>BORDEREAU N° : <span data-field="numeroBordereau">001/2025</span></div>
       </div>
@@ -231,7 +231,7 @@
           <span data-field="montantLettres">zéro FCFA</span>
           <div class="signature-line">
             <br />
-            <span data-field="ville">Vavoua</span>, le
+            <span data-field="ville">Azaguié</span>, le
             <span data-field="dateBordereau">__/__/____</span>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <br /><br />
@@ -405,7 +405,7 @@
           .forEach((el) => (el.textContent = data.ville));
         document
           .querySelectorAll('[data-field="codeCommune"]')
-          .forEach((el) => (el.textContent = data.codeCommune));
+          .forEach((el) => (el.textContent = data.codeCommune ?? 422));
         document
           .querySelectorAll('[data-field="exercice"]')
           .forEach((el) => (el.textContent = data.exercice));

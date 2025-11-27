@@ -28,20 +28,6 @@
           </div>
           <div class="col-12 col-sm-3">
             <q-select
-              v-model="filterMairie"
-              filled
-              dense
-              :options="mairieOptions"
-              option-value="value"
-              option-label="label"
-              emit-value
-              map-options
-              label="Mairie"
-              clearable
-            />
-          </div>
-          <div class="col-12 col-sm-2">
-            <q-select
               v-model="filterActif"
               filled
               dense
@@ -219,19 +205,17 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
-import { db, type Taxe, type Mairie } from 'src/database/db';
+import { db, type Taxe, DEFAULT_MAIRIE_ID } from 'src/database/db';
 
 const $q = useQuasar();
 
 const taxes = ref<Taxe[]>([]);
-const mairies = ref<Mairie[]>([]);
 const loading = ref(false);
 const saving = ref(false);
 const dialogVisible = ref(false);
 const isEditing = ref(false);
 const search = ref('');
 const filterType = ref('');
-const filterMairie = ref<number | undefined>(undefined);
 const filterActif = ref('');
 
 const typeOptions = ['fixe', 'variable'];
@@ -262,17 +246,11 @@ const columns = [
   { name: 'actions', label: 'Actions', field: 'actions', align: 'center' as const },
 ];
 
-const mairieOptions = computed(() => mairies.value.map((m) => ({ label: m.nom, value: m.id! })));
-
 const filteredTaxes = computed(() => {
   let result = taxes.value;
 
   if (filterType.value) {
     result = result.filter((t) => t.type === filterType.value);
-  }
-
-  if (filterMairie.value) {
-    result = result.filter((t) => t.mairieId === filterMairie.value);
   }
 
   if (filterActif.value) {
@@ -304,7 +282,7 @@ function formatMontant(montant: number): string {
 async function loadData() {
   loading.value = true;
   try {
-    [taxes.value, mairies.value] = await Promise.all([db.taxes.toArray(), db.mairies.toArray()]);
+    taxes.value = await db.taxes.toArray();
   } catch (error) {
     console.error('Erreur lors du chargement:', error);
     $q.notify({ type: 'negative', message: 'Erreur lors du chargement' });
@@ -344,6 +322,7 @@ async function onSubmit() {
     } else {
       await db.taxes.add({
         ...form.value,
+        mairieId: DEFAULT_MAIRIE_ID,
         createdAt: now,
         updatedAt: now,
       } as Taxe);

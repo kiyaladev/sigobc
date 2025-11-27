@@ -9,13 +9,10 @@
     <FilterBar
       v-model:search="search"
       v-model:statut="filterStatut"
-      v-model:mairie="filterMairie"
       v-model:date-debut="filterDateDebut"
       v-model:date-fin="filterDateFin"
       :statut-options="statutOptions"
-      :mairie-options="mairieOptions"
       show-statut
-      show-mairie
       show-date-range
       search-placeholder="Rechercher N° bordereau..."
       @reset="resetFilters"
@@ -103,11 +100,9 @@
       v-model="dialogVisible"
       :bordereau="currentBordereau"
       :is-editing="isEditing"
-      :mairie-options="mairieOptions"
       :statut-options="statutOptions"
       :readonly="!authStore.isAdmin"
       :loading="saving"
-      :default-mairie-id="authStore.currentUser?.mairieId || 0"
       :next-numero="nextNumeroBordereau"
       @submit="onSubmit"
     />
@@ -195,7 +190,6 @@ const isEditing = ref(false);
 const currentBordereau = ref<BordereauMandat | null>(null);
 const search = ref('');
 const filterStatut = ref('');
-const filterMairie = ref<number | null>(null);
 const filterDateDebut = ref('');
 const filterDateFin = ref('');
 const mandatsDialogVisible = ref(false);
@@ -284,8 +278,6 @@ const mandatsColumns = [
   },
 ];
 
-const mairieOptions = computed(() => mairies.value.map((m) => ({ label: m.nom, value: m.id! })));
-
 const bordereauMandatsTotal = computed(() => {
   return bordereauMandats.value.reduce((sum, mandat) => sum + (mandat.montant || 0), 0);
 });
@@ -295,10 +287,6 @@ const filteredBordereaux = computed(() => {
 
   if (filterStatut.value) {
     result = result.filter((b) => b.statut === filterStatut.value);
-  }
-
-  if (filterMairie.value) {
-    result = result.filter((b) => b.mairieId === filterMairie.value);
   }
 
   if (filterDateDebut.value) {
@@ -334,7 +322,6 @@ const bordereauxFermes = computed(() => {
 function resetFilters() {
   search.value = '';
   filterStatut.value = '';
-  filterMairie.value = null;
   filterDateDebut.value = '';
   filterDateFin.value = '';
 }
@@ -490,11 +477,11 @@ function confirmDelete(bordereau: BordereauMandat) {
 }
 
 function printBordereau(bordereau: BordereauMandat) {
-  window.open(`/bordereau_emission_mandats.html?bordereauId=${bordereau.id}`, '_blank');
+  window.open(`/bordereau_mandat_new.html?bordereauId=${bordereau.id}`, '_blank');
 }
 
 function downloadBordereauPDF(bordereau: BordereauMandat) {
-  window.open(`/bordereau_emission_mandats.html?bordereauId=${bordereau.id}&print=true`, '_blank');
+  window.open(`/bordereau_mandat_new.html?bordereauId=${bordereau.id}&print=true`, '_blank');
 }
 
 onMounted(() => {

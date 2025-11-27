@@ -1,5 +1,6 @@
 import {
   db,
+  DEFAULT_MAIRIE_ID,
   type Mairie,
   type Taxe,
   type Declaration,
@@ -116,57 +117,36 @@ export async function seedUtilisateurs(count: number = 10) {
 }
 
 /**
- * Seeder pour les Mairies
+ * Seeder pour la Mairie d'Azaguié (mairie unique)
  */
-export async function seedMairies(count: number = 15) {
-  console.log(`🌱 Seeding ${count} mairies...`);
-
-  const prefixes = ['Commune de', 'Ville de', 'Mairie de'];
-  const villes = [
-    'Saint-Denis',
-    'Saint-Paul',
-    'Le Tampon',
-    'Saint-Pierre',
-    'Saint-André',
-    'Saint-Benoît',
-    'Le Port',
-    'Saint-Louis',
-    'Saint-Joseph',
-    'Sainte-Marie',
-    'Sainte-Suzanne',
-    'Saint-Leu',
-    'Entre-Deux',
-    'Cilaos',
-    'Salazie',
-  ];
+export async function seedMairies() {
+  console.log(`🌱 Seeding Mairie d'Azaguié...`);
 
   const mairies: Mairie[] = [];
   const now = new Date();
 
-  for (let i = 0; i < Math.min(count, villes.length); i++) {
-    const ville = villes[i]!;
-    mairies.push({
-      nom: `${randomChoice(prefixes)} ${ville}`,
-      code: `MAI${String(i + 1).padStart(3, '0')}`,
-      adresse: `${randomAmount(1, 200)} Avenue de la République`,
-      ville,
-      codePostal: `97${randomAmount(400, 499)}`,
-      telephone: `0262 ${randomAmount(20, 99)} ${randomAmount(10, 99)} ${randomAmount(10, 99)}`,
-      email: `mairie.${ville.toLowerCase().replace(/[- ]/g, '')}@reunion.fr`,
-      createdAt: randomDate(new Date(2020, 0, 1), now),
-      updatedAt: now,
-    });
-  }
+  // Créer uniquement la Mairie d'Azaguié
+  mairies.push({
+    nom: "Mairie d'Azaguié",
+    code: '422',
+    adresse: 'Avenue Principale',
+    ville: 'Azaguié',
+    codePostal: '00225',
+    telephone: '+225 XX XX XX XX',
+    email: 'contact@mairie-azaguie.ci',
+    createdAt: new Date(2020, 0, 1),
+    updatedAt: now,
+  });
 
   await db.mairies.bulkAdd(mairies);
-  console.log(`✅ ${mairies.length} mairies créées`);
+  console.log(`✅ Mairie d'Azaguié créée`);
   return mairies;
 }
 
 /**
  * Seeder pour les Taxes
  */
-export async function seedTaxes(mairieIds: number[], count: number = 25) {
+export async function seedTaxes(count: number = 25) {
   console.log(`🌱 Seeding ${count} taxes...`);
 
   const nomsTaxesFixe = [
@@ -191,7 +171,7 @@ export async function seedTaxes(mairieIds: number[], count: number = 25) {
   // Taxes fixes
   for (let i = 0; i < count / 2; i++) {
     taxes.push({
-      mairieId: randomChoice(mairieIds),
+      mairieId: DEFAULT_MAIRIE_ID,
       libelle: randomChoice(nomsTaxesFixe),
       code: `TXF${String(i + 1).padStart(3, '0')}`,
       type: 'fixe',
@@ -206,7 +186,7 @@ export async function seedTaxes(mairieIds: number[], count: number = 25) {
   // Taxes variables
   for (let i = 0; i < count / 2; i++) {
     taxes.push({
-      mairieId: randomChoice(mairieIds),
+      mairieId: DEFAULT_MAIRIE_ID,
       libelle: randomChoice(nomsTaxesVariable),
       code: `TXV${String(i + 1).padStart(3, '0')}`,
       type: 'variable',
@@ -227,9 +207,9 @@ export async function seedTaxes(mairieIds: number[], count: number = 25) {
  * Seeder pour les Déclarations
  */
 export async function seedDeclarations(
-  mairieIds: number[],
   taxeIds: number[],
   personnelIds: number[],
+  bordereaux: BordereauRecette[],
   count: number = 100,
 ) {
   console.log(`🌱 Seeding ${count} déclarations...`);
@@ -238,20 +218,45 @@ export async function seedDeclarations(
   const now = new Date();
   const startDate = new Date(2023, 0, 1);
 
+  // Map to track bordereau updates
+  const bordereauUpdates = new Map<number, { count: number; total: number }>();
+
   for (let i = 0; i < count; i++) {
     const montantHT = randomAmount(1000, 50000);
     const montantTaxe = Math.round((montantHT * randomAmount(5, 20)) / 100);
     const montantTTC = montantHT + montantTaxe;
-    const dateEncaissement = randomDate(startDate, now);
-    const personnelId = randomChoice(personnelIds);
 
+    // Choose a bordereau randomly (80% chance to be in a bordereau)
+    const assignBordereau = Math.random() > 0.2 && bordereaux.length > 0;
+    let bordereauId: number | undefined;
+    let exercice = new Date(randomDate(startDate, now)).getFullYear();
+    let dateEncaissement = randomDate(new Date(exercice, 0, 1), new Date(exercice, 11, 31));
+
+    if (assignBordereau) {
+      const bordereau = randomChoice(bordereaux);
+      if (bordereau && bordereau.id) {
+        bordereauId = bordereau.id;
+        exercice = bordereau.annee; // Match exercice with bordereau year
+        // Date encaissement must be in that year
+        dateEncaissement = randomDate(new Date(exercice, 0, 1), new Date(exercice, 11, 31));
+
+        // Update stats
+        const current = bordereauUpdates.get(bordereauId) || { count: 0, total: 0 };
+        bordereauUpdates.set(bordereauId, {
+          count: current.count + 1,
+          total: current.total + montantTTC,
+        });
+      }
+    }
+
+    const personnelId = randomChoice(personnelIds);
     const obs = Math.random() > 0.7 ? 'Observations diverses sur la déclaration' : undefined;
 
     const declaration: Partial<Declaration> = {
       personnelId,
-      mairieId: randomChoice(mairieIds),
+      mairieId: DEFAULT_MAIRIE_ID,
       taxeId: randomChoice(taxeIds),
-      exercice: new Date(dateEncaissement).getFullYear(),
+      exercice,
       numeroPiece: String(i + 1),
       nomPartieVersante: `Contribuable ${String(i + 1).padStart(4, '0')}`,
       adresse: `${randomChoice(['Rue', 'Avenue', 'Boulevard'])} ${Math.floor(Math.random() * 100)} ${randomChoice(['Dakar', 'Thiès', 'Saint-Louis'])}`,
@@ -264,6 +269,10 @@ export async function seedDeclarations(
       updatedAt: now,
     };
 
+    if (bordereauId) {
+      declaration.bordereauId = bordereauId;
+    }
+
     if (obs) {
       declaration.observations = obs;
     }
@@ -272,18 +281,23 @@ export async function seedDeclarations(
   }
 
   await db.declarations.bulkAdd(declarations as Declaration[]);
-  console.log(`✅ ${count} déclarations créées`);
+
+  // Update bordereaux
+  for (const [id, stats] of bordereauUpdates.entries()) {
+    await db.bordereauxRecette.update(id, {
+      nombreDeclarations: stats.count,
+      montantTotal: stats.total,
+    });
+  }
+
+  console.log(`✅ ${count} déclarations créées et liées aux bordereaux`);
   return declarations;
 }
 
 /**
  * Seeder pour les Bordereaux
  */
-export async function seedBordereaux(
-  mairieIds: number[],
-  personnelIds: number[],
-  count: number = 80,
-) {
+export async function seedBordereaux(personnelIds: number[], count: number = 80) {
   console.log(`🌱 Seeding ${count} bordereaux...`);
 
   const statutsBordereau: Array<'ouvert' | 'ferme'> = ['ouvert', 'ferme'];
@@ -293,7 +307,6 @@ export async function seedBordereaux(
   const startDate = new Date(2023, 0, 1);
 
   for (let i = 0; i < count; i++) {
-    const montantTotal = randomAmount(10000, 200000);
     const annee = randomAmount(2023, 2025);
     const statut = randomChoice(statutsBordereau);
     const personnelId = randomChoice(personnelIds);
@@ -302,11 +315,11 @@ export async function seedBordereaux(
 
     const bordereau: Partial<BordereauRecette> = {
       personnelId,
-      mairieId: randomChoice(mairieIds),
+      mairieId: DEFAULT_MAIRIE_ID,
       numero: i + 1,
       annee,
-      montantTotal,
-      nombreDeclarations: randomAmount(5, 30),
+      montantTotal: 0,
+      nombreDeclarations: 0,
       statut,
       createdAt: randomDate(startDate, now),
       updatedAt: now,
@@ -331,11 +344,7 @@ export async function seedBordereaux(
 /**
  * Seeder pour les Approvisionnements (App2)
  */
-export async function seedApprovisionnements(
-  mairieIds: number[],
-  personnelIds: number[],
-  count: number = 20,
-) {
+export async function seedApprovisionnements(personnelIds: number[], count: number = 20) {
   console.log(`🌱 Seeding ${count} approvisionnements...`);
 
   const approvisionnements: Partial<Approvisionnement>[] = [];
@@ -348,7 +357,7 @@ export async function seedApprovisionnements(
       new Date(exercice, 0, 1),
       exercice === 2025 ? now : new Date(exercice, 11, 31),
     );
-    const type = 'appro';
+    const type = 'approvisionnement';
     // Générer des quantités aléatoires pour chaque valeur de timbre
     const timbres: Timbres = {
       100: randomAmount(100, 1000),
@@ -372,7 +381,7 @@ export async function seedApprovisionnements(
       Math.random() > 0.7 ? `Approvisionnement ${type} de l'exercice ${exercice}` : undefined;
 
     const approvisionnement: Partial<Approvisionnement> = {
-      mairieId: randomChoice(mairieIds),
+      mairieId: DEFAULT_MAIRIE_ID,
       exercice,
       date,
       type,
@@ -398,7 +407,7 @@ export async function seedApprovisionnements(
 /**
  * Seeder pour les Remises (App2)
  */
-export async function seedRemises(mairieIds: number[], personnelIds: number[], count: number = 50) {
+export async function seedRemises(personnelIds: number[], count: number = 50) {
   console.log(`🌱 Seeding ${count} remises...`);
 
   const remises: Partial<Remise>[] = [];
@@ -435,7 +444,7 @@ export async function seedRemises(mairieIds: number[], personnelIds: number[], c
     const obs = Math.random() > 0.6 ? `Remise de l'imprimerie nationale` : undefined;
 
     const remise: Partial<Remise> = {
-      mairieId: randomChoice(mairieIds),
+      mairieId: DEFAULT_MAIRIE_ID,
       exercice,
       date,
       numeroRemise,
@@ -461,11 +470,7 @@ export async function seedRemises(mairieIds: number[], personnelIds: number[], c
 /**
  * Seeder pour les Versements (App2)
  */
-export async function seedVersements(
-  mairieIds: number[],
-  personnelIds: number[],
-  count: number = 60,
-) {
+export async function seedVersements(personnelIds: number[], count: number = 60) {
   console.log(`🌱 Seeding ${count} versements...`);
 
   const versements: Partial<Versement>[] = [];
@@ -502,7 +507,7 @@ export async function seedVersements(
     const obs = Math.random() > 0.7 ? `Versement journalier` : undefined;
 
     const versement: Partial<Versement> = {
-      mairieId: randomChoice(mairieIds),
+      mairieId: DEFAULT_MAIRIE_ID,
       exercice,
       date,
       numeroVersement,
@@ -528,11 +533,7 @@ export async function seedVersements(
 /**
  * Seeder pour les Balances d'Entrée (App2)
  */
-export async function seedBalancesEntree(
-  mairieIds: number[],
-  personnelIds: number[],
-  count: number = 5,
-) {
+export async function seedBalancesEntree(personnelIds: number[], count: number = 5) {
   console.log(`🌱 Seeding ${count} balances d'entrée...`);
 
   const balances: Partial<BalanceEntree>[] = [];
@@ -564,7 +565,7 @@ export async function seedBalancesEntree(
       timbres[1000] * 1000;
 
     const balance: Partial<BalanceEntree> = {
-      mairieId: randomChoice(mairieIds),
+      mairieId: DEFAULT_MAIRIE_ID,
       exercice,
       date,
       type,
@@ -591,7 +592,7 @@ export async function seedBalancesEntree(
 /**
  * Seeder pour les Rubriques budgétaires (App3)
  */
-export async function seedRubriques(mairieIds: number[], count: number = 15) {
+export async function seedRubriques(count: number = 15) {
   console.log(`🌱 Seeding ${count} rubriques budgétaires...`);
 
   const chapitresData = [
@@ -626,7 +627,7 @@ export async function seedRubriques(mairieIds: number[], count: number = 15) {
       code: data.code,
       libelle: data.libelle,
       description: data.description,
-      mairieId: randomChoice(mairieIds),
+      mairieId: DEFAULT_MAIRIE_ID,
       actif: Math.random() > 0.1, // 90% actifs
       createdAt: randomDate(new Date(2020, 0, 1), now),
       updatedAt: now,
@@ -641,11 +642,7 @@ export async function seedRubriques(mairieIds: number[], count: number = 15) {
 /**
  * Seeder pour les Chapitres budgétaires (App3)
  */
-export async function seedChapitres(
-  mairieIds: number[],
-  rubriqueIds: number[],
-  count: number = 60,
-) {
+export async function seedChapitres(rubriqueIds: number[], count: number = 60) {
   console.log(`🌱 Seeding ${count} chapitres budgétaires...`);
 
   const comptesData = [
@@ -817,7 +814,7 @@ export async function seedChapitres(
       libelle: data.libelle,
       description: data.description,
       rubriqueId: randomChoice(rubriqueIds),
-      mairieId: randomChoice(mairieIds),
+      mairieId: DEFAULT_MAIRIE_ID,
       actif: true,
       createdAt: randomDate(new Date(2020, 0, 1), now),
       updatedAt: now,
@@ -833,7 +830,6 @@ export async function seedChapitres(
  * Seeder pour les Prévisions budgétaires (App3)
  */
 export async function seedPrevisions(
-  mairieIds: number[],
   rubriqueIds: number[],
   personnelIds: number[],
   count: number = 30,
@@ -865,7 +861,7 @@ export async function seedPrevisions(
     const prevision: Partial<Prevision> = {
       exercice,
       rubriqueId: randomChoice(rubriqueIds),
-      mairieId: randomChoice(mairieIds),
+      mairieId: DEFAULT_MAIRIE_ID,
       montantPrevu,
       montantEngage,
       montantDisponible,
@@ -891,7 +887,6 @@ export async function seedPrevisions(
  * Seeder pour les Mandats de dépense (App3)
  */
 export async function seedMandats(
-  mairieIds: number[],
   rubriqueIds: number[],
   previsionIds: number[],
   personnelIds: number[],
@@ -973,7 +968,7 @@ export async function seedMandats(
       numeroMandat,
       dateMandat,
       rubriqueId: randomChoice(rubriqueIds),
-      mairieId: randomChoice(mairieIds),
+      mairieId: DEFAULT_MAIRIE_ID,
       beneficiaire: randomChoice(beneficiaires),
       objet: randomChoice(objets),
       montant,
@@ -1011,11 +1006,7 @@ export async function seedMandats(
 /**
  * Seeder pour les Bordereaux d'émission des mandats (App3)
  */
-export async function seedBordereauMandats(
-  mairieIds: number[],
-  personnelIds: number[],
-  count: number = 20,
-) {
+export async function seedBordereauMandats(personnelIds: number[], count: number = 20) {
   console.log(`🌱 Seeding ${count} bordereaux d'émission des mandats...`);
 
   const bordereauMandats: Partial<BordereauMandat>[] = [];
@@ -1041,7 +1032,7 @@ export async function seedBordereauMandats(
       numero,
       exercice,
       dateEmission,
-      mairieId: randomChoice(mairieIds),
+      mairieId: DEFAULT_MAIRIE_ID,
       montantTotal,
       nombreMandats,
       statut,
@@ -1088,7 +1079,7 @@ export async function runAllSeeders(
 
   const {
     utilisateurs = 10,
-    mairies = 15,
+
     taxes = 25,
     declarations = 100,
     bordereaux = 80,
@@ -1129,59 +1120,58 @@ export async function runAllSeeders(
     const utilisateursCreated = await seedUtilisateurs(utilisateurs);
     const utilisateurIds = utilisateursCreated.map((u) => u.id!);
 
-    // Créer les mairies
-    const mairiesCreated = await seedMairies(mairies);
-    const mairieIds = mairiesCreated.map((m) => m.id!);
+    // Créer la Mairie d'Azaguié (mairie unique)
+    const mairiesCreated = await seedMairies();
 
     // Créer les taxes
-    const taxesCreated = await seedTaxes(mairieIds, taxes);
+    const taxesCreated = await seedTaxes(taxes);
     const taxeIds = taxesCreated.map((t) => t.id!);
 
-    // Créer les déclarations
-    await seedDeclarations(mairieIds, taxeIds, utilisateurIds, declarations);
-
     // Créer les bordereaux
-    await seedBordereaux(mairieIds, utilisateurIds, bordereaux);
+    const bordereauxCreated = await seedBordereaux(utilisateurIds, bordereaux);
+
+    // Créer les déclarations
+    await seedDeclarations(
+      taxeIds,
+      utilisateurIds,
+      bordereauxCreated as BordereauRecette[],
+      declarations, // count of declarations to create
+    );
 
     // App2 - Gestion de la Trésorerie
     console.log('\n💰 Seeders App2 - Gestion de la Trésorerie');
 
     // Créer les approvisionnements
-    await seedApprovisionnements(mairieIds, utilisateurIds, approvisionnements);
+    await seedApprovisionnements(utilisateurIds, approvisionnements);
 
     // Créer les remises
-    await seedRemises(mairieIds, utilisateurIds, remises);
+    await seedRemises(utilisateurIds, remises);
 
     //  Créer les versements
-    await seedVersements(mairieIds, utilisateurIds, versements);
+    await seedVersements(utilisateurIds, versements);
 
     // Créer les balances d'entrée
-    await seedBalancesEntree(mairieIds, utilisateurIds, balancesEntree);
+    await seedBalancesEntree(utilisateurIds, balancesEntree);
 
     // App3 - Gestion des Dépenses
     console.log('\n📦 Seeders App3 - Gestion des Dépenses');
 
     // Créer les rubriques budgétaires (ex-chapitres)
-    const rubriquesCreated = await seedRubriques(mairieIds, chapitres);
+    const rubriquesCreated = await seedRubriques(chapitres);
     const rubriqueIds = rubriquesCreated.map((c) => c.id!);
 
     // Créer les chapitres budgétaires (ex-comptes)
-    const chapitresCreated = await seedChapitres(mairieIds, rubriqueIds, chapitres);
+    const chapitresCreated = await seedChapitres(rubriqueIds, chapitres);
 
     // Créer les prévisions budgétaires
-    const previsionsCreated = await seedPrevisions(
-      mairieIds,
-      rubriqueIds,
-      utilisateurIds,
-      previsions,
-    );
+    const previsionsCreated = await seedPrevisions(rubriqueIds, utilisateurIds, previsions);
     const previsionIds = previsionsCreated.map((p) => p.id!);
 
     // Créer les mandats de dépense
-    await seedMandats(mairieIds, rubriqueIds, previsionIds, utilisateurIds, mandats);
+    await seedMandats(rubriqueIds, previsionIds, utilisateurIds, mandats);
 
     // Créer les bordereaux d'émission des mandats
-    await seedBordereauMandats(mairieIds, utilisateurIds, bordereauMandats);
+    await seedBordereauMandats(utilisateurIds, bordereauMandats);
 
     console.log('\n✨ Tous les seeders ont été exécutés avec succès !');
     console.log('📊 Statistiques :');
@@ -1251,145 +1241,107 @@ export async function seedTable(
       return seedUtilisateurs(count);
 
     case 'mairies':
-      return seedMairies(count);
+      return seedMairies();
 
     case 'declarations': {
-      const [mairies, taxes, utilisateurs] = await Promise.all([
-        db.mairies.toArray(),
+      const [taxes, utilisateurs] = await Promise.all([
         db.taxes.toArray(),
         db.utilisateurs.toArray(),
       ]);
-      const mairieIds = mairies.map((m: Mairie) => m.id!);
       const taxeIds = taxes.map((t: Taxe) => t.id!);
       const utilisateurIds = utilisateurs.map((u: Utilisateur) => u.id!);
-      if (mairieIds.length === 0 || taxeIds.length === 0 || utilisateurIds.length === 0) {
-        throw new Error("Mairies, taxes et utilisateurs requis. Créez-les d'abord.");
+      if (taxeIds.length === 0 || utilisateurIds.length === 0) {
+        throw new Error("Taxes et utilisateurs requis. Créez-les d'abord.");
       }
-      return seedDeclarations(mairieIds, taxeIds, utilisateurIds, count);
+      return seedDeclarations(taxeIds, utilisateurIds, [], count);
     }
 
     case 'bordereaux': {
-      const [mairies, utilisateurs] = await Promise.all([
-        db.mairies.toArray(),
-        db.utilisateurs.toArray(),
-      ]);
-      const mairieIds = mairies.map((m: Mairie) => m.id!);
+      const utilisateurs = await db.utilisateurs.toArray();
       const utilisateurIds = utilisateurs.map((u: Utilisateur) => u.id!);
-      if (mairieIds.length === 0 || utilisateurIds.length === 0) {
-        throw new Error("Mairies et utilisateurs requis. Créez-les d'abord.");
+      if (utilisateurIds.length === 0) {
+        throw new Error("Utilisateurs requis. Créez-les d'abord.");
       }
-      return seedBordereaux(mairieIds, utilisateurIds, count);
+      return seedBordereaux(utilisateurIds, count);
     }
 
     // App2 - Gestion de la Trésorerie
     case 'approvisionnements': {
-      const [mairies, utilisateurs] = await Promise.all([
-        db.mairies.toArray(),
-        db.utilisateurs.toArray(),
-      ]);
-      const mairieIds = mairies.map((m: Mairie) => m.id!);
+      const utilisateurs = await db.utilisateurs.toArray();
       const utilisateurIds = utilisateurs.map((u: Utilisateur) => u.id!);
-      if (mairieIds.length === 0 || utilisateurIds.length === 0) {
-        throw new Error("Mairies et utilisateurs requis. Créez-les d'abord.");
+      if (utilisateurIds.length === 0) {
+        throw new Error("Utilisateurs requis. Créez-les d'abord.");
       }
-      return seedApprovisionnements(mairieIds, utilisateurIds, count);
+      return seedApprovisionnements(utilisateurIds, count);
     }
 
     case 'remises': {
-      const [mairies, utilisateurs] = await Promise.all([
-        db.mairies.toArray(),
-        db.utilisateurs.toArray(),
-      ]);
-      const mairieIds = mairies.map((m: Mairie) => m.id!);
+      const utilisateurs = await db.utilisateurs.toArray();
       const utilisateurIds = utilisateurs.map((u: Utilisateur) => u.id!);
-      if (mairieIds.length === 0 || utilisateurIds.length === 0) {
-        throw new Error("Mairies et utilisateurs requis. Créez-les d'abord.");
+      if (utilisateurIds.length === 0) {
+        throw new Error("Utilisateurs requis. Créez-les d'abord.");
       }
-      return seedRemises(mairieIds, utilisateurIds, count);
+      return seedRemises(utilisateurIds, count);
     }
 
     case 'versements': {
-      const [mairies, utilisateurs] = await Promise.all([
-        db.mairies.toArray(),
-        db.utilisateurs.toArray(),
-      ]);
-      const mairieIds = mairies.map((m: Mairie) => m.id!);
+      const utilisateurs = await db.utilisateurs.toArray();
       const utilisateurIds = utilisateurs.map((u: Utilisateur) => u.id!);
-      if (mairieIds.length === 0 || utilisateurIds.length === 0) {
-        throw new Error("Mairies et utilisateurs requis. Créez-les d'abord.");
+      if (utilisateurIds.length === 0) {
+        throw new Error("Utilisateurs requis. Créez-les d'abord.");
       }
-      return seedVersements(mairieIds, utilisateurIds, count);
+      return seedVersements(utilisateurIds, count);
     }
 
     // App3 - Gestion des Dépenses
     case 'rubriques': {
-      const mairies = await db.mairies.toArray();
-      const mairieIds = mairies.map((m: Mairie) => m.id!);
-      if (mairieIds.length === 0) {
-        throw new Error("Aucune mairie trouvée. Créez d'abord des mairies.");
-      }
-      return seedRubriques(mairieIds, count);
+      return seedRubriques(count);
     }
 
     case 'chapitres': {
-      const mairies = await db.mairies.toArray();
-      const mairieIds = mairies.map((m: Mairie) => m.id!);
-      if (mairieIds.length === 0) {
-        throw new Error("Aucune mairie trouvée. Créez d'abord des mairies.");
-      }
       const rubriques = await db.rubriques.toArray();
       const rubriqueIds = rubriques.map((r: Rubrique) => r.id!);
-      if (mairieIds.length === 0 || rubriqueIds.length === 0) {
-        throw new Error("Mairies et rubriques requises. Créez-les d'abord.");
+      if (rubriqueIds.length === 0) {
+        throw new Error("Rubriques requises. Créez-les d'abord.");
       }
-      return seedChapitres(mairieIds, rubriqueIds, count);
+      return seedChapitres(rubriqueIds, count);
     }
 
     case 'previsions': {
-      const [mairies, rubriques, utilisateurs] = await Promise.all([
-        db.mairies.toArray(),
+      const [rubriques, utilisateurs] = await Promise.all([
         db.rubriques.toArray(),
         db.utilisateurs.toArray(),
       ]);
-      const mairieIds = mairies.map((m: Mairie) => m.id!);
       const rubriqueIds = rubriques.map((c: Rubrique) => c.id!);
       const utilisateurIds = utilisateurs.map((u: Utilisateur) => u.id!);
-      if (mairieIds.length === 0 || rubriqueIds.length === 0 || utilisateurIds.length === 0) {
-        throw new Error("Mairies, rubriques et utilisateurs requis. Créez-les d'abord.");
+      if (rubriqueIds.length === 0 || utilisateurIds.length === 0) {
+        throw new Error("Rubriques et utilisateurs requis. Créez-les d'abord.");
       }
-      return seedPrevisions(mairieIds, rubriqueIds, utilisateurIds, count);
+      return seedPrevisions(rubriqueIds, utilisateurIds, count);
     }
 
     case 'mandats': {
-      const [mairies, rubriques, previsions, utilisateurs] = await Promise.all([
-        db.mairies.toArray(),
+      const [rubriques, previsions, utilisateurs] = await Promise.all([
         db.rubriques.toArray(),
         db.previsions.toArray(),
         db.utilisateurs.toArray(),
       ]);
-      const mairieIds = mairies.map((m: Mairie) => m.id!);
       const rubriqueIds = rubriques.map((c: Rubrique) => c.id!);
       const previsionIds = previsions.map((p: Prevision) => p.id!);
       const utilisateurIds = utilisateurs.map((u: Utilisateur) => u.id!);
-      if (mairieIds.length === 0 || rubriqueIds.length === 0 || utilisateurIds.length === 0) {
-        throw new Error(
-          "Mairies, rubriques, prévisions et utilisateurs requis. Créez-les d'abord.",
-        );
+      if (rubriqueIds.length === 0 || utilisateurIds.length === 0) {
+        throw new Error("Rubriques, prévisions et utilisateurs requis. Créez-les d'abord.");
       }
-      return seedMandats(mairieIds, rubriqueIds, previsionIds, utilisateurIds, count);
+      return seedMandats(rubriqueIds, previsionIds, utilisateurIds, count);
     }
 
     case 'bordereauMandats': {
-      const [mairies, utilisateurs] = await Promise.all([
-        db.mairies.toArray(),
-        db.utilisateurs.toArray(),
-      ]);
-      const mairieIds = mairies.map((m: Mairie) => m.id!);
+      const utilisateurs = await db.utilisateurs.toArray();
       const utilisateurIds = utilisateurs.map((u: Utilisateur) => u.id!);
-      if (mairieIds.length === 0 || utilisateurIds.length === 0) {
-        throw new Error("Mairies et utilisateurs requis. Créez-les d'abord.");
+      if (utilisateurIds.length === 0) {
+        throw new Error("Utilisateurs requis. Créez-les d'abord.");
       }
-      return seedBordereauMandats(mairieIds, utilisateurIds, count);
+      return seedBordereauMandats(utilisateurIds, count);
     }
   }
 }

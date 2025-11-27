@@ -9,13 +9,10 @@
     <FilterBar
       v-model:search="search"
       v-model:statut="filterStatut"
-      v-model:mairie="filterMairie"
       v-model:date-debut="filterDateDebut"
       v-model:date-fin="filterDateFin"
       :statut-options="statutOptions"
-      :mairie-options="mairieOptions"
       show-statut
-      show-mairie
       show-date-range
       search-placeholder="Rechercher N° bordereau..."
       @reset="resetFilters"
@@ -61,11 +58,9 @@
       v-model="dialogVisible"
       :bordereau="currentBordereau"
       :is-editing="isEditing"
-      :mairie-options="mairieOptions"
       :statut-options="statutOptions"
       :readonly="!authStore.isAdmin"
       :loading="saving"
-      :default-mairie-id="authStore.currentUser?.mairieId || 0"
       :next-numero="nextNumeroBordereau"
       @submit="onSubmit"
     />
@@ -160,7 +155,6 @@ const isEditing = ref(false);
 const currentBordereau = ref<BordereauRecette | null>(null);
 const search = ref('');
 const filterStatut = ref('');
-const filterMairie = ref<number | null>(null);
 const filterDateDebut = ref('');
 const filterDateFin = ref('');
 const declarationsDialogVisible = ref(false);
@@ -171,6 +165,7 @@ const selectedBordereau = ref<BordereauRecette | null>(null);
 const statutOptions = ['ouvert', 'ferme'];
 
 const columns = [
+  { name: 'id', label: 'ID', field: 'id', align: 'center' as const, sortable: true },
   { name: 'numero', label: 'N°', field: 'numero', align: 'center' as const, sortable: true },
   {
     name: 'annee',
@@ -242,8 +237,6 @@ const declarationsColumns = [
   },
 ];
 
-const mairieOptions = computed(() => mairies.value.map((m) => ({ label: m.nom, value: m.id! })));
-
 const bordereauDeclarationsTotal = computed(() => {
   return bordereauDeclarations.value.reduce((sum, decl) => sum + (decl.montantRecette || 0), 0);
 });
@@ -253,10 +246,6 @@ const filteredBordereaux = computed(() => {
 
   if (filterStatut.value) {
     result = result.filter((b) => b.statut === filterStatut.value);
-  }
-
-  if (filterMairie.value) {
-    result = result.filter((b) => b.mairieId === filterMairie.value);
   }
 
   if (filterDateDebut.value) {
@@ -280,7 +269,6 @@ const filteredBordereaux = computed(() => {
 function resetFilters() {
   search.value = '';
   filterStatut.value = '';
-  filterMairie.value = null;
   filterDateDebut.value = '';
   filterDateFin.value = '';
 }
@@ -484,8 +472,8 @@ async function printBordereau(bordereau: BordereauRecette) {
             type: 'FILL_BORDEREAU',
             data: {
               mairie: mairie?.nom || '',
-              ville: mairie?.ville || 'Vavoua',
-              codeCommune: mairie?.code || '',
+              ville: mairie?.ville || 'Azaguié',
+              codeCommune: mairie?.code || 422,
               exercice: bordereau.annee || new Date().getFullYear(),
               numeroBordereau: formatNumeroBordereau(bordereau.numero, bordereau.annee),
               numeroSimple: bordereau.numero,
@@ -546,8 +534,8 @@ async function downloadBordereauPDF(bordereau: BordereauRecette) {
             type: 'FILL_AND_PRINT',
             data: {
               mairie: mairie?.nom || '',
-              ville: mairie?.ville || 'Vavoua',
-              codeCommune: mairie?.code || '',
+              ville: mairie?.ville || 'Azaguié',
+              codeCommune: mairie?.code || 422,
               exercice: bordereau.annee || new Date().getFullYear(),
               numeroBordereau: formatNumeroBordereau(bordereau.numero, bordereau.annee),
               numeroSimple: bordereau.numero,

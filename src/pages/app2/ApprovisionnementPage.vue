@@ -133,7 +133,7 @@
                   v-model.number="form.exercice"
                   filled
                   type="number"
-                  label="EXO (Exonération)"
+                  label="Exercice"
                   min="0"
                   dense
                 />

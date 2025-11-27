@@ -302,16 +302,16 @@ const fullSeederOptions = ref({
   declarations: 100,
   bordereaux: 12,
   // App2
-  approvisionnements: 20,
-  remises: 50,
-  versements: 60,
+  approvisionnements: 10,
+  remises: 10,
+  versements: 5,
   balancesEntree: 5,
   // App3
   rubriques: 8,
   chapitres: 47,
   previsions: 10,
-  mandats: 100,
-  bordereauMandats: 12,
+  mandats: 50,
+  bordereauMandats: 6,
 });
 
 const tables = ref([

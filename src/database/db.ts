@@ -1,5 +1,8 @@
 import Dexie, { type EntityTable } from 'dexie';
 
+// Constante pour l'ID de la mairie par défaut (Mairie d'Azaguié)
+export const DEFAULT_MAIRIE_ID = 1;
+
 // Interfaces pour les modèles de données
 export interface Mairie {
   id?: number;
@@ -284,15 +287,15 @@ export async function initializeDatabase() {
     // Données de démonstration
     const now = new Date();
 
-    // Créer une mairie par défaut
+    // Créer la Mairie d'Azaguié (mairie unique de l'application)
     const mairieId = await db.mairies.add({
-      nom: "Mairie d'Azaguie",
+      nom: "Mairie d'Azaguié",
       code: '422',
-      adresse: 'Azaguie',
-      ville: 'Dakar',
-      codePostal: '10000',
-      telephone: '+221 33 889 40 00',
-      email: 'contact@mairie-dakar.sn',
+      adresse: 'Avenue Principale',
+      ville: 'Azaguié',
+      codePostal: '00225',
+      telephone: '+225 XX XX XX XX',
+      email: 'contact@mairie-azaguie.ci',
       createdAt: now,
       updatedAt: now,
     });

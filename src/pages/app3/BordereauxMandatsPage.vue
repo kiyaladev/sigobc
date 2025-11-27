@@ -8,11 +8,8 @@
     <!-- Recherche et filtres -->
     <FilterBar
       v-model:search="search"
-      v-model:mairie="filterMairie"
       v-model:date-debut="filterDateDebut"
       v-model:date-fin="filterDateFin"
-      :mairie-options="mairieOptions"
-      show-mairie
       show-date-range
       search-placeholder="Rechercher par exercice..."
       @reset="resetFilters"
@@ -131,17 +128,6 @@
             emit-value
             map-options
           />
-
-          <q-select
-            v-model="selectedMairie"
-            :options="mairieOptions"
-            label="Mairie (optionnel)"
-            outlined
-            emit-value
-            map-options
-            clearable
-            class="q-mt-md"
-          />
         </q-card-section>
 
         <q-card-actions align="right">
@@ -226,23 +212,20 @@
 import { ref, computed, onMounted } from 'vue';
 import { useQuasar, date } from 'quasar';
 import { db, type Mandat, type Mairie, type Chapitre } from 'src/database/db';
-import { useAuthStore } from 'src/stores/auth-store';
+
 import FilterBar from 'src/components/FilterBar.vue';
 
 const $q = useQuasar();
-const authStore = useAuthStore();
 
 const mandats = ref<Mandat[]>([]);
 const mairies = ref<Mairie[]>([]);
 const chapitres = ref<Chapitre[]>([]);
 const loading = ref(false);
 const search = ref('');
-const filterMairie = ref<number | null>(null);
 const filterDateDebut = ref('');
 const filterDateFin = ref('');
 const printDialogVisible = ref(false);
 const selectedExercice = ref<number | null>(null);
-const selectedMairie = ref<number | null>(null);
 const mandatsDialogVisible = ref(false);
 const selectedExerciceView = ref<number | null>(null);
 const mandatsExerciceView = ref<Mandat[]>([]);
@@ -300,8 +283,6 @@ const mandatsColumns = [
   },
 ];
 
-const mairieOptions = computed(() => mairies.value.map((m) => ({ label: m.nom, value: m.id! })));
-
 const exerciceOptions = computed(() =>
   exercicesDisponibles.value.map((e) => ({ label: `Exercice ${e}`, value: e })),
 );
@@ -343,7 +324,6 @@ const mandatsExerciceViewTotal = computed(() => {
 
 function resetFilters() {
   search.value = '';
-  filterMairie.value = null;
   filterDateDebut.value = '';
   filterDateFin.value = '';
 }
@@ -416,35 +396,23 @@ async function viewBordereauExercice(exercice: number) {
 function openPrintDialog() {
   const currentYear = new Date().getFullYear();
   selectedExercice.value = currentYear;
-  selectedMairie.value = authStore.currentUser?.mairieId || null;
   printDialogVisible.value = true;
 }
 
 function printBordereauExercice(exercice: number) {
-  const mairieId = authStore.currentUser?.mairieId;
-  let url = `/bordereau_emission_mandats.html?exercice=${exercice}`;
-  if (mairieId) {
-    url += `&mairieId=${mairieId}`;
-  }
+  const url = `/bordereau_mandat_new.html?exercice=${exercice}`;
   window.open(url, '_blank');
 }
 
 function downloadBordereauPDF(exercice: number) {
-  const mairieId = authStore.currentUser?.mairieId;
-  let url = `/bordereau_emission_mandats.html?exercice=${exercice}&print=true`;
-  if (mairieId) {
-    url += `&mairieId=${mairieId}`;
-  }
+  const url = `/bordereau_mandat_new.html?exercice=${exercice}&print=true`;
   window.open(url, '_blank');
 }
 
 function confirmPrint() {
   if (!selectedExercice.value) return;
 
-  let url = `/bordereau_emission_mandats.html?exercice=${selectedExercice.value}`;
-  if (selectedMairie.value) {
-    url += `&mairieId=${selectedMairie.value}`;
-  }
+  const url = `/bordereau_mandat_new.html?exercice=${selectedExercice.value}`;
   window.open(url, '_blank');
   printDialogVisible.value = false;
 }
@@ -452,10 +420,7 @@ function confirmPrint() {
 function confirmDownload() {
   if (!selectedExercice.value) return;
 
-  let url = `/bordereau_emission_mandats.html?exercice=${selectedExercice.value}&print=true`;
-  if (selectedMairie.value) {
-    url += `&mairieId=${selectedMairie.value}`;
-  }
+  const url = `/bordereau_mandat_new.html?exercice=${selectedExercice.value}&print=true`;
   window.open(url, '_blank');
   printDialogVisible.value = false;
 }
