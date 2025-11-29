@@ -120,7 +120,7 @@
 </template>
 
 <script setup lang="ts">
-import { SectionIIIEntry } from '../types';
+import type { SectionIIIEntry } from '../types';
 
 defineProps<{
   data: SectionIIIEntry[];

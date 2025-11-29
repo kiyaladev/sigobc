@@ -146,7 +146,7 @@
  */
 import { ref, onMounted, computed } from 'vue';
 import { useQuasar } from 'quasar';
-import type { SectionIEntry, SectionIIEntry, SectionIIIEntry } from './types';
+import type { SectionIEntry, SectionIIEntry, SectionIIIEntry, DenominationsType } from './types';
 import type { AnySectionEntry } from './types';
 import SectionI from './components/SectionI.vue';
 import SectionII from './components/SectionII.vue';
@@ -183,22 +183,6 @@ const sectionIData = ref<SectionIEntry[]>([]);
 const sectionIIData = ref<SectionIIEntry[]>([]);
 const sectionIIIData = ref<SectionIIIEntry[]>([]);
 
-const formatDate = (date: Date | string) => {
-  return new Date(date).toLocaleDateString('fr-FR');
-};
-
-const formatMontant = (montant: number) => {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'XOF',
-    minimumFractionDigits: 0,
-  }).format(montant);
-};
-
-const formatNumber = (num: number) => {
-  return new Intl.NumberFormat('fr-FR').format(num);
-};
-
 // Charger les données depuis Dexie
 const loadData = async () => {
   loading.value = true;
@@ -218,17 +202,31 @@ const loadData = async () => {
 
     console.log('✅ Remises pour exercice', exercice, ':', remises.length);
 
+    // Charger les approvisionnements (uniquement par exercice)
+    const approvisionnements = await db.approvisionnements
+      .where('exercice')
+      .equals(exercice)
+      .toArray();
+    console.log('✅ Approvisionnements pour exercice', exercice, ':', approvisionnements.length);
+
     // Charger les versements (uniquement par exercice)
     const versements = await db.versements.where('exercice').equals(exercice).toArray();
     console.log('✅ Versements pour exercice', exercice, ':', versements.length);
 
     // Construire les données pour Section I (Balances + Approvisionnements + Remises)
-    const sectionIEntries: SectionIEntry[] = [];
-    let sectionISolde = 0;
+    // On rassemble tout d'abord pour trier par date
+    const rawSectionI: {
+      id: number;
+      date: Date;
+      type: string;
+      denominations: DenominationsType;
+      approvisionnement?: number;
+      remise?: number;
+    }[] = [];
 
     // Ajouter les balances d'entrée de Section I
     const balancesBES1 = balances.filter(
-      (b) => b.type.includes('BE-S1') || b.type.includes('Stock'),
+      (b) => b.type.includes('BE-S1') || b.type.includes('INITIAL') || b.type.includes('Stock'),
     );
     console.log(
       '🔍 Section I - Balances filtrées (BE-S1 ou Stock):',
@@ -237,37 +235,62 @@ const loadData = async () => {
     );
 
     balancesBES1.forEach((b) => {
-      sectionISolde += b.total;
-      sectionIEntries.push({
+      rawSectionI.push({
         id: b.id!,
-        date: b.date.toISOString(),
+        date: b.date,
         type: b.type,
         denominations: b.timbres,
         approvisionnement: b.total,
-        solde: sectionISolde,
+      });
+    });
+
+    // Ajouter les approvisionnements
+    approvisionnements.forEach((a) => {
+      rawSectionI.push({
+        id: a.id!,
+        date: a.date,
+        type: 'Approvisionnement',
+        denominations: a.timbres,
+        approvisionnement: a.total,
       });
     });
 
     // Ajouter les remises (sorties)
     remises.forEach((r) => {
-      sectionISolde -= r.total;
-      sectionIEntries.push({
+      rawSectionI.push({
         id: r.id!,
-        date: r.date.toISOString(),
+        date: r.date,
         type: 'Remise',
         denominations: r.timbres,
         remise: r.total,
-        solde: sectionISolde,
       });
     });
 
-    sectionIData.value = sectionIEntries.sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
-    );
+    // Trier par date
+    rawSectionI.sort((a, b) => a.date.getTime() - b.date.getTime());
+
+    // Calculer les soldes
+    let sectionISolde = 0;
+    sectionIData.value = rawSectionI.map((item) => {
+      if (item.approvisionnement) sectionISolde += item.approvisionnement;
+      if (item.remise) sectionISolde -= item.remise;
+
+      return {
+        ...item,
+        date: item.date.toISOString(),
+        solde: sectionISolde,
+      };
+    });
 
     // Construire les données pour Section II (Balances + Remises + Versements)
-    const sectionIIEntries: SectionIIEntry[] = [];
-    let sectionIISolde = 0;
+    const rawSectionII: {
+      id: number;
+      date: Date;
+      type: string;
+      denominations: DenominationsType;
+      remise?: number;
+      versement?: number;
+    }[] = [];
 
     // Ajouter les balances d'entrée de Section II
     const balancesBES2 = balances.filter((b) => b.type.includes('BE-S2'));
@@ -278,50 +301,61 @@ const loadData = async () => {
     );
 
     balancesBES2.forEach((b) => {
-      sectionIISolde += b.total;
-      sectionIIEntries.push({
+      rawSectionII.push({
         id: b.id!,
-        date: b.date.toISOString(),
+        date: b.date,
         type: b.type,
         denominations: b.timbres,
-        remise: b.total,
-        solde: sectionIISolde,
+        remise: b.total, // Pour section II, l'entrée est une remise (ou équivalent)
       });
     });
 
-    // Ajouter remises et versements
-    [...remises, ...versements]
-      .sort((a, b) => a.date.getTime() - b.date.getTime())
-      .forEach((entry) => {
-        const isRemise = 'numeroRemise' in entry;
-        if (isRemise) {
-          sectionIISolde += entry.total;
-          sectionIIEntries.push({
-            id: entry.id!,
-            date: entry.date.toISOString(),
-            type: 'Remise',
-            denominations: entry.timbres,
-            remise: entry.total,
-            solde: sectionIISolde,
-          });
-        } else {
-          sectionIISolde -= entry.total;
-          sectionIIEntries.push({
-            id: entry.id!,
-            date: entry.date.toISOString(),
-            type: 'Versement',
-            denominations: entry.timbres,
-            versement: entry.total,
-            solde: sectionIISolde,
-          });
-        }
+    // Ajouter remises (entrées) et versements (sorties)
+    remises.forEach((r) => {
+      rawSectionII.push({
+        id: r.id!,
+        date: r.date,
+        type: 'Remise',
+        denominations: r.timbres,
+        remise: r.total,
       });
+    });
 
-    sectionIIData.value = sectionIIEntries;
+    versements.forEach((v) => {
+      rawSectionII.push({
+        id: v.id!,
+        date: v.date,
+        type: 'Versement',
+        denominations: v.timbres,
+        versement: v.total,
+      });
+    });
+
+    // Trier par date
+    rawSectionII.sort((a, b) => a.date.getTime() - b.date.getTime());
+
+    // Calculer les soldes
+    let sectionIISolde = 0;
+    sectionIIData.value = rawSectionII.map((item) => {
+      if (item.remise) sectionIISolde += item.remise;
+      if (item.versement) sectionIISolde -= item.versement;
+
+      return {
+        ...item,
+        date: item.date.toISOString(),
+        solde: sectionIISolde,
+      };
+    });
 
     // Construire les données pour Section III (Balances + Versements)
-    const sectionIIIEntries: SectionIIIEntry[] = [];
-    let sectionIIISolde = 0;
+    const rawSectionIII: {
+      id: number;
+      date: Date;
+      type: string;
+      denominations: DenominationsType;
+      approvisionnement?: number;
+      versement?: number;
+    }[] = [];
 
     // Ajouter les balances d'entrée de Section III
     const balancesBES3 = balances.filter((b) => b.type.includes('BE-S3'));
@@ -332,33 +366,45 @@ const loadData = async () => {
     );
 
     balancesBES3.forEach((b) => {
-      sectionIIISolde += b.total;
-      sectionIIIEntries.push({
+      rawSectionIII.push({
         id: b.id!,
-        date: b.date.toISOString(),
+        date: b.date,
         type: b.type,
         denominations: b.timbres,
-        approvisionnement: b.total,
-        solde: sectionIIISolde,
+        approvisionnement: b.total, // BE est une entrée
       });
     });
 
-    // Ajouter les versements
+    // Ajouter les versements (entrées dans la caisse ? Non, Section III = Caisse)
+    // Section III :
+    // Reçoit les versements de Section II (sorties négatives de SII -> entrées positives SIII)
+    // Formule : Solde = BE-S3 + Versements
     versements.forEach((v) => {
-      sectionIIISolde -= v.total;
-      sectionIIIEntries.push({
+      rawSectionIII.push({
         id: v.id!,
-        date: v.date.toISOString(),
+        date: v.date,
         type: 'Versement',
         denominations: v.timbres,
-        versement: v.total,
-        solde: sectionIIISolde,
+        versement: v.total, // Ici versement est un ajout au solde (selon commentaire ligne 133)
       });
     });
 
-    sectionIIIData.value = sectionIIIEntries.sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
-    );
+    // Trier par date
+    rawSectionIII.sort((a, b) => a.date.getTime() - b.date.getTime());
+
+    // Calculer les soldes
+    let sectionIIISolde = 0;
+    sectionIIIData.value = rawSectionIII.map((item) => {
+      if (item.approvisionnement) sectionIIISolde += item.approvisionnement;
+      // Section III (Caisse) : Formule = BE-S3 - Versement (selon demande utilisateur)
+      if (item.versement) sectionIIISolde -= item.versement;
+
+      return {
+        ...item,
+        date: item.date.toISOString(),
+        solde: sectionIIISolde,
+      };
+    });
 
     // Mettre à jour les soldes
     soldeSectionI.value = sectionISolde;
@@ -376,29 +422,124 @@ const loadData = async () => {
 };
 
 // Impression d'une section spécifique
+const getMonthLabel = (month: number, year: number) => {
+  const date = new Date(year, month, 1);
+  // Capitalize first letter
+  const label = date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+  return 'Total ' + label.charAt(0).toUpperCase() + label.slice(1);
+};
+
+type MonthlyTotalEntry = {
+  isMonthlyTotal: boolean;
+  date: string;
+  denominations: DenominationsType;
+  approvisionnement?: number;
+  remise?: number;
+  versement?: number;
+  solde: number;
+};
+
+const addMonthlyTotals = (data: AnySectionEntry[]) => {
+  if (!data.length) return [];
+
+  const result: (AnySectionEntry | MonthlyTotalEntry)[] = [];
+  let currentMonth = new Date(data[0]!.date).getMonth();
+  let currentYear = new Date(data[0]!.date).getFullYear();
+
+  // Init accumulators
+  let totalDenom: DenominationsType = {
+    100: 0,
+    200: 0,
+    300: 0,
+    500: 0,
+    600: 0,
+    1000: 0,
+  };
+  let totalApprov = 0;
+  let totalRemise = 0;
+  let totalVersement = 0;
+
+  data.forEach((row, index) => {
+    const date = new Date(row.date);
+    const month = date.getMonth();
+    const year = date.getFullYear();
+
+    if (month !== currentMonth || year !== currentYear) {
+      // Add total row
+      result.push({
+        isMonthlyTotal: true,
+        date: getMonthLabel(currentMonth, currentYear),
+        denominations: { ...totalDenom },
+        approvisionnement: totalApprov,
+        remise: totalRemise,
+        versement: totalVersement,
+        solde: data[index - 1]!.solde, // Solde at end of month
+      });
+
+      // Reset
+      totalDenom = { 100: 0, 200: 0, 300: 0, 500: 0, 600: 0, 1000: 0 };
+      totalApprov = 0;
+      totalRemise = 0;
+      totalVersement = 0;
+      currentMonth = month;
+      currentYear = year;
+    }
+
+    // Accumulate
+    if (row.denominations) {
+      for (const k in row.denominations) {
+        const key = Number(k);
+        const val = row.denominations[key];
+        if (totalDenom[key] !== undefined) {
+          totalDenom[key] += val || 0;
+        }
+      }
+    }
+    if ('approvisionnement' in row && row.approvisionnement) totalApprov += row.approvisionnement;
+    if ('remise' in row && row.remise) totalRemise += row.remise;
+    if ('versement' in row && row.versement) totalVersement += row.versement;
+
+    result.push(row);
+  });
+
+  // Last month total
+  result.push({
+    isMonthlyTotal: true,
+    date: getMonthLabel(currentMonth, currentYear),
+    denominations: { ...totalDenom },
+    approvisionnement: totalApprov,
+    remise: totalRemise,
+    versement: totalVersement,
+    solde: data[data.length - 1]!.solde,
+  });
+
+  return result;
+};
+
 const printSection = (sectionName: string) => {
   let data: AnySectionEntry[] = [];
   let templateUrl = '';
 
   if (sectionName === 'section1') {
-    data = sectionIData.value;
+    data = JSON.parse(JSON.stringify(sectionIData.value));
     templateUrl = '/SectionI.html';
   } else if (sectionName === 'section2') {
-    data = sectionIIData.value;
+    data = JSON.parse(JSON.stringify(sectionIIData.value));
     templateUrl = '/SectionII.html';
   } else if (sectionName === 'section3') {
-    data = sectionIIIData.value;
+    data = JSON.parse(JSON.stringify(sectionIIIData.value));
     templateUrl = '/SectionIII.html';
   }
 
   const printWindow = window.open(templateUrl, '_blank');
 
   if (printWindow) {
+    const dataWithTotals = addMonthlyTotals(data);
     printWindow.addEventListener('load', () => {
       printWindow.postMessage(
         {
           type: 'FILL_DATA',
-          data: data,
+          data: dataWithTotals,
         },
         '*',
       );

@@ -226,8 +226,8 @@ export async function seedDeclarations(
     const montantTaxe = Math.round((montantHT * randomAmount(5, 20)) / 100);
     const montantTTC = montantHT + montantTaxe;
 
-    // Choose a bordereau randomly (80% chance to be in a bordereau)
-    const assignBordereau = Math.random() > 0.2 && bordereaux.length > 0;
+    // Choose a bordereau (100% chance if bordereaux exist)
+    const assignBordereau = bordereaux.length > 0;
     let bordereauId: number | undefined;
     let exercice = new Date(randomDate(startDate, now)).getFullYear();
     let dateEncaissement = randomDate(new Date(exercice, 0, 1), new Date(exercice, 11, 31));
@@ -357,7 +357,7 @@ export async function seedApprovisionnements(personnelIds: number[], count: numb
       new Date(exercice, 0, 1),
       exercice === 2025 ? now : new Date(exercice, 11, 31),
     );
-    const type = 'approvisionnement';
+    const type = 'appro';
     // Générer des quantités aléatoires pour chaque valeur de timbre
     const timbres: Timbres = {
       100: randomAmount(100, 1000),
@@ -543,7 +543,9 @@ export async function seedBalancesEntree(personnelIds: number[], count: number =
   for (let i = 0; i < count; i++) {
     const exercice = randomChoice(exercices);
     const date = new Date(exercice, 0, 1); // 1er janvier de l'exercice
-    const type = i === 0 ? 'Balance' : randomChoice(['Balance', 'Balance Entrée', 'Solde Initial']);
+
+    const types = ['INITIAL', 'BE-S1', 'BE-S2', 'BE-S3'];
+    const type = types[i % types.length]!; // Cycle through types to ensure coverage
 
     // Générer des quantités aléatoires pour le stock initial
     const timbres: Timbres = {

@@ -122,7 +122,7 @@
 </template>
 
 <script setup lang="ts">
-import { SectionIIEntry } from '../types';
+import type { SectionIIEntry } from '../types';
 
 defineProps<{
   data: SectionIIEntry[];

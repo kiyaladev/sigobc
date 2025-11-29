@@ -143,7 +143,7 @@ export interface BalanceEntree {
   mairieId: number;
   exercice: number; // Année
   date: Date;
-  type: string; // Type de balance (Balance, Balance Entrée, Solde Initial)
+  type: string; // Type de balance (INITIAL, BE-S1, BE-S2, BE-S3)
   timbres: Timbres; // Stock de timbres par valeur
   total: number; // Montant total du stock
   commentaires?: string;
