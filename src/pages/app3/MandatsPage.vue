@@ -459,10 +459,10 @@ const rubriqueOptions = computed(() =>
 
 const chapitreOptions = computed(() =>
   chapitres.value
-    .filter(
-      (c) =>
-        c.actif && (formData.value.rubriqueId ? c.rubriqueId === formData.value.rubriqueId : true),
-    )
+    // .filter(
+    //   (c) =>
+    //     c.actif && (formData.value.rubriqueId ? c.rubriqueId === formData.value.rubriqueId : true),
+    // )
     .map((c) => ({
       label: `${c.code} - ${c.libelle}`,
       value: c.id,

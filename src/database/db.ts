@@ -159,7 +159,7 @@ export interface Chapitre {
   code: string; // Ex: 6011
   libelle: string; // Ex: "Fournitures de bureau"
   description?: string;
-  rubriqueId: number; // Lien vers la rubrique
+//  rubriqueId: number; // Lien vers la rubrique
   mairieId: number;
   actif: boolean;
   createdAt: Date;
@@ -266,7 +266,7 @@ class TresorDatabase extends Dexie {
       versements: '++id, numeroVersement, date, exercice, mairieId, personnelId',
       balancesEntree: '++id, date, exercice, mairieId, type, personnelId, [exercice+mairieId]',
       // App3
-      chapitres: '++id, code, libelle, rubriqueId, mairieId, actif',
+      chapitres: '++id, code, libelle, mairieId, actif',
       rubriques: '++id, code, libelle, mairieId, actif',
       previsions: '++id, exercice, rubriqueId, mairieId, statut, personnelId',
       mandats:
@@ -351,20 +351,11 @@ export async function initializeDatabase() {
     ]);
 
     // Créer quelques rubriques et chapitres par défaut pour App3
-    const rubriqueId = await db.rubriques.add({
-      code: '60',
-      libelle: 'Achats de matières et fournitures',
-      mairieId: mairieId as number,
-      actif: true,
-      createdAt: now,
-      updatedAt: now,
-    });
 
     await db.chapitres.bulkAdd([
       {
         code: '6011',
         libelle: 'Fournitures de bureau',
-        rubriqueId: rubriqueId as number,
         mairieId: mairieId as number,
         actif: true,
         createdAt: now,
@@ -373,7 +364,6 @@ export async function initializeDatabase() {
       {
         code: '6012',
         libelle: 'Fournitures informatiques',
-        rubriqueId: rubriqueId as number,
         mairieId: mairieId as number,
         actif: true,
         createdAt: now,

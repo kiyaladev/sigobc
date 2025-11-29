@@ -85,16 +85,7 @@
 
         <q-card-section>
           <q-form @submit="saveChaptre" class="q-gutter-md">
-            <q-select
-              v-model="form.rubriqueId"
-              :options="rubriqueOptions"
-              label="Rubrique *"
-              outlined
-              dense
-              emit-value
-              map-options
-              :rules="[(val) => !!val || 'La rubrique est requise']"
-            />
+
 
             <q-input
               v-model="form.code"
@@ -162,12 +153,12 @@ interface ChapitreForm {
   code: string;
   libelle: string;
   description: string;
-  rubriqueId: number | null;
+  // rubriqueId: number | null;
   actif: boolean;
 }
 
 const form = ref<ChapitreForm>({
-  rubriqueId: null,
+  //rubriqueId: null,
   code: '',
   libelle: '',
   description: '',
@@ -179,25 +170,20 @@ const statutOptions = [
   { label: 'Inactif', value: false },
 ];
 
-const rubriqueOptions = computed(() =>
-  rubriques.value.map((r) => ({
-    label: `${r.code} - ${r.libelle}`,
-    value: r.id,
-  })),
-);
+
 
 const columns = [
   { name: 'code', label: 'Code', field: 'code', align: 'left' as const, sortable: true },
-  {
-    name: 'rubrique',
-    label: 'Rubrique',
-    align: 'left' as const,
-    field: (row: Chapitre) => {
-      const rubrique = rubriques.value.find((r) => r.id === row.rubriqueId);
-      return rubrique ? `${rubrique.code} - ${rubrique.libelle}` : '';
-    },
-    sortable: true,
-  },
+  // {
+  //   name: 'rubrique',
+  //   label: 'Rubrique',
+  //   align: 'left' as const,
+  //   field: (row: Chapitre) => {
+  //     const rubrique = rubriques.value.find((r) => r.id === row.rubriqueId);
+  //     return rubrique ? `${rubrique.code} - ${rubrique.libelle}` : '';
+  //   },
+  //   sortable: true,
+  // },
   { name: 'libelle', label: 'Libellé', field: 'libelle', align: 'left' as const, sortable: true },
   {
     name: 'description',
@@ -251,7 +237,6 @@ function openDialog(chapitre?: Chapitre) {
     isEditing.value = true;
     form.value = {
       id: chapitre.id,
-      rubriqueId: chapitre.rubriqueId,
       code: chapitre.code,
       libelle: chapitre.libelle,
       description: chapitre.description || '',
@@ -260,7 +245,6 @@ function openDialog(chapitre?: Chapitre) {
   } else {
     isEditing.value = false;
     form.value = {
-      rubriqueId: null,
       code: '',
       libelle: '',
       description: '',
@@ -276,7 +260,6 @@ async function saveChaptre() {
     const now = new Date();
     const chapitreData: Chapitre = {
       ...form.value,
-      rubriqueId: form.value.rubriqueId!,
       code: form.value.code,
       libelle: form.value.libelle,
       actif: form.value.actif,

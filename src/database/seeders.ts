@@ -815,7 +815,7 @@ export async function seedChapitres(rubriqueIds: number[], count: number = 60) {
       code: data.code,
       libelle: data.libelle,
       description: data.description,
-      rubriqueId: randomChoice(rubriqueIds),
+      // rubriqueId: randomChoice(rubriqueIds),
       mairieId: DEFAULT_MAIRIE_ID,
       actif: true,
       createdAt: randomDate(new Date(2020, 0, 1), now),
