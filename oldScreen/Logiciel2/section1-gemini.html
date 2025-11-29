@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>État des Stocks - Section 1</title>
+    <style>
+      /* Configuration générale */
+      body {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-size: 11px; /* Taille optimisée pour contenir beaucoup de données sur A4 */
+        color: #000;
+        background-color: #f0f0f0; /* Gris pour l'écran, blanc pour l'impression */
+        margin: 0;
+        padding: 20px;
+      }
+
+      /* Conteneur principal simulant la feuille A4 */
+      .page-container {
+        background-color: white;
+        width: 210mm; /* Largeur A4 */
+        min-height: 297mm; /* Hauteur A4 */
+        margin: 0 auto;
+        padding: 15mm;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        box-sizing: border-box;
+      }
+
+      /* Titre */
+      h1 {
+        text-align: center;
+        text-transform: uppercase;
+        font-size: 18px;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #000;
+        padding-bottom: 10px;
+      }
+
+      /* Tableaux */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 10px;
+      }
+
+      th,
+      td {
+        border: 1px solid #000;
+        padding: 4px 6px;
+        text-align: right; /* Alignement des chiffres à droite */
+      }
+
+      /* En-têtes */
+      th {
+        background-color: #e0e0e0;
+        font-weight: bold;
+        text-align: center;
+        vertical-align: middle;
+      }
+
+      /* Colonnes spécifiques */
+      td:nth-child(1),
+      td:nth-child(2) {
+        text-align: left; /* Date et Type à gauche */
+        white-space: nowrap;
+      }
+
+      /* Lignes de résumé mensuel */
+      .summary-row {
+        background-color: #d1d1d1;
+        font-weight: bold;
+      }
+
+      .summary-row td:first-child {
+        text-align: left;
+        text-transform: uppercase;
+      }
+
+      /* Bouton d'impression (caché à l'impression) */
+      .no-print {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+        font-size: 16px;
+        border-radius: 4px;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+
+      /* Styles spécifiques pour l'impression */
+      @media print {
+        body {
+          background-color: white;
+          margin: 0;
+          padding: 0;
+        }
+        .page-container {
+          width: 100%;
+          margin: 0;
+          padding: 0; /* Les marges sont gérées par @page */
+          box-shadow: none;
+          border: none;
+        }
+        .no-print {
+          display: none;
+        }
+        @page {
+          size: A4 landscape; /* Orientation paysage recommandée vu le nombre de colonnes */
+          margin: 10mm;
+        }
+        table {
+          page-break-inside: auto;
+        }
+        tr {
+          page-break-inside: avoid;
+          page-break-after: auto;
+        }
+        thead {
+          display: table-header-group;
+        }
+        tfoot {
+          display: table-footer-group;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="no-print">
+      <button onclick="window.print()">🖨️ Imprimer / Sauvegarder en PDF</button>
+      <p>
+        <small
+          >Conseil : Utilisez l'orientation "Paysage" dans les paramètres d'impression pour une
+          meilleure lisibilité.</small
+        >
+      </p>
+    </div>
+
+    <div class="page-container">
+      <h1>Section 1 - État des Mouvements</h1>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>500</th>
+            <th>1000</th>
+            <th>1500</th>
+            <th>3000</th>
+            <th>4500</th>
+            <th>5000</th>
+            <th>Approv.</th>
+            <th>Remise</th>
+            <th>Solde</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Janvier 2025 -->
+          <tr>
+            <td>01/01/2025</td>
+            <td>B_E_1</td>
+            <td>98 500</td>
+            <td>74 670</td>
+            <td>0</td>
+            <td>45 790</td>
+            <td>0</td>
+            <td>0</td>
+            <td>261 290 000</td>
+            <td></td>
+            <td>261 290 000</td>
+          </tr>
+          <tr>
+            <td>06/01/2025</td>
+            <td>Remise</td>
+            <td>-500</td>
+            <td>-100</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td></td>
+            <td>-650 000</td>
+            <td>260 640 000</td>
+          </tr>
+          <tr>
+            <td>10/01/2025</td>
+            <td>Remise</td>
+            <td>-500</td>
+            <td>-250</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td></td>
+            <td>-800 000</td>
+            <td>259 840 000</td>
+          </tr>
+          <tr>
+            <td>15/01/2025</td>
+            <td>Remise</td>
+            <td>-500</td>
+            <td>-250</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td></td>
+            <td>-800 000</td>
+            <td>259 040 000</td>
+          </tr>
+          <tr>
+            <td>20/01/2025</td>
+            <td>Remise</td>
+            <td>-100</td>
+            <td>-250</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td></td>
+            <td>-600 000</td>
+            <td>258 440 000</td>
+          </tr>
+          <tr>
+            <td>24/01/2025</td>
+            <td>Remise</td>
+            <td>-400</td>
+            <td>-250</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td></td>
+            <td>-750 000</td>
+            <td>257 690 000</td>
+          </tr>
+          <tr>
+            <td>31/01/2025</td>
+            <td>Remise</td>
+            <td>-400</td>
+            <td>-250</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td></td>
+            <td>-750 000</td>
+            <td>256 940 000</td>
+          </tr>
+          <!-- Sommaire Janvier -->
+          <tr class="summary-row">
+            <td colspan="2">JANVIER 2025</td>
+            <td>96 100</td>
+            <td>73 320</td>
+            <td>0</td>
+            <td>45 190</td>
+            <td>0</td>
+            <td>0</td>
+            <td>261 290 000</td>
+            <td>-4 350 000</td>
+            <td>256 940 000</td>
+          </tr>
+
+          <!-- Février 2025 -->
+          <tr>
+            <td>05/02/2025</td>
+            <td>Remise</td>
+            <td>-300</td>
+            <td>-200</td>
+            <td>0</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>0</td>
+            <td></td>
+            <td>-650 000</td>
+            <td>256 290 000</td>
+          </tr>
+          <tr>
+            <td>07/02/2025</td>
+            <td>Remise</td>
+            <td>-100</td>
+            <td>-200</td>
+            <td>0</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>0</td>
+            <td></td>
+            <td>-550 000</td>
+            <td>255 740 000</td>
+          </tr>
+          <tr>
+            <td>12/02/2025</td>
+            <td>Remise</td>
+            <td>-200</td>
+            <td>-150</td>
+            <td>0</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>0</td>
+            <td></td>
+            <td>-550 000</td>
+            <td>255 190 000</td>
+          </tr>
+          <tr>
+            <td>14/02/2025</td>
+            <td>Remise</td>
+            <td>-300</td>
+            <td>-150</td>
+            <td>0</td>
+            <td>-50</td>
+            <td>0</td>
+            <td>0</td>
+            <td></td>
+            <td>-450 000</td>
+            <td>254 740 000</td>
+          </tr>
+          <tr>
+            <td>19/02/2025</td>
+            <td>Remise</td>
+            <td>-100</td>
+            <td>-200</td>
+            <td>0</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>0</td>
+            <td></td>
+            <td>-550 000</td>
+            <td>254 190 000</td>
+          </tr>
+          <tr>
+            <td>21/02/2025</td>
+            <td>Remise</td>
+            <td>-200</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>-50</td>
+            <td>0</td>
+            <td>0</td>
+            <td></td>
+            <td>-350 000</td>
+            <td>253 840 000</td>
+          </tr>
+          <tr>
+            <td>26/02/2025</td>
+            <td>Remise</td>
+            <td>-300</td>
+            <td>-50</td>
+            <td>0</td>
+            <td>-50</td>
+            <td>0</td>
+            <td>0</td>
+            <td></td>
+            <td>-350 000</td>
+            <td>253 490 000</td>
+          </tr>
+          <tr>
+            <td>28/02/2025</td>
+            <td>Remise</td>
+            <td>-200</td>
+            <td>-250</td>
+            <td>0</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>0</td>
+            <td></td>
+            <td>-650 000</td>
+            <td>252 840 000</td>
+          </tr>
+          <!-- Sommaire Février -->
+          <tr class="summary-row">
+            <td colspan="2">FÉVRIER 2025</td>
+            <td>94 400</td>
+            <td>72 020</td>
+            <td>0</td>
+            <td>44 540</td>
+            <td>0</td>
+            <td>0</td>
+            <td>261 290 000</td>
+            <td>-8 450 000</td>
+            <td>252 840 000</td>
+          </tr>
+
+          <!-- Mars 2025 -->
+          <tr>
+            <td>05/03/2025</td>
+            <td>Remise</td>
+            <td>-200</td>
+            <td>-200</td>
+            <td>0</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>0</td>
+            <td></td>
+            <td>-600 000</td>
+            <td>252 240 000</td>
+          </tr>
+          <tr>
+            <td>06/03/2025</td>
+            <td>Remise</td>
+            <td>-300</td>
+            <td>-200</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td></td>
+            <td>-350 000</td>
+            <td>251 890 000</td>
+          </tr>
+          <tr>
+            <td>12/03/2025</td>
+            <td>Remise</td>
+            <td>-100</td>
+            <td>-200</td>
+            <td>0</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>0</td>
+            <td></td>
+            <td>-550 000</td>
+            <td>251 340 000</td>
+          </tr>
+          <tr>
+            <td>14/03/2025</td>
+            <td>Remise</td>
+            <td>-300</td>
+            <td>-150</td>
+            <td>0</td>
+            <td>-300</td>
+            <td>0</td>
+            <td>0</td>
+            <td></td>
+            <td>-1 200 000</td>
+            <td>250 140 000</td>
+          </tr>
+          <tr>
+            <td>19/03/2025</td>
+            <td>Remise</td>
+            <td>-100</td>
+            <td>-150</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td></td>
+            <td>-200 000</td>
+            <td>249 940 000</td>
+          </tr>
+          <tr>
+            <td>21/03/2025</td>
+            <td>Remise</td>
+            <td>-300</td>
+            <td>-150</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td></td>
+            <td>-300 000</td>
+            <td>249 640 000</td>
+          </tr>
+          <tr>
+            <td>26/03/2025</td>
+            <td>Remise</td>
+            <td>-100</td>
+            <td>-50</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td></td>
+            <td>-100 000</td>
+            <td>249 540 000</td>
+          </tr>
+          <!-- Sommaire Mars -->
+          <tr class="summary-row">
+            <td colspan="2">MARS 2025</td>
+            <td>93 000</td>
+            <td>70 920</td>
+            <td>0</td>
+            <td>44 040</td>
+            <td>0</td>
+            <td>0</td>
+            <td>261 290 000</td>
+            <td>-11 750 000</td>
+            <td>249 540 000</td>
+          </tr>
+          <!-- Avril 2025 (Échantillon) -->
+          <tr>
+            <td>01/04/2025</td>
+            <td>Remise</td>
+            <td>-500</td>
+            <td>-250</td>
+            <td>0</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>0</td>
+            <td></td>
+            <td>-800 000</td>
+            <td>248 740 000</td>
+          </tr>
+          <tr>
+            <td>...</td>
+            <td>...</td>
+            <td>...</td>
+            <td>...</td>
+            <td>...</td>
+            <td>...</td>
+            <td>...</td>
+            <td>...</td>
+            <td>...</td>
+            <td>...</td>
+            <td>...</td>
+          </tr>
+          <!-- Sommaire Avril -->
+          <tr class="summary-row">
+            <td colspan="2">AVRIL 2025</td>
+            <td>90 700</td>
+            <td>69 370</td>
+            <td>0</td>
+            <td>43 290</td>
+            <td>0</td>
+            <td>0</td>
+            <td>261 290 000</td>
+            <td>-16 700 000</td>
+            <td>244 590 000</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </body>
+</html>

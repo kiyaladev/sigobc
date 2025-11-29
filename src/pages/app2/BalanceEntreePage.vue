@@ -47,11 +47,13 @@
       >
         <template v-slot:body-cell-date="props">
           <q-td :props="props">
-            {{ new Date(props.row.date).toLocaleDateString('fr-FR', {
-              year: 'numeric',
-              month: '2-digit',
-              day: '2-digit'
-            }) }}
+            {{
+              new Date(props.row.date).toLocaleDateString('fr-FR', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+              })
+            }}
           </q-td>
         </template>
 
@@ -111,7 +113,8 @@
           <template v-slot:avatar>
             <q-icon name="warning" color="warning" />
           </template>
-          <strong>Attention :</strong> Une seule balance d'entrée est autorisée par exercice. Si une balance existe déjà pour cet exercice, la création sera refusée.
+          <strong>Attention :</strong> Une seule balance d'entrée est autorisée par exercice. Si une
+          balance existe déjà pour cet exercice, la création sera refusée.
         </q-banner>
 
         <q-card-section>
@@ -131,11 +134,13 @@
               <div class="col-12 col-sm-4">
                 <q-input
                   :model-value="form.date ? new Date(form.date).toISOString().split('T')[0] : ''"
-                  @update:model-value="(val: string | number | null) => {
-                    if (val && typeof val === 'string') {
-                      form.date = new Date(val);
+                  @update:model-value="
+                    (val: string | number | null) => {
+                      if (val && typeof val === 'string') {
+                        form.date = new Date(val);
+                      }
                     }
-                  }"
+                  "
                   filled
                   type="date"
                   label="Date d'opération *"
@@ -199,7 +204,6 @@
                 </q-card>
               </div>
 
-
               <!-- Commentaires -->
               <div class="col-12">
                 <q-input
@@ -231,7 +235,7 @@ import { db, type BalanceEntree } from 'src/database/db';
 const $q = useQuasar();
 
 const valeursTimbre = [100, 200, 300, 500, 600, 1000];
-const typeOptions = ['Balance'];
+const typeOptions = ['Initial', 'BE-S1', 'BE-S2', 'BE-S3'];
 
 const search = ref('');
 const filterDate = ref<string | null>(null);
@@ -370,6 +374,7 @@ const onSubmit = async () => {
     const exerciceValue = form.value.exercice || new Date().getFullYear();
 
     // Vérifier qu'il n'existe pas déjà une balance d'entrée pour cet exercice
+    /*
     const existingBalance = await db.balancesEntree
       .where('exercice')
       .equals(exerciceValue)
@@ -385,7 +390,7 @@ const onSubmit = async () => {
       saving.value = false;
       return;
     }
-
+*/
     const data = {
       mairieId,
       exercice: exerciceValue,

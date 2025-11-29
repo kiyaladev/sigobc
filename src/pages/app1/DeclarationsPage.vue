@@ -21,7 +21,13 @@
       show-date-range
       search-placeholder="Rechercher..."
       @reset="resetFilters"
-    />
+    >
+      <template v-slot:custom-filters>
+        <div class="col-12 col-sm-4 col-md-3">
+          <q-input v-model="filterBordereau" filled dense label="N° Bordereau" clearable />
+        </div>
+      </template>
+    </FilterBar>
 
     <!-- Table des déclarations -->
     <DataTable
@@ -73,6 +79,7 @@
       :readonly="!authStore.isAdmin"
       :loading="saving"
       :next-numero-piece="nextNumeroPiece"
+      :default-adresse="defaultAdresse"
       @submit="onSubmit"
     />
   </q-page>
@@ -112,6 +119,7 @@ const filterExercice = ref<number | null>(null);
 const filterTaxe = ref<number | null>(null);
 const filterDateDebut = ref('');
 const filterDateFin = ref('');
+const filterBordereau = ref('');
 
 const statutOptions = ['brouillon', 'validee'];
 
@@ -196,6 +204,14 @@ const filteredDeclarations = computed(() => {
     result = result.filter((d) => d.taxeId === filterTaxe.value);
   }
 
+  if (filterBordereau.value) {
+    const searchBordereau = filterBordereau.value.toLowerCase();
+    result = result.filter((d) => {
+      const bordereauNum = getBordereauNumero(d.bordereauId).toLowerCase();
+      return bordereauNum.includes(searchBordereau);
+    });
+  }
+
   if (filterDateDebut.value) {
     const debut = new Date(filterDateDebut.value);
     result = result.filter((d) => new Date(d.dateEncaissement) >= debut);
@@ -221,11 +237,19 @@ const filteredDeclarations = computed(() => {
   return result;
 });
 
+const defaultAdresse = computed(() => {
+  if (mairies.value.length === 0) return '';
+  const userMairieId = authStore.currentUser?.mairieId;
+  const mairie = userMairieId ? mairies.value.find((m) => m.id === userMairieId) : mairies.value[0];
+  return mairie?.ville || '';
+});
+
 function resetFilters() {
   search.value = '';
   filterStatut.value = '';
   filterExercice.value = null;
   filterTaxe.value = null;
+  filterBordereau.value = '';
   filterDateDebut.value = '';
   filterDateFin.value = '';
 }

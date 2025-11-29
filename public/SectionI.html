@@ -1,0 +1,860 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Section I</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 15mm;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        font-size: 9pt;
+        line-height: 1.2;
+      }
+
+      .header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
+      .header-icon {
+        width: 30px;
+        height: 30px;
+        background-color: #70ad47;
+        margin-right: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid #548235;
+      }
+
+      .header-icon::before {
+        content: '≡';
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+      }
+
+      h1 {
+        font-size: 18pt;
+        color: #333;
+        font-weight: normal;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+      }
+
+      th,
+      td {
+        border: 1px solid #000;
+        padding: 4px 6px;
+        text-align: center;
+      }
+
+      th {
+        background-color: #f0f0f0;
+        font-weight: bold;
+      }
+
+      td.date {
+        text-align: left;
+        white-space: nowrap;
+      }
+
+      td.type {
+        text-align: left;
+      }
+
+      td.amount {
+        text-align: right;
+      }
+
+      tr.monthly-total {
+        background-color: #e7e6e6;
+        font-weight: bold;
+      }
+
+      tr.monthly-total td {
+        background-color: #e7e6e6;
+      }
+
+      .page-break {
+        page-break-after: always;
+      }
+
+      .page-number {
+        text-align: right;
+        font-size: 8pt;
+        color: #666;
+        margin-top: 10px;
+      }
+
+      @media print {
+        body {
+          margin: 0;
+        }
+
+        .page-break {
+          page-break-after: always;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="header">
+        <div class="header-icon"></div>
+        <h1>Section I</h1>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>100</th>
+            <th>200</th>
+            <th>300</th>
+            <th>500</th>
+            <th>600</th>
+            <th>1000</th>
+            <th>Approv</th>
+            <th>Remise</th>
+            <th>Solde</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <!-- Les données seront insérées ici par JavaScript -->
+        </tbody>
+      </table>
+
+      <div class="page-number" id="page-number"></div>
+    </div>
+
+    <script>
+      function formatNumber(num) {
+        if (!num && num !== 0) return '';
+        return new Intl.NumberFormat('fr-FR').format(num);
+      }
+
+      function formatMontant(montant) {
+        if (!montant && montant !== 0) return '';
+        return new Intl.NumberFormat('fr-FR').format(montant); // + ' FCFA';
+      }
+
+      function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('fr-FR');
+      }
+
+      function renderTable(data) {
+        const tbody = document.getElementById('table-body');
+        tbody.innerHTML = '';
+
+        data.forEach((row) => {
+          const tr = document.createElement('tr');
+
+          if (row.isMonthlyTotal) {
+            tr.className = 'monthly-total';
+          }
+
+          // Date
+          const tdDate = document.createElement('td');
+          tdDate.className = 'date';
+          tdDate.textContent = row.isMonthlyTotal ? row.date : formatDate(row.date);
+          tr.appendChild(tdDate);
+
+          // Type
+          const tdType = document.createElement('td');
+          tdType.className = 'type';
+          tdType.textContent = row.type || '';
+          tr.appendChild(tdType);
+
+          // Dénominations
+          const denoms = [100, 200, 300, 500, 600, 1000];
+          denoms.forEach((d) => {
+            const td = document.createElement('td');
+            const val = row.denominations ? row.denominations[d] : 0;
+            td.textContent = formatNumber(val);
+            tr.appendChild(td);
+          });
+
+          // Approv
+          const tdApprov = document.createElement('td');
+          tdApprov.className = 'amount';
+          tdApprov.textContent = formatMontant(row.approvisionnement);
+          tr.appendChild(tdApprov);
+
+          // Remise
+          const tdRemise = document.createElement('td');
+          tdRemise.className = 'amount';
+          tdRemise.textContent = formatMontant(row.remise);
+          tr.appendChild(tdRemise);
+
+          // Solde
+          const tdSolde = document.createElement('td');
+          tdSolde.className = 'amount';
+          tdSolde.textContent = formatMontant(row.solde);
+          tr.appendChild(tdSolde);
+
+          tbody.appendChild(tr);
+        });
+      }
+
+      window.addEventListener('message', (event) => {
+        if (event.data.type === 'FILL_DATA') {
+          renderTable(event.data.data);
+
+          // Mise à jour du numéro de page si nécessaire
+          // document.getElementById('page-number').textContent = ...
+
+          // Lancer l'impression après un court délai pour laisser le temps au rendu
+          setTimeout(() => {
+            window.print();
+          }, 500);
+        }
+      });
+    </script>
+
+    <div class="page-break"></div>
+
+    <!-- Page 2 -->
+    <div class="page">
+      <table>
+        <thead>
+          <tr>
+            <th>date</th>
+            <th>type</th>
+            <th>500</th>
+            <th>1000</th>
+            <th>1500</th>
+            <th>3000</th>
+            <th>4500</th>
+            <th>5000</th>
+            <th>Approv</th>
+            <th>Remise</th>
+            <th>solde</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="date">09/05/2025</td>
+            <td class="type">Remise</td>
+            <td>-400</td>
+            <td>-150</td>
+            <td>0</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-650 000</td>
+            <td class="amount">243 240 000</td>
+          </tr>
+          <tr>
+            <td class="date">14/05/2025</td>
+            <td class="type">Remise</td>
+            <td>0</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-400 000</td>
+            <td class="amount">242 840 000</td>
+          </tr>
+          <tr>
+            <td class="date">16/05/2025</td>
+            <td class="type">Remise</td>
+            <td>0</td>
+            <td>-150</td>
+            <td>0</td>
+            <td>-50</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-300 000</td>
+            <td class="amount">242 540 000</td>
+          </tr>
+          <tr>
+            <td class="date">21/05/2025</td>
+            <td class="type">Remise</td>
+            <td>-200</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-500 000</td>
+            <td class="amount">242 040 000</td>
+          </tr>
+          <tr>
+            <td class="date">23/05/2025</td>
+            <td class="type">Remise</td>
+            <td>-400</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>-50</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-450 000</td>
+            <td class="amount">241 590 000</td>
+          </tr>
+          <tr>
+            <td class="date">28/05/2025</td>
+            <td class="type">Remise</td>
+            <td>-300</td>
+            <td>-300</td>
+            <td>0</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-750 000</td>
+            <td class="amount">240 840 000</td>
+          </tr>
+          <tr>
+            <td class="date">30/05/2025</td>
+            <td class="type">Remise</td>
+            <td>0</td>
+            <td>-50</td>
+            <td>0</td>
+            <td>-50</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-200 000</td>
+            <td class="amount">240 640 000</td>
+          </tr>
+          <tr class="monthly-total">
+            <td class="date">mai 2025</td>
+            <td class="type"></td>
+            <td>89100</td>
+            <td>68170</td>
+            <td>0</td>
+            <td>42640</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount">261 290 000</td>
+            <td class="amount">-20 650 000</td>
+            <td class="amount">240 640 000</td>
+          </tr>
+          <tr>
+            <td class="date">04/06/2025</td>
+            <td class="type">Remise</td>
+            <td>-200</td>
+            <td>-250</td>
+            <td>0</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-650 000</td>
+            <td class="amount">239 990 000</td>
+          </tr>
+          <tr>
+            <td class="date">10/06/2025</td>
+            <td class="type">Remise</td>
+            <td>0</td>
+            <td>-250</td>
+            <td>0</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-550 000</td>
+            <td class="amount">239 440 000</td>
+          </tr>
+          <tr>
+            <td class="date">13/06/2025</td>
+            <td class="type">Remise</td>
+            <td>-100</td>
+            <td>-200</td>
+            <td>0</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-550 000</td>
+            <td class="amount">238 890 000</td>
+          </tr>
+          <tr>
+            <td class="date">17/06/2025</td>
+            <td class="type">Remise</td>
+            <td>-500</td>
+            <td>-150</td>
+            <td>0</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-700 000</td>
+            <td class="amount">238 190 000</td>
+          </tr>
+          <tr>
+            <td class="date">20/06/2025</td>
+            <td class="type">Remise</td>
+            <td>0</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-400 000</td>
+            <td class="amount">237 790 000</td>
+          </tr>
+          <tr>
+            <td class="date">25/06/2025</td>
+            <td class="type">Remise</td>
+            <td>-400</td>
+            <td>-50</td>
+            <td>0</td>
+            <td>-50</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-400 000</td>
+            <td class="amount">237 390 000</td>
+          </tr>
+          <tr>
+            <td class="date">27/06/2025</td>
+            <td class="type">Remise</td>
+            <td>-300</td>
+            <td>-200</td>
+            <td>0</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-650 000</td>
+            <td class="amount">236 740 000</td>
+          </tr>
+          <tr class="monthly-total">
+            <td class="date">juin 2025</td>
+            <td class="type"></td>
+            <td>87600</td>
+            <td>66970</td>
+            <td>0</td>
+            <td>41990</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount">261 290 000</td>
+            <td class="amount">-24 550 000</td>
+            <td class="amount">236 740 000</td>
+          </tr>
+          <tr>
+            <td class="date">02/07/2025</td>
+            <td class="type">Remise</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>-50</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-150 000</td>
+            <td class="amount">236 590 000</td>
+          </tr>
+          <tr>
+            <td class="date">04/07/2025</td>
+            <td class="type">Remise</td>
+            <td>-200</td>
+            <td>-250</td>
+            <td>0</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-650 000</td>
+            <td class="amount">235 940 000</td>
+          </tr>
+          <tr>
+            <td class="date">09/07/2025</td>
+            <td class="type">Remise</td>
+            <td>-400</td>
+            <td>-200</td>
+            <td>0</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-700 000</td>
+            <td class="amount">235 240 000</td>
+          </tr>
+          <tr>
+            <td class="date">11/07/2025</td>
+            <td class="type">Remise</td>
+            <td>-100</td>
+            <td>-200</td>
+            <td>0</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-550 000</td>
+            <td class="amount">234 690 000</td>
+          </tr>
+          <tr>
+            <td class="date">16/07/2025</td>
+            <td class="type">Remise</td>
+            <td>-400</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>-50</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-450 000</td>
+            <td class="amount">234 240 000</td>
+          </tr>
+          <tr>
+            <td class="date">18/07/2025</td>
+            <td class="type">Remise</td>
+            <td>-400</td>
+            <td>-150</td>
+            <td>0</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-650 000</td>
+            <td class="amount">233 590 000</td>
+          </tr>
+          <tr>
+            <td class="date">23/07/2025</td>
+            <td class="type">Remise</td>
+            <td>-400</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-200 000</td>
+            <td class="amount">233 390 000</td>
+          </tr>
+          <tr>
+            <td class="date">25/07/2025</td>
+            <td class="type">Remise</td>
+            <td>-300</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>-50</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-400 000</td>
+            <td class="amount">232 990 000</td>
+          </tr>
+          <tr>
+            <td class="date">30/07/2025</td>
+            <td class="type">Remise</td>
+            <td>-100</td>
+            <td>-50</td>
+            <td>0</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-400 000</td>
+            <td class="amount">232 590 000</td>
+          </tr>
+          <tr class="monthly-total">
+            <td class="date">juillet 2025</td>
+            <td class="type"></td>
+            <td>85300</td>
+            <td>65920</td>
+            <td>0</td>
+            <td>41340</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount">261 290 000</td>
+            <td class="amount">-28 700 000</td>
+            <td class="amount">232 590 000</td>
+          </tr>
+          <tr>
+            <td class="date">01/08/2025</td>
+            <td class="type">Remise</td>
+            <td>-100</td>
+            <td>-200</td>
+            <td>0</td>
+            <td>-50</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-400 000</td>
+            <td class="amount">232 190 000</td>
+          </tr>
+          <tr>
+            <td class="date">08/08/2025</td>
+            <td class="type">Remise</td>
+            <td>-500</td>
+            <td>-200</td>
+            <td>0</td>
+            <td>-200</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-1 050 000</td>
+            <td class="amount">231 140 000</td>
+          </tr>
+          <tr>
+            <td class="date">14/08/2025</td>
+            <td class="type">Remise</td>
+            <td>-800</td>
+            <td>-400</td>
+            <td>0</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-1 100 000</td>
+            <td class="amount">230 040 000</td>
+          </tr>
+          <tr>
+            <td class="date">22/08/2025</td>
+            <td class="type">Remise</td>
+            <td>0</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-100 000</td>
+            <td class="amount">229 940 000</td>
+          </tr>
+          <tr>
+            <td class="date">26/08/2025</td>
+            <td class="type">Remise</td>
+            <td>-1000</td>
+            <td>-400</td>
+            <td>0</td>
+            <td>-150</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-1 350 000</td>
+            <td class="amount">228 590 000</td>
+          </tr>
+          <tr class="monthly-total">
+            <td class="date">août 2025</td>
+            <td class="type"></td>
+            <td>82900</td>
+            <td>64620</td>
+            <td>0</td>
+            <td>40840</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount">261 290 000</td>
+            <td class="amount">-32 700 000</td>
+            <td class="amount">228 590 000</td>
+          </tr>
+          <tr>
+            <td class="date">03/09/2025</td>
+            <td class="type">Remise</td>
+            <td>0</td>
+            <td>-200</td>
+            <td>0</td>
+            <td>-200</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-800 000</td>
+            <td class="amount">227 790 000</td>
+          </tr>
+          <tr>
+            <td class="date">09/09/2025</td>
+            <td class="type">Remise</td>
+            <td>-1000</td>
+            <td>-200</td>
+            <td>0</td>
+            <td>-200</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-1 300 000</td>
+            <td class="amount">226 490 000</td>
+          </tr>
+          <tr>
+            <td class="date">12/09/2025</td>
+            <td class="type">Remise</td>
+            <td>0</td>
+            <td>-300</td>
+            <td>0</td>
+            <td>-150</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-750 000</td>
+            <td class="amount">225 740 000</td>
+          </tr>
+          <tr>
+            <td class="date">16/09/2025</td>
+            <td class="type">Remise</td>
+            <td>-600</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-300 000</td>
+            <td class="amount">225 440 000</td>
+          </tr>
+          <tr>
+            <td class="date">19/09/2025</td>
+            <td class="type">Remise</td>
+            <td>-500</td>
+            <td>-300</td>
+            <td>0</td>
+            <td>-200</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-1 150 000</td>
+            <td class="amount">224 290 000</td>
+          </tr>
+          <tr>
+            <td class="date">23/09/2025</td>
+            <td class="type">Remise</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>-50</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-150 000</td>
+            <td class="amount">224 140 000</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="page-number">Page 2 sur 3</div>
+    </div>
+
+    <div class="page-break"></div>
+
+    <!-- Page 3 -->
+    <div class="page">
+      <table>
+        <thead>
+          <tr>
+            <th>date</th>
+            <th>type</th>
+            <th>500</th>
+            <th>1000</th>
+            <th>1500</th>
+            <th>3000</th>
+            <th>4500</th>
+            <th>5000</th>
+            <th>Approv</th>
+            <th>Remise</th>
+            <th>solde</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="date">30/09/2025</td>
+            <td class="type">Remise</td>
+            <td>-1000</td>
+            <td>-300</td>
+            <td>0</td>
+            <td>-200</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-1 400 000</td>
+            <td class="amount">222 740 000</td>
+          </tr>
+          <tr class="monthly-total">
+            <td class="date">septembre 2025</td>
+            <td class="type"></td>
+            <td>79800</td>
+            <td>63320</td>
+            <td>0</td>
+            <td>39840</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount">261 290 000</td>
+            <td class="amount">-38 550 000</td>
+            <td class="amount">222 740 000</td>
+          </tr>
+          <tr>
+            <td class="date">03/10/2025</td>
+            <td class="type">Remise</td>
+            <td>0</td>
+            <td>-200</td>
+            <td>0</td>
+            <td>-100</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-500 000</td>
+            <td class="amount">222 240 000</td>
+          </tr>
+          <tr>
+            <td class="date">07/10/2025</td>
+            <td class="type">Remise</td>
+            <td>0</td>
+            <td>-200</td>
+            <td>0</td>
+            <td>-200</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-800 000</td>
+            <td class="amount">221 440 000</td>
+          </tr>
+          <tr>
+            <td class="date">10/10/2025</td>
+            <td class="type">Remise</td>
+            <td>-1000</td>
+            <td>-500</td>
+            <td>0</td>
+            <td>-200</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount"></td>
+            <td class="amount">-1 600 000</td>
+            <td class="amount">219 840 000</td>
+          </tr>
+          <tr class="monthly-total">
+            <td class="date">octobre 2025</td>
+            <td class="type"></td>
+            <td>78800</td>
+            <td>62420</td>
+            <td>0</td>
+            <td>39340</td>
+            <td>0</td>
+            <td>0</td>
+            <td class="amount">261 290 000</td>
+            <td class="amount">-41 450 000</td>
+            <td class="amount">219 840 000</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="page-number">Page 3 sur 3</div>
+    </div>
+  </body>
+</html>

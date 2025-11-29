@@ -30,7 +30,7 @@
                 v-model="localForm.taxeId"
                 filled
                 dense
-                :options="taxeOptions"
+                :options="filteredTaxeOptions"
                 option-value="value"
                 option-label="label"
                 emit-value
@@ -39,6 +39,7 @@
                 input-debounce="0"
                 label="Article N° (Taxe) *"
                 :rules="[(val) => !!val || 'Requis']"
+                @filter="filterTaxe"
               >
                 <template v-slot:no-option>
                   <q-item>
@@ -204,12 +205,14 @@ interface Props {
   statutOptions: string[];
   readonly?: boolean;
   loading?: boolean;
+  defaultAdresse?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   isEditing: false,
   readonly: false,
   loading: false,
+  defaultAdresse: '',
 });
 
 const emit = defineEmits<{
@@ -219,6 +222,30 @@ const emit = defineEmits<{
 
 const localForm = ref<Partial<Declaration>>({});
 const dateStr = ref('');
+const filteredTaxeOptions = ref(props.taxeOptions);
+
+watch(
+  () => props.taxeOptions,
+  (newOptions) => {
+    filteredTaxeOptions.value = newOptions;
+  },
+);
+
+function filterTaxe(val: string, update: (callback: () => void) => void) {
+  if (val === '') {
+    update(() => {
+      filteredTaxeOptions.value = props.taxeOptions;
+    });
+    return;
+  }
+
+  update(() => {
+    const needle = val.toLowerCase();
+    filteredTaxeOptions.value = props.taxeOptions.filter((v) =>
+      v.label.toLowerCase().includes(needle),
+    );
+  });
+}
 
 // Initialiser le formulaire quand la dialog s'ouvre
 watch(
@@ -237,8 +264,8 @@ watch(
           exercice: new Date().getFullYear(),
           taxeId: 0,
           numeroPiece: String(props.nextNumeroPiece || 1),
-          nomPartieVersante: '',
-          adresse: '',
+          nomPartieVersante: 'Régisseur',
+          adresse: props.defaultAdresse,
           dateEncaissement: new Date(),
           numeroLivre: 'T31T',
           numeroEncaissement: '',
