@@ -70,7 +70,7 @@
             class="text-primary bg-white"
             active-color="primary"
             indicator-color="primary"
-            align="left"
+            align="justify"
             animated
           >
             <q-tab name="section1" label="Section I - Timbres Fiscaux" icon="receipt" />

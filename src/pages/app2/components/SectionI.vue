@@ -238,6 +238,7 @@ const columns = [
   :deep(thead tr:first-child th) {
     /* bg color is important for th; just specify one */
     background-color: #fff;
+    color: #000;
   }
 
   :deep(thead tr th) {
