@@ -22,7 +22,7 @@
             round
             dense
             icon="visibility"
-            color="info"
+            color="grey-7"
             @click="$emit('view', props.row)"
           >
             <q-tooltip>Voir</q-tooltip>
@@ -33,7 +33,7 @@
             round
             dense
             icon="print"
-            color="primary"
+            color="grey-7"
             @click="$emit('print', props.row)"
           >
             <q-tooltip>Imprimer</q-tooltip>
@@ -44,7 +44,7 @@
             round
             dense
             icon="download"
-            color="secondary"
+            color="grey-7"
             @click="$emit('download', props.row)"
           >
             <q-tooltip>Télécharger PDF</q-tooltip>
@@ -55,7 +55,7 @@
             round
             dense
             icon="edit"
-            color="primary"
+            color="grey-7"
             @click="$emit('edit', props.row)"
           >
             <q-tooltip>Modifier</q-tooltip>

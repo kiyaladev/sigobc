@@ -66,14 +66,14 @@
             />
 
             <q-select
-              v-model="formData.rubriqueId"
-              :options="rubriqueOptions"
-              label="Rubrique *"
+              v-model="formData.chapitreId"
+              :options="chapitreOptions"
+              label="Chapitre *"
               outlined
               dense
               emit-value
               map-options
-              :rules="[(val) => !!val || 'Rubrique requise']"
+              :rules="[(val) => !!val || 'Chapitre requis']"
             />
 
             <q-input
@@ -117,7 +117,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
-import { db, type Prevision, type Rubrique } from 'src/database/db';
+import { db, type Prevision, type Chapitre } from 'src/database/db';
 import PageHeader from 'src/components/PageHeader.vue';
 import DataTable from 'src/components/DataTable.vue';
 
@@ -128,21 +128,18 @@ const showAddDialog = ref(false);
 const editingId = ref<number | null>(null);
 
 const previsions = ref<Prevision[]>([]);
-const rubriques = ref<Rubrique[]>([]);
+const chapitres = ref<Chapitre[]>([]);
 
 const formData = ref({
   exercice: new Date().getFullYear(),
-  rubriqueId: null as number | null,
+  chapitreId: null as number | null,
   montantPrevu: 0,
   statut: 'brouillon' as 'brouillon' | 'validee' | 'cloturee',
   observations: '',
 });
 
-const rubriqueOptions = computed(() =>
-  rubriques.value.map((r) => ({
-    label: `${r.code} - ${r.libelle}`,
-    value: r.id,
-  })),
+const chapitreOptions = computed(() =>
+  chapitres.value.map((c) => ({ label: `${c.code} - ${c.libelle}`, value: c.id })),
 );
 
 const columns = [
@@ -154,12 +151,12 @@ const columns = [
     sortable: true,
   },
   {
-    name: 'rubrique',
-    label: 'Rubrique',
+    name: 'chapitre',
+    label: 'Chapitre',
     align: 'left' as const,
     field: (row: Prevision) => {
-      const rubrique = rubriques.value.find((r) => r.id === row.rubriqueId);
-      return rubrique ? `${rubrique.code} - ${rubrique.libelle}` : '';
+      const chapitre = chapitres.value.find((c) => c.id === row.chapitreId);
+      return chapitre ? `${chapitre.code} - ${chapitre.libelle}` : '';
     },
   },
   {
@@ -215,7 +212,7 @@ async function loadData() {
   loading.value = true;
   try {
     previsions.value = await db.previsions.toArray();
-    rubriques.value = await db.rubriques.filter((r) => r.actif).toArray();
+    chapitres.value = await db.chapitres.filter((c) => c.actif).toArray();
   } catch (error) {
     console.error('Erreur lors du chargement:', error);
     $q.notify({
@@ -230,7 +227,7 @@ async function loadData() {
 function resetForm() {
   formData.value = {
     exercice: new Date().getFullYear(),
-    rubriqueId: null,
+    chapitreId: null,
     montantPrevu: 0,
     statut: 'brouillon',
     observations: '',
@@ -250,7 +247,7 @@ async function savePrevision() {
       montantDisponible: formData.value.montantPrevu,
       mairieId,
       personnelId,
-      rubriqueId: formData.value.rubriqueId!,
+      chapitreId: formData.value.chapitreId!,
     };
 
     if (editingId.value) {
@@ -290,7 +287,7 @@ function editPrevision(row: Prevision) {
   editingId.value = row.id!;
   formData.value = {
     exercice: row.exercice,
-    rubriqueId: row.rubriqueId,
+    chapitreId: row.chapitreId,
     montantPrevu: row.montantPrevu,
     statut: row.statut,
     observations: row.observations || '',

@@ -127,7 +127,7 @@ const previsionsStats = ref<
 const tableColumns = [
   {
     name: 'rubrique',
-    label: 'Rubrique',
+    label: 'Chapitre',
     align: 'left' as const,
     field: 'rubrique',
   },
@@ -175,7 +175,7 @@ async function loadStatistics() {
   try {
     // Charger les prévisions
     const previsions = await db.previsions.toArray();
-    const rubriques = await db.rubriques.toArray();
+    const chapitres = await db.chapitres.toArray();
     const mandats = await db.mandats.toArray();
 
     // Calculer le budget total
@@ -197,12 +197,12 @@ async function loadStatistics() {
 
     // Préparer les données du tableau
     previsionsStats.value = previsions.map((p) => {
-      const rubrique = rubriques.find((r) => r.id === p.rubriqueId);
+      const chapitre = chapitres.find((c) => c.id === p.chapitreId);
       const taux = p.montantPrevu > 0 ? Math.round((p.montantEngage / p.montantPrevu) * 100) : 0;
 
       return {
         id: p.id!,
-        rubrique: rubrique ? `${rubrique.code} - ${rubrique.libelle}` : 'N/A',
+        rubrique: chapitre ? `${chapitre.code} - ${chapitre.libelle}` : 'N/A',
         prevu: formatMontant(p.montantPrevu),
         engage: formatMontant(p.montantEngage),
         disponible: formatMontant(p.montantDisponible),

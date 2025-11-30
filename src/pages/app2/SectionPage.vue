@@ -39,7 +39,7 @@
             </div>
             <div class="col-12 col-md-3">
               <q-btn
-                color="secondary"
+                color="grey-7"
                 label="Imprimer section"
                 icon="print"
                 @click="printCurrentSection"
@@ -49,7 +49,7 @@
             </div>
             <div class="col-12 col-md-3">
               <q-btn
-                color="accent"
+                color="grey-7"
                 label="Imprimer tout"
                 icon="print"
                 @click="printAllSections"

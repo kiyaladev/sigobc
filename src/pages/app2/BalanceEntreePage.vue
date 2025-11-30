@@ -4,16 +4,16 @@
       <div class="col">
         <div class="text-h5">Balance d'Entrée</div>
         <div class="text-caption text-grey-7 q-mt-xs">
-          <q-icon name="info" size="16px" color="info" />
+          <q-icon name="info" size="16px" color="grey-7" />
           État du stock entre le 1er janvier et une date donnée
         </div>
         <div class="text-caption text-orange-7 q-mt-xs">
-          <q-icon name="warning" size="16px" color="warning" />
+          <q-icon name="warning" size="16px" color="primary" />
           <strong>Important :</strong> Une seule balance d'entrée est autorisée par exercice
         </div>
       </div>
       <div class="col-auto">
-        <q-btn color="info" icon="balance" label="Nouvelle Balance" @click="openDialog()" />
+        <q-btn color="primary" icon="balance" label="Nouvelle Balance" @click="openDialog()" />
       </div>
     </div>
 
@@ -61,7 +61,7 @@
           <q-td :props="props">
             <div class="row q-gutter-xs">
               <div v-for="(value, key) in props.row.timbres" :key="key">
-                <q-chip v-if="value > 0" dense color="info" text-color="white">
+                <q-chip v-if="value > 0" dense color="accent" text-color="grey-9">
                   {{ key }}: {{ value }}
                 </q-chip>
               </div>
@@ -77,10 +77,10 @@
 
         <template v-slot:body-cell-actions="props">
           <q-td :props="props">
-            <q-btn flat round dense icon="visibility" color="info" @click="viewDetails(props.row)">
+            <q-btn flat round dense icon="visibility" color="grey-7" @click="viewDetails(props.row)">
               <q-tooltip>Voir détails</q-tooltip>
             </q-btn>
-            <q-btn flat round dense icon="edit" color="info" @click="openDialog(props.row)">
+            <q-btn flat round dense icon="edit" color="grey-7" @click="openDialog(props.row)">
               <q-tooltip>Modifier</q-tooltip>
             </q-btn>
             <q-btn
@@ -101,7 +101,7 @@
     <!-- Dialog de création/modification -->
     <q-dialog v-model="dialogVisible" persistent>
       <q-card style="min-width: 700px">
-        <q-card-section class="bg-info text-white">
+        <q-card-section>
           <div class="text-h6">
             <q-icon name="balance" class="q-mr-sm" />
             {{ isEditing ? 'Modifier' : 'Ajouter une' }} Balance d'Entrée
@@ -190,14 +190,14 @@
 
               <!-- Total calculé -->
               <div class="col-12">
-                <q-card flat bordered class="bg-blue-1">
-                  <q-card-section>
+                <q-card flat bordered>
+                  <q-card-section class="accent-left">
                     <div class="row items-center justify-between">
                       <div class="col">
                         <div class="text-subtitle2 text-grey-7">Total Stock</div>
                       </div>
                       <div class="col-auto">
-                        <div class="text-h6 text-info">{{ formatMontant(form.total || 0) }}</div>
+                        <div class="text-h6">{{ formatMontant(form.total || 0) }}</div>
                       </div>
                     </div>
                   </q-card-section>
@@ -218,7 +218,7 @@
 
             <div class="row q-gutter-sm justify-end">
               <q-btn label="Fermer" color="grey-7" flat @click="dialogVisible = false" />
-              <q-btn label="OK" color="info" type="submit" :loading="saving" />
+              <q-btn label="OK" color="primary" type="submit" :loading="saving" />
             </div>
           </q-form>
         </q-card-section>

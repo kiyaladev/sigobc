@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bordereau d'Émission des Mandats - Paysage</title>
+    <script src="dexie.min.js"></script>
     <style>
         /* RESET & GENERAL */
         * {
@@ -213,7 +214,7 @@
                         <div class="exercice-label w-100 text-center" style="padding-bottom: 2px;">
                             <u>EXERCICE</u>
                         </div>
-                        <div class="exercice-year">2018</div>
+                        <div class="exercice-year" id="exerciceYear">2018</div>
                     </div>
                 </th>
 
@@ -270,7 +271,7 @@
             </tr>
             </thead>
 
-            <tbody>
+            <tbody id="mandatsBody">
             <!-- LIGNE DE DONNÉES 1 -->
             <tr>
                 <td class="text-center" style="color: #666;">01</td>
@@ -361,7 +362,7 @@
             <!-- TOTAUX 1 -->
             <tr style="border-top: 2px solid black; height: 30px">
                 <td colspan="5" style="text-align: right; font-weight: bold; padding-right: 10px; background-color: #f9f9f9;">TOTAL DU PRÉSENT BORDEREAU</td>
-                <td style="text-align: right; font-weight: bold; font-family: monospace; background-color: #fffff0; font-size: 13px;">646 362</td>
+                <td id="totalBordereau" style="text-align: right; font-weight: bold; font-family: monospace; background-color: #fffff0; font-size: 13px;">646 362</td>
                 <!-- Partie Receveur Totaux (Fusionnée verticalement pour le schéma) -->
                 <td colspan="4" rowspan="3" style="vertical-align: bottom; position: relative; padding: 0;">
                     <!-- Dessin des cases à cocher style ancien -->
@@ -382,8 +383,8 @@
                     <div class="flex center justify-between w-100">
                         <div class="flex center" style="padding: 2px; background: white;">
                             FOLIO N° &nbsp;&nbsp;
-                            <span style="font-weight: bold; font-size: 10px; width: 50px; border: 1px solid black;">1257887</span>
-                            <span style="font-weight: bold; font-size: 14px; width: 50px; border: 1px solid black;">2018</span>
+                            <span style="font-weight: bold; font-size: 10px; width: 50px; border: 1px solid black;" id="folioNumber">1257887</span>
+                            <span style="font-weight: bold; font-size: 14px; width: 50px; border: 1px solid black;" id="folioYear">2018</span>
                         </div>
                         <span style="font-weight: bold; text-transform: uppercase;">Total Général</span>
                     </div>
@@ -404,7 +405,7 @@
                 </div>
 
                 <div class="signature-block">
-                    <div style="font-weight: bold; font-size: 11px; margin-bottom: 5px;">A VAVOUA, le 15 DÉCEMBRE 2018</div>
+                    <div id="footerDate" style="font-weight: bold; font-size: 11px; margin-bottom: 5px;">A VAVOUA, le 15 DÉCEMBRE 2018</div>
                     <div style="font-style: italic; font-size: 12px; margin-bottom: 40px;">L' Ordonnateur,</div>
                     <div style="font-weight: bold; font-size: 12px;">P/ LE MAIRE & P.D.</div>
                 </div>
@@ -468,5 +469,61 @@
     </div>
 </div>
 
+<script>
+  const db = new Dexie('TresorDatabase');
+  db.version(10).stores({
+    mairies: '++id, nom, code, ville',
+    chapitres: '++id, code, libelle, mairieId, actif',
+    sousChapitres: '++id, code, libelle, mairieId, actif',
+    mandats: '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
+    bordereauMandats: '++id, numero, exercice, mairieId, statut, personnelId',
+  });
+
+  function fmtMontant(n) {
+    return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 0 }).format(n || 0);
+  }
+
+  async function render() {
+    const params = new URLSearchParams(window.location.search);
+    const bordereauId = parseInt(params.get('bordereauId'));
+    if (!bordereauId) return;
+
+    const bordereau = await db.bordereauMandats.get(bordereauId);
+    const mandats = await db.mandats.where('bordereauMandatId').equals(bordereauId).toArray();
+    const sousChapitres = await db.sousChapitres.toArray();
+    const mairie = await db.mairies.get(1);
+
+    document.getElementById('exerciceYear').textContent = bordereau?.exercice || '';
+    document.getElementById('folioYear').textContent = bordereau?.exercice || '';
+    document.getElementById('footerDate').textContent = `${mairie?.ville || ''}, le ${new Date().toLocaleDateString('fr-FR')}`;
+
+    const tbody = document.getElementById('mandatsBody');
+    tbody.innerHTML = '';
+    let total = 0;
+    mandats.forEach((m, i) => {
+      total += m.montant || 0;
+      const sc = m.sousChapitreId ? sousChapitres.find(s => s.id === m.sousChapitreId) : null;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="text-center" style="color: #666;">${String(i + 1).padStart(2, '0')}</td>
+        <td>${m.objet || ''}</td>
+        <td>${m.beneficiaire || ''}</td>
+        <td class="center" style="font-family: monospace;">${sc ? sc.code + '/1' : ''}</td>
+        <td></td>
+        <td style="text-align: right; font-weight: bold; font-family: monospace;">${fmtMontant(m.montant)}</td>
+        <td></td><td></td><td></td><td></td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById('totalBordereau').textContent = fmtMontant(total);
+
+    if (params.get('print') === 'true') {
+      setTimeout(() => window.print(), 400);
+    }
+  }
+
+  render();
+</script>
 </body>
 </html>

@@ -33,7 +33,7 @@
       <!-- Seeder complet -->
       <div class="col-12 col-md-6">
         <q-card>
-          <q-card-section class="bg-primary text-white">
+          <q-card-section>
             <div class="text-h6">🚀 Seeder Complet</div>
             <div class="text-caption">
               Génère toutes les données de test pour {{ selectedAppLabel }}
@@ -124,16 +124,17 @@
               <div v-if="showApp3">
                 <div class="text-subtitle2 text-primary q-mb-sm">App3 - Gestion des Dépenses</div>
                 <q-input
-                  v-model.number="fullSeederOptions.rubriques"
-                  type="number"
-                  label="Rubriques"
-                  filled
-                  dense
-                />
-                <q-input
                   v-model.number="fullSeederOptions.chapitres"
                   type="number"
                   label="Chapitres"
+                  filled
+                  dense
+                  class="q-mt-sm"
+                />
+                <q-input
+                  v-model.number="fullSeederOptions.sousChapitres"
+                  type="number"
+                  label="Sous-chapitres"
                   filled
                   dense
                   class="q-mt-sm"
@@ -182,7 +183,7 @@
       <!-- Seeders individuels -->
       <div class="col-12 col-md-6">
         <q-card>
-          <q-card-section class="bg-secondary text-white">
+          <q-card-section>
             <div class="text-h6">🎯 Seeders Individuels</div>
             <div class="text-caption">Génère des données pour une table spécifique</div>
           </q-card-section>
@@ -219,7 +220,7 @@
       <!-- Statistiques actuelles -->
       <div class="col-12">
         <q-card>
-          <q-card-section class="bg-info text-white">
+          <q-card-section>
             <div class="text-h6">📊 Données Actuelles</div>
           </q-card-section>
 
@@ -260,11 +261,11 @@
       <!-- Logs -->
       <div class="col-12" v-if="logs.length > 0">
         <q-card>
-          <q-card-section class="bg-dark text-white">
+          <q-card-section>
             <div class="text-h6">📝 Logs d'exécution</div>
           </q-card-section>
 
-          <q-card-section class="bg-grey-10 text-white" style="max-height: 300px; overflow-y: auto">
+          <q-card-section style="max-height: 300px; overflow-y: auto">
             <div v-for="(log, index) in logs" :key="index" class="text-caption q-mb-xs">
               <span :class="getLogColor(log)">{{ log }}</span>
             </div>
@@ -308,7 +309,8 @@ const fullSeederOptions = ref({
   balancesEntree: 5,
   // App3
   rubriques: 8,
-  chapitres: 47,
+  chapitres: 8,
+  sousChapitres: 8,
   previsions: 10,
   mandats: 50,
   bordereauMandats: 6,
@@ -371,17 +373,17 @@ const tables = ref([
   },
   // App3 - Gestion des Dépenses
   {
-    name: 'rubriques',
-    label: 'Rubriques',
-    description: 'Rubriques budgétaires',
+    name: 'chapitres',
+    label: 'Chapitres',
+    description: 'Chapitres budgétaires',
     count: 8,
     app: 'app3',
   },
   {
-    name: 'chapitres',
-    label: 'Chapitres',
-    description: 'Chapitres budgétaires',
-    count: 47,
+    name: 'sousChapitres',
+    label: 'Sous-chapitres',
+    description: 'Sous-chapitres budgétaires',
+    count: 43,
     app: 'app3',
   },
 
@@ -416,8 +418,8 @@ const stats = ref([
   { label: 'Versements', count: 0, app: 'app2' },
   { label: 'Balances Entrée', count: 0, app: 'app2' },
   // App3
-  { label: 'Rubriques', count: 0, app: 'app3' },
   { label: 'Chapitres', count: 0, app: 'app3' },
+  { label: 'Sous-chapitres', count: 0, app: 'app3' },
   { label: 'Prévisions', count: 0, app: 'app3' },
   { label: 'Mandats', count: 0, app: 'app3' },
   { label: 'Bordereaux Mandats', count: 0, app: 'app3' },
@@ -482,8 +484,8 @@ async function loadStats() {
       approvisionnements,
       remises,
       versements,
-      rubriques,
       chapitres,
+      sousChapitres,
       previsions,
       mandats,
       bordereauMandats,
@@ -498,8 +500,8 @@ async function loadStats() {
       db.remises.count(),
       db.versements.count(),
       db.balancesEntree.count(),
-      db.rubriques.count(),
       db.chapitres.count(),
+      db.sousChapitres.count(),
       db.previsions.count(),
       db.mandats.count(),
       db.bordereauMandats.count(),
@@ -518,8 +520,8 @@ async function loadStats() {
     stats.value[7]!.count = versements;
     stats.value[8]!.count = balancesEntree;
     // App3
-    stats.value[9]!.count = rubriques;
-    stats.value[10]!.count = chapitres;
+    stats.value[9]!.count = chapitres;
+    stats.value[10]!.count = sousChapitres;
     stats.value[11]!.count = previsions;
     stats.value[12]!.count = mandats;
     stats.value[13]!.count = bordereauMandats;
@@ -598,8 +600,8 @@ function runSingleSeeder(tableName: string, count: number) {
             | 'approvisionnements'
             | 'remises'
             | 'versements'
-            | 'rubriques'
             | 'chapitres'
+            | 'sousChapitres'
             | 'previsions'
             | 'mandats'
             | 'bordereauMandats',
@@ -648,7 +650,7 @@ function confirmClearAll() {
           db.remises.clear(),
           db.versements.clear(),
           db.balancesEntree.clear(),
-          db.rubriques.clear(),
+          db.sousChapitres.clear(),
           db.chapitres.clear(),
           db.previsions.clear(),
           db.mandats.clear(),
@@ -686,7 +688,7 @@ async function exportDatabase() {
       approvisionnements,
       remises,
       versements,
-      rubriques,
+      sousChapitres,
       chapitres,
       previsions,
       mandats,
@@ -702,7 +704,7 @@ async function exportDatabase() {
       db.remises.toArray(),
       db.versements.toArray(),
       db.balancesEntree.toArray(),
-      db.rubriques.toArray(),
+      db.sousChapitres.toArray(),
       db.chapitres.toArray(),
       db.previsions.toArray(),
       db.mandats.toArray(),
@@ -723,7 +725,7 @@ async function exportDatabase() {
         remises,
         versements,
         balancesEntree,
-        rubriques,
+        sousChapitres,
         chapitres,
         previsions,
         mandats,
@@ -802,7 +804,7 @@ function importDatabase() {
                 db.remises.clear(),
                 db.versements.clear(),
                 db.balancesEntree.clear(),
-                db.rubriques.clear(),
+                db.sousChapitres.clear(),
                 db.chapitres.clear(),
                 db.previsions.clear(),
                 db.mandats.clear(),
@@ -837,8 +839,8 @@ function importDatabase() {
               if (backup.data.balancesEntree?.length) {
                 await db.balancesEntree.bulkAdd(backup.data.balancesEntree);
               }
-              if (backup.data.rubriques?.length) {
-                await db.rubriques.bulkAdd(backup.data.rubriques);
+              if (backup.data.sousChapitres?.length) {
+                await db.sousChapitres.bulkAdd(backup.data.sousChapitres);
               }
               if (backup.data.chapitres?.length) {
                 await db.chapitres.bulkAdd(backup.data.chapitres);

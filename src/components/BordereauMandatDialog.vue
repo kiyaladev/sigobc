@@ -5,7 +5,7 @@
     persistent
   >
     <q-card style="min-width: 600px">
-      <q-card-section class="bg-purple text-white">
+      <q-card-section class="accent-left">
         <div class="text-h6">{{ isEditing ? 'Modifier' : 'Nouveau' }} Bordereau de Mandats</div>
       </q-card-section>
 
@@ -113,8 +113,8 @@
       </q-card-section>
 
       <q-card-actions align="right">
-        <q-btn flat label="Annuler" color="grey" @click="$emit('update:modelValue', false)" />
-        <q-btn label="Enregistrer" color="purple" @click="handleSubmit" :loading="loading" />
+        <q-btn flat label="Annuler" color="grey-7" @click="$emit('update:modelValue', false)" />
+        <q-btn label="Enregistrer" color="primary" @click="handleSubmit" :loading="loading" />
       </q-card-actions>
     </q-card>
   </q-dialog>

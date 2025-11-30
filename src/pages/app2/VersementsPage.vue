@@ -4,13 +4,13 @@
       <div class="col">
         <div class="text-h5">Gestion des Versements</div>
         <div class="text-caption text-grey-7 q-mt-xs">
-          <q-icon name="info" size="16px" color="blue" />
+          <q-icon name="info" size="16px" color="grey-7" />
           Le régisseur de mairie vient verser ce qu'il a vendu
           <span class="text-grey-8">(Enregistrement des recettes)</span>
         </div>
       </div>
       <div class="col-auto">
-        <q-btn color="blue" icon="payments" label="Nouveau Versement" @click="openDialog()" />
+        <q-btn color="primary" icon="payments" label="Nouveau Versement" @click="openDialog()" />
       </div>
     </div>
 
@@ -54,7 +54,7 @@
       >
         <template v-slot:body-cell-type="props">
           <q-td :props="props">
-            <q-badge color="blue" :label="props.row.type">
+            <q-badge color="accent" :label="props.row.type">
               <q-icon name="money" size="xs" class="q-ml-xs" />
             </q-badge>
           </q-td>
@@ -64,7 +64,7 @@
           <q-td :props="props">
             <div class="row q-gutter-xs">
               <div v-for="(value, key) in props.row.timbres" :key="key">
-                <q-chip v-if="value > 0" dense color="blue" text-color="white">
+                <q-chip v-if="value > 0" dense color="accent" text-color="grey-9">
                   {{ key }}: {{ value }}
                 </q-chip>
               </div>
@@ -111,7 +111,7 @@
     <!-- Dialog de création/modification -->
     <q-dialog v-model="dialogVisible" persistent>
       <q-card style="min-width: 700px">
-        <q-card-section class="bg-negative text-white">
+        <q-card-section>
           <div class="text-h6">
             <q-icon name="remove_circle" class="q-mr-sm" />
             {{ isEditing ? 'Modifier' : 'Ajouter un' }} Versement
@@ -185,14 +185,14 @@
 
               <!-- Total calculé -->
               <div class="col-12">
-                <q-card flat bordered class="bg-red-1">
-                  <q-card-section>
+                <q-card flat bordered>
+                  <q-card-section class="accent-left">
                     <div class="row items-center justify-between">
                       <div class="col">
                         <div class="text-subtitle2 text-grey-7">Total (- Stock)</div>
                       </div>
                       <div class="col-auto">
-                        <div class="text-h6 text-negative">{{ formatMontant(form.total) }}</div>
+                        <div class="text-h6">{{ formatMontant(form.total) }}</div>
                       </div>
                     </div>
                   </q-card-section>

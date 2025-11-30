@@ -28,8 +28,8 @@
           title="Stock Total"
           :subtitle="`${stats.typesTickets} types de tickets`"
           icon="confirmation_number"
-          icon-color="blue"
-          border-color="var(--q-blue)"
+          icon-color="grey-7"
+          border-color="var(--q-orange)"
         />
       </div>
 
@@ -39,7 +39,7 @@
           title="Valeur Totale"
           subtitle="En stock actuellement"
           icon="payments"
-          icon-color="green"
+          icon-color="grey-7"
           border-color="var(--q-green)"
           format="currency"
         />
@@ -51,7 +51,7 @@
           title="Appros Période"
           :subtitle="formatMontant(stats.montantAppros)"
           icon="inventory"
-          icon-color="orange"
+          icon-color="grey-7"
           border-color="var(--q-orange)"
         />
       </div>
@@ -62,8 +62,8 @@
           title="Versements Période"
           :subtitle="formatMontant(stats.montantVersements)"
           icon="upload"
-          icon-color="purple"
-          border-color="var(--q-purple)"
+          icon-color="grey-7"
+          border-color="var(--q-orange)"
         />
       </div>
     </div>
@@ -88,7 +88,7 @@
         <ChartCard
           title="Répartition du Stock par Valeur"
           :chart-config="stockChartConfig"
-          header-class="bg-primary text-white"
+          header-class="text-grey-8"
         />
       </div>
 
@@ -97,7 +97,7 @@
         <ChartCard
           title="Valeur du Stock par Type"
           :chart-config="valeurChartConfig"
-          header-class="bg-secondary text-white"
+          header-class="text-grey-8"
         />
       </div>
 
@@ -106,7 +106,7 @@
         <ChartCard
           title="Évolution des Opérations"
           :chart-config="evolutionChartConfig"
-          header-class="bg-info text-white"
+          header-class="text-grey-8"
           container-class="chart-container-large"
         />
       </div>
@@ -114,10 +114,10 @@
       <!-- Tableau détaillé par type de ticket -->
       <div v-if="!loading && stats.stockTotal > 0" class="col-12">
         <q-card>
-          <q-card-section class="bg-accent text-white">
+          <q-card-section class="accent-left">
             <div class="text-h6">Détails par Type de Ticket</div>
           </q-card-section>
-          <q-card-section>
+          <q-card-section class="accent-left">
             <q-table
               :rows="detailsTickets"
               :columns="ticketsColumns"
@@ -128,7 +128,7 @@
             >
               <template v-slot:body-cell-valeur="props">
                 <q-td :props="props">
-                  <q-badge color="primary" :label="props.row.valeur + ' FCFA'" />
+                  <q-badge color="accent" :label="props.row.valeur + ' FCFA'" />
                 </q-td>
               </template>
               <template v-slot:body-cell-stock="props">
@@ -182,14 +182,14 @@
       <!-- Statistiques d'activité -->
       <div v-if="!loading && stats.stockTotal > 0" class="col-12 col-md-6">
         <q-card>
-          <q-card-section class="bg-positive text-white">
+          <q-card-section class="accent-left">
             <div class="text-h6">Activité de la Période</div>
           </q-card-section>
           <q-card-section>
             <q-list separator>
               <q-item>
                 <q-item-section avatar>
-                  <q-avatar color="blue" text-color="white" icon="shopping_cart" />
+                  <q-avatar color="accent" text-color="grey-9" icon="shopping_cart" />
                 </q-item-section>
                 <q-item-section>
                   <q-item-label class="text-weight-bold">Approvisionnements</q-item-label>
@@ -205,14 +205,14 @@
 
               <q-item>
                 <q-item-section avatar>
-                  <q-avatar color="orange" text-color="white" icon="local_shipping" />
+                  <q-avatar color="accent" text-color="grey-9" icon="local_shipping" />
                 </q-item-section>
                 <q-item-section>
                   <q-item-label class="text-weight-bold">Remises</q-item-label>
                   <q-item-label caption>Total des sorties (remises)</q-item-label>
                 </q-item-section>
                 <q-item-section side>
-                  <q-item-label class="text-h6 text-orange">
+                  <q-item-label class="text-h6">
                     {{ formatNumber(stats.totalRemises) }}
                   </q-item-label>
                   <q-item-label caption>tickets</q-item-label>
@@ -221,14 +221,14 @@
 
               <q-item>
                 <q-item-section avatar>
-                  <q-avatar color="purple" text-color="white" icon="account_balance" />
+                  <q-avatar color="accent" text-color="grey-9" icon="account_balance" />
                 </q-item-section>
                 <q-item-section>
                   <q-item-label class="text-weight-bold">Versements</q-item-label>
                   <q-item-label caption>Total des versements</q-item-label>
                 </q-item-section>
                 <q-item-section side>
-                  <q-item-label class="text-h6 text-purple">
+                  <q-item-label class="text-h6">
                     {{ formatNumber(stats.totalVersementsTickets) }}
                   </q-item-label>
                   <q-item-label caption>tickets</q-item-label>
@@ -237,7 +237,7 @@
 
               <q-item>
                 <q-item-section avatar>
-                  <q-avatar color="green" text-color="white" icon="trending_up" />
+                  <q-avatar color="positive" text-color="white" icon="trending_up" />
                 </q-item-section>
                 <q-item-section>
                   <q-item-label class="text-weight-bold">Taux de Rotation</q-item-label>
@@ -257,7 +257,7 @@
       <!-- Alertes et recommandations -->
       <div v-if="!loading && stats.stockTotal > 0" class="col-12 col-md-6">
         <q-card>
-          <q-card-section class="bg-warning text-white">
+          <q-card-section>
             <div class="text-h6">Alertes et Recommandations</div>
           </q-card-section>
           <q-card-section>

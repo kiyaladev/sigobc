@@ -49,7 +49,7 @@
     <!-- Dialog de création/modification -->
     <q-dialog v-model="dialogVisible" persistent>
       <q-card style="min-width: 600px">
-        <q-card-section class="bg-primary text-white">
+        <q-card-section class="accent-left">
           <div class="text-h6">{{ isEditing ? 'Modifier' : 'Nouvelle' }} Mairie</div>
         </q-card-section>
 

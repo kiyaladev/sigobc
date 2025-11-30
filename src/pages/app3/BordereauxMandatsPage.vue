@@ -2,7 +2,7 @@
   <q-page class="q-pa-md">
     <div class="row q-mb-md justify-between items-center no-print">
       <div class="text-h5">Bordereaux d'Émission des Mandats</div>
-      <q-btn color="purple" icon="print" label="Imprimer le Bordereau" @click="openPrintDialog()" />
+      <q-btn color="primary" icon="print" label="Imprimer le Bordereau" @click="openPrintDialog()" />
     </div>
 
     <!-- Recherche et filtres -->
@@ -21,7 +21,7 @@
         <q-card>
           <q-card-section>
             <div class="text-caption text-grey-7">Total Exercice en cours</div>
-            <div class="text-h6 text-purple">{{ formatMontant(statsExerciceCourant) }}</div>
+            <div class="text-h6">{{ formatMontant(statsExerciceCourant) }}</div>
             <div class="text-caption">{{ mandatsExerciceCourant.length }} mandats</div>
           </q-card-section>
         </q-card>
@@ -30,7 +30,7 @@
         <q-card>
           <q-card-section>
             <div class="text-caption text-grey-7">Mandats Émis</div>
-            <div class="text-h6 text-blue">{{ mandatsEmis }}</div>
+            <div class="text-h6">{{ mandatsEmis }}</div>
           </q-card-section>
         </q-card>
       </div>
@@ -38,7 +38,7 @@
         <q-card>
           <q-card-section>
             <div class="text-caption text-grey-7">Mandats Payés</div>
-            <div class="text-h6 text-green">{{ mandatsPayes }}</div>
+            <div class="text-h6">{{ mandatsPayes }}</div>
           </q-card-section>
         </q-card>
       </div>
@@ -46,7 +46,7 @@
         <q-card>
           <q-card-section>
             <div class="text-caption text-grey-7">En Attente</div>
-            <div class="text-h6 text-orange">{{ mandatsEnAttente }}</div>
+            <div class="text-h6">{{ mandatsEnAttente }}</div>
           </q-card-section>
         </q-card>
       </div>
@@ -64,7 +64,7 @@
             @click="viewBordereauExercice(exercice)"
           >
             <q-item-section avatar>
-              <q-avatar color="purple" text-color="white" icon="calendar_today" />
+              <q-avatar color="accent" text-color="grey-9" icon="calendar_today" />
             </q-item-section>
             <q-item-section>
               <q-item-label>Exercice {{ exercice }}</q-item-label>
@@ -79,7 +79,7 @@
                   flat
                   round
                   dense
-                  color="purple"
+                  color="grey-7"
                   icon="visibility"
                   @click.stop="viewBordereauExercice(exercice)"
                 >
@@ -89,7 +89,7 @@
                   flat
                   round
                   dense
-                  color="primary"
+                  color="grey-7"
                   icon="print"
                   @click.stop="printBordereauExercice(exercice)"
                 >
@@ -99,7 +99,7 @@
                   flat
                   round
                   dense
-                  color="red"
+                  color="grey-7"
                   icon="picture_as_pdf"
                   @click.stop="downloadBordereauPDF(exercice)"
                 >
@@ -115,11 +115,11 @@
     <!-- Dialog de sélection pour impression -->
     <q-dialog v-model="printDialogVisible">
       <q-card style="min-width: 400px">
-        <q-card-section class="bg-purple text-white">
+        <q-card-section class="accent-left">
           <div class="text-h6">Imprimer Bordereau d'Émission</div>
         </q-card-section>
 
-        <q-card-section>
+        <q-card-section class="accent-left">
           <q-select
             v-model="selectedExercice"
             :options="exerciceOptions"
@@ -131,11 +131,11 @@
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn flat label="Annuler" color="grey" v-close-popup />
+          <q-btn flat label="Annuler" color="grey-7" v-close-popup />
           <q-btn
             flat
             label="Imprimer"
-            color="purple"
+            color="primary"
             icon="print"
             @click="confirmPrint"
             :disable="!selectedExercice"
@@ -143,7 +143,7 @@
           <q-btn
             flat
             label="PDF"
-            color="red"
+            color="grey-7"
             icon="picture_as_pdf"
             @click="confirmDownload"
             :disable="!selectedExercice"
@@ -155,7 +155,7 @@
     <!-- Dialog pour voir les mandats d'un exercice -->
     <q-dialog v-model="mandatsDialogVisible" maximized>
       <q-card>
-        <q-card-section class="bg-purple text-white">
+        <q-card-section>
           <div class="row items-center">
             <div class="col">
               <div class="text-h6">Mandats de l'Exercice {{ selectedExerciceView }}</div>
@@ -353,7 +353,7 @@ function formatStatut(statut: string): string {
 function getStatutColor(statut: string): string {
   const colors: Record<string, string> = {
     brouillon: 'grey',
-    emis: 'blue',
+    emis: 'info',
     paye: 'green',
     annule: 'red',
   };

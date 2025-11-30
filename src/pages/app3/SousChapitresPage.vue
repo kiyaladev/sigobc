@@ -128,7 +128,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
-import { db, type Chapitre } from 'src/database/db';
+import { db, type SousChapitre } from 'src/database/db';
 import PageHeader from 'src/components/PageHeader.vue';
 import FilterBar from 'src/components/FilterBar.vue';
 import DataTable from 'src/components/DataTable.vue';
@@ -140,8 +140,7 @@ const saving = ref(false);
 const dialogVisible = ref(false);
 const isEditing = ref(false);
 
-const chapitres = ref<Chapitre[]>([]);
-// Rubriques supprimées pour App3
+const chapitres = ref<SousChapitre[]>([]);
 
 const filters = ref({
   search: '',
@@ -219,7 +218,7 @@ const filteredChapitres = computed(() => {
 async function loadChapitres() {
   loading.value = true;
   try {
-    chapitres.value = await db.chapitres.toArray();
+    chapitres.value = await db.sousChapitres.toArray();
   } catch (error) {
     console.error('Erreur lors du chargement des chapitres:', error);
     $q.notify({
@@ -231,7 +230,7 @@ async function loadChapitres() {
   }
 }
 
-function openDialog(chapitre?: Chapitre) {
+function openDialog(chapitre?: SousChapitre) {
   if (chapitre?.id) {
     isEditing.value = true;
     form.value = {
@@ -257,7 +256,7 @@ async function saveChaptre() {
   saving.value = true;
   try {
     const now = new Date();
-    const chapitreData: Chapitre = {
+    const chapitreData: SousChapitre = {
       ...form.value,
       code: form.value.code,
       libelle: form.value.libelle,
@@ -268,7 +267,7 @@ async function saveChaptre() {
     };
 
     if (isEditing.value && form.value.id) {
-      await db.chapitres.update(form.value.id, {
+      await db.sousChapitres.update(form.value.id, {
         ...chapitreData,
         updatedAt: now,
       });
@@ -278,7 +277,7 @@ async function saveChaptre() {
       });
     } else {
       chapitreData.createdAt = now;
-      await db.chapitres.add(chapitreData);
+      await db.sousChapitres.add(chapitreData);
       $q.notify({
         type: 'positive',
         message: 'Chapitre créé avec succès',
@@ -298,7 +297,7 @@ async function saveChaptre() {
   }
 }
 
-function confirmDelete(chapitre: Chapitre) {
+function confirmDelete(chapitre: SousChapitre) {
   if (!chapitre.id) {
     $q.notify({
       type: 'negative',
@@ -316,7 +315,7 @@ function confirmDelete(chapitre: Chapitre) {
     void (async () => {
       try {
         if (chapitre.id) {
-          await db.chapitres.delete(chapitre.id);
+          await db.sousChapitres.delete(chapitre.id);
           $q.notify({
             type: 'positive',
             message: 'Chapitre supprimé avec succès',

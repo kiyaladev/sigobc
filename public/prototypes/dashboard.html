@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prototype – Dashboard</title>
+  <style>
+    :root {
+      --orange: #E67E22;
+      --green: #2E7D32;
+      --bg: #F5F7FA;
+      --text: #111827;
+      --muted: #6B7280;
+    }
+    body { margin:0; font-family: Arial, sans-serif; background: var(--bg); color: var(--text); }
+    header { background:#fff; border-bottom:1px solid #E5E7EB; padding:16px 24px; }
+    .container { max-width:1200px; margin:24px auto; padding:0 16px; }
+    .grid { display:grid; grid-template-columns: repeat(3,1fr); gap:16px; }
+    .card { background:#fff; border:1px solid #E5E7EB; border-radius:8px; padding:16px; }
+    .card h3 { margin:0 0 8px 0; font-size:16px; color: var(--muted); }
+    .value { font-size:24px; font-weight:700; }
+    .accent-line { height:3px; background: var(--orange); border-radius:2px; margin-top:12px; width:64px; }
+    .btn { background: var(--orange); color:#fff; border:none; border-radius:6px; padding:10px 14px; cursor:pointer; }
+    .btn:disabled { opacity:.6; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <strong>Dashboard</strong>
+    </div>
+  </header>
+  <div class="container">
+    <div class="grid">
+      <div class="card"><h3>Total Budget</h3><div class="value">120 000 000 XOF</div><div class="accent-line"></div></div>
+      <div class="card"><h3>Mandats Émis</h3><div class="value">152</div><div class="accent-line"></div></div>
+      <div class="card"><h3>Taux Exécution</h3><div class="value" style="color:var(--green)">72%</div><div class="accent-line" style="background:var(--green)"></div></div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3>Dépenses par Chapitre</h3>
+      <p style="color:var(--muted)">Placeholder graphique</p>
+      <button class="btn">Action primaire</button>
+    </div>
+  </div>
+</body>
+</html>

@@ -3,19 +3,19 @@
 // Version Entreprise - Palette épurée : Orange, Blanc, Vert
 
 // Couleurs principales de la marque
-$primary: #ff6600;    // Orange principal
-$secondary: #22c55e;  // Vert
-$accent: #f5f5f5;     // Gris clair (remplace le blanc pur pour meilleur contraste)
+$primary: #e67e22;    // Orange (désaturé)
+$secondary: #2e7d32;  // Vert (désaturé)
+$accent: #f5f7fa;     // Gris très clair
 
 // Mode sombre
 $dark: #1a1a1a;
 $dark-page: #121212;
 
 // Couleurs fonctionnelles (simplifiées)
-$positive: #22c55e;   // Vert (réutilise la couleur secondaire)
-$negative: #dc2626;   // Rouge (simplifié)
-$info: #ff6600;       // Orange (réutilise la couleur primaire)
-$warning: #ff8c3a;    // Orange moyen
+$positive: #2e7d32;   // Succès (vert)
+$negative: #dc2626;   // Erreur (rouge)
+$info: #6b7280;       // Info (gris)
+$warning: #e67e22;    // Avertissement (orange)
 
 // Échelle de gris épurée (entreprise)
 $grey-1: #fafafa;

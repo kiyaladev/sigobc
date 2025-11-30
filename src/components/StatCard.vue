@@ -1,6 +1,6 @@
 <template>
-  <q-card class="stat-card hover-lift" :class="cardClass" :style="{ animationDelay: `${delay}s` }">
-    <q-card-section :class="`stat-card-content ${bgClass} text-white`">
+  <q-card class="stat-card hover-lift" :style="{ animationDelay: `${delay}s` }">
+    <q-card-section class="stat-card-content">
       <div class="row items-center no-wrap">
         <div class="col">
           <div class="stat-value">{{ value }}</div>
@@ -18,7 +18,7 @@
       <q-linear-progress
         v-if="showProgress"
         :value="progress"
-        color="white"
+        color="positive"
         class="stat-progress q-mt-md"
         :class="{ 'pulse-animation': progress < 1 }"
       />
@@ -37,7 +37,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
 
 interface Props {
   value: string | number;
@@ -51,15 +50,12 @@ interface Props {
   delay?: number;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  color: 'blue',
+withDefaults(defineProps<Props>(), {
+  color: 'info',
   progress: 1,
   showProgress: true,
   delay: 0,
 });
-
-const bgClass = computed(() => `bg-${props.color}-6`);
-const cardClass = computed(() => `stat-card-${props.color}`);
 </script>
 
 <style scoped lang="scss">

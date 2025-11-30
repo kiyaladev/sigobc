@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prototype – Mandats</title>
+  <style>
+    :root { --orange:#E67E22; --green:#2E7D32; --bg:#F5F7FA; --text:#111827; --muted:#6B7280; }
+    body { margin:0; font-family: Arial, sans-serif; background: var(--bg); color: var(--text); }
+    header { background:#fff; border-bottom:1px solid #E5E7EB; padding:16px 24px; }
+    .container { max-width:1100px; margin:24px auto; padding:0 16px; }
+    .card { background:#fff; border:1px solid #E5E7EB; border-radius:8px; padding:16px; }
+    .row { display:flex; gap:12px; }
+    .field { flex:1; }
+    label { display:block; font-size:12px; color:var(--muted); margin-bottom:6px; }
+    input, select { width:100%; padding:10px; border:1px solid #E5E7EB; border-radius:6px; }
+    .actions { display:flex; justify-content:flex-end; gap:8px; margin-top:12px; }
+    .btn { background: var(--orange); color:#fff; border:none; border-radius:6px; padding:10px 14px; cursor:pointer; }
+    .btn-sec { background:#fff; color:var(--text); border:1px solid #E5E7EB; border-radius:6px; padding:10px 14px; }
+  </style>
+</head>
+<body>
+  <header><div class="container"><strong>Mandats</strong></div></header>
+  <div class="container">
+    <div class="card">
+      <div class="row">
+        <div class="field"><label>Numéro Mandat</label><input placeholder="M2025-0001"/></div>
+        <div class="field"><label>Date</label><input type="date"/></div>
+        <div class="field"><label>Exercice</label><input type="number" value="2025"/></div>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <div class="field"><label>Chapitre</label><select><option>01 - SALAIRE ET INDEM.</option></select></div>
+        <div class="field"><label>Sous-chapitre</label><select><option>60013 - INDEMNITÉS DE FONCTION...</option></select></div>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <div class="field"><label>Bénéficiaire</label><input placeholder="Nom / Raison sociale"/></div>
+        <div class="field"><label>Montant</label><input type="number" placeholder="0"/></div>
+      </div>
+      <div class="actions">
+        <button class="btn-sec">Annuler</button>
+        <button class="btn">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

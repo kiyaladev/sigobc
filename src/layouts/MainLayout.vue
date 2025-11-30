@@ -48,7 +48,7 @@
 
               <q-item clickable v-close-popup @click="router.push('/profile')" class="menu-item">
                 <q-item-section avatar>
-                  <q-icon name="person" color="primary" />
+                  <q-icon name="person" color="grey-7" />
                 </q-item-section>
                 <q-item-section>
                   <q-item-label>Mon Profil</q-item-label>
@@ -115,8 +115,8 @@
           </div>
         </q-item-section>
         <q-item-section>
-          <q-item-label class="text-h5 text-weight-bold text-white">Trésor App</q-item-label>
-          <q-item-label caption class="text-white text-opacity-90">Gestion Municipale</q-item-label>
+          <q-item-label class="text-h5 text-weight-bold">Trésor App</q-item-label>
+          <q-item-label caption class="text-grey-7">Gestion Municipale</q-item-label>
         </q-item-section>
       </q-item>
 
@@ -203,7 +203,7 @@
             active-class="nav-item-active"
           >
             <q-item-section avatar>
-              <q-icon name="dashboard" color="teal" />
+              <q-icon name="dashboard" color="grey-7" />
             </q-item-section>
             <q-item-section>
               <q-item-label>Dashboard Tickets</q-item-label>
@@ -293,7 +293,7 @@
             active-class="nav-item-active"
           >
             <q-item-section avatar>
-              <q-icon name="bar_chart" color="deep-purple" />
+              <q-icon name="bar_chart" color="grey-7" />
             </q-item-section>
             <q-item-section>
               <q-item-label>Statistiques</q-item-label>
@@ -315,7 +315,7 @@
             active-class="nav-item-active"
           >
             <q-item-section avatar>
-              <q-icon name="dashboard" color="purple" />
+              <q-icon name="dashboard" />
             </q-item-section>
             <q-item-section>
               <q-item-label>Dashboard Dépenses</q-item-label>
@@ -336,6 +336,22 @@
               <q-item-label>Chapitres</q-item-label>
             </q-item-section>
           </q-item>
+
+          <q-item
+            clickable
+            v-ripple
+            to="/app3/sous-chapitres"
+            class="nav-item q-mb-xs"
+            active-class="nav-item-active"
+          >
+            <q-item-section avatar>
+              <q-icon name="view_list" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Sous-Chapitres</q-item-label>
+            </q-item-section>
+          </q-item>
+
 
           <q-item
             clickable
@@ -405,7 +421,7 @@
             active-class="nav-item-active"
           >
             <q-item-section avatar>
-              <q-icon name="bar_chart" color="indigo" />
+              <q-icon name="bar_chart" />
             </q-item-section>
             <q-item-section>
               <q-item-label>Statistiques</q-item-label>
@@ -473,7 +489,7 @@
               active-class="nav-item-active"
             >
               <q-item-section avatar>
-                <q-icon name="database" color="warning" />
+                <q-icon name="database" color="grey-7" />
               </q-item-section>
               <q-item-section>
                 <q-item-label>Seeders (Test)</q-item-label>
@@ -600,10 +616,9 @@ function onLogout() {
 <style scoped lang="scss">
 // Header moderne
 .modern-header {
-  /*background: linear-gradient(135deg, #ff6600 0%, #22c55e 100%);*/
-  background: gray;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .toolbar-title {
@@ -637,20 +652,8 @@ function onLogout() {
 }
 
 .drawer-header {
-  background: linear-gradient(135deg, #ff6600 0%, #22c55e 100%);
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-    animation: pulse 4s infinite;
-  }
+  background: #ffffff;
+  border-bottom: 3px solid #e67e22;
 }
 
 .logo-container {
@@ -680,13 +683,13 @@ function onLogout() {
     top: 0;
     height: 100%;
     width: 4px;
-    background: linear-gradient(135deg, #ff6600 0%, #22c55e 100%);
+    background: #e67e22;
     transform: scaleY(0);
     transition: transform 0.3s ease;
   }
 
   &:hover {
-    background-color: rgba(255, 102, 0, 0.08);
+    background-color: rgba(0, 0, 0, 0.04);
     transform: translateX(4px);
     &::before {
       transform: scaleY(1);
@@ -704,7 +707,7 @@ function onLogout() {
 }
 
 .nav-item-active {
-  background: linear-gradient(135deg, rgba(255, 102, 0, 0.15) 0%, rgba(34, 197, 94, 0.15) 100%);
+  background-color: rgba(0, 0, 0, 0.04);
   font-weight: 600;
 
   &::before {
@@ -712,11 +715,11 @@ function onLogout() {
   }
 
   .q-icon {
-    color: #ff6600;
+    color: #e67e22;
   }
 
   .q-item-label {
-    color: #ff6600;
+    color: #e67e22;
   }
 } // Menu utilisateur
 .modern-menu {

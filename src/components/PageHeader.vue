@@ -56,7 +56,7 @@ interface Props {
 }
 
 withDefaults(defineProps<Props>(), {
-  gradient: true,
+  gradient: false,
 });
 
 const slots = useSlots();
@@ -98,7 +98,7 @@ const hasStats = computed(() => !!slots.stats);
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #ff6600 0%, #22c55e 100%);
+  background: linear-gradient(135deg, #e67e22 0%, #2e7d32 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

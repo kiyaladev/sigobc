@@ -51,6 +51,11 @@
           {{ formatMontant(props.row.montantTotal) }}
         </q-td>
       </template>
+      <template v-slot:body-cell-totalPrecedent="props">
+        <q-td :props="props">
+          {{ formatMontant(props.row.totalPrecedent || 0) }}
+        </q-td>
+      </template>
     </DataTable>
 
     <!-- Dialog de création/modification -->
@@ -68,7 +73,7 @@
     <!-- Dialog pour voir les déclarations -->
     <q-dialog v-model="declarationsDialogVisible" maximized>
       <q-card>
-        <q-card-section class="bg-primary text-white">
+        <q-card-section class="accent-left">
           <div class="row items-center">
             <div class="col">
               <div class="text-h6">
@@ -185,6 +190,13 @@ const columns = [
     name: 'montantTotal',
     label: 'Montant Total',
     field: 'montantTotal',
+    align: 'right' as const,
+    sortable: true,
+  },
+  {
+    name: 'totalPrecedent',
+    label: 'Total Précédent',
+    field: 'totalPrecedent',
     align: 'right' as const,
     sortable: true,
   },
@@ -402,7 +414,7 @@ async function onSubmit(formData: Partial<BordereauRecette>) {
         ...data,
         createdAt: now,
         updatedAt: now,
-      } as BordereauRecette);
+      });
       $q.notify({ type: 'positive', message: 'Bordereau créé' });
     }
     dialogVisible.value = false;
@@ -481,6 +493,7 @@ async function printBordereau(bordereau: BordereauRecette) {
                 ? date.formatDate(bordereau.dateTransmission, 'DD/MM/YYYY')
                 : date.formatDate(new Date(), 'DD/MM/YYYY'),
               montantTotal: bordereau.montantTotal || 0,
+              totalPrecedent: bordereau.totalPrecedent || 0,
               declarations: declarationsAvecTaxes,
             },
           },

@@ -130,18 +130,6 @@
                   :rules="[(val) => !!val || 'Exercice requis']"
                 />
               </div>
-              <div class="col-6">
-                <q-select
-                  v-model="formData.rubriqueId"
-                  :options="rubriqueOptions"
-                  label="Rubrique *"
-                  outlined
-                  dense
-                  emit-value
-                  map-options
-                  :rules="[(val) => !!val || 'Rubrique requise']"
-                />
-              </div>
               <div class="col-12">
                 <q-select
                   v-model="formData.chapitreId"
@@ -153,6 +141,19 @@
                   map-options
                   :rules="[(val) => !!val || 'Chapitre requis']"
                   hint="Sélectionner un chapitre budgétaire"
+                />
+              </div>
+              <div class="col-12">
+                <q-select
+                  v-model="formData.sousChapitreId"
+                  :options="sousChapitreOptions"
+                  label="Sous-chapitre"
+                  outlined
+                  dense
+                  emit-value
+                  map-options
+                  clearable
+                  hint="Sélectionner un sous-chapitre budgétaire"
                 />
               </div>
             </div>
@@ -299,8 +300,8 @@
             <div class="mandat-details q-mb-lg">
               <table class="details-table">
                 <tr>
-                  <td class="label-cell">Rubrique budgétaire:</td>
-                  <td class="value-cell">{{ rubriqueInfo }}</td>
+                  <td class="label-cell">Sous-chapitre:</td>
+                  <td class="value-cell">{{ sousChapitreInfo }}</td>
                 </tr>
                 <tr>
                   <td class="label-cell">Chapitre:</td>
@@ -385,13 +386,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useQuasar, date } from 'quasar';
-import {
-  db,
-  type Mandat,
-  type Rubrique,
-  type Chapitre,
-  type BordereauMandat,
-} from 'src/database/db';
+import { db, type Mandat, type Chapitre, type SousChapitre, type BordereauMandat } from 'src/database/db';
 import PageHeader from 'src/components/PageHeader.vue';
 import DataTable from 'src/components/DataTable.vue';
 
@@ -402,16 +397,16 @@ const showAddDialog = ref(false);
 const editingId = ref<number | null>(null);
 
 const mandats = ref<Mandat[]>([]);
-const rubriques = ref<Rubrique[]>([]);
 const chapitres = ref<Chapitre[]>([]);
+const sousChapitres = ref<SousChapitre[]>([]);
 const bordereauMandats = ref<BordereauMandat[]>([]);
 
 const formData = ref({
   numeroMandat: '',
   dateMandat: date.formatDate(new Date(), 'YYYY-MM-DD'),
   exercice: new Date().getFullYear(),
-  rubriqueId: null as number | null,
   chapitreId: null as number | null,
+  sousChapitreId: null as number | null,
   bordereauMandatId: null as number | null,
   beneficiaire: '',
   objet: '',
@@ -438,10 +433,10 @@ const mairieInfo = computed(() => {
   };
 });
 
-const rubriqueInfo = computed(() => {
+const sousChapitreInfo = computed(() => {
   if (!selectedMandat.value) return '';
-  const rubrique = rubriques.value.find((r) => r.id === selectedMandat.value!.rubriqueId);
-  return rubrique ? `${rubrique.code} - ${rubrique.libelle}` : '-';
+  const sc = sousChapitres.value.find((s) => s.id === selectedMandat.value!.sousChapitreId);
+  return sc ? `${sc.code} - ${sc.libelle}` : '-';
 });
 
 const chapitreInfo = computed(() => {
@@ -449,13 +444,6 @@ const chapitreInfo = computed(() => {
   const chapitre = chapitres.value.find((c) => c.id === selectedMandat.value!.chapitreId);
   return chapitre ? `${chapitre.code} - ${chapitre.libelle}` : '-';
 });
-
-const rubriqueOptions = computed(() =>
-  rubriques.value.map((r) => ({
-    label: `${r.code} - ${r.libelle}`,
-    value: r.id,
-  })),
-);
 
 const chapitreOptions = computed(() =>
   chapitres.value
@@ -467,6 +455,10 @@ const chapitreOptions = computed(() =>
       label: `${c.code} - ${c.libelle}`,
       value: c.id,
     })),
+);
+
+const sousChapitreOptions = computed(() =>
+  sousChapitres.value.map((s) => ({ label: `${s.code} - ${s.libelle}`, value: s.id })),
 );
 
 const bordereauMandatOptions = computed(() =>
@@ -597,7 +589,8 @@ function printMandat(mandat: Mandat) {
 }
 
 function doPrint() {
-  window.print();
+  if (!selectedMandat.value?.id) return;
+  window.open(`/mandat_depense.html?mandatId=${selectedMandat.value.id}&print=true`, '_blank');
 }
 
 async function loadData() {
@@ -605,8 +598,8 @@ async function loadData() {
   try {
     mandats.value = await db.mandats.toArray();
     mandats.value = await db.mandats.toArray();
-    rubriques.value = await db.rubriques.filter((r) => r.actif).toArray();
     chapitres.value = await db.chapitres.filter((c) => c.actif).toArray();
+    sousChapitres.value = await db.sousChapitres.filter((s) => s.actif).toArray();
     bordereauMandats.value = await db.bordereauMandats.toArray();
   } catch (error) {
     console.error('Erreur lors du chargement:', error);
@@ -624,8 +617,8 @@ function resetForm() {
     numeroMandat: '',
     dateMandat: date.formatDate(new Date(), 'YYYY-MM-DD'),
     exercice: new Date().getFullYear(),
-    rubriqueId: null,
     chapitreId: null,
+    sousChapitreId: null,
     bordereauMandatId: null,
     beneficiaire: '',
     objet: '',
@@ -656,16 +649,16 @@ async function saveMandat() {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { dateFacture, dateMandat, ...otherFormData } = formData.value;
 
-    const data = {
-      ...otherFormData,
-      rubriqueId: formData.value.rubriqueId!,
-      chapitreId: formData.value.chapitreId!,
-      dateMandat: new Date(formData.value.dateMandat),
-      ...(dateFacture ? { dateFacture: new Date(dateFacture) } : {}),
-      ...(formData.value.bordereauMandatId ? { bordereauMandatId: formData.value.bordereauMandatId } : {}),
-      mairieId,
-      personnelId,
-    };
+  const data = {
+    ...otherFormData,
+    chapitreId: formData.value.chapitreId!,
+    ...(formData.value.sousChapitreId ? { sousChapitreId: formData.value.sousChapitreId } : {}),
+    dateMandat: new Date(formData.value.dateMandat),
+    ...(dateFacture ? { dateFacture: new Date(dateFacture) } : {}),
+    ...(formData.value.bordereauMandatId ? { bordereauMandatId: formData.value.bordereauMandatId } : {}),
+    mairieId,
+    personnelId,
+  };
 
     if (editingId.value) {
       const updateData = {
@@ -710,8 +703,8 @@ function editMandat(row: Mandat) {
     numeroMandat: row.numeroMandat,
     dateMandat: date.formatDate(row.dateMandat, 'YYYY-MM-DD'),
     exercice: row.exercice,
-    rubriqueId: row.rubriqueId,
     chapitreId: row.chapitreId,
+    sousChapitreId: row.sousChapitreId || null,
     bordereauMandatId: row.bordereauMandatId || null,
     beneficiaire: row.beneficiaire,
     objet: row.objet,

@@ -120,9 +120,9 @@ const routes: RouteRecordRaw[] = [
         name: 'app3-chapitres',
       },
       {
-        path: 'app3/rubriques',
-        component: () => import('pages/app3/RubriquesPage.vue'),
-        name: 'app3-rubriques',
+        path: 'app3/sous-chapitres',
+        component: () => import('pages/app3/SousChapitresPage.vue'),
+        name: 'app3-sous-chapitres',
       },
       {
         path: 'app3/previsions',

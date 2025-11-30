@@ -31,7 +31,7 @@
       <!-- Statistiques des stocks par valeur -->
       <div class="col-12">
         <q-card>
-          <q-card-section class="bg-primary text-white">
+          <q-card-section>
             <div class="text-h6">Stock Actuel des Timbres</div>
             <div class="text-caption">Exercice {{ selectedYear }}</div>
           </q-card-section>
@@ -53,7 +53,7 @@
               <div class="col-12 col-sm-6 col-md-4" v-for="timbre in timbres" :key="timbre.valeur">
                 <q-card flat bordered>
                   <q-card-section class="text-center">
-                    <div class="text-h3 text-primary">{{ timbre.stock }}</div>
+                    <div class="text-h3">{{ timbre.stock }}</div>
                     <div class="text-h6 text-grey-7">{{ timbre.valeur }} FCFA</div>
                     <q-linear-progress
                       :value="timbre.stock / 1000"
@@ -76,7 +76,7 @@
       <div class="col-12">
         <div class="row q-col-gutter-md">
           <div class="col-12 col-sm-6 col-md col-lg">
-            <q-card class="stat-card" style="border-left: 4px solid #2196f3">
+            <q-card class="stat-card" style="border-left: 4px solid #E67E22">
               <q-card-section>
                 <div class="row items-center">
                   <div class="col">
@@ -87,7 +87,7 @@
                     <q-icon
                       name="confirmation_number"
                       size="48px"
-                      color="blue"
+                      color="grey-7"
                       style="opacity: 0.3"
                     />
                   </div>
@@ -97,7 +97,7 @@
           </div>
 
           <div class="col-12 col-sm-6 col-md col-lg">
-            <q-card class="stat-card" style="border-left: 4px solid #4caf50">
+            <q-card class="stat-card" style="border-left: 4px solid #2E7D32">
               <q-card-section>
                 <div class="row items-center">
                   <div class="col">
@@ -105,7 +105,7 @@
                     <div class="text-caption text-grey-6">Valeur Totale</div>
                   </div>
                   <div class="col-auto">
-                    <q-icon name="payments" size="48px" color="green" style="opacity: 0.3" />
+                    <q-icon name="payments" size="48px" color="grey-7" style="opacity: 0.3" />
                   </div>
                 </div>
               </q-card-section>
@@ -113,7 +113,7 @@
           </div>
 
           <div class="col-12 col-sm-6 col-md col-lg">
-            <q-card class="stat-card" style="border-left: 4px solid #4caf50">
+            <q-card class="stat-card" style="border-left: 4px solid #2E7D32">
               <q-card-section>
                 <div class="row items-center">
                   <div class="col">
@@ -122,7 +122,7 @@
                     <div class="text-caption text-positive">+ Stock</div>
                   </div>
                   <div class="col-auto">
-                    <q-icon name="add_box" size="48px" color="green" style="opacity: 0.3" />
+                    <q-icon name="add_box" size="48px" color="grey-7" style="opacity: 0.3" />
                   </div>
                 </div>
               </q-card-section>
@@ -130,7 +130,7 @@
           </div>
 
           <div class="col-12 col-sm-6 col-md col-lg">
-            <q-card class="stat-card" style="border-left: 4px solid #f44336">
+            <q-card class="stat-card" style="border-left: 4px solid #DC2626">
               <q-card-section>
                 <div class="row items-center">
                   <div class="col">
@@ -139,7 +139,7 @@
                     <div class="text-caption text-negative">- Stock</div>
                   </div>
                   <div class="col-auto">
-                    <q-icon name="remove_circle" size="48px" color="red" style="opacity: 0.3" />
+                    <q-icon name="remove_circle" size="48px" color="grey-7" style="opacity: 0.3" />
                   </div>
                 </div>
               </q-card-section>
@@ -147,7 +147,7 @@
           </div>
 
           <div class="col-12 col-sm-6 col-md col-lg">
-            <q-card class="stat-card" style="border-left: 4px solid #2196f3">
+            <q-card class="stat-card" style="border-left: 4px solid #E67E22">
               <q-card-section>
                 <div class="row items-center">
                   <div class="col">
@@ -156,7 +156,7 @@
                     <div class="text-caption text-grey-7">Recettes</div>
                   </div>
                   <div class="col-auto">
-                    <q-icon name="payments" size="48px" color="primary" style="opacity: 0.3" />
+                    <q-icon name="payments" size="48px" color="grey-7" style="opacity: 0.3" />
                   </div>
                 </div>
               </q-card-section>
@@ -242,7 +242,7 @@
               <div class="col-12 col-sm-6 col-md col-lg">
                 <q-btn
                   outline
-                  color="deep-purple"
+                  color="grey-7"
                   class="full-width q-py-lg"
                   style="background: white; border-width: 2px"
                   icon="bar_chart"

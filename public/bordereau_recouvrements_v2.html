@@ -36,7 +36,11 @@
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        margin-bottom: 10px;
+        padding: 4px;
+        /*margin-bottom: 10px;*/
+        border-top: 1px solid #000;
+        border-left: 1px solid #000;
+        border-right: 1px solid #000;
       }
 
       .header-left {
@@ -46,7 +50,7 @@
       .header-center {
         text-align: center;
         font-weight: bold;
-        font-size: 14px;
+        font-size: 13px;
       }
 
       .header-right {
@@ -56,11 +60,19 @@
       .sub-header {
         display: flex;
         justify-content: space-between;
-        margin-bottom: 5px;
+        padding: 4px;
+        /*margin-bottom: 5px;*/
+        border-left: 1px solid #000;
+        border-right: 1px solid #000;
       }
 
       .commune-info {
-        font-weight: bold;
+          font-weight: bold;
+          position: absolute;
+          padding-left: 15px;
+          padding-top: 8.5px;
+          border-bottom: 1px solid;
+          width: 300px;
       }
 
       table {
@@ -85,11 +97,15 @@
 
       .col-numero {
         width: 40px;
+        padding-top: 35px;
+        border-right: none;
       }
 
       .col-nature {
         width: 200px;
         text-align: left;
+        padding-top: 35px;
+        border-left: none;
       }
 
       .col-nom {
@@ -189,15 +205,20 @@
       </div>
 
       <div class="sub-header">
-        <div class="commune-info">
+        <!--<div class="commune-info">
           COMMUNE DE : <span data-field="mairie">Mairie d'Azaguié</span><br />
           CODE COMMUNE : <span data-field="codeCommune">422</span>
-        </div>
-        <div>BORDEREAU N° : <span data-field="numeroBordereau">001/2025</span></div>
+        </div> -->
       </div>
 
       <table>
         <thead>
+          <tr style="border-left: 1px solid #000;">
+              <div class="commune-info">
+                COMMUNE DE : <span data-field="mairie">Mairie d'Azaguié</span><br />
+                CODE COMMUNE : <span data-field="codeCommune">422</span>
+              </div>
+          </tr>
           <tr>
             <th rowspan="2" class="col-numero">N°</th>
             <th rowspan="2" class="col-nature">NATURE DE LA RECETTE</th>
@@ -278,7 +299,9 @@
             >
               TOTAL GÉNÉRAL DU<br />PRÉCÉDENT ARRÊTÉ
             </div>
-            <div style="border: 1px solid #000; border-left: none; padding: 5px; flex: 1"></div>
+            <div style="border: 1px solid #000; border-left: none; padding: 5px; flex: 1; text-align: center">
+              <span data-field="totalPrecedentChiffres">0</span>
+            </div>
           </div>
           <div style="display: flex">
             <div
@@ -292,7 +315,9 @@
             >
               TOTAL GÉNÉRAL DU<br />PRÉSENT ARRÊTÉ
             </div>
-            <div style="border: 1px solid #000; border-left: none; padding: 5px; flex: 1"></div>
+            <div style="border: 1px solid #000; border-left: none; padding: 5px; flex: 1; text-align: center">
+              <span data-field="totalGeneralChiffres">0</span>
+            </div>
           </div>
         </div>
         <div style="width: 32%; border: 1px solid #000; border-left: none; padding: 15px">
@@ -420,8 +445,10 @@
           .forEach((el) => (el.textContent = data.dateBordereau));
 
         // Montants
-        const montantLettres = nombreEnLettres(data.montantTotal) + ' FCFA';
+        const totalPrecedent = Number(data.totalPrecedent || 0);
         const montantChiffres = formatMontant(data.montantTotal);
+        const totalGeneral = totalPrecedent + Number(data.montantTotal || 0);
+        const montantLettres = nombreEnLettres(totalGeneral) + ' FCFA';
 
         document
           .querySelectorAll('[data-field="montantLettres"]')
@@ -429,6 +456,14 @@
         document
           .querySelectorAll('[data-field="montantTotalChiffres"]')
           .forEach((el) => (el.textContent = montantChiffres));
+
+        document
+          .querySelectorAll('[data-field="totalPrecedentChiffres"]')
+          .forEach((el) => (el.textContent = formatMontant(totalPrecedent)));
+
+        document
+          .querySelectorAll('[data-field="totalGeneralChiffres"]')
+          .forEach((el) => (el.textContent = formatMontant(totalGeneral)));
 
         // Remplir le tableau des déclarations
         const tbody = document.getElementById('declarations-tbody');

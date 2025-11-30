@@ -1,19 +1,15 @@
 <template>
   <q-page class="flex flex-center login-page">
-    <!-- Particules d'arrière-plan -->
-    <div class="particles-bg">
-      <div class="particle" v-for="i in 20" :key="i" :style="getParticleStyle()"></div>
-    </div>
 
     <!-- Carte de connexion -->
-    <q-card class="login-card scale-in q-pa-lg shadow-24">
+    <q-card class="login-card q-pa-lg">
       <!-- En-tête avec logo -->
       <q-card-section class="text-center q-pb-md">
         <div class="logo-wrapper q-mb-md">
           <q-icon name="account_balance" class="logo-icon" />
         </div>
-        <div class="text-h4 text-weight-bold gradient-text q-mb-xs">Trésor App</div>
-        <div class="text-subtitle1 text-grey-6">Système de Gestion des Taxes Municipales</div>
+        <div class="text-h4 text-weight-bold q-mb-xs">Trésor App</div>
+        <div class="text-subtitle1 text-grey-7">Système de Gestion des Taxes Municipales</div>
       </q-card-section>
 
       <q-card-section>
@@ -29,7 +25,7 @@
               class="modern-input"
             >
               <template v-slot:prepend>
-                <q-icon name="person" color="primary" class="input-icon" />
+                <q-icon name="person" color="grey-7" class="input-icon" />
               </template>
             </q-input>
           </div>
@@ -47,7 +43,7 @@
               class="modern-input"
             >
               <template v-slot:prepend>
-                <q-icon name="lock" color="primary" class="input-icon" />
+                <q-icon name="lock" color="grey-7" class="input-icon" />
               </template>
               <template v-slot:append>
                 <q-icon
@@ -63,7 +59,7 @@
             <q-toggle
               v-model="rememberMe"
               label="Se souvenir de moi"
-              color="primary"
+              color="grey-7"
               :disable="loading"
               class="modern-toggle"
             />
@@ -72,7 +68,7 @@
               flat
               dense
               label="Mot de passe oublié ?"
-              color="primary"
+              color="grey-7"
               size="sm"
               @click="onForgotPassword"
               :disable="loading"
@@ -111,12 +107,12 @@
     <!-- Informations de démonstration -->
     <q-card class="demo-info scale-in q-pa-md q-mt-md" flat bordered>
       <div class="text-subtitle2 text-weight-bold q-mb-sm flex items-center">
-        <q-icon name="info" color="primary" size="20px" class="q-mr-xs" />
+        <q-icon name="info" color="grey-7" size="20px" class="q-mr-xs" />
         Comptes de démonstration
       </div>
       <div class="text-caption text-grey-7">
         <div class="q-mb-xs demo-account" @click="fillAdminCredentials" role="button" tabindex="0">
-          <q-chip size="sm" color="primary" text-color="white" dense> Admin </q-chip>
+          <q-chip size="sm" color="accent" text-color="grey-9" dense> Admin </q-chip>
           <span class="q-ml-sm">admin / admin123</span>
           <q-icon name="edit" size="16px" class="q-ml-xs" />
         </div>
@@ -141,20 +137,7 @@ const rememberMe = ref(false);
 const isPwd = ref(true);
 const loading = ref(false);
 
-function getParticleStyle() {
-  const size = Math.random() * 4 + 2;
-  const duration = Math.random() * 20 + 10;
-  const delay = Math.random() * 5;
-  const left = Math.random() * 100;
-
-  return {
-    width: `${size}px`,
-    height: `${size}px`,
-    left: `${left}%`,
-    animationDuration: `${duration}s`,
-    animationDelay: `${delay}s`,
-  };
-}
+//
 
 async function onSubmit() {
   loading.value = true;
@@ -224,39 +207,7 @@ function onForgotPassword() {
 }
 
 // Particules d'arrière-plan
-.particles-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.particle {
-  position: absolute;
-  background: rgba(255, 255, 255, 0.5);
-  border-radius: 50%;
-  animation: float linear infinite;
-}
-
-@keyframes float {
-  0% {
-    transform: translateY(100vh) rotate(0deg);
-    opacity: 0;
-  }
-  10% {
-    opacity: 1;
-  }
-  90% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(-100px) rotate(360deg);
-    opacity: 0;
-  }
-}
+/* pas de particules d'arrière-plan pour sobriété */
 
 // Carte de connexion
 .login-card {
@@ -294,12 +245,7 @@ function onForgotPassword() {
 
 .logo-icon {
   font-size: 80px;
-  background: linear-gradient(135deg, #ff6600 0%, #22c55e 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: logoFloat 3s ease-in-out infinite;
-  filter: drop-shadow(0 4px 8px rgba(255, 102, 0, 0.3));
+  color: #e67e22;
 }
 
 @keyframes logoFloat {
@@ -312,12 +258,7 @@ function onForgotPassword() {
   }
 }
 
-.gradient-text {
-  background: linear-gradient(135deg, #ff6600 0%, #22c55e 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
+/* texte sans gradient pour sobriété */
 
 // Inputs modernes
 .input-wrapper {
@@ -348,7 +289,6 @@ function onForgotPassword() {
   &.q-field--focused {
     .q-field__control {
       background: white;
-      box-shadow: 0 4px 12px rgba(255, 102, 0, 0.15);
     }
   }
 }
@@ -359,11 +299,6 @@ function onForgotPassword() {
 
 .password-toggle {
   transition: all 0.3s ease;
-
-  &:hover {
-    transform: scale(1.2);
-    color: #ff6600;
-  }
 }
 
 // Toggle et boutons
@@ -386,40 +321,7 @@ function onForgotPassword() {
   border-radius: 12px;
   font-weight: 600;
   letter-spacing: 0.5px;
-  background: linear-gradient(135deg, #ff6600 0%, #22c55e 100%);
-  box-shadow: 0 4px 15px rgba(255, 102, 0, 0.4);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    transform: translate(-50%, -50%);
-    transition:
-      width 0.6s,
-      height 0.6s;
-  }
-
-  &:hover:not(:disabled) {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(255, 102, 0, 0.5);
-
-    &::before {
-      width: 300px;
-      height: 300px;
-    }
-  }
-
-  &:active:not(:disabled) {
-    transform: translateY(-1px);
-  }
+  background: #e67e22;
 }
 
 // Carte de démonstration
@@ -443,7 +345,7 @@ function onForgotPassword() {
   align-items: center;
 
   &:hover {
-    background: rgba(255, 102, 0, 0.1);
+    background: rgba(0, 0, 0, 0.04);
     transform: translateX(4px);
 
     .q-icon {

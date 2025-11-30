@@ -5,7 +5,7 @@
     persistent
   >
     <q-card style="min-width: 600px">
-      <q-card-section class="bg-primary text-white">
+      <q-card-section class="accent-left">
         <div class="text-h6">{{ isEditing ? 'Modifier' : 'Nouveau' }} Bordereau</div>
       </q-card-section>
 
@@ -62,6 +62,17 @@
               />
             </div>
 
+            <!-- Total Précédent -->
+            <div class="col-12 col-sm-6">
+              <q-input
+                v-model.number="localForm.totalPrecedent"
+                filled
+                type="number"
+                label="Total précédent"
+                suffix="FCFA"
+              />
+            </div>
+
             <!-- Nombre de Déclarations (readonly) -->
             <div class="col-12 col-sm-6">
               <q-input
@@ -89,7 +100,7 @@
       </q-card-section>
 
       <q-card-actions align="right">
-        <q-btn flat label="Annuler" color="grey" @click="$emit('update:modelValue', false)" />
+        <q-btn flat label="Annuler" color="grey-7" @click="$emit('update:modelValue', false)" />
         <q-btn label="Enregistrer" color="primary" @click="handleSubmit" :loading="loading" />
       </q-card-actions>
     </q-card>
@@ -142,6 +153,7 @@ watch(
           annee: currentYear,
           mairieId: DEFAULT_MAIRIE_ID,
           montantTotal: 0,
+          totalPrecedent: 0,
           nombreDeclarations: 0,
           statut: 'ouvert' as const,
           observations: '',

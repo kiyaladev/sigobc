@@ -53,8 +53,8 @@
         <template v-slot:body-cell-type="props">
           <q-td :props="props">
             <q-chip
-              :color="props.row.type === 'fixe' ? 'blue' : 'orange'"
-              text-color="white"
+              :color="props.row.type === 'fixe' ? 'accent' : 'accent'"
+              text-color="grey-9"
               size="sm"
             >
               {{ props.row.type }}
@@ -73,7 +73,7 @@
 
         <template v-slot:body-cell-actif="props">
           <q-td :props="props">
-            <q-chip :color="props.row.actif ? 'green' : 'grey'" text-color="white" size="sm">
+            <q-chip :color="props.row.actif ? 'positive' : 'grey'" text-color="white" size="sm">
               {{ props.row.actif ? 'Actif' : 'Inactif' }}
             </q-chip>
           </q-td>
@@ -102,7 +102,7 @@
     <!-- Dialog de création/modification -->
     <q-dialog v-model="dialogVisible" persistent>
       <q-card style="min-width: 700px">
-        <q-card-section class="bg-primary text-white">
+        <q-card-section class="accent-left">
           <div class="text-h6">{{ isEditing ? 'Modifier' : 'Nouvelle' }} Taxe</div>
         </q-card-section>
 

@@ -6,7 +6,7 @@
       <!-- Sauvegarde -->
       <div class="col-12 col-md-6">
         <q-card>
-          <q-card-section class="bg-positive text-white">
+          <q-card-section class="accent-left">
             <div class="row items-center">
               <q-icon name="save" size="md" class="q-mr-md" />
               <div>
@@ -16,7 +16,7 @@
             </div>
           </q-card-section>
 
-          <q-card-section>
+          <q-card-section class="accent-left">
             <div class="text-body2 q-mb-md">
               La sauvegarde exportera toutes les données de l'application dans un fichier JSON que
               vous pourrez télécharger.
@@ -91,7 +91,7 @@
       <!-- Restauration -->
       <div class="col-12 col-md-6">
         <q-card>
-          <q-card-section class="bg-info text-white">
+          <q-card-section class="accent-left">
             <div class="row items-center">
               <q-icon name="upload" size="md" class="q-mr-md" />
               <div>
@@ -139,7 +139,7 @@
       <!-- Historique des sauvegardes -->
       <div class="col-12">
         <q-card>
-          <q-card-section class="bg-grey-9 text-white">
+          <q-card-section>
             <div class="text-h6">📋 Dernières opérations</div>
           </q-card-section>
 

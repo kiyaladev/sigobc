@@ -2,7 +2,7 @@
   <q-page class="q-pa-md">
     <div class="row q-mb-md justify-between items-center no-print">
       <div class="text-h5">Gestion des Bordereaux de Mandats</div>
-      <q-btn color="purple" icon="add" label="Nouveau Bordereau" @click="openDialog()" />
+      <q-btn color="primary" icon="add" label="Nouveau Bordereau" @click="openDialog()" />
     </div>
 
     <!-- Recherche et filtres -->
@@ -24,7 +24,7 @@
         <q-card>
           <q-card-section>
             <div class="text-caption text-grey-7">Total Bordereaux</div>
-            <div class="text-h6 text-purple">{{ filteredBordereaux.length }}</div>
+            <div class="text-h6">{{ filteredBordereaux.length }}</div>
           </q-card-section>
         </q-card>
       </div>
@@ -32,7 +32,7 @@
         <q-card>
           <q-card-section>
             <div class="text-caption text-grey-7">Montant Total</div>
-            <div class="text-h6 text-green">{{ formatMontant(montantTotal) }}</div>
+            <div class="text-h6">{{ formatMontant(montantTotal) }}</div>
           </q-card-section>
         </q-card>
       </div>
@@ -40,7 +40,7 @@
         <q-card>
           <q-card-section>
             <div class="text-caption text-grey-7">Bordereaux Ouverts</div>
-            <div class="text-h6 text-orange">{{ bordereauxOuverts }}</div>
+            <div class="text-h6">{{ bordereauxOuverts }}</div>
           </q-card-section>
         </q-card>
       </div>
@@ -48,7 +48,7 @@
         <q-card>
           <q-card-section>
             <div class="text-caption text-grey-7">Bordereaux Fermés</div>
-            <div class="text-h6 text-blue">{{ bordereauxFermes }}</div>
+            <div class="text-h6">{{ bordereauxFermes }}</div>
           </q-card-section>
         </q-card>
       </div>
@@ -110,7 +110,7 @@
     <!-- Dialog pour voir les mandats -->
     <q-dialog v-model="mandatsDialogVisible" maximized>
       <q-card>
-        <q-card-section class="bg-purple text-white">
+        <q-card-section class="accent-left">
           <div class="row items-center">
             <div class="col">
               <div class="text-h6">
@@ -360,7 +360,7 @@ function getStatutColor(statut: string): string {
 function getMandatStatutColor(statut: string): string {
   const colors: Record<string, string> = {
     brouillon: 'grey',
-    emis: 'blue',
+    emis: 'info',
     valide: 'green',
     paye: 'green',
     annule: 'red',

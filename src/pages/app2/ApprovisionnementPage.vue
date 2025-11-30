@@ -4,13 +4,13 @@
       <div class="col">
         <div class="text-h5">Approvisionnement</div>
         <div class="text-caption text-grey-7 q-mt-xs">
-          <q-icon name="info" size="16px" color="positive" />
+          <q-icon name="info" size="16px" color="grey-7" />
           L'imprimerie envoie des valeurs au trésor
           <span class="text-positive text-weight-bold">(+ Augmente le stock du trésor - Section 1)</span>
         </div>
       </div>
       <div class="col-auto">
-        <q-btn color="positive" icon="add_box" label="Nouvel Approvisionnement" @click="openDialog()" />
+        <q-btn color="primary" icon="add_box" label="Nouvel Approvisionnement" @click="openDialog()" />
       </div>
     </div>
 
@@ -64,7 +64,7 @@
 
         <template v-slot:body-cell-type="props">
           <q-td :props="props">
-            <q-badge :color="getTypeColor()" :label="props.row.type" />
+            <q-badge color="positive" :label="props.row.type" />
           </q-td>
         </template>
 
@@ -72,7 +72,7 @@
           <q-td :props="props">
             <div class="row q-gutter-xs">
               <div v-for="(value, key) in props.row.timbres" :key="key">
-                <q-chip v-if="value > 0" dense color="green" text-color="white">
+                <q-chip v-if="value > 0" dense color="positive" text-color="white">
                   {{ key }}: {{ value }}
                 </q-chip>
               </div>
@@ -93,12 +93,12 @@
               round
               dense
               icon="visibility"
-              color="positive"
+              color="grey-7"
               @click="viewDetails(props.row)"
             >
               <q-tooltip>Voir détails</q-tooltip>
             </q-btn>
-            <q-btn flat round dense icon="edit" color="positive" @click="openDialog(props.row)">
+            <q-btn flat round dense icon="edit" color="grey-7" @click="openDialog(props.row)">
               <q-tooltip>Modifier</q-tooltip>
             </q-btn>
             <q-btn
@@ -119,7 +119,7 @@
     <!-- Dialog de création/modification -->
     <q-dialog v-model="dialogVisible" persistent>
       <q-card style="min-width: 700px">
-        <q-card-section class="bg-primary text-white">
+        <q-card-section>
           <div class="text-h6">{{ isEditing ? 'Modifier' : 'Ajouter des' }} Approvisionnements</div>
         </q-card-section>
 
@@ -196,14 +196,14 @@
 
               <!-- Total calculé -->
               <div class="col-12">
-                <q-card flat bordered class="bg-blue-1">
-                  <q-card-section>
+                <q-card flat bordered>
+                  <q-card-section class="accent-left">
                     <div class="row items-center justify-between">
                       <div class="col">
                         <div class="text-subtitle2 text-grey-7">Total</div>
                       </div>
                       <div class="col-auto">
-                        <div class="text-h6 text-primary">{{ formatMontant(form.total || 0) }}</div>
+                        <div class="text-h6">{{ formatMontant(form.total || 0) }}</div>
                       </div>
                     </div>
                   </q-card-section>
@@ -226,7 +226,7 @@
 
             <div class="row q-gutter-sm justify-end">
               <q-btn label="Fermer" color="grey-7" flat @click="dialogVisible = false" />
-              <q-btn label="OK" color="positive" type="submit" :loading="saving" />
+              <q-btn label="OK" color="primary" type="submit" :loading="saving" />
             </div>
           </q-form>
         </q-card-section>
@@ -331,10 +331,7 @@ const formatMontant = (montant: number) => {
   }).format(montant);
 };
 
-const getTypeColor = () => {
-  // Toujours vert pour les approvisionnements (augmente le stock)
-  return 'positive';
-};
+//
 
 const calculateTotal = () => {
   let total = 0;

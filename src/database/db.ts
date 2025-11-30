@@ -60,6 +60,7 @@ export interface BordereauRecette {
   dateTransmission?: Date; // Date de transmission du bordereau
   mairieId: number;
   montantTotal: number;
+  totalPrecedent?: number;
   nombreDeclarations: number;
   statut: 'ouvert' | 'ferme';
   observations?: string;
@@ -166,10 +167,10 @@ export interface Chapitre {
   updatedAt: Date;
 }
 
-export interface Rubrique {
+export interface SousChapitre {
   id?: number;
-  code: string; // Ex: 60, 61, 62, etc.
-  libelle: string; // Ex: "Charges de personnel"
+  code: string;
+  libelle: string;
   description?: string;
   mairieId: number;
   actif: boolean;
@@ -177,10 +178,12 @@ export interface Rubrique {
   updatedAt: Date;
 }
 
+// Rubriques ne sont plus utilisées dans App3
+
 export interface Prevision {
   id?: number;
   exercice: number; // Année budgétaire
-  rubriqueId: number; // Référence à la rubrique
+  chapitreId: number; // Référence au chapitre principal
   mairieId: number;
   montantPrevu: number; // Montant total prévu pour ce chapitre
   montantEngage: number; // Montant déjà engagé (mandats)
@@ -198,8 +201,8 @@ export interface Mandat {
   exercice: number; // Année
   numeroMandat: string; // Numéro unique du mandat
   dateMandat: Date; // Date d'émission du mandat
-  rubriqueId: number; // Rubrique budgétaire
-  chapitreId: number; // Chapitre budgétaire
+  chapitreId: number; // Chapitre budgétaire (01..08)
+  sousChapitreId?: number; // Sous-chapitre budgétaire (codes 600xx)
   previsionId?: number; // Lien vers la prévision
   bordereauMandatId?: number; // ID du bordereau d'émission des mandats
   mairieId: number;
@@ -245,7 +248,7 @@ class TresorDatabase extends Dexie {
   balancesEntree!: EntityTable<BalanceEntree, 'id'>;
   // App3 - Gestion des Dépenses
   chapitres!: EntityTable<Chapitre, 'id'>;
-  rubriques!: EntityTable<Rubrique, 'id'>;
+  sousChapitres!: EntityTable<SousChapitre, 'id'>;
   previsions!: EntityTable<Prevision, 'id'>;
   mandats!: EntityTable<Mandat, 'id'>;
   bordereauMandats!: EntityTable<BordereauMandat, 'id'>;
@@ -253,7 +256,7 @@ class TresorDatabase extends Dexie {
   constructor() {
     super('TresorDatabase');
 
-    this.version(9).stores({
+    this.version(10).stores({
       mairies: '++id, nom, code, ville',
       taxes: '++id, code, libelle, mairieId, type, actif',
       declarations:
@@ -267,10 +270,10 @@ class TresorDatabase extends Dexie {
       balancesEntree: '++id, date, exercice, mairieId, type, personnelId, [exercice+mairieId]',
       // App3
       chapitres: '++id, code, libelle, mairieId, actif',
-      rubriques: '++id, code, libelle, mairieId, actif',
-      previsions: '++id, exercice, rubriqueId, mairieId, statut, personnelId',
+      sousChapitres: '++id, code, libelle, mairieId, actif',
+      previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
       mandats:
-        '++id, numeroMandat, dateMandat, exercice, rubriqueId, chapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
+        '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
       bordereauMandats: '++id, numero, exercice, mairieId, statut, personnelId',
     });
   }

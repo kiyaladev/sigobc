@@ -59,8 +59,8 @@
         <template v-slot:body-cell-role="props">
           <q-td :props="props">
             <q-chip
-              :color="getRoleColor(props.row.role)"
-              text-color="white"
+              :color="'accent'"
+              text-color="grey-9"
               size="sm"
             >
               {{ getRoleLabel(props.row.role) }}
@@ -71,7 +71,7 @@
         <template v-slot:body-cell-actif="props">
           <q-td :props="props">
             <q-chip
-              :color="props.row.actif ? 'green' : 'grey'"
+              :color="props.row.actif ? 'positive' : 'grey'"
               text-color="white"
               size="sm"
             >
@@ -93,7 +93,7 @@
               round
               dense
               icon="edit"
-              color="primary"
+              color="grey-7"
               @click="openDialog(props.row)"
             >
               <q-tooltip>Modifier</q-tooltip>
@@ -103,7 +103,7 @@
               round
               dense
               icon="vpn_key"
-              color="warning"
+              color="grey-7"
               @click="resetPassword(props.row)"
             >
               <q-tooltip>Réinitialiser mot de passe</q-tooltip>
@@ -127,7 +127,7 @@
     <!-- Dialog de création/modification -->
     <q-dialog v-model="dialogVisible" persistent>
       <q-card style="min-width: 700px">
-        <q-card-section class="bg-primary text-white">
+        <q-card-section class="accent-left">
           <div class="text-h6">{{ isEditing ? 'Modifier' : 'Nouvel' }} Utilisateur</div>
         </q-card-section>
 
@@ -226,7 +226,7 @@
               </div>
 
               <div class="col-12">
-                <q-banner class="bg-info text-white" rounded>
+                <q-banner rounded>
                   <template v-slot:avatar>
                     <q-icon name="info" />
                   </template>
@@ -337,14 +337,7 @@ function getRoleLabel(role: string): string {
   return labels[role] || role;
 }
 
-function getRoleColor(role: string): string {
-  const colors: Record<string, string> = {
-    admin: 'red',
-    gestionnaire: 'blue',
-    operateur: 'green',
-  };
-  return colors[role] || 'grey';
-}
+//
 
 function formatDate(dateValue: Date | undefined): string {
   if (!dateValue) return 'Jamais';
@@ -401,7 +394,7 @@ async function onSubmit() {
         ...form.value,
         createdAt: now,
         updatedAt: now,
-      } as Utilisateur);
+      });
       $q.notify({ type: 'positive', message: 'Utilisateur créé avec succès' });
     }
     dialogVisible.value = false;

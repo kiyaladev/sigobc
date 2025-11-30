@@ -4,13 +4,13 @@
       <!-- Informations du profil -->
       <div class="col-12 col-md-4">
         <q-card class="profile-card">
-          <q-card-section class="text-center bg-primary text-white">
+          <q-card-section class="text-center">
             <q-avatar size="100px" color="white" text-color="primary">
               <span class="text-h4">{{ userInitials }}</span>
             </q-avatar>
             <div class="text-h6 q-mt-md">{{ authStore.userName }}</div>
             <div class="text-caption">{{ roleLabel }}</div>
-            <q-chip outline color="white" text-color="white" class="q-mt-sm">
+            <q-chip outline color="accent" text-color="grey-9" class="q-mt-sm">
               <q-icon name="verified_user" left />
               {{ authStore.userRole.toUpperCase() }}
             </q-chip>
@@ -183,7 +183,7 @@
                   </template>
                 </q-input>
 
-                <q-banner class="bg-info text-white" rounded>
+                <q-banner rounded>
                   <template v-slot:avatar>
                     <q-icon name="info" />
                   </template>

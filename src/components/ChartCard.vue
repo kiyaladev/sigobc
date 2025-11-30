@@ -24,7 +24,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  headerClass: 'bg-primary text-white',
+  headerClass: 'text-grey-8',
   containerClass: 'chart-container',
   height: '300px',
 });
