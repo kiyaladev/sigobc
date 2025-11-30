@@ -347,7 +347,7 @@ const loading = ref(false);
 const approvisionnements = ref<Approvisionnement[]>([]);
 const remises = ref<Remise[]>([]);
 const versements = ref<Versement[]>([]);
-const balanceEntree = ref<BalanceEntree | null>(null);
+const balancesEntree = ref<BalanceEntree[]>([]);
 
 // Calculer les statistiques
 const stats = computed(() => {
@@ -382,6 +382,7 @@ const stats = computed(() => {
     versementsMois,
   };
 });
+
 
 const operationsColumns = [
   { name: 'date', label: 'Date', field: 'date', align: 'left' as const, sortable: true },
@@ -424,13 +425,18 @@ const calculateStock = () => {
     stockActuel[valeur] = 0;
   });
 
-  // 1. Ajouter la balance d'entrée si elle existe
-  if (balanceEntree.value?.timbres) {
-    valeursTimbre.forEach((valeur) => {
-      stockActuel[valeur] =
-        (stockActuel[valeur] ?? 0) + (balanceEntree.value?.timbres[valeur] || 0);
-    });
-  }
+  // 1. Ajouter les balances d'entrée (BE-S1 uniquement)
+  const balancesBES1 = balancesEntree.value.filter((b) =>
+    b.type.includes('BE-S1') || b.type.includes('INITIAL') || b.type.includes('Stock')
+  );
+
+  balancesBES1.forEach((balance) => {
+    if (balance.timbres) {
+      valeursTimbre.forEach((valeur) => {
+        stockActuel[valeur] = (stockActuel[valeur] ?? 0) + (balance.timbres[valeur] || 0);
+      });
+    }
+  });
 
   // 2. Ajouter les approvisionnements
   approvisionnements.value.forEach((appro) => {
@@ -450,15 +456,6 @@ const calculateStock = () => {
     }
   });
 
-  // 4. Soustraire les versements
-  versements.value.forEach((versement) => {
-    if (versement?.timbres) {
-      valeursTimbre.forEach((valeur) => {
-        stockActuel[valeur] = (stockActuel[valeur] ?? 0) - (versement.timbres[valeur] || 0);
-      });
-    }
-  });
-
   // Mettre à jour l'affichage
   timbres.value = valeursTimbre.map((valeur) => ({
     valeur,
@@ -470,16 +467,16 @@ const calculateStock = () => {
 const loadDernieresOperations = () => {
   const operations: Operation[] = [];
 
-  // Ajouter la balance d'entrée
-  if (balanceEntree.value) {
+  // Ajouter les balances d'entrée
+  balancesEntree.value.forEach((balance) => {
     operations.push({
-      id: balanceEntree.value.id!,
-      date: new Date(balanceEntree.value.date).toLocaleString('fr-FR'),
+      id: balance.id!,
+      date: new Date(balance.date).toLocaleString('fr-FR'),
       type: 'Balance Entree',
-      description: balanceEntree.value.type || "Balance d'entrée",
-      montant: balanceEntree.value.total,
+      description: balance.type || "Balance d'entrée",
+      montant: balance.total,
     });
-  }
+  });
 
   // Ajouter les approvisionnements
   approvisionnements.value.forEach((appro) => {
@@ -533,7 +530,7 @@ const loadData = async () => {
     const exercice = selectedYear.value;
 
     // Charger toutes les données pour l'exercice sélectionné
-    const [appros, remisesList, versementsList, balance] = await Promise.all([
+    const [appros, remisesList, versementsList, balances] = await Promise.all([
       db.approvisionnements
         .where('exercice')
         .equals(exercice)
@@ -553,13 +550,13 @@ const loadData = async () => {
         .where('exercice')
         .equals(exercice)
         .and((b) => b.mairieId === mairieId)
-        .first(),
+        .toArray(),
     ]);
 
     approvisionnements.value = appros;
     remises.value = remisesList;
     versements.value = versementsList;
-    balanceEntree.value = balance ?? null;
+    balancesEntree.value = balances;
 
     // Calculer le stock actuel
     calculateStock();

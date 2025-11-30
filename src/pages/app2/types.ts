@@ -37,6 +37,7 @@ export interface SectionIIIEntry {
   denominations: DenominationsType;
   detailsQuotites?: Record<string, number>;
   approvisionnement?: number;
+  remise?: number;
   versement?: number;
   solde: number;
 }

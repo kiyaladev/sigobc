@@ -95,11 +95,11 @@ const loadData = async () => {
     const approvisionnements = await db.approvisionnements.where('exercice').equals(exercice).toArray();
     const versements = await db.versements.where('exercice').equals(exercice).toArray();
 
-    const rawSectionI: { id: number; date: Date; type: string; denominations: DenominationsType; approvisionnement?: number; remise?: number }[] = [];
+    const rawSectionI: { id: number; date: Date; type: string; denominations: DenominationsType; detailsQuotites?: Record<string, number>; approvisionnement?: number; remise?: number }[] = [];
     const balancesBES1 = balances.filter((b) => b.type.includes('BE-S1') || b.type.includes('INITIAL') || b.type.includes('Stock'));
-    balancesBES1.forEach((b) => rawSectionI.push({ id: b.id!, date: b.date, type: b.type, denominations: b.timbres, approvisionnement: b.total }));
-    approvisionnements.forEach((a) => rawSectionI.push({ id: a.id!, date: a.date, type: 'Approvisionnement', denominations: a.timbres, approvisionnement: a.total }));
-    remises.forEach((r) => rawSectionI.push({ id: r.id!, date: r.date, type: 'Remise', denominations: r.timbres, remise: r.total }));
+    balancesBES1.forEach((b) => rawSectionI.push({ id: b.id!, date: b.date, type: b.type, denominations: b.timbres, detailsQuotites: b.detailsQuotites, approvisionnement: b.total }));
+    approvisionnements.forEach((a) => rawSectionI.push({ id: a.id!, date: a.date, type: 'Approvisionnement', denominations: a.timbres, detailsQuotites: a.detailsQuotites, approvisionnement: a.total }));
+    remises.forEach((r) => rawSectionI.push({ id: r.id!, date: r.date, type: 'Remise', denominations: r.timbres, detailsQuotites: r.detailsQuotites, remise: r.total }));
     rawSectionI.sort((a, b) => a.date.getTime() - b.date.getTime());
     let sectionISolde = 0;
     sectionIData.value = rawSectionI.map((item) => {
@@ -108,11 +108,11 @@ const loadData = async () => {
       return { ...item, date: item.date.toISOString(), solde: sectionISolde };
     });
 
-    const rawSectionII: { id: number; date: Date; type: string; denominations: DenominationsType; remise?: number; versement?: number }[] = [];
+    const rawSectionII: { id: number; date: Date; type: string; denominations: DenominationsType; detailsQuotites?: Record<string, number>; remise?: number; versement?: number }[] = [];
     const balancesBES2 = balances.filter((b) => b.type.includes('BE-S2'));
-    balancesBES2.forEach((b) => rawSectionII.push({ id: b.id!, date: b.date, type: b.type, denominations: b.timbres, remise: b.total }));
-    remises.forEach((r) => rawSectionII.push({ id: r.id!, date: r.date, type: 'Remise', denominations: r.timbres, remise: r.total }));
-    versements.forEach((v) => rawSectionII.push({ id: v.id!, date: v.date, type: 'Versement', denominations: v.timbres, versement: v.total }));
+    balancesBES2.forEach((b) => rawSectionII.push({ id: b.id!, date: b.date, type: b.type, denominations: b.timbres, detailsQuotites: b.detailsQuotites, remise: b.total }));
+    remises.forEach((r) => rawSectionII.push({ id: r.id!, date: r.date, type: 'Remise', denominations: r.timbres, detailsQuotites: r.detailsQuotites, remise: r.total }));
+    versements.forEach((v) => rawSectionII.push({ id: v.id!, date: v.date, type: 'Versement', denominations: v.timbres, detailsQuotites: v.detailsQuotites, versement: v.total }));
     rawSectionII.sort((a, b) => a.date.getTime() - b.date.getTime());
     let sectionIISolde = 0;
     sectionIIData.value = rawSectionII.map((item) => {
@@ -121,14 +121,16 @@ const loadData = async () => {
       return { ...item, date: item.date.toISOString(), solde: sectionIISolde };
     });
 
-    const rawSectionIII: { id: number; date: Date; type: string; denominations: DenominationsType; approvisionnement?: number; versement?: number }[] = [];
+    const rawSectionIII: { id: number; date: Date; type: string; denominations: DenominationsType; detailsQuotites?: Record<string, number>; approvisionnement?: number; versement?: number; remise?: number }[] = [];
     const balancesBES3 = balances.filter((b) => b.type.includes('BE-S3'));
-    balancesBES3.forEach((b) => rawSectionIII.push({ id: b.id!, date: b.date, type: b.type, denominations: b.timbres, approvisionnement: b.total }));
-    versements.forEach((v) => rawSectionIII.push({ id: v.id!, date: v.date, type: 'Versement', denominations: v.timbres, versement: v.total }));
+    balancesBES3.forEach((b) => rawSectionIII.push({ id: b.id!, date: b.date, type: b.type, denominations: b.timbres, detailsQuotites: b.detailsQuotites, approvisionnement: b.total }));
+    versements.forEach((v) => rawSectionIII.push({ id: v.id!, date: v.date, type: 'Versement', denominations: v.timbres, detailsQuotites: v.detailsQuotites, versement: v.total }));
+    remises.forEach((r) => rawSectionIII.push({ id: r.id!, date: r.date, type: 'Remise', denominations: r.timbres, detailsQuotites: r.detailsQuotites, remise: r.total }));
     rawSectionIII.sort((a, b) => a.date.getTime() - b.date.getTime());
     let sectionIIISolde = 0;
     sectionIIIData.value = rawSectionIII.map((item) => {
       if (item.approvisionnement) sectionIIISolde += item.approvisionnement;
+      if (item.remise) sectionIIISolde += item.remise;
       if (item.versement) sectionIIISolde -= item.versement;
       return { ...item, date: item.date.toISOString(), solde: sectionIIISolde };
     });

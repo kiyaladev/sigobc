@@ -415,20 +415,36 @@ const openDialog = (versement?: Versement) => {
 const onSubmit = async () => {
   saving.value = true;
   try {
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    const now = new Date();
+    const mairieId = 1; // À adapter selon l'utilisateur connecté
+    const personnelId = 1; // À adapter selon l'utilisateur connecté
+    
+    const data = {
+      mairieId,
+      exercice: form.value.exercice || new Date().getFullYear(),
+      date: new Date(form.value.date),
+      numeroVersement: `V-${Date.now()}`, // Génération temporaire
+      type: form.value.type || 'Versement',
+      timbres: buildTimbresFromQuantites(),
+      detailsQuotites: buildDetailsFromQuantites(),
+      total: form.value.total || 0,
+      observations: form.value.commentaires || '',
+      personnelId,
+      createdAt: now,
+      updatedAt: now,
+    };
 
-    if (isEditing.value) {
-      const index = versements.value.findIndex((v) => v.id === form.value.id);
-      if (index !== -1) {
-        versements.value[index] = { ...form.value, timbres: buildTimbresFromQuantites(), detailsQuotites: buildDetailsFromQuantites() };
-      }
+    if (isEditing.value && form.value.id) {
+      await db.versements.update(form.value.id, {
+        ...data,
+        updatedAt: now,
+      });
       $q.notify({
         type: 'positive',
         message: 'Versement modifié avec succès',
       });
     } else {
-      const newId = Math.max(...versements.value.map((v) => v.id || 0)) + 1;
-      versements.value.unshift({ ...form.value, timbres: buildTimbresFromQuantites(), detailsQuotites: buildDetailsFromQuantites(), id: newId });
+      await db.versements.add(data);
       $q.notify({
         type: 'positive',
         message: 'Versement ajouté avec succès',
@@ -436,7 +452,9 @@ const onSubmit = async () => {
     }
 
     dialogVisible.value = false;
-  } catch {
+    await loadData();
+  } catch (error) {
+    console.error('Erreur:', error);
     $q.notify({
       type: 'negative',
       message: "Erreur lors de l'enregistrement",
@@ -466,16 +484,41 @@ const confirmDelete = (versement: Versement) => {
     cancel: true,
     persistent: true,
   }).onOk(() => {
-    const index = versements.value.findIndex((v) => v.id === versement.id);
-    if (index !== -1) {
-      versements.value.splice(index, 1);
-      $q.notify({
-        type: 'positive',
-        message: 'Versement supprimé avec succès',
-      });
-    }
+    void (async () => {
+      try {
+        if (versement.id) {
+          await db.versements.delete(versement.id);
+          $q.notify({
+            type: 'positive',
+            message: 'Versement supprimé avec succès',
+          });
+          await loadData();
+        }
+      } catch (error) {
+        console.error('Erreur:', error);
+        $q.notify({
+          type: 'negative',
+          message: 'Erreur lors de la suppression',
+        });
+      }
+    })();
   });
 };
+
+async function loadData() {
+  loading.value = true;
+  try {
+    versements.value = await db.versements.toArray();
+  } catch (error) {
+    console.error('Erreur lors du chargement:', error);
+    $q.notify({
+      type: 'negative',
+      message: 'Erreur lors du chargement des données',
+    });
+  } finally {
+    loading.value = false;
+  }
+}
 
 onMounted(() => {
   void (async () => {
@@ -492,6 +535,7 @@ onMounted(() => {
       const key = `${q.prix}-${q.code}`;
       if (!(key in quantites.value)) quantites.value[key] = 0;
     }
+    await loadData();
   })();
 });
 </script>

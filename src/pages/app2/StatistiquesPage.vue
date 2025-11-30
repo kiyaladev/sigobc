@@ -316,7 +316,7 @@ const dateFin = ref('');
 const approvisionnements = ref<Approvisionnement[]>([]);
 const remises = ref<Remise[]>([]);
 const versements = ref<Versement[]>([]);
-const balanceEntree = ref<BalanceEntree | null>(null);
+const balancesEntree = ref<BalanceEntree[]>([]);
 
 // Options de période
 const periodOptions = [
@@ -338,12 +338,18 @@ const stockActuel = computed(() => {
     stock[valeur] = 0;
   });
 
-  // Ajouter la balance d'entrée
-  if (balanceEntree.value?.timbres) {
-    valeursTimbre.forEach((valeur) => {
-      stock[valeur] = (stock[valeur] ?? 0) + (balanceEntree.value?.timbres[valeur] || 0);
-    });
-  }
+  // Ajouter les balances d'entrée (BE-S1 uniquement)
+  const balancesBES1 = balancesEntree.value.filter((b) =>
+    b.type.includes('BE-S1') || b.type.includes('INITIAL') || b.type.includes('Stock')
+  );
+
+  balancesBES1.forEach((balance) => {
+    if (balance.timbres) {
+      valeursTimbre.forEach((valeur) => {
+        stock[valeur] = (stock[valeur] ?? 0) + (balance.timbres[valeur] || 0);
+      });
+    }
+  });
 
   // Ajouter les approvisionnements
   approvisionnements.value.forEach((appro) => {
@@ -359,15 +365,6 @@ const stockActuel = computed(() => {
     if (remise?.timbres) {
       valeursTimbre.forEach((valeur) => {
         stock[valeur] = (stock[valeur] ?? 0) - (remise.timbres[valeur] || 0);
-      });
-    }
-  });
-
-  // Soustraire les versements
-  versements.value.forEach((versement) => {
-    if (versement?.timbres) {
-      valeursTimbre.forEach((valeur) => {
-        stock[valeur] = (stock[valeur] ?? 0) - (versement.timbres[valeur] || 0);
       });
     }
   });
@@ -391,22 +388,59 @@ const stats = computed(() => {
     0,
   );
 
+  // Helper filter
+  const filterByPeriod = (items: { date: string | Date }[]) => {
+    if (!dateDebut.value || !dateFin.value) return items;
+    const start = new Date(dateDebut.value).getTime();
+    const end = new Date(dateFin.value).getTime() + 86400000 - 1; // End of day
+    return items.filter(i => {
+      const d = new Date(i.date).getTime();
+      return d >= start && d <= end;
+    });
+  };
+
+  const approsFiltered = filterByPeriod(approvisionnements.value) as Approvisionnement[];
+  const remisesFiltered = filterByPeriod(remises.value) as Remise[];
+  const versementsFiltered = filterByPeriod(versements.value) as Versement[];
+
   // Nombre d'approvisionnements et montant total
-  const nbAppros = approvisionnements.value.length;
-  const montantAppros = approvisionnements.value.reduce((sum, a) => sum + (a.total || 0), 0);
+  const nbAppros = approsFiltered.length;
+  const montantAppros = approsFiltered.reduce((sum, a) => sum + (a.total || 0), 0);
 
   // Nombre de versements et montant total
-  const nbVersements = versements.value.length;
-  const montantVersements = versements.value.reduce((sum, v) => sum + (v.total || 0), 0);
+  const nbVersements = versementsFiltered.length;
+  const montantVersements = versementsFiltered.reduce((sum, v) => sum + (v.total || 0), 0);
 
-  // Total des tickets entrés (approvisionnements + balance)
+  // Total des tickets entrés (approvisionnements + balances)
+  // Balances are usually "Initial", so they might be before period.
+  // If period includes Start of Year, include balances?
+  // For "Activity", usually we only count movements (Appros).
+  // But "Rotation" needs Initial Stock + Appros.
+  // I will include Balances ONLY if period starts at Jan 1?
+  // Or just ignore Balances for "Activity Flow".
+  // "Total Entrees" for Rotation usually means "Stock Available to be sold".
+  // So it should include Initial Stock.
+
   let totalEntrees = 0;
-  if (balanceEntree.value?.timbres) {
-    valeursTimbre.forEach((valeur) => {
-      totalEntrees += balanceEntree.value?.timbres[valeur] || 0;
-    });
-  }
-  approvisionnements.value.forEach((appro) => {
+
+  // Include balances in 'totalEntrees' for Rotation calculation?
+  // If Rotation = Output / Input.
+  // Input = Initial Stock + Appros.
+  // So yes, include balances.
+
+  const balancesBES1 = balancesEntree.value.filter((b) =>
+    b.type.includes('BE-S1') || b.type.includes('INITIAL') || b.type.includes('Stock')
+  );
+
+  balancesBES1.forEach((balance) => {
+    if (balance.timbres) {
+      valeursTimbre.forEach((valeur) => {
+        totalEntrees += balance.timbres[valeur] || 0;
+      });
+    }
+  });
+
+  approsFiltered.forEach((appro) => {
     if (appro?.timbres) {
       valeursTimbre.forEach((valeur) => {
         totalEntrees += appro.timbres[valeur] || 0;
@@ -416,7 +450,7 @@ const stats = computed(() => {
 
   // Total des remises
   let totalRemises = 0;
-  remises.value.forEach((remise) => {
+  remisesFiltered.forEach((remise) => {
     if (remise?.timbres) {
       valeursTimbre.forEach((valeur) => {
         totalRemises += remise.timbres[valeur] || 0;
@@ -426,7 +460,7 @@ const stats = computed(() => {
 
   // Total des versements (tickets)
   let totalVersementsTickets = 0;
-  versements.value.forEach((versement) => {
+  versementsFiltered.forEach((versement) => {
     if (versement?.timbres) {
       valeursTimbre.forEach((valeur) => {
         totalVersementsTickets += versement.timbres[valeur] || 0;
@@ -434,10 +468,10 @@ const stats = computed(() => {
     }
   });
 
-  // Taux de rotation (sorties / entrées * 100)
+  // Taux de rotation (sorties (remises) / entrées * 100)
   const tauxRotation =
     totalEntrees > 0
-      ? Math.round(((totalRemises + totalVersementsTickets) / totalEntrees) * 100)
+      ? Math.round((totalRemises / totalEntrees) * 100)
       : 0;
 
   return {
@@ -488,8 +522,16 @@ const detailsTickets = computed(() => {
     });
 
     // Calculer le taux de rotation pour cette valeur
-    const totalEntrees = appros + (balanceEntree.value?.timbres[valeur] || 0);
-    const totalSorties = remisesQte + versementsQte;
+    let balanceVal = 0;
+    const balancesBES1 = balancesEntree.value.filter((b) =>
+      b.type.includes('BE-S1') || b.type.includes('INITIAL') || b.type.includes('Stock')
+    );
+    balancesBES1.forEach((b) => {
+      balanceVal += b.timbres[valeur] || 0;
+    });
+
+    const totalEntrees = appros + balanceVal;
+    const totalSorties = remisesQte; // Versements removed from rotation logic
     const taux = totalEntrees > 0 ? Math.round((totalSorties / totalEntrees) * 100) : 0;
 
     return {
@@ -670,8 +712,20 @@ function resetFilters() {
 async function loadStatistics() {
   loading.value = true;
   try {
-    // Ici, charger les vraies données depuis la base de données
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    const mairieId = 1;
+    const exercice = selectedYear.value;
+
+    const [appros, remisesList, versementsList, balances] = await Promise.all([
+      db.approvisionnements.where('exercice').equals(exercice).and(a => a.mairieId === mairieId).toArray(),
+      db.remises.where('exercice').equals(exercice).and(r => r.mairieId === mairieId).toArray(),
+      db.versements.where('exercice').equals(exercice).and(v => v.mairieId === mairieId).toArray(),
+      db.balancesEntree.where('exercice').equals(exercice).and(b => b.mairieId === mairieId).toArray(),
+    ]);
+
+    approvisionnements.value = appros;
+    remises.value = remisesList;
+    versements.value = versementsList;
+    balancesEntree.value = balances;
   } catch (error) {
     console.error('Erreur:', error);
     $q.notify({
@@ -778,54 +832,81 @@ const valeurChartConfig = computed<ChartConfiguration>(() => ({
   },
 }));
 
-const evolutionChartConfig = computed<ChartConfiguration>(() => ({
-  type: 'line',
-  data: {
-    labels: ['Janv', 'Févr', 'Mars', 'Avr', 'Mai', 'Juin'],
-    datasets: [
-      {
-        label: 'Approvisionnements',
-        data: [1200, 1900, 1500, 2200, 1800, 2500],
-        borderColor: '#42A5F5',
-        backgroundColor: 'rgba(66, 165, 245, 0.1)',
-        tension: 0.4,
+const evolutionChartConfig = computed<ChartConfiguration>(() => {
+  const labels = ['Janv', 'Févr', 'Mars', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sept', 'Oct', 'Nov', 'Déc'];
+  const appData = new Array(12).fill(0);
+  const remData = new Array(12).fill(0);
+  const verData = new Array(12).fill(0);
+
+  const process = (items: any[], target: number[]) => {
+    items.forEach(item => {
+      const d = new Date(item.date);
+      if (d.getFullYear() === selectedYear.value) {
+        target[d.getMonth()] += (item.total || 0);
+      }
+    });
+  };
+
+  process(approvisionnements.value, appData);
+  process(remises.value, remData);
+  process(versements.value, verData);
+
+  return {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Approvisionnements',
+          data: appData,
+          borderColor: '#42A5F5',
+          backgroundColor: 'rgba(66, 165, 245, 0.1)',
+          tension: 0.4,
+        },
+        {
+          label: 'Remises',
+          data: remData,
+          borderColor: '#FFA726',
+          backgroundColor: 'rgba(255, 167, 38, 0.1)',
+          tension: 0.4,
+        },
+        {
+          label: 'Versements',
+          data: verData,
+          borderColor: '#AB47BC',
+          backgroundColor: 'rgba(171, 71, 188, 0.1)',
+          tension: 0.4,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: { position: 'bottom' },
+        tooltip: {
+          callbacks: {
+            label: function (context: TooltipItem<keyof ChartTypeRegistry>) {
+              const label = context.dataset.label || '';
+              const value = context.parsed.y || 0;
+              return `${label}: ${formatMontant(value)}`;
+            },
+          },
+        },
       },
-      {
-        label: 'Remises',
-        data: [800, 1200, 1000, 1500, 1300, 1800],
-        borderColor: '#FFA726',
-        backgroundColor: 'rgba(255, 167, 38, 0.1)',
-        tension: 0.4,
-      },
-      {
-        label: 'Versements',
-        data: [700, 1100, 900, 1400, 1200, 1600],
-        borderColor: '#AB47BC',
-        backgroundColor: 'rgba(171, 71, 188, 0.1)',
-        tension: 0.4,
-      },
-    ],
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: true,
-    plugins: {
-      legend: { position: 'bottom' },
-      tooltip: {
-        callbacks: {
-          label: function (context: TooltipItem<keyof ChartTypeRegistry>) {
-            const label = context.dataset.label || '';
-            const value = context.parsed.y || 0;
-            return `${label}: ${formatNumber(value)} tickets`;
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: function (tickValue: string | number) {
+              return formatMontant(Number(tickValue));
+            },
           },
         },
       },
     },
-    scales: {
-      y: { beginAtZero: true },
-    },
-  },
-}));
+  };
+});
 
 // Lifecycle hooks
 onMounted(async () => {

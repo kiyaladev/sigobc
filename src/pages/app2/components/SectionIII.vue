@@ -54,6 +54,14 @@
         </q-td>
       </template>
 
+      <template v-slot:body-cell-remise="props">
+        <q-td :props="props">
+          <div v-if="props.row.remise" class="text-positive text-weight-bold">
+            {{ formatMontant(props.row.remise) }}
+          </div>
+        </q-td>
+      </template>
+
       <template v-slot:body-cell-versement="props">
         <q-td :props="props">
           <div v-if="props.row.versement" class="text-negative text-weight-bold">
@@ -115,6 +123,7 @@ const columns = (() => {
   }));
   const tail = [
     { name: 'approvisionnement', label: 'Approv°', field: 'approvisionnement', align: 'right' as const, sortable: true },
+    { name: 'remise', label: 'Remise', field: 'remise', align: 'right' as const, sortable: true },
     { name: 'versement', label: 'Versement', field: 'versement', align: 'right' as const, sortable: true },
     { name: 'solde', label: 'Solde', field: 'solde', align: 'right' as const, sortable: true },
   ];
