@@ -1,232 +1,103 @@
 <template>
   <q-page class="q-pa-md">
-    <div class="text-h5 q-mb-md">⚙️ Seeders de Test - 3 Applications</div>
+    <div class="text-h5 q-mb-md">⚙️ Gestion de la Base de Données</div>
 
     <q-banner class="bg-warning text-white q-mb-md" rounded>
       <template v-slot:avatar>
         <q-icon name="warning" />
       </template>
-      <strong>Attention :</strong> Les seeders vont supprimer toutes les données existantes !
+      <strong>Attention :</strong> Les actions sur cette page peuvent supprimer définitivement les données.
     </q-banner>
 
-    <!-- Sélection d'application -->
-    <q-card class="q-mb-md">
-      <q-card-section>
-        <div class="text-h6 q-mb-md">Sélectionner l'application à seeder</div>
-        <q-tabs
-          v-model="selectedApp"
-          dense
-          class="text-grey"
-          active-color="primary"
-          indicator-color="primary"
-          align="justify"
-        >
-          <q-tab name="all" label="Toutes les Apps" icon="apps" />
-          <q-tab name="app1" label="App1: Déclarations" icon="receipt" />
-          <q-tab name="app2" label="App2: Trésorerie" icon="account_balance" />
-          <q-tab name="app3" label="App3: Dépenses" icon="payments" />
-        </q-tabs>
-      </q-card-section>
-    </q-card>
-
     <div class="row q-col-gutter-md">
-      <!-- Seeder complet -->
+      <!-- Actions Principales -->
       <div class="col-12 col-md-6">
         <q-card>
           <q-card-section>
-            <div class="text-h6">🚀 Seeder Complet</div>
+            <div class="text-h6">🚀 Actions Rapides</div>
+          </q-card-section>
+          <q-list separator>
+            <q-item>
+              <q-item-section>
+                <q-item-label>Initialiser la base de données</q-item-label>
+                <q-item-label caption>Vide la DB et la remplit avec les données par défaut (mairie, admin, taxes, etc.).</q-item-label>
+              </q-item-section>
+              <q-item-section side>
+                <q-btn
+                  label="Initialiser"
+                  color="primary"
+                  icon="rocket_launch"
+                  @click="runSeedDefault"
+                  :loading="loading.default"
+                />
+              </q-item-section>
+            </q-item>
+
+            <q-item>
+              <q-item-section>
+                <q-item-label>Supprimer toutes les données</q-item-label>
+                <q-item-label caption>Vide complètement la base de données. Action irréversible.</q-item-label>
+              </q-item-section>
+              <q-item-section side>
+                <q-btn
+                  label="Supprimer"
+                  color="negative"
+                  icon="delete_forever"
+                  @click="runClear"
+                  :loading="loading.clear"
+                />
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-card>
+      </div>
+
+      <!-- Seeder de Test -->
+      <div class="col-12 col-md-6">
+        <q-card>
+          <q-card-section>
+            <div class="text-h6">🧪 Générer des Données de Test</div>
             <div class="text-caption">
-              Génère toutes les données de test pour {{ selectedAppLabel }}
+              Remplit la base avec un grand volume de données aléatoires pour les tests.
             </div>
           </q-card-section>
 
           <q-card-section>
-            <div class="q-gutter-md">
-              <!-- Commun -->
-              <div v-if="showCommon">
-                <div class="text-subtitle2 text-primary q-mb-sm">Commun</div>
-                <q-input
-                  v-model.number="fullSeederOptions.utilisateurs"
-                  type="number"
-                  label="Utilisateurs"
-                  filled
-                  dense
-                />
-                <q-input
-                  v-model.number="fullSeederOptions.mairies"
-                  type="number"
-                  label="Mairies"
-                  filled
-                  dense
-                  class="q-mt-sm"
-                />
+            <q-expansion-item
+              icon="settings"
+              label="Personnaliser les quantités"
+              class="q-mb-md"
+            >
+              <div class="q-gutter-md q-pt-md">
+                <q-input v-model.number="testDataOptions.declarations" type="number" label="Déclarations" filled dense />
+                <q-input v-model.number="testDataOptions.bordereaux" type="number" label="Bordereaux de Recette" filled dense />
+                <q-input v-model.number="testDataOptions.mandats" type="number" label="Mandats" filled dense />
+                <q-input v-model.number="testDataOptions.bordereauMandats" type="number" label="Bordereaux de Mandats" filled dense />
               </div>
-
-              <!-- App1 -->
-              <div v-if="showApp1">
-                <div class="text-subtitle2 text-primary q-mb-sm">
-                  App1 - Déclarations & Bordereaux
-                </div>
-                <q-input
-                  v-model.number="fullSeederOptions.taxes"
-                  type="number"
-                  label="Taxes"
-                  filled
-                  dense
-                />
-                <q-input
-                  v-model.number="fullSeederOptions.declarations"
-                  type="number"
-                  label="Déclarations"
-                  filled
-                  dense
-                  class="q-mt-sm"
-                />
-                <q-input
-                  v-model.number="fullSeederOptions.bordereaux"
-                  type="number"
-                  label="Bordereaux"
-                  filled
-                  dense
-                  class="q-mt-sm"
-                />
-              </div>
-
-              <!-- App2 -->
-              <div v-if="showApp2">
-                <div class="text-subtitle2 text-primary q-mb-sm">App2 - Gestion Trésorerie</div>
-                <q-input
-                  v-model.number="fullSeederOptions.approvisionnements"
-                  type="number"
-                  label="Approvisionnements"
-                  filled
-                  dense
-                />
-                <q-input
-                  v-model.number="fullSeederOptions.remises"
-                  type="number"
-                  label="Remises"
-                  filled
-                  dense
-                  class="q-mt-sm"
-                />
-                <q-input
-                  v-model.number="fullSeederOptions.versements"
-                  type="number"
-                  label="Versements"
-                  filled
-                  dense
-                  class="q-mt-sm"
-                />
-              </div>
-
-              <!-- App3 -->
-              <div v-if="showApp3">
-                <div class="text-subtitle2 text-primary q-mb-sm">App3 - Gestion des Dépenses</div>
-                <q-input
-                  v-model.number="fullSeederOptions.chapitres"
-                  type="number"
-                  label="Chapitres"
-                  filled
-                  dense
-                  class="q-mt-sm"
-                />
-                <q-input
-                  v-model.number="fullSeederOptions.sousChapitres"
-                  type="number"
-                  label="Sous-chapitres"
-                  filled
-                  dense
-                  class="q-mt-sm"
-                />
-
-                <q-input
-                  v-model.number="fullSeederOptions.previsions"
-                  type="number"
-                  label="Prévisions"
-                  filled
-                  dense
-                  class="q-mt-sm"
-                />
-                <q-input
-                  v-model.number="fullSeederOptions.mandats"
-                  type="number"
-                  label="Mandats"
-                  filled
-                  dense
-                  class="q-mt-sm"
-                />
-                <q-input
-                  v-model.number="fullSeederOptions.bordereauMandats"
-                  type="number"
-                  label="Bordereaux Mandats"
-                  filled
-                  dense
-                  class="q-mt-sm"
-                />
-              </div>
-            </div>
+            </q-expansion-item>
           </q-card-section>
 
           <q-card-actions align="right">
             <q-btn
-              label="Exécuter Tout"
-              color="primary"
-              icon="play_arrow"
-              @click="runFullSeeder"
-              :loading="loading"
+              label="Générer Données de Test"
+              color="secondary"
+              icon="science"
+              @click="runSeedTest"
+              :loading="loading.test"
             />
           </q-card-actions>
         </q-card>
       </div>
 
-      <!-- Seeders individuels -->
-      <div class="col-12 col-md-6">
-        <q-card>
-          <q-card-section>
-            <div class="text-h6">🎯 Seeders Individuels</div>
-            <div class="text-caption">Génère des données pour une table spécifique</div>
-          </q-card-section>
-
-          <q-card-section>
-            <q-list separator>
-              <q-item v-for="table in filteredTables" :key="table.name" class="q-mb-sm">
-                <q-item-section>
-                  <q-item-label>{{ table.label }}</q-item-label>
-                  <q-item-label caption>{{ table.description }}</q-item-label>
-                </q-item-section>
-
-                <q-item-section side>
-                  <q-input v-model.number="table.count" type="number" dense style="width: 80px" />
-                </q-item-section>
-
-                <q-item-section side>
-                  <q-btn
-                    flat
-                    round
-                    dense
-                    icon="play_arrow"
-                    color="primary"
-                    @click="runSingleSeeder(table.name, table.count)"
-                    :loading="loadingTable === table.name"
-                  />
-                </q-item-section>
-              </q-item>
-            </q-list>
-          </q-card-section>
-        </q-card>
-      </div>
-
-      <!-- Statistiques actuelles -->
+      <!-- Statistiques -->
       <div class="col-12">
         <q-card>
           <q-card-section>
             <div class="text-h6">📊 Données Actuelles</div>
           </q-card-section>
-
           <q-card-section>
             <div class="row q-col-gutter-md">
-              <div class="col-6 col-sm-4 col-md-2" v-for="stat in filteredStats" :key="stat.label">
+              <div class="col-6 col-sm-4 col-md-2" v-for="stat in stats" :key="stat.label">
                 <q-card flat bordered>
                   <q-card-section class="text-center">
                     <div class="text-h4 text-primary">{{ stat.count }}</div>
@@ -236,24 +107,8 @@
               </div>
             </div>
           </q-card-section>
-
           <q-card-actions align="right">
             <q-btn flat label="Actualiser" icon="refresh" color="primary" @click="loadStats" />
-            <q-btn
-              flat
-              label="Sauvegarder DB"
-              icon="save"
-              color="positive"
-              @click="exportDatabase"
-            />
-            <q-btn flat label="Restaurer DB" icon="upload" color="info" @click="importDatabase" />
-            <q-btn
-              flat
-              label="Tout Supprimer"
-              icon="delete_forever"
-              color="negative"
-              @click="confirmClearAll"
-            />
           </q-card-actions>
         </q-card>
       </div>
@@ -264,13 +119,9 @@
           <q-card-section>
             <div class="text-h6">📝 Logs d'exécution</div>
           </q-card-section>
-
           <q-card-section style="max-height: 300px; overflow-y: auto">
-            <div v-for="(log, index) in logs" :key="index" class="text-caption q-mb-xs">
-              <span :class="getLogColor(log)">{{ log }}</span>
-            </div>
+            <div v-for="(log, index) in logs" :key="index" class="text-caption q-mb-xs" v-html="log"></div>
           </q-card-section>
-
           <q-card-actions align="right">
             <q-btn flat label="Effacer" icon="clear" color="grey" @click="logs = []" />
           </q-card-actions>
@@ -281,356 +132,112 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { db } from 'src/database/db';
-import { runAllSeeders, seedTable } from 'src/database/seeders';
+import { seedDefaultData, seedTestData, clearDatabase, type SeedOptions } from 'src/database/seeders';
 
 const $q = useQuasar();
 
-const loading = ref(false);
-const loadingTable = ref<string | null>(null);
+const loading = ref({
+  default: false,
+  test: false,
+  clear: false,
+});
 const logs = ref<string[]>([]);
 
-const selectedApp = ref('all');
-
-const fullSeederOptions = ref({
-  // Commun
-  utilisateurs: 5,
-  mairies: 1,
-  // App1
-  taxes: 25,
+const testDataOptions = ref<SeedOptions>({
   declarations: 100,
   bordereaux: 12,
-  // App2
-  approvisionnements: 10,
-  remises: 10,
-  versements: 5,
-  balancesEntree: 5,
-  // App3
-  rubriques: 8,
-  chapitres: 8,
-  sousChapitres: 8,
-  previsions: 10,
   mandats: 50,
   bordereauMandats: 6,
+  // Les autres options utiliseront les valeurs par défaut de seedTestData
 });
-
-const tables = ref([
-  // Commun
-  {
-    name: 'utilisateurs',
-    label: 'Utilisateurs',
-    description: 'Comptes utilisateurs',
-    count: 10,
-    app: 'common',
-  },
-  {
-    name: 'mairies',
-    label: 'Mairies',
-    description: 'Communes et mairies',
-    count: 15,
-    app: 'common',
-  },
-  // App1 - Déclarations et Bordereaux
-  { name: 'taxes', label: 'Taxes', description: 'Types de taxes', count: 25, app: 'app1' },
-  {
-    name: 'declarations',
-    label: 'Déclarations',
-    description: 'Déclarations de recettes',
-    count: 100,
-    app: 'app1',
-  },
-  {
-    name: 'bordereaux',
-    label: 'Bordereaux',
-    description: 'Bordereaux de paiement',
-    count: 80,
-    app: 'app1',
-  },
-  // App2 - Gestion Trésorerie
-  {
-    name: 'approvisionnements',
-    label: 'Approvisionnements',
-    description: 'Stock initial de timbres',
-    count: 20,
-    app: 'app2',
-  },
-  { name: 'remises', label: 'Remises', description: 'Remises de timbres', count: 50, app: 'app2' },
-  {
-    name: 'versements',
-    label: 'Versements',
-    description: 'Versements effectués',
-    count: 60,
-    app: 'app2',
-  },
-  {
-    name: 'balancesEntree',
-    label: 'Balances Entrée',
-    description: 'Stock initial de timbres par exercice',
-    count: 5,
-    app: 'app2',
-  },
-  // App3 - Gestion des Dépenses
-  {
-    name: 'chapitres',
-    label: 'Chapitres',
-    description: 'Chapitres budgétaires',
-    count: 8,
-    app: 'app3',
-  },
-  {
-    name: 'sousChapitres',
-    label: 'Sous-chapitres',
-    description: 'Sous-chapitres budgétaires',
-    count: 43,
-    app: 'app3',
-  },
-
-  {
-    name: 'previsions',
-    label: 'Prévisions',
-    description: 'Prévisions budgétaires',
-    count: 30,
-    app: 'app3',
-  },
-  { name: 'mandats', label: 'Mandats', description: 'Mandats de dépense', count: 100, app: 'app3' },
-  {
-    name: 'bordereauMandats',
-    label: 'Bordereaux Mandats',
-    description: 'Bordereaux émission mandats',
-    count: 20,
-    app: 'app3',
-  },
-]);
 
 const stats = ref([
-  // Commun
-  { label: 'Utilisateurs', count: 0, app: 'common' },
-  { label: 'Mairies', count: 0, app: 'common' },
-  // App1
-  { label: 'Taxes', count: 0, app: 'app1' },
-  { label: 'Déclarations', count: 0, app: 'app1' },
-  { label: 'Bordereaux', count: 0, app: 'app1' },
-  // App2
-  { label: 'Approvisionnements', count: 0, app: 'app2' },
-  { label: 'Remises', count: 0, app: 'app2' },
-  { label: 'Versements', count: 0, app: 'app2' },
-  { label: 'Balances Entrée', count: 0, app: 'app2' },
-  // App3
-  { label: 'Chapitres', count: 0, app: 'app3' },
-  { label: 'Sous-chapitres', count: 0, app: 'app3' },
-  { label: 'Prévisions', count: 0, app: 'app3' },
-  { label: 'Mandats', count: 0, app: 'app3' },
-  { label: 'Bordereaux Mandats', count: 0, app: 'app3' },
+  { label: 'Utilisateurs', count: 0, table: 'utilisateurs' },
+  { label: 'Mairies', count: 0, table: 'mairies' },
+  { label: 'Taxes', count: 0, table: 'taxes' },
+  { label: 'Déclarations', count: 0, table: 'declarations' },
+  { label: 'Bordereaux Recette', count: 0, table: 'bordereauxRecette' },
+  { label: 'Chapitres', count: 0, table: 'chapitres' },
+  { label: 'Sous-chapitres', count: 0, table: 'sousChapitres' },
+  { label: 'Mandats', count: 0, table: 'mandats' },
+  { label: 'Bordereaux Mandats', count: 0, table: 'bordereauMandats' },
 ]);
-
-// Computed properties pour le filtrage
-const selectedAppLabel = computed(() => {
-  switch (selectedApp.value) {
-    case 'all':
-      return 'toutes les applications';
-    case 'app1':
-      return 'App1 - Déclarations & Bordereaux';
-    case 'app2':
-      return 'App2 - Gestion Trésorerie';
-    case 'app3':
-      return 'App3 - Gestion des Dépenses';
-    default:
-      return 'toutes les applications';
-  }
-});
-
-const showCommon = computed(() => selectedApp.value === 'all');
-const showApp1 = computed(() => selectedApp.value === 'all' || selectedApp.value === 'app1');
-const showApp2 = computed(() => selectedApp.value === 'all' || selectedApp.value === 'app2');
-const showApp3 = computed(() => selectedApp.value === 'all' || selectedApp.value === 'app3');
-
-const filteredTables = computed(() => {
-  if (selectedApp.value === 'all') {
-    return tables.value;
-  }
-  return tables.value.filter((t) => t.app === 'common' || t.app === selectedApp.value);
-});
-
-const filteredStats = computed(() => {
-  if (selectedApp.value === 'all') {
-    return stats.value;
-  }
-  return stats.value.filter((s) => s.app === 'common' || s.app === selectedApp.value);
-});
 
 function addLog(message: string) {
   const timestamp = new Date().toLocaleTimeString();
-  logs.value.push(`[${timestamp}] ${message}`);
-}
-
-function getLogColor(log: string): string {
-  if (log.includes('✅') || log.includes('✨')) return 'text-green';
-  if (log.includes('❌')) return 'text-red';
-  if (log.includes('🌱')) return 'text-blue';
-  if (log.includes('🗑️')) return 'text-orange';
-  return 'text-white';
+  const color = message.includes('✅') || message.includes('✨') ? 'green'
+              : message.includes('❌') ? 'red'
+              : message.includes('🌱') ? 'blue'
+              : message.includes('🗑️') ? 'orange'
+              : 'white';
+  logs.value.push(`[${timestamp}] <span class="text-${color}">${message}</span>`);
 }
 
 async function loadStats() {
   try {
-    const [
-      utilisateurs,
-      mairies,
-      taxes,
-      declarations,
-      bordereaux,
-      approvisionnements,
-      remises,
-      versements,
-      chapitres,
-      sousChapitres,
-      previsions,
-      mandats,
-      bordereauMandats,
-      balancesEntree,
-    ] = await Promise.all([
-      db.utilisateurs.count(),
-      db.mairies.count(),
-      db.taxes.count(),
-      db.declarations.count(),
-      db.bordereauxRecette.count(),
-      db.approvisionnements.count(),
-      db.remises.count(),
-      db.versements.count(),
-      db.balancesEntree.count(),
-      db.chapitres.count(),
-      db.sousChapitres.count(),
-      db.previsions.count(),
-      db.mandats.count(),
-      db.bordereauMandats.count(),
-    ]);
-
-    // Commun
-    stats.value[0]!.count = utilisateurs;
-    stats.value[1]!.count = mairies;
-    // App1
-    stats.value[2]!.count = taxes;
-    stats.value[3]!.count = declarations;
-    stats.value[4]!.count = bordereaux;
-    // App2
-    stats.value[5]!.count = approvisionnements;
-    stats.value[6]!.count = remises;
-    stats.value[7]!.count = versements;
-    stats.value[8]!.count = balancesEntree;
-    // App3
-    stats.value[9]!.count = chapitres;
-    stats.value[10]!.count = sousChapitres;
-    stats.value[11]!.count = previsions;
-    stats.value[12]!.count = mandats;
-    stats.value[13]!.count = bordereauMandats;
+    const counts = await Promise.all(
+      stats.value.map(stat => db.table(stat.table).count())
+    );
+    stats.value.forEach((stat, index) => {
+      stat.count = counts[index];
+    });
   } catch (error) {
     console.error('Erreur lors du chargement des statistiques:', error);
+    $q.notify({ type: 'negative', message: 'Impossible de charger les statistiques.' });
   }
 }
 
-function runFullSeeder() {
+// Wrapper pour exécuter une fonction de seeder avec gestion de logs et d'état
+async function runSeederAction(action: () => Promise<any>, type: 'default' | 'test' | 'clear', successMessage: string) {
+  loading.value[type] = true;
+  logs.value = [];
+
+  const originalLog = console.log;
+  console.log = (...args) => {
+    addLog(args.join(' '));
+    originalLog(...args);
+  };
+
+  try {
+    await action();
+    $q.notify({ type: 'positive', message: successMessage, timeout: 3000 });
+    await loadStats();
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error(`Erreur lors de l'action '${type}':`, errorMessage);
+    $q.notify({ type: 'negative', message: `Erreur lors de l'action: ${errorMessage}` });
+  } finally {
+    console.log = originalLog;
+    loading.value[type] = false;
+  }
+}
+
+function runSeedDefault() {
   $q.dialog({
     title: 'Confirmation',
-    message:
-      'Voulez-vous vraiment exécuter le seeder complet ? Toutes les données existantes seront supprimées !',
+    message: 'Voulez-vous vraiment initialiser la base de données ? Toutes les données actuelles seront supprimées.',
     cancel: true,
     persistent: true,
   }).onOk(() => {
-    void (async () => {
-      loading.value = true;
-      logs.value = [];
-
-      // Rediriger console.log vers les logs
-      const originalLog = console.log;
-      console.log = (...args) => {
-        addLog(args.join(' '));
-        originalLog(...args);
-      };
-
-      try {
-        await runAllSeeders(fullSeederOptions.value);
-
-        $q.notify({
-          type: 'positive',
-          message: 'Seeders exécutés avec succès !',
-          timeout: 3000,
-        });
-
-        await loadStats();
-      } catch (error) {
-        console.error('Erreur:', error);
-        addLog(`❌ Erreur: ${String(error)}`);
-        $q.notify({
-          type: 'negative',
-          message: "Erreur lors de l'exécution des seeders",
-        });
-      } finally {
-        console.log = originalLog;
-        loading.value = false;
-      }
-    })();
+    void runSeederAction(seedDefaultData, 'default', 'Base de données initialisée avec succès !');
   });
 }
 
-function runSingleSeeder(tableName: string, count: number) {
+function runSeedTest() {
   $q.dialog({
     title: 'Confirmation',
-    message: `Voulez-vous générer ${count} enregistrements pour ${tableName} ?`,
+    message: 'Voulez-vous vraiment générer les données de test ? Cela va d\'abord initialiser la base de données.',
     cancel: true,
+    persistent: true,
   }).onOk(() => {
-    void (async () => {
-      loadingTable.value = tableName;
-
-      const originalLog = console.log;
-      console.log = (...args) => {
-        addLog(args.join(' '));
-        originalLog(...args);
-      };
-
-      try {
-        await seedTable(
-          tableName as
-            | 'utilisateurs'
-            | 'mairies'
-            | 'taxes'
-            | 'declarations'
-            | 'bordereaux'
-            | 'approvisionnements'
-            | 'remises'
-            | 'versements'
-            | 'chapitres'
-            | 'sousChapitres'
-            | 'previsions'
-            | 'mandats'
-            | 'bordereauMandats',
-          count,
-        );
-
-        $q.notify({
-          type: 'positive',
-          message: `${count} enregistrements créés pour ${tableName}`,
-        });
-
-        await loadStats();
-      } catch (error) {
-        console.error('Erreur:', error);
-        const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
-        addLog(`❌ Erreur: ${errorMessage}`);
-        $q.notify({
-          type: 'negative',
-          message: errorMessage || "Erreur lors de l'exécution du seeder",
-        });
-      } finally {
-        console.log = originalLog;
-        loadingTable.value = null;
-      }
-    })();
+    void runSeederAction(() => seedTestData(testDataOptions.value), 'test', 'Données de test générées avec succès !');
   });
 }
 
-function confirmClearAll() {
+function runClear() {
   $q.dialog({
     title: 'Confirmation',
     message: 'Voulez-vous vraiment supprimer TOUTES les données ? Cette action est irréversible !',
@@ -638,254 +245,9 @@ function confirmClearAll() {
     persistent: true,
     color: 'negative',
   }).onOk(() => {
-    void (async () => {
-      try {
-        await Promise.all([
-          db.utilisateurs.clear(),
-          db.mairies.clear(),
-          db.taxes.clear(),
-          db.declarations.clear(),
-          db.bordereauxRecette.clear(),
-          db.approvisionnements.clear(),
-          db.remises.clear(),
-          db.versements.clear(),
-          db.balancesEntree.clear(),
-          db.sousChapitres.clear(),
-          db.chapitres.clear(),
-          db.previsions.clear(),
-          db.mandats.clear(),
-          db.bordereauMandats.clear(),
-        ]);
-
-        addLog('🗑️ Toutes les données ont été supprimées');
-
-        $q.notify({
-          type: 'positive',
-          message: 'Toutes les données ont été supprimées',
-        });
-
-        await loadStats();
-      } catch (error) {
-        console.error('Erreur:', error);
-        $q.notify({
-          type: 'negative',
-          message: 'Erreur lors de la suppression',
-        });
-      }
-    })();
+    void runSeederAction(clearDatabase, 'clear', 'Base de données entièrement vidée.');
   });
 }
 
-async function exportDatabase() {
-  try {
-    // Récupérer toutes les données de toutes les tables
-    const [
-      utilisateurs,
-      mairies,
-      taxes,
-      declarations,
-      bordereaux,
-      approvisionnements,
-      remises,
-      versements,
-      sousChapitres,
-      chapitres,
-      previsions,
-      mandats,
-      bordereauMandats,
-      balancesEntree,
-    ] = await Promise.all([
-      db.utilisateurs.toArray(),
-      db.mairies.toArray(),
-      db.taxes.toArray(),
-      db.declarations.toArray(),
-      db.bordereauxRecette.toArray(),
-      db.approvisionnements.toArray(),
-      db.remises.toArray(),
-      db.versements.toArray(),
-      db.balancesEntree.toArray(),
-      db.sousChapitres.toArray(),
-      db.chapitres.toArray(),
-      db.previsions.toArray(),
-      db.mandats.toArray(),
-      db.bordereauMandats.toArray(),
-    ]);
-
-    // Créer l'objet de sauvegarde
-    const backup = {
-      version: '2.0',
-      exportDate: new Date().toISOString(),
-      data: {
-        utilisateurs,
-        mairies,
-        taxes,
-        declarations,
-        bordereaux,
-        approvisionnements,
-        remises,
-        versements,
-        balancesEntree,
-        sousChapitres,
-        chapitres,
-        previsions,
-        mandats,
-        bordereauMandats,
-      },
-    };
-
-    // Convertir en JSON
-    const json = JSON.stringify(backup, null, 2);
-
-    // Créer un blob et le télécharger
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `tresor-backup-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-
-    $q.notify({
-      type: 'positive',
-      message: 'Base de données sauvegardée avec succès',
-      icon: 'save',
-    });
-  } catch (error) {
-    console.error('Erreur lors de la sauvegarde:', error);
-    $q.notify({
-      type: 'negative',
-      message: 'Erreur lors de la sauvegarde de la base de données',
-    });
-  }
-}
-
-function importDatabase() {
-  // Créer un input file caché
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.json';
-
-  input.onchange = (e: Event) => {
-    const target = e.target as HTMLInputElement;
-    const file = target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const json = event.target?.result as string;
-        const backup = JSON.parse(json);
-
-        // Vérifier la structure du backup
-        if (!backup.data) {
-          throw new Error('Format de fichier invalide');
-        }
-
-        // Demander confirmation
-        $q.dialog({
-          title: 'Confirmation',
-          message: `Voulez-vous vraiment restaurer cette sauvegarde du ${new Date(backup.exportDate).toLocaleDateString('fr-FR')} ? Les données actuelles seront remplacées !`,
-          cancel: true,
-          persistent: true,
-          color: 'warning',
-        }).onOk(() => {
-          void (async () => {
-            try {
-              // Vider les tables existantes
-              await Promise.all([
-                db.utilisateurs.clear(),
-                db.mairies.clear(),
-                db.taxes.clear(),
-                db.declarations.clear(),
-                db.bordereauxRecette.clear(),
-                db.approvisionnements.clear(),
-                db.remises.clear(),
-                db.versements.clear(),
-                db.balancesEntree.clear(),
-                db.sousChapitres.clear(),
-                db.chapitres.clear(),
-                db.previsions.clear(),
-                db.mandats.clear(),
-                db.bordereauMandats.clear(),
-              ]);
-
-              // Restaurer les données
-              if (backup.data.utilisateurs?.length) {
-                await db.utilisateurs.bulkAdd(backup.data.utilisateurs);
-              }
-              if (backup.data.mairies?.length) {
-                await db.mairies.bulkAdd(backup.data.mairies);
-              }
-              if (backup.data.taxes?.length) {
-                await db.taxes.bulkAdd(backup.data.taxes);
-              }
-              if (backup.data.declarations?.length) {
-                await db.declarations.bulkAdd(backup.data.declarations);
-              }
-              if (backup.data.bordereaux?.length) {
-                await db.bordereauxRecette.bulkAdd(backup.data.bordereaux);
-              }
-              if (backup.data.approvisionnements?.length) {
-                await db.approvisionnements.bulkAdd(backup.data.approvisionnements);
-              }
-              if (backup.data.remises?.length) {
-                await db.remises.bulkAdd(backup.data.remises);
-              }
-              if (backup.data.versements?.length) {
-                await db.versements.bulkAdd(backup.data.versements);
-              }
-              if (backup.data.balancesEntree?.length) {
-                await db.balancesEntree.bulkAdd(backup.data.balancesEntree);
-              }
-              if (backup.data.sousChapitres?.length) {
-                await db.sousChapitres.bulkAdd(backup.data.sousChapitres);
-              }
-              if (backup.data.chapitres?.length) {
-                await db.chapitres.bulkAdd(backup.data.chapitres);
-              }
-              if (backup.data.previsions?.length) {
-                await db.previsions.bulkAdd(backup.data.previsions);
-              }
-              if (backup.data.mandats?.length) {
-                await db.mandats.bulkAdd(backup.data.mandats);
-              }
-              if (backup.data.bordereauMandats?.length) {
-                await db.bordereauMandats.bulkAdd(backup.data.bordereauMandats);
-              }
-
-              $q.notify({
-                type: 'positive',
-                message: 'Base de données restaurée avec succès',
-                icon: 'check_circle',
-              });
-
-              await loadStats();
-            } catch (error) {
-              console.error('Erreur lors de la restauration:', error);
-              $q.notify({
-                type: 'negative',
-                message: 'Erreur lors de la restauration de la base de données',
-              });
-            }
-          })();
-        });
-      } catch (error) {
-        console.error('Erreur lors de la lecture du fichier:', error);
-        $q.notify({
-          type: 'negative',
-          message: 'Erreur lors de la lecture du fichier de sauvegarde',
-        });
-      }
-    };
-    reader.readAsText(file);
-  };
-
-  input.click();
-}
-
-onMounted(() => {
-  void loadStats();
-});
+onMounted(loadStats);
 </script>
