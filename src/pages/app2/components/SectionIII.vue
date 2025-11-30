@@ -44,53 +44,7 @@
         </q-td>
       </template>
 
-      <template v-slot:body-cell-100="props">
-        <q-td :props="props">
-          <span :class="props.row.denominations[100] < 0 ? 'text-negative' : ''">
-            {{ formatNumber(props.row.denominations[100]) }}
-          </span>
-        </q-td>
-      </template>
 
-      <template v-slot:body-cell-200="props">
-        <q-td :props="props">
-          <span :class="props.row.denominations[200] < 0 ? 'text-negative' : ''">
-            {{ formatNumber(props.row.denominations[200]) }}
-          </span>
-        </q-td>
-      </template>
-
-      <template v-slot:body-cell-300="props">
-        <q-td :props="props">
-          <span :class="props.row.denominations[300] < 0 ? 'text-negative' : ''">
-            {{ formatNumber(props.row.denominations[300]) }}
-          </span>
-        </q-td>
-      </template>
-
-      <template v-slot:body-cell-500="props">
-        <q-td :props="props">
-          <span :class="props.row.denominations[500] < 0 ? 'text-negative' : ''">
-            {{ formatNumber(props.row.denominations[500]) }}
-          </span>
-        </q-td>
-      </template>
-
-      <template v-slot:body-cell-600="props">
-        <q-td :props="props">
-          <span :class="props.row.denominations[600] < 0 ? 'text-negative' : ''">
-            {{ formatNumber(props.row.denominations[600]) }}
-          </span>
-        </q-td>
-      </template>
-
-      <template v-slot:body-cell-1000="props">
-        <q-td :props="props">
-          <span :class="props.row.denominations[1000] < 0 ? 'text-negative' : ''">
-            {{ formatNumber(props.row.denominations[1000]) }}
-          </span>
-        </q-td>
-      </template>
 
       <template v-slot:body-cell-approvisionnement="props">
         <q-td :props="props">
@@ -122,9 +76,11 @@
 <script setup lang="ts">
 import type { SectionIIIEntry } from '../types';
 
-defineProps<{
+const props = defineProps<{
   data: SectionIIIEntry[];
   loading: boolean;
+  labels?: Record<number, string>;
+  quotites?: { key: string; label: string; prix: number; code: string }[];
 }>();
 
 defineEmits<{
@@ -143,89 +99,27 @@ const formatMontant = (montant: number) => {
   }).format(montant);
 };
 
-const formatNumber = (num: number) => {
-  return new Intl.NumberFormat('fr-FR').format(num);
-};
+// const formatNumber = (num: number) => new Intl.NumberFormat('fr-FR').format(num);
 
-const columns = [
-  {
-    name: 'date',
-    label: 'Date',
-    field: 'date',
-    align: 'left' as const,
-    sortable: true,
-  },
-  {
-    name: 'type',
-    label: 'Nature',
-    field: 'type',
-    align: 'center' as const,
-    sortable: true,
-  },
-  {
-    name: '100',
-    label: '100',
-    field: (row: SectionIIIEntry) => row.denominations[100],
+const columns = (() => {
+  const base = [
+    { name: 'date', label: 'Date', field: 'date', align: 'left' as const, sortable: true },
+    { name: 'type', label: 'Nature', field: 'type', align: 'center' as const, sortable: true },
+  ];
+  const priceCols = (props.quotites || []).map((q) => ({
+    name: q.key,
+    label: q.label,
+    field: (row: SectionIIIEntry) => (row.detailsQuotites && row.detailsQuotites[q.key]) || 0,
     align: 'right' as const,
     sortable: true,
-  },
-  {
-    name: '200',
-    label: '200',
-    field: (row: SectionIIIEntry) => row.denominations[200],
-    align: 'right' as const,
-    sortable: true,
-  },
-  {
-    name: '300',
-    label: '300',
-    field: (row: SectionIIIEntry) => row.denominations[300],
-    align: 'right' as const,
-    sortable: true,
-  },
-  {
-    name: '500',
-    label: '500',
-    field: (row: SectionIIIEntry) => row.denominations[500],
-    align: 'right' as const,
-    sortable: true,
-  },
-  {
-    name: '600',
-    label: '600',
-    field: (row: SectionIIIEntry) => row.denominations[600],
-    align: 'right' as const,
-    sortable: true,
-  },
-  {
-    name: '1000',
-    label: '1000',
-    field: (row: SectionIIIEntry) => row.denominations[1000],
-    align: 'right' as const,
-    sortable: true,
-  },
-  {
-    name: 'approvisionnement',
-    label: 'Approv°',
-    field: 'approvisionnement',
-    align: 'right' as const,
-    sortable: true,
-  },
-  {
-    name: 'versement',
-    label: 'Versement',
-    field: 'versement',
-    align: 'right' as const,
-    sortable: true,
-  },
-  {
-    name: 'solde',
-    label: 'Solde',
-    field: 'solde',
-    align: 'right' as const,
-    sortable: true,
-  },
-];
+  }));
+  const tail = [
+    { name: 'approvisionnement', label: 'Approv°', field: 'approvisionnement', align: 'right' as const, sortable: true },
+    { name: 'versement', label: 'Versement', field: 'versement', align: 'right' as const, sortable: true },
+    { name: 'solde', label: 'Solde', field: 'solde', align: 'right' as const, sortable: true },
+  ];
+  return [...base, ...priceCols, ...tail];
+})();
 </script>
 
 <style scoped lang="scss">

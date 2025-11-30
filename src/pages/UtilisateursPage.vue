@@ -390,11 +390,24 @@ async function onSubmit() {
       await db.utilisateurs.update(form.value.id, updateData);
       $q.notify({ type: 'positive', message: 'Utilisateur modifié avec succès' });
     } else {
-      await db.utilisateurs.add({
-        ...form.value,
+      const payload: Omit<Utilisateur, 'id'> = {
+        username: form.value.username!,
+        password: form.value.password!,
+        nom: form.value.nom!,
+        prenom: form.value.prenom!,
+        email: form.value.email!,
+        role: (form.value.role || 'operateur'),
+        actif: form.value.actif ?? true,
         createdAt: now,
         updatedAt: now,
-      });
+      };
+      if (form.value.mairieId != null) {
+        payload.mairieId = form.value.mairieId;
+      }
+      if (form.value.derniereConnexion != null) {
+        payload.derniereConnexion = form.value.derniereConnexion;
+      }
+      await db.utilisateurs.add(payload);
       $q.notify({ type: 'positive', message: 'Utilisateur créé avec succès' });
     }
     dialogVisible.value = false;

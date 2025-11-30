@@ -13,6 +13,7 @@ export interface SectionIEntry {
   date: string;
   type: string;
   denominations: DenominationsType;
+  detailsQuotites?: Record<string, number>;
   approvisionnement?: number;
   remise?: number;
   solde: number;
@@ -23,6 +24,7 @@ export interface SectionIIEntry {
   date: string;
   type: string;
   denominations: DenominationsType;
+  detailsQuotites?: Record<string, number>;
   remise?: number;
   versement?: number;
   solde: number;
@@ -33,6 +35,7 @@ export interface SectionIIIEntry {
   date: string;
   type: string;
   denominations: DenominationsType;
+  detailsQuotites?: Record<string, number>;
   approvisionnement?: number;
   versement?: number;
   solde: number;

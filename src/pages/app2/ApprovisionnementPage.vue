@@ -71,11 +71,20 @@
         <template v-slot:body-cell-details="props">
           <q-td :props="props">
             <div class="row q-gutter-xs">
-              <div v-for="(value, key) in props.row.timbres" :key="key">
-                <q-chip v-if="value > 0" dense color="positive" text-color="white">
-                  {{ key }}: {{ value }}
-                </q-chip>
-              </div>
+              <template v-if="props.row.detailsQuotites">
+                <div v-for="(value, key) in props.row.detailsQuotites" :key="key">
+                  <q-chip v-if="value > 0" dense color="positive" text-color="white">
+                    {{ key }}: {{ value }}
+                  </q-chip>
+                </div>
+              </template>
+              <template v-else>
+                <div v-for="(value, key) in props.row.timbres" :key="key">
+                  <q-chip v-if="value > 0" dense color="positive" text-color="white">
+                    {{ key }}: {{ value }}
+                  </q-chip>
+                </div>
+              </template>
             </div>
           </q-td>
         </template>
@@ -174,21 +183,20 @@
                 <div class="row q-col-gutter-sm">
                   <div
                     class="col-6 col-sm-4 col-md-2"
-                    v-for="valeur in valeursTimbre"
-                    :key="valeur"
+                    v-for="q in quotites"
+                    :key="`${q.prix}-${q.code}`"
                   >
                     <q-input
-                      v-model.number="form.timbres![valeur]"
+                      v-model.number="quantites[`${q.prix}-${q.code}`]"
                       filled
                       type="number"
-                      :label="`t_${valeur}`"
+                      :label="`t_${q.prix} (${q.code})`"
                       min="0"
                       dense
                       @update:model-value="calculateTotal"
+                      :hint="q.type ? `Type: ${q.type}` : ''"
+                      :hide-hint="false"
                     >
-                      <template v-slot:prepend>
-                        <q-icon name="confirmation_number" />
-                      </template>
                     </q-input>
                   </div>
                 </div>
@@ -238,12 +246,15 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
-import { db, type Approvisionnement } from 'src/database/db';
+import { db, type Approvisionnement, type Timbres, type Quotite } from 'src/database/db';
 
 const $q = useQuasar();
 
-const valeursTimbre = [100, 200, 300, 500, 600, 1000];
+const valeursTimbre = ref<number[]>([]);
+// const codeHints = ref<Record<number, string>>({});
 const typeOptions = ['approvisionnement'];
+const quotites = ref<Quotite[]>([]);
+const quantites = ref<Record<string, number>>({});
 
 const search = ref('');
 const filterType = ref<string | null>(null);
@@ -259,14 +270,7 @@ const approvisionnements = ref<Approvisionnement[]>([]);
 const form = ref<Partial<Approvisionnement>>({
   type: 'approvisionnement',
   date: new Date(),
-  timbres: {
-    100: 0,
-    200: 0,
-    300: 0,
-    500: 0,
-    600: 0,
-    1000: 0,
-  },
+  timbres: { 100: 0, 200: 0, 300: 0, 500: 0, 600: 0, 1000: 0 },
   total: 0,
   exercice: new Date().getFullYear(),
   observations: '',
@@ -335,16 +339,40 @@ const formatMontant = (montant: number) => {
 
 const calculateTotal = () => {
   let total = 0;
-  if (form.value.timbres) {
-    for (const valeur of valeursTimbre) {
-      const quantite = form.value.timbres[valeur] || 0;
-      total += valeur * quantite;
-    }
+  for (const q of quotites.value) {
+    const key = `${q.prix}-${q.code}`;
+    const qty = quantites.value[key] || 0;
+    total += q.prix * qty;
   }
   form.value.total = total;
 };
 
+function buildTimbresFromQuantites(): Timbres {
+  const result: Timbres = { 100: 0, 200: 0, 300: 0, 500: 0, 600: 0, 1000: 0 };
+  for (const q of quotites.value) {
+    const key = `${q.prix}-${q.code}`;
+    const qty = quantites.value[key] || 0;
+    result[q.prix] = (result[q.prix] || 0) + qty;
+  }
+  return result;
+}
+
+function buildDetailsFromQuantites(): Record<string, number> {
+  const details: Record<string, number> = {};
+  for (const q of quotites.value) {
+    const key = `${q.prix}-${q.code}`;
+    details[key] = quantites.value[key] || 0;
+  }
+  return details;
+}
+
 const openDialog = (appro?: Approvisionnement) => {
+  // Réinitialiser les quantités à 0
+  quantites.value = {};
+  for (const q of quotites.value) {
+    quantites.value[`${q.prix}-${q.code}`] = 0;
+  }
+
   if (appro && appro.id) {
     isEditing.value = true;
     editingId.value = appro.id;
@@ -354,20 +382,31 @@ const openDialog = (appro?: Approvisionnement) => {
       date: new Date(appro.date),
       timbres: { ...appro.timbres },
     };
+
+    // Récupérer les quantités
+    if (appro.detailsQuotites) {
+      for (const [key, val] of Object.entries(appro.detailsQuotites)) {
+        quantites.value[key] = val;
+      }
+    } else {
+      // Fallback pour la rétrocompatibilité
+      for (const [prixStr, val] of Object.entries(appro.timbres)) {
+        const prix = parseInt(prixStr);
+        const q = quotites.value.find((q) => q.prix === prix);
+        if (q) {
+          quantites.value[`${q.prix}-${q.code}`] = val;
+        }
+      }
+    }
   } else {
     isEditing.value = false;
     editingId.value = undefined;
+    const empty: Timbres = { 100: 0, 200: 0, 300: 0, 500: 0, 600: 0, 1000: 0 };
+    for (const v of valeursTimbre.value) if (!(v in empty)) empty[v] = 0;
     form.value = {
       type: 'approvisionnement',
       date: new Date(),
-      timbres: {
-        100: 0,
-        200: 0,
-        300: 0,
-        500: 0,
-        600: 0,
-        1000: 0,
-      },
+      timbres: empty,
       total: 0,
       exercice: new Date().getFullYear(),
       observations: '',
@@ -391,7 +430,8 @@ const onSubmit = async () => {
       exercice: form.value.exercice || new Date().getFullYear(),
       date: dateValue,
       type: form.value.type || 'initial',
-      timbres: { ...form.value.timbres! }, // Cloner l'objet timbres
+      timbres: buildTimbresFromQuantites(),
+      detailsQuotites: buildDetailsFromQuantites(),
       total: form.value.total || 0,
       observations: form.value.observations || '',
       personnelId,
@@ -462,6 +502,21 @@ const viewDetails = (appro: Approvisionnement) => {
 };
 
 onMounted(() => {
-  void loadData();
+  void (async () => {
+    const qs = await db.quotites.toArray();
+    const byCode: Record<string, Quotite> = {};
+    for (const q of qs) {
+      if (!q.actif) continue;
+      if (!byCode[q.code]) byCode[q.code] = q;
+    }
+    quotites.value = Object.values(byCode);
+    const set = Array.from(new Set(quotites.value.map((q) => q.prix))).sort((a, b) => a - b);
+    valeursTimbre.value = set.length ? set : [100, 200, 300, 500, 600, 1000];
+    for (const q of quotites.value) {
+      const key = `${q.prix}-${q.code}`;
+      if (!(key in quantites.value)) quantites.value[key] = 0;
+    }
+    await loadData();
+  })();
 });
 </script>

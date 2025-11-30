@@ -108,6 +108,11 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/app2/SectionPage.vue'),
         name: 'app2-sections',
       },
+      {
+        path: 'app2/quotites',
+        component: () => import('pages/app2/QuotitesPage.vue'),
+        name: 'app2-quotites',
+      },
       // Routes App3 - Gestion des Dépenses
       {
         path: 'app3/dashboard',

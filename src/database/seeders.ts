@@ -845,7 +845,6 @@ export async function seedMandats(
       numeroMandat,
       dateMandat,
       chapitreId: randomChoice(chapitreIds),
-      sousChapitreId: Math.random() > 0.2 ? randomChoice(sousChapitreIds) : undefined,
       mairieId: DEFAULT_MAIRIE_ID,
       beneficiaire: randomChoice(beneficiaires),
       objet: randomChoice(objets),
@@ -856,6 +855,11 @@ export async function seedMandats(
       createdAt: dateMandat,
       updatedAt: now,
     };
+
+    const maybeSous = Math.random() > 0.2 ? randomChoice(sousChapitreIds) : undefined;
+    if (maybeSous != null) {
+      mandat.sousChapitreId = maybeSous;
+    }
 
     if (prevId) {
       mandat.previsionId = prevId;

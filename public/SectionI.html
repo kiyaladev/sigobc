@@ -123,19 +123,7 @@
 
       <table>
         <thead>
-          <tr>
-            <th>Date</th>
-            <th>Type</th>
-            <th>100</th>
-            <th>200</th>
-            <th>300</th>
-            <th>500</th>
-            <th>600</th>
-            <th>1000</th>
-            <th>Approv</th>
-            <th>Remise</th>
-            <th>Solde</th>
-          </tr>
+          <tr id="head-row"></tr>
         </thead>
         <tbody id="table-body">
           <!-- Les données seront insérées ici par JavaScript -->
@@ -162,7 +150,17 @@
         return date.toLocaleDateString('fr-FR');
       }
 
-      function renderTable(data) {
+      function renderHead(columns, labels) {
+        const head = document.getElementById('head-row');
+        const base = ['Date', 'Type'];
+        const tail = ['Approv', 'Remise', 'Solde'];
+        const cols = base
+          .concat(columns.map((c) => labels && labels[c] ? labels[c] : String(c)))
+          .concat(tail);
+        head.innerHTML = cols.map((txt) => `<th>${txt}</th>`).join('');
+      }
+
+      function renderTable(data, columns) {
         const tbody = document.getElementById('table-body');
         tbody.innerHTML = '';
 
@@ -186,10 +184,16 @@
           tr.appendChild(tdType);
 
           // Dénominations
-          const denoms = [100, 200, 300, 500, 600, 1000];
+          const denoms = columns || [];
           denoms.forEach((d) => {
             const td = document.createElement('td');
-            const val = row.denominations ? row.denominations[d] : 0;
+            let val = 0;
+            if (row.detailsQuotites && row.detailsQuotites[d] != null) {
+              val = row.detailsQuotites[d];
+            } else if (row.denominations) {
+              const price = parseInt(String(d).split('-')[0], 10);
+              val = row.denominations[price] || 0;
+            }
             td.textContent = formatNumber(val);
             tr.appendChild(td);
           });
@@ -218,7 +222,8 @@
 
       window.addEventListener('message', (event) => {
         if (event.data.type === 'FILL_DATA') {
-          renderTable(event.data.data);
+          renderHead(event.data.columns, event.data.labels);
+          renderTable(event.data.data, event.data.columns);
 
           // Mise à jour du numéro de page si nécessaire
           // document.getElementById('page-number').textContent = ...

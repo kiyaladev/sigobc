@@ -299,6 +299,21 @@
             </q-item-section>
           </q-item>
 
+          <q-item
+            clickable
+            v-ripple
+            to="/app2/quotites"
+            class="nav-item q-mb-xs"
+            active-class="nav-item-active"
+          >
+            <q-item-section avatar>
+              <q-icon name="toll" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Quotités</q-item-label>
+            </q-item-section>
+          </q-item>
+
           <q-separator class="q-my-md" />
 
           <q-item-label header class="text-grey-7 text-weight-medium q-px-md">

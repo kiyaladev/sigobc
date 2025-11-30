@@ -140,6 +140,7 @@ import {
   type Mairie,
   type Declaration,
   type Taxe,
+  DEFAULT_MAIRIE_ID,
 } from 'src/database/db';
 import { useAuthStore } from 'src/stores/auth-store';
 import FilterBar from 'src/components/FilterBar.vue';
@@ -410,11 +411,22 @@ async function onSubmit(formData: Partial<BordereauRecette>) {
       await db.bordereauxRecette.update(formData.id, { ...data, updatedAt: now });
       $q.notify({ type: 'positive', message: 'Bordereau modifié' });
     } else {
-      await db.bordereauxRecette.add({
-        ...data,
+      const payload: Omit<BordereauRecette, 'id'> = {
+        numero: data.numero!,
+        annee: data.annee!,
+        mairieId: data.mairieId ?? DEFAULT_MAIRIE_ID,
+        montantTotal: data.montantTotal!,
+        nombreDeclarations: data.nombreDeclarations!,
+        statut: (data.statut || 'ouvert'),
+        personnelId: (data.personnelId ?? 0),
         createdAt: now,
         updatedAt: now,
-      });
+      };
+      if (data.mois != null) payload.mois = data.mois;
+      if (data.dateTransmission != null) payload.dateTransmission = data.dateTransmission;
+      if (data.totalPrecedent != null) payload.totalPrecedent = data.totalPrecedent;
+      if (data.observations) payload.observations = data.observations;
+      await db.bordereauxRecette.add(payload);
       $q.notify({ type: 'positive', message: 'Bordereau créé' });
     }
     dialogVisible.value = false;

@@ -63,11 +63,20 @@
         <template v-slot:body-cell-details="props">
           <q-td :props="props">
             <div class="row q-gutter-xs">
-              <div v-for="(value, key) in props.row.timbres" :key="key">
-                <q-chip v-if="value > 0" dense color="accent" text-color="grey-9">
-                  {{ key }}: {{ value }}
-                </q-chip>
-              </div>
+              <template v-if="props.row.detailsQuotites">
+                <div v-for="(value, key) in props.row.detailsQuotites" :key="key">
+                  <q-chip v-if="value > 0" dense color="accent" text-color="grey-9">
+                    {{ key }}: {{ value }}
+                  </q-chip>
+                </div>
+              </template>
+              <template v-else>
+                <div v-for="(value, key) in props.row.timbres" :key="key">
+                  <q-chip v-if="value > 0" dense color="accent" text-color="grey-9">
+                    {{ key }}: {{ value }}
+                  </q-chip>
+                </div>
+              </template>
             </div>
           </q-td>
         </template>
@@ -148,7 +157,7 @@
                 <q-input
                   v-model="form.exercice"
                   filled
-                  type="date"
+                  type="number"
                   label="Date d'opération *"
                   lazy-rules
                   :rules="[(val) => !!val || 'La date est requise']"
@@ -163,21 +172,20 @@
                 <div class="row q-col-gutter-sm">
                   <div
                     class="col-6 col-sm-4 col-md-2"
-                    v-for="valeur in valeursTimbre"
-                    :key="valeur"
+                    v-for="q in quotites"
+                    :key="`${q.prix}-${q.code}`"
                   >
                     <q-input
-                      v-model.number="form.timbres[valeur]"
+                      v-model.number="quantites[`${q.prix}-${q.code}`]"
                       filled
                       type="number"
-                      :label="`t_${valeur}`"
+                      :label="`t_${q.prix} (${q.code})`"
                       min="0"
                       dense
                       @update:model-value="calculateTotal"
+                      :hint="q.type ? `Type: ${q.type}` : ''"
+                      :hide-hint="false"
                     >
-                      <template v-slot:prepend>
-                        <q-icon name="confirmation_number" />
-                      </template>
                     </q-input>
                   </div>
                 </div>
@@ -224,6 +232,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import { db, type Quotite } from 'src/database/db';
 import { useQuasar } from 'quasar';
 
 interface Timbres {
@@ -236,13 +245,17 @@ interface Versement {
   date: string;
   exercice: number;
   timbres: Timbres;
+  detailsQuotites?: Record<string, number>;
   total: number;
   commentaires: string;
 }
 
 const $q = useQuasar();
 
-const valeursTimbre = [100, 200, 300, 500, 600, 1000];
+const valeursTimbre = ref<number[]>([]);
+// const codeHints = ref<Record<number, string>>({});
+const quotites = ref<Quotite[]>([]);
+const quantites = ref<Record<string, number>>({});
 
 const search = ref('');
 const filterType = ref<string | null>(null);
@@ -329,30 +342,68 @@ const formatMontant = (montant: number) => {
 
 const calculateTotal = () => {
   let total = 0;
-  for (const valeur of valeursTimbre) {
-    const quantite = form.value.timbres[valeur] || 0;
-    total += valeur * quantite;
+  for (const q of quotites.value) {
+    const key = `${q.prix}-${q.code}`;
+    const qty = quantites.value[key] || 0;
+    total += q.prix * qty;
   }
   form.value.total = total;
 };
 
+function buildTimbresFromQuantites() {
+  const result: Record<number, number> = { 100: 0, 200: 0, 300: 0, 500: 0, 600: 0, 1000: 0 };
+  for (const q of quotites.value) {
+    const key = `${q.prix}-${q.code}`;
+    const qty = quantites.value[key] || 0;
+    result[q.prix] = (result[q.prix] || 0) + qty;
+  }
+  return result;
+}
+
+function buildDetailsFromQuantites(): Record<string, number> {
+  const details: Record<string, number> = {};
+  for (const q of quotites.value) {
+    const key = `${q.prix}-${q.code}`;
+    details[key] = quantites.value[key] || 0;
+  }
+  return details;
+}
+
 const openDialog = (versement?: Versement) => {
+  // Réinitialiser les quantités à 0
+  quantites.value = {};
+  for (const q of quotites.value) {
+    quantites.value[`${q.prix}-${q.code}`] = 0;
+  }
+
   if (versement) {
     isEditing.value = true;
     form.value = { ...versement };
+
+    // Récupérer les quantités
+    if (versement.detailsQuotites) {
+      for (const [key, val] of Object.entries(versement.detailsQuotites)) {
+        quantites.value[key] = val;
+      }
+    } else {
+      // Fallback pour la rétrocompatibilité
+      for (const [prixStr, val] of Object.entries(versement.timbres)) {
+        const prix = parseInt(prixStr);
+        const q = quotites.value.find((q) => q.prix === prix);
+        if (q) {
+          quantites.value[`${q.prix}-${q.code}`] = val;
+        }
+      }
+    }
   } else {
     isEditing.value = false;
+    const empty: Record<number, number> = { 100: 0, 200: 0, 300: 0, 500: 0, 600: 0, 1000: 0 };
+    for (const v of valeursTimbre.value) if (!(v in empty)) empty[v] = 0;
+
     form.value = {
       type: 'Versement',
       date: new Date().toISOString().split('T')[0] as string,
-      timbres: {
-        100: 0,
-        200: 0,
-        300: 0,
-        500: 0,
-        600: 0,
-        1000: 0,
-      },
+      timbres: empty,
       exercice: new Date().getFullYear(),
       total: 0,
       commentaires: '',
@@ -369,7 +420,7 @@ const onSubmit = async () => {
     if (isEditing.value) {
       const index = versements.value.findIndex((v) => v.id === form.value.id);
       if (index !== -1) {
-        versements.value[index] = { ...form.value };
+        versements.value[index] = { ...form.value, timbres: buildTimbresFromQuantites(), detailsQuotites: buildDetailsFromQuantites() };
       }
       $q.notify({
         type: 'positive',
@@ -377,7 +428,7 @@ const onSubmit = async () => {
       });
     } else {
       const newId = Math.max(...versements.value.map((v) => v.id || 0)) + 1;
-      versements.value.unshift({ ...form.value, id: newId });
+      versements.value.unshift({ ...form.value, timbres: buildTimbresFromQuantites(), detailsQuotites: buildDetailsFromQuantites(), id: newId });
       $q.notify({
         type: 'positive',
         message: 'Versement ajouté avec succès',
@@ -427,6 +478,20 @@ const confirmDelete = (versement: Versement) => {
 };
 
 onMounted(() => {
-  // Charger les données depuis la base de données
+  void (async () => {
+    const qs = await db.quotites.toArray();
+    const byCode: Record<string, Quotite> = {};
+    for (const q of qs) {
+      if (!q.actif) continue;
+      if (!byCode[q.code]) byCode[q.code] = q;
+    }
+    quotites.value = Object.values(byCode);
+    const set = Array.from(new Set(quotites.value.map((q) => q.prix))).sort((a, b) => a - b);
+    valeursTimbre.value = set.length ? set : [100, 200, 300, 500, 600, 1000];
+    for (const q of quotites.value) {
+      const key = `${q.prix}-${q.code}`;
+      if (!(key in quantites.value)) quantites.value[key] = 0;
+    }
+  })();
 });
 </script>

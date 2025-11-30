@@ -103,6 +103,7 @@ export interface Approvisionnement {
   date: Date;
   type: string; // Type d'approvisionnement (initial, complementaire, etc.)
   timbres: Timbres; // Stock de timbres par valeur
+  detailsQuotites?: Record<string, number>;
   total: number; // Montant total
   observations?: string;
   personnelId: number;
@@ -118,6 +119,7 @@ export interface Remise {
   type: string; // Type de la remise
   numeroRemise: string; // Numéro de la remise
   timbres: Timbres; // Quantité de timbres reçus
+  detailsQuotites?: Record<string, number>;
   total: number; // Montant total
   observations?: string;
   personnelId: number;
@@ -132,6 +134,7 @@ export interface Versement {
   date: Date;
   numeroVersement: string; // Numéro du versement
   timbres: Timbres; // Quantité de timbres vendus
+  detailsQuotites?: Record<string, number>;
   total: number; // Montant total
   observations?: string;
   personnelId: number;
@@ -146,9 +149,22 @@ export interface BalanceEntree {
   date: Date;
   type: string; // Type de balance (INITIAL, BE-S1, BE-S2, BE-S3)
   timbres: Timbres; // Stock de timbres par valeur
+  detailsQuotites?: Record<string, number>;
   total: number; // Montant total du stock
   commentaires?: string;
   personnelId: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Quotite {
+  id?: number;
+  code: string;
+  prix: number;
+  description: string;
+  type: string;
+  mairieId: number;
+  actif: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -246,6 +262,7 @@ class TresorDatabase extends Dexie {
   remises!: EntityTable<Remise, 'id'>;
   versements!: EntityTable<Versement, 'id'>;
   balancesEntree!: EntityTable<BalanceEntree, 'id'>;
+  quotites!: EntityTable<Quotite, 'id'>;
   // App3 - Gestion des Dépenses
   chapitres!: EntityTable<Chapitre, 'id'>;
   sousChapitres!: EntityTable<SousChapitre, 'id'>;
@@ -256,7 +273,7 @@ class TresorDatabase extends Dexie {
   constructor() {
     super('TresorDatabase');
 
-    this.version(10).stores({
+    this.version(11).stores({
       mairies: '++id, nom, code, ville',
       taxes: '++id, code, libelle, mairieId, type, actif',
       declarations:
@@ -268,6 +285,7 @@ class TresorDatabase extends Dexie {
       remises: '++id, numeroRemise, date, exercice, mairieId, personnelId',
       versements: '++id, numeroVersement, date, exercice, mairieId, personnelId',
       balancesEntree: '++id, date, exercice, mairieId, type, personnelId, [exercice+mairieId]',
+      quotites: '++id, code, prix, type, mairieId, actif',
       // App3
       chapitres: '++id, code, libelle, mairieId, actif',
       sousChapitres: '++id, code, libelle, mairieId, actif',
@@ -367,6 +385,40 @@ export async function initializeDatabase() {
       {
         code: '6012',
         libelle: 'Fournitures informatiques',
+        mairieId: mairieId as number,
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+    ]);
+
+    // Quotités par défaut (App2)
+    await db.quotites.bulkAdd([
+      {
+        code: 'TM',
+        prix: 100,
+        description: 'Ticket',
+        type: 'Marché',
+        mairieId: mairieId as number,
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        code: 'TA',
+        prix: 100,
+        description: 'Ticket',
+        type: 'Abattoirs',
+        mairieId: mairieId as number,
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        code: 'TS',
+        prix: 100,
+        description: 'Ticket',
+        type: 'Stationnement',
         mairieId: mairieId as number,
         actif: true,
         createdAt: now,
