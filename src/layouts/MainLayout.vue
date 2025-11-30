@@ -120,7 +120,6 @@
         </q-item-section>
       </q-item>
 
-      <q-scroll-area class="fit q-pt-md" style="height: calc(100% - 120px)">
         <q-list padding class="q-px-sm">
           <q-item-label header class="text-grey-7 text-weight-medium q-px-md">
             <q-icon name="dashboard" size="18px" class="q-mr-xs" />
@@ -512,7 +511,7 @@
             </q-item>
           </template>
         </q-list>
-      </q-scroll-area>
+
     </q-drawer>
 
     <q-page-container class="modern-page-container">

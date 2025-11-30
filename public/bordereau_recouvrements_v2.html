@@ -472,7 +472,7 @@
         data.declarations.forEach((decl, index) => {
           const tr = document.createElement('tr');
           tr.innerHTML = `
-                <td>${index + 1}</td>
+                <td>${decl.numeroPiece || ''}</td>
                 <td class="nature-text">${decl.natureRecette}</td>
                 <td>${decl.nomPartieVersante || 'RÉGISSEUR'}</td>
                 <td class="crossed"><span>${decl.article || ''}</span></td>

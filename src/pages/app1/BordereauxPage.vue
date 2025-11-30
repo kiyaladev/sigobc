@@ -466,9 +466,12 @@ async function printBordereau(bordereau: BordereauRecette) {
           dateEncaissement: date.formatDate(decl.dateEncaissement, 'DD/MM/YYYY'),
           nomPartieVersante: decl.nomPartieVersante,
           article: taxe?.code || '',
+          numeroPiece: decl.numeroPiece || '',
+          statut: decl.statut || '',
         };
       }),
     );
+    console.log(declarationsAvecTaxes);
 
     // Ouvrir la page HTML
     const printWindow = window.open(
