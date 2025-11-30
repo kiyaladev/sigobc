@@ -763,6 +763,11 @@ async function generateYearOptions() {
 }
 
 // Configuration des graphiques
+interface ProcessItem {
+  date: string | Date;
+  total?: number;
+}
+
 const stockChartConfig = computed<ChartConfiguration>(() => ({
   type: 'doughnut',
   data: {
@@ -838,13 +843,19 @@ const evolutionChartConfig = computed<ChartConfiguration>(() => {
   const remData = new Array(12).fill(0);
   const verData = new Array(12).fill(0);
 
-  const process = (items: any[], target: number[]) => {
-    items.forEach(item => {
+  const process = (items: ProcessItem[], target: number[]) => {
+    for (const item of items) {
       const d = new Date(item.date);
       if (d.getFullYear() === selectedYear.value) {
-        target[d.getMonth()] += (item.total || 0);
+        const month = d.getMonth();
+        if (month >= 0 && month < 12) {
+          const val = target[month];
+          if (typeof val === 'number') {
+            target[month] = val + (item.total || 0);
+          }
+        }
       }
-    });
+    }
   };
 
   process(approvisionnements.value, appData);

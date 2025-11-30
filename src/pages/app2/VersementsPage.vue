@@ -18,24 +18,14 @@
     <q-card class="q-mb-md">
       <q-card-section>
         <div class="row q-col-gutter-md">
-          <div class="col-12 col-sm-6 col-md-4">
+          <div class="col-12 col-sm-6">
             <q-input v-model="search" filled placeholder="Rechercher..." dense clearable>
               <template v-slot:prepend>
                 <q-icon name="search" />
               </template>
             </q-input>
           </div>
-          <div class="col-12 col-sm-6 col-md-4">
-            <q-select
-              v-model="filterType"
-              filled
-              dense
-              label="Type d'opération"
-              :options="['Versement']"
-              clearable
-            />
-          </div>
-          <div class="col-12 col-sm-6 col-md-4">
+          <div class="col-12 col-sm-6">
             <q-input v-model="filterDate" filled dense type="date" label="Date" clearable />
           </div>
         </div>
@@ -52,14 +42,6 @@
         :pagination="{ rowsPerPage: 10 }"
         binary-state-sort
       >
-        <template v-slot:body-cell-type="props">
-          <q-td :props="props">
-            <q-badge color="accent" :label="props.row.type">
-              <q-icon name="money" size="xs" class="q-ml-xs" />
-            </q-badge>
-          </q-td>
-        </template>
-
         <template v-slot:body-cell-details="props">
           <q-td :props="props">
             <div class="row q-gutter-xs">
@@ -131,18 +113,7 @@
         <q-card-section>
           <q-form @submit="onSubmit" class="q-gutter-md">
             <div class="row q-col-gutter-md">
-              <div class="col-12 col-sm-4">
-                <q-select
-                  v-model="form.type"
-                  filled
-                  label="Type d'opération *"
-                  :options="['Versement']"
-                  lazy-rules
-                  :rules="[(val) => !!val || 'Le type est requis']"
-                />
-              </div>
-
-              <div class="col-12 col-sm-4">
+              <div class="col-12 col-sm-6">
                 <q-input
                   v-model="form.date"
                   filled
@@ -153,14 +124,14 @@
                 />
               </div>
 
-              <div class="col-12 col-sm-4">
+              <div class="col-12 col-sm-6">
                 <q-input
                   v-model="form.exercice"
                   filled
                   type="number"
-                  label="Date d'opération *"
+                  label="Exercice *"
                   lazy-rules
-                  :rules="[(val) => !!val || 'La date est requise']"
+                  :rules="[(val) => !!val || 'Exercice requis']"
                 />
               </div>
 
@@ -232,16 +203,26 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { db, type Quotite } from 'src/database/db';
+import { db, type Quotite, type Versement, type Timbres } from 'src/database/db';
 import { useQuasar } from 'quasar';
 
-interface Timbres {
-  [key: number]: number;
-}
+const $q = useQuasar();
 
-interface Versement {
+const valeursTimbre = ref<number[]>([]);
+const quotites = ref<Quotite[]>([]);
+const quantites = ref<Record<string, number>>({});
+
+const search = ref('');
+const filterDate = ref<string | null>(null);
+const loading = ref(false);
+const saving = ref(false);
+const dialogVisible = ref(false);
+const isEditing = ref(false);
+
+const versements = ref<Versement[]>([]);
+
+interface VersementForm {
   id?: number;
-  type: string;
   date: string;
   exercice: number;
   timbres: Timbres;
@@ -250,43 +231,7 @@ interface Versement {
   commentaires: string;
 }
 
-const $q = useQuasar();
-
-const valeursTimbre = ref<number[]>([]);
-// const codeHints = ref<Record<number, string>>({});
-const quotites = ref<Quotite[]>([]);
-const quantites = ref<Record<string, number>>({});
-
-const search = ref('');
-const filterType = ref<string | null>(null);
-const filterDate = ref<string | null>(null);
-const loading = ref(false);
-const saving = ref(false);
-const dialogVisible = ref(false);
-const isEditing = ref(false);
-
-const versements = ref<Versement[]>([
-  // {
-  //   id: 1,
-  //   type: 'Versement',
-  //   date: '2025-11-07',
-  //   timbres: { 100: 300, 200: 200, 300: 150, 500: 100, 600: 80, 1000: 50 },
-  //   total: 315000,
-  //
-  //   commentaires: 'Versement journalier - Matin',
-  // },
-  // {
-  //   id: 2,
-  //   type: 'Versement',
-  //   date: '2025-11-06',
-  //   timbres: { 100: 250, 200: 180, 300: 120, 500: 80, 600: 60, 1000: 40 },
-  //   total: 255000,
-  //   commentaires: 'Versement journalier - Soir',
-  // },
-]);
-
-const form = ref<Versement>({
-  type: 'Versement',
+const form = ref<VersementForm>({
   date: new Date().toISOString().split('T')[0] as string,
   exercice: new Date().getFullYear(),
   timbres: {
@@ -303,7 +248,6 @@ const form = ref<Versement>({
 
 const columns = [
   { name: 'date', label: 'Date', field: 'date', align: 'left' as const, sortable: true },
-  { name: 'type', label: 'Type', field: 'type', align: 'left' as const, sortable: true },
   { name: 'details', label: 'Détails', field: 'timbres', align: 'left' as const },
   { name: 'total', label: 'Total', field: 'total', align: 'right' as const, sortable: true },
   { name: 'actions', label: 'Actions', field: 'actions', align: 'center' as const },
@@ -316,17 +260,12 @@ const filteredVersements = computed(() => {
     const searchLower = search.value.toLowerCase();
     result = result.filter(
       (v) =>
-        v.type.toLowerCase().includes(searchLower) ||
-        v.commentaires.toLowerCase().includes(searchLower),
+        (v.observations && v.observations.toLowerCase().includes(searchLower))
     );
   }
 
-  if (filterType.value) {
-    result = result.filter((v) => v.type === filterType.value);
-  }
-
   if (filterDate.value) {
-    result = result.filter((v) => v.date === filterDate.value);
+    result = result.filter((v) => new Date(v.date).toISOString().split('T')[0] === filterDate.value);
   }
 
   return result;
@@ -350,8 +289,8 @@ const calculateTotal = () => {
   form.value.total = total;
 };
 
-function buildTimbresFromQuantites() {
-  const result: Record<number, number> = { 100: 0, 200: 0, 300: 0, 500: 0, 600: 0, 1000: 0 };
+function buildTimbresFromQuantites(): Timbres {
+  const result: Timbres = { 100: 0, 200: 0, 300: 0, 500: 0, 600: 0, 1000: 0 };
   for (const q of quotites.value) {
     const key = `${q.prix}-${q.code}`;
     const qty = quantites.value[key] || 0;
@@ -378,7 +317,15 @@ const openDialog = (versement?: Versement) => {
 
   if (versement) {
     isEditing.value = true;
-    form.value = { ...versement };
+    form.value = {
+      ...(versement.id && { id: versement.id }),
+      date: new Date(versement.date).toISOString().split('T')[0]!,
+      exercice: versement.exercice,
+      timbres: versement.timbres,
+      total: versement.total,
+      commentaires: versement.observations || '',
+      ...(versement.detailsQuotites && { detailsQuotites: versement.detailsQuotites }),
+    };
 
     // Récupérer les quantités
     if (versement.detailsQuotites) {
@@ -397,14 +344,10 @@ const openDialog = (versement?: Versement) => {
     }
   } else {
     isEditing.value = false;
-    const empty: Record<number, number> = { 100: 0, 200: 0, 300: 0, 500: 0, 600: 0, 1000: 0 };
-    for (const v of valeursTimbre.value) if (!(v in empty)) empty[v] = 0;
-
     form.value = {
-      type: 'Versement',
       date: new Date().toISOString().split('T')[0] as string,
-      timbres: empty,
       exercice: new Date().getFullYear(),
+      timbres: { 100: 0, 200: 0, 300: 0, 500: 0, 600: 0, 1000: 0 },
       total: 0,
       commentaires: '',
     };
@@ -421,14 +364,13 @@ const onSubmit = async () => {
     
     const data = {
       mairieId,
-      exercice: form.value.exercice || new Date().getFullYear(),
+      exercice: form.value.exercice,
       date: new Date(form.value.date),
       numeroVersement: `V-${Date.now()}`, // Génération temporaire
-      type: form.value.type || 'Versement',
       timbres: buildTimbresFromQuantites(),
       detailsQuotites: buildDetailsFromQuantites(),
-      total: form.value.total || 0,
-      observations: form.value.commentaires || '',
+      total: form.value.total,
+      observations: form.value.commentaires,
       personnelId,
       createdAt: now,
       updatedAt: now,
@@ -468,10 +410,9 @@ const viewDetails = (versement: Versement) => {
   $q.dialog({
     title: 'Détails du versement',
     message: `
-      Date: ${versement.date}
-      Type: ${versement.type}
+      Date: ${new Date(versement.date).toLocaleDateString()}
       Total: ${formatMontant(versement.total)}
-      Commentaires: ${versement.commentaires}
+      Commentaires: ${versement.observations || ''}
     `,
     html: true,
   });
