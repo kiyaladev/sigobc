@@ -8,7 +8,7 @@ export type DenominationsType = {
   [key: number]: number;
 };
 
-export interface SectionIEntry {
+export interface RawSectionIEntry {
   id: number;
   date: string;
   type: string;
@@ -16,10 +16,13 @@ export interface SectionIEntry {
   detailsQuotites?: Record<string, number>;
   approvisionnement?: number;
   remise?: number;
+}
+
+export interface SectionIEntry extends RawSectionIEntry {
   solde: number;
 }
 
-export interface SectionIIEntry {
+export interface RawSectionIIEntry {
   id: number;
   date: string;
   type: string;
@@ -27,10 +30,13 @@ export interface SectionIIEntry {
   detailsQuotites?: Record<string, number>;
   remise?: number;
   versement?: number;
+}
+
+export interface SectionIIEntry extends RawSectionIIEntry {
   solde: number;
 }
 
-export interface SectionIIIEntry {
+export interface RawSectionIIIEntry {
   id: number;
   date: string;
   type: string;
@@ -39,7 +45,11 @@ export interface SectionIIIEntry {
   approvisionnement?: number;
   remise?: number;
   versement?: number;
+}
+
+export interface SectionIIIEntry extends RawSectionIIIEntry {
   solde: number;
 }
 
 export type AnySectionEntry = SectionIEntry | SectionIIEntry | SectionIIIEntry;
+

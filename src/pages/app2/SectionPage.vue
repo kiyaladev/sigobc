@@ -60,7 +60,7 @@ import { useQuasar } from 'quasar';
 import SectionI from './components/SectionI.vue';
 import SectionII from './components/SectionII.vue';
 import SectionIII from './components/SectionIII.vue';
-import type { SectionIEntry, SectionIIEntry, SectionIIIEntry, DenominationsType, AnySectionEntry } from './types';
+import type { SectionIEntry, SectionIIEntry, SectionIIIEntry, DenominationsType, AnySectionEntry, RawSectionIEntry, RawSectionIIEntry, RawSectionIIIEntry } from './types';
 import { db, DEFAULT_MAIRIE_ID } from 'src/database/db';
 
 const $q = useQuasar();
@@ -95,80 +95,80 @@ const loadData = async () => {
     const approvisionnements = await db.approvisionnements.where('exercice').equals(exercice).toArray();
     const versements = await db.versements.where('exercice').equals(exercice).toArray();
 
-    const rawSectionI: { id: number; date: Date; type: string; denominations: DenominationsType; detailsQuotites?: Record<string, number>; approvisionnement?: number; remise?: number }[] = [];
+    const rawSectionI: RawSectionIEntry[] = [];
     const balancesBES1 = balances.filter((b) => b.type.includes('BE-S1') || b.type.includes('INITIAL') || b.type.includes('Stock'));
     balancesBES1.forEach((b) => {
-      const entry: any = { id: b.id!, date: b.date, type: b.type, denominations: b.timbres, approvisionnement: b.total };
-      if (b.detailsQuotites) entry.detailsQuotites = b.detailsQuotites;
+      const baseEntry: RawSectionIEntry = { id: b.id!, date: b.date.toISOString(), type: b.type, denominations: b.timbres, approvisionnement: b.total };
+      const entry: RawSectionIEntry = b.detailsQuotites ? { ...baseEntry, detailsQuotites: b.detailsQuotites } : baseEntry;
       rawSectionI.push(entry);
     });
     approvisionnements.forEach((a) => {
-      const entry: any = { id: a.id!, date: a.date, type: 'Approvisionnement', denominations: a.timbres, approvisionnement: a.total };
-      if (a.detailsQuotites) entry.detailsQuotites = a.detailsQuotites;
+      const baseEntry: RawSectionIEntry = { id: a.id!, date: a.date.toISOString(), type: 'Approvisionnement', denominations: a.timbres, approvisionnement: a.total };
+      const entry: RawSectionIEntry = a.detailsQuotites ? { ...baseEntry, detailsQuotites: a.detailsQuotites } : baseEntry;
       rawSectionI.push(entry);
     });
     remises.forEach((r) => {
-      const entry: any = { id: r.id!, date: r.date, type: 'Remise', denominations: r.timbres, remise: r.total };
-      if (r.detailsQuotites) entry.detailsQuotites = r.detailsQuotites;
+      const baseEntry: RawSectionIEntry = { id: r.id!, date: r.date.toISOString(), type: 'Remise', denominations: r.timbres, remise: r.total };
+      const entry: RawSectionIEntry = r.detailsQuotites ? { ...baseEntry, detailsQuotites: r.detailsQuotites } : baseEntry;
       rawSectionI.push(entry);
     });
-    rawSectionI.sort((a, b) => a.date.getTime() - b.date.getTime());
+    rawSectionI.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     let sectionISolde = 0;
     sectionIData.value = rawSectionI.map((item) => {
       if (item.approvisionnement) sectionISolde += item.approvisionnement;
       if (item.remise) sectionISolde -= item.remise;
-      return { ...item, date: item.date.toISOString(), solde: sectionISolde };
+      return { ...item, solde: sectionISolde };
     });
 
-    const rawSectionII: { id: number; date: Date; type: string; denominations: DenominationsType; detailsQuotites?: Record<string, number>; remise?: number; versement?: number }[] = [];
+    const rawSectionII: RawSectionIIEntry[] = [];
     const balancesBES2 = balances.filter((b) => b.type.includes('BE-S2'));
     balancesBES2.forEach((b) => {
-        const entry: any = { id: b.id!, date: b.date, type: b.type, denominations: b.timbres, remise: b.total };
-        if (b.detailsQuotites) entry.detailsQuotites = b.detailsQuotites;
+        const baseEntry: RawSectionIIEntry = { id: b.id!, date: b.date.toISOString(), type: b.type, denominations: b.timbres, remise: b.total };
+        const entry: RawSectionIIEntry = b.detailsQuotites ? { ...baseEntry, detailsQuotites: b.detailsQuotites } : baseEntry;
         rawSectionII.push(entry);
     });
     remises.forEach((r) => {
-        const entry: any = { id: r.id!, date: r.date, type: 'Remise', denominations: r.timbres, remise: r.total };
-        if (r.detailsQuotites) entry.detailsQuotites = r.detailsQuotites;
+        const baseEntry: RawSectionIIEntry = { id: r.id!, date: r.date.toISOString(), type: 'Remise', denominations: r.timbres, remise: r.total };
+        const entry: RawSectionIIEntry = r.detailsQuotites ? { ...baseEntry, detailsQuotites: r.detailsQuotites } : baseEntry;
         rawSectionII.push(entry);
     });
     versements.forEach((v) => {
-        const entry: any = { id: v.id!, date: v.date, type: 'Versement', denominations: v.timbres, versement: v.total };
-        if (v.detailsQuotites) entry.detailsQuotites = v.detailsQuotites;
+        const baseEntry: RawSectionIIEntry = { id: v.id!, date: v.date.toISOString(), type: 'Versement', denominations: v.timbres, versement: v.total };
+        const entry: RawSectionIIEntry = v.detailsQuotites ? { ...baseEntry, detailsQuotites: v.detailsQuotites } : baseEntry;
         rawSectionII.push(entry);
     });
-    rawSectionII.sort((a, b) => a.date.getTime() - b.date.getTime());
+    rawSectionII.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     let sectionIISolde = 0;
     sectionIIData.value = rawSectionII.map((item) => {
       if (item.remise) sectionIISolde += item.remise;
       if (item.versement) sectionIISolde -= item.versement;
-      return { ...item, date: item.date.toISOString(), solde: sectionIISolde };
+      return { ...item, solde: sectionIISolde };
     });
 
-    const rawSectionIII: { id: number; date: Date; type: string; denominations: DenominationsType; detailsQuotites?: Record<string, number>; approvisionnement?: number; versement?: number; remise?: number }[] = [];
+    const rawSectionIII: RawSectionIIIEntry[] = [];
     const balancesBES3 = balances.filter((b) => b.type.includes('BE-S3'));
     balancesBES3.forEach((b) => {
-        const entry: any = { id: b.id!, date: b.date, type: b.type, denominations: b.timbres, approvisionnement: b.total };
-        if (b.detailsQuotites) entry.detailsQuotites = b.detailsQuotites;
+        const baseEntry: RawSectionIIIEntry = { id: b.id!, date: b.date.toISOString(), type: b.type, denominations: b.timbres, approvisionnement: b.total };
+        const entry: RawSectionIIIEntry = b.detailsQuotites ? { ...baseEntry, detailsQuotites: b.detailsQuotites } : baseEntry;
         rawSectionIII.push(entry);
     });
     versements.forEach((v) => {
-        const entry: any = { id: v.id!, date: v.date, type: 'Versement', denominations: v.timbres, versement: v.total };
-        if (v.detailsQuotites) entry.detailsQuotites = v.detailsQuotites;
+        const baseEntry: RawSectionIIIEntry = { id: v.id!, date: v.date.toISOString(), type: 'Versement', denominations: v.timbres, versement: v.total };
+        const entry: RawSectionIIIEntry = v.detailsQuotites ? { ...baseEntry, detailsQuotites: v.detailsQuotites } : baseEntry;
         rawSectionIII.push(entry);
     });
     remises.forEach((r) => {
-        const entry: any = { id: r.id!, date: r.date, type: 'Remise', denominations: r.timbres, remise: r.total };
-        if (r.detailsQuotites) entry.detailsQuotites = r.detailsQuotites;
+        const baseEntry: RawSectionIIIEntry = { id: r.id!, date: r.date.toISOString(), type: 'Remise', denominations: r.timbres, remise: r.total };
+        const entry: RawSectionIIIEntry = r.detailsQuotites ? { ...baseEntry, detailsQuotites: r.detailsQuotites } : baseEntry;
         rawSectionIII.push(entry);
     });
-    rawSectionIII.sort((a, b) => a.date.getTime() - b.date.getTime());
+    rawSectionIII.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     let sectionIIISolde = 0;
     sectionIIIData.value = rawSectionIII.map((item) => {
       if (item.approvisionnement) sectionIIISolde += item.approvisionnement;
       if (item.remise) sectionIIISolde += item.remise;
       if (item.versement) sectionIIISolde -= item.versement;
-      return { ...item, date: item.date.toISOString(), solde: sectionIIISolde };
+      return { ...item, solde: sectionIIISolde };
     });
 
     soldeSectionI.value = sectionISolde;
