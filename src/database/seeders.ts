@@ -1,11 +1,5 @@
-import { db, DEFAULT_MAIRIE_ID } from './db';
+import { db, DEFAULT_MAIRIE_ID, type Quotite } from './db';
 import type {
-  Mairie,
-  Taxe,
-  Utilisateur,
-  Chapitre,
-  SousChapitre,
-  Quotite,
   Declaration,
   BordereauRecette,
   Approvisionnement,
@@ -186,12 +180,6 @@ function randomChoice<T>(array: T[]): T {
   return array[index]!;
 }
 
-async function generateUtilisateurs(count: number) {
-  // ... (logique de seedUtilisateurs de l'ancien fichier)
-}
-async function generateTaxes(count: number) {
-  // ... (logique de seedTaxes de l'ancien fichier)
-}
 // ... etc. pour toutes les autres fonctions de génération
 
 /**
@@ -211,6 +199,7 @@ export interface SeedOptions {
   previsions?: number;
   mandats?: number;
   bordereauMandats?: number;
+  quotites?: number;
 }
 
 /**
@@ -220,19 +209,16 @@ export async function seedTestData(options: SeedOptions = {}) {
   console.log('🚀 Starting test data seeders...');
 
   const {
-    utilisateurs = 10,
-    taxes = 25,
     declarations = 100,
     bordereaux = 80,
     approvisionnements = 20,
     remises = 50,
     versements = 60,
     balancesEntree = 2,
-    chapitres = 8,
-    sousChapitres = 43,
     previsions = 30,
     mandats = 100,
     bordereauMandats = 20,
+    quotites = 10,
   } = options;
 
   try {
@@ -274,6 +260,8 @@ export async function seedTestData(options: SeedOptions = {}) {
     await seedMandats(chapitreIds, sousChapitreIds, previsionIds, utilisateurIds, mandats);
     console.log(`🌱 Seeding ${bordereauMandats} test bordereau mandats...`);
     await seedBordereauMandats(utilisateurIds, bordereauMandats);
+    console.log(`🌱 Seeding ${quotites} test quotites...`);
+    await seedQuotites(quotites);
 
 
     console.log('\n✨ All test data seeders have been executed successfully!');
@@ -901,4 +889,35 @@ export async function seedBordereauMandats(personnelIds: number[], count: number
   await db.bordereauMandats.bulkAdd(bordereauMandats as unknown as BordereauMandat[]);
   console.log(`✅ ${count} bordereaux mandats créés`);
   return bordereauMandats;
+}
+
+export async function seedQuotites(count: number = 10) {
+  console.log(`🌱 Seeding ${count} quotités...`);
+
+  const quotites: Partial<Quotite>[] = [];
+  const now = new Date();
+  const types = ['Marché', 'Abattoirs', 'Stationnement', 'Publicité', 'Occupation Voie Publique'];
+  const descriptions = ['Ticket', 'Macaron', 'Droit de place', 'Autocollant'];
+
+  for (let i = 0; i < count; i++) {
+    const type = randomChoice(types);
+    const prix = randomChoice([100, 200, 300, 500, 1000, 2000]);
+    const code = `${type.substring(0, 2).toUpperCase()}${prix}`;
+
+    const quotite: Partial<Quotite> = {
+      code,
+      prix,
+      description: randomChoice(descriptions),
+      type,
+      mairieId: DEFAULT_MAIRIE_ID,
+      actif: Math.random() > 0.2, // 80% chance of being active
+      createdAt: randomDate(new Date(2023, 0, 1), now),
+      updatedAt: now,
+    };
+    quotites.push(quotite);
+  }
+
+  await db.quotites.bulkAdd(quotites as Quotite[]);
+  console.log(`✅ ${count} quotités créées`);
+  return quotites;
 }

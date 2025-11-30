@@ -73,6 +73,13 @@
                 <q-input v-model.number="testDataOptions.bordereaux" type="number" label="Bordereaux de Recette" filled dense />
                 <q-input v-model.number="testDataOptions.mandats" type="number" label="Mandats" filled dense />
                 <q-input v-model.number="testDataOptions.bordereauMandats" type="number" label="Bordereaux de Mandats" filled dense />
+                <q-separator />
+                <div class="text-subtitle2">App2 - Trésorerie</div>
+                <q-input v-model.number="testDataOptions.approvisionnements" type="number" label="Approvisionnements" filled dense />
+                <q-input v-model.number="testDataOptions.remises" type="number" label="Remises" filled dense />
+                <q-input v-model.number="testDataOptions.versements" type="number" label="Versements" filled dense />
+                <q-input v-model.number="testDataOptions.balancesEntree" type="number" label="Balances d'Entrée" filled dense />
+                <q-input v-model.number="testDataOptions.quotites" type="number" label="Quotités" filled dense />
               </div>
             </q-expansion-item>
           </q-card-section>
@@ -151,6 +158,11 @@ const testDataOptions = ref<SeedOptions>({
   bordereaux: 12,
   mandats: 50,
   bordereauMandats: 6,
+  approvisionnements: 20,
+  remises: 50,
+  versements: 60,
+  balancesEntree: 2,
+  quotites: 10,
   // Les autres options utiliseront les valeurs par défaut de seedTestData
 });
 
@@ -164,6 +176,11 @@ const stats = ref([
   { label: 'Sous-chapitres', count: 0, table: 'sousChapitres' },
   { label: 'Mandats', count: 0, table: 'mandats' },
   { label: 'Bordereaux Mandats', count: 0, table: 'bordereauMandats' },
+  { label: 'Approvisionnements', count: 0, table: 'approvisionnements' },
+  { label: 'Remises', count: 0, table: 'remises' },
+  { label: 'Versements', count: 0, table: 'versements' },
+  { label: "Balances d'Entrée", count: 0, table: 'balancesEntree' },
+  { label: 'Quotités', count: 0, table: 'quotites' },
 ]);
 
 function addLog(message: string) {
@@ -182,7 +199,7 @@ async function loadStats() {
       stats.value.map(stat => db.table(stat.table).count())
     );
     stats.value.forEach((stat, index) => {
-      stat.count = counts[index];
+      stat.count = counts[index] ?? 0;
     });
   } catch (error) {
     console.error('Erreur lors du chargement des statistiques:', error);
@@ -191,7 +208,7 @@ async function loadStats() {
 }
 
 // Wrapper pour exécuter une fonction de seeder avec gestion de logs et d'état
-async function runSeederAction(action: () => Promise<any>, type: 'default' | 'test' | 'clear', successMessage: string) {
+async function runSeederAction(action: () => Promise<void>, type: 'default' | 'test' | 'clear', successMessage: string) {
   loading.value[type] = true;
   logs.value = [];
 
