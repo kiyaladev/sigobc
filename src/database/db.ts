@@ -320,6 +320,7 @@ export async function initializeDatabase() {
       createdAt: now,
       updatedAt: now,
     });
+    
 
     // Créer un utilisateur admin par défaut
     await db.utilisateurs.add({
