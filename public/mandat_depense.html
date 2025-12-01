@@ -482,6 +482,11 @@
 
       // Fonction pour remplir les deux formulaires
       function remplirFormulaire(data) {
+        // Calculer les champs dérivés
+        data.montantBrut = formatMontant(data.montantBrut);
+        data.montantNet = formatMontant(data.montantNet);
+        data.montantLettres = nombreEnLettres(data.montantNet) + ' FRANCS CFA';
+
         for (const key in data) {
           const elements = document.querySelectorAll(`[data-field="${key}"]`);
           elements.forEach(el => {
@@ -492,6 +497,7 @@
 
       // Écouter les messages de la fenêtre parent
       window.addEventListener('message', (event) => {
+        console.log('Message received:', event.data);
         if (event.data.type === 'FILL_MANDAT') {
           remplirFormulaire(event.data.data);
           const urlParams = new URLSearchParams(window.location.search);

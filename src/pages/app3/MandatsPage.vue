@@ -450,19 +450,41 @@ function getBordereauNumero(bordereauMandatId?: number): string {
   return `${bordereau.numero}-${bordereau.exercice}`;
 }
 
-function formatDate(dateValue: Date | string): string {
-  if (!dateValue) return '-';
-  return date.formatDate(dateValue, 'DD/MM/YYYY');
-}
+function printMandat(mandat: Mandat) {
+  const printWindow = window.open(
+    `/mandat_depense.html?mandatId=${mandat.id}&print=true`,
+    '_blank',
+  );
 
-function formatModePaiement(mode: string): string {
-  const modes: Record<string, string> = {
-    virement: 'Virement',
-    cheque: 'Chèque',
-    especes: 'Espèces',
-    autre: 'Autre',
-  };
-  return modes[mode] || mode;
+  if (printWindow) {
+    printWindow.addEventListener('load', () => {
+      const chapitre = chapitres.value.find((c) => c.id === mandat.chapitreId);
+      const sousChapitre = sousChapitres.value.find((s) => s.id === mandat.sousChapitreId);
+      const bordereau = bordereauMandats.value.find((b) => b.id === mandat.bordereauMandatId);
+
+      printWindow.postMessage(
+        {
+          type: 'FILL_MANDAT',
+          data: {
+            exercice: mandat.exercice,
+            imputationFonctionnelle: sousChapitre
+              ? `${sousChapitre.code}/${chapitre?.code}`
+              : chapitre?.code,
+            numeroOrdre: mandat.numeroOrdre || '',
+            numeroBordereau: bordereau ? `${bordereau.numero}-${bordereau.exercice}` : '',
+            objetDepense: mandat.objet,
+            periode: '', // This field is not in the Mandat interface
+            beneficiaire: mandat.beneficiaire,
+            beneficiaireDetails: '', // This field is not in the Mandat interface
+            montantBrut: mandat.montant,
+            montantNet: mandat.montant,
+            dateEmission: new Date(mandat.dateMandat).toLocaleDateString('fr-FR'),
+          },
+        },
+        '*',
+      );
+    });
+  }
 }
 
 async function loadData() {
