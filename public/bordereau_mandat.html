@@ -1,0 +1,742 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bordereau d'Émission des Mandats - Paysage</title>
+    <style>
+      /* RESET & GENERAL */
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 20px;
+        background-color: #f3f4f6;
+        font-family: Arial, Helvetica, sans-serif;
+        -webkit-print-color-adjust: exact;
+      }
+
+      /* CONFIGURATION PAGE A4 PAYSAGE */
+      .page-container {
+        background-color: white;
+        width: 297mm; /* Largeur A4 Paysage */
+        min-height: 210mm; /* Hauteur A4 Paysage */
+        margin: 0 auto;
+        padding: 5mm; /* Marges intérieures */
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        position: relative;
+      }
+
+      /* CONTENEUR PRINCIPAL (BORDURE DOUBLE EXTERNE) */
+      /*.main-border {
+            border: 2px solid black;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            min-height: 200mm;
+        }*/
+
+      /* TABLEAU GLOBAL */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+        color: black;
+        table-layout: fixed; /* Important pour respecter les pourcentages exacts */
+      }
+
+      th,
+      td {
+        border: 1px solid black;
+        padding: 3px;
+        vertical-align: middle;
+        overflow: hidden;
+      }
+
+      /* UTILITAIRES FLEXBOX */
+      .flex {
+        display: flex;
+      }
+      .flex-col {
+        flex-direction: column;
+      }
+      .row {
+        flex-direction: row;
+      }
+      .center {
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+      }
+      .justify-between {
+        justify-content: space-between;
+      }
+      .justify-start {
+        justify-content: flex-start;
+      }
+      .justify-end {
+        justify-content: flex-end;
+      }
+      .align-top {
+        align-items: flex-start;
+      }
+      .align-bottom {
+        align-items: flex-end;
+      }
+
+      .w-100 {
+        width: 100%;
+      }
+      .h-100 {
+        height: 100%;
+      }
+
+      /* BORDURES SPECIFIQUES (UTILES DANS LES DIVS FLEX) */
+      .bt {
+        border-top: 1px solid black;
+      }
+      /* .bb { border-bottom: 1px solid black; } */
+      .bl {
+        border-left: 1px solid black;
+      }
+      .br {
+        border-right: 1px solid black;
+      }
+      .bd-dashed {
+        border-bottom: 1px dashed #999;
+      }
+      .no-border {
+        border: none !important;
+      }
+
+      /* TYPOGRAPHIE HEADER */
+      .text-republic {
+        font-size: 10px;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 5px;
+      }
+      .text-commune {
+        font-size: 14px;
+        font-weight: 800;
+        text-align: center;
+        margin-top: 5px;
+      }
+      .text-code {
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        font-size: 12px;
+        margin-top: 10px;
+        padding-left: 10px;
+      }
+
+      .title-bordereau {
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 12px;
+        padding: 8px 0;
+        text-align: center;
+      }
+
+      .title-receveur {
+        font-size: 12px;
+        font-weight: bold;
+        text-align: center;
+        padding: 4px 0;
+      }
+
+      .exercice-label {
+        font-size: 10px;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: #555;
+      }
+      .exercice-year {
+        font-size: 24px;
+        font-weight: 900;
+        letter-spacing: 4px;
+        margin-top: 4px;
+      }
+
+      .imputation-header {
+        background-color: #f8f8f8;
+        font-weight: bold;
+        padding: 5px;
+        text-align: center;
+      }
+
+      /* TEXTE VERTICAL */
+      .vertical-text {
+        writing-mode: vertical-rl;
+        transform: rotate(180deg);
+        white-space: nowrap;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+      }
+
+      /* PIED DE PAGE */
+      .footer-section {
+        border: 1px solid black;
+        display: flex;
+        height: 220px; /* Hauteur fixe pour le bas de page */
+      }
+
+      /* Ajustement des largeurs du footer pour s'aligner avec les colonnes :
+           Left (Cols 1-5): 3+20+25+7+7 = 62%
+           Middle (Col 6): 10%
+           Right (Cols 7-10): 7+7+7+7 = 28%
+        */
+      .footer-left {
+        width: 62%;
+        position: relative;
+        padding: 10px 20px;
+      }
+      .footer-middle {
+        width: 10%;
+      }
+      .footer-right {
+        width: 28%;
+      }
+
+      .amount-text {
+        font-weight: bold;
+        font-size: 13px;
+        line-height: 2;
+        text-transform: uppercase;
+      }
+      .signature-block {
+        text-align: center;
+        position: absolute;
+        bottom: 20px;
+        left: 0;
+        width: 100%;
+      }
+
+      /* TABLEAU DE CONTROLE (Footer Droit) */
+      .control-row {
+        display: flex;
+        width: 100%;
+      }
+      .control-header-v {
+        width: 40px;
+        background-color: #f9f9f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .control-label {
+        width: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+      }
+      .control-cell {
+        flex: 1;
+        border-right: 1px solid black;
+      }
+      .control-cell:last-child {
+        border-right: none;
+      }
+
+      .control-grid {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+      }
+      .control-grid-row {
+        display: flex;
+        flex: 1;
+        border-bottom: 1px solid black;
+      }
+      .control-grid-row:last-child {
+        border-bottom: none;
+      }
+
+      /* MEDIA QUERIES IMPRESSION */
+      @media print {
+        body {
+          background: none;
+          padding: 0;
+          margin: 0;
+        }
+        .page-container {
+          margin: 0;
+          width: 100%;
+          height: 100%;
+          box-shadow: none;
+          padding: 2mm;
+        }
+        /* Force l'impression du background gris */
+        .title-bordereau,
+        .title-receveur,
+        .imputation-header,
+        .footer-middle,
+        .control-header-v {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-container">
+      <div class="main-border">
+        <!-- TABLEAU PRINCIPAL (Prend toute la place disponible sauf le footer) -->
+        <table style="height: 100%">
+          <!-- DEFINITION DES LARGEURS (Total 100%) -->
+          <!-- Les 4 dernières colonnes sont ajustées à 7% chacune -->
+          <colgroup>
+            <col style="width: 3%" />
+            <!-- N° -->
+            <col style="width: 20%" />
+            <!-- Nature -->
+            <col style="width: 25%" />
+            <!-- Nom -->
+            <col style="width: 7%" />
+            <!-- Fonction -->
+            <col style="width: 7%" />
+            <!-- Patrimoine -->
+            <col style="width: 10%" />
+            <!-- Somme (Col 6) -->
+            <col style="width: 7%" />
+            <!-- Reste (Col 7) -->
+            <col style="width: 7%" />
+            <!-- Divers (Col 8) -->
+            <col style="width: 7%" />
+            <!-- Montants (Col 9) -->
+            <col style="width: 7%" />
+            <!-- No Compte (Col 10) -->
+          </colgroup>
+
+          <thead>
+            <!-- LIGNE 1 : BLOCS PRINCIPAUX -->
+            <tr>
+              <!-- BLOC REPUBLIQUE (Sur N° et Nature) -->
+              <th colspan="2" rowspan="2" class="align-top" style="padding: 0">
+                <div
+                  class="flex flex-col h-100 justify-start"
+                  style="padding: 10px; text-align-last: left"
+                >
+                  <div class="text-republic bd-dashed">REPUBLIQUE DE COTE D'IVOIRE</div>
+                  <div class="text-commune">COMMUNE DE VAVOUA</div>
+                  <div class="text-code">CODE : 433</div>
+                </div>
+              </th>
+
+              <!-- TITRE BORDEREAU (Sur Nom, Fonc, Pat, Somme) -->
+              <th colspan="4" style="padding: 0; height: 40px" class="align-top">
+                <div class="title-bordereau">BORDEREAU D'ÉMISSION DES MANDATS</div>
+              </th>
+
+              <!-- TITRE RECEVEUR (Sur les 4 dernières colonnes) -->
+              <th colspan="4" style="padding: 0; height: 40px" class="align-top">
+                <div class="title-receveur">PARTIE RÉSERVÉE AU RECEVEUR MUNICIPAL</div>
+              </th>
+            </tr>
+
+            <!-- LIGNE 2 : SOUS-TITRES -->
+            <tr style="height: 60px">
+              <!-- EXERCICE (Au-dessus de Nom) -->
+              <th style="padding: 5px">
+                <div class="flex flex-col center h-100">
+                  <div class="exercice-label w-100 text-center" style="padding-bottom: 2px">
+                    <u>EXERCICE</u>
+                  </div>
+                  <div class="exercice-year">2018</div>
+                </div>
+              </th>
+
+              <!-- IMPUTATION (Au-dessus de Fonc & Pat) -->
+              <th colspan="2" style="padding: 0" class="align-top">
+                <div class="flex flex-col h-100">
+                  <div class="imputation-header bb">IMPUTATION</div>
+                  <!-- Vide en dessous, les titres de colonnes suivent -->
+                </div>
+              </th>
+
+              <!-- CASE VIDE (Au-dessus de Somme) -->
+              <th style="border: none"></th>
+
+              <!-- RECEVEUR COL 1 (Dates / Reste / C 4690) -->
+              <th rowspan="2" style="padding: 0; font-size: 10px">
+                <div class="flex flex-col h-100">
+                  <div class="flex center bb" style="flex: 1; border-bottom: 1px solid">
+                    DATES<br />de Paiement
+                  </div>
+                  <hr />
+                  <div class="flex center bb" style="flex: 1">
+                    Reste à Payer
+                    <br />
+                    C/ 4690
+                  </div>
+                </div>
+              </th>
+
+              <!-- RECEVEUR COL 2 (Créditeurs / Divers) -->
+              <th rowspan="2" style="padding: 0; font-size: 10px">
+                <div class="flex flex-col h-100">
+                  <div class="flex center bb" style="flex: 1; font-weight: bold">CREDITEURS</div>
+                  <div class="flex center" style="flex: 1">DIVERS</div>
+                </div>
+              </th>
+
+              <!-- RECEVEUR COL 3 (Autres Opérations Titre) -->
+              <th colspan="2" style="padding: 0; height: 30px" class="align-top">
+                <div class="flex center h-100 bb" style="font-size: 10px">AUTRES OPERATIONS</div>
+              </th>
+            </tr>
+
+            <!-- LIGNE 3 : EN-TÊTES DE COLONNES -->
+            <tr style="height: 40px; font-weight: bold; text-align: center">
+              <th>N°</th>
+              <th>Nature de la Dépense</th>
+              <th>Nom et adresse du Créancier</th>
+              <th style="font-size: 10px">Fonction-<br />nelle</th>
+              <th style="font-size: 10px">Patrimo-<br />niale</th>
+              <th style="border: none">SOMME<br />MANDATÉE</th>
+
+              <!-- Sous-colonnes Autres Opérations -->
+              <th style="font-size: 10px">Montants</th>
+              <th style="font-size: 9px; line-height: 1.1">
+                N° de compte<br />autres comptes<br />de tiers
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <!-- LIGNE DE DONNÉES 1 -->
+            <tr>
+              <td class="text-center" style="color: #666">01</td>
+              <td>INDEMNITE DE FONCTION</td>
+              <td>THEODULE DIRO LAHUET, <b>Maire</b></td>
+              <td class="center" style="font-family: monospace">60013/1</td>
+              <td></td>
+              <td style="text-align: right; font-weight: bold; font-family: monospace">340 058</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            <!-- LIGNE DE DONNÉES 2 -->
+            <tr>
+              <td class="text-center" style="color: #666">02</td>
+              <td>INDEMNITE DE FONCTION</td>
+              <td>SANOGO OUMAR, <b>1er Adjoint</b></td>
+              <td class="center" style="font-family: monospace">60013/1</td>
+              <td></td>
+              <td style="text-align: right; font-weight: bold; font-family: monospace">56 576</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            <!-- LIGNE DE DONNÉES 3 -->
+            <tr>
+              <td class="text-center" style="color: #666">03</td>
+              <td>INDEMNITE DE FONCTION</td>
+              <td>IDRISSA KONATE, <b>2è Adjoint</b></td>
+              <td class="center" style="font-family: monospace">60013/1</td>
+              <td></td>
+              <td style="text-align: right; font-weight: bold; font-family: monospace">56 576</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            <!-- LIGNE DE DONNÉES 4 -->
+            <tr>
+              <td class="text-center" style="color: #666">04</td>
+              <td>INDEMNITE DE FONCTION</td>
+              <td>SORO TIEGBE, <b>3è Adjoint</b></td>
+              <td class="center" style="font-family: monospace">60013/1</td>
+              <td></td>
+              <td style="text-align: right; font-weight: bold; font-family: monospace">56 576</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            <!-- LIGNE DE DONNÉES 5 -->
+            <tr>
+              <td class="text-center" style="color: #666">05</td>
+              <td>INDEMNITE DE FONCTION</td>
+              <td>DIABY FANTA, <b>4è Adjoint</b></td>
+              <td class="center" style="font-family: monospace">60013/1</td>
+              <td></td>
+              <td style="text-align: right; font-weight: bold; font-family: monospace">56 576</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            <!-- LIGNE DE DONNÉES 6 -->
+            <tr>
+              <td class="text-center" style="color: #666">06</td>
+              <td>INDEMNITE DE FONCTION</td>
+              <td>RECEVEUR MUNICIPAL</td>
+              <td class="center" style="font-family: monospace">6020/1</td>
+              <td></td>
+              <td style="text-align: right; font-weight: bold; font-family: monospace">75 000</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            <!-- LIGNE DE DONNÉES 7 -->
+            <tr>
+              <td class="text-center" style="color: #666">07</td>
+              <td>INDEMNITE DE FONCTION</td>
+              <td>ALI SANOGO, <b>Régie d'avance</b></td>
+              <td class="center" style="font-family: monospace">6010/1</td>
+              <td></td>
+              <td style="text-align: right; font-weight: bold; font-family: monospace">5 000</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            <!-- Empty rows to fill space -->
+            <!--
+            <tr><td class="text-center" style="color: #666;"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td class="text-center" style="color: #666;"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td class="text-center" style="color: #666;"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td class="text-center" style="color: #666;"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr>
+                <td class="text-center" style="color: #666;"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+            </tr>
+            -->
+            <!-- ESPACEUR -->
+            <tr style="height: 20px">
+              <td class="text-center" style="color: #666"></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+
+              <td
+                colspan="10"
+                style="
+                  border-top: none;
+                  border-bottom: none;
+                  border-left: 1px solid black;
+                  border-right: 1px solid black;
+                "
+              ></td>
+            </tr>
+
+            <!-- TOTAUX 1 -->
+            <tr style="border-top: 2px solid black; height: 30px">
+              <td
+                colspan="5"
+                style="
+                  text-align: right;
+                  font-weight: bold;
+                  padding-right: 10px;
+                  background-color: #f9f9f9;
+                "
+              >
+                TOTAL DU PRÉSENT BORDEREAU
+              </td>
+              <td
+                style="
+                  text-align: right;
+                  font-weight: bold;
+                  font-family: monospace;
+                  background-color: #fffff0;
+                  font-size: 13px;
+                "
+              >
+                646 362
+              </td>
+              <!-- Partie Receveur Totaux (Fusionnée verticalement pour le schéma) -->
+              <td
+                colspan="4"
+                rowspan="3"
+                style="vertical-align: bottom; position: relative; padding: 0"
+              >
+                <!-- Dessin des cases à cocher style ancien -->
+                <div
+                  style="
+                    width: 152px;
+                    height: 40px;
+                    border: 1px solid black;
+                    background: white;
+                    margin: 0 auto 10px auto;
+                    position: relative;
+                    top: -10px;
+                  "
+                ></div>
+                <div
+                  style="
+                    width: 76px;
+                    height: 30px;
+                    border: 1px solid black;
+                    border-top: none;
+                    background: white;
+                    margin: -10px auto 20px auto;
+                    position: relative;
+                    top: -10px;
+                  "
+                ></div>
+              </td>
+            </tr>
+            <!-- TOTAUX 2 -->
+            <tr style="height: 30px">
+              <td
+                colspan="5"
+                style="
+                  text-align: right;
+                  font-weight: bold;
+                  padding-right: 10px;
+                  color: #666;
+                  border-bottom: none;
+                "
+              >
+                TOTAL DU PRÉCÉDENT BORDEREAU
+              </td>
+              <td class="text-center" style="color: #999">_ _ _ _ _</td>
+            </tr>
+            <!-- TOTAUX 3 (Folio) -->
+            <tr style="border-bottom: 2px solid black">
+              <td colspan="5" style="padding: 5px">
+                <div class="flex center justify-between w-100">
+                  <div class="flex center" style="padding: 2px; background: white">
+                    FOLIO N° &nbsp;&nbsp;
+                    <span
+                      style="
+                        font-weight: bold;
+                        font-size: 10px;
+                        width: 50px;
+                        border: 1px solid black;
+                      "
+                      >1257887</span
+                    >
+                    <span
+                      style="
+                        font-weight: bold;
+                        font-size: 14px;
+                        width: 50px;
+                        border: 1px solid black;
+                      "
+                      >2018</span
+                    >
+                  </div>
+                  <span style="font-weight: bold; text-transform: uppercase">Total Général</span>
+                </div>
+              </td>
+              <td class="text-center" style="color: #999">_ . _ . _</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- PIED DE PAGE (Section Footer) -->
+        <div class="footer-section">
+          <!-- GAUCHE : Arrêté + Signature -->
+          <div class="footer-left br">
+            <div class="flex align-top" style="margin-bottom: 20px">
+              <span
+                style="
+                  font-style: italic;
+                  white-space: nowrap;
+                  margin-right: 10px;
+                  font-size: 11px;
+                  margin-top: 5px;
+                "
+                >Arrêté à la somme de :</span
+              >
+              <span class="amount-text"
+                >SIX CENT QUARANTE SIX MILLE TROIS CENT SOIXANTE DEUX FRANCS</span
+              >
+            </div>
+
+            <div class="signature-block">
+              <div style="font-weight: bold; font-size: 11px; margin-bottom: 5px">
+                A VAVOUA, le 15 DÉCEMBRE 2018
+              </div>
+              <div style="font-style: italic; font-size: 12px; margin-bottom: 40px">
+                L' Ordonnateur,
+              </div>
+              <div style="font-weight: bold; font-size: 12px">P/ LE MAIRE & P.D.</div>
+            </div>
+          </div>
+
+          <!-- CENTRE : Date d'émission -->
+          <div class="footer-middle br center flex">
+            <div class="flex flex-col center">
+              <span style="font-weight: bold; font-size: 10px">DATE</span>
+              <span style="font-weight: bold; font-size: 10px">D'ÉMISSION</span>
+            </div>
+          </div>
+
+          <!-- DROITE : Tableau de Contrôle -->
+          <div class="footer-right flex">
+            <!-- Bandeau Vertical Titre -->
+            <div class="control-header-v br">
+              <div
+                class="vertical-text"
+                style="font-weight: bold; font-size: 10px; letter-spacing: 1px"
+              >
+                CONTRÔLE DES PRISES EN CHARGE
+              </div>
+            </div>
+
+            <!-- Grille -->
+            <div class="control-grid">
+              <!-- Ligne 1 : Sommes -->
+              <div class="control-grid-row">
+                <div class="control-label br">
+                  <div class="vertical-text" style="font-weight: bold; font-size: 9px">Sommes</div>
+                </div>
+                <!-- Cellules vides -->
+                <div class="control-cell"></div>
+                <div class="control-cell"></div>
+                <div class="control-cell"></div>
+                <div class="control-cell"></div>
+                <div class="control-cell"></div>
+                <div class="control-cell"></div>
+                <!-- Colonne Totaux -->
+                <div
+                  class="control-cell bl flex flex-col justify-end align-bottom"
+                  style="border-bottom: none"
+                ></div>
+              </div>
+
+              <!-- Ligne 2 : Numéros de comptes -->
+              <div class="control-grid-row">
+                <div class="control-label br">
+                  <div class="vertical-text" style="font-weight: bold; font-size: 9px">
+                    Numéro de Comptes
+                  </div>
+                </div>
+                <!-- Cellules vides -->
+                <div class="control-cell"></div>
+                <div class="control-cell"></div>
+                <div class="control-cell"></div>
+                <div class="control-cell"></div>
+                <div class="control-cell"></div>
+                <div class="control-cell"></div>
+                <!-- Colonne Totaux -->
+                <div class="control-cell bl flex center">
+                  <div class="vertical-text" style="font-weight: bold; font-size: 10px">TOTAUX</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
