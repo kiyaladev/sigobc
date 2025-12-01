@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CT 02 Fonct 2019-1 (HTML/CSS)</title>
+    <style>
+      /* Réinitialisation et polices */
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 20px;
+        background-color: #f0f0f0;
+        font-family: 'Arial', sans-serif;
+        font-size: 11px; /* Taille de base lisible */
+        -webkit-print-color-adjust: exact; /* Pour Chrome/Safari */
+        print-color-adjust: exact; /* Standard */
+      }
+
+      /* Configuration de la page A4 Paysage */
+      @page {
+        size: A4 landscape;
+        margin: 10mm; /* Marges d'impression */
+      }
+
+      /* Conteneur principal simulant la feuille A4 */
+      .page-container {
+        background: white;
+        width: 297mm; /* Largeur A4 paysage */
+        min-height: 210mm; /* Hauteur A4 paysage */
+        padding: 15mm;
+        margin: 0 auto;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        position: relative;
+      }
+
+      /* Bouton d'impression (masqué à l'impression) */
+      .no-print {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      button {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        border-radius: 4px;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+
+      /* --- STYLES DU DOCUMENT --- */
+
+      /* En-tête */
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #000;
+        padding-bottom: 10px;
+      }
+
+      .header-left,
+      .header-right {
+        width: 25%;
+      }
+
+      .header-center {
+        width: 50%;
+        text-align: center;
+      }
+
+      .header-left strong {
+        display: block;
+        font-size: 12px;
+        margin-bottom: 15px;
+      }
+
+      .main-title {
+        font-size: 16px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+      }
+
+      .doc-ref-box {
+        border: 2px solid #000;
+        padding: 5px 10px;
+        font-weight: bold;
+        display: inline-block;
+      }
+
+      .header-right {
+        text-align: right;
+      }
+
+      /* Tableaux */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 15px;
+        font-size: 9px; /* Légère réduction pour faire tenir les 11 colonnes */
+        table-layout: fixed; /* Fixe la largeur des colonnes pour un alignement parfait */
+      }
+
+      th,
+      td {
+        border: 1px solid #000;
+        padding: 3px;
+        text-align: right;
+        overflow: hidden;
+        white-space: nowrap; /* Évite les retours à la ligne intempestifs */
+      }
+
+      th {
+        background-color: #e0e0e0 !important;
+        text-align: center;
+        font-weight: bold;
+        vertical-align: middle;
+        white-space: normal; /* Permet le texte sur plusieurs lignes dans les en-têtes */
+      }
+
+      /* Définition précise des largeurs de colonnes (Total 100%) */
+      .col-ref {
+        width: 15%;
+        text-align: center;
+      } /* Références */
+      .col-art {
+        width: 8%;
+      } /* 8 colonnes Articles */
+      .col-total {
+        width: 13%;
+        background-color: #f5f5f5;
+      } /* Totaux plus larges */
+
+      .text-left {
+        text-align: left;
+      }
+      .text-center {
+        text-align: center;
+      }
+      .bold {
+        font-weight: bold;
+      }
+
+      /* Lignes spécifiques */
+      .total-row {
+        background-color: #f9f9f9;
+        font-weight: bold;
+        border-top: 2px solid #000;
+      }
+
+      .section-title {
+        font-weight: bold;
+        text-transform: uppercase;
+        background-color: #eee;
+      }
+
+      /* Crédits disponibles */
+      .credits-disponibles {
+        margin-top: 20px;
+        border: 2px solid #000;
+      }
+      .credits-disponibles td {
+        font-size: 11px;
+        padding: 8px;
+      }
+
+      /* Media Queries pour l'impression */
+      @media print {
+        body {
+          background: none;
+          margin: 0;
+          padding: 0;
+        }
+        .page-container {
+          width: 100%;
+          margin: 0;
+          padding: 0;
+          box-shadow: none;
+          border: none;
+        }
+        .no-print {
+          display: none;
+        }
+        /* Assurer que les bordures et fonds s'impriment */
+        * {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="no-print">
+      <button onclick="window.print()">🖨️ Imprimer / Sauvegarder en PDF</button>
+      <div style="margin-top: 5px; font-size: 0.9em; color: #666">
+        Astuce : Dans les paramètres d'impression, sélectionnez "Paysage" et "A4".
+      </div>
+    </div>
+
+    <div class="page-container">
+      <!-- EN-TÊTE -->
+      <header class="header">
+        <div class="header-left">
+          <strong>RECETTE MUNICIPALE<br />DE VAVOUA</strong>
+          <div>CODE COMMUNE: 433</div>
+        </div>
+
+        <div class="header-center">
+          <div class="main-title">COMMUNE DE VAVOUA</div>
+          <div class="doc-ref-box">
+            CT 02 A - Livre d'exécution des opérations budgétaires dépenses
+          </div>
+        </div>
+
+        <div class="header-right">
+          <div class="bold">EXERCICE: 2019</div>
+          <div style="margin-top: 10px">
+            COMPTE: 6000<br />
+            INTITULÉ: ADMINISTRATION
+          </div>
+        </div>
+      </header>
+
+      <!-- TABLEAU 1: PRÉVISIONS -->
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 15%; text-align: left">ARTICLES</th>
+            <th>1</th>
+            <th>2</th>
+            <th>3</th>
+            <th>4</th>
+            <th>5</th>
+            <th>6</th>
+            <th>7</th>
+            <th>8</th>
+            <th>TOTAL</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="text-left bold">PRÉVISIONS BUDGETS</td>
+            <td>5 172 000</td>
+            <td>359 000</td>
+            <td>800 000</td>
+            <td>1 200 000</td>
+            <td>1 500 000</td>
+            <td>7 000 000</td>
+            <td>700 000</td>
+            <td>900 000</td>
+            <td class="bold">17 631 000</td>
+          </tr>
+          <tr>
+            <td class="text-left">Décision Modificative N°1</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td class="text-left">Décision Modificative N°2</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr class="total-row">
+            <td class="text-left">TOTAL PRÉVISIONS</td>
+            <td>5 172 000</td>
+            <td>359 000</td>
+            <td>800 000</td>
+            <td>1 200 000</td>
+            <td>1 500 000</td>
+            <td>7 000 000</td>
+            <td>700 000</td>
+            <td>900 000</td>
+            <td>17 631 000</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- TABLEAU 2: ÉMISSIONS -->
+      <table>
+        <thead>
+          <!-- Ligne Supérieure des En-têtes -->
+          <tr style="height: 30px">
+            <th class="col-ref" style="border-bottom: 2px solid #000">N° Mandats</th>
+            <th colspan="10" style="border-bottom: 2px solid #000">EMISSIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Lignes de données -->
+          <tr>
+            <td class="text-center">09-10/02</td>
+            <td>250 238</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="bold">250 238</td>
+            <td class="bold">250 238</td>
+          </tr>
+          <tr>
+            <td class="text-center">51-52/09</td>
+            <td>125 000</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="bold">125 000</td>
+            <td class="bold">375 238</td>
+          </tr>
+          <tr>
+            <td class="text-center">53/10</td>
+            <td>3 109</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="bold">3 109</td>
+            <td class="bold">378 347</td>
+          </tr>
+          <tr>
+            <td class="text-center">61/11</td>
+            <td>13 067</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="bold">13 067</td>
+            <td class="bold">391 414</td>
+          </tr>
+          <tr>
+            <td class="text-center">69/12</td>
+            <td>21 630</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="bold">21 630</td>
+            <td class="bold">413 044</td>
+          </tr>
+          <tr>
+            <td class="text-center">77/13</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>567 660</td>
+            <td></td>
+            <td></td>
+            <td class="bold">567 660</td>
+            <td class="bold">980 704</td>
+          </tr>
+          <tr>
+            <td class="text-center">87-88/16</td>
+            <td>250 238</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="bold">250 238</td>
+            <td class="bold">1 230 942</td>
+          </tr>
+          <tr>
+            <td class="text-center">128-129/23</td>
+            <td>125 000</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="bold">125 000</td>
+            <td class="bold">1 355 942</td>
+          </tr>
+          <tr>
+            <td class="text-center">130/24</td>
+            <td>3 109</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="bold">3 109</td>
+            <td class="bold">1 359 051</td>
+          </tr>
+          <tr>
+            <td class="text-center">138/25</td>
+            <td>13 067</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="bold">13 067</td>
+            <td class="bold">1 372 118</td>
+          </tr>
+          <tr>
+            <td class="text-center">146/26</td>
+            <td>21 630</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="bold">21 630</td>
+            <td class="bold">1 393 748</td>
+          </tr>
+
+          <!-- Totaux intermédiaires -->
+          <tr class="total-row">
+            <td class="text-center">TOTAUX FÉVRIER</td>
+            <td>782 828</td>
+            <td>43 260</td>
+            <td>-</td>
+            <td>-</td>
+            <td>-</td>
+            <td>567 660</td>
+            <td>-</td>
+            <td>-</td>
+            <td>1 393 748</td>
+            <td>1 393 748</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- CRÉDITS DISPONIBLES (Bas de page) -->
+      <table class="credits-disponibles">
+        <tr class="total-row" style="background-color: #e8e8e8">
+          <td class="text-left" style="width: 12%">SOLDE / CRÉDITS DISPO.</td>
+          <td class="col-art">4 389 172</td>
+          <td class="col-art">315 740</td>
+          <td class="col-art">800 000</td>
+          <td class="col-art">1 200 000</td>
+          <td class="col-art">1 500 000</td>
+          <td class="col-art">6 432 340</td>
+          <td class="col-art">700 000</td>
+          <td class="col-art">900 000</td>
+          <td style="width: 24%; text-align: center; font-weight: bold">16 237 252</td>
+        </tr>
+      </table>
+    </div>
+  </body>
+</html>

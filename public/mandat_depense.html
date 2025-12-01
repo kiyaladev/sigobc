@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mandat de Paiement - Vavoua</title>
+    <title>Mandat de Paiement</title>
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Arimo:wght@400;700&display=swap');
 
@@ -242,10 +242,10 @@
       <div class="header-grid">
         <div class="header-col header-left">
           <p>République de Côte d'Ivoire</p>
-          <p>Département de Vavoua</p>
-          <p>Commune de Vavoua</p>
-          <p class="bold mt-2 text-center">Ville de Vavoua</p>
-          <p class="bold mt-4">Code : <span style="font-style: italic">455</span></p>
+          <p>Département de <span data-field="mairieVille"></span></p>
+          <p>Commune de <span data-field="mairieVille"></span></p>
+          <p class="bold mt-2 text-center">Ville de <span data-field="mairieVille"></span></p>
+          <p class="bold mt-4">Code : <span style="font-style: italic" data-field="mairieCode"></span></p>
         </div>
         <div class="header-col text-center">
           <p class="bold uppercase" style="font-size: 1.1em">MANDAT DE PAIEMENT</p>
@@ -258,7 +258,7 @@
           </div>
         </div>
         <div class="header-col header-right text-center">
-          <p class="uppercase">TRESORERIE PRINCIPALE<br />DE VAVOUA</p>
+          <p class="uppercase">TRESORERIE PRINCIPALE<br />DE <span data-field="mairieVille"></span></p>
           <div class="text-left mt-2" style="font-size: 0.8em">
             <p>N° d'inscription au livre d'exécution</p>
             <p>des opérations budgétaires :</p>
@@ -364,7 +364,7 @@
           </div>
 
           <div class="signature-section">
-            <p class="uppercase mt-2">A VAVOUA , le <span data-field="dateEmission">15/09/2019</span></p>
+            <p class="uppercase mt-2">A <span data-field="mairieVille"></span> , le <span data-field="dateEmission">15/09/2019</span></p>
             <p class="text-sm italic mt-1">Signature et cachet de l'Ordonnateur</p>
             <p class="bold mt-2">P/ LE MAIRE & P.D.</p>
           </div>
@@ -390,102 +390,31 @@
           <p class="uppercase">MANDAT DE PAIEMENT</p>
         </div>
         <div class="footer-col">
-          <p class="uppercase">TRÉSORERIE PRINCIPALE<br />DE VAVOUA</p>
+          <p class="uppercase">TRÉSORERIE PRINCIPALE<br />DE <span data-field="mairieVille"></span></p>
         </div>
       </div>
       <div class="footer-note">Pour acquit de la somme indiquée ci-dessus (A) :</div>
     </div>
     <script>
-      // Fonction pour convertir un nombre en lettres (français)
-      function nombreEnLettres(nombre) {
-        if (nombre === 0) return 'zéro';
-
-        const unites = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf'];
-        const dizaines = [
-          '',
-          '',
-          'vingt',
-          'trente',
-          'quarante',
-          'cinquante',
-          'soixante',
-          'soixante',
-          'quatre-vingt',
-          'quatre-vingt',
-        ];
-        const special = [
-          'dix',
-          'onze',
-          'douze',
-          'treize',
-          'quatorze',
-          'quinze',
-          'seize',
-          'dix-sept',
-          'dix-huit',
-          'dix-neuf',
-        ];
-
-        function convertirCentaines(n) {
-          if (n === 0) return '';
-          if (n < 10) return unites[n];
-          if (n < 20) return special[n - 10];
-          if (n < 100) {
-            const d = Math.floor(n / 10);
-            const u = n % 10;
-            let result = dizaines[d];
-            if (d === 7 || d === 9) {
-              result = dizaines[d - 1] + '-' + special[u];
-            } else if (u === 1 && d === 8) {
-              result = 'quatre-vingt-un';
-            } else if (u > 0) {
-              result += '-' + unites[u];
-            } else if (d === 8) {
-              result += 's';
-            }
-            return result;
-          }
-          const c = Math.floor(n / 100);
-          const reste = n % 100;
-          let result = c === 1 ? 'cent' : unites[c] + ' cent';
-          if (c > 1 && reste === 0) result += 's';
-          if (reste > 0) result += ' ' + convertirCentaines(reste);
-          return result;
-        }
-
-        function convertirMilliers(n) {
-          if (n < 1000) return convertirCentaines(n);
-          const m = Math.floor(n / 1000);
-          const reste = n % 1000;
-          let result = m === 1 ? 'mille' : convertirCentaines(m) + ' mille';
-          if (reste > 0) result += ' ' + convertirCentaines(reste);
-          return result;
-        }
-
-        function convertirMillions(n) {
-          if (n < 1000000) return convertirMilliers(n);
-          const m = Math.floor(n / 1000000);
-          const reste = n % 1000000;
-          let result = convertirCentaines(m) + ' million';
-          if (m > 1) result += 's';
-          if (reste > 0) result += ' ' + convertirMilliers(reste);
-          return result;
-        }
-
-        return convertirMillions(nombre);
-      }
-
       // Fonction pour formater un nombre avec espaces
       function formatMontant(montant) {
-        return new Intl.NumberFormat('fr-FR').format(montant);
+        // we receive a number so we format it
+        if (typeof montant === 'number') {
+          return new Intl.NumberFormat('fr-FR').format(montant);
+        }
+        // if we receive a string, we assume it's already formatted
+        return montant;
       }
 
       // Fonction pour remplir les deux formulaires
       function remplirFormulaire(data) {
+        // Remplacer le titre
+        document.title = `Mandat de Paiement - ${data.mairieVille || 'Mairie'}`;
+
         // Calculer les champs dérivés
         data.montantBrut = formatMontant(data.montantBrut);
         data.montantNet = formatMontant(data.montantNet);
-        data.montantLettres = nombreEnLettres(data.montantNet) + ' FRANCS CFA';
+        // data.montantLettres est maintenant fourni directement
 
         for (const key in data) {
           const elements = document.querySelectorAll(`[data-field="${key}"]`);

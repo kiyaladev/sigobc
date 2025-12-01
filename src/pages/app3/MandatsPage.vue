@@ -233,8 +233,6 @@
         </q-card-section>
       </q-card>
     </q-dialog>
-
-
   </q-page>
 </template>
 
@@ -247,9 +245,11 @@ import {
   type Chapitre,
   type SousChapitre,
   type BordereauMandat,
+  type Mairie,
 } from 'src/database/db';
 import PageHeader from 'src/components/PageHeader.vue';
 import DataTable from 'src/components/DataTable.vue';
+import { amountToWords } from 'src/utils/numberToWords';
 
 const $q = useQuasar();
 const loading = ref(false);
@@ -261,6 +261,7 @@ const mandats = ref<Mandat[]>([]);
 const chapitres = ref<Chapitre[]>([]);
 const sousChapitres = ref<SousChapitre[]>([]);
 const bordereauMandats = ref<BordereauMandat[]>([]);
+const mairies = ref<Mairie[]>([]);
 
 const formData = ref({
   numeroMandat: '',
@@ -280,11 +281,10 @@ const formData = ref({
 });
 
 const chapitreOptions = computed(() =>
-  chapitres.value
-    .map((c) => ({
-      label: `${c.code} - ${c.libelle}`,
-      value: c.id,
-    })),
+  chapitres.value.map((c) => ({
+    label: `${c.code} - ${c.libelle}`,
+    value: c.id,
+  })),
 );
 
 const sousChapitreOptions = computed(() =>
@@ -326,7 +326,7 @@ function filterChapitre(val: string, update: (callback: () => void) => void) {
   update(() => {
     const needle = val.toLowerCase();
     filteredChapitreOptions.value = chapitreOptions.value.filter(
-      (v) => v.label.toLowerCase().indexOf(needle) > -1
+      (v) => v.label.toLowerCase().indexOf(needle) > -1,
     );
   });
 }
@@ -341,7 +341,7 @@ function filterSousChapitre(val: string, update: (callback: () => void) => void)
   update(() => {
     const needle = val.toLowerCase();
     filteredSousChapitreOptions.value = sousChapitreOptions.value.filter(
-      (v) => v.label.toLowerCase().indexOf(needle) > -1
+      (v) => v.label.toLowerCase().indexOf(needle) > -1,
     );
   });
 }
@@ -356,19 +356,19 @@ function filterBordereauMandat(val: string, update: (callback: () => void) => vo
   update(() => {
     const needle = val.toLowerCase();
     filteredBordereauMandatOptions.value = bordereauMandatOptions.value.filter(
-      (v) => v.label.toLowerCase().indexOf(needle) > -1
+      (v) => v.label.toLowerCase().indexOf(needle) > -1,
     );
   });
 }
 
 const columns = [
-  {
+  /*{
     name: 'numeroOrdre',
     label: 'N° Ordre',
     align: 'center' as const,
     field: 'numeroOrdre',
     sortable: true,
-  },
+  },*/
   {
     name: 'numeroMandat',
     label: 'N° Mandat',
@@ -461,6 +461,7 @@ function printMandat(mandat: Mandat) {
       const chapitre = chapitres.value.find((c) => c.id === mandat.chapitreId);
       const sousChapitre = sousChapitres.value.find((s) => s.id === mandat.sousChapitreId);
       const bordereau = bordereauMandats.value.find((b) => b.id === mandat.bordereauMandatId);
+      const mairie = mairies.value[0]; // Get the first mairie
 
       printWindow.postMessage(
         {
@@ -468,17 +469,23 @@ function printMandat(mandat: Mandat) {
           data: {
             exercice: mandat.exercice,
             imputationFonctionnelle: sousChapitre
-              ? `${sousChapitre.code}/${chapitre?.code}`
+              ? `${chapitre?.code}/${sousChapitre.code}`
               : chapitre?.code,
-            numeroOrdre: mandat.numeroOrdre || '',
-            numeroBordereau: bordereau ? `${bordereau.numero}-${bordereau.exercice}` : '',
+            numeroOrdre: mandat.numeroMandat || '',
+            numeroBordereau: bordereau ? `${bordereau.numero}-${bordereau.exercice % 100}` : '',
             objetDepense: mandat.objet,
             periode: '', // This field is not in the Mandat interface
             beneficiaire: mandat.beneficiaire,
             beneficiaireDetails: '', // This field is not in the Mandat interface
             montantBrut: mandat.montant,
             montantNet: mandat.montant,
+            montantLettres: amountToWords(mandat.montant).toUpperCase(),
             dateEmission: new Date(mandat.dateMandat).toLocaleDateString('fr-FR'),
+            // Mairie info
+            mairieDepartement: mairie?.departement ?? '',
+            mairieCommune: mairie?.commune ?? '',
+            mairieCode: mairie?.code ?? '',
+            mairieVille: mairie?.nom ?? '',
           },
         },
         '*',
@@ -490,11 +497,14 @@ function printMandat(mandat: Mandat) {
 async function loadData() {
   loading.value = true;
   try {
-    mandats.value = await db.mandats.toArray();
-    mandats.value = await db.mandats.toArray();
-    chapitres.value = await db.chapitres.filter((c) => c.actif).toArray();
-    sousChapitres.value = await db.sousChapitres.filter((s) => s.actif).toArray();
-    bordereauMandats.value = await db.bordereauMandats.toArray();
+    [mandats.value, chapitres.value, sousChapitres.value, bordereauMandats.value, mairies.value] =
+      await Promise.all([
+        db.mandats.toArray(),
+        db.chapitres.filter((c) => c.actif).toArray(),
+        db.sousChapitres.filter((s) => s.actif).toArray(),
+        db.bordereauMandats.toArray(),
+        db.mairies.toArray(),
+      ]);
   } catch (error) {
     console.error('Erreur lors du chargement:', error);
     $q.notify({

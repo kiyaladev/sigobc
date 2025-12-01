@@ -41,7 +41,6 @@
       :columns="columns"
       :loading="loading"
       row-key="id"
-      @row-click="openDialog"
     >
       <template v-slot:body-cell-code="props">
         <q-td :props="props">

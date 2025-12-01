@@ -41,7 +41,6 @@
       :columns="columns"
       :loading="loading"
       row-key="id"
-      @row-click="openDialog"
     >
       <template v-slot:body-cell-code="props">
         <q-td :props="props">
@@ -85,8 +84,6 @@
 
         <q-card-section>
           <q-form @submit="saveSousChapitre" class="q-gutter-md">
-
-
             <q-input
               v-model="form.code"
               filled
