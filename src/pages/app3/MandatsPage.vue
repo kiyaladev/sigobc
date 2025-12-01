@@ -98,7 +98,7 @@
         <q-card-section>
           <q-form @submit="saveMandat" class="q-gutter-md">
             <div class="row q-col-gutter-md">
-              <div class="col-6">
+              <div class="col-4">
                 <q-input
                   v-model="formData.numeroMandat"
                   label="Numéro Mandat *"
@@ -107,7 +107,7 @@
                   :rules="[(val) => !!val || 'Numéro requis']"
                 />
               </div>
-              <div class="col-6">
+              <div class="col-4">
                 <q-input
                   v-model="formData.dateMandat"
                   label="Date Mandat *"
@@ -117,10 +117,7 @@
                   :rules="[(val) => !!val || 'Date requise']"
                 />
               </div>
-            </div>
-
-            <div class="row q-col-gutter-md">
-              <div class="col-6">
+              <div class="col-4">
                 <q-input
                   v-model.number="formData.exercice"
                   label="Exercice *"
@@ -130,30 +127,39 @@
                   :rules="[(val) => !!val || 'Exercice requis']"
                 />
               </div>
+            </div>
+
+            <div class="row q-col-gutter-md">
               <div class="col-12">
                 <q-select
                   v-model="formData.chapitreId"
-                  :options="chapitreOptions"
+                  :options="filteredChapitreOptions"
                   label="Chapitre *"
                   outlined
                   dense
                   emit-value
                   map-options
+                  use-input
+                  input-debounce="0"
                   :rules="[(val) => !!val || 'Chapitre requis']"
                   hint="Sélectionner un chapitre budgétaire"
+                  @filter="filterChapitre"
                 />
               </div>
               <div class="col-12">
                 <q-select
                   v-model="formData.sousChapitreId"
-                  :options="sousChapitreOptions"
+                  :options="filteredSousChapitreOptions"
                   label="Sous-chapitre"
                   outlined
                   dense
                   emit-value
                   map-options
                   clearable
+                  use-input
+                  input-debounce="0"
                   hint="Sélectionner un sous-chapitre budgétaire"
+                  @filter="filterSousChapitre"
                 />
               </div>
             </div>
@@ -161,14 +167,17 @@
             <!-- Bordereau de Mandat -->
             <q-select
               v-model="formData.bordereauMandatId"
-              :options="bordereauMandatOptions"
-              label="Bordereau de Mandat"
+              :options="filteredBordereauMandatOptions"
+              label="Bordereau de Mandat *"
               outlined
               dense
               emit-value
               map-options
-              clearable
-              hint="Sélectionner un bordereau (optionnel)"
+              use-input
+              input-debounce="0"
+              :rules="[(val) => !!val || 'Bordereau requis']"
+              hint="Sélectionner un bordereau"
+              @filter="filterBordereauMandat"
             >
               <template v-slot:prepend>
                 <q-icon name="description" />
@@ -386,7 +395,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useQuasar, date } from 'quasar';
-import { db, type Mandat, type Chapitre, type SousChapitre, type BordereauMandat } from 'src/database/db';
+import {
+  db,
+  type Mandat,
+  type Chapitre,
+  type SousChapitre,
+  type BordereauMandat,
+} from 'src/database/db';
 import PageHeader from 'src/components/PageHeader.vue';
 import DataTable from 'src/components/DataTable.vue';
 
@@ -447,10 +462,6 @@ const chapitreInfo = computed(() => {
 
 const chapitreOptions = computed(() =>
   chapitres.value
-    // .filter(
-    //   (c) =>
-    //     c.actif && (formData.value.rubriqueId ? c.rubriqueId === formData.value.rubriqueId : true),
-    // )
     .map((c) => ({
       label: `${c.code} - ${c.libelle}`,
       value: c.id,
@@ -469,6 +480,67 @@ const bordereauMandatOptions = computed(() =>
       value: b.id,
     })),
 );
+
+const filteredChapitreOptions = ref(chapitreOptions.value);
+const filteredSousChapitreOptions = ref(sousChapitreOptions.value);
+const filteredBordereauMandatOptions = ref(bordereauMandatOptions.value);
+
+watch(chapitreOptions, (newOptions) => {
+  filteredChapitreOptions.value = newOptions;
+});
+
+watch(sousChapitreOptions, (newOptions) => {
+  filteredSousChapitreOptions.value = newOptions;
+});
+
+watch(bordereauMandatOptions, (newOptions) => {
+  filteredBordereauMandatOptions.value = newOptions;
+});
+
+function filterChapitre(val: string, update: (callback: () => void) => void) {
+  if (val === '') {
+    update(() => {
+      filteredChapitreOptions.value = chapitreOptions.value;
+    });
+    return;
+  }
+  update(() => {
+    const needle = val.toLowerCase();
+    filteredChapitreOptions.value = chapitreOptions.value.filter(
+      (v) => v.label.toLowerCase().indexOf(needle) > -1
+    );
+  });
+}
+
+function filterSousChapitre(val: string, update: (callback: () => void) => void) {
+  if (val === '') {
+    update(() => {
+      filteredSousChapitreOptions.value = sousChapitreOptions.value;
+    });
+    return;
+  }
+  update(() => {
+    const needle = val.toLowerCase();
+    filteredSousChapitreOptions.value = sousChapitreOptions.value.filter(
+      (v) => v.label.toLowerCase().indexOf(needle) > -1
+    );
+  });
+}
+
+function filterBordereauMandat(val: string, update: (callback: () => void) => void) {
+  if (val === '') {
+    update(() => {
+      filteredBordereauMandatOptions.value = bordereauMandatOptions.value;
+    });
+    return;
+  }
+  update(() => {
+    const needle = val.toLowerCase();
+    filteredBordereauMandatOptions.value = bordereauMandatOptions.value.filter(
+      (v) => v.label.toLowerCase().indexOf(needle) > -1
+    );
+  });
+}
 
 const columns = [
   {
@@ -649,16 +721,18 @@ async function saveMandat() {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { dateFacture, dateMandat, ...otherFormData } = formData.value;
 
-  const data = {
-    ...otherFormData,
-    chapitreId: formData.value.chapitreId!,
-    ...(formData.value.sousChapitreId ? { sousChapitreId: formData.value.sousChapitreId } : {}),
-    dateMandat: new Date(formData.value.dateMandat),
-    ...(dateFacture ? { dateFacture: new Date(dateFacture) } : {}),
-    ...(formData.value.bordereauMandatId ? { bordereauMandatId: formData.value.bordereauMandatId } : {}),
-    mairieId,
-    personnelId,
-  };
+    const data = {
+      ...otherFormData,
+      chapitreId: formData.value.chapitreId!,
+      ...(formData.value.sousChapitreId ? { sousChapitreId: formData.value.sousChapitreId } : {}),
+      dateMandat: new Date(formData.value.dateMandat),
+      ...(dateFacture ? { dateFacture: new Date(dateFacture) } : {}),
+      ...(formData.value.bordereauMandatId
+        ? { bordereauMandatId: formData.value.bordereauMandatId }
+        : {}),
+      mairieId,
+      personnelId,
+    };
 
     if (editingId.value) {
       const updateData = {

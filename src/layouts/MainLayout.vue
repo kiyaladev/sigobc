@@ -397,20 +397,6 @@
             </q-item-section>
           </q-item>
 
-          <q-item
-            clickable
-            v-ripple
-            to="/app3/bordereaux-mandats"
-            class="nav-item q-mb-xs"
-            active-class="nav-item-active"
-          >
-            <q-item-section avatar>
-              <q-icon name="description" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>Bordereaux (Impression)</q-item-label>
-            </q-item-section>
-          </q-item>
 
           <q-item
             clickable

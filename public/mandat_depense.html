@@ -3,472 +3,397 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mandat de Dépense</title>
-    <script src="dexie.min.js"></script>
-    <script src="vue.global.js"></script>
+    <title>Mandat de Paiement - Vavoua</title>
     <style>
-      @page {
-        size: A4;
-        margin: 15mm;
+      @import url('https://fonts.googleapis.com/css2?family=Arimo:wght@400;700&display=swap');
+
+      :root {
+          --border-color: #000;
+          --border-width: 1.5px;
+          --border-width-thick: 2.5px;
       }
 
       * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
       }
 
       body {
-        font-family: Arial, sans-serif;
-        font-size: 12px;
-        line-height: 1.4;
-        background: #f5f5f5;
-        padding: 20px;
+          background-color: #f0f0f0;
+          font-family: 'Arimo', sans-serif; /* Police proche de l'original */
+          font-size: 11pt;
+          line-height: 1.3;
+          display: flex;
+          justify-content: center;
+          padding: 20px;
       }
 
       .page {
-        width: 210mm;
-        min-height: 297mm;
-        background: white;
-        margin: 0 auto;
-        padding: 15mm;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+          background-color: white;
+          width: 210mm;
+          min-height: 297mm;
+          padding: 10mm 15mm; /* Marges intérieures */
+          box-shadow: 0 0 15px rgba(0,0,0,0.1);
+          display: flex;
+          flex-direction: column;
+          position: relative;
       }
 
-      .header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 20px;
-        padding-bottom: 10px;
-        border-bottom: 2px solid #000;
+      /* Classes utilitaires */
+      .bold { font-weight: 700; }
+      .uppercase { text-transform: uppercase; }
+      .text-center { text-align: center; }
+      .text-right { text-align: right; }
+      .text-sm { font-size: 0.9em; }
+      .text-xs { font-size: 0.8em; }
+      .mt-1 { margin-top: 5px; }
+      .mt-2 { margin-top: 10px; }
+      .mt-4 { margin-top: 20px; }
+      .mb-1 { margin-bottom: 5px; }
+      .flex { display: flex; }
+      .flex-col { display: flex-direction: column; }
+      .justify-between { justify-content: space-between; }
+      .items-center { align-items: center; }
+      .items-end { align-items: flex-end; }
+      .w-full { width: 100%; }
+      .h-full { height: 100%; }
+
+      /* Structure des bordures */
+      .border-box {
+          border: var(--border-width) solid var(--border-color);
+      }
+      .border-t { border-top: var(--border-width) solid var(--border-color); }
+      .border-b { border-bottom: var(--border-width) solid var(--border-color); }
+      .border-l { border-left: var(--border-width) solid var(--border-color); }
+      .border-r { border-right: var(--border-width) solid var(--border-color); }
+      .border-thick-t { border-top: var(--border-width-thick) solid var(--border-color); }
+      .border-thick-b { border-bottom: var(--border-width-thick) solid var(--border-color); }
+
+      /* HEADER */
+      .header-grid {
+          display: grid;
+          grid-template-columns: 1fr 1.2fr 1fr;
+          border-bottom: var(--border-width-thick) solid var(--border-color);
       }
 
-      .header-left {
-        flex: 1;
+      .header-col {
+          padding: 10px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
       }
 
-      .header-center {
-        flex: 1;
-        text-align: center;
+      .header-col:nth-child(2) {
+          border-left: var(--border-width) solid var(--border-color);
+          border-right: var(--border-width) solid var(--border-color);
+          align-items: center;
       }
 
-      .header-right {
-        flex: 1;
-        text-align: right;
+      .header-left p { margin-bottom: 8px; }
+      .header-right p { margin-bottom: 8px; font-size: 0.85em;}
+      .dots { border-bottom: 1px dotted #000; display: inline-block; width: 100%; height: 1em; }
+
+      /* OBJECT */
+      .object-section {
+          padding: 15px 0;
+          text-align: center;
+          border-bottom: var(--border-width) solid var(--border-color);
       }
 
-      .title {
-        font-size: 18px;
-        font-weight: bold;
-        text-align: center;
-        margin: 20px 0;
-        text-decoration: underline;
+      /* MAIN CONTENT SPLIT */
+      .main-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          flex-grow: 1;
       }
 
-      .info-box {
-        border: 1px solid #000;
-        padding: 10px;
-        margin: 10px 0;
+      .col-left {
+          border-right: var(--border-width) solid var(--border-color);
+          display: flex;
+          flex-direction: column;
       }
 
-      .info-row {
-        display: flex;
-        margin-bottom: 8px;
+      .col-right {
+          display: flex;
+          flex-direction: column;
       }
 
-      .info-label {
-        font-weight: bold;
-        min-width: 150px;
+      /* Left Column Specifics */
+      .creditor-section {
+          padding: 10px;
+          padding-bottom: 42px;
+          border-bottom: var(--border-width) solid var(--border-color);
       }
 
-      .info-value {
-        flex: 1;
-        border-bottom: 1px dotted #000;
-        padding: 0 5px;
+      .payment-mode-section {
+          padding: 10px;
+          padding-bottom: 25px;
+          padding-top: 25px;
+          border-bottom: var(--border-width) solid var(--border-color);
       }
 
-      .section-title {
-        font-weight: bold;
-        font-size: 14px;
-        margin: 15px 0 10px 0;
-        padding: 5px;
-        background: #f0f0f0;
-        border-left: 4px solid #333;
+      .justification-section {
+          padding: 10px;
+          flex-grow: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 15px;
       }
 
-      .montant-box {
-        border: 2px solid #000;
-        padding: 15px;
-        margin: 20px 0;
-        text-align: center;
+      .dotted-line {
+          border-bottom: 1px dotted #000;
+          display: inline-block;
+          width: 100%;
       }
 
-      .montant-label {
-        font-weight: bold;
-        font-size: 14px;
+      /* Right Column Specifics */
+      .amount-row {
+          display: flex;
+          align-items: center;
+          padding: 10px;
+          padding-right: 20px;
+      }
+      .amount-row label { width: 120px; font-size: 0.9em; }
+      .amount-box {
+          border: 2px solid #000;
+          padding: 5px 10px;
+          flex-grow: 1;
+          text-align: right;
+          font-weight: bold;
+          font-size: 1.1em;
+          height: 35px;
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
       }
 
-      .montant-value {
-        font-size: 20px;
-        font-weight: bold;
-        margin: 10px 0;
+      .amount-text-section {
+          padding: 10px;
+          border-top: var(--border-width) solid var(--border-color);
+          /* border-bottom: var(--border-width) solid var(--border-color); */
       }
 
       .signature-section {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 40px;
+          padding: 10px;
+          padding-bottom: 140px;
+          text-align: center;
+          min-height: 150px;
+          border-bottom: var(--border-width) solid var(--border-color);
       }
 
-      .signature-box {
-        width: 45%;
-        text-align: center;
+      .vu-bon-section {
+          padding: 10px;
+          flex-grow: 1;
       }
 
-      .signature-line {
-        margin-top: 60px;
-        border-top: 1px solid #000;
-        padding-top: 5px;
+      /* FOOTER */
+      .footer-grid {
+          display: grid;
+          grid-template-columns: 1fr 1.2fr 1fr;
+          border-top: var(--border-width-thick) solid var(--border-color);
+          margin-top: auto;
+      }
+      .footer-col {
+          padding: 5px;
+      }
+      .footer-col:nth-child(2) {
+          border-left: var(--border-width) solid var(--border-color);
+          border-right: var(--border-width) solid var(--border-color);
+          text-align: center;
+          font-weight: bold;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+      }
+      .footer-col:nth-child(3) {
+          text-align: center;
+          font-size: 0.9em;
       }
 
-      .footer {
-        margin-top: 30px;
-        font-size: 10px;
-        text-align: center;
-        border-top: 1px solid #ccc;
-        padding-top: 10px;
+      .footer-note {
+          text-align: center;
+          font-style: italic;
+          font-size: 0.9em;
+          margin-top: 5px;
+          font-weight: bold;
       }
 
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 10px 0;
-      }
-
-      table td {
-        padding: 5px;
-        border: 1px solid #ccc;
-      }
-
-      table td.label {
-        font-weight: bold;
-        background: #f9f9f9;
-        width: 30%;
-      }
-
+      /* Print styles */
       @media print {
-        body {
-          background: white;
-          padding: 0;
-        }
-
-        .page {
-          box-shadow: none;
-          padding: 0;
-          width: 100%;
-        }
+          body {
+              background: none;
+              padding: 0;
+              -webkit-print-color-adjust: exact;
+          }
+          .page {
+              width: 100%;
+              height: auto;
+              box-shadow: none;
+              margin: 0;
+              padding: 5mm; /* Ajustement marge imprimante */
+          }
       }
     </style>
   </head>
   <body>
-    <div class="page" v-if="mandat">
-      <div class="header">
-        <div class="header-left">
-          <div><strong>MAIRIE DE</strong></div>
-          <div>{{ mairie?.ville || '........................' }}</div>
-          <div>COMMUNE DE</div>
-          <div>{{ mairie?.nom || '........................' }}</div>
+    <div class="page">
+      <!-- HEADER -->
+      <div class="header-grid">
+        <div class="header-col header-left">
+          <p>République de Côte d'Ivoire</p>
+          <p>Département de Vavoua</p>
+          <p>Commune de Vavoua</p>
+          <p class="bold mt-2 text-center">Ville de Vavoua</p>
+          <p class="bold mt-4">Code : <span style="font-style: italic">455</span></p>
         </div>
-        <div class="header-center">
-          <div style="font-size: 16px; font-weight: bold">MANDAT DE DÉPENSE</div>
+        <div class="header-col text-center">
+          <p class="bold uppercase" style="font-size: 1.1em">MANDAT DE PAIEMENT</p>
+          <p class="bold uppercase mt-2">EXERCICE : 2019</p>
+          <p class="bold uppercase mt-2">TITRE DU BUDGET : I</p>
+          <p class="bold uppercase mt-4">IMPUTATION</p>
+          <div class="w-full text-left mt-2" style="padding-left: 10px">
+            <p>FONCTIONNELLE : <span class="bold">6000/1</span></p>
+            <p class="mt-2">PATRIMONIALE :</p>
+          </div>
         </div>
-        <div class="header-right">
-          <div>Exercice : <strong>{{ mandat.exercice }}</strong></div>
-          <div>N° Mandat : <strong>{{ mandat.numeroMandat }}</strong></div>
-          <div>Date : <strong>{{ formatDate(mandat.dateMandat) }}</strong></div>
-        </div>
-      </div>
-
-      <div class="section-title">INFORMATIONS BUDGÉTAIRES</div>
-      <table>
-        <tr>
-          <td class="label">Chapitre budgétaire :</td>
-          <td>{{ getChapitre() }}</td>
-        </tr>
-        <tr>
-          <td class="label">Code chapitre :</td>
-          <td>{{ getChapitre('code') }}</td>
-        </tr>
-      </table>
-
-      <div class="section-title">BÉNÉFICIAIRE</div>
-      <table>
-        <tr>
-          <td class="label">Nom / Raison sociale :</td>
-          <td>{{ mandat.beneficiaire }}</td>
-        </tr>
-      </table>
-
-      <div class="section-title">OBJET DE LA DÉPENSE</div>
-      <div class="info-box">
-        <div style="min-height: 60px">{{ mandat.objet }}</div>
-      </div>
-
-      <div class="section-title">RÉFÉRENCES FACTURE</div>
-      <table>
-        <tr>
-          <td class="label">N° Facture :</td>
-          <td>{{ mandat.numeroFacture || 'Non spécifié' }}</td>
-        </tr>
-        <tr>
-          <td class="label">Date facture :</td>
-          <td>{{ mandat.dateFacture ? formatDate(mandat.dateFacture) : 'Non spécifiée' }}</td>
-        </tr>
-      </table>
-
-      <div class="section-title">MONTANT</div>
-      <div class="montant-box">
-        <div class="montant-label">Montant en lettres :</div>
-        <div style="margin: 10px 0; font-size: 14px">{{ montantEnLettres }}</div>
-        <div class="montant-label">Montant en chiffres :</div>
-        <div class="montant-value">{{ formatMontant(mandat.montant) }} FCFA</div>
-      </div>
-
-      <table>
-        <tr>
-          <td class="label">Mode de paiement :</td>
-          <td>{{ formatModePaiement(mandat.modePaiement) }}</td>
-        </tr>
-        <tr>
-          <td class="label">Statut :</td>
-          <td>{{ formatStatut(mandat.statut) }}</td>
-        </tr>
-      </table>
-
-      <div v-if="mandat.observations" style="margin-top: 15px">
-        <div class="section-title">OBSERVATIONS</div>
-        <div class="info-box">{{ mandat.observations }}</div>
-      </div>
-
-      <div class="signature-section">
-        <div class="signature-box">
-          <div><strong>L'Ordonnateur</strong></div>
-          <div class="signature-line">Le Maire</div>
-        </div>
-        <div class="signature-box">
-          <div>À {{ mairie?.ville || '............' }}, le {{ formatDate(mandat.dateMandat) }}</div>
-          <div style="margin-top: 20px"><strong>Le Comptable</strong></div>
-          <div class="signature-line">Le Receveur Municipal</div>
+        <div class="header-col header-right text-center">
+          <p class="uppercase">TRESORERIE PRINCIPALE<br />DE VAVOUA</p>
+          <div class="text-left mt-2" style="font-size: 0.8em">
+            <p>N° d'inscription au livre d'exécution</p>
+            <p>des opérations budgétaires :</p>
+            <span class="dots mt-1"></span>
+          </div>
+          <div class="mt-4 text-center">
+            <p>N° d'Ordre</p>
+            <span style="width: 50%"></span>
+          </div>
+          <div class="mt-auto text-left" style="font-size: 0.8em">
+            <p>N° du bordereau d'émission</p>
+          </div>
         </div>
       </div>
 
-      <div class="footer">
-        <div>Document généré le {{ new Date().toLocaleDateString('fr-FR') }}</div>
-        <div>Mandat N° {{ mandat.numeroMandat }} - Exercice {{ mandat.exercice }}</div>
+      <!-- OBJET -->
+      <div class="object-section">
+        <p class="bold uppercase" style="font-size: 1.2em">OBJET DE LA DÉPENSE :</p>
+        <p class="bold uppercase mt-2" style="letter-spacing: 1px">
+          Paiement de Salaire de la période
+        </p>
+        <p class="uppercase bold">DU 01/09/2019 AU 30/09/2019</p>
       </div>
+
+      <!-- MAIN CONTENT -->
+      <div class="main-grid">
+        <!-- LEFT COLUMN -->
+        <div class="col-left">
+          <div class="creditor-section">
+            <p class="bold uppercase mb-1 text-center">CRÉANCIER</p>
+            <div class="flex mt-4">
+              <span style="width: 100px">Bénéficiaire :</span>
+              <div>
+                <p class="bold uppercase">ZAGBAÏ DIABO</p>
+                <p class="italic">Agent de mairie</p>
+              </div>
+            </div>
+            <div class="mt-2">
+              <p>Compte Bancaire <span class="dotted-line" style="width: 60%"></span></p>
+              <p>ou Postal <span class="dotted-line" style="width: 78%"></span></p>
+              <p>Agence d... <span class="dotted-line" style="width: 75%"></span></p>
+            </div>
+          </div>
+
+          <div class="payment-mode-section">
+            <p class="mb-2">A Régler au compte indiqué ci-dessus par :</p>
+            <ul style="list-style: none; padding-left: 15px">
+              <li>- Virement postal</li>
+              <li>- Virement bancaire</li>
+              <li>- Chèque bancaire</li>
+            </ul>
+          </div>
+
+          <div class="justification-section">
+            <div>
+              <p>Pièces justificatives de la dépense :</p>
+              <p class="bold italic ml-2">Voir état de solde ci-joint</p>
+            </div>
+
+            <div class="mt-1"><span class="dotted-line"></span></div>
+
+            <div>
+              <p>Référence du Marché :<span class="dotted-line" style="width: 60%"></span></p>
+            </div>
+
+            <div>
+              <p>Avis de la Municipalité :<span class="dotted-line" style="width: 60%"></span></p>
+              <span class="dotted-line"></span>
+            </div>
+
+            <div>
+              <p>Délibération N°.............du.......................</p>
+              <p>Montants à précompter ( en lettre )</p>
+              <span class="dotted-line mt-1"></span>
+              <span class="dotted-line mt-1"></span>
+              <span class="dotted-line mt-1"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div class="col-right">
+          <div class="amounts-section">
+            <div class="amount-row mt-4">
+              <label>Montant brut</label>
+              <div class="amount-box">181 366</div>
+            </div>
+            <div class="amount-row">
+              <label>A Précompter</label>
+              <div class="amount-box"></div>
+            </div>
+            <div class="amount-row mt-2">
+              <label style="font-size: 0.7em">Somme nette à payer ou à virer</label>
+              <div class="amount-box" style="border-width: 3px">181 366</div>
+            </div>
+          </div>
+
+          <div class="amount-text-section">
+            <p class="text-xs">Arrêté le présent mandat de paiement à la somme de :</p>
+            <p class="bold uppercase mt-1" style="font-size: 1.1em; line-height: 1.4">
+              CENT QUATRE VINGT ET UN MILLE TROIS SOIXANTE SIX FRANCS
+            </p>
+          </div>
+
+          <div class="signature-section">
+            <p class="uppercase mt-2">A VAVOUA , le 15/09/2019</p>
+            <p class="text-sm italic mt-1">Signature et cachet de l'Ordonnateur</p>
+            <p class="bold mt-2">P/ LE MAIRE & P.D.</p>
+          </div>
+
+          <div class="vu-bon-section">
+            <p class="text-center bold">Vu bon à Payer</p>
+            <div class="mt-2">
+              <span class="dotted-line mt-2"></span>
+              <span class="dotted-line mt-2"></span>
+              <span class="dotted-line mt-2"></span>
+              <span class="dotted-line mt-2"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FOOTER -->
+      <div class="footer-grid">
+        <div class="footer-col">
+          <p>République de Côte d'Ivoire</p>
+        </div>
+        <div class="footer-col">
+          <p class="uppercase">MANDAT DE PAIEMENT</p>
+        </div>
+        <div class="footer-col">
+          <p class="uppercase">TRÉSORERIE PRINCIPALE<br />DE VAVOUA</p>
+        </div>
+      </div>
+      <div class="footer-note">Pour acquit de la somme indiquée ci-dessus (A) :</div>
     </div>
-
-    <script>
-      const { createApp } = Vue;
-
-      // Initialiser Dexie
-      const db = new Dexie('TresorDatabase');
-      db.version(10).stores({
-        mairies: '++id, nom, code, ville',
-        chapitres: '++id, code, libelle, mairieId, actif',
-        sousChapitres: '++id, code, libelle, mairieId, actif',
-        previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
-        mandats:
-          '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, mairieId, statut, personnelId',
-      });
-
-      createApp({
-        data() {
-          return {
-            mandat: null,
-            mairie: null,
-            chapitre: null,
-            loading: true,
-            error: null,
-          };
-        },
-        computed: {
-          montantEnLettres() {
-            if (!this.mandat) return '';
-            return this.nombreEnLettres(this.mandat.montant);
-          },
-        },
-        methods: {
-          formatDate(dateValue) {
-            if (!dateValue) return '';
-            const date = new Date(dateValue);
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const year = date.getFullYear();
-            return `${day}/${month}/${year}`;
-          },
-          formatMontant(montant) {
-            if (!montant) return '0';
-            return new Intl.NumberFormat('fr-FR').format(montant);
-          },
-          formatModePaiement(mode) {
-            const modes = {
-              virement: 'Virement bancaire',
-              cheque: 'Chèque',
-              especes: 'Espèces',
-              autre: 'Autre',
-            };
-            return modes[mode] || mode;
-          },
-          formatStatut(statut) {
-            const statuts = {
-              brouillon: 'Brouillon',
-              emis: 'Émis',
-              paye: 'Payé',
-              annule: 'Annulé',
-            };
-            return statuts[statut] || statut;
-          },
-          getChapitre(field = 'full') {
-            if (!this.chapitre) return 'Non spécifié';
-            if (field === 'code') return this.chapitre.code;
-            return `${this.chapitre.code} - ${this.chapitre.libelle}`;
-          },
-          nombreEnLettres(nombre) {
-            if (nombre === 0) return 'zéro';
-
-            const unites = [
-              '',
-              'un',
-              'deux',
-              'trois',
-              'quatre',
-              'cinq',
-              'six',
-              'sept',
-              'huit',
-              'neuf',
-            ];
-            const dizaines = [
-              '',
-              '',
-              'vingt',
-              'trente',
-              'quarante',
-              'cinquante',
-              'soixante',
-              'soixante',
-              'quatre-vingt',
-              'quatre-vingt',
-            ];
-            const dizainesSpeciales = [
-              'dix',
-              'onze',
-              'douze',
-              'treize',
-              'quatorze',
-              'quinze',
-              'seize',
-              'dix-sept',
-              'dix-huit',
-              'dix-neuf',
-            ];
-
-            function convertirMoinsDeMillions(n) {
-              if (n === 0) return '';
-              if (n < 10) return unites[n];
-              if (n < 20) return dizainesSpeciales[n - 10];
-              if (n < 100) {
-                const d = Math.floor(n / 10);
-                const u = n % 10;
-                if (d === 7 || d === 9) {
-                  return (
-                    dizaines[d] + (u === 0 ? (d === 9 ? 's' : '') : '-' + dizainesSpeciales[u])
-                  );
-                }
-                return (
-                  dizaines[d] +
-                  (u === 0 ? (d === 8 ? 's' : '') : u === 1 && d < 8 ? ' et un' : '-' + unites[u])
-                );
-              }
-              if (n < 1000) {
-                const c = Math.floor(n / 100);
-                const r = n % 100;
-                return (
-                  (c === 1 ? 'cent' : unites[c] + ' cent') +
-                  (r === 0 ? (c > 1 ? 's' : '') : ' ' + convertirMoinsDeMillions(r))
-                );
-              }
-              if (n < 1000000) {
-                const m = Math.floor(n / 1000);
-                const r = n % 1000;
-                return (
-                  (m === 1 ? 'mille' : convertirMoinsDeMillions(m) + ' mille') +
-                  (r === 0 ? '' : ' ' + convertirMoinsDeMillions(r))
-                );
-              }
-              const millions = Math.floor(n / 1000000);
-              const reste = n % 1000000;
-              return (
-                (millions === 1 ? 'un million' : convertirMoinsDeMillions(millions) + ' millions') +
-                (reste === 0 ? '' : ' ' + convertirMoinsDeMillions(reste))
-              );
-            }
-
-            return convertirMoinsDeMillions(Math.floor(nombre));
-          },
-          async loadMandat() {
-            try {
-              this.loading = true;
-              const urlParams = new URLSearchParams(window.location.search);
-              const mandatId = urlParams.get('mandatId');
-
-              if (!mandatId) {
-                this.error = 'Aucun ID de mandat fourni';
-                return;
-              }
-
-              // Charger le mandat
-              this.mandat = await db.mandats.get(parseInt(mandatId));
-
-              if (!this.mandat) {
-                this.error = 'Mandat non trouvé';
-                return;
-              }
-
-              // Charger la mairie associée
-              if (this.mandat.mairieId) {
-                this.mairie = await db.mairies.get(this.mandat.mairieId);
-              }
-
-              // Charger le chapitre associé
-              if (this.mandat.chapitreId) {
-                this.chapitre = await db.chapitres.get(this.mandat.chapitreId);
-              }
-
-              console.log('Mandat chargé:', this.mandat);
-              console.log('Mairie:', this.mairie);
-              console.log('Chapitre:', this.chapitre);
-            } catch (err) {
-              console.error('Erreur lors du chargement:', err);
-              this.error = 'Erreur lors du chargement du mandat';
-            } finally {
-              this.loading = false;
-            }
-          },
-        },
-        async mounted() {
-          console.log('Application Vue montée');
-          await this.loadMandat();
-
-          // Auto-print après le chargement si demandé
-          const urlParams = new URLSearchParams(window.location.search);
-          if (urlParams.get('print') === 'true' && !this.error) {
-            setTimeout(() => window.print(), 500);
-          }
-        },
-      }).mount('body');
-    </script>
   </body>
 </html>

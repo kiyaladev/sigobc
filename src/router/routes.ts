@@ -140,11 +140,6 @@ const routes: RouteRecordRaw[] = [
         name: 'app3-mandats',
       },
       {
-        path: 'app3/bordereaux-mandats',
-        component: () => import('pages/app3/BordereauxMandatsPage.vue'),
-        name: 'app3-bordereaux-mandats',
-      },
-      {
         path: 'app3/bordereaux-mandats-gestion',
         component: () => import('pages/app3/BordereauxMandatsGestionPage.vue'),
         name: 'app3-bordereaux-mandats-gestion',

@@ -312,25 +312,40 @@ function confirmDelete(chapitre: Chapitre) {
     message: `Voulez-vous vraiment supprimer le chapitre "${chapitre.code} - ${chapitre.libelle}" ?`,
     cancel: true,
     persistent: true,
-  }).onOk(() => {
-    void (async () => {
-      try {
-        if (chapitre.id) {
-          await db.chapitres.delete(chapitre.id);
+  }).onOk(async () => {
+    try {
+      if (chapitre.id) {
+        // Vérifier les dépendances dans les prévisions et les mandats
+        const relatedPrevisions = await db.previsions
+          .where({ chapitreId: chapitre.id })
+          .count();
+        const relatedMandats = await db.mandats.where({ chapitreId: chapitre.id }).count();
+
+        if (relatedPrevisions > 0 || relatedMandats > 0) {
           $q.notify({
-            type: 'positive',
-            message: 'Chapitre supprimé avec succès',
+            type: 'negative',
+            message:
+              'Impossible de supprimer ce chapitre car il est utilisé par des prévisions ou des mandats.',
+            caption: `Prévisions: ${relatedPrevisions}, Mandats: ${relatedMandats}`,
+            timeout: 5000,
           });
-          await loadChapitres();
+          return;
         }
-      } catch (error) {
-        console.error('Erreur lors de la suppression:', error);
+
+        await db.chapitres.delete(chapitre.id);
         $q.notify({
-          type: 'negative',
-          message: 'Erreur lors de la suppression du chapitre',
+          type: 'positive',
+          message: 'Chapitre supprimé avec succès',
         });
+        await loadChapitres();
       }
-    })();
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error);
+      $q.notify({
+        type: 'negative',
+        message: 'Erreur lors de la suppression du chapitre',
+      });
+    }
   });
 }
 

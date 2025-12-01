@@ -134,7 +134,7 @@ const formData = ref({
   exercice: new Date().getFullYear(),
   chapitreId: null as number | null,
   montantPrevu: 0,
-  statut: 'brouillon' as 'brouillon' | 'validee' | 'cloturee',
+  statut: 'validee' as 'brouillon' | 'validee' | 'cloturee',
   observations: '',
 });
 
@@ -229,7 +229,7 @@ function resetForm() {
     exercice: new Date().getFullYear(),
     chapitreId: null,
     montantPrevu: 0,
-    statut: 'brouillon',
+    statut: 'validee',
     observations: '',
   };
   editingId.value = null;

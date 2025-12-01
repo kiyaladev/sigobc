@@ -1,12 +1,12 @@
 <template>
   <q-page class="q-pa-md">
     <PageHeader
-      title="Gestion des Chapitres Budgétaires"
-      subtitle="Chapitres budgétaires pour les mandats de dépense"
+      title="Gestion des Sous-Chapitres Budgétaires"
+      subtitle="Sous-chapitres budgétaires pour les mandats de dépense"
       icon="account_balance_wallet"
     >
       <template #actions>
-        <q-btn color="primary" icon="add" label="Nouveau Chapitre" @click="openDialog()" />
+        <q-btn color="primary" icon="add" label="Nouveau Sous-Chapitre" @click="openDialog()" />
       </template>
     </PageHeader>
 
@@ -35,9 +35,9 @@
       </template>
     </FilterBar>
 
-    <!-- Table des chapitres -->
+    <!-- Table des sous-chapitres -->
     <DataTable
-      :rows="filteredChapitres"
+      :rows="filteredSousChapitres"
       :columns="columns"
       :loading="loading"
       row-key="id"
@@ -80,18 +80,18 @@
     <q-dialog v-model="dialogVisible" persistent>
       <q-card style="min-width: 500px">
         <q-card-section class="accent-left">
-          <div class="text-h6">{{ isEditing ? 'Modifier' : 'Nouveau' }} Chapitre</div>
+          <div class="text-h6">{{ isEditing ? 'Modifier' : 'Nouveau' }} Sous-Chapitre</div>
         </q-card-section>
 
         <q-card-section>
-          <q-form @submit="saveChaptre" class="q-gutter-md">
+          <q-form @submit="saveSousChapitre" class="q-gutter-md">
 
 
             <q-input
               v-model="form.code"
               filled
-              label="Code du chapitre *"
-              hint="Ex: 6011, 6013, 6020, etc."
+              label="Code du sous-chapitre *"
+              hint="Ex: 6000, 60010, 60011, etc."
               :rules="[(val) => !!val || 'Le code est requis']"
             />
 
@@ -99,7 +99,7 @@
               v-model="form.libelle"
               filled
               label="Libellé *"
-              hint="Ex: Achats de matières et fournitures"
+              hint="Ex: ADMINISTRATION"
               :rules="[(val) => !!val || 'Le libellé est requis']"
             />
 
@@ -109,10 +109,10 @@
               type="textarea"
               label="Description"
               rows="3"
-              hint="Description détaillée du chapitre"
+              hint="Description détaillée du sous-chapitre"
             />
 
-            <q-toggle v-model="form.actif" label="Chapitre actif" color="positive" />
+            <q-toggle v-model="form.actif" label="Sous-chapitre actif" color="positive" />
 
             <div class="row q-gutter-sm justify-end">
               <q-btn label="Annuler" color="grey-7" flat @click="dialogVisible = false" />
@@ -140,24 +140,22 @@ const saving = ref(false);
 const dialogVisible = ref(false);
 const isEditing = ref(false);
 
-const chapitres = ref<SousChapitre[]>([]);
+const sousChapitres = ref<SousChapitre[]>([]);
 
 const filters = ref({
   search: '',
   actif: null as boolean | null,
 });
 
-interface ChapitreForm {
+interface SousChapitreForm {
   id?: number;
   code: string;
   libelle: string;
   description: string;
-  // rubriqueId: number | null;
   actif: boolean;
 }
 
-const form = ref<ChapitreForm>({
-  //rubriqueId: null,
+const form = ref<SousChapitreForm>({
   code: '',
   libelle: '',
   description: '',
@@ -169,20 +167,8 @@ const statutOptions = [
   { label: 'Inactif', value: false },
 ];
 
-
-
 const columns = [
   { name: 'code', label: 'Code', field: 'code', align: 'left' as const, sortable: true },
-  // {
-  //   name: 'rubrique',
-  //   label: 'Rubrique',
-  //   align: 'left' as const,
-  //   field: (row: Chapitre) => {
-  //     const rubrique = rubriques.value.find((r) => r.id === row.rubriqueId);
-  //     return rubrique ? `${rubrique.code} - ${rubrique.libelle}` : '';
-  //   },
-  //   sortable: true,
-  // },
   { name: 'libelle', label: 'Libellé', field: 'libelle', align: 'left' as const, sortable: true },
   {
     name: 'description',
@@ -195,8 +181,8 @@ const columns = [
   { name: 'actions', label: 'Actions', field: 'actions', align: 'center' as const },
 ];
 
-const filteredChapitres = computed(() => {
-  let result = chapitres.value;
+const filteredSousChapitres = computed(() => {
+  let result = sousChapitres.value;
 
   if (filters.value.search) {
     const searchLower = filters.value.search.toLowerCase();
@@ -215,30 +201,30 @@ const filteredChapitres = computed(() => {
   return result;
 });
 
-async function loadChapitres() {
+async function loadSousChapitres() {
   loading.value = true;
   try {
-    chapitres.value = await db.sousChapitres.toArray();
+    sousChapitres.value = await db.sousChapitres.toArray();
   } catch (error) {
-    console.error('Erreur lors du chargement des chapitres:', error);
+    console.error('Erreur lors du chargement des sous-chapitres:', error);
     $q.notify({
       type: 'negative',
-      message: 'Erreur lors du chargement des chapitres',
+      message: 'Erreur lors du chargement des sous-chapitres',
     });
   } finally {
     loading.value = false;
   }
 }
 
-function openDialog(chapitre?: SousChapitre) {
-  if (chapitre?.id) {
+function openDialog(sousChapitre?: SousChapitre) {
+  if (sousChapitre?.id) {
     isEditing.value = true;
     form.value = {
-      id: chapitre.id,
-      code: chapitre.code,
-      libelle: chapitre.libelle,
-      description: chapitre.description || '',
-      actif: chapitre.actif,
+      id: sousChapitre.id,
+      code: sousChapitre.code,
+      libelle: sousChapitre.libelle,
+      description: sousChapitre.description || '',
+      actif: sousChapitre.actif,
     };
   } else {
     isEditing.value = false;
@@ -252,11 +238,11 @@ function openDialog(chapitre?: SousChapitre) {
   dialogVisible.value = true;
 }
 
-async function saveChaptre() {
+async function saveSousChapitre() {
   saving.value = true;
   try {
     const now = new Date();
-    const chapitreData: SousChapitre = {
+    const sousChapitreData: SousChapitre = {
       ...form.value,
       code: form.value.code,
       libelle: form.value.libelle,
@@ -268,72 +254,86 @@ async function saveChaptre() {
 
     if (isEditing.value && form.value.id) {
       await db.sousChapitres.update(form.value.id, {
-        ...chapitreData,
+        ...sousChapitreData,
         updatedAt: now,
       });
       $q.notify({
         type: 'positive',
-        message: 'Chapitre modifié avec succès',
+        message: 'Sous-chapitre modifié avec succès',
       });
     } else {
-      chapitreData.createdAt = now;
-      await db.sousChapitres.add(chapitreData);
+      sousChapitreData.createdAt = now;
+      await db.sousChapitres.add(sousChapitreData);
       $q.notify({
         type: 'positive',
-        message: 'Chapitre créé avec succès',
+        message: 'Sous-chapitre créé avec succès',
       });
     }
 
     dialogVisible.value = false;
-    await loadChapitres();
+    await loadSousChapitres();
   } catch (error) {
     console.error('Erreur lors de la sauvegarde:', error);
     $q.notify({
       type: 'negative',
-      message: "Erreur lors de l'enregistrement du chapitre",
+      message: "Erreur lors de l'enregistrement du sous-chapitre",
     });
   } finally {
     saving.value = false;
   }
 }
 
-function confirmDelete(chapitre: SousChapitre) {
-  if (!chapitre.id) {
+function confirmDelete(sousChapitre: SousChapitre) {
+  if (!sousChapitre.id) {
     $q.notify({
       type: 'negative',
-      message: 'Impossible de supprimer ce chapitre (ID manquant)',
+      message: 'Impossible de supprimer ce sous-chapitre (ID manquant)',
     });
     return;
   }
 
   $q.dialog({
     title: 'Confirmation',
-    message: `Voulez-vous vraiment supprimer le chapitre "${chapitre.code} - ${chapitre.libelle}" ?`,
+    message: `Voulez-vous vraiment supprimer le sous-chapitre "${sousChapitre.code} - ${sousChapitre.libelle}" ?`,
     cancel: true,
     persistent: true,
-  }).onOk(() => {
-    void (async () => {
-      try {
-        if (chapitre.id) {
-          await db.sousChapitres.delete(chapitre.id);
+  }).onOk(async () => {
+    try {
+      if (sousChapitre.id) {
+        // Vérifier les dépendances dans les mandats
+        const relatedMandats = await db.mandats
+          .where({ sousChapitreId: sousChapitre.id })
+          .count();
+
+        if (relatedMandats > 0) {
           $q.notify({
-            type: 'positive',
-            message: 'Chapitre supprimé avec succès',
+            type: 'negative',
+            message:
+              'Impossible de supprimer ce sous-chapitre car il est utilisé par des mandats.',
+            caption: `Mandats: ${relatedMandats}`,
+            timeout: 5000,
           });
-          await loadChapitres();
+          return;
         }
-      } catch (error) {
-        console.error('Erreur lors de la suppression:', error);
+
+        await db.sousChapitres.delete(sousChapitre.id);
         $q.notify({
-          type: 'negative',
-          message: 'Erreur lors de la suppression du chapitre',
+          type: 'positive',
+          message: 'Sous-chapitre supprimé avec succès',
         });
+        await loadSousChapitres();
       }
-    })();
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error);
+      $q.notify({
+        type: 'negative',
+        message: 'Erreur lors de la suppression du sous-chapitre',
+      });
+    }
   });
 }
 
 onMounted(() => {
-  void loadChapitres();
+  void loadSousChapitres();
 });
 </script>
