@@ -297,39 +297,42 @@ function confirmDelete(sousChapitre: SousChapitre) {
     message: `Voulez-vous vraiment supprimer le sous-chapitre "${sousChapitre.code} - ${sousChapitre.libelle}" ?`,
     cancel: true,
     persistent: true,
-  }).onOk(async () => {
-    try {
-      if (sousChapitre.id) {
-        // Vérifier les dépendances dans les mandats
-        const relatedMandats = await db.mandats
-          .where({ sousChapitreId: sousChapitre.id })
-          .count();
+  }).onOk(() => {
+    void (async () => {
+      try {
+        if (sousChapitre.id) {
+          // Vérifier les dépendances dans les mandats
+          const relatedMandats = await db.mandats
+            .where({ sousChapitreId: sousChapitre.id })
+            .count();
 
-        if (relatedMandats > 0) {
+          if (relatedMandats > 0) {
+            console.log(`Suppression bloquée: ${relatedMandats} mandats associés.`);
+            $q.notify({
+              type: 'negative',
+              message:
+                'Impossible de supprimer ce sous-chapitre car il est utilisé par des mandats.',
+              caption: `Mandats: ${relatedMandats}`,
+              timeout: 5000,
+            });
+            return;
+          }
+
+          await db.sousChapitres.delete(sousChapitre.id);
           $q.notify({
-            type: 'negative',
-            message:
-              'Impossible de supprimer ce sous-chapitre car il est utilisé par des mandats.',
-            caption: `Mandats: ${relatedMandats}`,
-            timeout: 5000,
+            type: 'positive',
+            message: 'Sous-chapitre supprimé avec succès',
           });
-          return;
+          await loadSousChapitres();
         }
-
-        await db.sousChapitres.delete(sousChapitre.id);
+      } catch (error) {
+        console.error('Erreur lors de la suppression:', error);
         $q.notify({
-          type: 'positive',
-          message: 'Sous-chapitre supprimé avec succès',
+          type: 'negative',
+          message: 'Erreur lors de la suppression du sous-chapitre',
         });
-        await loadSousChapitres();
       }
-    } catch (error) {
-      console.error('Erreur lors de la suppression:', error);
-      $q.notify({
-        type: 'negative',
-        message: 'Erreur lors de la suppression du sous-chapitre',
-      });
-    }
+    })();
   });
 }
 

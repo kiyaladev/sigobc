@@ -33,6 +33,8 @@
           :rows="filteredMandats"
           :columns="columns"
           :loading="loading"
+          show-print
+          @print="printMandat"
           @edit="editMandat"
           @delete="deleteMandat"
         >
@@ -45,41 +47,6 @@
           <template v-slot:body-cell-bordereauNumero="props">
             <q-td :props="props">
               {{ getBordereauNumero(props.row.bordereauMandatId) }}
-            </q-td>
-          </template>
-
-          <template v-slot:body-cell-actions="props">
-            <q-td :props="props">
-              <q-btn
-                flat
-                round
-                dense
-                icon="print"
-                color="primary"
-                @click.stop="printMandat(props.row)"
-              >
-                <q-tooltip>Imprimer</q-tooltip>
-              </q-btn>
-              <q-btn
-                flat
-                round
-                dense
-                icon="edit"
-                color="primary"
-                @click.stop="editMandat(props.row)"
-              >
-                <q-tooltip>Modifier</q-tooltip>
-              </q-btn>
-              <q-btn
-                flat
-                round
-                dense
-                icon="delete"
-                color="negative"
-                @click.stop="deleteMandat(props.row)"
-              >
-                <q-tooltip>Supprimer</q-tooltip>
-              </q-btn>
             </q-td>
           </template>
         </DataTable>
@@ -267,133 +234,12 @@
       </q-card>
     </q-dialog>
 
-    <!-- Dialog d'impression -->
-    <q-dialog v-model="showPrintDialog" maximized>
-      <q-card class="print-container">
-        <q-card-section class="no-print row items-center q-pb-none">
-          <div class="text-h6">Aperçu avant impression</div>
-          <q-space />
-          <q-btn icon="close" flat round dense v-close-popup />
-        </q-card-section>
 
-        <q-card-section class="print-content">
-          <div class="mandat-document" v-if="selectedMandat">
-            <!-- En-tête -->
-            <div class="document-header">
-              <div class="row items-start justify-between">
-                <div class="col-6">
-                  <div class="text-h6 text-weight-bold">{{ mairieInfo?.nom || 'MAIRIE' }}</div>
-                  <div class="text-caption">{{ mairieInfo?.adresse }}</div>
-                  <div class="text-caption">
-                    {{ mairieInfo?.ville }} - {{ mairieInfo?.codePostal }}
-                  </div>
-                  <div class="text-caption">Tél: {{ mairieInfo?.telephone }}</div>
-                </div>
-                <div class="col-6 text-right">
-                  <div class="text-caption">Exercice: {{ selectedMandat.exercice }}</div>
-                  <div class="text-caption">Date: {{ formatDate(selectedMandat.dateMandat) }}</div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Titre -->
-            <div class="document-title text-center q-my-lg">
-              <div class="text-h4 text-weight-bold">MANDAT DE PAIEMENT</div>
-              <div class="text-h6 q-mt-sm">N° {{ selectedMandat.numeroMandat }}</div>
-              <div class="text-caption" v-if="selectedMandat.numeroOrdre">
-                N° d'ordre: {{ selectedMandat.numeroOrdre }}
-              </div>
-            </div>
-
-            <!-- Informations du mandat -->
-            <div class="mandat-details q-mb-lg">
-              <table class="details-table">
-                <tr>
-                  <td class="label-cell">Sous-chapitre:</td>
-                  <td class="value-cell">{{ sousChapitreInfo }}</td>
-                </tr>
-                <tr>
-                  <td class="label-cell">Chapitre:</td>
-                  <td class="value-cell">{{ chapitreInfo }}</td>
-                </tr>
-                <tr>
-                  <td class="label-cell">Bénéficiaire:</td>
-                  <td class="value-cell text-weight-bold">{{ selectedMandat.beneficiaire }}</td>
-                </tr>
-                <tr>
-                  <td class="label-cell">Objet:</td>
-                  <td class="value-cell">{{ selectedMandat.objet }}</td>
-                </tr>
-                <tr v-if="selectedMandat.numeroFacture">
-                  <td class="label-cell">N° Facture:</td>
-                  <td class="value-cell">{{ selectedMandat.numeroFacture }}</td>
-                </tr>
-                <tr v-if="selectedMandat.dateFacture">
-                  <td class="label-cell">Date Facture:</td>
-                  <td class="value-cell">{{ formatDate(selectedMandat.dateFacture) }}</td>
-                </tr>
-                <tr>
-                  <td class="label-cell">Mode de paiement:</td>
-                  <td class="value-cell">{{ formatModePaiement(selectedMandat.modePaiement) }}</td>
-                </tr>
-              </table>
-            </div>
-
-            <!-- Montant -->
-            <div class="montant-section q-mb-lg">
-              <div class="montant-box">
-                <div class="text-subtitle2">Montant du mandat</div>
-                <div class="text-h4 text-weight-bold text-primary">
-                  {{ formatMontant(selectedMandat.montant) }}
-                </div>
-                <div class="text-caption q-mt-sm">
-                  {{ montantEnLettres(selectedMandat.montant) }}
-                </div>
-              </div>
-            </div>
-
-            <!-- Observations -->
-            <div class="observations q-mb-lg" v-if="selectedMandat.observations">
-              <div class="text-weight-bold">Observations:</div>
-              <div class="q-mt-xs">{{ selectedMandat.observations }}</div>
-            </div>
-
-            <!-- Signatures -->
-            <div class="signatures-section q-mt-xl">
-              <div class="row q-col-gutter-xl">
-                <div class="col-6">
-                  <div class="signature-box">
-                    <div class="text-weight-bold q-mb-md">Le Maire</div>
-                    <div class="signature-line"></div>
-                  </div>
-                </div>
-                <div class="col-6">
-                  <div class="signature-box">
-                    <div class="text-weight-bold q-mb-md">Le Trésorier</div>
-                    <div class="signature-line"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Pied de page -->
-            <div class="document-footer q-mt-xl text-center text-caption">
-              <div>Document généré le {{ new Date().toLocaleDateString('fr-FR') }}</div>
-            </div>
-          </div>
-        </q-card-section>
-
-        <q-card-actions align="right" class="no-print">
-          <q-btn flat label="Fermer" color="grey-7" v-close-popup />
-          <q-btn unelevated label="Imprimer" color="primary" icon="print" @click="doPrint" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useQuasar, date } from 'quasar';
 import {
   db,
@@ -431,33 +277,6 @@ const formData = ref({
   modePaiement: 'virement' as 'virement' | 'cheque' | 'especes' | 'autre',
   statut: 'emis' as 'brouillon' | 'emis' | 'paye' | 'annule',
   observations: '',
-});
-
-// Print dialog state
-const showPrintDialog = ref(false);
-const selectedMandat = ref<Mandat | null>(null);
-
-const mairieInfo = computed(() => {
-  if (!selectedMandat.value) return null;
-  return {
-    nom: "Mairie d'Azaguie",
-    adresse: 'Azaguie',
-    ville: 'Dakar',
-    codePostal: '10000',
-    telephone: '+221 33 889 40 00',
-  };
-});
-
-const sousChapitreInfo = computed(() => {
-  if (!selectedMandat.value) return '';
-  const sc = sousChapitres.value.find((s) => s.id === selectedMandat.value!.sousChapitreId);
-  return sc ? `${sc.code} - ${sc.libelle}` : '-';
-});
-
-const chapitreInfo = computed(() => {
-  if (!selectedMandat.value) return '';
-  const chapitre = chapitres.value.find((c) => c.id === selectedMandat.value!.chapitreId);
-  return chapitre ? `${chapitre.code} - ${chapitre.libelle}` : '-';
 });
 
 const chapitreOptions = computed(() =>
@@ -644,25 +463,6 @@ function formatModePaiement(mode: string): string {
     autre: 'Autre',
   };
   return modes[mode] || mode;
-}
-
-function montantEnLettres(montant: number): string {
-  // Conversion simplifiée du montant en lettres
-  if (montant === 0) return 'Zéro francs CFA';
-
-  // Pour simplifier, on retourne juste le montant formaté
-  // Une implémentation complète nécessiterait une bibliothèque dédiée
-  return `${formatMontant(montant)} (montant en lettres)`;
-}
-
-function printMandat(mandat: Mandat) {
-  selectedMandat.value = mandat;
-  showPrintDialog.value = true;
-}
-
-function doPrint() {
-  if (!selectedMandat.value?.id) return;
-  window.open(`/mandat_depense.html?mandatId=${selectedMandat.value.id}&print=true`, '_blank');
 }
 
 async function loadData() {

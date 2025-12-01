@@ -249,11 +249,11 @@
         </div>
         <div class="header-col text-center">
           <p class="bold uppercase" style="font-size: 1.1em">MANDAT DE PAIEMENT</p>
-          <p class="bold uppercase mt-2">EXERCICE : 2019</p>
+          <p class="bold uppercase mt-2">EXERCICE : <span data-field="exercice">2019</span></p>
           <p class="bold uppercase mt-2">TITRE DU BUDGET : I</p>
           <p class="bold uppercase mt-4">IMPUTATION</p>
           <div class="w-full text-left mt-2" style="padding-left: 10px">
-            <p>FONCTIONNELLE : <span class="bold">6000/1</span></p>
+            <p>FONCTIONNELLE : <span class="bold" data-field="imputationFonctionnelle">6000/1</span></p>
             <p class="mt-2">PATRIMONIALE :</p>
           </div>
         </div>
@@ -266,10 +266,10 @@
           </div>
           <div class="mt-4 text-center">
             <p>N° d'Ordre</p>
-            <span style="width: 50%"></span>
+            <span style="width: 50%" data-field="numeroOrdre"></span>
           </div>
           <div class="mt-auto text-left" style="font-size: 0.8em">
-            <p>N° du bordereau d'émission</p>
+            <p>N° du bordereau d'émission: <span data-field="numeroBordereau"></span></p>
           </div>
         </div>
       </div>
@@ -277,10 +277,10 @@
       <!-- OBJET -->
       <div class="object-section">
         <p class="bold uppercase" style="font-size: 1.2em">OBJET DE LA DÉPENSE :</p>
-        <p class="bold uppercase mt-2" style="letter-spacing: 1px">
+        <p class="bold uppercase mt-2" style="letter-spacing: 1px" data-field="objetDepense">
           Paiement de Salaire de la période
         </p>
-        <p class="uppercase bold">DU 01/09/2019 AU 30/09/2019</p>
+        <p class="uppercase bold" data-field="periode">DU 01/09/2019 AU 30/09/2019</p>
       </div>
 
       <!-- MAIN CONTENT -->
@@ -292,8 +292,8 @@
             <div class="flex mt-4">
               <span style="width: 100px">Bénéficiaire :</span>
               <div>
-                <p class="bold uppercase">ZAGBAÏ DIABO</p>
-                <p class="italic">Agent de mairie</p>
+                <p class="bold uppercase" data-field="beneficiaire">ZAGBAÏ DIABO</p>
+                <p class="italic" data-field="beneficiaireDetails">Agent de mairie</p>
               </div>
             </div>
             <div class="mt-2">
@@ -344,7 +344,7 @@
           <div class="amounts-section">
             <div class="amount-row mt-4">
               <label>Montant brut</label>
-              <div class="amount-box">181 366</div>
+              <div class="amount-box" data-field="montantBrut">181 366</div>
             </div>
             <div class="amount-row">
               <label>A Précompter</label>
@@ -352,19 +352,19 @@
             </div>
             <div class="amount-row mt-2">
               <label style="font-size: 0.7em">Somme nette à payer ou à virer</label>
-              <div class="amount-box" style="border-width: 3px">181 366</div>
+              <div class="amount-box" style="border-width: 3px" data-field="montantNet">181 366</div>
             </div>
           </div>
 
           <div class="amount-text-section">
             <p class="text-xs">Arrêté le présent mandat de paiement à la somme de :</p>
-            <p class="bold uppercase mt-1" style="font-size: 1.1em; line-height: 1.4">
+            <p class="bold uppercase mt-1" style="font-size: 1.1em; line-height: 1.4" data-field="montantLettres">
               CENT QUATRE VINGT ET UN MILLE TROIS SOIXANTE SIX FRANCS
             </p>
           </div>
 
           <div class="signature-section">
-            <p class="uppercase mt-2">A VAVOUA , le 15/09/2019</p>
+            <p class="uppercase mt-2">A VAVOUA , le <span data-field="dateEmission">15/09/2019</span></p>
             <p class="text-sm italic mt-1">Signature et cachet de l'Ordonnateur</p>
             <p class="bold mt-2">P/ LE MAIRE & P.D.</p>
           </div>
@@ -395,5 +395,112 @@
       </div>
       <div class="footer-note">Pour acquit de la somme indiquée ci-dessus (A) :</div>
     </div>
+    <script>
+      // Fonction pour convertir un nombre en lettres (français)
+      function nombreEnLettres(nombre) {
+        if (nombre === 0) return 'zéro';
+
+        const unites = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf'];
+        const dizaines = [
+          '',
+          '',
+          'vingt',
+          'trente',
+          'quarante',
+          'cinquante',
+          'soixante',
+          'soixante',
+          'quatre-vingt',
+          'quatre-vingt',
+        ];
+        const special = [
+          'dix',
+          'onze',
+          'douze',
+          'treize',
+          'quatorze',
+          'quinze',
+          'seize',
+          'dix-sept',
+          'dix-huit',
+          'dix-neuf',
+        ];
+
+        function convertirCentaines(n) {
+          if (n === 0) return '';
+          if (n < 10) return unites[n];
+          if (n < 20) return special[n - 10];
+          if (n < 100) {
+            const d = Math.floor(n / 10);
+            const u = n % 10;
+            let result = dizaines[d];
+            if (d === 7 || d === 9) {
+              result = dizaines[d - 1] + '-' + special[u];
+            } else if (u === 1 && d === 8) {
+              result = 'quatre-vingt-un';
+            } else if (u > 0) {
+              result += '-' + unites[u];
+            } else if (d === 8) {
+              result += 's';
+            }
+            return result;
+          }
+          const c = Math.floor(n / 100);
+          const reste = n % 100;
+          let result = c === 1 ? 'cent' : unites[c] + ' cent';
+          if (c > 1 && reste === 0) result += 's';
+          if (reste > 0) result += ' ' + convertirCentaines(reste);
+          return result;
+        }
+
+        function convertirMilliers(n) {
+          if (n < 1000) return convertirCentaines(n);
+          const m = Math.floor(n / 1000);
+          const reste = n % 1000;
+          let result = m === 1 ? 'mille' : convertirCentaines(m) + ' mille';
+          if (reste > 0) result += ' ' + convertirCentaines(reste);
+          return result;
+        }
+
+        function convertirMillions(n) {
+          if (n < 1000000) return convertirMilliers(n);
+          const m = Math.floor(n / 1000000);
+          const reste = n % 1000000;
+          let result = convertirCentaines(m) + ' million';
+          if (m > 1) result += 's';
+          if (reste > 0) result += ' ' + convertirMilliers(reste);
+          return result;
+        }
+
+        return convertirMillions(nombre);
+      }
+
+      // Fonction pour formater un nombre avec espaces
+      function formatMontant(montant) {
+        return new Intl.NumberFormat('fr-FR').format(montant);
+      }
+
+      // Fonction pour remplir les deux formulaires
+      function remplirFormulaire(data) {
+        for (const key in data) {
+          const elements = document.querySelectorAll(`[data-field="${key}"]`);
+          elements.forEach(el => {
+            el.textContent = data[key];
+          });
+        }
+      }
+
+      // Écouter les messages de la fenêtre parent
+      window.addEventListener('message', (event) => {
+        if (event.data.type === 'FILL_MANDAT') {
+          remplirFormulaire(event.data.data);
+          const urlParams = new URLSearchParams(window.location.search);
+          const shouldPrint = urlParams.get('print') === 'true';
+          if (shouldPrint) {
+            setTimeout(() => window.print(), 500);
+          }
+        }
+      });
+    </script>
   </body>
 </html>
