@@ -184,9 +184,9 @@
                 <!-- BLOC REPUBLIQUE (Sur N° et Nature) -->
                 <th colspan="2" rowspan="2" class="align-top" style="padding: 0;">
                     <div class="flex flex-col h-100 justify-start" style="padding: 10px; text-align-last: left;">
-                        <div class="text-republic bd-dashed">REPUBLIQUE DE COTE D'IVOIRE</div>
-                        <div class="text-commune">COMMUNE DE VAVOUA</div>
-                        <div class="text-code">CODE : 433</div>
+                        <div class="text-republic bd-dashed" id="mairie-republique">REPUBLIQUE DE COTE D'IVOIRE</div>
+                        <div class="text-commune" id="mairie-nom">COMMUNE DE VAVOUA</div>
+                        <div class="text-code" id="mairie-code">CODE : 433</div>
                     </div>
                 </th>
 
@@ -213,7 +213,7 @@
                         <div class="exercice-label w-100 text-center" style="padding-bottom: 2px;">
                             <u>EXERCICE</u>
                         </div>
-                        <div class="exercice-year">2018</div>
+                        <div class="exercice-year" id="bordereau-exercice">2018</div>
                     </div>
                 </th>
 
@@ -270,98 +270,20 @@
             </tr>
             </thead>
 
-            <tbody>
-            <!-- LIGNE DE DONNÉES 1 -->
-            <tr>
-                <td class="text-center" style="color: #666;">01</td>
-                <td>INDEMNITE DE FONCTION</td>
-                <td>THEODULE DIRO LAHUET, <b>Maire</b></td>
-                <td class="center" style="font-family: monospace;">60013/1</td>
-                <td></td>
-                <td style="text-align: right; font-weight: bold; font-family: monospace;">340 058</td>
-                <td></td><td></td><td></td><td></td>
-            </tr>
-            <!-- LIGNE DE DONNÉES 2 -->
-            <tr>
-                <td class="text-center" style="color: #666;">02</td>
-                <td>INDEMNITE DE FONCTION</td>
-                <td>SANOGO OUMAR, <b>1er Adjoint</b></td>
-                <td class="center" style="font-family: monospace;">60013/1</td>
-                <td></td>
-                <td style="text-align: right; font-weight: bold; font-family: monospace;">56 576</td>
-                <td></td><td></td><td></td><td></td>
-            </tr>
-            <!-- LIGNE DE DONNÉES 3 -->
-            <tr>
-                <td class="text-center" style="color: #666;">03</td>
-                <td>INDEMNITE DE FONCTION</td>
-                <td>IDRISSA KONATE, <b>2è Adjoint</b></td>
-                <td class="center" style="font-family: monospace;">60013/1</td>
-                <td></td>
-                <td style="text-align: right; font-weight: bold; font-family: monospace;">56 576</td>
-                <td></td><td></td><td></td><td></td>
-            </tr>
-            <!-- LIGNE DE DONNÉES 4 -->
-            <tr>
-                <td class="text-center" style="color: #666;">04</td>
-                <td>INDEMNITE DE FONCTION</td>
-                <td>SORO TIEGBE, <b>3è Adjoint</b></td>
-                <td class="center" style="font-family: monospace;">60013/1</td>
-                <td></td>
-                <td style="text-align: right; font-weight: bold; font-family: monospace;">56 576</td>
-                <td></td><td></td><td></td><td></td>
-            </tr>
-            <!-- LIGNE DE DONNÉES 5 -->
-            <tr>
-                <td class="text-center" style="color: #666;">05</td>
-                <td>INDEMNITE DE FONCTION</td>
-                <td>DIABY FANTA, <b>4è Adjoint</b></td>
-                <td class="center" style="font-family: monospace;">60013/1</td>
-                <td></td>
-                <td style="text-align: right; font-weight: bold; font-family: monospace;">56 576</td>
-                <td></td><td></td><td></td><td></td>
-            </tr>
-            <!-- LIGNE DE DONNÉES 6 -->
-            <tr>
-                <td class="text-center" style="color: #666;">06</td>
-                <td>INDEMNITE DE FONCTION</td>
-                <td>RECEVEUR MUNICIPAL</td>
-                <td class="center" style="font-family: monospace;">6020/1</td>
-                <td></td>
-                <td style="text-align: right; font-weight: bold; font-family: monospace;">75 000</td>
-                <td></td><td></td><td></td><td></td>
-            </tr>
-            <!-- LIGNE DE DONNÉES 7 -->
-            <tr>
-                <td class="text-center" style="color: #666;">07</td>
-                <td>INDEMNITE DE FONCTION</td>
-                <td>ALI SANOGO, <b>Régie d'avance</b></td>
-                <td class="center" style="font-family: monospace;">6010/1</td>
-                <td></td>
-                <td style="text-align: right; font-weight: bold; font-family: monospace;">5 000</td>
-                <td></td><td></td><td></td><td></td>
-            </tr>
-            <!-- Empty rows to fill space -->
-            <!--
-            <tr><td class="text-center" style="color: #666;"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-            <tr><td class="text-center" style="color: #666;"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-            <tr><td class="text-center" style="color: #666;"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-            <tr><td class="text-center" style="color: #666;"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-            <tr>
-                <td class="text-center" style="color: #666;"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-            </tr>
-            -->
+            <tbody id="mandats-table-body">
+            <!-- Les lignes de mandats seront injectées ici par JavaScript -->
+            </tbody>
+
+            <tfoot>
             <!-- ESPACEUR -->
             <tr style="height: 20px;">
-                <td class="text-center" style="color: #666;"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-
                 <td colspan="10" style="border-top: none; border-bottom: none; border-left: 1px solid black; border-right: 1px solid black;"></td>
             </tr>
 
             <!-- TOTAUX 1 -->
             <tr style="border-top: 2px solid black; height: 30px">
                 <td colspan="5" style="text-align: right; font-weight: bold; padding-right: 10px; background-color: #f9f9f9;">TOTAL DU PRÉSENT BORDEREAU</td>
-                <td style="text-align: right; font-weight: bold; font-family: monospace; background-color: #fffff0; font-size: 13px;">646 362</td>
+                <td id="total-bordereau" style="text-align: right; font-weight: bold; font-family: monospace; background-color: #fffff0; font-size: 13px;"></td>
                 <!-- Partie Receveur Totaux (Fusionnée verticalement pour le schéma) -->
                 <td colspan="4" rowspan="3" style="vertical-align: bottom; position: relative; padding: 0;">
                     <!-- Dessin des cases à cocher style ancien -->
@@ -374,7 +296,7 @@
             <!-- TOTAUX 2 -->
             <tr style="height: 30px">
                 <td colspan="5" style="text-align: right; font-weight: bold; padding-right: 10px; color: #666; border-bottom: none;">TOTAL DU PRÉCÉDENT BORDEREAU</td>
-                <td class="text-center" style="color: #999;">_ _ _ _ _</td>
+                <td id="total-precedent" class="text-center" style="font-weight: bold; font-family: monospace; font-size: 13px;"></td>
             </tr>
             <!-- TOTAUX 3 (Folio) -->
             <tr style="border-bottom: 2px solid black;">
@@ -382,15 +304,15 @@
                     <div class="flex center justify-between w-100">
                         <div class="flex center" style="padding: 2px; background: white;">
                             FOLIO N° &nbsp;&nbsp;
-                            <span style="font-weight: bold; font-size: 10px; width: 50px; border: 1px solid black;">1257887</span>
-                            <span style="font-weight: bold; font-size: 14px; width: 50px; border: 1px solid black;">2018</span>
+                            <span id="bordereau-numero" style="font-weight: bold; font-size: 10px; width: 50px; border: 1px solid black;"></span>
+                            <span id="bordereau-annee-folio" style="font-weight: bold; font-size: 14px; width: 50px; border: 1px solid black;"></span>
                         </div>
                         <span style="font-weight: bold; text-transform: uppercase;">Total Général</span>
                     </div>
                 </td>
-                <td class="text-center" style="color: #999;">_ . _ . _</td>
+                <td id="total-general" class="text-center" style="font-weight: bold; font-family: monospace; font-size: 13px;"></td>
             </tr>
-            </tbody>
+            </tfoot>
         </table>
 
         <!-- PIED DE PAGE (Section Footer) -->
@@ -400,11 +322,11 @@
             <div class="footer-left br">
                 <div class="flex align-top" style="margin-bottom: 20px;">
                     <span style="font-style: italic; white-space: nowrap; margin-right: 10px; font-size: 11px; margin-top: 5px;">Arrêté à la somme de :</span>
-                    <span class="amount-text">SIX CENT QUARANTE SIX MILLE TROIS CENT SOIXANTE DEUX FRANCS</span>
+                    <span class="amount-text" id="total-en-lettres"></span>
                 </div>
 
                 <div class="signature-block">
-                    <div style="font-weight: bold; font-size: 11px; margin-bottom: 5px;">A VAVOUA, le 15 DÉCEMBRE 2018</div>
+                    <div id="signature-date" style="font-weight: bold; font-size: 11px; margin-bottom: 5px;"></div>
                     <div style="font-style: italic; font-size: 12px; margin-bottom: 40px;">L' Ordonnateur,</div>
                     <div style="font-weight: bold; font-size: 12px;">P/ LE MAIRE & P.D.</div>
                 </div>
@@ -467,6 +389,280 @@
 
     </div>
 </div>
+<script src="dexie.min.js"></script>
+<script>
+    /**
+     * Convertit un nombre en lettres en français
+     * @param num - Le nombre à convertir (de 0 à 999 999 999 999)
+     * @returns La représentation en lettres du nombre
+     */
+    function numberToWords(num) {
+      if (num === 0) return 'zéro';
+      if (num < 0) return 'moins ' + numberToWords(Math.abs(num));
+      if (!Number.isInteger(num)) {
+        const parts = num.toString().split('.');
+        const integerPart = numberToWords(parseInt(parts[0] || '0'));
+        const decimalPart = parts[1];
+        return `${integerPart} virgule ${(decimalPart || '')
+          .split('')
+          .map((d) => numberToWords(parseInt(d)))
+          .join(' ')}`;
+      }
 
+      const units = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf'];
+      const teens = [
+        'dix',
+        'onze',
+        'douze',
+        'treize',
+        'quatorze',
+        'quinze',
+        'seize',
+        'dix-sept',
+        'dix-huit',
+        'dix-neuf',
+      ];
+      const tens = [
+        '',
+        '',
+        'vingt',
+        'trente',
+        'quarante',
+        'cinquante',
+        'soixante',
+        'soixante',
+        'quatre-vingt',
+        'quatre-vingt',
+      ];
+
+      function convertLessThanThousand(n) {
+        if (n === 0) return '';
+        if (n < 10) return units[n] || '';
+        if (n < 20) return teens[n - 10] || '';
+
+        if (n < 100) {
+          const ten = Math.floor(n / 10);
+          const unit = n % 10;
+
+          if (ten === 7 || ten === 9) {
+            // 70-79 et 90-99 cas particuliers
+            const base = tens[ten];
+            const remainder = ten === 7 ? n - 60 : n - 80;
+            if (remainder < 10) {
+              return base + '-' + units[remainder];
+            } else if (remainder < 20) {
+              return base + '-' + teens[remainder - 10];
+            }
+          }
+
+          if (unit === 0) {
+            return tens[ten] + (ten === 8 ? 's' : ''); // quatre-vingts
+          }
+          if (unit === 1 && ten < 8) {
+            return tens[ten] + '-et-un';
+          }
+          return tens[ten] + '-' + units[unit];
+        }
+
+        // 100-999
+        const hundred = Math.floor(n / 100);
+        const remainder = n % 100;
+
+        let result = '';
+        if (hundred === 1) {
+          result = 'cent';
+        } else {
+          result = units[hundred] + '-cent';
+        }
+
+        if (remainder === 0 && hundred > 1) {
+          result += 's'; // deux-cents, trois-cents, etc.
+        } else if (remainder > 0) {
+          const remainderText = convertLessThanThousand(remainder);
+          result += '-' + remainderText;
+        }
+
+        return result;
+      }
+
+      function convert(n) {
+        if (n === 0) return '';
+
+        // Milliards
+        if (n >= 1000000000) {
+          const billions = Math.floor(n / 1000000000);
+          const remainder = n % 1000000000;
+          let result = '';
+
+          if (billions === 1) {
+            result = 'un-milliard';
+          } else {
+            result = convertLessThanThousand(billions) + '-milliards';
+          }
+
+          if (remainder > 0) {
+            result += '-' + convert(remainder);
+          }
+          return result;
+        }
+
+        // Millions
+        if (n >= 1000000) {
+          const millions = Math.floor(n / 1000000);
+          const remainder = n % 1000000;
+          let result = '';
+
+          if (millions === 1) {
+            result = 'un-million';
+          } else {
+            result = convertLessThanThousand(millions) + '-millions';
+          }
+
+          if (remainder > 0) {
+            result += '-' + convert(remainder);
+          }
+          return result;
+        }
+
+        // Milliers
+        if (n >= 1000) {
+          const thousands = Math.floor(n / 1000);
+          const remainder = n % 1000;
+          let result = '';
+
+          if (thousands === 1) {
+            result = 'mille';
+          } else {
+            result = convertLessThanThousand(thousands) + '-mille';
+          }
+
+          if (remainder > 0) {
+            result += '-' + convertLessThanThousand(remainder);
+          }
+          return result;
+        }
+
+        return convertLessThanThousand(n);
+      }
+
+      return convert(num);
+    }
+
+    const db = new Dexie('TresorDatabase');
+    db.version(12).stores({
+      mairies: '++id, nom, code, ville',
+      taxes: '++id, code, libelle, mairieId, type, actif',
+      declarations:
+        '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
+      bordereauxRecette: '++id, numero, annee, mairieId, statut, personnelId',
+      utilisateurs: '++id, username, email, role, mairieId, actif',
+      // App2
+      approvisionnements: '++id, date, exercice, mairieId, type, personnelId',
+      remises: '++id, numeroRemise, date, exercice, mairieId, personnelId',
+      versements: '++id, numeroVersement, date, exercice, mairieId, personnelId',
+      balancesEntree: '++id, date, exercice, mairieId, type, personnelId, [exercice+mairieId]',
+      quotites: '++id, code, prix, type, mairieId, actif',
+      // App3
+      chapitres: '++id, code, libelle, mairieId, actif',
+      sousChapitres: '++id, code, libelle, mairieId, actif',
+      previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
+      mandats:
+        '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
+      bordereauMandats: '++id, numero, exercice, mairieId, statut, personnelId',
+    });
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const params = new URLSearchParams(window.location.search);
+        const bordereauId = parseInt(params.get('bordereauId'), 10);
+        const shouldPrint = params.get('print') === 'true';
+
+        if (!bordereauId) {
+            document.body.innerHTML = 'ID de bordereau manquant.';
+            return;
+        }
+
+        try {
+            const bordereau = await db.bordereauMandats.get(bordereauId);
+            if (!bordereau) {
+                document.body.innerHTML = `Bordereau avec ID ${bordereauId} non trouvé.`;
+                return;
+            }
+
+            const mairie = await db.mairies.get(bordereau.mairieId);
+            const mandats = await db.mandats.where('bordereauMandatId').equals(bordereauId).toArray();
+            const chapitres = await db.chapitres.toArray();
+            const chapitresMap = new Map(chapitres.map(c => [c.id, c]));
+
+            // Populate header
+            if(mairie) {
+                document.getElementById('mairie-nom').textContent = mairie.nom;
+                document.getElementById('mairie-code').textContent = `CODE : ${mairie.code}`;
+            }
+            document.getElementById('bordereau-exercice').textContent = bordereau.exercice;
+            document.getElementById('bordereau-numero').textContent = bordereau.numero;
+            document.getElementById('bordereau-annee-folio').textContent = bordereau.exercice;
+
+
+            // Populate mandats table
+            const tableBody = document.getElementById('mandats-table-body');
+            let totalBordereau = 0;
+            mandats.forEach((mandat) => {
+                const chapitre = chapitresMap.get(mandat.chapitreId);
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="text-center" style="color: #666;">${mandat.numeroMandat}</td>
+                    <td>${chapitre ? chapitre.libelle : 'N/A'}</td>
+                    <td>${mandat.beneficiaire}</td>
+                    <td class="center" style="font-family: monospace;">${chapitre ? chapitre.code : 'N/A'}</td>
+                    <td></td>
+                    <td style="text-align: right; font-weight: bold; font-family: monospace;">${mandat.montant.toLocaleString('fr-FR')}</td>
+                    <td></td><td></td><td></td><td></td>
+                `;
+                tableBody.appendChild(row);
+                totalBordereau += mandat.montant;
+            });
+
+            // Add empty rows if less than 8
+            const minRows = 8;
+            const rowsToAdd = minRows - mandats.length;
+            if (rowsToAdd > 0) {
+                for (let i = 0; i < rowsToAdd; i++) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>&nbsp;</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td><td></td><td></td><td></td>
+                    `;
+                    tableBody.appendChild(row);
+                }
+            }
+
+            // Populate footer
+            const totalPrecedent = bordereau.totalPrecedent || 0;
+            const totalGeneral = totalPrecedent + totalBordereau;
+
+            document.getElementById('total-bordereau').textContent = totalBordereau.toLocaleString('fr-FR');
+            document.getElementById('total-precedent').textContent = totalPrecedent.toLocaleString('fr-FR');
+            document.getElementById('total-general').textContent = totalGeneral.toLocaleString('fr-FR');
+            document.getElementById('total-en-lettres').textContent = numberToWords(totalBordereau) + ' francs CFA';
+            
+            const emissionDate = bordereau.dateEmission ? new Date(bordereau.dateEmission) : new Date();
+            document.getElementById('signature-date').textContent = `A ${mairie ? mairie.ville : 'VAVOUA'}, le ${emissionDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+
+
+            if (shouldPrint) {
+                setTimeout(() => window.print(), 500);
+            }
+
+        } catch (error) {
+            console.error('Erreur lors de la génération du bordereau:', error);
+            document.body.innerHTML = `Une erreur est survenue: ${error.message}`;
+        }
+    });
+</script>
 </body>
 </html>

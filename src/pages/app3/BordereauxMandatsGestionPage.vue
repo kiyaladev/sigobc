@@ -477,11 +477,11 @@ function confirmDelete(bordereau: BordereauMandat) {
 }
 
 function printBordereau(bordereau: BordereauMandat) {
-  window.open(`/bordereau_mandat_new.html?bordereauId=${bordereau.id}`, '_blank');
+  window.open(`/bordereau_mandat.html?bordereauId=${bordereau.id}`, '_blank');
 }
 
 function downloadBordereauPDF(bordereau: BordereauMandat) {
-  window.open(`/bordereau_mandat_new.html?bordereauId=${bordereau.id}&print=true`, '_blank');
+  window.open(`/bordereau_mandat.html?bordereauId=${bordereau.id}&print=true`, '_blank');
 }
 
 onMounted(() => {

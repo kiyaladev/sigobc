@@ -242,6 +242,7 @@ export interface BordereauMandat {
   dateEmission?: Date; // Date d'émission du bordereau
   mairieId: number;
   montantTotal: number;
+  totalPrecedent?: number;
   nombreMandats: number;
   statut: 'ouvert' | 'ferme';
   observations?: string;
@@ -273,7 +274,7 @@ class TresorDatabase extends Dexie {
   constructor() {
     super('TresorDatabase');
 
-    this.version(11).stores({
+    this.version(12).stores({
       mairies: '++id, nom, code, ville',
       taxes: '++id, code, libelle, mairieId, type, actif',
       declarations:
