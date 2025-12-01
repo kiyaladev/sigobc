@@ -49,6 +49,17 @@
               />
             </div>
 
+            <!-- Total Précédent -->
+            <div class="col-12 col-sm-6">
+              <q-input
+                v-model.number="localForm.totalPrecedent"
+                filled
+                type="number"
+                label="Total Précédent"
+                hint="Montant total du bordereau précédent"
+              />
+            </div>
+
             <!-- Montant Total (readonly) -->
             <div class="col-12 col-sm-6">
               <q-input
@@ -174,6 +185,7 @@ watch(
           exercice: currentYear,
           mairieId: DEFAULT_MAIRIE_ID,
           montantTotal: 0,
+          totalPrecedent: 0,
           nombreMandats: 0,
           statut: 'ouvert' as const,
           observations: '',
