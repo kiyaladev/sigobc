@@ -358,7 +358,7 @@ const getMonthLabel = (month: number, year: number) => {
   return 'Total ' + label.charAt(0).toUpperCase() + label.slice(1);
 };
 
-const addMonthlyTotals = (data: AnySectionEntry[]) => {
+const addMonthlyTotals = (data: AnySectionEntry[], sectionName: string) => {
   if (!data.length) return [];
   const result: (AnySectionEntry | MonthlyTotalEntry)[] = [];
   let currentMonth = new Date(data[0]!.date).getMonth();
@@ -391,9 +391,18 @@ const addMonthlyTotals = (data: AnySectionEntry[]) => {
       currentMonth = month;
       currentYear = year;
     }
-    // Déterminer le signe: approvisionnement = positif, remise = négatif (pour Section I)
-    const isRemise = row.type === 'Remise';
-    const sign = isRemise ? -1 : 1;
+    // Déterminer le signe selon la section et le type d'opération
+    // Section I: Appro = +, Remise = -
+    // Section II: Remise = +, Versement = -
+    // Section III: Appro = +, Remise = +, Versement = -
+    let sign = 1;
+    if (sectionName === 'section1') {
+      sign = row.type === 'Remise' ? -1 : 1;
+    } else if (sectionName === 'section2') {
+      sign = row.type === 'Versement' ? -1 : 1;
+    } else if (sectionName === 'section3') {
+      sign = row.type === 'Versement' ? -1 : 1;
+    }
     if (row.denominations) {
       for (const k in row.denominations) {
         const key = Number(k);
@@ -444,7 +453,7 @@ const printSection = (sectionName: string) => {
   }
   const printWindow = window.open(templateUrl, '_blank');
   if (printWindow) {
-    const dataWithTotals = addMonthlyTotals(data);
+    const dataWithTotals = addMonthlyTotals(data, sectionName);
     printWindow.addEventListener('load', () => {
       printWindow.postMessage(
         {
