@@ -41,6 +41,8 @@
       :columns="columns"
       :loading="loading"
       row-key="id"
+      @edit="openDialog"
+      @delete="confirmDelete"
     >
       <template v-slot:body-cell-code="props">
         <q-td :props="props">
@@ -55,24 +57,6 @@
           </q-badge>
         </q-td>
       </template>
-
-      <template v-slot:body-cell-actions="props">
-        <q-td :props="props">
-          <q-btn flat round dense icon="edit" color="primary" @click.stop="openDialog(props.row)">
-            <q-tooltip>Modifier</q-tooltip>
-          </q-btn>
-          <q-btn
-            flat
-            round
-            dense
-            icon="delete"
-            color="negative"
-            @click.stop="confirmDelete(props.row)"
-          >
-            <q-tooltip>Supprimer</q-tooltip>
-          </q-btn>
-        </q-td>
-      </template>
     </DataTable>
 
     <!-- Dialog d'ajout/modification -->
@@ -84,8 +68,6 @@
 
         <q-card-section>
           <q-form @submit="saveChaptre" class="q-gutter-md">
-
-
             <q-input
               v-model="form.code"
               filled
@@ -168,8 +150,6 @@ const statutOptions = [
   { label: 'Actif', value: true },
   { label: 'Inactif', value: false },
 ];
-
-
 
 const columns = [
   { name: 'code', label: 'Code', field: 'code', align: 'left' as const, sortable: true },
@@ -298,6 +278,7 @@ async function saveChaptre() {
 }
 
 function confirmDelete(chapitre: Chapitre) {
+  console.log('Tentative de suppression du chapitre:', chapitre);
   if (!chapitre.id) {
     $q.notify({
       type: 'negative',
@@ -316,9 +297,7 @@ function confirmDelete(chapitre: Chapitre) {
       try {
         if (chapitre.id) {
           // Vérifier les dépendances dans les prévisions et les mandats
-          const relatedPrevisions = await db.previsions
-            .where({ chapitreId: chapitre.id })
-            .count();
+          const relatedPrevisions = await db.previsions.where({ chapitreId: chapitre.id }).count();
           const relatedMandats = await db.mandats.where({ chapitreId: chapitre.id }).count();
 
           if (relatedPrevisions > 0 || relatedMandats > 0) {

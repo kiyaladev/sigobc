@@ -488,5 +488,152 @@
         </tr>
       </table>
     </div>
+
+    <script>
+      function formatNumber(num) {
+        if (!num && num !== 0) return '';
+        return new Intl.NumberFormat('fr-FR').format(num);
+      }
+
+      // Écouter les données envoyées depuis PrevisionPage.vue
+      window.addEventListener('message', (event) => {
+        if (event.data.type === 'FILL_CT02_DATA') {
+          const data = event.data.data;
+          fillCT02(data);
+        }
+      });
+
+      function fillCT02(data) {
+        // En-tête
+        if (data.mairie) {
+          document.querySelector('.header-left strong').innerHTML =
+            `RECETTE MUNICIPALE<br>DE ${data.mairie.ville.toUpperCase()}`;
+          document.querySelector('.header-left div').textContent =
+            `CODE COMMUNE: ${data.mairie.code}`;
+          document.querySelector('.main-title').textContent =
+            `COMMUNE DE ${data.mairie.ville.toUpperCase()}`;
+        }
+
+        document.querySelector('.header-right .bold').textContent = `EXERCICE: ${data.exercice}`;
+        document.querySelector('.header-right div:last-child').innerHTML =
+          `COMPTE: ${data.sousChapitreCode}<br>INTITULÉ: ${data.sousChapitreLibelle}`;
+
+        // Tableau Prévisions
+        const previsionsRow = document.querySelector('tbody tr:first-child');
+        if (previsionsRow) {
+          const cells = previsionsRow.querySelectorAll('td');
+          data.chapitresCodes.forEach((code, index) => {
+            if (cells[index + 1]) {
+              cells[index + 1].textContent = formatNumber(data.previsionsByChapitreCode[code] || 0);
+            }
+          });
+          // Total
+          if (cells[9]) {
+            cells[9].textContent = formatNumber(data.totalPrevisions);
+          }
+        }
+
+        // Total Prévisions row
+        const totalPrevisionsRow = document.querySelector('.total-row');
+        if (totalPrevisionsRow) {
+          const cells = totalPrevisionsRow.querySelectorAll('td');
+          data.chapitresCodes.forEach((code, index) => {
+            if (cells[index + 1]) {
+              cells[index + 1].textContent = formatNumber(data.previsionsByChapitreCode[code] || 0);
+            }
+          });
+          if (cells[9]) {
+            cells[9].textContent = formatNumber(data.totalPrevisions);
+          }
+        }
+
+        // Tableau Émissions - Remplir avec les mandats
+        const emissionsBody = document.querySelectorAll('table')[1]?.querySelector('tbody');
+        if (emissionsBody && data.mandats) {
+          // Vider le contenu existant
+          emissionsBody.innerHTML = '';
+
+          let cumulTotal = 0;
+
+          // Grouper par mois et afficher
+          const monthNames = [
+            'JANVIER',
+            'FÉVRIER',
+            'MARS',
+            'AVRIL',
+            'MAI',
+            'JUIN',
+            'JUILLET',
+            'AOÛT',
+            'SEPTEMBRE',
+            'OCTOBRE',
+            'NOVEMBRE',
+            'DÉCEMBRE',
+          ];
+
+          // Créer les lignes pour chaque mandat
+          data.mandats.forEach((mandat, idx) => {
+            const row = document.createElement('tr');
+            const chapitreIndex = data.chapitresCodes.indexOf(mandat.chapitreCode);
+
+            // Créer les cellules
+            let rowHTML = `<td class="text-center">${mandat.numeroMandat}</td>`;
+
+            // Cellules pour chaque chapitre
+            data.chapitresCodes.forEach((code, i) => {
+              if (code === mandat.chapitreCode) {
+                rowHTML += `<td>${formatNumber(mandat.montant)}</td>`;
+              } else {
+                rowHTML += `<td></td>`;
+              }
+            });
+
+            cumulTotal += mandat.montant;
+            rowHTML += `<td class="bold">${formatNumber(mandat.montant)}</td>`;
+            rowHTML += `<td class="bold">${formatNumber(cumulTotal)}</td>`;
+
+            row.innerHTML = rowHTML;
+            emissionsBody.appendChild(row);
+          });
+
+          // Ligne de total
+          const totalRow = document.createElement('tr');
+          totalRow.className = 'total-row';
+          let totalRowHTML = `<td class="text-center">TOTAUX</td>`;
+
+          data.chapitresCodes.forEach((code) => {
+            totalRowHTML += `<td>${formatNumber(data.emissionsByChapitreCode[code] || 0)}</td>`;
+          });
+          totalRowHTML += `<td>${formatNumber(data.totalEmissions)}</td>`;
+          totalRowHTML += `<td>${formatNumber(data.totalEmissions)}</td>`;
+
+          totalRow.innerHTML = totalRowHTML;
+          emissionsBody.appendChild(totalRow);
+        }
+
+        // Crédits disponibles
+        const creditsRow = document.querySelector('.credits-disponibles tr');
+        if (creditsRow) {
+          const cells = creditsRow.querySelectorAll('td');
+          data.chapitresCodes.forEach((code, index) => {
+            if (cells[index + 1]) {
+              cells[index + 1].textContent = formatNumber(
+                data.creditsDispoByChapitreCode[code] || 0,
+              );
+            }
+          });
+          // Total crédits dispo
+          const lastCell = cells[cells.length - 1];
+          if (lastCell) {
+            lastCell.textContent = formatNumber(data.totalCreditsDispo);
+          }
+        }
+
+        // Lancer l'impression après un court délai
+        setTimeout(() => {
+          window.print();
+        }, 500);
+      }
+    </script>
   </body>
 </html>

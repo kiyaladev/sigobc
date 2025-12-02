@@ -200,6 +200,7 @@ export interface Prevision {
   id?: number;
   exercice: number; // Année budgétaire
   chapitreId: number; // Référence au chapitre principal
+  sousChapitreId?: number; // Référence optionnelle au sous-chapitre
   mairieId: number;
   montantPrevu: number; // Montant total prévu pour ce chapitre
   montantEngage: number; // Montant déjà engagé (mandats)
@@ -376,7 +377,7 @@ export async function initializeDatabase() {
 
     await db.chapitres.bulkAdd([
       {
-        code: '6013',
+        code: '1',
         libelle: 'SALAIRE ET INDEM.',
         mairieId: mairieId as number,
         actif: true,
@@ -384,7 +385,7 @@ export async function initializeDatabase() {
         updatedAt: now,
       },
       {
-        code: '6014',
+        code: '2',
         libelle: 'CHARGES SOCIALES',
         mairieId: mairieId as number,
         actif: true,
@@ -392,7 +393,7 @@ export async function initializeDatabase() {
         updatedAt: now,
       },
       {
-        code: '6015',
+        code: '3',
         libelle: 'TRANSP. & FRAIS DE MISS.',
         mairieId: mairieId as number,
         actif: true,
@@ -400,7 +401,7 @@ export async function initializeDatabase() {
         updatedAt: now,
       },
       {
-        code: '6016',
+        code: '4',
         libelle: 'CARBUR. ET LUBRIF.',
         mairieId: mairieId as number,
         actif: true,
@@ -408,7 +409,7 @@ export async function initializeDatabase() {
         updatedAt: now,
       },
       {
-        code: '6017',
+        code: '5',
         libelle: 'MATERIEL ET FOURNIT.',
         mairieId: mairieId as number,
         actif: true,
@@ -416,7 +417,7 @@ export async function initializeDatabase() {
         updatedAt: now,
       },
       {
-        code: '6018',
+        code: '6',
         libelle: 'ABONN. EAU, ELEC, TELEPH.',
         mairieId: mairieId as number,
         actif: true,
@@ -424,7 +425,7 @@ export async function initializeDatabase() {
         updatedAt: now,
       },
       {
-        code: '6019',
+        code: '7',
         libelle: "TRAVAUX & SCES A L'ENTREP.",
         mairieId: mairieId as number,
         actif: true,
@@ -432,7 +433,7 @@ export async function initializeDatabase() {
         updatedAt: now,
       },
       {
-        code: '6020',
+        code: '8',
         libelle: 'INTERVEN ET TRANSF.',
         mairieId: mairieId as number,
         actif: true,
@@ -834,5 +835,3 @@ export async function initializeDatabase() {
     console.log('Base de données initialisée avec succès avec des données de démonstration');
   }
 }
-
-

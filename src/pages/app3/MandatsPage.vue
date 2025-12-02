@@ -482,8 +482,8 @@ function printMandat(mandat: Mandat) {
             montantLettres: amountToWords(mandat.montant).toUpperCase(),
             dateEmission: new Date(mandat.dateMandat).toLocaleDateString('fr-FR'),
             // Mairie info
-            mairieDepartement: mairie?.departement ?? '',
-            mairieCommune: mairie?.commune ?? '',
+            mairieDepartement: mairie?.ville ?? '',
+            mairieCommune: mairie?.ville ?? '',
             mairieCode: mairie?.code ?? '',
             mairieVille: mairie?.nom ?? '',
           },

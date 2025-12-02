@@ -91,71 +91,426 @@ export async function seedDefaultData() {
 
   // 4. Chapitres par défaut (App3)
   await db.chapitres.bulkAdd([
-    { code: '6011', libelle: 'Fournitures de bureau', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6012', libelle: 'Fournitures informatiques', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6013', libelle: 'SALAIRE ET INDEM.', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6014', libelle: 'CHARGES SOCIALES', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6015', libelle: 'TRANSP. & FRAIS DE MISS.', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6016', libelle: 'CARBUR. & LUBRIF.', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6017', libelle: 'MATERIEL ET FOURNIT.', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6018', libelle: 'ABONN. EAU, ELEC, TELEPH.', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6019', libelle: 'TRAVAUX & SCES A L\'ENTREP.', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6020', libelle: 'INTERVEN ET TRANSF.', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
+    {
+      code: '1',
+      libelle: 'SALAIRE ET INDEM.',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '2',
+      libelle: 'CHARGES SOCIALES',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '3',
+      libelle: 'TRANSP. & FRAIS DE MISS.',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '4',
+      libelle: 'CARBUR. & LUBRIF.',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '5',
+      libelle: 'MATERIEL ET FOURNIT.',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6',
+      libelle: 'ABONN. EAU, ELEC, TELEPH.',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '7',
+      libelle: "TRAVAUX & SCES A L'ENTREP.",
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '8',
+      libelle: 'INTERVEN ET TRANSF.',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
   ]);
 
   // 5. Sous-chapitres par défaut (App3)
   await db.sousChapitres.bulkAdd([
-    { code: '6000', libelle: 'ADMINISTRATION', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '60010', libelle: 'FONCTIONNEMENT DU CONSEIL ET DES COMMISSIONS', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '60011', libelle: 'FONCTIONNEMENT DE LA MUNICIPALITÉ', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '60012', libelle: 'FONCTIONNEMENT CABINET DU MAIRE', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '60013', libelle: 'INDEMNITÉS DE FONCTION ET DE REPRÉSENTATION', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '60015', libelle: 'FRAIS DE MISSIONS EN DEHORS DU TERRITOIRE NATIONALE', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '60016', libelle: 'AUTRES DÉPENSES AU TITRE DES AUTORITÉS MUNICIPALES', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6002', libelle: 'ETAT CIVIL ET POPULATION', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6006', libelle: "AUTRES DÉPENSES D'ADMINISTRATION GÉNÉRALE", mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6010', libelle: 'ADMINISTRATION', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6016', libelle: 'AUTRES DÉPENSES RELATIVES AU DOMAINE COMMUNAL', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6020', libelle: 'ADMINISTRATION', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6021', libelle: 'FRAIS DE RECOUVREMENTS ET DE POURSUITES', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6031', libelle: 'GARDES MUNICIPAUX', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6100', libelle: 'ADMINISTRATION', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6101', libelle: 'VOIRIES-ROUTES-CHEMINS', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6131', libelle: "OPÉRATIONS D'ASSAINISSEMENT", mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6133', libelle: 'NETTOIEMENT DE LA VOIRIE- ENLÈVEMENT DES ORDURES', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6136', libelle: "AUTRES DÉPENSES D'HYGIÈNES ET SALUBRITÉ PUBLIQUE-HYDRAULIQUE", mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6141', libelle: 'PROTECTION CIVILE', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6151', libelle: 'CIMETIÈRES-INHUMATION-EXHUMATIONS-CREUSEMENTS DE FOSSES', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6206', libelle: "AUTRES DÉPENSES D'ÉDUCATION", mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6214', libelle: 'EVACUATIONS SANITAIRES-SERVICE AMBULANCE', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6216', libelle: 'AUTRES DÉPENSES DE SANTÉ PUBLIQUE', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6223', libelle: 'HANDICAPÉS', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6224', libelle: 'AIDE FAMILIALE ,SOCIALE ET PERSONNES AGÉES', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6225', libelle: 'AIDE AUX INDIGENTS', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6246', libelle: 'AUTRES DÉPENSES AU TITRE DES SPORTS ET LOISIRS', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6250', libelle: 'ADMINISTRATION', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6256', libelle: 'AUTRES DÉPENSES AU TITRE DES ACTIVITÉS CULTURELLES', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '626', libelle: 'AUTRES DEPENSES DES SERVICES SOCIAUX ,CULTURELS ET DE PROMOTION HUMAINE', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6336', libelle: 'AUTRES DÉPENSES DE TRANSPORT ET COMMUNICATIONS', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6341', libelle: 'ABATTOIRS-CONSERVATION ET TRANSPORTS DE VIANDE', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6344', libelle: 'MARCHÉS', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6406', libelle: 'AUTRES DETTES DE LA COMMUNE (OU DE LA VILLE )', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6415', libelle: 'CONFÉRENCES INTERCOMMUNALES -ASSOCIATION DES VILLES ET COMMUNES', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6416', libelle: 'AUTRES CONTRIBUTIONS ET TRANSFERTS', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6420', libelle: 'RESPONSABILITÉ CIVILE', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6422', libelle: 'ASSURANCES DES VÉHICULES', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6426', libelle: 'AUTRES ASSURANCES', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6430', libelle: 'CÉRÉMONIES PUBLIQUES', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6431', libelle: 'FÊTES ET RÉCEPTIONS OFFICIELLES', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6441', libelle: "FONDS D'INVESTISSEMENT", mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: '6456', libelle: 'AUTRES REMBOURSEMENTS DIVERS', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-  ]);
-
-  // 6. Quotités par défaut (App2)
-  await db.quotites.bulkAdd([
-    { code: 'TM', prix: 100, description: 'Ticket', type: 'Marché', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: 'TA', prix: 100, description: 'Ticket', type: 'Abattoirs', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
-    { code: 'TS', prix: 100, description: 'Ticket', type: 'Stationnement', mairieId: mairieId as number, actif: true, createdAt: now, updatedAt: now },
+    {
+      code: '6000',
+      libelle: 'ADMINISTRATION',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '60010',
+      libelle: 'FONCTIONNEMENT DU CONSEIL ET DES COMMISSIONS',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '60011',
+      libelle: 'FONCTIONNEMENT DE LA MUNICIPALITÉ',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '60012',
+      libelle: 'FONCTIONNEMENT CABINET DU MAIRE',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '60013',
+      libelle: 'INDEMNITÉS DE FONCTION ET DE REPRÉSENTATION',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '60015',
+      libelle: 'FRAIS DE MISSIONS EN DEHORS DU TERRITOIRE NATIONALE',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '60016',
+      libelle: 'AUTRES DÉPENSES AU TITRE DES AUTORITÉS MUNICIPALES',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6002',
+      libelle: 'ETAT CIVIL ET POPULATION',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6006',
+      libelle: "AUTRES DÉPENSES D'ADMINISTRATION GÉNÉRALE",
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6010',
+      libelle: 'ADMINISTRATION',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6016',
+      libelle: 'AUTRES DÉPENSES RELATIVES AU DOMAINE COMMUNAL',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6020',
+      libelle: 'ADMINISTRATION',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6021',
+      libelle: 'FRAIS DE RECOUVREMENTS ET DE POURSUITES',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6031',
+      libelle: 'GARDES MUNICIPAUX',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6100',
+      libelle: 'ADMINISTRATION',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6101',
+      libelle: 'VOIRIES-ROUTES-CHEMINS',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6131',
+      libelle: "OPÉRATIONS D'ASSAINISSEMENT",
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6133',
+      libelle: 'NETTOIEMENT DE LA VOIRIE- ENLÈVEMENT DES ORDURES',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6136',
+      libelle: "AUTRES DÉPENSES D'HYGIÈNES ET SALUBRITÉ PUBLIQUE-HYDRAULIQUE",
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6141',
+      libelle: 'PROTECTION CIVILE',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6151',
+      libelle: 'CIMETIÈRES-INHUMATION-EXHUMATIONS-CREUSEMENTS DE FOSSES',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6206',
+      libelle: "AUTRES DÉPENSES D'ÉDUCATION",
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6214',
+      libelle: 'EVACUATIONS SANITAIRES-SERVICE AMBULANCE',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6216',
+      libelle: 'AUTRES DÉPENSES DE SANTÉ PUBLIQUE',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6223',
+      libelle: 'HANDICAPÉS',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6224',
+      libelle: 'AIDE FAMILIALE ,SOCIALE ET PERSONNES AGÉES',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6225',
+      libelle: 'AIDE AUX INDIGENTS',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6246',
+      libelle: 'AUTRES DÉPENSES AU TITRE DES SPORTS ET LOISIRS',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6250',
+      libelle: 'ADMINISTRATION',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6256',
+      libelle: 'AUTRES DÉPENSES AU TITRE DES ACTIVITÉS CULTURELLES',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '626',
+      libelle: 'AUTRES DEPENSES DES SERVICES SOCIAUX ,CULTURELS ET DE PROMOTION HUMAINE',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6336',
+      libelle: 'AUTRES DÉPENSES DE TRANSPORT ET COMMUNICATIONS',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6341',
+      libelle: 'ABATTOIRS-CONSERVATION ET TRANSPORTS DE VIANDE',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6344',
+      libelle: 'MARCHÉS',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6406',
+      libelle: 'AUTRES DETTES DE LA COMMUNE (OU DE LA VILLE )',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6415',
+      libelle: 'CONFÉRENCES INTERCOMMUNALES -ASSOCIATION DES VILLES ET COMMUNES',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6416',
+      libelle: 'AUTRES CONTRIBUTIONS ET TRANSFERTS',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6420',
+      libelle: 'RESPONSABILITÉ CIVILE',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6422',
+      libelle: 'ASSURANCES DES VÉHICULES',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6426',
+      libelle: 'AUTRES ASSURANCES',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6430',
+      libelle: 'CÉRÉMONIES PUBLIQUES',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6431',
+      libelle: 'FÊTES ET RÉCEPTIONS OFFICIELLES',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6441',
+      libelle: "FONDS D'INVESTISSEMENT",
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6456',
+      libelle: 'AUTRES REMBOURSEMENTS DIVERS',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
   ]);
 
   console.log('✅ Default data seeded successfully.');
@@ -178,6 +533,38 @@ function randomAmount(min: number, max: number): number {
 function randomChoice<T>(array: T[]): T {
   const index = Math.floor(Math.random() * array.length);
   return array[index]!;
+}
+
+/**
+ * Construire un objet detailsQuotites à partir d'un objet timbres.
+ * Répartit les quantités par valeur entre les quotités actives de même prix.
+ */
+async function buildDetailsQuotitesFromTimbres(timbres: any) {
+  const result: Record<string, number> = {};
+  const quotites = await db.quotites.filter((q) => q.actif).toArray();
+  const byPrix = new Map<number, typeof quotites>();
+  for (const q of quotites) {
+    const list = byPrix.get(q.prix) || [];
+    list.push(q);
+    byPrix.set(q.prix, list);
+  }
+
+  for (const prixKey of Object.keys(timbres)) {
+    const prix = Number(prixKey);
+    const total = Number(timbres[prix]) || 0;
+    const list = byPrix.get(prix) || [];
+    if (list.length === 0) continue;
+    const base = Math.floor(total / list.length);
+    let remainder = total - base * list.length;
+    for (let i = 0; i < list.length; i++) {
+      const q = list[i];
+      const add = base + (remainder > 0 ? 1 : 0);
+      if (remainder > 0) remainder--;
+      result[`${prix}-${q.code}`] = add;
+    }
+  }
+
+  return result;
 }
 
 // ... etc. pour toutes les autres fonctions de génération
@@ -236,7 +623,6 @@ export async function seedTestData(options: SeedOptions = {}) {
     const sousChapitresCreated = await db.sousChapitres.toArray();
     const sousChapitreIds = sousChapitresCreated.map((s) => s.id!);
 
-
     // Génération des données de test supplémentaires
     // Note: les fonctions ci-dessous sont les anciennes fonctions de seeders.ts
     // qui génèrent des données aléatoires.
@@ -244,7 +630,11 @@ export async function seedTestData(options: SeedOptions = {}) {
     console.log(`🌱 Seeding ${bordereaux} test bordereaux...`);
     const bordereauxCreated = await seedBordereaux(utilisateurIds, bordereaux);
     console.log(`🌱 Seeding ${declarations} test declarations...`);
-    await seedDeclarations(taxeIds, utilisateurIds, bordereauxCreated as BordereauRecette[], declarations);
+    await seedDeclarations(taxeIds, utilisateurIds, bordereauxCreated, declarations);
+    // IMPORTANT: Seeding quotites AVANT approvisionnements/remises/versements/balances
+    // car buildDetailsQuotitesFromTimbres a besoin des quotités existantes
+    console.log(`🌱 Seeding ${quotites} test quotites...`);
+    await seedQuotites(quotites);
     console.log(`🌱 Seeding ${approvisionnements} test approvisionnements...`);
     await seedApprovisionnements(utilisateurIds, approvisionnements);
     console.log(`🌱 Seeding ${remises} test remises...`);
@@ -254,23 +644,34 @@ export async function seedTestData(options: SeedOptions = {}) {
     console.log(`🌱 Seeding ${balancesEntree} test balances...`);
     await seedBalancesEntree(utilisateurIds, balancesEntree);
     console.log(`🌱 Seeding ${previsions} test previsions...`);
-    const previsionsCreated = await seedPrevisions(chapitreIds, utilisateurIds, previsions);
+    const previsionsCreated = await seedPrevisions(
+      chapitreIds,
+      utilisateurIds,
+      previsions,
+      sousChapitreIds,
+    );
     const previsionIds = previsionsCreated.map((p) => p.id!);
-    console.log(`🌱 Seeding ${mandats} test mandats...`);
-    await seedMandats(chapitreIds, sousChapitreIds, previsionIds, utilisateurIds, mandats);
+    // D'abord créer les bordereaux de mandats
     console.log(`🌱 Seeding ${bordereauMandats} test bordereau mandats...`);
-    await seedBordereauMandats(utilisateurIds, bordereauMandats);
-    console.log(`🌱 Seeding ${quotites} test quotites...`);
-    await seedQuotites(quotites);
-
+    const bordereauMandatsCreated = await seedBordereauMandats(utilisateurIds, bordereauMandats);
+    // Puis créer les mandats en les liant aux bordereaux
+    console.log(`🌱 Seeding ${mandats} test mandats...`);
+    await seedMandats(
+      chapitreIds,
+      sousChapitreIds,
+      previsionIds,
+      utilisateurIds,
+      bordereauMandatsCreated,
+      mandats,
+      200,
+    );
 
     console.log('\n✨ All test data seeders have been executed successfully!');
   } catch (error) {
-    console.error("❌ Error during test data seeding:", error);
+    console.error('❌ Error during test data seeding:', error);
     throw error;
   }
 }
-
 
 // =================================================================
 //                      FONCTIONS UTILITAIRES
@@ -301,35 +702,46 @@ export async function clearDatabase() {
   console.log('✅ All tables cleared.');
 }
 
-
 // On garde les fonctions de génération de l'ancien seeder.ts ici
 // pour que seedTestData puisse les utiliser.
 
 export async function seedBordereaux(personnelIds: number[], count: number = 80) {
-  console.log(`🌱 Seeding ${count} bordereaux...`);
-
-  const statutsBordereau: Array<'ouvert' | 'ferme'> = ['ouvert', 'ferme'];
+  console.log(`🌱 Seeding ${count} bordereaux de recette...`);
 
   const bordereaux: Partial<BordereauRecette>[] = [];
   const now = new Date();
-  const startDate = new Date(2023, 0, 1);
+
+  // Créer des bordereaux répartis sur les exercices avec des dates cohérentes
+  const exercices = [2023, 2024, 2025];
+  let numeroGlobal = 1;
 
   for (let i = 0; i < count; i++) {
-    const annee = randomAmount(2023, 2025);
-    const statut = randomChoice(statutsBordereau);
-    const personnelId = randomChoice(personnelIds);
+    const annee = exercices[i % exercices.length]!;
+    // Date de création répartie sur l'année
+    const mois = Math.floor((i / count) * 12);
+    const dateCreation = new Date(annee, mois, randomAmount(1, 28));
+
+    // Si c'est 2025 et la date dépasse maintenant, ajuster
+    if (annee === 2025 && dateCreation > now) {
+      dateCreation.setTime(now.getTime() - randomAmount(1, 30) * 24 * 60 * 60 * 1000);
+    }
+
+    const statuts: Array<'ouvert' | 'ferme'> = ['ouvert', 'ferme'];
+    // Les exercices passés sont fermés, l'année en cours peut être ouvert
+    const statut = annee < 2025 ? 'ferme' : randomChoice(statuts);
 
     const obs = Math.random() > 0.6 ? 'Bordereau conforme' : undefined;
 
     const bordereau: Partial<BordereauRecette> = {
-      personnelId,
+      personnelId: randomChoice(personnelIds),
       mairieId: DEFAULT_MAIRIE_ID,
-      numero: i + 1,
+      numero: numeroGlobal++,
       annee,
-      montantTotal: 0,
-      nombreDeclarations: 0,
+      mois: mois + 1, // Mois du bordereau (1-12)
+      montantTotal: 0, // Sera calculé après insertion des déclarations
+      nombreDeclarations: 0, // Sera calculé après insertion des déclarations
       statut,
-      createdAt: randomDate(startDate, now),
+      createdAt: dateCreation,
       updatedAt: now,
     };
 
@@ -340,9 +752,19 @@ export async function seedBordereaux(personnelIds: number[], count: number = 80)
     bordereaux.push(bordereau);
   }
 
-  await db.bordereauxRecette.bulkAdd(bordereaux as BordereauRecette[]);
-  console.log(`✅ ${count} bordereaux créés`);
-  return bordereaux;
+  // Insérer les bordereaux et récupérer les IDs
+  const insertedIds = await db.bordereauxRecette.bulkAdd(bordereaux as BordereauRecette[], {
+    allKeys: true,
+  });
+
+  // Retourner les bordereaux avec leurs IDs
+  const result = bordereaux.map((b, index) => ({
+    ...b,
+    id: insertedIds[index],
+  })) as BordereauRecette[];
+
+  console.log(`✅ ${count} bordereaux de recette créés`);
+  return result;
 }
 
 export async function seedDeclarations(
@@ -355,37 +777,38 @@ export async function seedDeclarations(
 
   const declarations: Partial<Declaration>[] = [];
   const now = new Date();
-  const startDate = new Date(2023, 0, 1);
 
   // Map to track bordereau updates
   const bordereauUpdates = new Map<number, { count: number; total: number }>();
+
+  // Trier les bordereaux par date pour une meilleure répartition
+  const sortedBordereaux = [...bordereaux].sort((a, b) => {
+    const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    return dateA - dateB;
+  });
 
   for (let i = 0; i < count; i++) {
     const montantHT = randomAmount(1000, 50000);
     const montantTaxe = Math.round((montantHT * randomAmount(5, 20)) / 100);
     const montantTTC = montantHT + montantTaxe;
 
-    // Choose a bordereau (100% chance if bordereaux exist)
-    const assignBordereau = bordereaux.length > 0;
-    let bordereauId: number | undefined;
-    let exercice = new Date(randomDate(startDate, now)).getFullYear();
-    let dateEncaissement = randomDate(new Date(exercice, 0, 1), new Date(exercice, 11, 31));
+    // Choisir un bordereau aléatoirement
+    const bordereau = randomChoice(sortedBordereaux);
+    const exercice = bordereau.annee;
+    const bordereauId = bordereau.id;
 
-    if (assignBordereau) {
-      const bordereau = randomChoice(bordereaux);
-      if (bordereau && bordereau.id) {
-        bordereauId = bordereau.id;
-        exercice = bordereau.annee; // Match exercice with bordereau year
-        // Date encaissement must be in that year
-        dateEncaissement = randomDate(new Date(exercice, 0, 1), new Date(exercice, 11, 31));
+    // La date d'encaissement doit être cohérente avec le mois du bordereau
+    const bordereauMois = bordereau.mois || 1;
+    const startOfMonth = new Date(exercice, bordereauMois - 1, 1);
+    const endOfMonth = new Date(exercice, bordereauMois, 0); // Dernier jour du mois
 
-        // Update stats
-        const current = bordereauUpdates.get(bordereauId) || { count: 0, total: 0 };
-        bordereauUpdates.set(bordereauId, {
-          count: current.count + 1,
-          total: current.total + montantTTC,
-        });
-      }
+    // Date d'encaissement dans le mois du bordereau
+    let dateEncaissement = randomDate(startOfMonth, endOfMonth);
+
+    // Si c'est 2025 et la date dépasse maintenant, ajuster
+    if (exercice === 2025 && dateEncaissement > now) {
+      dateEncaissement = new Date(now.getTime() - randomAmount(1, 30) * 24 * 60 * 60 * 1000);
     }
 
     const personnelId = randomChoice(personnelIds);
@@ -408,8 +831,16 @@ export async function seedDeclarations(
       updatedAt: now,
     };
 
+    // Lier la déclaration au bordereau
     if (bordereauId) {
       declaration.bordereauId = bordereauId;
+
+      // Mettre à jour les statistiques du bordereau
+      const current = bordereauUpdates.get(bordereauId) || { count: 0, total: 0 };
+      bordereauUpdates.set(bordereauId, {
+        count: current.count + 1,
+        total: current.total + montantTTC,
+      });
     }
 
     if (obs) {
@@ -421,11 +852,12 @@ export async function seedDeclarations(
 
   await db.declarations.bulkAdd(declarations as Declaration[]);
 
-  // Update bordereaux
+  // Update bordereaux avec le nombre réel de déclarations et le montant total
   for (const [id, stats] of bordereauUpdates.entries()) {
     await db.bordereauxRecette.update(id, {
       nombreDeclarations: stats.count,
       montantTotal: stats.total,
+      updatedAt: now,
     });
   }
 
@@ -458,7 +890,7 @@ export async function seedApprovisionnements(personnelIds: number[], count: numb
     };
 
     // Calculer le total
-    const total = 
+    const total =
       timbres[100] * 100 +
       timbres[200] * 200 +
       timbres[300] * 300 +
@@ -475,6 +907,7 @@ export async function seedApprovisionnements(personnelIds: number[], count: numb
       date,
       type,
       timbres,
+      detailsQuotites: await buildDetailsQuotitesFromTimbres(timbres),
       total,
       personnelId: randomChoice(personnelIds),
       createdAt: date,
@@ -519,7 +952,7 @@ export async function seedRemises(personnelIds: number[], count: number = 50) {
     };
 
     // Calculer le total
-    const total = 
+    const total =
       timbres[100] * 100 +
       timbres[200] * 200 +
       timbres[300] * 300 +
@@ -535,6 +968,7 @@ export async function seedRemises(personnelIds: number[], count: number = 50) {
       date,
       numeroRemise,
       timbres,
+      detailsQuotites: await buildDetailsQuotitesFromTimbres(timbres),
       total,
       personnelId: randomChoice(personnelIds),
       createdAt: date,
@@ -579,7 +1013,7 @@ export async function seedVersements(personnelIds: number[], count: number = 60)
     };
 
     // Calculer le total
-    const total = 
+    const total =
       timbres[100] * 100 +
       timbres[200] * 200 +
       timbres[300] * 300 +
@@ -595,6 +1029,7 @@ export async function seedVersements(personnelIds: number[], count: number = 60)
       date,
       numeroVersement,
       timbres,
+      detailsQuotites: await buildDetailsQuotitesFromTimbres(timbres),
       total,
       personnelId: randomChoice(personnelIds),
       createdAt: date,
@@ -624,7 +1059,7 @@ export async function seedBalancesEntree(personnelIds: number[], count: number =
     const exercice = randomChoice(exercices);
     const date = new Date(exercice, 0, 1); // 1er janvier de l'exercice
 
-    const types = ['INITIAL', 'BE-S1', 'BE-S2', 'BE-S3'];
+    const types = ['BE-S1', 'BE-S2', 'BE-S3'];
     const type = types[i % types.length]!;
 
     // Générer des quantités aléatoires pour le stock initial
@@ -638,7 +1073,7 @@ export async function seedBalancesEntree(personnelIds: number[], count: number =
     };
 
     // Calculer le total
-    const total = 
+    const total =
       timbres[100] * 100 +
       timbres[200] * 200 +
       timbres[300] * 300 +
@@ -652,6 +1087,7 @@ export async function seedBalancesEntree(personnelIds: number[], count: number =
       date,
       type,
       timbres,
+      detailsQuotites: await buildDetailsQuotitesFromTimbres(timbres),
       total,
       commentaires: `Stock initial de l'exercice ${exercice}`,
       personnelId: randomChoice(personnelIds),
@@ -671,6 +1107,7 @@ export async function seedPrevisions(
   chapitreIds: number[],
   personnelIds: number[],
   count: number = 30,
+  sousChapitreIds?: number[],
 ) {
   console.log(`🌱 Seeding ${count} prévisions budgétaires...`);
 
@@ -713,6 +1150,11 @@ export async function seedPrevisions(
       prevision.observations = obs;
     }
 
+    // Associer éventuellement un sous-chapitre à la prévision si fourni
+    if (sousChapitreIds && sousChapitreIds.length > 0 && Math.random() > 0.3) {
+      prevision.sousChapitreId = randomChoice(sousChapitreIds);
+    }
+
     previsions.push(prevision);
   }
 
@@ -726,7 +1168,8 @@ export async function seedMandats(
   sousChapitreIds: number[],
   previsionIds: number[],
   personnelIds: number[],
-  count: number = 100,
+  bordereauMandats: BordereauMandat[],
+  count: number = 200,
 ) {
   console.log(`🌱 Seeding ${count} mandats de dépense...`);
 
@@ -748,18 +1191,7 @@ export async function seedMandats(
     'Garage AUTO REPAIR',
   ];
 
-  const objets = [
-    'INDEMNITE DE FONCTION',
-    'TRANSP. & FRAIS DE MISSION',
-    "Régie d'avance",
-    'Fournitures de bureau',
-    'Travaux de réparation',
-    'Maintenance informatique',
-    'Carburant véhicules de service',
-    'Frais de communication',
-    'Honoraires consultant',
-    'Achats matériel technique',
-  ];
+  const objets = ['INDEMNITE DE FONCTION', 'TRANSP. & FRAIS DE MISSION', "Régie d'avance"];
 
   const modesPaiement: Array<'virement' | 'cheque' | 'especes' | 'autre'> = [
     'virement',
@@ -771,24 +1203,41 @@ export async function seedMandats(
   const mandats: Partial<Mandat>[] = [];
   const now = new Date();
 
+  // Map pour suivre les mises à jour des bordereaux (nombre de mandats et montant total)
+  const bordereauUpdates = new Map<number, { count: number; total: number }>();
+
+  // Trier les bordereaux par date pour une meilleure répartition
+  const sortedBordereaux = [...bordereauMandats].sort((a, b) => {
+    const dateA = a.dateEmission ? new Date(a.dateEmission).getTime() : 0;
+    const dateB = b.dateEmission ? new Date(b.dateEmission).getTime() : 0;
+    return dateA - dateB;
+  });
+
   for (let i = 0; i < count; i++) {
-    const exercice = randomAmount(2023, 2025);
-    const dateMandat = randomDate(
-      new Date(exercice, 0, 1),
-      exercice === 2025 ? now : new Date(exercice, 11, 31),
-    );
+    // Choisir un bordereau aléatoirement
+    const bordereau = randomChoice(sortedBordereaux);
+    const exercice = bordereau.exercice;
+    const bordereauId = bordereau.id;
+
+    // La date du mandat doit être dans la période du bordereau
+    // Le mandat doit être créé avant ou à la date d'émission du bordereau
+    const bordereauDate = bordereau.dateEmission
+      ? new Date(bordereau.dateEmission)
+      : new Date(exercice, 11, 31);
+    const startOfYear = new Date(exercice, 0, 1);
+
+    // Date du mandat : entre le début de l'année et la date du bordereau
+    const dateMandat = randomDate(startOfYear, bordereauDate);
 
     const numeroMandat = `M${exercice}-${String(i + 1).padStart(4, '0')}`;
     const montant = randomAmount(5000, 500000);
 
-    const statuts: Array<'brouillon' | 'emis' | 'paye' | 'annule'> = [
-      'brouillon',
-      'emis',
-      'paye',
-      'annule',
-    ];
+    const statuts: Array<'emis' | 'paye'> = ['emis', 'paye'];
+    // Les mandats liés à un bordereau fermé sont émis ou payés
     const statut =
-      exercice < 2025 ? randomChoice(['emis' as const, 'paye' as const]) : randomChoice(statuts);
+      bordereau.statut === 'ferme'
+        ? randomChoice(['emis' as const, 'paye' as const])
+        : randomChoice(statuts);
 
     const numeroFacture =
       Math.random() > 0.3 ? `FACT-${String(randomAmount(1000, 9999)).padStart(4, '0')}` : undefined;
@@ -802,6 +1251,7 @@ export async function seedMandats(
     const mandat: Partial<Mandat> = {
       exercice,
       numeroMandat,
+      numeroOrdre: i + 1,
       dateMandat,
       chapitreId: randomChoice(chapitreIds),
       mairieId: DEFAULT_MAIRIE_ID,
@@ -814,6 +1264,11 @@ export async function seedMandats(
       createdAt: dateMandat,
       updatedAt: now,
     };
+
+    // Lier le mandat au bordereau
+    if (bordereauId) {
+      mandat.bordereauMandatId = bordereauId;
+    }
 
     const maybeSous = Math.random() > 0.2 ? randomChoice(sousChapitreIds) : undefined;
     if (maybeSous != null) {
@@ -836,11 +1291,30 @@ export async function seedMandats(
       mandat.observations = obs;
     }
 
+    // Mettre à jour les statistiques du bordereau
+    if (bordereauId) {
+      const current = bordereauUpdates.get(bordereauId) || { count: 0, total: 0 };
+      bordereauUpdates.set(bordereauId, {
+        count: current.count + 1,
+        total: current.total + montant,
+      });
+    }
+
     mandats.push(mandat);
   }
 
   await db.mandats.bulkAdd(mandats as unknown as Mandat[]);
-  console.log(`✅ ${count} mandats créés`);
+
+  // Mettre à jour les bordereaux avec le nombre réel de mandats et le montant total
+  for (const [id, stats] of bordereauUpdates.entries()) {
+    await db.bordereauMandats.update(id, {
+      nombreMandats: stats.count,
+      montantTotal: stats.total,
+      updatedAt: now,
+    });
+  }
+
+  console.log(`✅ ${count} mandats créés et liés aux bordereaux`);
   return mandats;
 }
 
@@ -850,29 +1324,34 @@ export async function seedBordereauMandats(personnelIds: number[], count: number
   const bordereauMandats: Partial<BordereauMandat>[] = [];
   const now = new Date();
 
-  for (let i = 0; i < count; i++) {
-    const exercice = randomAmount(2023, 2025);
-    const dateEmission = randomDate(
-      new Date(exercice, 0, 1),
-      exercice === 2025 ? now : new Date(exercice, 11, 31),
-    );
+  // Créer des bordereaux répartis sur les exercices avec des dates cohérentes
+  const exercices = [2023, 2024, 2025];
+  let numeroGlobal = 1;
 
-    const numero = i + 1;
-    const nombreMandats = randomAmount(3, 15);
-    const montantTotal = randomAmount(100000, 2000000);
+  for (let i = 0; i < count; i++) {
+    const exercice = exercices[i % exercices.length]!;
+    // Date d'émission répartie sur l'année
+    const mois = Math.floor((i / count) * 12);
+    const dateEmission = new Date(exercice, mois, randomAmount(1, 28));
+
+    // Si c'est 2025 et la date dépasse maintenant, ajuster
+    if (exercice === 2025 && dateEmission > now) {
+      dateEmission.setTime(now.getTime() - randomAmount(1, 30) * 24 * 60 * 60 * 1000);
+    }
 
     const statuts: Array<'ouvert' | 'ferme'> = ['ouvert', 'ferme'];
+    // Les exercices passés sont fermés, l'année en cours peut être ouvert
     const statut = exercice < 2025 ? 'ferme' : randomChoice(statuts);
 
     const obs = Math.random() > 0.6 ? 'Bordereau conforme' : undefined;
 
     const bordereauMandat: Partial<BordereauMandat> = {
-      numero,
+      numero: numeroGlobal++,
       exercice,
       dateEmission,
       mairieId: DEFAULT_MAIRIE_ID,
-      montantTotal,
-      nombreMandats,
+      montantTotal: 0, // Sera calculé après insertion des mandats
+      nombreMandats: 0, // Sera calculé après insertion des mandats
       statut,
       personnelId: randomChoice(personnelIds),
       createdAt: dateEmission,
@@ -886,9 +1365,20 @@ export async function seedBordereauMandats(personnelIds: number[], count: number
     bordereauMandats.push(bordereauMandat);
   }
 
-  await db.bordereauMandats.bulkAdd(bordereauMandats as unknown as BordereauMandat[]);
+  // Insérer les bordereaux et récupérer les IDs
+  const insertedIds = await db.bordereauMandats.bulkAdd(
+    bordereauMandats as unknown as BordereauMandat[],
+    { allKeys: true },
+  );
+
+  // Retourner les bordereaux avec leurs IDs
+  const result = bordereauMandats.map((b, index) => ({
+    ...b,
+    id: insertedIds[index],
+  })) as BordereauMandat[];
+
   console.log(`✅ ${count} bordereaux mandats créés`);
-  return bordereauMandats;
+  return result;
 }
 
 export async function seedQuotites(count: number = 10) {
@@ -896,13 +1386,35 @@ export async function seedQuotites(count: number = 10) {
 
   const quotites: Partial<Quotite>[] = [];
   const now = new Date();
-  const types = ['Marché', 'Abattoirs', 'Stationnement', 'Publicité', 'Occupation Voie Publique'];
+  const types = ['Marché', 'Abattoirs', 'Stationnement'];
   const descriptions = ['Ticket', 'Macaron', 'Droit de place', 'Autocollant'];
+  // Prix obligatoires pour correspondre aux timbres (100, 200, 300, 500, 600, 1000)
+  const requiredPrices = [100, 200, 300, 500, 600, 1000];
 
-  for (let i = 0; i < count; i++) {
+  // D'abord, créer une quotité pour chaque prix obligatoire
+  for (const prix of requiredPrices) {
     const type = randomChoice(types);
-    const prix = randomChoice([100, 200, 300, 500, 1000, 2000]);
     const code = `${type.substring(0, 2).toUpperCase()}${prix}`;
+
+    const quotite: Partial<Quotite> = {
+      code,
+      prix,
+      description: randomChoice(descriptions),
+      type,
+      mairieId: DEFAULT_MAIRIE_ID,
+      actif: true, // Toujours actif pour les quotités obligatoires
+      createdAt: randomDate(new Date(2023, 0, 1), now),
+      updatedAt: now,
+    };
+    quotites.push(quotite);
+  }
+
+  // Ensuite, créer des quotités supplémentaires aléatoires
+  const additionalCount = Math.max(0, count - requiredPrices.length);
+  for (let i = 0; i < additionalCount; i++) {
+    const type = randomChoice(types);
+    const prix = randomChoice([100, 200, 300, 500, 600, 1000, 2000]);
+    const code = `${type.substring(0, 2).toUpperCase()}${prix}-${i}`;
 
     const quotite: Partial<Quotite> = {
       code,
@@ -918,6 +1430,6 @@ export async function seedQuotites(count: number = 10) {
   }
 
   await db.quotites.bulkAdd(quotites as Quotite[]);
-  console.log(`✅ ${count} quotités créées`);
+  console.log(`✅ ${quotites.length} quotités créées`);
   return quotites;
 }
