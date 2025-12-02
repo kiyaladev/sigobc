@@ -539,7 +539,7 @@ function randomChoice<T>(array: T[]): T {
  * Construire un objet detailsQuotites à partir d'un objet timbres.
  * Répartit les quantités par valeur entre les quotités actives de même prix.
  */
-async function buildDetailsQuotitesFromTimbres(timbres: any) {
+async function buildDetailsQuotitesFromTimbres(timbres: Record<number, number>) {
   const result: Record<string, number> = {};
   const quotites = await db.quotites.filter((q) => q.actif).toArray();
   const byPrix = new Map<number, typeof quotites>();
@@ -598,12 +598,12 @@ export async function seedTestData(options: SeedOptions = {}) {
   const {
     declarations = 100,
     bordereaux = 80,
-    approvisionnements = 20,
-    remises = 50,
-    versements = 60,
-    balancesEntree = 2,
+    approvisionnements = 30,
+    remises = 30,
+    versements = 30,
+    balancesEntree = 9,
     previsions = 30,
-    mandats = 100,
+    mandats = 200,
     bordereauMandats = 20,
     quotites = 10,
   } = options;
@@ -663,7 +663,6 @@ export async function seedTestData(options: SeedOptions = {}) {
       utilisateurIds,
       bordereauMandatsCreated,
       mandats,
-      200,
     );
 
     console.log('\n✨ All test data seeders have been executed successfully!');

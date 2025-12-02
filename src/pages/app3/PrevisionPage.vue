@@ -333,12 +333,13 @@ async function printCT02() {
     // Récupérer les prévisions de l'exercice
     const previsionsExercice = await db.previsions.where('exercice').equals(exercice).toArray();
     const previsionsFiltered = sousChapitreId
-      ? previsionsExercice.filter((p) => (p as any).sousChapitreId === sousChapitreId)
+      ? previsionsExercice.filter(
+          (p) => 'sousChapitreId' in p && p.sousChapitreId === sousChapitreId,
+        )
       : previsionsExercice;
 
     // Récupérer les mandats de l'exercice (émis ou payés)
-    let mandatsQuery = db.mandats.where('exercice').equals(exercice);
-    const mandatsExercice = (await mandatsQuery.toArray()).filter(
+    const mandatsExercice = (await db.mandats.where('exercice').equals(exercice).toArray()).filter(
       (m) => m.statut === 'emis' || m.statut === 'paye',
     );
 
@@ -509,7 +510,7 @@ function editPrevision(row: Prevision) {
   formData.value = {
     exercice: row.exercice,
     chapitreId: row.chapitreId,
-    sousChapitreId: (row as any).sousChapitreId || null,
+    sousChapitreId: ('sousChapitreId' in row ? row.sousChapitreId : null) || null,
     montantPrevu: row.montantPrevu,
     statut: row.statut,
     observations: row.observations || '',

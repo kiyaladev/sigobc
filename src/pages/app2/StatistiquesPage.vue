@@ -1,24 +1,62 @@
 <template>
-  <q-page class="q-pa-md">
-    <div class="row q-mb-md justify-between items-center">
-      <div class="text-h5">Statistiques des Tickets</div>
-      <ExportButtons @export-pdf="exportPDF" @export-excel="exportExcel" />
-    </div>
+  <q-page class="statistiques-page q-pa-md">
+    <PageHeader
+      title="Statistiques des Tickets"
+      subtitle="Analyse et suivi du stock de tickets"
+      icon="analytics"
+    />
 
     <!-- Filtres de période -->
-    <FilterBar
-      v-model:period="periodFilter"
-      v-model:date-debut="dateDebut"
-      v-model:date-fin="dateFin"
-      :period-options="periodOptions"
-      show-period
-      show-date-range
-      show-refresh
-      :loading="loading"
-      @period-change="onPeriodChange"
-      @refresh="loadStatistics"
-      @reset="resetFilters"
-    />
+    <q-card class="filter-card q-mb-md">
+      <q-card-section>
+        <div class="row q-col-gutter-md items-end">
+          <!-- Sélecteur de période -->
+          <div class="col-12 col-sm-6 col-md-3">
+            <q-select
+              v-model="periodFilter"
+              :options="periodOptions"
+              label="Période"
+              outlined
+              dense
+              @update:model-value="onPeriodChange"
+            />
+          </div>
+
+          <!-- Date début -->
+          <div class="col-12 col-sm-6 col-md-3">
+            <q-input v-model="dateDebut" type="date" label="Date début" outlined dense clearable />
+          </div>
+
+          <!-- Date fin -->
+          <div class="col-12 col-sm-6 col-md-3">
+            <q-input v-model="dateFin" type="date" label="Date fin" outlined dense clearable />
+          </div>
+
+          <!-- Boutons d'action -->
+          <div class="col-12 col-sm-6 col-md-3 row q-gutter-sm">
+            <q-btn
+              color="grey-7"
+              icon="clear"
+              label="Réinitialiser"
+              outline
+              @click="resetFilters"
+              class="col"
+              no-caps
+            />
+            <q-btn
+              color="primary"
+              icon="refresh"
+              label="Actualiser"
+              unelevated
+              @click="loadStatistics"
+              :loading="loading"
+              class="col"
+              no-caps
+            />
+          </div>
+        </div>
+      </q-card-section>
+    </q-card>
 
     <!-- Cartes de statistiques principales -->
     <div class="row q-col-gutter-md q-mb-md">
@@ -29,7 +67,7 @@
           :subtitle="`${stats.typesTickets} types de tickets`"
           icon="confirmation_number"
           icon-color="grey-7"
-          border-color="var(--q-orange)"
+          border-color="#E67E22"
         />
       </div>
 
@@ -40,7 +78,7 @@
           subtitle="En stock actuellement"
           icon="payments"
           icon-color="grey-7"
-          border-color="var(--q-green)"
+          border-color="#2E7D32"
           format="currency"
         />
       </div>
@@ -52,7 +90,7 @@
           :subtitle="formatMontant(stats.montantAppros)"
           icon="inventory"
           icon-color="grey-7"
-          border-color="var(--q-orange)"
+          border-color="#E67E22"
         />
       </div>
 
@@ -63,7 +101,7 @@
           :subtitle="formatMontant(stats.montantVersements)"
           icon="upload"
           icon-color="grey-7"
-          border-color="var(--q-orange)"
+          border-color="#E67E22"
         />
       </div>
     </div>
@@ -113,11 +151,11 @@
 
       <!-- Tableau détaillé par type de ticket -->
       <div v-if="!loading && stats.stockTotal > 0" class="col-12">
-        <q-card>
-          <q-card-section class="accent-left">
-            <div class="text-h6">Détails par Type de Ticket</div>
+        <q-card class="details-card">
+          <q-card-section class="bg-grey-1">
+            <div class="text-h6 text-grey-8">Détails par Type de Ticket</div>
           </q-card-section>
-          <q-card-section class="accent-left">
+          <q-card-section>
             <q-table
               :rows="detailsTickets"
               :columns="ticketsColumns"
@@ -128,7 +166,7 @@
             >
               <template v-slot:body-cell-valeur="props">
                 <q-td :props="props">
-                  <q-badge color="accent" :label="props.row.valeur + ' FCFA'" />
+                  <q-badge color="primary" :label="props.row.valeur + ' FCFA'" />
                 </q-td>
               </template>
               <template v-slot:body-cell-stock="props">
@@ -148,7 +186,7 @@
                 </q-td>
               </template>
               <template v-slot:body-cell-valeurStock="props">
-                <q-td :props="props" class="text-weight-bold text-positive">
+                <q-td :props="props" class="text-weight-bold" style="color: #2e7d32">
                   {{ formatMontant(props.row.valeurStock) }}
                 </q-td>
               </template>
@@ -181,22 +219,22 @@
 
       <!-- Statistiques d'activité -->
       <div v-if="!loading && stats.stockTotal > 0" class="col-12 col-md-6">
-        <q-card>
-          <q-card-section class="accent-left">
-            <div class="text-h6">Activité de la Période</div>
+        <q-card class="activity-card">
+          <q-card-section class="bg-grey-1">
+            <div class="text-h6 text-grey-8">Activité de la Période</div>
           </q-card-section>
           <q-card-section>
             <q-list separator>
               <q-item>
                 <q-item-section avatar>
-                  <q-avatar color="accent" text-color="grey-9" icon="shopping_cart" />
+                  <q-avatar color="primary" text-color="white" icon="shopping_cart" />
                 </q-item-section>
                 <q-item-section>
                   <q-item-label class="text-weight-bold">Approvisionnements</q-item-label>
                   <q-item-label caption>Total des entrées</q-item-label>
                 </q-item-section>
                 <q-item-section side>
-                  <q-item-label class="text-h6 text-primary">
+                  <q-item-label class="text-h6" style="color: #e67e22">
                     {{ formatNumber(stats.totalEntrees) }}
                   </q-item-label>
                   <q-item-label caption>tickets</q-item-label>
@@ -205,14 +243,14 @@
 
               <q-item>
                 <q-item-section avatar>
-                  <q-avatar color="accent" text-color="grey-9" icon="local_shipping" />
+                  <q-avatar color="primary" text-color="white" icon="local_shipping" />
                 </q-item-section>
                 <q-item-section>
                   <q-item-label class="text-weight-bold">Remises</q-item-label>
                   <q-item-label caption>Total des sorties (remises)</q-item-label>
                 </q-item-section>
                 <q-item-section side>
-                  <q-item-label class="text-h6">
+                  <q-item-label class="text-h6 text-grey-8">
                     {{ formatNumber(stats.totalRemises) }}
                   </q-item-label>
                   <q-item-label caption>tickets</q-item-label>
@@ -221,14 +259,14 @@
 
               <q-item>
                 <q-item-section avatar>
-                  <q-avatar color="accent" text-color="grey-9" icon="account_balance" />
+                  <q-avatar color="primary" text-color="white" icon="account_balance" />
                 </q-item-section>
                 <q-item-section>
                   <q-item-label class="text-weight-bold">Versements</q-item-label>
                   <q-item-label caption>Total des versements</q-item-label>
                 </q-item-section>
                 <q-item-section side>
-                  <q-item-label class="text-h6">
+                  <q-item-label class="text-h6 text-grey-8">
                     {{ formatNumber(stats.totalVersementsTickets) }}
                   </q-item-label>
                   <q-item-label caption>tickets</q-item-label>
@@ -237,14 +275,18 @@
 
               <q-item>
                 <q-item-section avatar>
-                  <q-avatar color="positive" text-color="white" icon="trending_up" />
+                  <q-avatar
+                    style="background-color: #2e7d32"
+                    text-color="white"
+                    icon="trending_up"
+                  />
                 </q-item-section>
                 <q-item-section>
                   <q-item-label class="text-weight-bold">Taux de Rotation</q-item-label>
                   <q-item-label caption>Rotation du stock</q-item-label>
                 </q-item-section>
                 <q-item-section side>
-                  <q-item-label class="text-h6 text-green">
+                  <q-item-label class="text-h6" style="color: #2e7d32">
                     {{ stats.tauxRotation }}%
                   </q-item-label>
                 </q-item-section>
@@ -256,9 +298,9 @@
 
       <!-- Alertes et recommandations -->
       <div v-if="!loading && stats.stockTotal > 0" class="col-12 col-md-6">
-        <q-card>
-          <q-card-section>
-            <div class="text-h6">Alertes et Recommandations</div>
+        <q-card class="alerts-card">
+          <q-card-section class="bg-grey-1">
+            <div class="text-h6 text-grey-8">Alertes et Recommandations</div>
           </q-card-section>
           <q-card-section>
             <q-list separator>
@@ -268,16 +310,16 @@
                 </q-item-section>
                 <q-item-section>
                   <q-item-label class="text-weight-medium">{{ alerte.titre }}</q-item-label>
-                  <q-item-label caption>{{ alerte.description }}</q-item-label>
+                  <q-item-label caption class="text-grey-6">{{ alerte.description }}</q-item-label>
                 </q-item-section>
               </q-item>
               <q-item v-if="alertes.length === 0">
                 <q-item-section avatar>
-                  <q-icon name="check_circle" color="positive" size="md" />
+                  <q-icon name="check_circle" style="color: #2e7d32" size="md" />
                 </q-item-section>
                 <q-item-section>
                   <q-item-label class="text-weight-medium">Tout est normal</q-item-label>
-                  <q-item-label caption>Aucune alerte à signaler</q-item-label>
+                  <q-item-label caption class="text-grey-6">Aucune alerte à signaler</q-item-label>
                 </q-item-section>
               </q-item>
             </q-list>
@@ -292,10 +334,9 @@
 import { ref, computed, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { type ChartConfiguration, type TooltipItem, type ChartTypeRegistry } from 'chart.js';
-import FilterBar from 'src/components/FilterBar.vue';
+import PageHeader from 'src/components/PageHeader.vue';
 import StatisticsCard from 'src/components/StatisticsCard.vue';
 import ChartCard from 'src/components/ChartCard.vue';
-import ExportButtons from 'src/components/ExportButtons.vue';
 import { db } from 'src/database/db';
 import type { Approvisionnement, Remise, Versement, BalanceEntree } from 'src/database/db';
 
@@ -304,7 +345,6 @@ const $q = useQuasar();
 // Filtre par année
 const currentYear = new Date().getFullYear();
 const selectedYear = ref(currentYear);
-const yearOptions = ref<number[]>([]);
 
 // Refs
 const loading = ref(false);
@@ -339,8 +379,8 @@ const stockActuel = computed(() => {
   });
 
   // Ajouter les balances d'entrée (BE-S1 uniquement)
-  const balancesBES1 = balancesEntree.value.filter((b) =>
-    b.type.includes('BE-S1') || b.type.includes('INITIAL') || b.type.includes('Stock')
+  const balancesBES1 = balancesEntree.value.filter(
+    (b) => b.type.includes('BE-S1') || b.type.includes('INITIAL') || b.type.includes('Stock'),
   );
 
   balancesBES1.forEach((balance) => {
@@ -393,7 +433,7 @@ const stats = computed(() => {
     if (!dateDebut.value || !dateFin.value) return items;
     const start = new Date(dateDebut.value).getTime();
     const end = new Date(dateFin.value).getTime() + 86400000 - 1; // End of day
-    return items.filter(i => {
+    return items.filter((i) => {
       const d = new Date(i.date).getTime();
       return d >= start && d <= end;
     });
@@ -428,8 +468,8 @@ const stats = computed(() => {
   // Input = Initial Stock + Appros.
   // So yes, include balances.
 
-  const balancesBES1 = balancesEntree.value.filter((b) =>
-    b.type.includes('BE-S1') || b.type.includes('INITIAL') || b.type.includes('Stock')
+  const balancesBES1 = balancesEntree.value.filter(
+    (b) => b.type.includes('BE-S1') || b.type.includes('INITIAL') || b.type.includes('Stock'),
   );
 
   balancesBES1.forEach((balance) => {
@@ -469,10 +509,7 @@ const stats = computed(() => {
   });
 
   // Taux de rotation (sorties (remises) / entrées * 100)
-  const tauxRotation =
-    totalEntrees > 0
-      ? Math.round((totalRemises / totalEntrees) * 100)
-      : 0;
+  const tauxRotation = totalEntrees > 0 ? Math.round((totalRemises / totalEntrees) * 100) : 0;
 
   return {
     stockTotal,
@@ -523,8 +560,8 @@ const detailsTickets = computed(() => {
 
     // Calculer le taux de rotation pour cette valeur
     let balanceVal = 0;
-    const balancesBES1 = balancesEntree.value.filter((b) =>
-      b.type.includes('BE-S1') || b.type.includes('INITIAL') || b.type.includes('Stock')
+    const balancesBES1 = balancesEntree.value.filter(
+      (b) => b.type.includes('BE-S1') || b.type.includes('INITIAL') || b.type.includes('Stock'),
     );
     balancesBES1.forEach((b) => {
       balanceVal += b.timbres[valeur] || 0;
@@ -649,21 +686,6 @@ function getTauxColor(taux: number): string {
   return 'negative';
 }
 
-// Fonctions d'export
-function exportPDF() {
-  $q.notify({
-    type: 'info',
-    message: 'Export PDF en cours de développement...',
-  });
-}
-
-function exportExcel() {
-  $q.notify({
-    type: 'info',
-    message: 'Export Excel en cours de développement...',
-  });
-}
-
 // Gestion des périodes
 function onPeriodChange() {
   const today = new Date();
@@ -716,10 +738,26 @@ async function loadStatistics() {
     const exercice = selectedYear.value;
 
     const [appros, remisesList, versementsList, balances] = await Promise.all([
-      db.approvisionnements.where('exercice').equals(exercice).and(a => a.mairieId === mairieId).toArray(),
-      db.remises.where('exercice').equals(exercice).and(r => r.mairieId === mairieId).toArray(),
-      db.versements.where('exercice').equals(exercice).and(v => v.mairieId === mairieId).toArray(),
-      db.balancesEntree.where('exercice').equals(exercice).and(b => b.mairieId === mairieId).toArray(),
+      db.approvisionnements
+        .where('exercice')
+        .equals(exercice)
+        .and((a) => a.mairieId === mairieId)
+        .toArray(),
+      db.remises
+        .where('exercice')
+        .equals(exercice)
+        .and((r) => r.mairieId === mairieId)
+        .toArray(),
+      db.versements
+        .where('exercice')
+        .equals(exercice)
+        .and((v) => v.mairieId === mairieId)
+        .toArray(),
+      db.balancesEntree
+        .where('exercice')
+        .equals(exercice)
+        .and((b) => b.mairieId === mairieId)
+        .toArray(),
     ]);
 
     approvisionnements.value = appros;
@@ -737,37 +775,7 @@ async function loadStatistics() {
   }
 }
 
-// Générer les options d'années
-async function generateYearOptions() {
-  try {
-    const years = new Set<number>();
-
-    const [appros, remisesList, versementsList, balances] = await Promise.all([
-      db.approvisionnements.toArray(),
-      db.remises.toArray(),
-      db.versements.toArray(),
-      db.balancesEntree.toArray(),
-    ]);
-
-    appros.forEach((a) => years.add(a.exercice));
-    remisesList.forEach((r) => years.add(r.exercice));
-    versementsList.forEach((v) => years.add(v.exercice));
-    balances.forEach((b) => years.add(b.exercice));
-
-    years.add(currentYear);
-    yearOptions.value = Array.from(years).sort((a, b) => b - a);
-  } catch (error) {
-    console.error('Erreur lors de la génération des années:', error);
-    yearOptions.value = [currentYear];
-  }
-}
-
 // Configuration des graphiques
-interface ProcessItem {
-  date: string | Date;
-  total?: number;
-}
-
 const stockChartConfig = computed<ChartConfiguration>(() => ({
   type: 'doughnut',
   data: {
@@ -838,12 +846,25 @@ const valeurChartConfig = computed<ChartConfiguration>(() => ({
 }));
 
 const evolutionChartConfig = computed<ChartConfiguration>(() => {
-  const labels = ['Janv', 'Févr', 'Mars', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sept', 'Oct', 'Nov', 'Déc'];
+  const labels = [
+    'Janv',
+    'Févr',
+    'Mars',
+    'Avr',
+    'Mai',
+    'Juin',
+    'Juil',
+    'Août',
+    'Sept',
+    'Oct',
+    'Nov',
+    'Déc',
+  ];
   const appData = new Array(12).fill(0);
   const remData = new Array(12).fill(0);
   const verData = new Array(12).fill(0);
 
-  const process = (items: ProcessItem[], target: number[]) => {
+  const processData = (items: Array<{ date: string | Date; total?: number }>, target: number[]) => {
     for (const item of items) {
       const d = new Date(item.date);
       if (d.getFullYear() === selectedYear.value) {
@@ -858,9 +879,9 @@ const evolutionChartConfig = computed<ChartConfiguration>(() => {
     }
   };
 
-  process(approvisionnements.value, appData);
-  process(remises.value, remData);
-  process(versements.value, verData);
+  processData(approvisionnements.value, appData);
+  processData(remises.value, remData);
+  processData(versements.value, verData);
 
   return {
     type: 'line',
@@ -923,14 +944,32 @@ const evolutionChartConfig = computed<ChartConfiguration>(() => {
 onMounted(async () => {
   // Initialiser les dates par défaut
   onPeriodChange();
-  // Générer les options d'années
-  await generateYearOptions();
   // Charger les statistiques
   await loadStatistics();
 });
 </script>
 
 <style scoped lang="scss">
+.statistiques-page {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.filter-card,
+.details-card,
+.activity-card,
+.alerts-card {
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+
+  &:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  }
+}
+
 .chart-container {
   position: relative;
   height: 300px;
