@@ -13,7 +13,42 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
-import { Chart, type ChartConfiguration } from 'chart.js';
+import {
+  Chart,
+  type ChartConfiguration,
+  ArcElement,
+  BarElement,
+  LineElement,
+  PointElement,
+  CategoryScale,
+  LinearScale,
+  Title,
+  Tooltip,
+  Legend,
+  DoughnutController,
+  BarController,
+  LineController,
+  PieController,
+  Filler,
+} from 'chart.js';
+
+// Enregistrer tous les composants Chart.js nécessaires
+Chart.register(
+  ArcElement,
+  BarElement,
+  LineElement,
+  PointElement,
+  CategoryScale,
+  LinearScale,
+  Title,
+  Tooltip,
+  Legend,
+  DoughnutController,
+  BarController,
+  LineController,
+  PieController,
+  Filler,
+);
 
 interface Props {
   title: string;

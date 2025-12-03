@@ -364,8 +364,8 @@ const addMonthlyTotals = (data: AnySectionEntry[], sectionName: string) => {
   let currentMonth = new Date(data[0]!.date).getMonth();
   let currentYear = new Date(data[0]!.date).getFullYear();
   // Totaux cumulatifs sur l'année (ne sont jamais remis à zéro)
-  let cumulDenom: DenominationsType = { 100: 0, 200: 0, 300: 0, 500: 0, 600: 0, 1000: 0 };
-  let cumulDetailsQuotites: Record<string, number> = {};
+  const cumulDenom: DenominationsType = { 100: 0, 200: 0, 300: 0, 500: 0, 600: 0, 1000: 0 };
+  const cumulDetailsQuotites: Record<string, number> = {};
   let cumulApprov = 0,
     cumulRemise = 0,
     cumulVersement = 0;

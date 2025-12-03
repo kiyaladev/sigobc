@@ -558,6 +558,7 @@ async function buildDetailsQuotitesFromTimbres(timbres: Record<number, number>) 
     let remainder = total - base * list.length;
     for (let i = 0; i < list.length; i++) {
       const q = list[i];
+      if (!q) continue;
       const add = base + (remainder > 0 ? 1 : 0);
       if (remainder > 0) remainder--;
       result[`${prix}-${q.code}`] = add;

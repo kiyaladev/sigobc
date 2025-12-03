@@ -249,6 +249,16 @@ const columns = [
     },
   },
   {
+    name: 'sousChapitre',
+    label: 'Sous-chapitre',
+    align: 'left' as const,
+    field: (row: Prevision) => {
+      if (!('sousChapitreId' in row) || !row.sousChapitreId) return '';
+      const sousChapitre = sousChapitres.value.find((s) => s.id === row.sousChapitreId);
+      return sousChapitre ? `${sousChapitre.code} - ${sousChapitre.libelle}` : '';
+    },
+  },
+  {
     name: 'montantPrevu',
     label: 'Montant Prévu',
     align: 'right' as const,
@@ -360,7 +370,8 @@ async function printCT02() {
     previsionsFiltered.forEach((p) => {
       const chapitre = chapitresMap.get(p.chapitreId);
       if (chapitre && chapitresCodes.includes(chapitre.code)) {
-        previsionsByChapitreCode[chapitre.code] += p.montantPrevu;
+        previsionsByChapitreCode[chapitre.code] =
+          (previsionsByChapitreCode[chapitre.code] ?? 0) + p.montantPrevu;
       }
     });
 
@@ -371,7 +382,8 @@ async function printCT02() {
     mandatsFiltres.forEach((m) => {
       const chapitre = chapitresMap.get(m.chapitreId);
       if (chapitre && chapitresCodes.includes(chapitre.code)) {
-        emissionsByChapitreCode[chapitre.code] += m.montant;
+        emissionsByChapitreCode[chapitre.code] =
+          (emissionsByChapitreCode[chapitre.code] ?? 0) + m.montant;
       }
     });
 
@@ -379,7 +391,7 @@ async function printCT02() {
     const creditsDispoByChapitreCode: Record<string, number> = {};
     chapitresCodes.forEach((code) => {
       creditsDispoByChapitreCode[code] =
-        previsionsByChapitreCode[code] - emissionsByChapitreCode[code];
+        (previsionsByChapitreCode[code] ?? 0) - (emissionsByChapitreCode[code] ?? 0);
     });
 
     // Calculer les totaux
@@ -462,21 +474,28 @@ async function savePrevision() {
     const mairieId = 1;
     const personnelId = 1;
 
-    const data = {
-      ...formData.value,
+    const baseData = {
+      exercice: formData.value.exercice,
+      chapitreId: formData.value.chapitreId!,
+      montantPrevu: formData.value.montantPrevu,
       montantEngage: 0,
       montantDisponible: formData.value.montantPrevu,
+      statut: formData.value.statut,
+      observations: formData.value.observations,
       mairieId,
       personnelId,
-      chapitreId: formData.value.chapitreId!,
-      sousChapitreId: formData.value.sousChapitreId || undefined,
     };
+
+    // Ajouter sousChapitreId seulement s'il est défini
+    const data = formData.value.sousChapitreId
+      ? { ...baseData, sousChapitreId: formData.value.sousChapitreId }
+      : baseData;
 
     if (editingId.value) {
       await db.previsions.update(editingId.value, {
         ...data,
         updatedAt: now,
-      });
+      } as Parameters<typeof db.previsions.update>[1]);
       $q.notify({
         type: 'positive',
         message: 'Prévision modifiée avec succès',
@@ -486,7 +505,7 @@ async function savePrevision() {
         ...data,
         createdAt: now,
         updatedAt: now,
-      });
+      } as Parameters<typeof db.previsions.add>[0]);
       $q.notify({
         type: 'positive',
         message: 'Prévision ajoutée avec succès',

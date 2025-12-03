@@ -1,36 +1,57 @@
 <template>
-  <q-page class="q-pa-md">
-    <div class="text-h5 q-mb-md">Statistiques et Rapports</div>
+  <q-page class="statistiques-page q-pa-md">
+    <PageHeader
+      title="Statistiques des Recettes"
+      subtitle="Analyse et suivi des déclarations de recettes"
+      icon="analytics"
+    />
 
-    <!-- Sélecteur de période -->
-    <q-card class="q-mb-md">
+    <!-- Filtres de période -->
+    <q-card class="filter-card q-mb-md">
       <q-card-section>
-        <div class="row q-col-gutter-md items-center">
-          <div class="col-12 col-sm-3">
-            <q-input
-              v-model="dateDebut"
-              filled
-              type="date"
-              label="Date début"
-              @update:model-value="loadStatistics"
+        <div class="row q-col-gutter-md items-end">
+          <!-- Sélecteur de période -->
+          <div class="col-12 col-sm-6 col-md-3">
+            <q-select
+              v-model="periodFilter"
+              :options="periodOptions"
+              label="Période"
+              outlined
+              dense
+              @update:model-value="onPeriodChange"
             />
           </div>
-          <div class="col-12 col-sm-3">
-            <q-input
-              v-model="dateFin"
-              filled
-              type="date"
-              label="Date fin"
-              @update:model-value="loadStatistics"
-            />
+
+          <!-- Date début -->
+          <div class="col-12 col-sm-6 col-md-3">
+            <q-input v-model="dateDebut" type="date" label="Date début" outlined dense clearable />
           </div>
-          <div class="col-12 col-sm-3">
+
+          <!-- Date fin -->
+          <div class="col-12 col-sm-6 col-md-3">
+            <q-input v-model="dateFin" type="date" label="Date fin" outlined dense clearable />
+          </div>
+
+          <!-- Boutons d'action -->
+          <div class="col-12 col-sm-6 col-md-3 row q-gutter-sm">
+            <q-btn
+              color="grey-7"
+              icon="clear"
+              label="Réinitialiser"
+              outline
+              @click="resetFilters"
+              class="col"
+              no-caps
+            />
             <q-btn
               color="primary"
               icon="refresh"
               label="Actualiser"
+              unelevated
               @click="loadStatistics"
               :loading="loading"
+              class="col"
+              no-caps
             />
           </div>
         </div>
@@ -40,102 +61,207 @@
     <!-- Cartes de statistiques principales -->
     <div class="row q-col-gutter-md q-mb-md">
       <div class="col-12 col-sm-6 col-md-3">
-        <q-card class="stat-card" style="border-left: 4px solid var(--q-blue)">
-          <q-card-section>
-            <div class="text-h3 text-grey-8">{{ stats.totalDeclarations }}</div>
-            <div class="text-subtitle1 text-grey-6">Déclarations</div>
-            <q-icon name="description" size="48px" class="stat-icon" color="blue" />
-          </q-card-section>
-        </q-card>
+        <StatisticsCard
+          :value="stats.totalDeclarations"
+          title="Déclarations"
+          :subtitle="`${stats.declarationsPayees} validées`"
+          icon="description"
+          icon-color="grey-7"
+          border-color="#2196F3"
+        />
       </div>
 
       <div class="col-12 col-sm-6 col-md-3">
-        <q-card class="stat-card" style="border-left: 4px solid var(--q-green)">
-          <q-card-section>
-            <div class="text-h3 text-grey-8">{{ stats.declarationsPayees }}</div>
-            <div class="text-subtitle1 text-grey-6">Déclarations Payées</div>
-            <q-icon name="check_circle" size="48px" class="stat-icon" color="green" />
-          </q-card-section>
-        </q-card>
+        <StatisticsCard
+          :value="stats.montantTotal"
+          title="Montant Total"
+          subtitle="Recettes encaissées"
+          icon="payments"
+          icon-color="grey-7"
+          border-color="#2E7D32"
+          format="currency"
+        />
       </div>
 
       <div class="col-12 col-sm-6 col-md-3">
-        <q-card class="stat-card" style="border-left: 4px solid var(--q-orange)">
-          <q-card-section>
-            <div class="text-h3 text-grey-8">{{ stats.totalBordereaux }}</div>
-            <div class="text-subtitle1 text-grey-6">Bordereaux</div>
-            <q-icon name="receipt_long" size="48px" class="stat-icon" color="orange" />
-          </q-card-section>
-        </q-card>
+        <StatisticsCard
+          :value="stats.totalBordereaux"
+          title="Bordereaux"
+          :subtitle="`${stats.bordereauxTransmis} fermés`"
+          icon="receipt_long"
+          icon-color="grey-7"
+          border-color="#E67E22"
+        />
       </div>
 
       <div class="col-12 col-sm-6 col-md-3">
-        <q-card class="stat-card" style="border-left: 4px solid var(--q-purple)">
-          <q-card-section>
-            <div class="text-h4 text-grey-8">{{ formatMontant(stats.montantTotal) }}</div>
-            <div class="text-subtitle1 text-grey-6">Montant Total</div>
-            <q-icon name="payments" size="48px" class="stat-icon" color="purple" />
-          </q-card-section>
-        </q-card>
+        <StatisticsCard
+          :value="stats.tauxPaiement"
+          title="Taux Validation"
+          subtitle="Déclarations validées"
+          icon="trending_up"
+          icon-color="grey-7"
+          border-color="#9C27B0"
+          suffix="%"
+        />
       </div>
     </div>
 
-    <!-- Graphiques et tableaux -->
+    <!-- Graphiques et analyses -->
     <div class="row q-col-gutter-md">
+      <q-inner-loading :showing="loading">
+        <q-spinner-gears size="50px" color="primary" />
+      </q-inner-loading>
+
+      <!-- Message si aucune donnée -->
+      <div v-if="!loading && stats.totalDeclarations === 0" class="col-12 text-center q-pa-xl">
+        <q-icon name="bar_chart" size="64px" color="grey-5" />
+        <div class="text-h6 text-grey-6 q-mt-md">Aucune donnée disponible</div>
+        <div class="text-caption text-grey-5">
+          Créez des déclarations de recettes pour voir les statistiques
+        </div>
+      </div>
+
       <!-- Répartition par statut -->
-      <div class="col-12 col-md-6">
-        <q-card>
-          <q-card-section>
-            <div class="text-h6 q-mb-md">Répartition par Statut</div>
-            <div class="chart-container">
-              <canvas ref="statutChartRef"></canvas>
-            </div>
-          </q-card-section>
-        </q-card>
+      <div v-if="!loading && stats.totalDeclarations > 0" class="col-12 col-md-6">
+        <ChartCard
+          title="Répartition par Statut"
+          :chart-config="statutChartConfig"
+          header-class="text-grey-8"
+        />
       </div>
 
       <!-- Répartition par taxe -->
-      <div class="col-12 col-md-6">
-        <q-card>
-          <q-card-section>
-            <div class="text-h6 q-mb-md">Répartition par Taxe</div>
-            <div class="chart-container">
-              <canvas ref="taxeChartRef"></canvas>
-            </div>
-          </q-card-section>
-        </q-card>
+      <div v-if="!loading && stats.totalDeclarations > 0" class="col-12 col-md-6">
+        <ChartCard
+          title="Top 5 Taxes par Montant"
+          :chart-config="taxeChartConfig"
+          header-class="text-grey-8"
+        />
       </div>
 
       <!-- Évolution mensuelle -->
-      <div class="col-12">
-        <q-card>
+      <div v-if="!loading && stats.totalDeclarations > 0" class="col-12">
+        <ChartCard
+          title="Évolution Mensuelle des Recettes"
+          :chart-config="evolutionChartConfig"
+          header-class="text-grey-8"
+          container-class="chart-container-large"
+        />
+      </div>
+
+      <!-- Tableau détaillé par taxe -->
+      <div v-if="!loading && stats.totalDeclarations > 0" class="col-12">
+        <q-card class="details-card">
+          <q-card-section class="bg-grey-1">
+            <div class="text-h6 text-grey-8">Détails par Taxe</div>
+          </q-card-section>
           <q-card-section>
-            <div class="text-h6 q-mb-md">Évolution Mensuelle</div>
-            <div class="chart-container">
-              <canvas ref="evolutionChartRef"></canvas>
-            </div>
+            <q-table
+              :rows="detailsTaxes"
+              :columns="taxesColumns"
+              row-key="taxeId"
+              :pagination="{ rowsPerPage: 10 }"
+              flat
+              bordered
+            >
+              <template v-slot:body-cell-taxe="props">
+                <q-td :props="props">
+                  <q-badge color="primary" :label="props.row.label" />
+                </q-td>
+              </template>
+              <template v-slot:body-cell-count="props">
+                <q-td :props="props">
+                  <span class="text-weight-bold">{{ formatNumber(props.row.count) }}</span>
+                </q-td>
+              </template>
+              <template v-slot:body-cell-montant="props">
+                <q-td :props="props" class="text-weight-bold" style="color: #2e7d32">
+                  {{ formatMontant(props.row.montant) }}
+                </q-td>
+              </template>
+              <template v-slot:body-cell-moyenne="props">
+                <q-td :props="props">
+                  {{ formatMontant(props.row.moyenne) }}
+                </q-td>
+              </template>
+              <template v-slot:body-cell-part="props">
+                <q-td :props="props">
+                  <q-chip :color="getPartColor(props.row.part)" text-color="white" size="sm" dense>
+                    {{ props.row.part }}%
+                  </q-chip>
+                </q-td>
+              </template>
+            </q-table>
           </q-card-section>
         </q-card>
       </div>
 
-      <!-- Top 5 taxes -->
-      <div class="col-12 col-md-6">
-        <q-card>
+      <!-- Statistiques d'activité -->
+      <div v-if="!loading && stats.totalDeclarations > 0" class="col-12 col-md-6">
+        <q-card class="activity-card">
+          <q-card-section class="bg-grey-1">
+            <div class="text-h6 text-grey-8">Résumé de l'Activité</div>
+          </q-card-section>
           <q-card-section>
-            <div class="text-h6 q-mb-md">Top 5 Taxes par Montant</div>
             <q-list separator>
-              <q-item v-for="(item, index) in topTaxes" :key="index">
+              <q-item>
                 <q-item-section avatar>
-                  <q-avatar color="primary" text-color="white">
-                    {{ index + 1 }}
-                  </q-avatar>
+                  <q-avatar color="primary" text-color="white" icon="description" />
                 </q-item-section>
                 <q-item-section>
-                  <q-item-label>{{ item.label }}</q-item-label>
-                  <q-item-label caption>{{ item.count }} déclarations</q-item-label>
+                  <q-item-label class="text-weight-bold">Déclarations Totales</q-item-label>
+                  <q-item-label caption>Sur la période sélectionnée</q-item-label>
                 </q-item-section>
                 <q-item-section side>
-                  <div class="text-weight-bold">{{ formatMontant(item.montant) }}</div>
+                  <q-item-label class="text-h6" style="color: #2196f3">
+                    {{ formatNumber(stats.totalDeclarations) }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+
+              <q-item>
+                <q-item-section avatar>
+                  <q-avatar color="positive" text-color="white" icon="check_circle" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label class="text-weight-bold">Déclarations Validées</q-item-label>
+                  <q-item-label caption>Prêtes pour émission</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-item-label class="text-h6" style="color: #4caf50">
+                    {{ formatNumber(stats.declarationsPayees) }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+
+              <q-item>
+                <q-item-section avatar>
+                  <q-avatar color="warning" text-color="white" icon="receipt_long" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label class="text-weight-bold">Bordereaux Créés</q-item-label>
+                  <q-item-label caption>Dont {{ stats.bordereauxTransmis }} fermés</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-item-label class="text-h6" style="color: #e67e22">
+                    {{ formatNumber(stats.totalBordereaux) }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+
+              <q-item>
+                <q-item-section avatar>
+                  <q-avatar style="background-color: #9c27b0" text-color="white" icon="calculate" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label class="text-weight-bold">Montant Moyen</q-item-label>
+                  <q-item-label caption>Par déclaration</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-item-label class="text-h6" style="color: #9c27b0">
+                    {{ formatMontant(stats.montantMoyen) }}
+                  </q-item-label>
                 </q-item-section>
               </q-item>
             </q-list>
@@ -143,37 +269,33 @@
         </q-card>
       </div>
 
-      <!-- Statistiques détaillées -->
-      <div class="col-12 col-md-6">
-        <q-card>
+      <!-- Top 5 taxes -->
+      <div v-if="!loading && stats.totalDeclarations > 0" class="col-12 col-md-6">
+        <q-card class="top-card">
+          <q-card-section class="bg-grey-1">
+            <div class="text-h6 text-grey-8">Top 5 Taxes</div>
+          </q-card-section>
           <q-card-section>
-            <div class="text-h6 q-mb-md">Statistiques Détaillées</div>
-            <q-list>
-              <q-item>
+            <q-list separator>
+              <q-item v-for="(item, index) in topTaxes" :key="index">
+                <q-item-section avatar>
+                  <q-avatar :color="getTopColor(index)" text-color="white">
+                    {{ index + 1 }}
+                  </q-avatar>
+                </q-item-section>
                 <q-item-section>
-                  <q-item-label caption>Montant Moyen par Déclaration</q-item-label>
-                  <q-item-label>{{ formatMontant(stats.montantMoyen) }}</q-item-label>
+                  <q-item-label class="text-weight-medium">{{ item.label }}</q-item-label>
+                  <q-item-label caption>{{ item.count }} déclarations</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-item-label class="text-weight-bold" style="color: #2e7d32">
+                    {{ formatMontant(item.montant) }}
+                  </q-item-label>
                 </q-item-section>
               </q-item>
-              <q-separator />
-              <q-item>
-                <q-item-section>
-                  <q-item-label caption>Taux de Paiement</q-item-label>
-                  <q-item-label>{{ stats.tauxPaiement }}%</q-item-label>
-                </q-item-section>
-              </q-item>
-              <q-separator />
-              <q-item>
-                <q-item-section>
-                  <q-item-label caption>Nombre de Mairies</q-item-label>
-                  <q-item-label>{{ stats.nombreMairies }}</q-item-label>
-                </q-item-section>
-              </q-item>
-              <q-separator />
-              <q-item>
-                <q-item-section>
-                  <q-item-label caption>Bordereaux Transmis</q-item-label>
-                  <q-item-label>{{ stats.bordereauxTransmis }}</q-item-label>
+              <q-item v-if="topTaxes.length === 0">
+                <q-item-section class="text-center text-grey-6">
+                  Aucune donnée disponible
                 </q-item-section>
               </q-item>
             </q-list>
@@ -185,64 +307,89 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, nextTick } from 'vue';
-import {
-  db,
-  type Declaration,
-  type Taxe,
-  type Mairie,
-  type BordereauRecette,
-} from 'src/database/db';
-import Chart from 'chart.js/auto';
+import { ref, computed, onMounted } from 'vue';
+import { useQuasar } from 'quasar';
+import { type ChartConfiguration, type TooltipItem, type ChartTypeRegistry } from 'chart.js';
+import PageHeader from 'src/components/PageHeader.vue';
+import StatisticsCard from 'src/components/StatisticsCard.vue';
+import ChartCard from 'src/components/ChartCard.vue';
+import { db } from 'src/database/db';
+import type { Declaration, Taxe, Mairie, BordereauRecette } from 'src/database/db';
 
+const $q = useQuasar();
+
+// Refs
 const loading = ref(false);
+const periodFilter = ref('mois');
 const dateDebut = ref('');
 const dateFin = ref('');
 
-const mairies = ref<Mairie[]>([]);
+// Données brutes de la base
 const declarations = ref<Declaration[]>([]);
 const taxes = ref<Taxe[]>([]);
+const mairies = ref<Mairie[]>([]);
 const bordereaux = ref<BordereauRecette[]>([]);
 
-const statutChartRef = ref<HTMLCanvasElement | null>(null);
-const taxeChartRef = ref<HTMLCanvasElement | null>(null);
-const evolutionChartRef = ref<HTMLCanvasElement | null>(null);
+// Options de période
+const periodOptions = [
+  { label: "Aujourd'hui", value: 'jour' },
+  { label: 'Cette semaine', value: 'semaine' },
+  { label: 'Ce mois', value: 'mois' },
+  { label: 'Ce trimestre', value: 'trimestre' },
+  { label: 'Cette année', value: 'annee' },
+  { label: 'Personnalisé', value: 'custom' },
+];
 
-let statutChart: Chart | null = null;
-let taxeChart: Chart | null = null;
-let evolutionChart: Chart | null = null;
+// Déclarations filtrées par période
+const filteredDeclarations = computed(() => {
+  let filtered = declarations.value;
 
+  if (dateDebut.value) {
+    const debut = new Date(dateDebut.value);
+    filtered = filtered.filter((d) => new Date(d.dateEncaissement) >= debut);
+  }
+
+  if (dateFin.value) {
+    const fin = new Date(dateFin.value);
+    fin.setHours(23, 59, 59, 999);
+    filtered = filtered.filter((d) => new Date(d.dateEncaissement) <= fin);
+  }
+
+  return filtered;
+});
+
+// Données des statistiques
 const stats = computed(() => {
-  const filteredDecl = getFilteredDeclarations();
+  const decl = filteredDeclarations.value;
 
-  const totalDeclarations = filteredDecl.length;
-  const declarationsValidees = filteredDecl.filter((d) => d.statut === 'validee').length;
-  const montantTotal = filteredDecl.reduce((sum, d) => sum + (d.montantRecette || 0), 0);
+  const totalDeclarations = decl.length;
+  const declarationsPayees = decl.filter((d) => d.statut === 'validee').length;
+  const montantTotal = decl.reduce((sum, d) => sum + (d.montantRecette || 0), 0);
   const montantMoyen = totalDeclarations > 0 ? montantTotal / totalDeclarations : 0;
-  const tauxValidation =
-    totalDeclarations > 0 ? Math.round((declarationsValidees / totalDeclarations) * 100) : 0;
+  const tauxPaiement =
+    totalDeclarations > 0 ? Math.round((declarationsPayees / totalDeclarations) * 100) : 0;
 
-  const filteredBordereaux = bordereaux.value;
-
-  const bordereauxFermes = filteredBordereaux.filter((b) => b.statut === 'ferme').length;
+  const totalBordereaux = bordereaux.value.length;
+  const bordereauxTransmis = bordereaux.value.filter((b) => b.statut === 'ferme').length;
 
   return {
     totalDeclarations,
-    declarationsPayees: declarationsValidees,
-    totalBordereaux: filteredBordereaux.length,
+    declarationsPayees,
     montantTotal,
     montantMoyen,
-    tauxPaiement: tauxValidation,
+    tauxPaiement,
+    totalBordereaux,
+    bordereauxTransmis,
     nombreMairies: mairies.value.length,
-    bordereauxTransmis: bordereauxFermes,
   };
 });
 
+// Top taxes
 const topTaxes = computed(() => {
-  const filteredDecl = getFilteredDeclarations();
+  const decl = filteredDeclarations.value;
   const taxeStats: Record<number, { label: string; montant: number; count: number }> = {};
 
-  filteredDecl.forEach((d) => {
+  decl.forEach((d) => {
     if (!taxeStats[d.taxeId]) {
       const taxe = taxes.value.find((t) => t.id === d.taxeId);
       taxeStats[d.taxeId] = {
@@ -263,22 +410,65 @@ const topTaxes = computed(() => {
     .slice(0, 5);
 });
 
-function getFilteredDeclarations(): Declaration[] {
-  let filtered = declarations.value;
+// Détails par taxe pour le tableau
+const detailsTaxes = computed(() => {
+  const decl = filteredDeclarations.value;
+  const montantTotal = stats.value.montantTotal;
+  const taxeStats: Record<
+    number,
+    { taxeId: number; label: string; montant: number; count: number; moyenne: number; part: number }
+  > = {};
 
-  if (dateDebut.value) {
-    const debut = new Date(dateDebut.value);
-    filtered = filtered.filter((d) => new Date(d.dateEncaissement) >= debut);
-  }
+  decl.forEach((d) => {
+    if (!taxeStats[d.taxeId]) {
+      const taxe = taxes.value.find((t) => t.id === d.taxeId);
+      taxeStats[d.taxeId] = {
+        taxeId: d.taxeId,
+        label: taxe?.libelle || 'Inconnu',
+        montant: 0,
+        count: 0,
+        moyenne: 0,
+        part: 0,
+      };
+    }
+    const stat = taxeStats[d.taxeId];
+    if (stat) {
+      stat.montant += d.montantRecette || 0;
+      stat.count += 1;
+    }
+  });
 
-  if (dateFin.value) {
-    const fin = new Date(dateFin.value);
-    filtered = filtered.filter((d) => new Date(d.dateEncaissement) <= fin);
-  }
+  return Object.values(taxeStats)
+    .map((t) => ({
+      ...t,
+      moyenne: t.count > 0 ? t.montant / t.count : 0,
+      part: montantTotal > 0 ? Math.round((t.montant / montantTotal) * 100) : 0,
+    }))
+    .sort((a, b) => b.montant - a.montant);
+});
 
-  return filtered;
-}
+// Colonnes du tableau
+const taxesColumns = [
+  { name: 'taxe', label: 'Taxe', align: 'left' as const, field: 'label', sortable: true },
+  {
+    name: 'count',
+    label: 'Déclarations',
+    align: 'center' as const,
+    field: 'count',
+    sortable: true,
+  },
+  {
+    name: 'montant',
+    label: 'Montant Total',
+    align: 'right' as const,
+    field: 'montant',
+    sortable: true,
+  },
+  { name: 'moyenne', label: 'Moyenne', align: 'right' as const, field: 'moyenne', sortable: true },
+  { name: 'part', label: 'Part', align: 'center' as const, field: 'part', sortable: true },
+];
 
+// Fonctions utilitaires
 function formatMontant(montant: number): string {
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
@@ -287,52 +477,105 @@ function formatMontant(montant: number): string {
   }).format(montant);
 }
 
-async function loadData() {
+function formatNumber(num: number): string {
+  return new Intl.NumberFormat('fr-FR').format(num);
+}
+
+function getPartColor(part: number): string {
+  if (part >= 30) return 'positive';
+  if (part >= 15) return 'warning';
+  return 'grey-7';
+}
+
+function getTopColor(index: number): string {
+  const colors = ['amber-8', 'blue-grey-5', 'brown-5', 'grey-6', 'grey-7'];
+  return colors[index] || 'grey-7';
+}
+
+// Gestion des périodes
+function onPeriodChange() {
+  const today = new Date();
+  let debut = new Date();
+  let fin = new Date();
+
+  switch (periodFilter.value) {
+    case 'jour':
+      debut = new Date(today);
+      fin = new Date(today);
+      break;
+    case 'semaine':
+      debut = new Date(today.setDate(today.getDate() - today.getDay()));
+      fin = new Date();
+      break;
+    case 'mois':
+      debut = new Date(today.getFullYear(), today.getMonth(), 1);
+      fin = new Date();
+      break;
+    case 'trimestre': {
+      const quarter = Math.floor(today.getMonth() / 3);
+      debut = new Date(today.getFullYear(), quarter * 3, 1);
+      fin = new Date();
+      break;
+    }
+    case 'annee':
+      debut = new Date(today.getFullYear(), 0, 1);
+      fin = new Date();
+      break;
+    default:
+      return;
+  }
+
+  dateDebut.value = debut.toISOString().split('T')[0]!;
+  dateFin.value = fin.toISOString().split('T')[0]!;
+
+  void loadStatistics();
+}
+
+function resetFilters() {
+  periodFilter.value = 'mois';
+  onPeriodChange();
+}
+
+// Chargement des statistiques
+async function loadStatistics() {
   loading.value = true;
   try {
-    [declarations.value, taxes.value, mairies.value, bordereaux.value] = await Promise.all([
+    const [decl, taxesList, mairiesList, bordereauxList] = await Promise.all([
       db.declarations.toArray(),
       db.taxes.toArray(),
       db.mairies.toArray(),
       db.bordereauxRecette.toArray(),
     ]);
+
+    declarations.value = decl;
+    taxes.value = taxesList;
+    mairies.value = mairiesList;
+    bordereaux.value = bordereauxList;
   } catch (error) {
-    console.error('Erreur lors du chargement:', error);
+    console.error('Erreur:', error);
+    $q.notify({
+      type: 'negative',
+      message: 'Erreur lors du chargement des statistiques',
+    });
   } finally {
     loading.value = false;
   }
 }
 
-async function loadStatistics() {
-  await loadData();
-  await nextTick();
-  createCharts();
-}
+// Configuration des graphiques
+const statutChartConfig = computed<ChartConfiguration>(() => {
+  const decl = filteredDeclarations.value;
+  const brouillon = decl.filter((d) => d.statut === 'brouillon').length;
+  const validee = decl.filter((d) => d.statut === 'validee').length;
 
-function createCharts() {
-  createStatutChart();
-  createTaxeChart();
-  createEvolutionChart();
-}
-
-function createStatutChart() {
-  if (!statutChartRef.value) return;
-
-  const filteredDecl = getFilteredDeclarations();
-  const statutData = {
-    brouillon: filteredDecl.filter((d) => d.statut === 'brouillon').length,
-    validee: filteredDecl.filter((d) => d.statut === 'validee').length,
-  };
-
-  if (statutChart) statutChart.destroy();
-
-  statutChart = new Chart(statutChartRef.value, {
+  return {
     type: 'doughnut',
     data: {
       labels: ['Brouillon', 'Validée'],
       datasets: [
         {
-          data: [statutData.brouillon, statutData.validee],
+          label: 'Déclarations',
+          data: [brouillon, validee],
           backgroundColor: ['#9E9E9E', '#4CAF50'],
         },
       ],
@@ -341,78 +584,105 @@ function createStatutChart() {
       responsive: true,
       maintainAspectRatio: true,
       plugins: {
-        legend: {
-          position: 'bottom',
+        legend: { position: 'bottom' },
+        tooltip: {
+          callbacks: {
+            label: function (context: TooltipItem<keyof ChartTypeRegistry>) {
+              const label = context.label || '';
+              const value = context.parsed || 0;
+              return `${label}: ${formatNumber(value)} déclarations`;
+            },
+          },
         },
       },
     },
-  });
-}
+  };
+});
 
-function createTaxeChart() {
-  if (!taxeChartRef.value) return;
-
+const taxeChartConfig = computed<ChartConfiguration>(() => {
   const top5 = topTaxes.value;
 
-  if (taxeChart) taxeChart.destroy();
-
-  taxeChart = new Chart(taxeChartRef.value, {
+  return {
     type: 'bar',
     data: {
       labels: top5.map((t) => t.label),
       datasets: [
         {
-          label: 'Montant (FCFA)',
+          label: 'Montant',
           data: top5.map((t) => t.montant),
-          backgroundColor: '#673AB7',
+          backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726', '#AB47BC', '#26C6DA'],
         },
       ],
     },
     options: {
       responsive: true,
       maintainAspectRatio: true,
+      indexAxis: 'y',
       plugins: {
-        legend: {
-          display: false,
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function (context: TooltipItem<keyof ChartTypeRegistry>) {
+              const value = context.parsed.x || 0;
+              return `Montant: ${formatMontant(value)}`;
+            },
+          },
         },
       },
       scales: {
-        y: {
+        x: {
           beginAtZero: true,
+          ticks: {
+            callback: function (tickValue: string | number) {
+              return formatMontant(Number(tickValue));
+            },
+          },
         },
       },
     },
+  };
+});
+
+const evolutionChartConfig = computed<ChartConfiguration>(() => {
+  const labels = [
+    'Janv',
+    'Févr',
+    'Mars',
+    'Avr',
+    'Mai',
+    'Juin',
+    'Juil',
+    'Août',
+    'Sept',
+    'Oct',
+    'Nov',
+    'Déc',
+  ];
+  const currentYear = new Date().getFullYear();
+  const monthlyData = new Array(12).fill(0);
+  const monthlyCount = new Array(12).fill(0);
+
+  filteredDeclarations.value.forEach((d) => {
+    const date = new Date(d.dateEncaissement);
+    if (date.getFullYear() === currentYear) {
+      const month = date.getMonth();
+      if (month >= 0 && month < 12) {
+        monthlyData[month] += d.montantRecette || 0;
+        monthlyCount[month] += 1;
+      }
+    }
   });
-}
 
-function createEvolutionChart() {
-  if (!evolutionChartRef.value) return;
-
-  const filteredDecl = getFilteredDeclarations();
-  const monthlyData: Record<string, number> = {};
-
-  filteredDecl.forEach((d) => {
-    const month = new Date(d.dateEncaissement).toLocaleDateString('fr-FR', {
-      year: 'numeric',
-      month: 'short',
-    });
-    monthlyData[month] = (monthlyData[month] || 0) + (d.montantRecette || 0);
-  });
-
-  const sortedMonths = Object.keys(monthlyData).sort();
-
-  if (evolutionChart) evolutionChart.destroy();
-
-  evolutionChart = new Chart(evolutionChartRef.value, {
+  return {
     type: 'line',
     data: {
-      labels: sortedMonths,
+      labels,
       datasets: [
         {
-          label: 'Montant (FCFA)',
-          data: sortedMonths.map((m) => monthlyData[m] ?? 0),
-          borderColor: '#FF9800',
-          backgroundColor: 'rgba(255, 152, 0, 0.1)',
+          label: 'Montant des recettes',
+          data: monthlyData,
+          borderColor: '#2196F3',
+          backgroundColor: 'rgba(33, 150, 243, 0.1)',
           tension: 0.4,
           fill: true,
         },
@@ -422,43 +692,66 @@ function createEvolutionChart() {
       responsive: true,
       maintainAspectRatio: true,
       plugins: {
-        legend: {
-          display: false,
+        legend: { position: 'bottom' },
+        tooltip: {
+          callbacks: {
+            label: function (context: TooltipItem<keyof ChartTypeRegistry>) {
+              const label = context.dataset.label || '';
+              const value = context.parsed.y || 0;
+              return `${label}: ${formatMontant(value)}`;
+            },
+          },
         },
       },
       scales: {
         y: {
           beginAtZero: true,
+          ticks: {
+            callback: function (tickValue: string | number) {
+              return formatMontant(Number(tickValue));
+            },
+          },
         },
       },
     },
-  });
-}
+  };
+});
 
-onMounted(() => {
-  void loadStatistics();
+// Lifecycle hooks
+onMounted(async () => {
+  onPeriodChange();
+  await loadStatistics();
 });
 </script>
 
 <style scoped lang="scss">
-.stat-card {
-  position: relative;
-  overflow: hidden;
+.statistiques-page {
+  max-width: 1400px;
+  margin: 0 auto;
+}
 
-  .stat-icon {
-    position: absolute;
-    right: 10px;
-    top: 10px;
-    opacity: 0.3;
+.filter-card,
+.details-card,
+.activity-card,
+.top-card {
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+
+  &:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
   }
 }
 
 .chart-container {
   position: relative;
   height: 300px;
+}
 
-  canvas {
-    max-height: 100%;
-  }
+.chart-container-large {
+  position: relative;
+  height: 400px;
 }
 </style>

@@ -97,7 +97,7 @@
             </div>
 
             <div class="row q-col-gutter-md">
-              <div class="col-12">
+              <div class="col-6">
                 <q-select
                   v-model="formData.chapitreId"
                   :options="filteredChapitreOptions"
@@ -113,7 +113,7 @@
                   @filter="filterChapitre"
                 />
               </div>
-              <div class="col-12">
+              <div class="col-6">
                 <q-select
                   v-model="formData.sousChapitreId"
                   :options="filteredSousChapitreOptions"
@@ -131,26 +131,6 @@
               </div>
             </div>
 
-            <!-- Bordereau de Mandat -->
-            <q-select
-              v-model="formData.bordereauMandatId"
-              :options="filteredBordereauMandatOptions"
-              label="Bordereau de Mandat *"
-              outlined
-              dense
-              emit-value
-              map-options
-              use-input
-              input-debounce="0"
-              :rules="[(val) => !!val || 'Bordereau requis']"
-              hint="Sélectionner un bordereau"
-              @filter="filterBordereauMandat"
-            >
-              <template v-slot:prepend>
-                <q-icon name="description" />
-              </template>
-            </q-select>
-
             <q-input
               v-model="formData.beneficiaire"
               label="Bénéficiaire *"
@@ -158,6 +138,47 @@
               dense
               :rules="[(val) => !!val || 'Bénéficiaire requis']"
             />
+
+            <!-- Bordereau, RIB, Patrimonial sur la même ligne -->
+            <div class="row q-col-gutter-md">
+              <div class="col-4">
+                <q-select
+                  v-model="formData.bordereauMandatId"
+                  :options="filteredBordereauMandatOptions"
+                  label="Bordereau de Mandat *"
+                  outlined
+                  dense
+                  emit-value
+                  map-options
+                  use-input
+                  input-debounce="0"
+                  :rules="[(val) => !!val || 'Bordereau requis']"
+                  @filter="filterBordereauMandat"
+                >
+                  <template v-slot:prepend>
+                    <q-icon name="description" />
+                  </template>
+                </q-select>
+              </div>
+              <div class="col-4">
+                <q-input
+                  v-model="formData.rib"
+                  label="RIB"
+                  outlined
+                  dense
+                  placeholder="Ex: SN001 01234 123456789012 12"
+                />
+              </div>
+              <div class="col-4">
+                <q-input
+                  v-model="formData.patrimonial"
+                  label="Imputation Patrimoniale"
+                  outlined
+                  dense
+                  placeholder="Ex: 6000/1"
+                />
+              </div>
+            </div>
 
             <q-input
               v-model="formData.objet"
@@ -271,6 +292,8 @@ const formData = ref({
   sousChapitreId: null as number | null,
   bordereauMandatId: null as number | null,
   beneficiaire: '',
+  rib: '',
+  patrimonial: '',
   objet: '',
   montant: 0,
   numeroFacture: '',
@@ -469,14 +492,16 @@ function printMandat(mandat: Mandat) {
           data: {
             exercice: mandat.exercice,
             imputationFonctionnelle: sousChapitre
-              ? `${chapitre?.code}/${sousChapitre.code}`
+              ? `${sousChapitre.code}/${chapitre?.code}`
               : chapitre?.code,
+            imputationPatrimoniale: mandat.patrimonial || '',
             numeroOrdre: mandat.numeroMandat || '',
             numeroBordereau: bordereau ? `${bordereau.numero}-${bordereau.exercice % 100}` : '',
             objetDepense: mandat.objet,
             periode: '', // This field is not in the Mandat interface
             beneficiaire: mandat.beneficiaire,
             beneficiaireDetails: '', // This field is not in the Mandat interface
+            rib: mandat.rib || '',
             montantBrut: mandat.montant,
             montantNet: mandat.montant,
             montantLettres: amountToWords(mandat.montant).toUpperCase(),
@@ -525,6 +550,8 @@ function resetForm() {
     sousChapitreId: null,
     bordereauMandatId: null,
     beneficiaire: '',
+    rib: '',
+    patrimonial: '',
     objet: '',
     montant: 0,
     numeroFacture: '',
@@ -613,6 +640,8 @@ function editMandat(row: Mandat) {
     sousChapitreId: row.sousChapitreId || null,
     bordereauMandatId: row.bordereauMandatId || null,
     beneficiaire: row.beneficiaire,
+    rib: row.rib || '',
+    patrimonial: row.patrimonial || '',
     objet: row.objet,
     montant: row.montant,
     numeroFacture: row.numeroFacture || '',

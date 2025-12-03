@@ -245,7 +245,9 @@
           <p>Département de <span data-field="mairieVille"></span></p>
           <p>Commune de <span data-field="mairieVille"></span></p>
           <p class="bold mt-2 text-center">Ville de <span data-field="mairieVille"></span></p>
-          <p class="bold mt-4">Code : <span style="font-style: italic" data-field="mairieCode"></span></p>
+          <p class="bold mt-4">
+            Code : <span style="font-style: italic" data-field="mairieCode"></span>
+          </p>
         </div>
         <div class="header-col text-center">
           <p class="bold uppercase" style="font-size: 1.1em">MANDAT DE PAIEMENT</p>
@@ -253,23 +255,32 @@
           <p class="bold uppercase mt-2">TITRE DU BUDGET : I</p>
           <p class="bold uppercase mt-4">IMPUTATION</p>
           <div class="w-full text-left mt-2" style="padding-left: 10px">
-            <p>FONCTIONNELLE : <span class="bold" data-field="imputationFonctionnelle">6000/1</span></p>
-            <p class="mt-2">PATRIMONIALE :</p>
+            <p>
+              FONCTIONNELLE : <span class="bold" data-field="imputationFonctionnelle">6000/1</span>
+            </p>
+            <p class="mt-2">
+              PATRIMONIALE : <span class="bold" data-field="imputationPatrimoniale"></span>
+            </p>
           </div>
         </div>
         <div class="header-col header-right text-center">
-          <p class="uppercase">TRESORERIE PRINCIPALE<br />DE <span data-field="mairieVille"></span></p>
+          <p class="uppercase">
+            TRESORERIE PRINCIPALE<br />DE <span data-field="mairieVille"></span>
+          </p>
           <div class="text-left mt-2" style="font-size: 0.8em">
             <p>N° d'inscription au livre d'exécution</p>
             <p>des opérations budgétaires :</p>
             <span class="dots mt-1"></span>
           </div>
-          <div class="mt-4 text-center">
+          <div class="mt-2 text-center">
             <p>N° d'Ordre</p>
             <span style="width: 50%" data-field="numeroOrdre"></span>
           </div>
-          <div class="mt-auto text-left" style="font-size: 0.8em">
-            <p>N° du bordereau d'émission: <span data-field="numeroBordereau"></span></p>
+          <div class="mt-2 text-left" style="font-size: 1.1em">
+            <p>
+              N° du bordereau d'émission: <br />
+              <span data-field="numeroBordereau"></span>
+            </p>
           </div>
         </div>
       </div>
@@ -297,7 +308,14 @@
               </div>
             </div>
             <div class="mt-2">
-              <p>Compte Bancaire <span class="dotted-line" style="width: 60%"></span></p>
+              <p>
+                Compte Bancaire
+                <span
+                  class="bold"
+                  data-field="rib"
+                  style="border-bottom: 1px dotted #000; min-width: 60%; display: inline-block"
+                ></span>
+              </p>
               <p>ou Postal <span class="dotted-line" style="width: 78%"></span></p>
               <p>Agence d... <span class="dotted-line" style="width: 75%"></span></p>
             </div>
@@ -352,19 +370,28 @@
             </div>
             <div class="amount-row mt-2">
               <label style="font-size: 0.7em">Somme nette à payer ou à virer</label>
-              <div class="amount-box" style="border-width: 3px" data-field="montantNet">181 366</div>
+              <div class="amount-box" style="border-width: 3px" data-field="montantNet">
+                181 366
+              </div>
             </div>
           </div>
 
           <div class="amount-text-section">
             <p class="text-xs">Arrêté le présent mandat de paiement à la somme de :</p>
-            <p class="bold uppercase mt-1" style="font-size: 1.1em; line-height: 1.4" data-field="montantLettres">
+            <p
+              class="bold uppercase mt-1"
+              style="font-size: 1.1em; line-height: 1.4"
+              data-field="montantLettres"
+            >
               CENT QUATRE VINGT ET UN MILLE TROIS SOIXANTE SIX FRANCS
             </p>
           </div>
 
           <div class="signature-section">
-            <p class="uppercase mt-2">A <span data-field="mairieVille"></span> , le <span data-field="dateEmission">15/09/2019</span></p>
+            <p class="uppercase mt-2">
+              A <span data-field="mairieVille"></span> , le
+              <span data-field="dateEmission">15/09/2019</span>
+            </p>
             <p class="text-sm italic mt-1">Signature et cachet de l'Ordonnateur</p>
             <p class="bold mt-2">P/ LE MAIRE & P.D.</p>
           </div>
@@ -382,17 +409,7 @@
       </div>
 
       <!-- FOOTER -->
-      <div class="footer-grid">
-        <div class="footer-col">
-          <p>République de Côte d'Ivoire</p>
-        </div>
-        <div class="footer-col">
-          <p class="uppercase">MANDAT DE PAIEMENT</p>
-        </div>
-        <div class="footer-col">
-          <p class="uppercase">TRÉSORERIE PRINCIPALE<br />DE <span data-field="mairieVille"></span></p>
-        </div>
-      </div>
+
       <div class="footer-note">Pour acquit de la somme indiquée ci-dessus (A) :</div>
     </div>
     <script>
@@ -418,7 +435,7 @@
 
         for (const key in data) {
           const elements = document.querySelectorAll(`[data-field="${key}"]`);
-          elements.forEach(el => {
+          elements.forEach((el) => {
             el.textContent = data[key];
           });
         }

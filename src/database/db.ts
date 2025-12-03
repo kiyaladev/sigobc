@@ -224,6 +224,8 @@ export interface Mandat {
   bordereauMandatId?: number; // ID du bordereau d'émission des mandats
   mairieId: number;
   beneficiaire: string; // Nom du bénéficiaire
+  rib?: string; // RIB du bénéficiaire
+  patrimonial?: string; // Imputation patrimoniale
   objet: string; // Objet de la dépense
   montant: number; // Montant du mandat
   numeroFacture?: string; // Numéro de facture
