@@ -8,6 +8,56 @@
 
     <q-card class="main-card">
       <q-card-section>
+        <!-- Filtres -->
+        <div class="row q-col-gutter-md q-mb-md">
+          <div class="col-12 col-md-3">
+            <q-select
+              v-model="filterExercice"
+              :options="exerciceFilterOptions"
+              label="Exercice"
+              outlined
+              dense
+              emit-value
+              map-options
+              clearable
+            />
+          </div>
+          <div class="col-12 col-md-3">
+            <q-select
+              v-model="filterChapitreId"
+              :options="chapitreOptions"
+              label="Chapitre"
+              outlined
+              dense
+              emit-value
+              map-options
+              clearable
+            />
+          </div>
+          <div class="col-12 col-md-3">
+            <q-select
+              v-model="filterSousChapitreId"
+              :options="sousChapitreOptions"
+              label="Sous-chapitre"
+              outlined
+              dense
+              emit-value
+              map-options
+              clearable
+            />
+          </div>
+          <div class="col-12 col-md-3">
+            <q-btn
+              label="Réinitialiser"
+              icon="refresh"
+              flat
+              color="grey-7"
+              @click="resetFilters"
+              class="full-width"
+            />
+          </div>
+        </div>
+
         <div class="row items-center justify-between q-mb-md">
           <div class="col-12 col-md-6">
             <q-input
@@ -195,6 +245,11 @@ const showAddDialog = ref(false);
 const showCT02Dialog = ref(false);
 const editingId = ref<number | null>(null);
 
+// Filtres
+const filterExercice = ref<number | null>(null);
+const filterChapitreId = ref<number | null>(null);
+const filterSousChapitreId = ref<number | null>(null);
+
 const previsions = ref<Prevision[]>([]);
 const chapitres = ref<Chapitre[]>([]);
 const sousChapitres = ref<SousChapitre[]>([]);
@@ -231,6 +286,11 @@ const exerciceOptions = computed(() => {
   }));
 });
 
+const exerciceFilterOptions = computed(() => {
+  const years = [...new Set(previsions.value.map((p) => p.exercice))].sort((a, b) => b - a);
+  return years.map((y) => ({ label: String(y), value: y }));
+});
+
 const columns = [
   {
     name: 'exercice',
@@ -247,6 +307,7 @@ const columns = [
       const chapitre = chapitres.value.find((c) => c.id === row.chapitreId);
       return chapitre ? `${chapitre.code} - ${chapitre.libelle}` : '';
     },
+    sortable: true,
   },
   {
     name: 'sousChapitre',
@@ -257,6 +318,7 @@ const columns = [
       const sousChapitre = sousChapitres.value.find((s) => s.id === row.sousChapitreId);
       return sousChapitre ? `${sousChapitre.code} - ${sousChapitre.libelle}` : '';
     },
+    sortable: true,
   },
   {
     name: 'montantPrevu',
@@ -264,6 +326,7 @@ const columns = [
     align: 'right' as const,
     field: 'montantPrevu',
     format: (val: number) => formatMontant(val),
+    sortable: true,
   },
   {
     name: 'montantEngage',
@@ -271,6 +334,7 @@ const columns = [
     align: 'right' as const,
     field: 'montantEngage',
     format: (val: number) => formatMontant(val),
+    sortable: true,
   },
   {
     name: 'montantDisponible',
@@ -278,12 +342,14 @@ const columns = [
     align: 'right' as const,
     field: 'montantDisponible',
     format: (val: number) => formatMontant(val),
+    sortable: true,
   },
   {
     name: 'statut',
     label: 'Statut',
     align: 'center' as const,
     field: 'statut',
+    sortable: true,
   },
   {
     name: 'actions',
@@ -294,10 +360,40 @@ const columns = [
 ];
 
 const filteredPrevisions = computed(() => {
-  if (!filter.value) return previsions.value;
-  const searchTerm = filter.value.toLowerCase();
-  return previsions.value.filter((p) => p.exercice.toString().includes(searchTerm));
+  let result = previsions.value;
+
+  // Filtre par exercice
+  if (filterExercice.value) {
+    result = result.filter((p) => p.exercice === filterExercice.value);
+  }
+
+  // Filtre par chapitre
+  if (filterChapitreId.value) {
+    result = result.filter((p) => p.chapitreId === filterChapitreId.value);
+  }
+
+  // Filtre par sous-chapitre
+  if (filterSousChapitreId.value) {
+    result = result.filter(
+      (p) => 'sousChapitreId' in p && p.sousChapitreId === filterSousChapitreId.value,
+    );
+  }
+
+  // Filtre par texte
+  if (filter.value) {
+    const searchTerm = filter.value.toLowerCase();
+    result = result.filter((p) => p.exercice.toString().includes(searchTerm));
+  }
+
+  return result;
 });
+
+function resetFilters() {
+  filterExercice.value = null;
+  filterChapitreId.value = null;
+  filterSousChapitreId.value = null;
+  filter.value = '';
+}
 
 function formatMontant(montant: number): string {
   return new Intl.NumberFormat('fr-FR', {

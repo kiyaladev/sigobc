@@ -503,7 +503,12 @@
               <td
                 id="total-precedent"
                 class="text-center"
-                style="font-weight: bold; font-family: monospace; font-size: 13px"
+                style="
+                  font-weight: bold;
+                  text-align: right;
+                  font-family: monospace;
+                  font-size: 13px;
+                "
               ></td>
             </tr>
             <!-- TOTAUX 3 (Folio) -->
@@ -537,7 +542,12 @@
               <td
                 id="total-general"
                 class="text-center"
-                style="font-weight: bold; font-family: monospace; font-size: 13px"
+                style="
+                  font-weight: bold;
+                  text-align: right;
+                  font-family: monospace;
+                  font-size: 13px;
+                "
               ></td>
             </tr>
           </tfoot>
@@ -842,6 +852,8 @@
           const mandats = await db.mandats.where('bordereauMandatId').equals(bordereauId).toArray();
           const chapitres = await db.chapitres.toArray();
           const chapitresMap = new Map(chapitres.map((c) => [c.id, c]));
+          const sousChapitres = await db.sousChapitres.toArray();
+          const sousChapitresMap = new Map(sousChapitres.map((sc) => [sc.id, sc]));
 
           // Populate header avec la ville et le code de la mairie
           if (mairie) {
@@ -858,13 +870,28 @@
           let totalBordereau = 0;
           mandats.forEach((mandat) => {
             const chapitre = chapitresMap.get(mandat.chapitreId);
+            const sousChapitre = mandat.sousChapitreId
+              ? sousChapitresMap.get(mandat.sousChapitreId)
+              : null;
+
+            // Imputation fonctionnelle: sous-chapitre/chapitre
+            let imputationFonctionnelle = '';
+            if (sousChapitre && chapitre) {
+              imputationFonctionnelle = `${sousChapitre.code}/${chapitre.code}`;
+            } else if (chapitre) {
+              imputationFonctionnelle = chapitre.code;
+            }
+
+            // Imputation patrimoniale
+            const imputationPatrimoniale = mandat.patrimonial || '';
+
             const row = document.createElement('tr');
             row.innerHTML = `
                     <td class="text-center" style="color: #666;">${mandat.numeroMandat}</td>
                     <td>${chapitre ? chapitre.libelle : 'N/A'}</td>
                     <td>${mandat.beneficiaire}</td>
-                    <td class="center" style="font-family: monospace;">${chapitre ? chapitre.code : 'N/A'}</td>
-                    <td></td>
+                    <td class="center" style="font-family: monospace;">${imputationFonctionnelle}</td>
+                    <td class="center" style="font-family: monospace;">${imputationPatrimoniale}</td>
                     <td style="text-align: right; font-weight: bold; font-family: monospace;">${mandat.montant.toLocaleString('fr-FR')}</td>
                     <td></td><td></td><td></td><td></td>
                 `;

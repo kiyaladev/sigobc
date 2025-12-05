@@ -1200,6 +1200,9 @@ export async function seedMandats(
     'autre',
   ];
 
+  // Codes patrimoniaux possibles
+  const patrimonials = ['21', '22', '23', '24', '211', '212', '213', '221', '231', '241', '242'];
+
   const mandats: Partial<Mandat>[] = [];
   const now = new Date();
 
@@ -1229,7 +1232,7 @@ export async function seedMandats(
     // Date du mandat : entre le début de l'année et la date du bordereau
     const dateMandat = randomDate(startOfYear, bordereauDate);
 
-    const numeroMandat = `M${exercice}-${String(i + 1).padStart(4, '0')}`;
+    const numeroMandat = String(i + 1);
     const montant = randomAmount(5000, 500000);
 
     const statuts: Array<'emis' | 'paye'> = ['emis', 'paye'];
@@ -1264,6 +1267,12 @@ export async function seedMandats(
       createdAt: dateMandat,
       updatedAt: now,
     };
+
+    // Ajouter le patrimonial (70% des mandats)
+    const maybePatrimonial = Math.random() > 0.3 ? randomChoice(patrimonials) : undefined;
+    if (maybePatrimonial) {
+      mandat.patrimonial = maybePatrimonial;
+    }
 
     // Lier le mandat au bordereau
     if (bordereauId) {

@@ -212,30 +212,51 @@
       <header class="header">
         <div class="header-left">
           <strong>RECETTE MUNICIPALE<br />DE VAVOUA</strong>
-          <div>CODE COMMUNE: 433</div>
         </div>
 
         <div class="header-center">
           <div class="main-title">COMMUNE DE VAVOUA</div>
-          <div class="doc-ref-box">
-            CT 02 A - Livre d'exécution des opérations budgétaires dépenses
+          <div style="margin-top: 10px">
+            <span>Compte :</span> <strong>6000</strong><br />
+            <span>Intitulé :</span> <strong>Administration</strong>
           </div>
         </div>
 
         <div class="header-right">
-          <div class="bold">EXERCICE: 2019</div>
-          <div style="margin-top: 10px">
-            COMPTE: 6000<br />
-            INTITULÉ: ADMINISTRATION
-          </div>
+          <div>Code Commune : <strong>433</strong></div>
+          <div style="margin-top: 10px">Exercice : <strong>2019</strong></div>
         </div>
       </header>
 
       <!-- TABLEAU 1: PRÉVISIONS -->
       <table>
+        <colgroup>
+          <col style="width: 12%" />
+          <!-- Libellé -->
+          <col style="width: 8%" />
+          <!-- 1 -->
+          <col style="width: 8%" />
+          <!-- 2 -->
+          <col style="width: 8%" />
+          <!-- 3 -->
+          <col style="width: 8%" />
+          <!-- 4 -->
+          <col style="width: 8%" />
+          <!-- 5 -->
+          <col style="width: 8%" />
+          <!-- 6 -->
+          <col style="width: 8%" />
+          <!-- 7 -->
+          <col style="width: 8%" />
+          <!-- 8 -->
+          <col style="width: 12%" />
+          <!-- TOTAL -->
+          <col style="width: 12%" />
+          <!-- CUMUL (pour aligner avec émissions) -->
+        </colgroup>
         <thead>
           <tr>
-            <th style="width: 15%; text-align: left">ARTICLES</th>
+            <th class="text-left">Articles</th>
             <th>1</th>
             <th>2</th>
             <th>3</th>
@@ -244,24 +265,28 @@
             <th>6</th>
             <th>7</th>
             <th>8</th>
-            <th>TOTAL</th>
+            <th>Total<br />Bordereau</th>
+            <th>Total Cumulé</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td class="text-left bold">PRÉVISIONS BUDGETS</td>
-            <td>5 172 000</td>
-            <td>359 000</td>
-            <td>800 000</td>
-            <td>1 200 000</td>
-            <td>1 500 000</td>
-            <td>7 000 000</td>
-            <td>700 000</td>
-            <td>900 000</td>
-            <td class="bold">17 631 000</td>
+            <td class="text-left" style="font-style: italic">Prévisions<br />BUDGETS</td>
+            <td style="color: #c00000">5 172 000</td>
+            <td style="color: #c00000">359 000</td>
+            <td style="color: #c00000">800 000</td>
+            <td style="color: #c00000">1 200 000</td>
+            <td style="color: #c00000">1 500 000</td>
+            <td style="color: #c00000">7 000 000</td>
+            <td style="color: #c00000">700 000</td>
+            <td style="color: #c00000">900 000</td>
+            <td class="bold" style="color: #c00000">17 631 000</td>
+            <td class="bold" style="color: #c00000">17 631 000</td>
           </tr>
           <tr>
-            <td class="text-left">Décision Modificative N°1</td>
+            <td class="text-left" style="font-style: italic">
+              Décision<br />Modificative<br />N°1
+            </td>
             <td></td>
             <td></td>
             <td></td>
@@ -270,10 +295,11 @@
             <td></td>
             <td></td>
             <td></td>
-            <td></td>
+            <td style="color: #c00000">-</td>
+            <td style="color: #c00000">-</td>
           </tr>
           <tr>
-            <td class="text-left">Décision Modificative N°2</td>
+            <td class="text-left" style="font-style: italic">N°2</td>
             <td></td>
             <td></td>
             <td></td>
@@ -282,37 +308,88 @@
             <td></td>
             <td></td>
             <td></td>
+            <td style="color: #c00000">-</td>
+            <td style="color: #c00000">-</td>
+          </tr>
+          <tr>
+            <td class="text-left" style="font-style: italic">N°3</td>
             <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td style="color: #c00000">-</td>
+            <td style="color: #c00000">-</td>
           </tr>
           <tr class="total-row">
-            <td class="text-left">TOTAL PRÉVISIONS</td>
-            <td>5 172 000</td>
-            <td>359 000</td>
-            <td>800 000</td>
-            <td>1 200 000</td>
-            <td>1 500 000</td>
-            <td>7 000 000</td>
-            <td>700 000</td>
-            <td>900 000</td>
-            <td>17 631 000</td>
+            <td class="text-left" style="font-style: italic">Total des<br />Prévisions</td>
+            <td style="color: #c00000">5 172 000</td>
+            <td style="color: #c00000">359 000</td>
+            <td style="color: #c00000">800 000</td>
+            <td style="color: #c00000">1 200 000</td>
+            <td style="color: #c00000">1 500 000</td>
+            <td style="color: #c00000">7 000 000</td>
+            <td style="color: #c00000">700 000</td>
+            <td style="color: #c00000">900 000</td>
+            <td style="color: #c00000">17 631 000</td>
+            <td style="color: #c00000">17 631 000</td>
           </tr>
         </tbody>
       </table>
 
       <!-- TABLEAU 2: ÉMISSIONS -->
       <table>
+        <colgroup>
+          <col style="width: 12%" />
+          <!-- N° Mandats -->
+          <col style="width: 8%" />
+          <!-- 1 -->
+          <col style="width: 8%" />
+          <!-- 2 -->
+          <col style="width: 8%" />
+          <!-- 3 -->
+          <col style="width: 8%" />
+          <!-- 4 -->
+          <col style="width: 8%" />
+          <!-- 5 -->
+          <col style="width: 8%" />
+          <!-- 6 -->
+          <col style="width: 8%" />
+          <!-- 7 -->
+          <col style="width: 8%" />
+          <!-- 8 -->
+          <col style="width: 12%" />
+          <!-- TOTAL -->
+          <col style="width: 12%" />
+          <!-- CUMUL -->
+        </colgroup>
         <thead>
           <!-- Ligne Supérieure des En-têtes -->
           <tr style="height: 30px">
-            <th class="col-ref" style="border-bottom: 2px solid #000">N° Mandats</th>
-            <th colspan="10" style="border-bottom: 2px solid #000">EMISSIONS</th>
+            <th rowspan="2" style="vertical-align: middle">Numéros des<br />Mandats</th>
+            <th colspan="10" style="text-align: center">EMISSIONS</th>
+          </tr>
+          <tr>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
           <!-- Lignes de données -->
           <tr>
             <td class="text-center">09-10/02</td>
-            <td>250 238</td>
+            <td style="background-color: #ffff00">250 238</td>
             <td></td>
             <td></td>
             <td></td>
@@ -325,7 +402,7 @@
           </tr>
           <tr>
             <td class="text-center">51-52/09</td>
-            <td>125 000</td>
+            <td style="background-color: #ffff00">125 000</td>
             <td></td>
             <td></td>
             <td></td>
@@ -339,7 +416,7 @@
 
           <tr>
             <td class="text-center">53/10</td>
-            <td>3 109</td>
+            <td style="background-color: #ffff00">3 109</td>
             <td></td>
             <td></td>
             <td></td>
@@ -352,7 +429,7 @@
           </tr>
           <tr>
             <td class="text-center">61/11</td>
-            <td>13 067</td>
+            <td style="background-color: #ffff00">13 067</td>
             <td></td>
             <td></td>
             <td></td>
@@ -365,8 +442,8 @@
           </tr>
           <tr>
             <td class="text-center">69/12</td>
-            <td>21 630</td>
             <td></td>
+            <td style="background-color: #ffff00">21 630</td>
             <td></td>
             <td></td>
             <td></td>
@@ -383,7 +460,7 @@
             <td></td>
             <td></td>
             <td></td>
-            <td>567 660</td>
+            <td style="background-color: #ffff00">567 660</td>
             <td></td>
             <td></td>
             <td class="bold">567 660</td>
@@ -391,7 +468,7 @@
           </tr>
           <tr>
             <td class="text-center">87-88/16</td>
-            <td>250 238</td>
+            <td style="background-color: #ffff00">250 238</td>
             <td></td>
             <td></td>
             <td></td>
@@ -404,7 +481,7 @@
           </tr>
           <tr>
             <td class="text-center">128-129/23</td>
-            <td>125 000</td>
+            <td style="background-color: #ffff00">125 000</td>
             <td></td>
             <td></td>
             <td></td>
@@ -417,7 +494,7 @@
           </tr>
           <tr>
             <td class="text-center">130/24</td>
-            <td>3 109</td>
+            <td style="background-color: #ffff00">3 109</td>
             <td></td>
             <td></td>
             <td></td>
@@ -430,7 +507,7 @@
           </tr>
           <tr>
             <td class="text-center">138/25</td>
-            <td>13 067</td>
+            <td style="background-color: #ffff00">13 067</td>
             <td></td>
             <td></td>
             <td></td>
@@ -443,8 +520,8 @@
           </tr>
           <tr>
             <td class="text-center">146/26</td>
-            <td>21 630</td>
             <td></td>
+            <td style="background-color: #ffff00">21 630</td>
             <td></td>
             <td></td>
             <td></td>
@@ -457,34 +534,64 @@
 
           <!-- Totaux intermédiaires -->
           <tr class="total-row">
-            <td class="text-center">TOTAUX FÉVRIER</td>
-            <td>782 828</td>
-            <td>43 260</td>
-            <td>-</td>
-            <td>-</td>
-            <td>-</td>
-            <td>567 660</td>
-            <td>-</td>
-            <td>-</td>
-            <td>1 393 748</td>
-            <td>1 393 748</td>
+            <td class="text-center"><strong>TOTAUX</strong></td>
+            <td class="text-center"><strong>FÉVRIER</strong></td>
+            <td style="color: #c00000">782 828</td>
+            <td style="color: #c00000">43 260</td>
+            <td style="color: #c00000">-</td>
+            <td style="color: #c00000">-</td>
+            <td style="color: #c00000">567 660</td>
+            <td style="color: #c00000">-</td>
+            <td style="color: #c00000">-</td>
+            <td style="color: #c00000">1 393 748</td>
+            <td style="color: #c00000">1 393 748</td>
           </tr>
         </tbody>
       </table>
 
+      <!-- Texte CT02 -->
+      <div style="font-size: 10px; margin-bottom: 10px">
+        CT 02 A Livre d'exécution des opérations budgétaires dépenses
+      </div>
+
       <!-- CRÉDITS DISPONIBLES (Bas de page) -->
       <table class="credits-disponibles">
+        <colgroup>
+          <col style="width: 12%" />
+          <!-- Libellé -->
+          <col style="width: 8%" />
+          <!-- 1 -->
+          <col style="width: 8%" />
+          <!-- 2 -->
+          <col style="width: 8%" />
+          <!-- 3 -->
+          <col style="width: 8%" />
+          <!-- 4 -->
+          <col style="width: 8%" />
+          <!-- 5 -->
+          <col style="width: 8%" />
+          <!-- 6 -->
+          <col style="width: 8%" />
+          <!-- 7 -->
+          <col style="width: 8%" />
+          <!-- 8 -->
+          <col style="width: 12%" />
+          <!-- TOTAL -->
+          <col style="width: 12%" />
+          <!-- CUMUL -->
+        </colgroup>
         <tr class="total-row" style="background-color: #e8e8e8">
-          <td class="text-left" style="width: 12%">SOLDE / CRÉDITS DISPO.</td>
-          <td class="col-art">4 389 172</td>
-          <td class="col-art">315 740</td>
-          <td class="col-art">800 000</td>
-          <td class="col-art">1 200 000</td>
-          <td class="col-art">1 500 000</td>
-          <td class="col-art">6 432 340</td>
-          <td class="col-art">700 000</td>
-          <td class="col-art">900 000</td>
-          <td style="width: 24%; text-align: center; font-weight: bold">16 237 252</td>
+          <td class="text-left">SOLDE / CRÉDITS DISPO.</td>
+          <td>4 389 172</td>
+          <td>315 740</td>
+          <td>800 000</td>
+          <td>1 200 000</td>
+          <td>1 500 000</td>
+          <td>6 432 340</td>
+          <td>700 000</td>
+          <td>900 000</td>
+          <td class="bold text-center">16 237 252</td>
+          <td></td>
         </tr>
       </table>
     </div>
@@ -508,43 +615,53 @@
         if (data.mairie) {
           document.querySelector('.header-left strong').innerHTML =
             `RECETTE MUNICIPALE<br>DE ${data.mairie.ville.toUpperCase()}`;
-          document.querySelector('.header-left div').textContent =
-            `CODE COMMUNE: ${data.mairie.code}`;
           document.querySelector('.main-title').textContent =
             `COMMUNE DE ${data.mairie.ville.toUpperCase()}`;
+          // Code commune à droite
+          const headerRight = document.querySelector('.header-right');
+          headerRight.innerHTML = `
+            <div>Code Commune : <strong>${data.mairie.code}</strong></div>
+            <div style="margin-top: 10px">Exercice : <strong>${data.exercice}</strong></div>
+          `;
         }
 
-        document.querySelector('.header-right .bold').textContent = `EXERCICE: ${data.exercice}`;
-        document.querySelector('.header-right div:last-child').innerHTML =
-          `COMPTE: ${data.sousChapitreCode}<br>INTITULÉ: ${data.sousChapitreLibelle}`;
+        // Compte et Intitulé au centre
+        const headerCenter = document.querySelector('.header-center');
+        const compteDiv = headerCenter.querySelector('div:last-child');
+        if (compteDiv) {
+          compteDiv.innerHTML = `
+            <span>Compte :</span> <strong>${data.sousChapitreCode}</strong><br />
+            <span>Intitulé :</span> <strong>${data.sousChapitreLibelle}</strong>
+          `;
+        }
 
-        // Tableau Prévisions
-        const previsionsRow = document.querySelector('tbody tr:first-child');
-        if (previsionsRow) {
-          const cells = previsionsRow.querySelectorAll('td');
+        // Tableau Prévisions - première ligne (PRÉVISIONS BUDGETS)
+        const previsionsTable = document.querySelectorAll('table')[0];
+        const previsionsRows = previsionsTable?.querySelectorAll('tbody tr');
+
+        // Ligne Prévisions BUDGETS (index 0)
+        if (previsionsRows && previsionsRows[0]) {
+          const cells = previsionsRows[0].querySelectorAll('td');
           data.chapitresCodes.forEach((code, index) => {
             if (cells[index + 1]) {
               cells[index + 1].textContent = formatNumber(data.previsionsByChapitreCode[code] || 0);
             }
           });
-          // Total
-          if (cells[9]) {
-            cells[9].textContent = formatNumber(data.totalPrevisions);
-          }
+          // Total Bordereau (colonne 9) et Total Cumulé (colonne 10)
+          if (cells[9]) cells[9].textContent = formatNumber(data.totalPrevisions);
+          if (cells[10]) cells[10].textContent = formatNumber(data.totalPrevisions);
         }
 
-        // Total Prévisions row
-        const totalPrevisionsRow = document.querySelector('.total-row');
-        if (totalPrevisionsRow) {
-          const cells = totalPrevisionsRow.querySelectorAll('td');
+        // Total Prévisions row (index 4 maintenant avec N°3 ajouté)
+        if (previsionsRows && previsionsRows[4]) {
+          const cells = previsionsRows[4].querySelectorAll('td');
           data.chapitresCodes.forEach((code, index) => {
             if (cells[index + 1]) {
               cells[index + 1].textContent = formatNumber(data.previsionsByChapitreCode[code] || 0);
             }
           });
-          if (cells[9]) {
-            cells[9].textContent = formatNumber(data.totalPrevisions);
-          }
+          if (cells[9]) cells[9].textContent = formatNumber(data.totalPrevisions);
+          if (cells[10]) cells[10].textContent = formatNumber(data.totalPrevisions);
         }
 
         // Tableau Émissions - Remplir avec les mandats
@@ -555,34 +672,17 @@
 
           let cumulTotal = 0;
 
-          // Grouper par mois et afficher
-          const monthNames = [
-            'JANVIER',
-            'FÉVRIER',
-            'MARS',
-            'AVRIL',
-            'MAI',
-            'JUIN',
-            'JUILLET',
-            'AOÛT',
-            'SEPTEMBRE',
-            'OCTOBRE',
-            'NOVEMBRE',
-            'DÉCEMBRE',
-          ];
-
           // Créer les lignes pour chaque mandat
-          data.mandats.forEach((mandat, idx) => {
+          data.mandats.forEach((mandat) => {
             const row = document.createElement('tr');
-            const chapitreIndex = data.chapitresCodes.indexOf(mandat.chapitreCode);
 
             // Créer les cellules
             let rowHTML = `<td class="text-center">${mandat.numeroMandat}</td>`;
 
-            // Cellules pour chaque chapitre
-            data.chapitresCodes.forEach((code, i) => {
+            // Cellules pour chaque chapitre (8 colonnes) avec surlignage jaune
+            data.chapitresCodes.forEach((code) => {
               if (code === mandat.chapitreCode) {
-                rowHTML += `<td>${formatNumber(mandat.montant)}</td>`;
+                rowHTML += `<td style="background-color: #ffff00;">${formatNumber(mandat.montant)}</td>`;
               } else {
                 rowHTML += `<td></td>`;
               }
@@ -596,16 +696,44 @@
             emissionsBody.appendChild(row);
           });
 
-          // Ligne de total
+          // Ligne de total avec TOTAUX et mois
           const totalRow = document.createElement('tr');
           totalRow.className = 'total-row';
-          let totalRowHTML = `<td class="text-center">TOTAUX</td>`;
 
-          data.chapitresCodes.forEach((code) => {
-            totalRowHTML += `<td>${formatNumber(data.emissionsByChapitreCode[code] || 0)}</td>`;
+          // Déterminer le mois basé sur les mandats
+          const moisNoms = [
+            'JANVIER',
+            'FÉVRIER',
+            'MARS',
+            'AVRIL',
+            'MAI',
+            'JUIN',
+            'JUILLET',
+            'AOÛT',
+            'SEPTEMBRE',
+            'OCTOBRE',
+            'NOVEMBRE',
+            'DÉCEMBRE',
+          ];
+          let moisActuel = '';
+          if (data.mandats.length > 0) {
+            const lastMandat = data.mandats[data.mandats.length - 1];
+            if (lastMandat.dateMandat) {
+              const date = new Date(lastMandat.dateMandat);
+              moisActuel = moisNoms[date.getMonth()];
+            }
+          }
+
+          let totalRowHTML = `<td class="text-center"><strong>TOTAUX</strong></td>`;
+          totalRowHTML += `<td class="text-center"><strong>${moisActuel}</strong></td>`;
+
+          // Commencer à partir de la colonne 2 (index 1 des chapitres)
+          data.chapitresCodes.slice(1).forEach((code) => {
+            const val = data.emissionsByChapitreCode[code] || 0;
+            totalRowHTML += `<td style="color: #c00000;">${val > 0 ? formatNumber(val) : '-'}</td>`;
           });
-          totalRowHTML += `<td>${formatNumber(data.totalEmissions)}</td>`;
-          totalRowHTML += `<td>${formatNumber(data.totalEmissions)}</td>`;
+          totalRowHTML += `<td style="color: #c00000;" class="bold">${formatNumber(data.totalEmissions)}</td>`;
+          totalRowHTML += `<td style="color: #c00000;" class="bold">${formatNumber(data.totalEmissions)}</td>`;
 
           totalRow.innerHTML = totalRowHTML;
           emissionsBody.appendChild(totalRow);
@@ -622,10 +750,9 @@
               );
             }
           });
-          // Total crédits dispo
-          const lastCell = cells[cells.length - 1];
-          if (lastCell) {
-            lastCell.textContent = formatNumber(data.totalCreditsDispo);
+          // Total crédits dispo (colonne 9)
+          if (cells[9]) {
+            cells[9].textContent = formatNumber(data.totalCreditsDispo);
           }
         }
 

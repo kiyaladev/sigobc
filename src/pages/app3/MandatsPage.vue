@@ -4,6 +4,76 @@
 
     <q-card class="main-card">
       <q-card-section>
+        <!-- Filtres -->
+        <div class="row q-col-gutter-md q-mb-md">
+          <div class="col-12 col-md-2">
+            <q-select
+              v-model="filterExercice"
+              :options="exerciceFilterOptions"
+              label="Exercice"
+              outlined
+              dense
+              emit-value
+              map-options
+              clearable
+            />
+          </div>
+          <div class="col-12 col-md-2">
+            <q-select
+              v-model="filterChapitreId"
+              :options="chapitreOptions"
+              label="Chapitre"
+              outlined
+              dense
+              emit-value
+              map-options
+              clearable
+            />
+          </div>
+          <div class="col-12 col-md-2">
+            <q-select
+              v-model="filterSousChapitreId"
+              :options="sousChapitreOptions"
+              label="Sous-chapitre"
+              outlined
+              dense
+              emit-value
+              map-options
+              clearable
+            />
+          </div>
+          <div class="col-12 col-md-2">
+            <q-input
+              v-model="filterDateDebut"
+              label="Date début"
+              outlined
+              dense
+              type="date"
+              clearable
+            />
+          </div>
+          <div class="col-12 col-md-2">
+            <q-input
+              v-model="filterDateFin"
+              label="Date fin"
+              outlined
+              dense
+              type="date"
+              clearable
+            />
+          </div>
+          <div class="col-12 col-md-2">
+            <q-btn
+              label="Réinitialiser"
+              icon="refresh"
+              flat
+              color="grey-7"
+              @click="resetFilters"
+              class="full-width"
+            />
+          </div>
+        </div>
+
         <div class="row items-center justify-between q-mb-md">
           <div class="col-12 col-md-6">
             <q-input
@@ -278,6 +348,13 @@ const filter = ref('');
 const showAddDialog = ref(false);
 const editingId = ref<number | null>(null);
 
+// Filtres
+const filterExercice = ref<number | null>(null);
+const filterChapitreId = ref<number | null>(null);
+const filterSousChapitreId = ref<number | null>(null);
+const filterDateDebut = ref<string>('');
+const filterDateFin = ref<string>('');
+
 const mandats = ref<Mandat[]>([]);
 const chapitres = ref<Chapitre[]>([]);
 const sousChapitres = ref<SousChapitre[]>([]);
@@ -313,6 +390,11 @@ const chapitreOptions = computed(() =>
 const sousChapitreOptions = computed(() =>
   sousChapitres.value.map((s) => ({ label: `${s.code} - ${s.libelle}`, value: s.id })),
 );
+
+const exerciceFilterOptions = computed(() => {
+  const years = [...new Set(mandats.value.map((m) => m.exercice))].sort((a, b) => b - a);
+  return years.map((y) => ({ label: String(y), value: y }));
+});
 
 const bordereauMandatOptions = computed(() =>
   bordereauMandats.value
@@ -419,12 +501,14 @@ const columns = [
     label: 'Bénéficiaire',
     align: 'left' as const,
     field: 'beneficiaire',
+    sortable: true,
   },
   {
     name: 'objet',
     label: 'Objet',
     align: 'left' as const,
     field: 'objet',
+    sortable: true,
   },
   {
     name: 'montant',
@@ -432,12 +516,14 @@ const columns = [
     align: 'right' as const,
     field: 'montant',
     format: (val: number) => formatMontant(val),
+    sortable: true,
   },
   {
     name: 'statut',
     label: 'Statut',
     align: 'center' as const,
     field: 'statut',
+    sortable: true,
   },
   {
     name: 'actions',
@@ -448,15 +534,58 @@ const columns = [
 ];
 
 const filteredMandats = computed(() => {
-  if (!filter.value) return mandats.value;
-  const searchTerm = filter.value.toLowerCase();
-  return mandats.value.filter(
-    (m) =>
-      m.numeroMandat.toLowerCase().includes(searchTerm) ||
-      m.beneficiaire.toLowerCase().includes(searchTerm) ||
-      m.objet.toLowerCase().includes(searchTerm),
-  );
+  let result = mandats.value;
+
+  // Filtre par exercice
+  if (filterExercice.value) {
+    result = result.filter((m) => m.exercice === filterExercice.value);
+  }
+
+  // Filtre par chapitre
+  if (filterChapitreId.value) {
+    result = result.filter((m) => m.chapitreId === filterChapitreId.value);
+  }
+
+  // Filtre par sous-chapitre
+  if (filterSousChapitreId.value) {
+    result = result.filter((m) => m.sousChapitreId === filterSousChapitreId.value);
+  }
+
+  // Filtre par date début
+  if (filterDateDebut.value) {
+    const dateDebut = new Date(filterDateDebut.value);
+    result = result.filter((m) => new Date(m.dateMandat) >= dateDebut);
+  }
+
+  // Filtre par date fin
+  if (filterDateFin.value) {
+    const dateFin = new Date(filterDateFin.value);
+    dateFin.setHours(23, 59, 59, 999); // Inclure toute la journée
+    result = result.filter((m) => new Date(m.dateMandat) <= dateFin);
+  }
+
+  // Filtre par texte
+  if (filter.value) {
+    const searchTerm = filter.value.toLowerCase();
+    result = result.filter(
+      (m) =>
+        m.numeroMandat.toLowerCase().includes(searchTerm) ||
+        m.beneficiaire.toLowerCase().includes(searchTerm) ||
+        m.objet.toLowerCase().includes(searchTerm),
+    );
+  }
+
+  return result;
 });
+
+function resetFilters() {
+  filterExercice.value = null;
+  filterChapitreId.value = null;
+  filterSousChapitreId.value = null;
+  filterDateDebut.value = '';
+  filterDateFin.value = '';
+  filter.value = '';
+}
 
 function formatMontant(montant: number): string {
   return new Intl.NumberFormat('fr-FR', {
