@@ -664,43 +664,12 @@
           if (cells[10]) cells[10].textContent = formatNumber(data.totalPrevisions);
         }
 
-        // Tableau Émissions - Remplir avec les mandats
+        // Tableau Émissions - Remplir avec les mandats groupés par mois
         const emissionsBody = document.querySelectorAll('table')[1]?.querySelector('tbody');
         if (emissionsBody && data.mandats) {
           // Vider le contenu existant
           emissionsBody.innerHTML = '';
 
-          let cumulTotal = 0;
-
-          // Créer les lignes pour chaque mandat
-          data.mandats.forEach((mandat) => {
-            const row = document.createElement('tr');
-
-            // Créer les cellules
-            let rowHTML = `<td class="text-center">${mandat.numeroMandat}</td>`;
-
-            // Cellules pour chaque chapitre (8 colonnes) avec surlignage jaune
-            data.chapitresCodes.forEach((code) => {
-              if (code === mandat.chapitreCode) {
-                rowHTML += `<td style="background-color: #ffff00;">${formatNumber(mandat.montant)}</td>`;
-              } else {
-                rowHTML += `<td></td>`;
-              }
-            });
-
-            cumulTotal += mandat.montant;
-            rowHTML += `<td class="bold">${formatNumber(mandat.montant)}</td>`;
-            rowHTML += `<td class="bold">${formatNumber(cumulTotal)}</td>`;
-
-            row.innerHTML = rowHTML;
-            emissionsBody.appendChild(row);
-          });
-
-          // Ligne de total avec TOTAUX et mois
-          const totalRow = document.createElement('tr');
-          totalRow.className = 'total-row';
-
-          // Déterminer le mois basé sur les mandats
           const moisNoms = [
             'JANVIER',
             'FÉVRIER',
@@ -715,28 +684,92 @@
             'NOVEMBRE',
             'DÉCEMBRE',
           ];
-          let moisActuel = '';
-          if (data.mandats.length > 0) {
-            const lastMandat = data.mandats[data.mandats.length - 1];
-            if (lastMandat.dateMandat) {
-              const date = new Date(lastMandat.dateMandat);
-              moisActuel = moisNoms[date.getMonth()];
+
+          // Grouper les mandats par mois
+          const mandatsByMonth = {};
+          data.mandats.forEach((mandat) => {
+            const date = new Date(mandat.dateMandat);
+            const monthKey = `${date.getFullYear()}-${String(date.getMonth()).padStart(2, '0')}`;
+            if (!mandatsByMonth[monthKey]) {
+              mandatsByMonth[monthKey] = {
+                mois: moisNoms[date.getMonth()],
+                mandats: [],
+                totalsByChapitreCode: {},
+              };
+              // Initialiser les totaux par chapitre
+              data.chapitresCodes.forEach((code) => {
+                mandatsByMonth[monthKey].totalsByChapitreCode[code] = 0;
+              });
             }
-          }
-
-          let totalRowHTML = `<td class="text-center"><strong>TOTAUX</strong></td>`;
-          totalRowHTML += `<td class="text-center"><strong>${moisActuel}</strong></td>`;
-
-          // Commencer à partir de la colonne 2 (index 1 des chapitres)
-          data.chapitresCodes.slice(1).forEach((code) => {
-            const val = data.emissionsByChapitreCode[code] || 0;
-            totalRowHTML += `<td style="color: #c00000;">${val > 0 ? formatNumber(val) : '-'}</td>`;
+            mandatsByMonth[monthKey].mandats.push(mandat);
+            mandatsByMonth[monthKey].totalsByChapitreCode[mandat.chapitreCode] =
+              (mandatsByMonth[monthKey].totalsByChapitreCode[mandat.chapitreCode] || 0) +
+              mandat.montant;
           });
-          totalRowHTML += `<td style="color: #c00000;" class="bold">${formatNumber(data.totalEmissions)}</td>`;
-          totalRowHTML += `<td style="color: #c00000;" class="bold">${formatNumber(data.totalEmissions)}</td>`;
 
-          totalRow.innerHTML = totalRowHTML;
-          emissionsBody.appendChild(totalRow);
+          // Trier les mois chronologiquement
+          const sortedMonths = Object.keys(mandatsByMonth).sort();
+
+          let cumulTotal = 0;
+          let cumulByChapitreCode = {};
+          data.chapitresCodes.forEach((code) => {
+            cumulByChapitreCode[code] = 0;
+          });
+
+          // Pour chaque mois, afficher les mandats puis la ligne de totaux
+          sortedMonths.forEach((monthKey) => {
+            const monthData = mandatsByMonth[monthKey];
+            let monthTotal = 0;
+
+            // Afficher les mandats du mois
+            monthData.mandats.forEach((mandat) => {
+              const row = document.createElement('tr');
+
+              // Créer les cellules
+              let rowHTML = `<td class="text-center">${mandat.numeroMandat}</td>`;
+
+              // Cellules pour chaque chapitre (8 colonnes) avec surlignage jaune
+              data.chapitresCodes.forEach((code) => {
+                if (code === mandat.chapitreCode) {
+                  rowHTML += `<td style="background-color: #ffff00;">${formatNumber(mandat.montant)}</td>`;
+                } else {
+                  rowHTML += `<td></td>`;
+                }
+              });
+
+              cumulTotal += mandat.montant;
+              monthTotal += mandat.montant;
+              rowHTML += `<td class="bold">${formatNumber(mandat.montant)}</td>`;
+              rowHTML += `<td class="bold">${formatNumber(cumulTotal)}</td>`;
+
+              row.innerHTML = rowHTML;
+              emissionsBody.appendChild(row);
+            });
+
+            // Mettre à jour les cumuls par chapitre
+            data.chapitresCodes.forEach((code) => {
+              cumulByChapitreCode[code] += monthData.totalsByChapitreCode[code] || 0;
+            });
+
+            // Ligne de totaux pour ce mois - le mois dans la première colonne uniquement
+            const totalRow = document.createElement('tr');
+            totalRow.className = 'total-row';
+
+            let totalRowHTML = `<td class="text-center"><strong>${monthData.mois}</strong></td>`;
+
+            // Totaux cumulés par chapitre (8 colonnes)
+            data.chapitresCodes.forEach((code) => {
+              const val = cumulByChapitreCode[code] || 0;
+              totalRowHTML += `<td style="color: #c00000;">${val > 0 ? formatNumber(val) : '-'}</td>`;
+            });
+
+            // Total Bordereau du mois et Total Cumulé
+            totalRowHTML += `<td style="color: #c00000;" class="bold">${formatNumber(cumulTotal)}</td>`;
+            totalRowHTML += `<td style="color: #c00000;" class="bold">${formatNumber(cumulTotal)}</td>`;
+
+            totalRow.innerHTML = totalRowHTML;
+            emissionsBody.appendChild(totalRow);
+          });
         }
 
         // Crédits disponibles
