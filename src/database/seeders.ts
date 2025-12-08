@@ -11,10 +11,6 @@ import type {
   Mandat,
   BordereauMandat,
   ChapitreInvestissement,
-  SousChapitreInvestissement,
-  PrevisionInvestissement,
-  MandatInvestissement,
-  BordereauMandatInvestissement,
 } from './db';
 
 // =================================================================
@@ -519,10 +515,10 @@ export async function seedDefaultData() {
   ]);
 
   // Seed Investissements Chapitres (App5)
-  const investChapitresCount = await db.investChapitres.count();
+  const investChapitresCount = await db.chapitresInvestissement.count();
   if (investChapitresCount === 0) {
     console.log('🌱 Seeding default investissement chapitres...');
-    await db.investChapitres.bulkAdd([
+    await db.chapitresInvestissement.bulkAdd([
       {
         code: '21',
         libelle: 'ACQUISITIONS IMMOBILIERES',
@@ -591,14 +587,14 @@ export async function seedDefaultData() {
   }
 
   // Seed Investissements Sous-Chapitres (App5)
-  const investSousChapitresCount = await db.investSousChapitres.count();
+  const investSousChapitresCount = await db.sousChapitresInvestissement.count();
   if (investSousChapitresCount === 0) {
     console.log('🌱 Seeding default investissement sous-chapitres...');
     // Fetch chapitres to link IDs
-    const chapitres = await db.investChapitres.toArray();
-    const getChapId = (code: string) => chapitres.find((c) => c.code === code)?.id;
+    const chapitres = await db.chapitresInvestissement.toArray();
+    const getChapId = (code: string) => chapitres.find((c: ChapitreInvestissement) => c.code === code)?.id;
 
-    await db.investSousChapitres.bulkAdd([
+    await db.sousChapitresInvestissement.bulkAdd([
       // Chapitre 21
       {
         code: '211',
@@ -889,8 +885,11 @@ export async function clearDatabase() {
     db.previsions.clear(),
     db.mandats.clear(),
     db.bordereauMandats.clear(),
-    db.investChapitres.clear(),
-    db.investSousChapitres.clear(),
+    db.chapitresInvestissement.clear(),
+    db.sousChapitresInvestissement.clear(),
+    db.previsionsInvestissement.clear(),
+    db.mandatsInvestissement.clear(),
+    db.bordereauMandatsInvestissement.clear(),
   ]);
   console.log('✅ All tables cleared.');
 }
