@@ -1,41 +1,34 @@
 <template>
   <q-page class="q-pa-md">
     <div class="row q-mb-md justify-between items-center">
-      <div class="text-h5">Gestion des Quotités</div>
-      <q-btn color="primary" icon="add" label="Nouvelle Quotité" @click="openDialog()" />
+      <div class="text-h5">
+        <q-icon name="verified" color="purple" class="q-mr-sm" />
+        Gestion des Quotités de Timbres
+      </div>
+      <q-btn color="purple" icon="add" label="Nouvelle Quotité" @click="openDialog()" />
     </div>
 
     <q-card class="q-mb-md">
       <q-card-section>
         <div class="row q-col-gutter-md">
-          <div class="col-12 col-sm-3">
+          <div class="col-12 col-sm-4">
             <q-input v-model="search" filled placeholder="Rechercher..." dense clearable>
               <template v-slot:prepend>
                 <q-icon name="search" />
               </template>
             </q-input>
           </div>
-          <div class="col-12 col-sm-2">
-            <q-select
-              v-model="filterIsTimbre"
-              filled
-              dense
-              :options="isTimbreOptions"
-              label="Catégorie"
-              clearable
-            />
-          </div>
           <div class="col-12 col-sm-3">
             <q-select
               v-model="filterType"
               filled
               dense
-              :options="allTypeOptions"
+              :options="typeOptions"
               label="Type"
               clearable
             />
           </div>
-          <div class="col-12 col-sm-2">
+          <div class="col-12 col-sm-3">
             <q-select
               v-model="filterActif"
               filled
@@ -72,17 +65,9 @@
           </q-td>
         </template>
 
-        <template v-slot:body-cell-isTimbre="props">
-          <q-td :props="props">
-            <q-chip :color="props.row.isTimbre ? 'purple' : 'blue'" text-color="white" size="sm">
-              {{ props.row.isTimbre ? 'Timbre' : 'Ticket' }}
-            </q-chip>
-          </q-td>
-        </template>
-
         <template v-slot:body-cell-actions="props">
           <q-td :props="props">
-            <q-btn flat round dense icon="edit" color="primary" @click="openDialog(props.row)">
+            <q-btn flat round dense icon="edit" color="purple" @click="openDialog(props.row)">
               <q-tooltip>Modifier</q-tooltip>
             </q-btn>
             <q-btn
@@ -102,8 +87,8 @@
 
     <q-dialog v-model="dialogVisible" persistent>
       <q-card style="min-width: 700px">
-        <q-card-section class="accent-left">
-          <div class="text-h6">{{ isEditing ? 'Modifier' : 'Nouvelle' }} Quotité</div>
+        <q-card-section class="bg-purple text-white">
+          <div class="text-h6">{{ isEditing ? 'Modifier' : 'Nouvelle' }} Quotité de Timbre</div>
         </q-card-section>
 
         <q-card-section>
@@ -150,10 +135,6 @@
               </div>
 
               <div class="col-12 col-sm-6">
-                <q-toggle v-model="form.isTimbre" label="Timbre (sinon Ticket)" color="purple" />
-              </div>
-
-              <div class="col-12 col-sm-6">
                 <q-toggle v-model="form.actif" label="Actif" color="green" />
               </div>
             </div>
@@ -162,7 +143,7 @@
 
         <q-card-actions align="right">
           <q-btn flat label="Annuler" color="grey" v-close-popup />
-          <q-btn label="Enregistrer" color="primary" @click="onSubmit" :loading="saving" />
+          <q-btn label="Enregistrer" color="purple" @click="onSubmit" :loading="saving" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -184,21 +165,16 @@ const isEditing = ref(false);
 const search = ref('');
 const filterType = ref('');
 const filterActif = ref('');
-const filterIsTimbre = ref<string | null>(null);
 
-const typeOptionsTickets = ['Marché', 'Abattoirs', 'Stationnement'];
-const typeOptionsTimbres = ['Fiscal', 'Municipal', 'Communal'];
-const typeOptions = computed(() => (form.value.isTimbre ? typeOptionsTimbres : typeOptionsTickets));
-const allTypeOptions = [...typeOptionsTickets, ...typeOptionsTimbres];
+const typeOptions = ['Fiscal', 'Municipal', 'Communal'];
 const actifOptions = ['Actif', 'Inactif'];
-const isTimbreOptions = ['Tickets', 'Timbres'];
 
 const form = ref<Partial<Quotite>>({
   code: '',
   prix: 0,
-  description: 'Ticket',
-  type: '',
-  isTimbre: false,
+  description: 'Timbre fiscal',
+  type: 'Fiscal',
+  isTimbre: true,
   actif: true,
 });
 
@@ -213,24 +189,12 @@ const columns = [
     sortable: true,
   },
   { name: 'type', label: 'Type', field: 'type', align: 'left' as const, sortable: true },
-  {
-    name: 'isTimbre',
-    label: 'Catégorie',
-    field: 'isTimbre',
-    align: 'center' as const,
-    sortable: true,
-  },
   { name: 'actif', label: 'Statut', field: 'actif', align: 'center' as const, sortable: true },
   { name: 'actions', label: 'Actions', field: 'actions', align: 'center' as const },
 ];
 
 const filteredRows = computed(() => {
   let result = rows.value;
-
-  if (filterIsTimbre.value) {
-    const isTimbre = filterIsTimbre.value === 'Timbres';
-    result = result.filter((t) => t.isTimbre === isTimbre);
-  }
 
   if (filterType.value) {
     result = result.filter((t) => t.type === filterType.value);
@@ -265,7 +229,9 @@ function formatMontant(montant: number): string {
 async function loadData() {
   loading.value = true;
   try {
-    rows.value = await db.quotites.toArray();
+    // Charger uniquement les quotités de type timbre
+    const allQuotites = await db.quotites.toArray();
+    rows.value = allQuotites.filter((q) => q.isTimbre && q.mairieId === DEFAULT_MAIRIE_ID);
   } catch (error) {
     console.error('Erreur lors du chargement:', error);
     $q.notify({ type: 'negative', message: 'Erreur lors du chargement' });
@@ -282,9 +248,9 @@ function openDialog(item?: Quotite) {
     form.value = {
       code: '',
       prix: 0,
-      description: 'Ticket',
-      type: '',
-      isTimbre: false,
+      description: 'Timbre fiscal',
+      type: 'Fiscal',
+      isTimbre: true,
       actif: true,
     };
   }
@@ -313,12 +279,14 @@ async function onSubmit() {
     if (isEditing.value && form.value.id) {
       await db.quotites.update(form.value.id, {
         ...form.value,
+        isTimbre: true, // Toujours true pour App4
         updatedAt: now,
       });
       $q.notify({ type: 'positive', message: 'Quotité modifiée avec succès' });
     } else {
       await db.quotites.add({
         ...(form.value as Quotite),
+        isTimbre: true, // Toujours true pour App4
         mairieId: DEFAULT_MAIRIE_ID,
         createdAt: now,
         updatedAt: now,

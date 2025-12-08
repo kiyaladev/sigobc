@@ -120,185 +120,187 @@
         </q-item-section>
       </q-item>
 
-        <q-list padding class="q-px-sm">
-          <q-item-label header class="text-grey-7 text-weight-medium q-px-md">
-            <q-icon name="dashboard" size="18px" class="q-mr-xs" />
-            Declarations & Bordereaux
-          </q-item-label>
+      <q-list padding class="q-px-sm">
+        <!-- ===== 1. GESTION DES DÉCLARATIONS ===== -->
+        <q-item-label header class="text-grey-7 text-weight-medium q-px-md">
+          <q-icon name="description" size="18px" class="q-mr-xs" />
+          Gestion des Déclarations
+        </q-item-label>
 
-          <q-item
-            clickable
-            v-ripple
-            to="/"
-            exact
-            class="nav-item q-mb-xs"
-            active-class="nav-item-active"
-          >
-            <q-item-section avatar>
-              <q-icon name="dashboard" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>Tableau de Bord</q-item-label>
-            </q-item-section>
-          </q-item>
+        <q-item
+          clickable
+          v-ripple
+          to="/"
+          exact
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="dashboard" color="primary" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Tableau de Bord</q-item-label>
+          </q-item-section>
+        </q-item>
 
-          <q-item
-            clickable
-            v-ripple
-            to="/declarations"
-            class="nav-item q-mb-xs"
-            active-class="nav-item-active"
-          >
-            <q-item-section avatar>
-              <q-icon name="description" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>Déclarations</q-item-label>
-            </q-item-section>
-          </q-item>
+        <q-item
+          clickable
+          v-ripple
+          to="/declarations"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="description" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Déclarations</q-item-label>
+          </q-item-section>
+        </q-item>
 
-          <q-item
-            clickable
-            v-ripple
-            to="/bordereaux"
-            class="nav-item q-mb-xs"
-            active-class="nav-item-active"
-          >
-            <q-item-section avatar>
-              <q-icon name="receipt_long" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>Bordereaux</q-item-label>
-            </q-item-section>
-          </q-item>
+        <q-item
+          clickable
+          v-ripple
+          to="/bordereaux"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="receipt_long" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Bordereaux</q-item-label>
+          </q-item-section>
+        </q-item>
 
-          <q-item
-            clickable
-            v-ripple
-            to="/taxes"
-            class="nav-item q-mb-xs"
-            active-class="nav-item-active"
-          >
-            <q-item-section avatar>
-              <q-icon name="calculate" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>Taxes</q-item-label>
-            </q-item-section>
-          </q-item>
+        <q-item
+          clickable
+          v-ripple
+          to="/taxes"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="calculate" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Taxes</q-item-label>
+          </q-item-section>
+        </q-item>
 
-          <q-separator class="q-my-md" />
+        <q-separator class="q-my-md" />
 
-          <q-item-label header class="text-grey-7 text-weight-medium q-px-md">
-            <q-icon name="confirmation_number" size="18px" class="q-mr-xs" />
-            Gestion des Tickets
-          </q-item-label>
+        <q-item-label header class="text-grey-7 text-weight-medium q-px-md">
+          <q-icon name="confirmation_number" size="18px" class="q-mr-xs" />
+          Gestion des Tickets
+        </q-item-label>
 
-          <q-item
-            clickable
-            v-ripple
-            to="/app2/dashboard"
-            class="nav-item q-mb-xs"
-            active-class="nav-item-active"
-          >
-            <q-item-section avatar>
-              <q-icon name="dashboard" color="grey-7" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>Dashboard Tickets</q-item-label>
-            </q-item-section>
-          </q-item>
+        <q-item
+          clickable
+          v-ripple
+          to="/app2/dashboard"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="dashboard" color="grey-7" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Dashboard Tickets</q-item-label>
+          </q-item-section>
+        </q-item>
 
-          <q-item
-            clickable
-            v-ripple
-            to="/app2/sections"
-            class="nav-item q-mb-xs"
-            active-class="nav-item-active"
-          >
-            <q-item-section avatar>
-              <q-icon name="folder_open" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>Sections</q-item-label>
-            </q-item-section>
-          </q-item>
+        <q-item
+          clickable
+          v-ripple
+          to="/app2/sections"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="folder_open" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Sections</q-item-label>
+          </q-item-section>
+        </q-item>
 
-          <q-item
-            clickable
-            v-ripple
-            to="/app2/balance-entree"
-            class="nav-item q-mb-xs"
-            active-class="nav-item-active"
-          >
-            <q-item-section avatar>
-              <q-icon name="balance" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>Balance d'Entrée</q-item-label>
-            </q-item-section>
-          </q-item>
+        <q-item
+          clickable
+          v-ripple
+          to="/app2/balance-entree"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="balance" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Balance d'Entrée</q-item-label>
+          </q-item-section>
+        </q-item>
 
-          <q-item
-            clickable
-            v-ripple
-            to="/app2/approvisionnements"
-            class="nav-item q-mb-xs"
-            active-class="nav-item-active"
-          >
-            <q-item-section avatar>
-              <q-icon name="inventory" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>Approvisionnements</q-item-label>
-            </q-item-section>
-          </q-item>
+        <q-item
+          clickable
+          v-ripple
+          to="/app2/approvisionnements"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="inventory" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Approvisionnements</q-item-label>
+          </q-item-section>
+        </q-item>
 
-          <q-item
-            clickable
-            v-ripple
-            to="/app2/remises"
-            class="nav-item q-mb-xs"
-            active-class="nav-item-active"
-          >
-            <q-item-section avatar>
-              <q-icon name="local_shipping" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>Remises</q-item-label>
-            </q-item-section>
-          </q-item>
+        <q-item
+          clickable
+          v-ripple
+          to="/app2/remises"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="local_shipping" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Remises</q-item-label>
+          </q-item-section>
+        </q-item>
 
-          <q-item
-            clickable
-            v-ripple
-            to="/app2/versements"
-            class="nav-item q-mb-xs"
-            active-class="nav-item-active"
-          >
-            <q-item-section avatar>
-              <q-icon name="upload" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>Versements</q-item-label>
-            </q-item-section>
-          </q-item>
+        <q-item
+          clickable
+          v-ripple
+          to="/app2/versements"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="upload" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Versements</q-item-label>
+          </q-item-section>
+        </q-item>
 
-          <q-item
-            clickable
-            v-ripple
-            to="/app2/statistiques"
-            class="nav-item q-mb-xs"
-            active-class="nav-item-active"
-          >
-            <q-item-section avatar>
-              <q-icon name="bar_chart" color="grey-7" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>Statistiques</q-item-label>
-            </q-item-section>
-          </q-item>
+        <q-item
+          clickable
+          v-ripple
+          to="/app2/statistiques"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="bar_chart" color="orange" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Statistiques Tickets</q-item-label>
+          </q-item-section>
+        </q-item>
 
+        <template v-if="authStore.isAdmin">
           <q-item
             clickable
             v-ripple
@@ -307,116 +309,426 @@
             active-class="nav-item-active"
           >
             <q-item-section avatar>
-              <q-icon name="toll" />
+              <q-icon name="toll" color="orange" />
             </q-item-section>
             <q-item-section>
-              <q-item-label>Quotités</q-item-label>
+              <q-item-label>Quotités Tickets</q-item-label>
             </q-item-section>
           </q-item>
+        </template>
 
-          <q-separator class="q-my-md" />
+        <q-separator class="q-my-md" />
 
+        <!-- ===== 3. GESTION DES TIMBRES ===== -->
+        <q-item-label header class="text-grey-7 text-weight-medium q-px-md">
+          <q-icon name="verified" size="18px" class="q-mr-xs" />
+          Gestion des Timbres
+        </q-item-label>
+
+        <q-item
+          clickable
+          v-ripple
+          to="/app4/dashboard"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="dashboard" color="purple" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Dashboard Timbres</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          clickable
+          v-ripple
+          to="/app4/sections"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="folder_open" color="purple" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Sections</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          clickable
+          v-ripple
+          to="/app4/balance-entree"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="balance" color="purple" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Balance d'Entrée</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          clickable
+          v-ripple
+          to="/app4/approvisionnements"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="inventory" color="purple" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Approvisionnements</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          clickable
+          v-ripple
+          to="/app4/remises"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="local_shipping" color="purple" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Remises</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          clickable
+          v-ripple
+          to="/app4/versements"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="upload" color="purple" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Versements</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          clickable
+          v-ripple
+          to="/app4/quotites"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="verified" color="purple" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Quotités Timbres</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          clickable
+          v-ripple
+          to="/app4/statistiques"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="bar_chart" color="purple" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Statistiques Timbres</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-separator class="q-my-md" />
+
+        <!-- ===== 4. GESTION DES DÉPENSES ===== -->
+        <q-item-label header class="text-grey-7 text-weight-medium q-px-md">
+          <q-icon name="receipt" size="18px" class="q-mr-xs" />
+          Gestion des Dépenses
+        </q-item-label>
+
+        <q-item
+          clickable
+          v-ripple
+          to="/app3/dashboard"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="dashboard" color="deep-orange" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Dashboard Dépenses</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          clickable
+          v-ripple
+          to="/app3/chapitres"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="category" color="deep-orange" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Chapitres</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          clickable
+          v-ripple
+          to="/app3/sous-chapitres"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="view_list" color="deep-orange" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Sous-Chapitres</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          clickable
+          v-ripple
+          to="/app3/previsions"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="pie_chart" color="deep-orange" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Prévisions</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          clickable
+          v-ripple
+          to="/app3/mandats"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="receipt" color="deep-orange" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Mandats</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          clickable
+          v-ripple
+          to="/app3/bordereaux-mandats-gestion"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="folder_open" color="deep-orange" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Bordereaux Mandats</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          clickable
+          v-ripple
+          to="/app3/statistiques"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="bar_chart" color="deep-orange" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Statistiques Dépenses</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-separator class="q-my-md" />
+
+        <!-- ===== 5. GESTION DES INVESTISSEMENTS ===== -->
+        <q-item-label header class="text-grey-7 text-weight-medium q-px-md">
+          <q-icon name="account_balance" size="18px" class="q-mr-xs" />
+          Gestion des Investissements
+        </q-item-label>
+
+        <q-item
+          clickable
+          v-ripple
+          to="/app5/dashboard"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="dashboard" color="teal" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Dashboard Invest.</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          clickable
+          v-ripple
+          to="/app5/chapitres"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="category" color="teal" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Chapitres Invest.</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          clickable
+          v-ripple
+          to="/app5/sous-chapitres"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="view_list" color="teal" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Sous-Chapitres Invest.</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          clickable
+          v-ripple
+          to="/app5/previsions"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="pie_chart" color="teal" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Prévisions Invest.</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          clickable
+          v-ripple
+          to="/app5/mandats"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="receipt_long" color="teal" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Mandats Invest.</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          clickable
+          v-ripple
+          to="/app5/bordereaux-mandats"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="folder_open" color="teal" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Bordereaux Invest.</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          clickable
+          v-ripple
+          to="/app5/ct02"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="description" color="teal" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>CT02 Invest.</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          clickable
+          v-ripple
+          to="/app5/statistiques"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="bar_chart" color="teal" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Statistiques Invest.</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-separator class="q-my-md" />
+
+        <!-- ===== ADMINISTRATION ===== -->
+        <template v-if="authStore.isAdmin">
           <q-item-label header class="text-grey-7 text-weight-medium q-px-md">
-            <q-icon name="receipt" size="18px" class="q-mr-xs" />
-            Gestion des Dépenses
+            <q-icon name="admin_panel_settings" size="18px" class="q-mr-xs" />
+            Administration
           </q-item-label>
 
           <q-item
             clickable
             v-ripple
-            to="/app3/dashboard"
+            to="/utilisateurs"
             class="nav-item q-mb-xs"
             active-class="nav-item-active"
           >
             <q-item-section avatar>
-              <q-icon name="dashboard" />
+              <q-icon name="manage_accounts" />
             </q-item-section>
             <q-item-section>
-              <q-item-label>Dashboard Dépenses</q-item-label>
+              <q-item-label>Utilisateurs</q-item-label>
             </q-item-section>
           </q-item>
 
           <q-item
             clickable
             v-ripple
-            to="/app3/chapitres"
+            to="/mairies"
             class="nav-item q-mb-xs"
             active-class="nav-item-active"
           >
             <q-item-section avatar>
-              <q-icon name="category" />
+              <q-icon name="location_city" />
             </q-item-section>
             <q-item-section>
-              <q-item-label>Chapitres</q-item-label>
+              <q-item-label>Mairies</q-item-label>
             </q-item-section>
           </q-item>
 
           <q-item
             clickable
             v-ripple
-            to="/app3/sous-chapitres"
-            class="nav-item q-mb-xs"
-            active-class="nav-item-active"
-          >
-            <q-item-section avatar>
-              <q-icon name="view_list" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>Sous-Chapitres</q-item-label>
-            </q-item-section>
-          </q-item>
-
-
-          <q-item
-            clickable
-            v-ripple
-            to="/app3/previsions"
-            class="nav-item q-mb-xs"
-            active-class="nav-item-active"
-          >
-            <q-item-section avatar>
-              <q-icon name="pie_chart" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>Prévisions</q-item-label>
-            </q-item-section>
-          </q-item>
-
-          <q-item
-            clickable
-            v-ripple
-            to="/app3/mandats"
-            class="nav-item q-mb-xs"
-            active-class="nav-item-active"
-          >
-            <q-item-section avatar>
-              <q-icon name="receipt" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>Mandats</q-item-label>
-            </q-item-section>
-          </q-item>
-
-
-          <q-item
-            clickable
-            v-ripple
-            to="/app3/bordereaux-mandats-gestion"
-            class="nav-item q-mb-xs"
-            active-class="nav-item-active"
-          >
-            <q-item-section avatar>
-              <q-icon name="folder_open" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>Gestion Bordereaux</q-item-label>
-            </q-item-section>
-          </q-item>
-
-          <q-item
-            clickable
-            v-ripple
-            to="/app3/statistiques"
+            to="/statistiques"
             class="nav-item q-mb-xs"
             active-class="nav-item-active"
           >
@@ -424,95 +736,41 @@
               <q-icon name="bar_chart" />
             </q-item-section>
             <q-item-section>
-              <q-item-label>Statistiques</q-item-label>
+              <q-item-label>Statistiques Globales</q-item-label>
             </q-item-section>
           </q-item>
 
-          <template v-if="authStore.isAdmin">
-            <q-separator class="q-my-md" />
+          <q-item
+            clickable
+            v-ripple
+            to="/admin/seeders"
+            class="nav-item q-mb-xs"
+            active-class="nav-item-active"
+          >
+            <q-item-section avatar>
+              <q-icon name="database" color="grey-7" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Seeders (Test)</q-item-label>
+            </q-item-section>
+          </q-item>
 
-            <q-item-label header class="text-grey-7 text-weight-medium q-px-md">
-              <q-icon name="admin_panel_settings" size="18px" class="q-mr-xs" />
-              Administration
-            </q-item-label>
-
-            <q-item
-              clickable
-              v-ripple
-              to="/utilisateurs"
-              class="nav-item q-mb-xs"
-              active-class="nav-item-active"
-            >
-              <q-item-section avatar>
-                <q-icon name="manage_accounts" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>Utilisateurs</q-item-label>
-              </q-item-section>
-            </q-item>
-
-            <q-item
-              clickable
-              v-ripple
-              to="/mairies"
-              class="nav-item q-mb-xs"
-              active-class="nav-item-active"
-            >
-              <q-item-section avatar>
-                <q-icon name="location_city" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>Mairies</q-item-label>
-              </q-item-section>
-            </q-item>
-
-            <q-item
-              clickable
-              v-ripple
-              to="/statistiques"
-              class="nav-item q-mb-xs"
-              active-class="nav-item-active"
-            >
-              <q-item-section avatar>
-                <q-icon name="bar_chart" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>Statistiques</q-item-label>
-              </q-item-section>
-            </q-item>
-
-            <q-item
-              clickable
-              v-ripple
-              to="/admin/seeders"
-              class="nav-item q-mb-xs"
-              active-class="nav-item-active"
-            >
-              <q-item-section avatar>
-                <q-icon name="database" color="grey-7" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>Seeders (Test)</q-item-label>
-              </q-item-section>
-            </q-item>
-
-            <q-item
-              clickable
-              v-ripple
-              to="/admin/backup"
-              class="nav-item q-mb-xs"
-              active-class="nav-item-active"
-            >
-              <q-item-section avatar>
-                <q-icon name="backup" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>Sauvegarde</q-item-label>
-              </q-item-section>
-            </q-item>
-          </template>
-        </q-list>
-
+          <q-item
+            clickable
+            v-ripple
+            to="/admin/backup"
+            class="nav-item q-mb-xs"
+            active-class="nav-item-active"
+          >
+            <q-item-section avatar>
+              <q-icon name="backup" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Sauvegarde</q-item-label>
+            </q-item-section>
+          </q-item>
+        </template>
+      </q-list>
     </q-drawer>
 
     <q-page-container class="modern-page-container">

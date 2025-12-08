@@ -1,0 +1,452 @@
+<template>
+  <q-page class="q-pa-md">
+    <div class="row q-col-gutter-md">
+      <div class="col-12">
+        <div class="row items-center justify-between q-mb-md">
+          <div class="col">
+            <div class="text-h4">
+              <q-icon name="verified" color="purple" class="q-mr-sm" />
+              Sections de Trésorerie - Timbres Fiscaux
+            </div>
+            <div class="text-subtitle1 text-grey-7">
+              Gestion des flux de trésorerie des timbres fiscaux
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12">
+        <q-card flat bordered>
+          <q-card-section class="row q-col-gutter-md items-center">
+            <div class="col-12 col-md-3">
+              <q-select
+                v-model="selectedExercice"
+                :options="exerciceOptions"
+                label="Exercice"
+                outlined
+                dense
+                emit-value
+                map-options
+              />
+            </div>
+            <div class="col-12 col-md-3">
+              <q-btn
+                color="purple"
+                label="Actualiser"
+                icon="refresh"
+                @click="loadData"
+                class="full-width"
+              />
+            </div>
+            <div class="col-12 col-md-3">
+              <q-btn
+                color="grey-7"
+                label="Imprimer section"
+                icon="print"
+                @click="printCurrentSection"
+                class="full-width"
+                outline
+              />
+            </div>
+            <div class="col-12 col-md-3">
+              <q-btn
+                color="grey-7"
+                label="Imprimer tout"
+                icon="print"
+                @click="printAllSections"
+                class="full-width"
+                outline
+              />
+            </div>
+          </q-card-section>
+        </q-card>
+      </div>
+
+      <div class="col-12">
+        <q-card>
+          <q-tabs
+            v-model="activeTab"
+            dense
+            class="text-purple bg-white"
+            active-color="purple"
+            indicator-color="purple"
+            align="justify"
+            animated
+          >
+            <q-tab name="section1" label="Section I - Stock Timbres" icon="inventory" />
+            <q-tab name="section2" label="Section II - Remises & Versements" icon="swap_horiz" />
+            <q-tab name="section3" label="Section III - Versements" icon="payments" />
+          </q-tabs>
+          <q-separator />
+          <q-tab-panels v-model="activeTab" animated>
+            <q-tab-panel name="section1">
+              <TimbreSectionI
+                :data="sectionIData"
+                :loading="loading"
+                :labels="labelsByPrice"
+                :quotites="activeQuotiteCols"
+                @print="printSection('section1')"
+              />
+            </q-tab-panel>
+            <q-tab-panel name="section2">
+              <TimbreSectionII
+                :data="sectionIIData"
+                :loading="loading"
+                :labels="labelsByPrice"
+                :quotites="activeQuotiteCols"
+                @print="printSection('section2')"
+              />
+            </q-tab-panel>
+            <q-tab-panel name="section3">
+              <TimbreSectionIII
+                :data="sectionIIIData"
+                :loading="loading"
+                :labels="labelsByPrice"
+                :quotites="activeQuotiteCols"
+                @print="printSection('section3')"
+              />
+            </q-tab-panel>
+          </q-tab-panels>
+        </q-card>
+      </div>
+    </div>
+  </q-page>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue';
+import { useQuasar } from 'quasar';
+import TimbreSectionI from './components/TimbreSectionI.vue';
+import TimbreSectionII from './components/TimbreSectionII.vue';
+import TimbreSectionIII from './components/TimbreSectionIII.vue';
+import type {
+  SectionIEntry,
+  SectionIIEntry,
+  SectionIIIEntry,
+  AnySectionEntry,
+  RawSectionIEntry,
+  RawSectionIIEntry,
+  RawSectionIIIEntry,
+} from './types';
+import { db, DEFAULT_MAIRIE_ID } from 'src/database/db';
+
+const $q = useQuasar();
+const activeTab = ref('section1');
+const loading = ref(false);
+const selectedExercice = ref(new Date().getFullYear());
+
+const exerciceOptions = computed(() => {
+  const currentYear = new Date().getFullYear();
+  return Array.from({ length: 5 }, (_, i) => ({
+    label: `Exercice ${currentYear - i}`,
+    value: currentYear - i,
+  }));
+});
+
+const soldeSectionI = ref(0);
+const soldeSectionII = ref(0);
+const soldeSectionIII = ref(0);
+
+const sectionIData = ref<SectionIEntry[]>([]);
+const sectionIIData = ref<SectionIIEntry[]>([]);
+const sectionIIIData = ref<SectionIIIEntry[]>([]);
+type QuotiteCol = { key: string; label: string; prix: number; code: string };
+const labelsByPrice = ref<Record<number, string>>({});
+const activeQuotiteCols = ref<QuotiteCol[]>([]);
+
+const loadData = async () => {
+  loading.value = true;
+  try {
+    const mairieId = DEFAULT_MAIRIE_ID;
+    const exercice = selectedExercice.value;
+
+    // Utiliser les tables spécifiques aux timbres
+    const balances = await db.timbreBalancesEntree.where({ exercice, mairieId }).toArray();
+    const remises = await db.timbreRemises.where('exercice').equals(exercice).toArray();
+    const approvisionnements = await db.timbreApprovisionnements
+      .where('exercice')
+      .equals(exercice)
+      .toArray();
+    const versements = await db.timbreVersements.where('exercice').equals(exercice).toArray();
+
+    // Section I: Stock de timbres (Approvisionnements - Remises)
+    const rawSectionI: RawSectionIEntry[] = [];
+    const balancesBES1 = balances.filter(
+      (b) => b.type.includes('BE-S1') || b.type.includes('INITIAL') || b.type.includes('Stock'),
+    );
+    balancesBES1.forEach((b) => {
+      const entry: RawSectionIEntry = {
+        id: b.id!,
+        date: b.date.toISOString(),
+        type: b.type,
+        approvisionnement: b.total,
+        detailsQuotites: b.detailsQuotites || {},
+      };
+      rawSectionI.push(entry);
+    });
+    approvisionnements.forEach((a) => {
+      const entry: RawSectionIEntry = {
+        id: a.id!,
+        date: a.date.toISOString(),
+        type: 'Approvisionnement',
+        approvisionnement: a.total,
+        detailsQuotites: a.detailsQuotites || {},
+      };
+      rawSectionI.push(entry);
+    });
+    remises.forEach((r) => {
+      const entry: RawSectionIEntry = {
+        id: r.id!,
+        date: r.date.toISOString(),
+        type: 'Remise',
+        remise: r.total,
+        detailsQuotites: r.detailsQuotites || {},
+      };
+      rawSectionI.push(entry);
+    });
+    rawSectionI.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    let sectionISolde = 0;
+    sectionIData.value = rawSectionI.map((item) => {
+      if (item.approvisionnement) sectionISolde += item.approvisionnement;
+      if (item.remise) sectionISolde -= item.remise;
+      return { ...item, solde: sectionISolde };
+    });
+
+    // Section II: Remises & Versements
+    const rawSectionII: RawSectionIIEntry[] = [];
+    const balancesBES2 = balances.filter((b) => b.type.includes('BE-S2'));
+    balancesBES2.forEach((b) => {
+      const entry: RawSectionIIEntry = {
+        id: b.id!,
+        date: b.date.toISOString(),
+        type: b.type,
+        remise: b.total,
+        detailsQuotites: b.detailsQuotites || {},
+      };
+      rawSectionII.push(entry);
+    });
+    remises.forEach((r) => {
+      const entry: RawSectionIIEntry = {
+        id: r.id!,
+        date: r.date.toISOString(),
+        type: 'Remise',
+        remise: r.total,
+        detailsQuotites: r.detailsQuotites || {},
+      };
+      rawSectionII.push(entry);
+    });
+    versements.forEach((v) => {
+      const entry: RawSectionIIEntry = {
+        id: v.id!,
+        date: v.date.toISOString(),
+        type: 'Versement',
+        versement: v.total,
+        detailsQuotites: v.detailsQuotites || {},
+      };
+      rawSectionII.push(entry);
+    });
+    rawSectionII.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    let sectionIISolde = 0;
+    sectionIIData.value = rawSectionII.map((item) => {
+      if (item.remise) sectionIISolde += item.remise;
+      if (item.versement) sectionIISolde -= item.versement;
+      return { ...item, solde: sectionIISolde };
+    });
+
+    // Section III: Versements
+    const rawSectionIII: RawSectionIIIEntry[] = [];
+    const balancesBES3 = balances.filter((b) => b.type.includes('BE-S3'));
+    balancesBES3.forEach((b) => {
+      const entry: RawSectionIIIEntry = {
+        id: b.id!,
+        date: b.date.toISOString(),
+        type: b.type,
+        approvisionnement: b.total,
+        detailsQuotites: b.detailsQuotites || {},
+      };
+      rawSectionIII.push(entry);
+    });
+    versements.forEach((v) => {
+      const entry: RawSectionIIIEntry = {
+        id: v.id!,
+        date: v.date.toISOString(),
+        type: 'Versement',
+        versement: v.total,
+        detailsQuotites: v.detailsQuotites || {},
+      };
+      rawSectionIII.push(entry);
+    });
+    remises.forEach((r) => {
+      const entry: RawSectionIIIEntry = {
+        id: r.id!,
+        date: r.date.toISOString(),
+        type: 'Remise',
+        remise: r.total,
+        detailsQuotites: r.detailsQuotites || {},
+      };
+      rawSectionIII.push(entry);
+    });
+    rawSectionIII.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    let sectionIIISolde = 0;
+    sectionIIIData.value = rawSectionIII.map((item) => {
+      if (item.approvisionnement) sectionIIISolde += item.approvisionnement;
+      if (item.remise) sectionIIISolde += item.remise;
+      if (item.versement) sectionIIISolde -= item.versement;
+      return { ...item, solde: sectionIIISolde };
+    });
+
+    soldeSectionI.value = sectionISolde;
+    soldeSectionII.value = sectionIISolde;
+    soldeSectionIII.value = sectionIIISolde;
+
+    // Charger les quotités pour timbres uniquement
+    const quotites = await db.quotites.toArray();
+    const actives = quotites.filter((q) => q.actif && q.isTimbre);
+    labelsByPrice.value = {};
+    activeQuotiteCols.value = actives.map((q) => ({
+      key: `${q.prix}-${q.code}`,
+      label: `${q.prix} (${q.code})`,
+      prix: q.prix,
+      code: q.code,
+    }));
+    for (const q of actives) {
+      labelsByPrice.value[q.prix] = labelsByPrice.value[q.prix]
+        ? `${labelsByPrice.value[q.prix]}, ${q.code}`
+        : `${q.prix} (${q.code})`;
+    }
+  } catch (error) {
+    console.error(error);
+    $q.notify({ type: 'negative', message: 'Erreur lors du chargement des données' });
+  } finally {
+    loading.value = false;
+  }
+};
+
+const getMonthLabel = (month: number, year: number) => {
+  const date = new Date(year, month, 1);
+  const label = date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+  return 'Total ' + label.charAt(0).toUpperCase() + label.slice(1);
+};
+
+type MonthlyTotalEntry = {
+  isMonthlyTotal: boolean;
+  date: string;
+  detailsQuotites: Record<string, number>;
+  approvisionnement?: number;
+  remise?: number;
+  versement?: number;
+  solde: number;
+};
+
+const addMonthlyTotals = (data: AnySectionEntry[], sectionName: string) => {
+  if (!data.length) return [];
+  const result: (AnySectionEntry | MonthlyTotalEntry)[] = [];
+  let currentMonth = new Date(data[0]!.date).getMonth();
+  let currentYear = new Date(data[0]!.date).getFullYear();
+  const cumulDetailsQuotites: Record<string, number> = {};
+  let cumulApprov = 0,
+    cumulRemise = 0,
+    cumulVersement = 0;
+
+  data.forEach((row, index) => {
+    const d = new Date(row.date);
+    const month = d.getMonth();
+    const year = d.getFullYear();
+    if (month !== currentMonth || year !== currentYear) {
+      const monthlyTotal: MonthlyTotalEntry = {
+        isMonthlyTotal: true,
+        date: getMonthLabel(currentMonth, currentYear),
+        detailsQuotites: { ...cumulDetailsQuotites },
+        approvisionnement: cumulApprov,
+        remise: cumulRemise,
+        versement: cumulVersement,
+        solde: data[index - 1]!.solde,
+      };
+      result.push(monthlyTotal);
+      currentMonth = month;
+      currentYear = year;
+    }
+    let sign = 1;
+    if (sectionName === 'section1') {
+      sign = row.type === 'Remise' ? -1 : 1;
+    } else if (sectionName === 'section2') {
+      sign = row.type === 'Versement' ? -1 : 1;
+    } else if (sectionName === 'section3') {
+      sign = row.type === 'Versement' ? -1 : 1;
+    }
+    if ('detailsQuotites' in row && row.detailsQuotites) {
+      for (const k in row.detailsQuotites) {
+        const val = row.detailsQuotites[k];
+        if (cumulDetailsQuotites[k] === undefined) cumulDetailsQuotites[k] = 0;
+        cumulDetailsQuotites[k] += (val || 0) * sign;
+      }
+    }
+    if ('approvisionnement' in row && row.approvisionnement) cumulApprov += row.approvisionnement;
+    if ('remise' in row && row.remise) cumulRemise += row.remise;
+    if ('versement' in row && row.versement) cumulVersement += row.versement;
+    result.push(row);
+  });
+
+  const finalMonthlyTotal: MonthlyTotalEntry = {
+    isMonthlyTotal: true,
+    date: getMonthLabel(currentMonth, currentYear),
+    detailsQuotites: { ...cumulDetailsQuotites },
+    approvisionnement: cumulApprov,
+    remise: cumulRemise,
+    versement: cumulVersement,
+    solde: data[data.length - 1]!.solde,
+  };
+  result.push(finalMonthlyTotal);
+  return result;
+};
+
+const printSection = (sectionName: string) => {
+  let data: AnySectionEntry[] = [];
+  let templateUrl = '';
+  if (sectionName === 'section1') {
+    data = JSON.parse(JSON.stringify(sectionIData.value));
+    templateUrl = '/SectionI.html';
+  } else if (sectionName === 'section2') {
+    data = JSON.parse(JSON.stringify(sectionIIData.value));
+    templateUrl = '/SectionII.html';
+  } else if (sectionName === 'section3') {
+    data = JSON.parse(JSON.stringify(sectionIIIData.value));
+    templateUrl = '/SectionIII.html';
+  }
+  const printWindow = window.open(templateUrl, '_blank');
+  if (printWindow) {
+    const dataWithTotals = addMonthlyTotals(data, sectionName);
+    printWindow.addEventListener('load', () => {
+      printWindow.postMessage(
+        {
+          type: 'FILL_DATA',
+          data: dataWithTotals,
+          columns: activeQuotiteCols.value.map((c) => c.key),
+          labels: Object.fromEntries(activeQuotiteCols.value.map((c) => [c.key, c.label])),
+        },
+        '*',
+      );
+    });
+  }
+};
+
+const printCurrentSection = () => {
+  printSection(activeTab.value);
+};
+
+const printAllSections = () => {
+  printSection('section1');
+  setTimeout(() => printSection('section2'), 500);
+  setTimeout(() => printSection('section3'), 1000);
+};
+
+onMounted(() => {
+  void loadData();
+});
+</script>
+
+<style scoped lang="scss">
+.bg-gradient-purple {
+  background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%);
+}
+</style>

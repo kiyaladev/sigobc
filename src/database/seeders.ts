@@ -10,6 +10,11 @@ import type {
   Prevision,
   Mandat,
   BordereauMandat,
+  ChapitreInvestissement,
+  SousChapitreInvestissement,
+  PrevisionInvestissement,
+  MandatInvestissement,
+  BordereauMandatInvestissement,
 } from './db';
 
 // =================================================================
@@ -513,6 +518,192 @@ export async function seedDefaultData() {
     },
   ]);
 
+  // Seed Investissements Chapitres (App5)
+  const investChapitresCount = await db.investChapitres.count();
+  if (investChapitresCount === 0) {
+    console.log('🌱 Seeding default investissement chapitres...');
+    await db.investChapitres.bulkAdd([
+      {
+        code: '21',
+        libelle: 'ACQUISITIONS IMMOBILIERES',
+        section: 'I',
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        code: '22',
+        libelle: 'AGENCEMENTS ET AMENAGEMENTS',
+        section: 'I',
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        code: '23',
+        libelle: 'MATERIEL DE TRANSPORT',
+        section: 'I',
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        code: '24',
+        libelle: 'MATERIEL ET OUTILLAGE',
+        section: 'I',
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        code: '25',
+        libelle: 'MOBILIER DE BUREAU ET MATERIEL INFORMATIQUE',
+        section: 'I',
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        code: '26',
+        libelle: 'AUTRES IMMOBILISATIONS CORPORELLES',
+        section: 'I',
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        code: '27',
+        libelle: 'IMMOBILISATIONS INCORPORELLES',
+        section: 'I',
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        code: '28',
+        libelle: 'IMMOBILISATIONS FINANCIERES',
+        section: 'I',
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+    ]);
+  }
+
+  // Seed Investissements Sous-Chapitres (App5)
+  const investSousChapitresCount = await db.investSousChapitres.count();
+  if (investSousChapitresCount === 0) {
+    console.log('🌱 Seeding default investissement sous-chapitres...');
+    // Fetch chapitres to link IDs
+    const chapitres = await db.investChapitres.toArray();
+    const getChapId = (code: string) => chapitres.find((c) => c.code === code)?.id;
+
+    await db.investSousChapitres.bulkAdd([
+      // Chapitre 21
+      {
+        code: '211',
+        libelle: 'TERRAINS',
+        chapitreInvestissementId: getChapId('21')!,
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        code: '212',
+        libelle: 'BATIMENTS',
+        chapitreInvestissementId: getChapId('21')!,
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      // Chapitre 22
+      {
+        code: '221',
+        libelle: 'VOIRIE ET RESEAUX DIVERS',
+        chapitreInvestissementId: getChapId('22')!,
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        code: '222',
+        libelle: 'PLANTATIONS',
+        chapitreInvestissementId: getChapId('22')!,
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      // Chapitre 23
+      {
+        code: '231',
+        libelle: 'VEHICULES AUTOMOBILES',
+        chapitreInvestissementId: getChapId('23')!,
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        code: '232',
+        libelle: 'CYCLES ET MOTOCYCLES',
+        chapitreInvestissementId: getChapId('23')!,
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      // Chapitre 24
+      {
+        code: '241',
+        libelle: 'MATERIEL TECHNIQUE',
+        chapitreInvestissementId: getChapId('24')!,
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        code: '242',
+        libelle: 'OUTILLAGE',
+        chapitreInvestissementId: getChapId('24')!,
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      // Chapitre 25
+      {
+        code: '251',
+        libelle: 'MOBILIER DE BUREAU',
+        chapitreInvestissementId: getChapId('25')!,
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        code: '252',
+        libelle: 'MATERIEL INFORMATIQUE',
+        chapitreInvestissementId: getChapId('25')!,
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      // Chapitre 26
+      {
+        code: '261',
+        libelle: 'LIVRES ET BIBLIOTHEQUES',
+        chapitreInvestissementId: getChapId('26')!,
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        code: '262',
+        libelle: "OEUVRES D'ART",
+        chapitreInvestissementId: getChapId('26')!,
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+    ]);
+  }
+
   console.log('✅ Default data seeded successfully.');
 }
 
@@ -698,6 +889,8 @@ export async function clearDatabase() {
     db.previsions.clear(),
     db.mandats.clear(),
     db.bordereauMandats.clear(),
+    db.investChapitres.clear(),
+    db.investSousChapitres.clear(),
   ]);
   console.log('✅ All tables cleared.');
 }

@@ -129,6 +129,16 @@
               />
             </div>
 
+            <!-- Imputation patrimoniale -->
+            <div class="col-12 col-sm-6">
+              <q-input
+                v-model="localForm.patrimonial"
+                filled
+                dense
+                label="Imputation patrimoniale"
+              />
+            </div>
+
             <!-- Bordereau -->
             <div class="col-12 col-sm-6">
               <q-select
@@ -270,6 +280,7 @@ watch(
           numeroLivre: 'T31T',
           numeroEncaissement: '',
           montantRecette: 0,
+          patrimonial: '',
           statut: 'validee' as const,
           observations: '',
         };

@@ -44,6 +44,7 @@ export interface Declaration {
   numeroLivre: string; // N° Livre (T31T par défaut)
   numeroEncaissement: string; // N° Encaissement
   montantRecette: number; // Montant de la recette
+  patrimonial?: string; // Imputation patrimoniale
   bordereauId?: number; // ID du Bordereau (optionnel)
   statut: 'validee' | 'brouillon';
   observations?: string;
@@ -163,8 +164,151 @@ export interface Quotite {
   prix: number;
   description: string;
   type: string;
+  isTimbre: boolean; // true = Timbre, false = Ticket
   mairieId: number;
   actif: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// ========== Interfaces pour App4 - Gestion des Timbres Fiscaux ==========
+
+export interface TimbreApprovisionnement {
+  id?: number;
+  mairieId: number;
+  exercice: number;
+  date: Date;
+  type: string;
+  detailsQuotites: Record<string, number>; // Code quotité -> quantité
+  total: number;
+  observations?: string;
+  personnelId: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface TimbreRemise {
+  id?: number;
+  mairieId: number;
+  exercice: number;
+  date: Date;
+  type: string;
+  numeroRemise: string;
+  detailsQuotites: Record<string, number>;
+  total: number;
+  observations?: string;
+  personnelId: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface TimbreVersement {
+  id?: number;
+  mairieId: number;
+  exercice: number;
+  date: Date;
+  numeroVersement: string;
+  detailsQuotites: Record<string, number>;
+  total: number;
+  observations?: string;
+  personnelId: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface TimbreBalanceEntree {
+  id?: number;
+  mairieId: number;
+  exercice: number;
+  date: Date;
+  type: string; // INITIAL, BE-S1, BE-S2, BE-S3
+  detailsQuotites: Record<string, number>;
+  total: number;
+  commentaires?: string;
+  personnelId: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// ========== Interfaces pour App5 - Gestion des Investissements ==========
+
+export interface ChapitreInvestissement {
+  id?: number;
+  code: string; // Ex: 21, 22, 23...
+  libelle: string; // Ex: "Immobilisations incorporelles"
+  description?: string;
+  mairieId: number;
+  actif: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface SousChapitreInvestissement {
+  id?: number;
+  code: string; // Ex: 211, 212, 221...
+  libelle: string;
+  description?: string;
+  chapitreInvestissementId?: number; // Lien optionnel vers le chapitre parent
+  mairieId: number;
+  actif: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface PrevisionInvestissement {
+  id?: number;
+  exercice: number;
+  chapitreInvestissementId: number;
+  sousChapitreInvestissementId?: number;
+  mairieId: number;
+  montantPrevu: number;
+  montantEngage: number;
+  montantDisponible: number;
+  observations?: string;
+  statut: 'brouillon' | 'validee' | 'cloturee';
+  personnelId: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface MandatInvestissement {
+  id?: number;
+  numeroOrdre?: number;
+  exercice: number;
+  numeroMandat: string;
+  dateMandat: Date;
+  chapitreInvestissementId: number;
+  sousChapitreInvestissementId?: number;
+  previsionInvestissementId?: number;
+  bordereauMandatInvestissementId?: number;
+  mairieId: number;
+  beneficiaire: string;
+  rib?: string;
+  patrimonial?: string;
+  objet: string;
+  montant: number;
+  numeroFacture?: string;
+  dateFacture?: Date;
+  modePaiement: 'virement' | 'cheque' | 'especes' | 'autre';
+  statut: 'brouillon' | 'emis' | 'paye' | 'annule';
+  observations?: string;
+  personnelId: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface BordereauMandatInvestissement {
+  id?: number;
+  numero: number;
+  exercice: number;
+  dateEmission?: Date;
+  mairieId: number;
+  montantTotal: number;
+  totalPrecedent?: number;
+  nombreMandats: number;
+  statut: 'ouvert' | 'ferme';
+  observations?: string;
+  personnelId: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -261,7 +405,7 @@ class TresorDatabase extends Dexie {
   declarations!: EntityTable<Declaration, 'id'>;
   bordereauxRecette!: EntityTable<BordereauRecette, 'id'>;
   utilisateurs!: EntityTable<Utilisateur, 'id'>;
-  // App2 - Gestion de la Trésorerie
+  // App2 - Gestion de la Trésorerie (Tickets)
   approvisionnements!: EntityTable<Approvisionnement, 'id'>;
   remises!: EntityTable<Remise, 'id'>;
   versements!: EntityTable<Versement, 'id'>;
@@ -273,11 +417,22 @@ class TresorDatabase extends Dexie {
   previsions!: EntityTable<Prevision, 'id'>;
   mandats!: EntityTable<Mandat, 'id'>;
   bordereauMandats!: EntityTable<BordereauMandat, 'id'>;
+  // App4 - Gestion des Timbres Fiscaux
+  timbreApprovisionnements!: EntityTable<TimbreApprovisionnement, 'id'>;
+  timbreRemises!: EntityTable<TimbreRemise, 'id'>;
+  timbreVersements!: EntityTable<TimbreVersement, 'id'>;
+  timbreBalancesEntree!: EntityTable<TimbreBalanceEntree, 'id'>;
+  // App5 - Gestion des Investissements
+  chapitresInvestissement!: EntityTable<ChapitreInvestissement, 'id'>;
+  sousChapitresInvestissement!: EntityTable<SousChapitreInvestissement, 'id'>;
+  previsionsInvestissement!: EntityTable<PrevisionInvestissement, 'id'>;
+  mandatsInvestissement!: EntityTable<MandatInvestissement, 'id'>;
+  bordereauMandatsInvestissement!: EntityTable<BordereauMandatInvestissement, 'id'>;
 
   constructor() {
     super('TresorDatabase');
 
-    this.version(12).stores({
+    this.version(15).stores({
       mairies: '++id, nom, code, ville',
       taxes: '++id, code, libelle, mairieId, type, actif',
       declarations:
@@ -289,7 +444,7 @@ class TresorDatabase extends Dexie {
       remises: '++id, numeroRemise, date, exercice, mairieId, personnelId',
       versements: '++id, numeroVersement, date, exercice, mairieId, personnelId',
       balancesEntree: '++id, date, exercice, mairieId, type, personnelId, [exercice+mairieId]',
-      quotites: '++id, code, prix, type, mairieId, actif',
+      quotites: '++id, code, prix, type, isTimbre, mairieId, actif',
       // App3
       chapitres: '++id, code, libelle, mairieId, actif',
       sousChapitres: '++id, code, libelle, mairieId, actif',
@@ -297,6 +452,21 @@ class TresorDatabase extends Dexie {
       mandats:
         '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
       bordereauMandats: '++id, numero, exercice, mairieId, statut, personnelId',
+      // App4 - Timbres Fiscaux
+      timbreApprovisionnements: '++id, date, exercice, mairieId, type, personnelId',
+      timbreRemises: '++id, numeroRemise, date, exercice, mairieId, personnelId',
+      timbreVersements: '++id, numeroVersement, date, exercice, mairieId, personnelId',
+      timbreBalancesEntree:
+        '++id, date, exercice, mairieId, type, personnelId, [exercice+mairieId]',
+      // App5 - Investissements
+      chapitresInvestissement: '++id, code, libelle, mairieId, actif',
+      sousChapitresInvestissement:
+        '++id, code, libelle, chapitreInvestissementId, mairieId, actif',
+      previsionsInvestissement:
+        '++id, exercice, chapitreInvestissementId, sousChapitreInvestissementId, mairieId, statut, personnelId',
+      mandatsInvestissement:
+        '++id, numeroMandat, dateMandat, exercice, chapitreInvestissementId, sousChapitreInvestissementId, previsionInvestissementId, bordereauMandatInvestissementId, mairieId, statut, personnelId',
+      bordereauMandatsInvestissement: '++id, numero, exercice, mairieId, statut, personnelId',
     });
   }
 }
@@ -800,13 +970,14 @@ export async function initializeDatabase() {
       },
     ]);
 
-    // Quotités par défaut (App2)
+    // Quotités par défaut (App2) - Tickets
     await db.quotites.bulkAdd([
       {
         code: 'TM100',
         prix: 100,
         description: 'Ticket',
         type: 'Marché',
+        isTimbre: false,
         mairieId: mairieId as number,
         actif: true,
         createdAt: now,
@@ -817,6 +988,7 @@ export async function initializeDatabase() {
         prix: 100,
         description: 'Ticket',
         type: 'Abattoirs',
+        isTimbre: false,
         mairieId: mairieId as number,
         actif: true,
         createdAt: now,
@@ -827,6 +999,52 @@ export async function initializeDatabase() {
         prix: 100,
         description: 'Ticket',
         type: 'Stationnement',
+        isTimbre: false,
+        mairieId: mairieId as number,
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      // Timbres fiscaux
+      {
+        code: 'TF100',
+        prix: 100,
+        description: 'Timbre fiscal 100F',
+        type: 'Fiscal',
+        isTimbre: true,
+        mairieId: mairieId as number,
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        code: 'TF200',
+        prix: 200,
+        description: 'Timbre fiscal 200F',
+        type: 'Fiscal',
+        isTimbre: true,
+        mairieId: mairieId as number,
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        code: 'TF500',
+        prix: 500,
+        description: 'Timbre fiscal 500F',
+        type: 'Fiscal',
+        isTimbre: true,
+        mairieId: mairieId as number,
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        code: 'TF1000',
+        prix: 1000,
+        description: 'Timbre fiscal 1000F',
+        type: 'Fiscal',
+        isTimbre: true,
         mairieId: mairieId as number,
         actif: true,
         createdAt: now,

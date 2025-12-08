@@ -149,6 +149,88 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/app3/StatistiquesPage.vue'),
         name: 'app3-statistiques',
       },
+      // Routes App4 - Gestion des Timbres Fiscaux
+      {
+        path: 'app4/dashboard',
+        component: () => import('pages/app4/DashboardPage.vue'),
+        name: 'app4-dashboard',
+      },
+      {
+        path: 'app4/approvisionnements',
+        component: () => import('pages/app4/ApprovisionnementPage.vue'),
+        name: 'app4-approvisionnements',
+      },
+      {
+        path: 'app4/remises',
+        component: () => import('pages/app4/RemisesPage.vue'),
+        name: 'app4-remises',
+      },
+      {
+        path: 'app4/versements',
+        component: () => import('pages/app4/VersementsPage.vue'),
+        name: 'app4-versements',
+      },
+      {
+        path: 'app4/balance-entree',
+        component: () => import('pages/app4/BalanceEntreePage.vue'),
+        name: 'app4-balance-entree',
+      },
+      {
+        path: 'app4/sections',
+        component: () => import('pages/app4/SectionPage.vue'),
+        name: 'app4-sections',
+      },
+      {
+        path: 'app4/quotites',
+        component: () => import('pages/app4/QuotitesPage.vue'),
+        name: 'app4-quotites',
+      },
+      {
+        path: 'app4/statistiques',
+        component: () => import('pages/app4/StatistiquesPage.vue'),
+        name: 'app4-statistiques',
+      },
+      // Routes App5 - Gestion des Investissements
+      {
+        path: 'app5/dashboard',
+        component: () => import('pages/app5/DashboardPage.vue'),
+        name: 'app5-dashboard',
+      },
+      {
+        path: 'app5/chapitres',
+        component: () => import('pages/app5/ChapitresPage.vue'),
+        name: 'app5-chapitres',
+      },
+      {
+        path: 'app5/sous-chapitres',
+        component: () => import('pages/app5/SousChapitresPage.vue'),
+        name: 'app5-sous-chapitres',
+      },
+      {
+        path: 'app5/previsions',
+        component: () => import('pages/app5/PrevisionPage.vue'),
+        name: 'app5-previsions',
+      },
+      {
+        path: 'app5/mandats',
+        component: () => import('pages/app5/MandatsPage.vue'),
+        name: 'app5-mandats',
+      },
+      {
+        path: 'app5/bordereaux-mandats',
+        component: () => import('pages/app5/BordereauxMandatsPage.vue'),
+        name: 'app5-bordereaux-mandats',
+      },
+      {
+        path: 'app5/statistiques',
+        component: () => import('pages/app5/StatistiquesPage.vue'),
+        name: 'app5-statistiques',
+      },
+      {
+        path: 'app5/ct02',
+        component: () => import('pages/app5/CT02Page.vue'),
+        name: 'app5-ct02',
+      },
     ],
   },
 
