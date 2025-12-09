@@ -11,6 +11,9 @@ import type {
   Mandat,
   BordereauMandat,
   ChapitreInvestissement,
+  PrevisionInvestissement,
+  BordereauMandatInvestissement,
+  MandatInvestissement,
 } from './db';
 
 // =================================================================
@@ -522,7 +525,7 @@ export async function seedDefaultData() {
       {
         code: '21',
         libelle: 'ACQUISITIONS IMMOBILIERES',
-        section: 'I',
+        mairieId: mairieId as number,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -530,7 +533,7 @@ export async function seedDefaultData() {
       {
         code: '22',
         libelle: 'AGENCEMENTS ET AMENAGEMENTS',
-        section: 'I',
+        mairieId: mairieId as number,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -538,7 +541,7 @@ export async function seedDefaultData() {
       {
         code: '23',
         libelle: 'MATERIEL DE TRANSPORT',
-        section: 'I',
+        mairieId: mairieId as number,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -546,7 +549,7 @@ export async function seedDefaultData() {
       {
         code: '24',
         libelle: 'MATERIEL ET OUTILLAGE',
-        section: 'I',
+        mairieId: mairieId as number,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -554,7 +557,7 @@ export async function seedDefaultData() {
       {
         code: '25',
         libelle: 'MOBILIER DE BUREAU ET MATERIEL INFORMATIQUE',
-        section: 'I',
+        mairieId: mairieId as number,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -562,7 +565,7 @@ export async function seedDefaultData() {
       {
         code: '26',
         libelle: 'AUTRES IMMOBILISATIONS CORPORELLES',
-        section: 'I',
+        mairieId: mairieId as number,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -570,7 +573,7 @@ export async function seedDefaultData() {
       {
         code: '27',
         libelle: 'IMMOBILISATIONS INCORPORELLES',
-        section: 'I',
+        mairieId: mairieId as number,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -578,7 +581,7 @@ export async function seedDefaultData() {
       {
         code: '28',
         libelle: 'IMMOBILISATIONS FINANCIERES',
-        section: 'I',
+        mairieId: mairieId as number,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -592,7 +595,8 @@ export async function seedDefaultData() {
     console.log('🌱 Seeding default investissement sous-chapitres...');
     // Fetch chapitres to link IDs
     const chapitres = await db.chapitresInvestissement.toArray();
-    const getChapId = (code: string) => chapitres.find((c: ChapitreInvestissement) => c.code === code)?.id;
+    const getChapId = (code: string) =>
+      chapitres.find((c: ChapitreInvestissement) => c.code === code)?.id;
 
     await db.sousChapitresInvestissement.bulkAdd([
       // Chapitre 21
@@ -600,6 +604,7 @@ export async function seedDefaultData() {
         code: '211',
         libelle: 'TERRAINS',
         chapitreInvestissementId: getChapId('21')!,
+        mairieId: mairieId as number,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -608,6 +613,7 @@ export async function seedDefaultData() {
         code: '212',
         libelle: 'BATIMENTS',
         chapitreInvestissementId: getChapId('21')!,
+        mairieId: mairieId as number,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -617,6 +623,7 @@ export async function seedDefaultData() {
         code: '221',
         libelle: 'VOIRIE ET RESEAUX DIVERS',
         chapitreInvestissementId: getChapId('22')!,
+        mairieId: mairieId as number,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -625,6 +632,7 @@ export async function seedDefaultData() {
         code: '222',
         libelle: 'PLANTATIONS',
         chapitreInvestissementId: getChapId('22')!,
+        mairieId: mairieId as number,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -634,6 +642,7 @@ export async function seedDefaultData() {
         code: '231',
         libelle: 'VEHICULES AUTOMOBILES',
         chapitreInvestissementId: getChapId('23')!,
+        mairieId: mairieId as number,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -642,6 +651,7 @@ export async function seedDefaultData() {
         code: '232',
         libelle: 'CYCLES ET MOTOCYCLES',
         chapitreInvestissementId: getChapId('23')!,
+        mairieId: mairieId as number,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -651,6 +661,7 @@ export async function seedDefaultData() {
         code: '241',
         libelle: 'MATERIEL TECHNIQUE',
         chapitreInvestissementId: getChapId('24')!,
+        mairieId: mairieId as number,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -659,6 +670,7 @@ export async function seedDefaultData() {
         code: '242',
         libelle: 'OUTILLAGE',
         chapitreInvestissementId: getChapId('24')!,
+        mairieId: mairieId as number,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -668,6 +680,7 @@ export async function seedDefaultData() {
         code: '251',
         libelle: 'MOBILIER DE BUREAU',
         chapitreInvestissementId: getChapId('25')!,
+        mairieId: mairieId as number,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -676,6 +689,7 @@ export async function seedDefaultData() {
         code: '252',
         libelle: 'MATERIEL INFORMATIQUE',
         chapitreInvestissementId: getChapId('25')!,
+        mairieId: mairieId as number,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -685,6 +699,7 @@ export async function seedDefaultData() {
         code: '261',
         libelle: 'LIVRES ET BIBLIOTHEQUES',
         chapitreInvestissementId: getChapId('26')!,
+        mairieId: mairieId as number,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -693,6 +708,7 @@ export async function seedDefaultData() {
         code: '262',
         libelle: "OEUVRES D'ART",
         chapitreInvestissementId: getChapId('26')!,
+        mairieId: mairieId as number,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -775,6 +791,9 @@ export interface SeedOptions {
   mandats?: number;
   bordereauMandats?: number;
   quotites?: number;
+  previsionsInvestissement?: number;
+  mandatsInvestissement?: number;
+  bordereauMandatsInvestissement?: number;
 }
 
 /**
@@ -794,6 +813,9 @@ export async function seedTestData(options: SeedOptions = {}) {
     mandats = 200,
     bordereauMandats = 20,
     quotites = 10,
+    previsionsInvestissement = 20,
+    mandatsInvestissement = 50,
+    bordereauMandatsInvestissement = 8,
   } = options;
 
   try {
@@ -851,6 +873,39 @@ export async function seedTestData(options: SeedOptions = {}) {
       utilisateurIds,
       bordereauMandatsCreated,
       mandats,
+    );
+
+    // Seeding App5 - Investissements
+    const chapitresInvestCreated = await db.chapitresInvestissement.toArray();
+    const chapitreInvestIds = chapitresInvestCreated.map((c) => c.id!);
+    const sousChapitresInvestCreated = await db.sousChapitresInvestissement.toArray();
+    const sousChapitreInvestIds = sousChapitresInvestCreated.map((s) => s.id!);
+
+    console.log(`🌱 Seeding ${previsionsInvestissement} test previsions investissement...`);
+    const previsionsInvestCreated = await seedPrevisionsInvestissement(
+      chapitreInvestIds,
+      utilisateurIds,
+      previsionsInvestissement,
+      sousChapitreInvestIds,
+    );
+    const previsionInvestIds = previsionsInvestCreated.map((p) => p.id!);
+
+    console.log(
+      `🌱 Seeding ${bordereauMandatsInvestissement} test bordereau mandats investissement...`,
+    );
+    const bordereauMandatsInvestCreated = await seedBordereauMandatsInvestissement(
+      utilisateurIds,
+      bordereauMandatsInvestissement,
+    );
+
+    console.log(`🌱 Seeding ${mandatsInvestissement} test mandats investissement...`);
+    await seedMandatsInvestissement(
+      chapitreInvestIds,
+      sousChapitreInvestIds,
+      previsionInvestIds,
+      utilisateurIds,
+      bordereauMandatsInvestCreated,
+      mandatsInvestissement,
     );
 
     console.log('\n✨ All test data seeders have been executed successfully!');
@@ -1633,4 +1688,229 @@ export async function seedQuotites(count: number = 10) {
   await db.quotites.bulkAdd(quotites as Quotite[]);
   console.log(`✅ ${quotites.length} quotités créées`);
   return quotites;
+}
+
+// =================================================================
+//                SEEDERS APP5 - INVESTISSEMENTS
+// =================================================================
+
+export async function seedPrevisionsInvestissement(
+  chapitreInvestIds: number[],
+  personnelIds: number[],
+  count: number = 20,
+  sousChapitreInvestIds: number[] = [],
+) {
+  console.log(`🌱 Seeding ${count} prévisions d'investissement...`);
+
+  const previsions: Omit<PrevisionInvestissement, 'id'>[] = [];
+  const now = new Date();
+  const exercices = [2023, 2024, 2025];
+
+  for (let i = 0; i < count; i++) {
+    const exercice = randomChoice(exercices);
+    const chapitreId = randomChoice(chapitreInvestIds);
+
+    const montantPrevu = randomAmount(1000000, 50000000);
+    const montantEngage = randomAmount(0, montantPrevu);
+    const montantDisponible = montantPrevu - montantEngage;
+
+    const statuts: Array<'brouillon' | 'validee' | 'cloturee'> = [
+      'brouillon',
+      'validee',
+      'cloturee',
+    ];
+    const statut = randomChoice(statuts);
+
+    const prevision: Omit<PrevisionInvestissement, 'id'> = {
+      exercice,
+      chapitreInvestissementId: chapitreId,
+      mairieId: DEFAULT_MAIRIE_ID,
+      montantPrevu,
+      montantEngage,
+      montantDisponible,
+      statut,
+      personnelId: randomChoice(personnelIds),
+      createdAt: randomDate(new Date(exercice, 0, 1), now),
+      updatedAt: now,
+    };
+
+    // Ajouter sousChapitreInvestissementId seulement si défini
+    if (Math.random() > 0.3 && sousChapitreInvestIds.length > 0) {
+      prevision.sousChapitreInvestissementId = randomChoice(sousChapitreInvestIds);
+    }
+
+    previsions.push(prevision);
+  }
+
+  await db.previsionsInvestissement.bulkAdd(previsions as PrevisionInvestissement[]);
+  console.log(`✅ ${count} prévisions d'investissement créées`);
+
+  // Récupérer les prévisions créées avec leurs IDs
+  const createdPrevisions = await db.previsionsInvestissement.toArray();
+  return createdPrevisions;
+}
+
+export async function seedBordereauMandatsInvestissement(
+  personnelIds: number[],
+  count: number = 8,
+) {
+  console.log(`🌱 Seeding ${count} bordereaux mandats investissement...`);
+
+  const bordereaux: Omit<BordereauMandatInvestissement, 'id'>[] = [];
+  const now = new Date();
+  const exercices = [2023, 2024, 2025];
+
+  for (let i = 0; i < count; i++) {
+    const exercice = randomChoice(exercices);
+    const numero = i + 1;
+    const dateEmission = randomDate(new Date(exercice, 0, 1), new Date(exercice, 11, 31));
+    const statut: 'ouvert' | 'ferme' = Math.random() > 0.3 ? 'ferme' : 'ouvert';
+
+    bordereaux.push({
+      numero,
+      exercice,
+      dateEmission,
+      mairieId: DEFAULT_MAIRIE_ID,
+      montantTotal: 0,
+      nombreMandats: 0,
+      statut,
+      personnelId: randomChoice(personnelIds),
+      createdAt: randomDate(new Date(exercice, 0, 1), dateEmission),
+      updatedAt: now,
+    });
+  }
+
+  await db.bordereauMandatsInvestissement.bulkAdd(bordereaux as BordereauMandatInvestissement[]);
+
+  console.log(`✅ ${count} bordereaux mandats investissement créés`);
+
+  // Récupérer les bordereaux créés avec leurs IDs
+  const createdBordereaux = await db.bordereauMandatsInvestissement.toArray();
+  return createdBordereaux;
+}
+
+export async function seedMandatsInvestissement(
+  chapitreInvestIds: number[],
+  sousChapitreInvestIds: number[],
+  previsionInvestIds: number[],
+  personnelIds: number[],
+  bordereauMandats: BordereauMandatInvestissement[],
+  count: number = 50,
+) {
+  console.log(`🌱 Seeding ${count} mandats d'investissement...`);
+
+  const beneficiaires = [
+    'ENTREPRISE BTP AZAGUIE',
+    'SARL CONSTRUCTION MODERNE',
+    'ETS FOURNITURES ÉQUIPEMENTS',
+    'CABINET ARCHITECTURE DESIGN',
+    'SOCIÉTÉ TRAVAUX PUBLICS',
+    'GARAGE VEHICULES MUNICIPAUX',
+    'INFORMATIQUE SOLUTIONS CI',
+    'MOBILIER BUREAU PRO',
+  ];
+
+  const objets = [
+    'Acquisition terrain',
+    'Construction bâtiment',
+    'Achat véhicule',
+    'Équipement informatique',
+    'Mobilier de bureau',
+    'Matériel technique',
+    'Aménagement voirie',
+  ];
+
+  const modesPaiement: Array<'virement' | 'cheque' | 'especes' | 'autre'> = [
+    'virement',
+    'cheque',
+    'autre',
+  ];
+
+  const mandats: Omit<MandatInvestissement, 'id'>[] = [];
+  const now = new Date();
+
+  const bordereauUpdates = new Map<number, { count: number; total: number }>();
+
+  const sortedBordereaux = [...bordereauMandats].sort((a, b) => {
+    const dateA = a.dateEmission ? new Date(a.dateEmission).getTime() : 0;
+    const dateB = b.dateEmission ? new Date(b.dateEmission).getTime() : 0;
+    return dateA - dateB;
+  });
+
+  for (let i = 0; i < count; i++) {
+    const bordereau = randomChoice(sortedBordereaux);
+    const exercice = bordereau.exercice;
+    const bordereauId = bordereau.id;
+
+    const bordereauDate = bordereau.dateEmission
+      ? new Date(bordereau.dateEmission)
+      : new Date(exercice, 11, 31);
+    const startOfYear = new Date(exercice, 0, 1);
+
+    const dateMandat = randomDate(startOfYear, bordereauDate);
+    const numeroMandat = String(i + 1);
+    const montant = randomAmount(100000, 10000000);
+
+    const statuts: Array<'emis' | 'paye'> = ['emis', 'paye'];
+    const statut =
+      bordereau.statut === 'ferme'
+        ? randomChoice(['emis' as const, 'paye' as const])
+        : randomChoice(statuts);
+
+    const numeroFacture =
+      Math.random() > 0.3 ? `INV-${String(randomAmount(1000, 9999)).padStart(4, '0')}` : undefined;
+
+    const mandat: Omit<MandatInvestissement, 'id'> = {
+      numeroMandat,
+      exercice,
+      dateMandat,
+      chapitreInvestissementId: randomChoice(chapitreInvestIds),
+      mairieId: DEFAULT_MAIRIE_ID,
+      objet: randomChoice(objets),
+      beneficiaire: randomChoice(beneficiaires),
+      montant,
+      modePaiement: randomChoice(modesPaiement),
+      statut,
+      personnelId: randomChoice(personnelIds),
+      createdAt: randomDate(startOfYear, dateMandat),
+      updatedAt: now,
+    };
+
+    // Ajouter les propriétés optionnelles seulement si définies
+    if (Math.random() > 0.3 && sousChapitreInvestIds.length > 0) {
+      mandat.sousChapitreInvestissementId = randomChoice(sousChapitreInvestIds);
+    }
+    if (Math.random() > 0.2 && previsionInvestIds.length > 0) {
+      mandat.previsionInvestissementId = randomChoice(previsionInvestIds);
+    }
+    if (bordereauId) {
+      mandat.bordereauMandatInvestissementId = bordereauId;
+    }
+    if (numeroFacture) {
+      mandat.numeroFacture = numeroFacture;
+    }
+
+    mandats.push(mandat);
+
+    if (bordereauId && !bordereauUpdates.has(bordereauId)) {
+      bordereauUpdates.set(bordereauId, { count: 0, total: 0 });
+    }
+    const update = bordereauId ? bordereauUpdates.get(bordereauId) : undefined;
+    if (update) {
+      update.count++;
+      update.total += montant;
+    }
+  }
+
+  await db.mandatsInvestissement.bulkAdd(mandats as MandatInvestissement[]);
+
+  for (const [bordereauId, update] of bordereauUpdates) {
+    await db.bordereauMandatsInvestissement.update(bordereauId, {
+      nombreMandats: update.count,
+      montantTotal: update.total,
+    });
+  }
+
+  console.log(`✅ ${count} mandats d'investissement créés`);
+  return mandats;
 }

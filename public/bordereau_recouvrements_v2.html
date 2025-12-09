@@ -28,7 +28,7 @@
         min-height: 210mm;
         background: #fffff0;
         margin: 0 auto;
-        padding: 15mm;
+        padding: 5mm;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
       }
 
@@ -36,7 +36,8 @@
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        padding: 4px;
+        padding-left: 4px;
+        padding-right: 4px;
         /*margin-bottom: 10px;*/
         border-top: 1px solid #000;
         border-left: 1px solid #000;
@@ -45,16 +46,26 @@
 
       .header-left {
         font-weight: bold;
+        padding-top: 5px;
       }
 
       .header-center {
         text-align: center;
         font-weight: bold;
-        font-size: 13px;
+        font-size: 10px;
+        border-left: 1px solid #000;
+        border-right: 1px solid #000;
+        height: 30px;
+        padding-left: 57px;
+        padding-right: 57px;
+        padding-top: 5px;
+        position: relative;
+        left: -15px;
       }
 
       .header-right {
         font-weight: bold;
+        padding-top: 5px;
       }
 
       .sub-header {
@@ -67,12 +78,12 @@
       }
 
       .commune-info {
-          font-weight: bold;
-          position: absolute;
-          padding-left: 15px;
-          padding-top: 8.5px;
-          border-bottom: 1px solid;
-          width: 300px;
+        font-weight: bold;
+        position: absolute;
+        padding-left: 15px;
+        padding-top: 10px;
+        border-bottom: 1px solid;
+        width: 320px;
       }
 
       table {
@@ -204,20 +215,13 @@
         <div class="header-right">EXERCICE : <span data-field="exercice">2025</span></div>
       </div>
 
-      <div class="sub-header">
-        <!--<div class="commune-info">
-          COMMUNE DE : <span data-field="mairie">Mairie d'Azaguié</span><br />
-          CODE COMMUNE : <span data-field="codeCommune">422</span>
-        </div> -->
-      </div>
-
       <table>
         <thead>
-          <tr style="border-left: 1px solid #000;">
-              <div class="commune-info">
-                COMMUNE DE : <span data-field="mairie">Mairie d'Azaguié</span><br />
-                CODE COMMUNE : <span data-field="codeCommune">422</span>
-              </div>
+          <tr style="border-left: 1px solid #000">
+            <div class="commune-info">
+              COMMUNE DE : <span data-field="mairie">Mairie d'Azaguié</span><br />
+              CODE COMMUNE : <span data-field="codeCommune">422</span>
+            </div>
           </tr>
           <tr>
             <th rowspan="2" class="col-numero">N°</th>
@@ -299,7 +303,15 @@
             >
               TOTAL GÉNÉRAL DU<br />PRÉCÉDENT ARRÊTÉ
             </div>
-            <div style="border: 1px solid #000; border-left: none; padding: 5px; flex: 1; text-align: center">
+            <div
+              style="
+                border: 1px solid #000;
+                border-left: none;
+                padding: 5px;
+                flex: 1;
+                text-align: center;
+              "
+            >
               <span data-field="totalPrecedentChiffres">0</span>
             </div>
           </div>
@@ -315,7 +327,15 @@
             >
               TOTAL GÉNÉRAL DU<br />PRÉSENT ARRÊTÉ
             </div>
-            <div style="border: 1px solid #000; border-left: none; padding: 5px; flex: 1; text-align: center">
+            <div
+              style="
+                border: 1px solid #000;
+                border-left: none;
+                padding: 5px;
+                flex: 1;
+                text-align: center;
+              "
+            >
               <span data-field="totalGeneralChiffres">0</span>
             </div>
           </div>
@@ -476,7 +496,7 @@
                 <td class="nature-text">${decl.natureRecette}</td>
                 <td>${decl.nomPartieVersante || 'RÉGISSEUR'}</td>
                 <td class="crossed"><span>${decl.article || ''}</span></td>
-                <td class="crossed"></td>
+                <td class="crossed"><span>${decl.patrimonial || ''}</span></td>
                 <td class="crossed"><span>${formatMontant(decl.montant)}</span></td>
                 <td><span>${decl.dateEncaissement}</span></td>
                 <td></td>
@@ -486,7 +506,7 @@
         });
 
         // Ajouter des lignes vides si nécessaire (minimum 10 lignes)
-        const lignesManquantes = Math.max(0, 10 - data.declarations.length);
+        const lignesManquantes = Math.max(0, 15 - data.declarations.length);
         for (let i = 0; i < lignesManquantes; i++) {
           const tr = document.createElement('tr');
           tr.className = 'empty-row';

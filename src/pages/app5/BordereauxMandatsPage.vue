@@ -372,7 +372,7 @@ function resetForm() {
   editingId.value = null;
 }
 
-async function openAddDialog() {
+function openAddDialog() {
   resetForm();
   // Générer le prochain numéro
   const existingBordereaux = bordereaux.value.filter((b) => b.exercice === formData.value.exercice);
@@ -400,7 +400,9 @@ async function saveBordereau() {
     const data = {
       numero: formData.value.numero,
       exercice: formData.value.exercice,
-      dateEmission: formData.value.dateEmission ? new Date(formData.value.dateEmission) : new Date(),
+      dateEmission: formData.value.dateEmission
+        ? new Date(formData.value.dateEmission)
+        : new Date(),
       mairieId: DEFAULT_MAIRIE_ID,
       montantTotal: 0,
       nombreMandats: 0,

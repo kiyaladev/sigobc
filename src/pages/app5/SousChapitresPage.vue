@@ -169,7 +169,7 @@ interface SousChapitreForm {
   code: string;
   libelle: string;
   description: string;
-  chapitreInvestissementId?: number;
+  chapitreInvestissementId?: number | null;
   actif: boolean;
 }
 
@@ -177,7 +177,7 @@ const form = ref<SousChapitreForm>({
   code: '',
   libelle: '',
   description: '',
-  chapitreInvestissementId: undefined,
+  chapitreInvestissementId: null,
   actif: true,
 });
 
@@ -261,7 +261,7 @@ function openDialog(sousChapitre?: SousChapitreInvestissement) {
       code: sousChapitre.code,
       libelle: sousChapitre.libelle,
       description: sousChapitre.description || '',
-      chapitreInvestissementId: sousChapitre.chapitreInvestissementId,
+      chapitreInvestissementId: sousChapitre.chapitreInvestissementId ?? null,
       actif: sousChapitre.actif,
     };
   } else {
@@ -270,7 +270,7 @@ function openDialog(sousChapitre?: SousChapitreInvestissement) {
       code: '',
       libelle: '',
       description: '',
-      chapitreInvestissementId: undefined,
+      chapitreInvestissementId: null,
       actif: true,
     };
   }

@@ -559,7 +559,7 @@ function deletePrevision(row: PrevisionInvestissement) {
   });
 }
 
-async function printCT02() {
+function printCT02() {
   loadingCT02.value = true;
   try {
     // Filtrer les prévisions et mandats selon les filtres CT02

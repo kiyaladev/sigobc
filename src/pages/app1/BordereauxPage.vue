@@ -417,8 +417,8 @@ async function onSubmit(formData: Partial<BordereauRecette>) {
         mairieId: data.mairieId ?? DEFAULT_MAIRIE_ID,
         montantTotal: data.montantTotal!,
         nombreDeclarations: data.nombreDeclarations!,
-        statut: (data.statut || 'ouvert'),
-        personnelId: (data.personnelId ?? 0),
+        statut: data.statut || 'ouvert',
+        personnelId: data.personnelId ?? 0,
         createdAt: now,
         updatedAt: now,
       };
@@ -478,6 +478,7 @@ async function printBordereau(bordereau: BordereauRecette) {
           dateEncaissement: date.formatDate(decl.dateEncaissement, 'DD/MM/YYYY'),
           nomPartieVersante: decl.nomPartieVersante,
           article: taxe?.code || '',
+          patrimonial: decl.patrimonial || '',
           numeroPiece: decl.numeroPiece || '',
           statut: decl.statut || '',
         };
