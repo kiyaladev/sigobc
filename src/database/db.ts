@@ -332,6 +332,7 @@ export interface SousChapitre {
   code: string;
   libelle: string;
   description?: string;
+  parentId?: number; // ID du parent (pour la hiérarchie)
   mairieId: number;
   actif: boolean;
   createdAt: Date;
@@ -432,7 +433,7 @@ class TresorDatabase extends Dexie {
   constructor() {
     super('TresorDatabase');
 
-    this.version(15).stores({
+    this.version(16).stores({
       mairies: '++id, nom, code, ville',
       taxes: '++id, code, libelle, mairieId, type, actif',
       declarations:
@@ -447,7 +448,7 @@ class TresorDatabase extends Dexie {
       quotites: '++id, code, prix, type, isTimbre, mairieId, actif',
       // App3
       chapitres: '++id, code, libelle, mairieId, actif',
-      sousChapitres: '++id, code, libelle, mairieId, actif',
+      sousChapitres: '++id, code, libelle, parentId, mairieId, actif',
       previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
       mandats:
         '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
@@ -460,8 +461,7 @@ class TresorDatabase extends Dexie {
         '++id, date, exercice, mairieId, type, personnelId, [exercice+mairieId]',
       // App5 - Investissements
       chapitresInvestissement: '++id, code, libelle, mairieId, actif',
-      sousChapitresInvestissement:
-        '++id, code, libelle, chapitreInvestissementId, mairieId, actif',
+      sousChapitresInvestissement: '++id, code, libelle, chapitreInvestissementId, mairieId, actif',
       previsionsInvestissement:
         '++id, exercice, chapitreInvestissementId, sousChapitreInvestissementId, mairieId, statut, personnelId',
       mandatsInvestissement:

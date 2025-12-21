@@ -36,15 +36,19 @@
     </FilterBar>
 
     <!-- Table des sous-chapitres -->
-    <DataTable
-      :rows="filteredSousChapitres"
-      :columns="columns"
-      :loading="loading"
-      row-key="id"
-    >
+    <DataTable :rows="filteredSousChapitres" :columns="columns" :loading="loading" row-key="id">
       <template v-slot:body-cell-code="props">
         <q-td :props="props">
           <q-badge color="accent" :label="props.row.code" />
+        </q-td>
+      </template>
+
+      <template v-slot:body-cell-parent="props">
+        <q-td :props="props">
+          <q-badge v-if="props.row.parentId" color="primary" text-color="white">
+            {{ getParentCode(props.row.parentId) }}
+          </q-badge>
+          <span v-else class="text-grey-5">-</span>
         </q-td>
       </template>
 
@@ -100,6 +104,30 @@
               :rules="[(val) => !!val || 'Le libellé est requis']"
             />
 
+            <q-select
+              v-model="form.parentId"
+              :options="parentOptions"
+              filled
+              label="Parent (Optionnel)"
+              hint="Sélectionnez le chapitre ou sous-chapitre parent"
+              option-value="id"
+              option-label="label"
+              emit-value
+              map-options
+              clearable
+              use-input
+              input-debounce="0"
+              @filter="filterParents"
+            >
+              <template v-slot:option="scope">
+                <q-item v-bind="scope.itemProps">
+                  <q-item-section>
+                    <q-item-label>{{ scope.opt.code }} - {{ scope.opt.libelle }}</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </template>
+            </q-select>
+
             <q-input
               v-model="form.description"
               filled
@@ -149,6 +177,7 @@ interface SousChapitreForm {
   code: string;
   libelle: string;
   description: string;
+  parentId?: number;
   actif: boolean;
 }
 
@@ -156,6 +185,7 @@ const form = ref<SousChapitreForm>({
   code: '',
   libelle: '',
   description: '',
+  parentId: undefined,
   actif: true,
 });
 
@@ -167,6 +197,7 @@ const statutOptions = [
 const columns = [
   { name: 'code', label: 'Code', field: 'code', align: 'left' as const, sortable: true },
   { name: 'libelle', label: 'Libellé', field: 'libelle', align: 'left' as const, sortable: true },
+  { name: 'parent', label: 'Parent', field: 'parentId', align: 'left' as const, sortable: true },
   {
     name: 'description',
     label: 'Description',
@@ -195,8 +226,45 @@ const filteredSousChapitres = computed(() => {
     result = result.filter((c) => c.actif === filters.value.actif);
   }
 
-  return result;
+  // Trier par code pour afficher la hiérarchie naturellement
+  return result.sort((a, b) => a.code.localeCompare(b.code));
 });
+
+function getParentCode(parentId: number) {
+  const parent = sousChapitres.value.find((sc) => sc.id === parentId);
+  return parent ? `${parent.code} - ${parent.libelle}` : parentId;
+}
+
+const allParentOptions = computed(() => {
+  return sousChapitres.value.map((sc) => ({
+    id: sc.id,
+    code: sc.code,
+    libelle: sc.libelle,
+    label: `${sc.code} - ${sc.libelle}`,
+  }));
+});
+
+const parentOptions = ref<any[]>([]);
+
+function filterParents(val: string, update: (fn: () => void) => void) {
+  if (val === '') {
+    update(() => {
+      parentOptions.value = allParentOptions.value.filter(
+        // Exclure soi-même si modification
+        (p) => !isEditing.value || p.id !== form.value.id,
+      );
+    });
+    return;
+  }
+
+  update(() => {
+    const needle = val.toLowerCase();
+    parentOptions.value = allParentOptions.value.filter(
+      (v) =>
+        (!isEditing.value || v.id !== form.value.id) && v.label.toLowerCase().indexOf(needle) > -1,
+    );
+  });
+}
 
 async function loadSousChapitres() {
   loading.value = true;
@@ -221,6 +289,7 @@ function openDialog(sousChapitre?: SousChapitre) {
       code: sousChapitre.code,
       libelle: sousChapitre.libelle,
       description: sousChapitre.description || '',
+      parentId: sousChapitre.parentId,
       actif: sousChapitre.actif,
     };
   } else {
@@ -229,6 +298,7 @@ function openDialog(sousChapitre?: SousChapitre) {
       code: '',
       libelle: '',
       description: '',
+      parentId: undefined,
       actif: true,
     };
   }
