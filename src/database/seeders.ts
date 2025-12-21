@@ -1,8 +1,7 @@
 import { db, DEFAULT_MAIRIE_ID } from './db';
-import type { Chapitre, SousChapitre, Prevision, Mandat, BordereauMandat } from './db';
+import type { SousChapitre, Prevision, Mandat, BordereauMandat } from './db';
 import type {
   ChapitreInvestissement,
-  PrevisionInvestissement,
   MandatInvestissement,
   BordereauMandatInvestissement,
 } from './db';
@@ -83,6 +82,8 @@ export async function seedDefaultData() {
     code: '422',
     adresse: 'Avenue Principale',
     ville: 'Azaguié',
+    departement: 'Agboville',
+    region: 'Agnéby-Tiassa',
     codePostal: '00225',
     telephone: '+225 23 54 00 00',
     email: 'contact@mairie-azaguie.ci',
@@ -485,7 +486,7 @@ export async function seedTestData(options: SeedOptions = {}) {
 
   const {
     previsions = 30,
-    mandats = 200,
+    // mandats = 200,
     bordereauMandats = 20,
     mandatsInvest = 50,
     bordereauMandatsInvest = 8,
@@ -518,15 +519,14 @@ export async function seedTestData(options: SeedOptions = {}) {
     console.log(`🌱 Seeding ${bordereauMandats} test bordereau mandats...`);
     const bordereauMandatsCreated = await seedBordereauMandats(utilisateurIds, bordereauMandats);
 
-    // Seeding mandats
-    console.log(`🌱 Seeding ${mandats} test mandats...`);
+    // Seeding mandats (3 par couple chapitre/sous-chapitre)
+    console.log('🌱 Seeding mandats (3 par couple chapitre/sous-chapitre)...');
     await seedMandats(
       chapitreIds,
       sousChapitreIds,
       previsionIds,
       utilisateurIds,
       bordereauMandatsCreated,
-      mandats,
     );
 
     // Seeding App5 - Investissements
@@ -716,7 +716,6 @@ async function seedMandats(
   previsionIds: number[],
   personnelIds: number[],
   bordereauMandats: BordereauMandat[],
-  _count: number = 200, // Ignoré, on génère 3 mandats par couple chapitre/sous-chapitre
 ) {
   const beneficiaires = [
     'THEODULE DIRO LAHUET',

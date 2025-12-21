@@ -10,6 +10,8 @@ export interface Mairie {
   code: string;
   adresse: string;
   ville: string;
+  departement?: string;
+  region?: string;
   codePostal: string;
   telephone?: string;
   email?: string;
@@ -203,6 +205,105 @@ export interface BordereauMandat {
   updatedAt: Date;
 }
 
+// ========== Interfaces pour les Recettes ==========
+
+export interface BordereauRecette {
+  id?: number;
+  numero: number;
+  annee: number;
+  mairieId: number;
+  montantTotal: number;
+  totalPrecedent?: number;
+  nombreDeclarations: number;
+  statut: 'ouvert' | 'ferme';
+  observations?: string;
+  personnelId?: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Declaration {
+  id?: number;
+  exercice: number;
+  numeroPiece: number | string;
+  dateDeclaration?: Date;
+  dateEncaissement?: Date;
+  bordereauRecetteId?: number;
+  bordereauId?: number;
+  taxeId: number;
+  mairieId: number;
+  contribuable?: string;
+  nomPartieVersante?: string;
+  adresse?: string;
+  numeroLivre?: string;
+  numeroEncaissement?: string;
+  montant?: number;
+  montantRecette?: number;
+  patrimonial?: string;
+  modePaiement?: 'especes' | 'cheque' | 'virement' | 'autre';
+  statut: 'brouillon' | 'validee' | 'annulee';
+  observations?: string;
+  personnelId?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+// ========== Interface pour l'État Financier Mensuel ==========
+
+/**
+ * État financier mensuel par couple sous-chapitre/chapitre
+ * Stocke les antécédents pour chaque mois de l'année
+ *
+ * Logique des antécédents:
+ * - ant1 (Janvier) = 0 (pas d'antécédent)
+ * - ant2 (Février) = total des dépenses de janvier
+ * - ant3 (Mars) = total des dépenses de janvier + février
+ * - ...
+ * - ant12 (Décembre) = total des dépenses de janvier à novembre
+ *
+ * Total du mois = antécédent + dépenses du mois
+ */
+export interface EtatFinancierMensuel {
+  id?: number;
+  annee: number; // Année de l'état financier (ex: 2025)
+  sousChapitreId: number; // Référence au sous-chapitre
+  chapitreId: number; // Référence au chapitre
+  sousChapitreCode?: string; // Code du sous-chapitre (ex: '6001')
+  chapitreCode?: string; // Code du chapitre (ex: '1')
+  mairieId: number;
+
+  // Antécédents pour chaque mois (cumul des mois précédents)
+  ant1: number; // Janvier = 0
+  ant2: number; // Février = total janvier
+  ant3: number; // Mars = total janvier + février
+  ant4: number; // Avril
+  ant5: number; // Mai
+  ant6: number; // Juin
+  ant7: number; // Juillet
+  ant8: number; // Août
+  ant9: number; // Septembre
+  ant10: number; // Octobre
+  ant11: number; // Novembre
+  ant12: number; // Décembre = total janvier à novembre
+
+  // Dépenses par mois
+  dep1: number; // Dépenses Janvier
+  dep2: number; // Dépenses Février
+  dep3: number; // Dépenses Mars
+  dep4: number; // Dépenses Avril
+  dep5: number; // Dépenses Mai
+  dep6: number; // Dépenses Juin
+  dep7: number; // Dépenses Juillet
+  dep8: number; // Dépenses Août
+  dep9: number; // Dépenses Septembre
+  dep10: number; // Dépenses Octobre
+  dep11: number; // Dépenses Novembre
+  dep12: number; // Dépenses Décembre
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // Classe Dexie pour la base de données
 class TresorDatabase extends Dexie {
   mairies!: EntityTable<Mairie, 'id'>;
@@ -214,6 +315,7 @@ class TresorDatabase extends Dexie {
   previsions!: EntityTable<Prevision, 'id'>;
   mandats!: EntityTable<Mandat, 'id'>;
   bordereauMandats!: EntityTable<BordereauMandat, 'id'>;
+  etatFinancierMensuel!: EntityTable<EtatFinancierMensuel, 'id'>;
 
   // App5 - Gestion des Investissements
   chapitresInvestissement!: EntityTable<ChapitreInvestissement, 'id'>;
@@ -225,7 +327,7 @@ class TresorDatabase extends Dexie {
   constructor() {
     super('TresorDatabase');
 
-    this.version(18).stores({
+    this.version(19).stores({
       mairies: '++id, nom, code, ville',
       utilisateurs: '++id, username, email, role, mairieId, actif',
 
@@ -236,6 +338,8 @@ class TresorDatabase extends Dexie {
       mandats:
         '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
       bordereauMandats: '++id, numero, exercice, mairieId, statut, personnelId',
+      etatFinancierMensuel:
+        '++id, annee, sousChapitreId, chapitreId, mairieId, [annee+sousChapitreId+chapitreId]',
 
       // App5 - Investissements
       chapitresInvestissement: '++id, code, libelle, mairieId, actif',

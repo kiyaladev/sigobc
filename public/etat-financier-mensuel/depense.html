@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Etat Mensuel d'Exécution des Dépenses - Septembre 2025</title>
+    <title>Etat Mensuel d'Exécution des Dépenses</title>
     <style>
       @page {
         size: A4 landscape;
@@ -13,7 +13,7 @@
         font-family: Arial, Helvetica, sans-serif;
         font-size: 10px;
         margin: 0;
-        padding: 0;
+        padding: 10px;
       }
       .container {
         width: 100%;
@@ -23,7 +23,7 @@
         font-weight: bold;
         margin-bottom: 10px;
         position: relative;
-        height: 60px;
+        height: 70px;
       }
       .header-left {
         text-align: left;
@@ -91,6 +91,10 @@
         font-weight: bold;
         background-color: #f5f5f5;
       }
+      .sous-chapitre-header {
+        font-weight: bold;
+        background-color: #fafafa;
+      }
       .sous-total {
         background-color: #f9f9f9;
         font-weight: bold;
@@ -117,558 +121,337 @@
         text-align: center;
         width: 200px;
       }
+      .loading {
+        text-align: center;
+        padding: 50px;
+        font-size: 16px;
+        color: #666;
+      }
+
+      .doc-header-cell {
+        border: none !important;
+        padding: 0 !important;
+        background: transparent !important;
+      }
+
+      .print-footer {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      @media print {
+        body {
+          padding: 0;
+        }
+        .no-print {
+          display: none;
+        }
+
+        thead {
+          display: table-header-group;
+        }
+
+        .footer-text,
+        .signatures,
+        .print-footer {
+          break-inside: avoid;
+          page-break-inside: avoid;
+        }
+      }
     </style>
   </head>
   <body>
     <div class="container">
-      <div class="header">
-        <div class="header-left">
-          DEPARTEMENT DE VAVOUA<br />
-          COMMUNE DE VAVOUA<br />
-          CODE : 433
-        </div>
-        <div class="header-center">
-          <div class="main-title">ETAT MENSUEL D'EXECUTION DES DEPENSES</div>
-          ARTICLE 4 DE LA LOI 81-1129 DU 30/12/1981<br />
-          MOIS DE : <strong>SEPTEMBRE</strong>
-        </div>
-        <div class="header-right">
-          ANNEE : <strong>2025</strong><br />
-          N° 08
-        </div>
-      </div>
+      <div id="loading" class="loading">Chargement des données...</div>
 
-      <table>
-        <thead>
-          <tr>
-            <th rowspan="2" class="col-code">COMPTES</th>
-            <th rowspan="2" class="col-libelle">RUBRIQUES BUDGETAIRES</th>
-            <th rowspan="2" class="col-num">PREVISIONS</th>
-            <th colspan="3">E N G A G E M E N T S</th>
-            <th colspan="3">L I Q U I D A T I O N S</th>
-            <th colspan="3">M A N D A T S</th>
-            <th rowspan="2" class="col-percent">%<br />TM/P</th>
-          </tr>
-          <tr>
-            <th class="col-num">ANT.</th>
-            <th class="col-num">MOIS</th>
-            <th class="col-num">TOTAL</th>
-            <th class="col-num">ANT.</th>
-            <th class="col-num">MOIS</th>
-            <th class="col-num">TOTAL</th>
-            <th class="col-num">ANT.</th>
-            <th class="col-num">MOIS</th>
-            <th class="col-num">TOTAL</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- SECTION 60 -->
-          <tr class="section-header">
-            <td>60</td>
-            <td colspan="12">SECTION 60- DEPENSES DES SERVICES GENERAUX</td>
-          </tr>
+      <div id="content" style="display: none">
+        <table>
+          <thead>
+            <tr>
+              <th colspan="13" class="doc-header-cell">
+                <div class="header">
+                  <div class="header-left">
+                    <span id="departement">DEPARTEMENT</span><br />
+                    <span id="commune">COMMUNE</span><br />
+                    CODE : <span id="codeCommune">---</span>
+                  </div>
+                  <div class="header-center">
+                    <div class="main-title">ETAT MENSUEL D'EXECUTION DES DEPENSES</div>
+                    ARTICLE 4 DE LA LOI 81-1129 DU 30/12/1981<br />
+                    MOIS DE : <strong id="moisNom">---</strong>
+                  </div>
+                  <div class="header-right">
+                    ANNEE : <strong id="annee">----</strong><br />
+                    N° <span id="numeroMois">--</span>
+                  </div>
+                </div>
+              </th>
+            </tr>
+            <tr>
+              <th rowspan="2" class="col-code">COMPTES</th>
+              <th rowspan="2" class="col-libelle">RUBRIQUES BUDGETAIRES</th>
+              <th rowspan="2" class="col-num">PREVISIONS</th>
+              <th colspan="3">E N G A G E M E N T S</th>
+              <th colspan="3">L I Q U I D A T I O N S</th>
+              <th colspan="3">M A N D A T S</th>
+              <th rowspan="2" class="col-percent">%<br />TM/P</th>
+            </tr>
+            <tr>
+              <th class="col-num">ANT.</th>
+              <th class="col-num">MOIS</th>
+              <th class="col-num">TOTAL</th>
+              <th class="col-num">ANT.</th>
+              <th class="col-num">MOIS</th>
+              <th class="col-num">TOTAL</th>
+              <th class="col-num">ANT.</th>
+              <th class="col-num">MOIS</th>
+              <th class="col-num">TOTAL</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <!-- Données générées dynamiquement -->
+          </tbody>
+        </table>
 
-          <!-- CHAP 600 -->
-          <tr class="chap-header">
-            <td>600</td>
-            <td colspan="12">CHAP. ADMINISTRATION GENERALE</td>
-          </tr>
+        <div class="print-footer">
+          <div class="footer-text" id="footerText">
+            Arrêté le présent état à la somme de : [SOMME EN LETTRES] FRANCS CFA.
+          </div>
 
-          <!-- 6000 ADMINISTRATION -->
-          <tr>
-            <td>6000</td>
-            <td colspan="12"><strong>ADMINISTRATION</strong></td>
-          </tr>
-          <tr>
-            <td>6000/1</td>
-            <td>Salaires et indemnités</td>
-            <td class="col-num">4 848 000</td>
-            <td class="col-num">3 483 276</td>
-            <td class="col-num">409 390</td>
-            <td class="col-num">3 892 666</td>
-            <td class="col-num">3 483 276</td>
-            <td class="col-num">409 390</td>
-            <td class="col-num">3 892 666</td>
-            <td class="col-num">3 483 276</td>
-            <td class="col-num">409 390</td>
-            <td class="col-num">3 892 666</td>
-            <td class="col-percent">80.29</td>
-          </tr>
-          <tr>
-            <td>6000/2</td>
-            <td>Charges sociales</td>
-            <td class="col-num">330 000</td>
-            <td class="col-num">0</td>
-            <td class="col-num">0</td>
-            <td class="col-num">0</td>
-            <td class="col-num">0</td>
-            <td class="col-num">0</td>
-            <td class="col-num">0</td>
-            <td class="col-num">0</td>
-            <td class="col-num">0</td>
-            <td class="col-num">0</td>
-            <td class="col-percent">0.00</td>
-          </tr>
-          <tr>
-            <td>6000/3</td>
-            <td>Transport et frais de mission</td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-percent"></td>
-          </tr>
-          <tr>
-            <td>6000/4</td>
-            <td>Carburants et lubrifiants</td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-percent"></td>
-          </tr>
-          <tr>
-            <td>6000/5</td>
-            <td>Matériels et fournitures</td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-percent"></td>
-          </tr>
-          <tr>
-            <td>6000/6</td>
-            <td>Abonnement eau - électricité - téléphone</td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-percent"></td>
-          </tr>
-          <tr>
-            <td>6000/7</td>
-            <td>Travaux et service à l'entreprise</td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-percent"></td>
-          </tr>
-          <tr>
-            <td>6000/8</td>
-            <td>Intervention et transferts</td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-percent"></td>
-          </tr>
-          <tr class="sous-total">
-            <td>S/T 6000</td>
-            <td>SOUS TOTAL CHAP. 6000</td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-percent"></td>
-          </tr>
-
-          <!-- 60010 FONCTIONNEMENT CONSEILS ET COMMISSIONS -->
-          <tr>
-            <td>60010</td>
-            <td colspan="12"><strong>FONCTIONNEMENT CONSEILS ET COMMISSIONS</strong></td>
-          </tr>
-          <tr>
-            <td>60010/1</td>
-            <td>Salaires et indemnités</td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-percent"></td>
-          </tr>
-          <tr>
-            <td>60010/2</td>
-            <td>Charges sociales</td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-percent"></td>
-          </tr>
-          <tr>
-            <td>60010/3</td>
-            <td>Transport et frais de mission</td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-percent"></td>
-          </tr>
-          <tr>
-            <td>60010/4</td>
-            <td>Carburants et lubrifiants</td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-percent"></td>
-          </tr>
-          <tr>
-            <td>60010/5</td>
-            <td>Matériels et fournitures</td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-percent"></td>
-          </tr>
-          <tr>
-            <td>60010/6</td>
-            <td>Abonnement eau - électricité - téléphone</td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-percent"></td>
-          </tr>
-          <tr>
-            <td>60010/7</td>
-            <td>Travaux et service à l'entreprise</td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-percent"></td>
-          </tr>
-          <tr>
-            <td>60010/8</td>
-            <td>Intervention et transferts</td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-percent"></td>
-          </tr>
-          <tr class="sous-total">
-            <td>S/T 60010</td>
-            <td>SOUS TOTAL CHAP. 60010</td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-percent"></td>
-          </tr>
-
-          <!-- 60011 FONCTIONNEMENT DE LA MUNICIPALITE -->
-          <tr>
-            <td>60011</td>
-            <td colspan="12"><strong>FONCTIONNEMENT DE LA MUNICIPALITE</strong></td>
-          </tr>
-          <tr>
-            <td>60011/1</td>
-            <td>Salaires et indemnités</td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-percent"></td>
-          </tr>
-          <tr>
-            <td>60011/2</td>
-            <td>Charges sociales</td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-percent"></td>
-          </tr>
-          <tr>
-            <td>60011/3</td>
-            <td>Transport et frais de mission</td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-percent"></td>
-          </tr>
-          <tr>
-            <td>60011/4</td>
-            <td>Carburants et lubrifiants</td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-percent"></td>
-          </tr>
-          <tr>
-            <td>60011/5</td>
-            <td>Matériels et fournitures</td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-percent"></td>
-          </tr>
-          <tr>
-            <td>60011/6</td>
-            <td>Abonnement eau - électricité - téléphone</td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-percent"></td>
-          </tr>
-          <tr>
-            <td>60011/7</td>
-            <td>Travaux et service à l'entreprise</td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-percent"></td>
-          </tr>
-          <tr>
-            <td>60011/8</td>
-            <td>Intervention et transferts</td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-percent"></td>
-          </tr>
-          <tr class="sous-total">
-            <td>S/T 60011</td>
-            <td>SOUS TOTAL CHAP. 60011</td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-num"></td>
-            <td class="col-percent"></td>
-          </tr>
-
-          <!-- SECTION 64 -->
-          <!-- CHAP 645 -->
-          <tr class="chap-header">
-            <td>645</td>
-            <td colspan="12">CHAP. 645- DEPENSES ACCIDENTELLES</td>
-          </tr>
-          <tr>
-            <td>6451</td>
-            <td colspan="12"><strong>INDEMNITES - FRAIS ET DOMMAGES ET INTERETS</strong></td>
-          </tr>
-          <tr>
-            <td>6451/8</td>
-            <td>Intervention et transferts</td>
-            <td class="col-num">150 000</td>
-            <td class="col-num">0</td>
-            <td class="col-num">0</td>
-            <td class="col-num">0</td>
-            <td class="col-num">0</td>
-            <td class="col-num">0</td>
-            <td class="col-num">0</td>
-            <td class="col-num">0</td>
-            <td class="col-num">0</td>
-            <td class="col-num">0</td>
-            <td class="col-percent">0.00</td>
-          </tr>
-          <tr class="sous-total">
-            <td>S/T 645</td>
-            <td>SOUS TOTAL CHAP. 645</td>
-            <td class="col-num">150 000</td>
-            <td class="col-num">0</td>
-            <td class="col-num">0</td>
-            <td class="col-num">0</td>
-            <td class="col-num">0</td>
-            <td class="col-num">0</td>
-            <td class="col-num">0</td>
-            <td class="col-num">0</td>
-            <td class="col-num">0</td>
-            <td class="col-num">0</td>
-            <td class="col-percent">0.00</td>
-          </tr>
-          <tr class="total-section">
-            <td>TOTAL</td>
-            <td>TOTAL GENERAL DES DEPENSES</td>
-            <td class="col-num">--</td>
-            <td class="col-num">--</td>
-            <td class="col-num">--</td>
-            <td class="col-num">--</td>
-            <td class="col-num">--</td>
-            <td class="col-num">--</td>
-            <td class="col-num">--</td>
-            <td class="col-num">--</td>
-            <td class="col-num">--</td>
-            <td class="col-num">--</td>
-            <td class="col-percent">--</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div class="footer-text">
-        Arrêté le présent état à la somme de : [SOMME EN LETTRES] FRANCS CFA.
-      </div>
-
-      <div class="signatures">
-        <div class="signature-box">
-          Vavoua, le 31 MARS 2025<br />
-          <strong>Le Trésorier Principal</strong>
-        </div>
-        <div class="signature-box">
-          <br />
-          <strong>Le Maire</strong>
+          <div class="signatures">
+            <div class="signature-box">
+              <span id="lieuSignature">---</span>, le <span id="dateSignature">---</span><br />
+              <strong>Le Trésorier Principal</strong>
+            </div>
+            <div class="signature-box">
+              <br />
+              <strong>Le Maire</strong>
+            </div>
+          </div>
         </div>
       </div>
     </div>
+
+    <script>
+      // Libellés des chapitres (1 à 8)
+      const chapitreLibelles = {
+        1: 'Salaires et indemnités',
+        2: 'Charges sociales',
+        3: 'Transport et frais de mission',
+        4: 'Carburants et lubrifiants',
+        5: 'Matériels et fournitures',
+        6: 'Abonnement eau - électricité - téléphone',
+        7: "Travaux et service à l'entreprise",
+        8: 'Intervention et transferts',
+      };
+
+      // Formater un nombre en format monétaire
+      function formatNumber(num) {
+        if (num === 0 || num === undefined || num === null) return '0';
+        return Math.round(num).toLocaleString('fr-FR');
+      }
+
+      // Calculer le pourcentage
+      function calculatePercent(total, prevision) {
+        if (!prevision || prevision === 0) return '0.00';
+        return ((total / prevision) * 100).toFixed(2);
+      }
+
+      function isEligibleSousChapitreCode(code) {
+        if (!code || typeof code !== 'string') return false;
+        const trimmed = code.trim();
+        if (trimmed.length < 4) return false;
+        const num = parseInt(trimmed, 10);
+        return !Number.isNaN(num) && num >= 6000;
+      }
+
+      // Remplir le tableau avec les données
+      function fillTable(data) {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+
+        // Grouper par sous-chapitre
+        const groupedBySousChapitre = {};
+
+        for (const ligne of data.lignes) {
+          const sousChapitreCode = ligne.sousChapitreCode;
+          if (!isEligibleSousChapitreCode(sousChapitreCode)) continue;
+          if (!groupedBySousChapitre[sousChapitreCode]) {
+            groupedBySousChapitre[sousChapitreCode] = {
+              code: sousChapitreCode,
+              libelle: ligne.sousChapitreLibelle || sousChapitreCode,
+              chapitres: {},
+              totaux: { prevision: 0, antecedent: 0, depenseMois: 0, total: 0 },
+            };
+          }
+
+          groupedBySousChapitre[sousChapitreCode].chapitres[ligne.chapitreCode] = ligne;
+          groupedBySousChapitre[sousChapitreCode].totaux.prevision += ligne.prevision || 0;
+          groupedBySousChapitre[sousChapitreCode].totaux.antecedent += ligne.antecedent || 0;
+          groupedBySousChapitre[sousChapitreCode].totaux.depenseMois += ligne.depenseMois || 0;
+          groupedBySousChapitre[sousChapitreCode].totaux.total += ligne.total || 0;
+        }
+
+        // Trier par code sous-chapitre (numérique)
+        const sortedSousChapitres = Object.values(groupedBySousChapitre).sort((a, b) => {
+          const numA = parseInt(a.code, 10);
+          const numB = parseInt(b.code, 10);
+          if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+          return a.code.localeCompare(b.code);
+        });
+
+        // Générer les lignes du tableau
+        for (const sousChapitre of sortedSousChapitres) {
+          // Entête du sous-chapitre
+          const headerRow = document.createElement('tr');
+          headerRow.className = 'sous-chapitre-header';
+          headerRow.innerHTML = `
+            <td>${sousChapitre.code}</td>
+            <td colspan="12"><strong>${sousChapitre.libelle}</strong></td>
+          `;
+          tbody.appendChild(headerRow);
+
+          // Lignes pour chaque chapitre (1 à 8)
+          for (let i = 1; i <= 8; i++) {
+            const chapCode = String(i);
+            const ligne = sousChapitre.chapitres[chapCode];
+            const row = document.createElement('tr');
+
+            if (ligne) {
+              const percent = calculatePercent(ligne.total, ligne.prevision);
+              row.innerHTML = `
+                <td class="col-code">${sousChapitre.code}/${chapCode}</td>
+                <td class="col-libelle">${chapitreLibelles[chapCode]}</td>
+                <td class="col-num">${formatNumber(ligne.prevision)}</td>
+                <td class="col-num">${formatNumber(ligne.antecedent)}</td>
+                <td class="col-num">${formatNumber(ligne.depenseMois)}</td>
+                <td class="col-num">${formatNumber(ligne.total)}</td>
+                <td class="col-num">${formatNumber(ligne.antecedent)}</td>
+                <td class="col-num">${formatNumber(ligne.depenseMois)}</td>
+                <td class="col-num">${formatNumber(ligne.total)}</td>
+                <td class="col-num">${formatNumber(ligne.antecedent)}</td>
+                <td class="col-num">${formatNumber(ligne.depenseMois)}</td>
+                <td class="col-num">${formatNumber(ligne.total)}</td>
+                <td class="col-percent">${percent}</td>
+              `;
+            } else {
+              row.innerHTML = `
+                <td class="col-code">${sousChapitre.code}/${chapCode}</td>
+                <td class="col-libelle">${chapitreLibelles[chapCode]}</td>
+                <td class="col-num">0</td>
+                <td class="col-num">0</td>
+                <td class="col-num">0</td>
+                <td class="col-num">0</td>
+                <td class="col-num">0</td>
+                <td class="col-num">0</td>
+                <td class="col-num">0</td>
+                <td class="col-num">0</td>
+                <td class="col-num">0</td>
+                <td class="col-num">0</td>
+                <td class="col-percent">0.00</td>
+              `;
+            }
+            tbody.appendChild(row);
+          }
+
+          // Sous-total du sous-chapitre
+          const subTotalRow = document.createElement('tr');
+          subTotalRow.className = 'sous-total';
+          const subPercent = calculatePercent(
+            sousChapitre.totaux.total,
+            sousChapitre.totaux.prevision,
+          );
+          subTotalRow.innerHTML = `
+            <td>S/T ${sousChapitre.code}</td>
+            <td>SOUS TOTAL ${sousChapitre.code}</td>
+            <td class="col-num">${formatNumber(sousChapitre.totaux.prevision)}</td>
+            <td class="col-num">${formatNumber(sousChapitre.totaux.antecedent)}</td>
+            <td class="col-num">${formatNumber(sousChapitre.totaux.depenseMois)}</td>
+            <td class="col-num">${formatNumber(sousChapitre.totaux.total)}</td>
+            <td class="col-num">${formatNumber(sousChapitre.totaux.antecedent)}</td>
+            <td class="col-num">${formatNumber(sousChapitre.totaux.depenseMois)}</td>
+            <td class="col-num">${formatNumber(sousChapitre.totaux.total)}</td>
+            <td class="col-num">${formatNumber(sousChapitre.totaux.antecedent)}</td>
+            <td class="col-num">${formatNumber(sousChapitre.totaux.depenseMois)}</td>
+            <td class="col-num">${formatNumber(sousChapitre.totaux.total)}</td>
+            <td class="col-percent">${subPercent}</td>
+          `;
+          tbody.appendChild(subTotalRow);
+        }
+
+        // Total général
+        const totalRow = document.createElement('tr');
+        totalRow.className = 'total-section';
+        const totalPercent = calculatePercent(data.totaux.total, data.totaux.prevision);
+        totalRow.innerHTML = `
+          <td>TOTAL</td>
+          <td>TOTAL GENERAL DES DEPENSES</td>
+          <td class="col-num">${formatNumber(data.totaux.prevision)}</td>
+          <td class="col-num">${formatNumber(data.totaux.antecedent)}</td>
+          <td class="col-num">${formatNumber(data.totaux.depenseMois)}</td>
+          <td class="col-num">${formatNumber(data.totaux.total)}</td>
+          <td class="col-num">${formatNumber(data.totaux.antecedent)}</td>
+          <td class="col-num">${formatNumber(data.totaux.depenseMois)}</td>
+          <td class="col-num">${formatNumber(data.totaux.total)}</td>
+          <td class="col-num">${formatNumber(data.totaux.antecedent)}</td>
+          <td class="col-num">${formatNumber(data.totaux.depenseMois)}</td>
+          <td class="col-num">${formatNumber(data.totaux.total)}</td>
+          <td class="col-percent">${totalPercent}</td>
+        `;
+        tbody.appendChild(totalRow);
+      }
+
+      // Écouter les messages de l'application Vue
+      window.addEventListener('message', function (event) {
+        if (event.data && event.data.type === 'FILL_ETAT_FINANCIER_DATA') {
+          const data = event.data.data;
+
+          // Mettre à jour l'en-tête
+          document.getElementById('annee').textContent = data.annee;
+          document.getElementById('moisNom').textContent = data.moisNom.toUpperCase();
+          document.getElementById('numeroMois').textContent = String(data.mois).padStart(2, '0');
+
+          // Informations de la mairie si disponibles
+          if (data.mairie) {
+            document.getElementById('departement').textContent =
+              'DEPARTEMENT DE ' + (data.mairie.departement || '').toUpperCase();
+            document.getElementById('commune').textContent =
+              'COMMUNE DE ' + (data.mairie.nom || '').toUpperCase();
+            document.getElementById('codeCommune').textContent = data.mairie.code || '---';
+            document.getElementById('lieuSignature').textContent = data.mairie.nom || '---';
+          }
+
+          // Date de signature
+          const today = new Date();
+          const dateOptions = { day: 'numeric', month: 'long', year: 'numeric' };
+          document.getElementById('dateSignature').textContent = today.toLocaleDateString(
+            'fr-FR',
+            dateOptions,
+          );
+
+          // Remplir le tableau
+          fillTable(data);
+
+          // Mettre à jour le pied de page
+          document.getElementById('footerText').textContent =
+            `Arrêté le présent état à la somme de : ${formatNumber(data.totaux.total)} FRANCS CFA.`;
+
+          // Afficher le contenu
+          document.getElementById('loading').style.display = 'none';
+          document.getElementById('content').style.display = 'block';
+
+          // Mettre à jour le titre de la page
+          document.title = `Etat Mensuel d'Exécution des Dépenses - ${data.moisNom} ${data.annee}`;
+        }
+      });
+
+      // Si pas de données après 5 secondes, afficher un message
+      setTimeout(function () {
+        const loading = document.getElementById('loading');
+        if (loading.style.display !== 'none') {
+          loading.innerHTML =
+            "Aucune donnée reçue. Veuillez générer l'état depuis la page des prévisions.";
+        }
+      }, 5000);
+    </script>
   </body>
 </html>

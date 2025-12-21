@@ -497,6 +497,14 @@ const columns = [
     sortable: true,
   },
   {
+    name: 'etatMensuelId',
+    label: 'État mensuel',
+    align: 'left' as const,
+    field: 'etatMensuelId',
+    format: (val?: string) => val || '-',
+    sortable: true,
+  },
+  {
     name: 'beneficiaire',
     label: 'Bénéficiaire',
     align: 'left' as const,
@@ -571,7 +579,8 @@ const filteredMandats = computed(() => {
       (m) =>
         m.numeroMandat.toLowerCase().includes(searchTerm) ||
         m.beneficiaire.toLowerCase().includes(searchTerm) ||
-        m.objet.toLowerCase().includes(searchTerm),
+        m.objet.toLowerCase().includes(searchTerm) ||
+        (m.etatMensuelId || '').toLowerCase().includes(searchTerm),
     );
   }
 

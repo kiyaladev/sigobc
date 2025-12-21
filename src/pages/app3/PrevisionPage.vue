@@ -74,6 +74,13 @@
           </div>
           <div class="col-12 col-md-auto q-mt-sm q-mt-md-none q-gutter-sm">
             <q-btn
+              color="accent"
+              icon="description"
+              label="État Financier Mensuel"
+              unelevated
+              @click="openEtatFinancierMensuel"
+            />
+            <q-btn
               color="secondary"
               icon="print"
               label="CT02"
@@ -227,6 +234,53 @@
         </q-card-section>
       </q-card>
     </q-dialog>
+
+    <!-- Dialog État Financier Mensuel -->
+    <q-dialog v-model="showEtatFinancierDialog" persistent>
+      <q-card style="min-width: 400px">
+        <q-card-section class="row items-center q-pb-none">
+          <div class="text-h6">État Financier Mensuel</div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+
+        <q-card-section>
+          <div class="q-gutter-md">
+            <q-select
+              v-model="etatFinancierFilters.annee"
+              :options="exerciceOptions"
+              label="Année *"
+              outlined
+              dense
+              emit-value
+              map-options
+            />
+
+            <q-select
+              v-model="etatFinancierFilters.mois"
+              :options="moisOptions"
+              label="Mois *"
+              outlined
+              dense
+              emit-value
+              map-options
+            />
+
+            <div class="row justify-end q-gutter-sm q-mt-md">
+              <q-btn label="Annuler" flat color="grey-7" v-close-popup />
+              <q-btn
+                label="Générer l'état"
+                icon="description"
+                color="accent"
+                unelevated
+                @click="generateEtatFinancierMensuel"
+                :loading="loadingEtatFinancier"
+              />
+            </div>
+          </div>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
@@ -240,9 +294,11 @@ import DataTable from 'src/components/DataTable.vue';
 const $q = useQuasar();
 const loading = ref(false);
 const loadingCT02 = ref(false);
+const loadingEtatFinancier = ref(false);
 const filter = ref('');
 const showAddDialog = ref(false);
 const showCT02Dialog = ref(false);
+const showEtatFinancierDialog = ref(false);
 const editingId = ref<number | null>(null);
 
 // Filtres
@@ -269,6 +325,28 @@ const ct02Filters = ref({
   exercice: new Date().getFullYear(),
   sousChapitreId: null as number | null,
 });
+
+// Filtres État Financier Mensuel
+const etatFinancierFilters = ref({
+  annee: new Date().getFullYear(),
+  mois: new Date().getMonth() + 1, // Mois courant (1-12)
+});
+
+// Options pour les mois
+const moisOptions = [
+  { label: 'Janvier', value: 1 },
+  { label: 'Février', value: 2 },
+  { label: 'Mars', value: 3 },
+  { label: 'Avril', value: 4 },
+  { label: 'Mai', value: 5 },
+  { label: 'Juin', value: 6 },
+  { label: 'Juillet', value: 7 },
+  { label: 'Août', value: 8 },
+  { label: 'Septembre', value: 9 },
+  { label: 'Octobre', value: 10 },
+  { label: 'Novembre', value: 11 },
+  { label: 'Décembre', value: 12 },
+];
 
 const chapitreOptions = computed(() =>
   chapitres.value.map((c) => ({ label: `${c.code} - ${c.libelle}`, value: c.id })),
@@ -549,6 +627,252 @@ async function printCT02() {
     });
   } finally {
     loadingCT02.value = false;
+  }
+}
+
+/**
+ * Ouvre le dialogue pour sélectionner l'année et le mois de l'état financier
+ */
+function openEtatFinancierMensuel() {
+  showEtatFinancierDialog.value = true;
+}
+
+/**
+ * Génère l'état financier mensuel avec calcul dynamique des antécédents
+ */
+async function generateEtatFinancierMensuel() {
+  loadingEtatFinancier.value = true;
+
+  try {
+    const annee = etatFinancierFilters.value.annee;
+    const moisSelectionne = etatFinancierFilters.value.mois;
+
+    // Récupérer la mairie
+    const mairie = await db.mairies.toCollection().first();
+
+    // Récupérer tous les mandats de l'année sélectionnée
+    const mandatsAnnee = await db.mandats.where('exercice').equals(annee).toArray();
+
+    // Récupérer les chapitres et sous-chapitres
+    const chapitresData = await db.chapitres.toArray();
+    const sousChapitresData = await db.sousChapitres.toArray();
+    const previsionsData = await db.previsions.where('exercice').equals(annee).toArray();
+
+    // Créer une map des codes
+    const chapitreMap = new Map(chapitresData.map((c) => [c.id, c]));
+    const sousChapitreMap = new Map(sousChapitresData.map((s) => [s.id, s]));
+
+    const isEligibleSousChapitreCode = (code: string) => {
+      const trimmed = (code || '').trim();
+      if (trimmed.length < 4) return false;
+      const num = parseInt(trimmed, 10);
+      return !Number.isNaN(num) && num >= 6000;
+    };
+
+    const parseEtatMensuelId = (etatMensuelId: string) => {
+      // Format attendu: {année-mois}--{sousChapitreCode}/{chapitreCode}
+      // Exemple: 2025-12--6000/5
+      const [ym, rest] = (etatMensuelId || '').split('--');
+      if (!ym || !rest) return null;
+      const [sousChapitreCode, chapitreCode] = rest.split('/');
+      if (!sousChapitreCode || !chapitreCode) return null;
+      return {
+        ym,
+        sousChapitreCode: sousChapitreCode.trim(),
+        chapitreCode: chapitreCode.trim(),
+      };
+    };
+
+    // Calculer les dépenses par mois et par couple sous-chapitre/chapitre
+    // (clé basée sur les codes pour faciliter le groupement via etatMensuelId)
+    interface DepensesMensuelles {
+      [key: string]: {
+        sousChapitreCode: string;
+        chapitreCode: string;
+        sousChapitreLibelle: string;
+        chapitreLibelle: string;
+        previsionMontant: number;
+        depenses: number[]; // Index 0 = janvier, 11 = décembre
+      };
+    }
+
+    const depensesMap: DepensesMensuelles = {};
+
+    // Initialiser avec toutes les combinaisons existantes dans les prévisions
+    for (const prev of previsionsData) {
+      if (!prev.sousChapitreId) continue;
+
+      const sousChapitre = sousChapitreMap.get(prev.sousChapitreId);
+      const chapitre = chapitreMap.get(prev.chapitreId);
+
+      const sousChapitreCode = (sousChapitre?.code || '').trim();
+      const chapitreCode = (chapitre?.code || '').trim();
+      if (!sousChapitreCode || !chapitreCode) continue;
+      if (!isEligibleSousChapitreCode(sousChapitreCode)) continue;
+
+      const key = `${sousChapitreCode}/${chapitreCode}`;
+      if (!depensesMap[key]) {
+        depensesMap[key] = {
+          sousChapitreCode,
+          chapitreCode,
+          sousChapitreLibelle: sousChapitre?.libelle || '',
+          chapitreLibelle: chapitre?.libelle || '',
+          previsionMontant: 0,
+          depenses: Array(12).fill(0),
+        };
+      }
+      depensesMap[key].previsionMontant += prev.montantPrevu;
+    }
+
+    // Ajouter les dépenses des mandats (utiliser etatMensuelId pour grouper)
+    const anneePrefix = `${annee}-`;
+    for (const mandat of mandatsAnnee) {
+      if (mandat.statut !== 'emis' && mandat.statut !== 'paye') continue;
+
+      let sousChapitreCode = '';
+      let chapitreCode = '';
+      let moisIndex: number | null = null;
+
+      if (mandat.etatMensuelId) {
+        const parsed = parseEtatMensuelId(mandat.etatMensuelId);
+        if (!parsed) continue;
+        if (!parsed.ym.startsWith(anneePrefix)) continue;
+
+        const mm = parsed.ym.split('-')[1] || '';
+        const moisNum = parseInt(mm, 10);
+        if (Number.isNaN(moisNum) || moisNum < 1 || moisNum > 12) continue;
+
+        sousChapitreCode = parsed.sousChapitreCode;
+        chapitreCode = parsed.chapitreCode;
+        moisIndex = moisNum - 1;
+      } else if (mandat.dateMandat) {
+        // Fallback si un vieux mandat n'a pas etatMensuelId
+        const sousChapitre = sousChapitreMap.get(mandat.sousChapitreId);
+        const chapitre = chapitreMap.get(mandat.chapitreId);
+        sousChapitreCode = (sousChapitre?.code || '').trim();
+        chapitreCode = (chapitre?.code || '').trim();
+        moisIndex = new Date(mandat.dateMandat).getMonth();
+      }
+
+      if (!sousChapitreCode || !chapitreCode || moisIndex === null) continue;
+      if (!isEligibleSousChapitreCode(sousChapitreCode)) continue;
+
+      const key = `${sousChapitreCode}/${chapitreCode}`;
+      let entry = depensesMap[key];
+      if (!entry) {
+        // Combinaison présente dans les mandats mais pas dans les prévisions
+        const sousChapitre = sousChapitresData.find(
+          (s) => (s.code || '').trim() === sousChapitreCode,
+        );
+        const chapitre = chapitresData.find((c) => (c.code || '').trim() === chapitreCode);
+        entry = depensesMap[key] = {
+          sousChapitreCode,
+          chapitreCode,
+          sousChapitreLibelle: sousChapitre?.libelle || '',
+          chapitreLibelle: chapitre?.libelle || '',
+          previsionMontant: 0,
+          depenses: Array(12).fill(0),
+        };
+      }
+
+      entry.depenses[moisIndex] += mandat.montant;
+    }
+
+    // Calculer les antécédents et préparer les données pour l'affichage
+    const etatFinancierData = Object.values(depensesMap).map((item) => {
+      const antecedents: number[] = [];
+      let cumul = 0;
+
+      // Calculer les antécédents pour chaque mois
+      for (let m = 0; m < 12; m++) {
+        antecedents[m] = cumul; // L'antécédent du mois est le cumul des mois précédents
+        cumul += item.depenses[m] ?? 0;
+      }
+
+      // Données pour le mois sélectionné
+      const moisIndex = moisSelectionne - 1;
+      const antecedent = antecedents[moisIndex] ?? 0;
+      const depenseMois = item.depenses[moisIndex] ?? 0;
+      const total = antecedent + depenseMois;
+
+      return {
+        sousChapitreCode: item.sousChapitreCode,
+        chapitreCode: item.chapitreCode,
+        sousChapitreLibelle: item.sousChapitreLibelle,
+        chapitreLibelle: item.chapitreLibelle,
+        prevision: item.previsionMontant,
+        antecedent,
+        depenseMois,
+        total,
+        solde: item.previsionMontant - total,
+        // Tous les mois pour référence
+        depensesParMois: item.depenses,
+        antecedentsParMois: antecedents,
+      };
+    });
+
+    // Filtrer + trier par code sous-chapitre puis chapitre
+    const etatFinancierDataFiltered = etatFinancierData
+      .filter((l) => isEligibleSousChapitreCode(l.sousChapitreCode))
+      .sort((a, b) => {
+        const aSous = parseInt(a.sousChapitreCode, 10);
+        const bSous = parseInt(b.sousChapitreCode, 10);
+        if (!Number.isNaN(aSous) && !Number.isNaN(bSous) && aSous !== bSous) return aSous - bSous;
+
+        const aChap = parseInt(a.chapitreCode, 10);
+        const bChap = parseInt(b.chapitreCode, 10);
+        if (!Number.isNaN(aChap) && !Number.isNaN(bChap) && aChap !== bChap) return aChap - bChap;
+
+        return `${a.sousChapitreCode}-${a.chapitreCode}`.localeCompare(
+          `${b.sousChapitreCode}-${b.chapitreCode}`,
+        );
+      });
+
+    // Préparer les données pour la page HTML
+    const dataToSend = {
+      annee,
+      mois: moisSelectionne,
+      moisNom: moisOptions.find((m) => m.value === moisSelectionne)?.label || '',
+      mairie: mairie
+        ? {
+            nom: mairie.nom,
+            code: mairie.code,
+            departement: mairie.departement,
+          }
+        : null,
+      lignes: etatFinancierDataFiltered,
+      totaux: {
+        prevision: etatFinancierDataFiltered.reduce((sum, l) => sum + l.prevision, 0),
+        antecedent: etatFinancierDataFiltered.reduce((sum, l) => sum + l.antecedent, 0),
+        depenseMois: etatFinancierDataFiltered.reduce((sum, l) => sum + l.depenseMois, 0),
+        total: etatFinancierDataFiltered.reduce((sum, l) => sum + l.total, 0),
+        solde: etatFinancierDataFiltered.reduce((sum, l) => sum + l.solde, 0),
+      },
+    };
+
+    // Ouvrir la page HTML et envoyer les données
+    const etatWindow = window.open('/etat-financier-mensuel/depense.html', '_blank');
+    if (etatWindow) {
+      // Attendre que la page soit chargée avant d'envoyer les données
+      const sendData = () => {
+        etatWindow.postMessage({ type: 'FILL_ETAT_FINANCIER_DATA', data: dataToSend }, '*');
+      };
+
+      // Tenter d'envoyer après un délai pour s'assurer que la page est prête
+      setTimeout(sendData, 500);
+      setTimeout(sendData, 1000);
+      setTimeout(sendData, 2000);
+    }
+
+    showEtatFinancierDialog.value = false;
+  } catch (error) {
+    console.error("Erreur lors de la génération de l'état financier:", error);
+    $q.notify({
+      type: 'negative',
+      message: "Erreur lors de la génération de l'état financier mensuel",
+    });
+  } finally {
+    loadingEtatFinancier.value = false;
   }
 }
 
