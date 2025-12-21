@@ -14,6 +14,7 @@ import type {
   PrevisionInvestissement,
   BordereauMandatInvestissement,
   MandatInvestissement,
+  SousChapitre,
 } from './db';
 
 // =================================================================
@@ -312,7 +313,7 @@ export async function seedDefaultData() {
       }
     }
 
-    const newItem: any = {
+    const newItem: Omit<SousChapitre, 'id'> = {
       code: item.code,
       libelle: item.libelle,
       mairieId: mairieId as number,

@@ -185,7 +185,6 @@ const form = ref<SousChapitreForm>({
   code: '',
   libelle: '',
   description: '',
-  parentId: undefined,
   actif: true,
 });
 
@@ -236,15 +235,20 @@ function getParentCode(parentId: number) {
 }
 
 const allParentOptions = computed(() => {
-  return sousChapitres.value.map((sc) => ({
-    id: sc.id,
-    code: sc.code,
-    libelle: sc.libelle,
-    label: `${sc.code} - ${sc.libelle}`,
-  }));
+  return sousChapitres.value.map((sc) => {
+    const option: { id?: number; code: string; libelle: string; label: string } = {
+      code: sc.code,
+      libelle: sc.libelle,
+      label: `${sc.code} - ${sc.libelle}`,
+    };
+    if (sc.id !== undefined) {
+      option.id = sc.id;
+    }
+    return option;
+  });
 });
 
-const parentOptions = ref<any[]>([]);
+const parentOptions = ref<Array<{ id?: number; code: string; libelle: string; label: string }>>([]);
 
 function filterParents(val: string, update: (fn: () => void) => void) {
   if (val === '') {
@@ -289,16 +293,17 @@ function openDialog(sousChapitre?: SousChapitre) {
       code: sousChapitre.code,
       libelle: sousChapitre.libelle,
       description: sousChapitre.description || '',
-      parentId: sousChapitre.parentId,
       actif: sousChapitre.actif,
     };
+    if (sousChapitre.parentId !== undefined) {
+      form.value.parentId = sousChapitre.parentId;
+    }
   } else {
     isEditing.value = false;
     form.value = {
       code: '',
       libelle: '',
       description: '',
-      parentId: undefined,
       actif: true,
     };
   }
