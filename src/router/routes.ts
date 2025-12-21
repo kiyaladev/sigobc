@@ -31,6 +31,18 @@ const routes: RouteRecordRaw[] = [
         meta: { requiresAdmin: true },
       },
       {
+        path: 'admin/seeders',
+        component: () => import('pages/admin/AdminSeedersPage.vue'),
+        name: 'admin-seeders',
+        meta: { requiresAdmin: true },
+      },
+      {
+        path: 'admin/backup',
+        component: () => import('pages/admin/BackupPage.vue'),
+        name: 'admin-backup',
+        meta: { requiresAdmin: true },
+      },
+      {
         path: 'app3/dashboard',
         component: () => import('pages/app3/DashboardPage.vue'),
         name: 'app3-dashboard',

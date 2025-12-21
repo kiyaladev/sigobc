@@ -25,7 +25,7 @@ export interface Utilisateur {
   nom: string;
   prenom: string;
   email: string;
-  role: 'admin' | 'gestionnaire' | 'operateur';
+  role: 'admin' | 'gestionnaire' | 'operateur' | 'agent' | 'comptable';
   mairieId?: number;
   actif: boolean;
   derniereConnexion?: Date;
@@ -702,88 +702,6 @@ export async function initializeDatabase() {
       {
         code: '6456',
         libelle: 'AUTRES REMBOURSEMENTS DIVERS',
-        mairieId: mairieId as number,
-        actif: true,
-        createdAt: now,
-        updatedAt: now,
-      },
-    ]);
-
-    // Quotités par défaut (App2) - Tickets
-    await db.quotites.bulkAdd([
-      {
-        code: 'TM100',
-        prix: 100,
-        description: 'Ticket',
-        type: 'Marché',
-        isTimbre: false,
-        mairieId: mairieId as number,
-        actif: true,
-        createdAt: now,
-        updatedAt: now,
-      },
-      {
-        code: 'TA100',
-        prix: 100,
-        description: 'Ticket',
-        type: 'Abattoirs',
-        isTimbre: false,
-        mairieId: mairieId as number,
-        actif: true,
-        createdAt: now,
-        updatedAt: now,
-      },
-      {
-        code: 'TS100',
-        prix: 100,
-        description: 'Ticket',
-        type: 'Stationnement',
-        isTimbre: false,
-        mairieId: mairieId as number,
-        actif: true,
-        createdAt: now,
-        updatedAt: now,
-      },
-      // Timbres fiscaux
-      {
-        code: 'TF100',
-        prix: 100,
-        description: 'Timbre fiscal 100F',
-        type: 'Fiscal',
-        isTimbre: true,
-        mairieId: mairieId as number,
-        actif: true,
-        createdAt: now,
-        updatedAt: now,
-      },
-      {
-        code: 'TF200',
-        prix: 200,
-        description: 'Timbre fiscal 200F',
-        type: 'Fiscal',
-        isTimbre: true,
-        mairieId: mairieId as number,
-        actif: true,
-        createdAt: now,
-        updatedAt: now,
-      },
-      {
-        code: 'TF500',
-        prix: 500,
-        description: 'Timbre fiscal 500F',
-        type: 'Fiscal',
-        isTimbre: true,
-        mairieId: mairieId as number,
-        actif: true,
-        createdAt: now,
-        updatedAt: now,
-      },
-      {
-        code: 'TF1000',
-        prix: 1000,
-        description: 'Timbre fiscal 1000F',
-        type: 'Fiscal',
-        isTimbre: true,
         mairieId: mairieId as number,
         actif: true,
         createdAt: now,
