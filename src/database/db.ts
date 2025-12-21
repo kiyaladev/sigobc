@@ -18,6 +18,21 @@ export interface Mairie {
   updatedAt: Date;
 }
 
+export interface Utilisateur {
+  id?: number;
+  username: string;
+  password: string; // Hash du mot de passe
+  nom: string;
+  prenom: string;
+  email: string;
+  role: 'admin' | 'gestionnaire' | 'operateur';
+  mairieId?: number;
+  actif: boolean;
+  derniereConnexion?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // ========== Interfaces pour App5 - Gestion des Investissements ==========
 
 export interface ChapitreInvestissement {

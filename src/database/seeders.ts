@@ -78,8 +78,33 @@ export async function seedDefaultData() {
   ]);
 
   // 4. Chapitres par défaut (App3)
-      updatedAt: now,
-    },
+  const chapitresCount = await db.chapitres.count();
+  if (chapitresCount === 0) {
+    await db.chapitres.bulkAdd([
+      {
+        code: '1',
+        libelle: 'SALAIRE ET INDEM.',
+        mairieId: mairieId as number,
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        code: '2',
+        libelle: 'CHARGES SOCIALES',
+        mairieId: mairieId as number,
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        code: '3',
+        libelle: 'TRANSP. & FRAIS DE MISS.',
+        mairieId: mairieId as number,
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
     {
       code: '4',
       libelle: 'CARBUR. & LUBRIF.',
@@ -500,6 +525,7 @@ export async function seedDefaultData() {
 // Pour la concision, je vais réutiliser les fonctions existantes de l'ancien `seeders.ts`
 // mais je les préfixerai avec "generate" pour clarifier leur rôle.
 
+// Helpers
 function randomDate(start: Date, end: Date): Date {
   return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 }
@@ -511,25 +537,6 @@ function randomChoice<T>(array: T[]): T {
   return array[index]!;
 }
 
-/**
- * Construire un objet detailsQuotites à partir d'un objet timbres.
- * Répartit les quantités par valeur entre les quotités actives de même prix.
- */
-  await Promise.all([
-    db.mairies.clear(),
-    db.utilisateurs.clear(),
-    db.chapitres.clear(),
-    db.sousChapitres.clear(),
-    db.previsions.clear(),
-    db.mandats.clear(),
-    db.bordereauMandats.clear(),
-    db.chapitresInvestissement.clear(),
-    db.sousChapitresInvestissement.clear(),
-    db.previsionsInvestissement.clear(),
-    db.mandatsInvestissement.clear(),
-    db.bordereauMandatsInvestissement.clear(),
-  ]);
-  console.log('✅ All tables cleared.');
 export interface SeedOptions {
   utilisateurs?: number;
   chapitres?: number;
@@ -546,70 +553,89 @@ export interface SeedOptions {
  * Remplit la base de données avec une grande quantité de données de test aléatoires.
  */
 export async function seedTestData(options: SeedOptions = {}) {
-  console.log('🚀 Starting test data seeders...');
+    console.log('🚀 Starting test data seeders...');
 
+    const {
+      previsions = 30,
+      mandats = 200,
+      bordereauMandats = 20,
+      previsionsInvestissement = 20,
+      mandatsInvestissement = 50,
+      bordereauMandatsInvestissement = 8,
+    } = options;
 
-    console.log(`🌱 Seeding ${previsions} test previsions...`);
-    const previsionsCreated = await seedPrevisions(
-      chapitreIds,
-      utilisateurIds,
-      previsions,
-      sousChapitreIds,
-    );
-    const previsionIds = previsionsCreated.map((p) => p.id!);
-    // D'abord créer les bordereaux de mandats
-    console.log(`🌱 Seeding ${bordereauMandats} test bordereau mandats...`);
-    const bordereauMandatsCreated = await seedBordereauMandats(utilisateurIds, bordereauMandats);
-    // Puis créer les mandats en les liant aux bordereaux
-    console.log(`🌱 Seeding ${mandats} test mandats...`);
-    await seedMandats(
-      chapitreIds,
-      sousChapitreIds,
-      previsionIds,
-      utilisateurIds,
-      bordereauMandatsCreated,
-      mandats,
-    );
+    try {
+      await seedDefaultData();
+      console.log('Default data seeded before adding test data.');
 
-    // Seeding App5 - Investissements
-    const chapitresInvestCreated = await db.chapitresInvestissement.toArray();
-    const chapitreInvestIds = chapitresInvestCreated.map((c) => c.id!);
-    const sousChapitresInvestCreated = await db.sousChapitresInvestissement.toArray();
-    const sousChapitreInvestIds = sousChapitresInvestCreated.map((s) => s.id!);
+      const utilisateursCreated = await db.utilisateurs.toArray();
+      const utilisateurIds = utilisateursCreated.map((u) => u.id!);
+      const chapitresCreated = await db.chapitres.toArray();
+      const chapitreIds = chapitresCreated.map((c) => c.id!);
+      const sousChapitresCreated = await db.sousChapitres.toArray();
+      const sousChapitreIds = sousChapitresCreated.map((s) => s.id!);
 
-    console.log(`🌱 Seeding ${previsionsInvestissement} test previsions investissement...`);
-    const previsionsInvestCreated = await seedPrevisionsInvestissement(
-      chapitreInvestIds,
-      utilisateurIds,
-      previsionsInvestissement,
-      sousChapitreInvestIds,
-    );
-    const previsionInvestIds = previsionsInvestCreated.map((p) => p.id!);
+      console.log(`🌱 Seeding ${previsions} test previsions...`);
+      const previsionsCreated = await seedPrevisions(
+        chapitreIds,
+        utilisateurIds,
+        previsions,
+        sousChapitreIds,
+      );
+      const previsionIds = previsionsCreated.map((p) => p.id!);
 
-    console.log(
-      `🌱 Seeding ${bordereauMandatsInvestissement} test bordereau mandats investissement...`,
-    );
-    const bordereauMandatsInvestCreated = await seedBordereauMandatsInvestissement(
-      utilisateurIds,
-      bordereauMandatsInvestissement,
-    );
+      console.log(`🌱 Seeding ${bordereauMandats} test bordereau mandats...`);
+      const bordereauMandatsCreated = await seedBordereauMandats(utilisateurIds, bordereauMandats);
 
-    console.log(`🌱 Seeding ${mandatsInvestissement} test mandats investissement...`);
-    await seedMandatsInvestissement(
-      chapitreInvestIds,
-      sousChapitreInvestIds,
-      previsionInvestIds,
-      utilisateurIds,
-      bordereauMandatsInvestCreated,
-      mandatsInvestissement,
-    );
+      console.log(`🌱 Seeding ${mandats} test mandats...`);
+      await seedMandats(
+        chapitreIds,
+        sousChapitreIds,
+        previsionIds,
+        utilisateurIds,
+        bordereauMandatsCreated,
+        mandats,
+      );
 
-    console.log('\n✨ All test data seeders have been executed successfully!');
-  } catch (error) {
-    console.error('❌ Error during test data seeding:', error);
-    throw error;
+      // Seeding App5 - Investissements
+      const chapitresInvestCreated = await db.chapitresInvestissement.toArray();
+      const chapitreInvestIds = chapitresInvestCreated.map((c) => c.id!);
+      const sousChapitresInvestCreated = await db.sousChapitresInvestissement.toArray();
+      const sousChapitreInvestIds = sousChapitresInvestCreated.map((s) => s.id!);
+
+      console.log(`🌱 Seeding ${previsionsInvestissement} test previsions investissement...`);
+      const previsionsInvestCreated = await seedPrevisionsInvestissement(
+        chapitreInvestIds,
+        utilisateurIds,
+        previsionsInvestissement,
+        sousChapitreInvestIds,
+      );
+      const previsionInvestIds = previsionsInvestCreated.map((p) => p.id!);
+
+      console.log(
+        `🌱 Seeding ${bordereauMandatsInvestissement} test bordereau mandats investissement...`,
+      );
+      const bordereauMandatsInvestCreated = await seedBordereauMandatsInvestissement(
+        utilisateurIds,
+        bordereauMandatsInvestissement,
+      );
+
+      console.log(`🌱 Seeding ${mandatsInvestissement} test mandats investissement...`);
+      await seedMandatsInvestissement(
+        chapitreInvestIds,
+        sousChapitreInvestIds,
+        previsionInvestIds,
+        utilisateurIds,
+        bordereauMandatsInvestCreated,
+        mandatsInvestissement,
+      );
+
+      console.log('\n✨ All test data seeders have been executed successfully!');
+    } catch (error) {
+      console.error('❌ Error during test data seeding:', error);
+      throw error;
+    }
   }
-}
 
 // =================================================================
 //                      FONCTIONS UTILITAIRES
@@ -645,6 +671,11 @@ export async function clearDatabase() {
     const sousChapitreIds = sousChapitresCreated.map((s) => s.id!);
 
     // Génération des données de test supplémentaires
+    // (Note: clearDatabase ne génère pas de données, c'est seedTestData qui le fait)
+  } catch (error) {
+    console.error('❌ Error clearing database:', error);
+    throw error;
+  }
 }
 
 // On garde les fonctions de génération de l'ancien seeder.ts ici
