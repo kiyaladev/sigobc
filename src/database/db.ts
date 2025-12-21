@@ -18,218 +18,6 @@ export interface Mairie {
   updatedAt: Date;
 }
 
-export interface Taxe {
-  id?: number;
-  code: string;
-  libelle: string;
-  description?: string;
-  taux?: number;
-  montant?: number;
-  type: 'fixe' | 'variable';
-  mairieId: number;
-  actif: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface Declaration {
-  id?: number;
-  mairieId: number; // Mairie de l'utilisateur
-  exercice: number; // Année en cours
-  taxeId: number; // Article N° - Taxe sélectionnée
-  numeroPiece: string; // Numéro de la pièce
-  nomPartieVersante: string; // Nom de la partie versante
-  adresse: string; // Adresse
-  dateEncaissement: Date; // Date d'encaissement (date du jour par défaut)
-  numeroLivre: string; // N° Livre (T31T par défaut)
-  numeroEncaissement: string; // N° Encaissement
-  montantRecette: number; // Montant de la recette
-  patrimonial?: string; // Imputation patrimoniale
-  bordereauId?: number; // ID du Bordereau (optionnel)
-  statut: 'validee' | 'brouillon';
-  observations?: string;
-  personnelId: number; // Agent qui a créé la déclaration
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface BordereauRecette {
-  id?: number;
-  numero: number; // Numéro incrémental (1, 2, 3...)
-  annee: number; // Année du bordereau
-  mois?: number; // Mois du bordereau (1-12)
-  dateTransmission?: Date; // Date de transmission du bordereau
-  mairieId: number;
-  montantTotal: number;
-  totalPrecedent?: number;
-  nombreDeclarations: number;
-  statut: 'ouvert' | 'ferme';
-  observations?: string;
-  personnelId: number; // Agent responsable
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface Utilisateur {
-  id?: number;
-  username: string;
-  password: string; // Hash du mot de passe
-  nom: string;
-  prenom: string;
-  email: string;
-  role: 'admin' | 'gestionnaire' | 'operateur';
-  mairieId?: number;
-  actif: boolean;
-  derniereConnexion?: Date;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-// ========== Interfaces pour App2 - Gestion de la Trésorerie ==========
-
-export interface Timbres {
-  100: number;
-  200: number;
-  300: number;
-  500: number;
-  600: number;
-  1000: number;
-  [key: number]: number; // Index signature pour permettre l'accès par number
-}
-
-export interface Approvisionnement {
-  id?: number;
-  mairieId: number;
-  exercice: number; // Année
-  date: Date;
-  type: string; // Type d'approvisionnement (initial, complementaire, etc.)
-  timbres: Timbres; // Stock de timbres par valeur
-  detailsQuotites?: Record<string, number>;
-  total: number; // Montant total
-  observations?: string;
-  personnelId: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface Remise {
-  id?: number;
-  mairieId: number;
-  exercice: number;
-  date: Date;
-  type: string; // Type de la remise
-  numeroRemise: string; // Numéro de la remise
-  timbres: Timbres; // Quantité de timbres reçus
-  detailsQuotites?: Record<string, number>;
-  total: number; // Montant total
-  observations?: string;
-  personnelId: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface Versement {
-  id?: number;
-  mairieId: number;
-  exercice: number;
-  date: Date;
-  numeroVersement: string; // Numéro du versement
-  timbres: Timbres; // Quantité de timbres vendus
-  detailsQuotites?: Record<string, number>;
-  total: number; // Montant total
-  observations?: string;
-  personnelId: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface BalanceEntree {
-  id?: number;
-  mairieId: number;
-  exercice: number; // Année
-  date: Date;
-  type: string; // Type de balance (INITIAL, BE-S1, BE-S2, BE-S3)
-  timbres: Timbres; // Stock de timbres par valeur
-  detailsQuotites?: Record<string, number>;
-  total: number; // Montant total du stock
-  commentaires?: string;
-  personnelId: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface Quotite {
-  id?: number;
-  code: string;
-  prix: number;
-  description: string;
-  type: string;
-  isTimbre: boolean; // true = Timbre, false = Ticket
-  mairieId: number;
-  actif: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-// ========== Interfaces pour App4 - Gestion des Timbres Fiscaux ==========
-
-export interface TimbreApprovisionnement {
-  id?: number;
-  mairieId: number;
-  exercice: number;
-  date: Date;
-  type: string;
-  detailsQuotites: Record<string, number>; // Code quotité -> quantité
-  total: number;
-  observations?: string;
-  personnelId: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface TimbreRemise {
-  id?: number;
-  mairieId: number;
-  exercice: number;
-  date: Date;
-  type: string;
-  numeroRemise: string;
-  detailsQuotites: Record<string, number>;
-  total: number;
-  observations?: string;
-  personnelId: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface TimbreVersement {
-  id?: number;
-  mairieId: number;
-  exercice: number;
-  date: Date;
-  numeroVersement: string;
-  detailsQuotites: Record<string, number>;
-  total: number;
-  observations?: string;
-  personnelId: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface TimbreBalanceEntree {
-  id?: number;
-  mairieId: number;
-  exercice: number;
-  date: Date;
-  type: string; // INITIAL, BE-S1, BE-S2, BE-S3
-  detailsQuotites: Record<string, number>;
-  total: number;
-  commentaires?: string;
-  personnelId: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
 // ========== Interfaces pour App5 - Gestion des Investissements ==========
 
 export interface ChapitreInvestissement {
@@ -402,27 +190,15 @@ export interface BordereauMandat {
 // Classe Dexie pour la base de données
 class TresorDatabase extends Dexie {
   mairies!: EntityTable<Mairie, 'id'>;
-  taxes!: EntityTable<Taxe, 'id'>;
-  declarations!: EntityTable<Declaration, 'id'>;
-  bordereauxRecette!: EntityTable<BordereauRecette, 'id'>;
   utilisateurs!: EntityTable<Utilisateur, 'id'>;
-  // App2 - Gestion de la Trésorerie (Tickets)
-  approvisionnements!: EntityTable<Approvisionnement, 'id'>;
-  remises!: EntityTable<Remise, 'id'>;
-  versements!: EntityTable<Versement, 'id'>;
-  balancesEntree!: EntityTable<BalanceEntree, 'id'>;
-  quotites!: EntityTable<Quotite, 'id'>;
+
   // App3 - Gestion des Dépenses
   chapitres!: EntityTable<Chapitre, 'id'>;
   sousChapitres!: EntityTable<SousChapitre, 'id'>;
   previsions!: EntityTable<Prevision, 'id'>;
   mandats!: EntityTable<Mandat, 'id'>;
   bordereauMandats!: EntityTable<BordereauMandat, 'id'>;
-  // App4 - Gestion des Timbres Fiscaux
-  timbreApprovisionnements!: EntityTable<TimbreApprovisionnement, 'id'>;
-  timbreRemises!: EntityTable<TimbreRemise, 'id'>;
-  timbreVersements!: EntityTable<TimbreVersement, 'id'>;
-  timbreBalancesEntree!: EntityTable<TimbreBalanceEntree, 'id'>;
+
   // App5 - Gestion des Investissements
   chapitresInvestissement!: EntityTable<ChapitreInvestissement, 'id'>;
   sousChapitresInvestissement!: EntityTable<SousChapitreInvestissement, 'id'>;
@@ -433,19 +209,10 @@ class TresorDatabase extends Dexie {
   constructor() {
     super('TresorDatabase');
 
-    this.version(16).stores({
+    this.version(18).stores({
       mairies: '++id, nom, code, ville',
-      taxes: '++id, code, libelle, mairieId, type, actif',
-      declarations:
-        '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
-      bordereauxRecette: '++id, numero, annee, mairieId, statut, personnelId',
       utilisateurs: '++id, username, email, role, mairieId, actif',
-      // App2
-      approvisionnements: '++id, date, exercice, mairieId, type, personnelId',
-      remises: '++id, numeroRemise, date, exercice, mairieId, personnelId',
-      versements: '++id, numeroVersement, date, exercice, mairieId, personnelId',
-      balancesEntree: '++id, date, exercice, mairieId, type, personnelId, [exercice+mairieId]',
-      quotites: '++id, code, prix, type, isTimbre, mairieId, actif',
+
       // App3
       chapitres: '++id, code, libelle, mairieId, actif',
       sousChapitres: '++id, code, libelle, parentId, mairieId, actif',
@@ -453,12 +220,7 @@ class TresorDatabase extends Dexie {
       mandats:
         '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
       bordereauMandats: '++id, numero, exercice, mairieId, statut, personnelId',
-      // App4 - Timbres Fiscaux
-      timbreApprovisionnements: '++id, date, exercice, mairieId, type, personnelId',
-      timbreRemises: '++id, numeroRemise, date, exercice, mairieId, personnelId',
-      timbreVersements: '++id, numeroVersement, date, exercice, mairieId, personnelId',
-      timbreBalancesEntree:
-        '++id, date, exercice, mairieId, type, personnelId, [exercice+mairieId]',
+
       // App5 - Investissements
       chapitresInvestissement: '++id, code, libelle, mairieId, actif',
       sousChapitresInvestissement: '++id, code, libelle, chapitreInvestissementId, mairieId, actif',
@@ -508,45 +270,7 @@ export async function initializeDatabase() {
       updatedAt: now,
     });
 
-    // Créer quelques taxes par défaut
-    await db.taxes.bulkAdd([
-      {
-        code: 'TXF001',
-        libelle: 'Taxe foncière',
-        description: 'Taxe sur les propriétés bâties',
-        taux: 5,
-        type: 'variable',
-        mairieId: mairieId as number,
-        actif: true,
-        createdAt: now,
-        updatedAt: now,
-      },
-      {
-        code: 'TXH001',
-        libelle: "Taxe d'habitation",
-        description: "Taxe sur l'occupation des logements",
-        taux: 3,
-        type: 'variable',
-        mairieId: mairieId as number,
-        actif: true,
-        createdAt: now,
-        updatedAt: now,
-      },
-      {
-        code: 'TXE001',
-        libelle: "Taxe d'enlèvement des ordures",
-        description: 'Taxe pour le service de collecte des ordures',
-        montant: 15000,
-        type: 'fixe',
-        mairieId: mairieId as number,
-        actif: true,
-        createdAt: now,
-        updatedAt: now,
-      },
-    ]);
-
     // Créer quelques rubriques et chapitres par défaut pour App3
-
     await db.chapitres.bulkAdd([
       {
         code: '1',

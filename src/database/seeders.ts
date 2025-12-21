@@ -1,92 +1,75 @@
-import { db, DEFAULT_MAIRIE_ID, type Quotite } from './db';
+import { db, DEFAULT_MAIRIE_ID } from './db';
+import type { Mairie, Utilisateur, Chapitre, SousChapitre, Prevision, Mandat, BordereauMandat } from './db';
 import type {
-  Declaration,
-  BordereauRecette,
-  Approvisionnement,
-  Remise,
-  Versement,
-  BalanceEntree,
-  Timbres,
-  Prevision,
-  Mandat,
-  BordereauMandat,
   ChapitreInvestissement,
+  SousChapitreInvestissement,
   PrevisionInvestissement,
-  BordereauMandatInvestissement,
   MandatInvestissement,
-  SousChapitre,
+  BordereauMandatInvestissement,
 } from './db';
 
+const now = new Date();
+
 // =================================================================
-//                      SEEDERS DE DONNÉES PAR DÉFAUT
+//                      SEEDER DE DONNÉES PAR DÉFAUT
 // =================================================================
 
 /**
- * Remplit la base de données avec les données initiales et essentielles.
- * C'est l'équivalent de la fonction `initializeDatabase` mais externalisée.
+ * Remplit la base de données avec des données initiales par défaut.
+ * Cette fonction est appelée si la base est vide.
  */
 export async function seedDefaultData() {
-  console.log('🌱 Seeding default data...');
-  await clearDatabase();
+  const mairieCount = await db.mairies.count();
+  if (mairieCount > 0) return;
 
-  const now = new Date();
+  console.log('🚀 Seeding default data...');
 
-  // 1. Mairie par défaut
+  // 1. Mairie
   const mairieId = await db.mairies.add({
     nom: "Mairie d'Azaguié",
     code: '422',
     adresse: 'Avenue Principale',
     ville: 'Azaguié',
     codePostal: '00225',
-    telephone: '+225 XX XX XX XX',
+    telephone: '+225 23 54 00 00',
     email: 'contact@mairie-azaguie.ci',
     createdAt: now,
     updatedAt: now,
   });
 
-  // 2. Utilisateur admin par défaut
-  await db.utilisateurs.add({
-    username: 'admin',
-    password: 'admin123', // Doit être hashé en production
-    nom: 'Administrateur',
-    prenom: 'Système',
-    email: 'admin@tresor.sn',
-    role: 'admin',
-    actif: true,
-    createdAt: now,
-    updatedAt: now,
-  });
-
-  // 3. Taxes par défaut
-  await db.taxes.bulkAdd([
+  // 2. Utilisateurs
+  await db.utilisateurs.bulkAdd([
     {
-      code: 'TXF001',
-      libelle: 'Taxe foncière',
-      description: 'Taxe sur les propriétés bâties',
-      taux: 5,
-      type: 'variable',
+      username: 'admin',
+      password: 'password', // Hashage à faire en prod
+      nom: 'Administrateur',
+      prenom: 'Complet',
+      email: 'admin@tresor.sn',
+      role: 'admin',
       mairieId: mairieId as number,
       actif: true,
       createdAt: now,
       updatedAt: now,
     },
     {
-      code: 'TXH001',
-      libelle: "Taxe d'habitation",
-      description: "Taxe sur l'occupation des logements",
-      taux: 3,
-      type: 'variable',
+      username: 'agent',
+      password: 'password',
+      nom: 'Agent',
+      prenom: 'Recouvrement',
+      email: 'agent@tresor.sn',
+      role: 'agent',
       mairieId: mairieId as number,
       actif: true,
       createdAt: now,
       updatedAt: now,
     },
     {
-      code: 'TXE001',
-      libelle: "Taxe d'enlèvement des ordures",
-      description: 'Taxe pour le service de collecte des ordures',
-      montant: 15000,
-      type: 'fixe',
+      username: 'comptable',
+      password: 'password',
+      nom: 'Comptable',
+      prenom: 'Public',
+      email: 'comptable@tresor.sn',
+      role: 'comptable',
       mairieId: mairieId as number,
       actif: true,
       createdAt: now,
@@ -95,29 +78,6 @@ export async function seedDefaultData() {
   ]);
 
   // 4. Chapitres par défaut (App3)
-  await db.chapitres.bulkAdd([
-    {
-      code: '1',
-      libelle: 'SALAIRE ET INDEM.',
-      mairieId: mairieId as number,
-      actif: true,
-      createdAt: now,
-      updatedAt: now,
-    },
-    {
-      code: '2',
-      libelle: 'CHARGES SOCIALES',
-      mairieId: mairieId as number,
-      actif: true,
-      createdAt: now,
-      updatedAt: now,
-    },
-    {
-      code: '3',
-      libelle: 'TRANSP. & FRAIS DE MISS.',
-      mairieId: mairieId as number,
-      actif: true,
-      createdAt: now,
       updatedAt: now,
     },
     {
@@ -555,55 +515,28 @@ function randomChoice<T>(array: T[]): T {
  * Construire un objet detailsQuotites à partir d'un objet timbres.
  * Répartit les quantités par valeur entre les quotités actives de même prix.
  */
-async function buildDetailsQuotitesFromTimbres(timbres: Record<number, number>) {
-  const result: Record<string, number> = {};
-  const quotites = await db.quotites.filter((q) => q.actif).toArray();
-  const byPrix = new Map<number, typeof quotites>();
-  for (const q of quotites) {
-    const list = byPrix.get(q.prix) || [];
-    list.push(q);
-    byPrix.set(q.prix, list);
-  }
-
-  for (const prixKey of Object.keys(timbres)) {
-    const prix = Number(prixKey);
-    const total = Number(timbres[prix]) || 0;
-    const list = byPrix.get(prix) || [];
-    if (list.length === 0) continue;
-    const base = Math.floor(total / list.length);
-    let remainder = total - base * list.length;
-    for (let i = 0; i < list.length; i++) {
-      const q = list[i];
-      if (!q) continue;
-      const add = base + (remainder > 0 ? 1 : 0);
-      if (remainder > 0) remainder--;
-      result[`${prix}-${q.code}`] = add;
-    }
-  }
-
-  return result;
-}
-
-// ... etc. pour toutes les autres fonctions de génération
-
-/**
- * Options pour le seeder de données de test.
- */
+  await Promise.all([
+    db.mairies.clear(),
+    db.utilisateurs.clear(),
+    db.chapitres.clear(),
+    db.sousChapitres.clear(),
+    db.previsions.clear(),
+    db.mandats.clear(),
+    db.bordereauMandats.clear(),
+    db.chapitresInvestissement.clear(),
+    db.sousChapitresInvestissement.clear(),
+    db.previsionsInvestissement.clear(),
+    db.mandatsInvestissement.clear(),
+    db.bordereauMandatsInvestissement.clear(),
+  ]);
+  console.log('✅ All tables cleared.');
 export interface SeedOptions {
   utilisateurs?: number;
-  taxes?: number;
-  declarations?: number;
-  bordereaux?: number;
-  approvisionnements?: number;
-  remises?: number;
-  versements?: number;
-  balancesEntree?: number;
   chapitres?: number;
   sousChapitres?: number;
   previsions?: number;
   mandats?: number;
   bordereauMandats?: number;
-  quotites?: number;
   previsionsInvestissement?: number;
   mandatsInvestissement?: number;
   bordereauMandatsInvestissement?: number;
@@ -615,57 +548,7 @@ export interface SeedOptions {
 export async function seedTestData(options: SeedOptions = {}) {
   console.log('🚀 Starting test data seeders...');
 
-  const {
-    declarations = 100,
-    bordereaux = 80,
-    approvisionnements = 30,
-    remises = 30,
-    versements = 30,
-    balancesEntree = 9,
-    previsions = 30,
-    mandats = 200,
-    bordereauMandats = 20,
-    quotites = 10,
-    previsionsInvestissement = 20,
-    mandatsInvestissement = 50,
-    bordereauMandatsInvestissement = 8,
-  } = options;
 
-  try {
-    // Il est recommandé de partir d'une base propre (ou de données par défaut)
-    await seedDefaultData();
-    console.log('Default data seeded before adding test data.');
-
-    // On récupère les IDs nécessaires après le seeding par défaut
-    const utilisateursCreated = await db.utilisateurs.toArray();
-    const utilisateurIds = utilisateursCreated.map((u) => u.id!);
-    const taxesCreated = await db.taxes.toArray();
-    const taxeIds = taxesCreated.map((t) => t.id!);
-    const chapitresCreated = await db.chapitres.toArray();
-    const chapitreIds = chapitresCreated.map((c) => c.id!);
-    const sousChapitresCreated = await db.sousChapitres.toArray();
-    const sousChapitreIds = sousChapitresCreated.map((s) => s.id!);
-
-    // Génération des données de test supplémentaires
-    // Note: les fonctions ci-dessous sont les anciennes fonctions de seeders.ts
-    // qui génèrent des données aléatoires.
-    // Pour l'instant, on simule leur exécution.
-    console.log(`🌱 Seeding ${bordereaux} test bordereaux...`);
-    const bordereauxCreated = await seedBordereaux(utilisateurIds, bordereaux);
-    console.log(`🌱 Seeding ${declarations} test declarations...`);
-    await seedDeclarations(taxeIds, utilisateurIds, bordereauxCreated, declarations);
-    // IMPORTANT: Seeding quotites AVANT approvisionnements/remises/versements/balances
-    // car buildDetailsQuotitesFromTimbres a besoin des quotités existantes
-    console.log(`🌱 Seeding ${quotites} test quotites...`);
-    await seedQuotites(quotites);
-    console.log(`🌱 Seeding ${approvisionnements} test approvisionnements...`);
-    await seedApprovisionnements(utilisateurIds, approvisionnements);
-    console.log(`🌱 Seeding ${remises} test remises...`);
-    await seedRemises(utilisateurIds, remises);
-    console.log(`🌱 Seeding ${versements} test versements...`);
-    await seedVersements(utilisateurIds, versements);
-    console.log(`🌱 Seeding ${balancesEntree} test balances...`);
-    await seedBalancesEntree(utilisateurIds, balancesEntree);
     console.log(`🌱 Seeding ${previsions} test previsions...`);
     const previsionsCreated = await seedPrevisions(
       chapitreIds,
@@ -737,431 +620,37 @@ export async function seedTestData(options: SeedOptions = {}) {
  */
 export async function clearDatabase() {
   console.log('🗑️ Clearing all database tables...');
-  await Promise.all([
-    db.mairies.clear(),
-    db.taxes.clear(),
-    db.declarations.clear(),
-    db.bordereauxRecette.clear(),
-    db.utilisateurs.clear(),
-    db.approvisionnements.clear(),
-    db.remises.clear(),
-    db.versements.clear(),
-    db.balancesEntree.clear(),
-    db.quotites.clear(),
-    db.chapitres.clear(),
-    db.sousChapitres.clear(),
-    db.previsions.clear(),
-    db.mandats.clear(),
-    db.bordereauMandats.clear(),
-    db.chapitresInvestissement.clear(),
-    db.sousChapitresInvestissement.clear(),
-    db.previsionsInvestissement.clear(),
-    db.mandatsInvestissement.clear(),
-    db.bordereauMandatsInvestissement.clear(),
-  ]);
-  console.log('✅ All tables cleared.');
+  const {
+    previsions = 30,
+    mandats = 200,
+    bordereauMandats = 20,
+    previsionsInvestissement = 20,
+    mandatsInvestissement = 50,
+    bordereauMandatsInvestissement = 8,
+  } = options;
+
+  try {
+    // Il est recommandé de partir d'une base propre (ou de données par défaut)
+    await seedDefaultData();
+    console.log('Default data seeded before adding test data.');
+
+    // On récupère les IDs nécessaires après le seeding par défaut
+    const utilisateursCreated = await db.utilisateurs.toArray();
+    const utilisateurIds = utilisateursCreated.map((u) => u.id!);
+    // Removed: taxesCreated, taxeIds (App1)
+
+    const chapitresCreated = await db.chapitres.toArray();
+    const chapitreIds = chapitresCreated.map((c) => c.id!);
+    const sousChapitresCreated = await db.sousChapitres.toArray();
+    const sousChapitreIds = sousChapitresCreated.map((s) => s.id!);
+
+    // Génération des données de test supplémentaires
 }
 
 // On garde les fonctions de génération de l'ancien seeder.ts ici
 // pour que seedTestData puisse les utiliser.
 
-export async function seedBordereaux(personnelIds: number[], count: number = 80) {
-  console.log(`🌱 Seeding ${count} bordereaux de recette...`);
 
-  const bordereaux: Partial<BordereauRecette>[] = [];
-  const now = new Date();
-
-  // Créer des bordereaux répartis sur les exercices avec des dates cohérentes
-  const exercices = [2023, 2024, 2025];
-  let numeroGlobal = 1;
-
-  for (let i = 0; i < count; i++) {
-    const annee = exercices[i % exercices.length]!;
-    // Date de création répartie sur l'année
-    const mois = Math.floor((i / count) * 12);
-    const dateCreation = new Date(annee, mois, randomAmount(1, 28));
-
-    // Si c'est 2025 et la date dépasse maintenant, ajuster
-    if (annee === 2025 && dateCreation > now) {
-      dateCreation.setTime(now.getTime() - randomAmount(1, 30) * 24 * 60 * 60 * 1000);
-    }
-
-    const statuts: Array<'ouvert' | 'ferme'> = ['ouvert', 'ferme'];
-    // Les exercices passés sont fermés, l'année en cours peut être ouvert
-    const statut = annee < 2025 ? 'ferme' : randomChoice(statuts);
-
-    const obs = Math.random() > 0.6 ? 'Bordereau conforme' : undefined;
-
-    const bordereau: Partial<BordereauRecette> = {
-      personnelId: randomChoice(personnelIds),
-      mairieId: DEFAULT_MAIRIE_ID,
-      numero: numeroGlobal++,
-      annee,
-      mois: mois + 1, // Mois du bordereau (1-12)
-      montantTotal: 0, // Sera calculé après insertion des déclarations
-      nombreDeclarations: 0, // Sera calculé après insertion des déclarations
-      statut,
-      createdAt: dateCreation,
-      updatedAt: now,
-    };
-
-    if (obs) {
-      bordereau.observations = obs;
-    }
-
-    bordereaux.push(bordereau);
-  }
-
-  // Insérer les bordereaux et récupérer les IDs
-  const insertedIds = await db.bordereauxRecette.bulkAdd(bordereaux as BordereauRecette[], {
-    allKeys: true,
-  });
-
-  // Retourner les bordereaux avec leurs IDs
-  const result = bordereaux.map((b, index) => ({
-    ...b,
-    id: insertedIds[index],
-  })) as BordereauRecette[];
-
-  console.log(`✅ ${count} bordereaux de recette créés`);
-  return result;
-}
-
-export async function seedDeclarations(
-  taxeIds: number[],
-  personnelIds: number[],
-  bordereaux: BordereauRecette[],
-  count: number = 100,
-) {
-  console.log(`🌱 Seeding ${count} déclarations...`);
-
-  const declarations: Partial<Declaration>[] = [];
-  const now = new Date();
-
-  // Map to track bordereau updates
-  const bordereauUpdates = new Map<number, { count: number; total: number }>();
-
-  // Trier les bordereaux par date pour une meilleure répartition
-  const sortedBordereaux = [...bordereaux].sort((a, b) => {
-    const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-    const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-    return dateA - dateB;
-  });
-
-  for (let i = 0; i < count; i++) {
-    const montantHT = randomAmount(1000, 50000);
-    const montantTaxe = Math.round((montantHT * randomAmount(5, 20)) / 100);
-    const montantTTC = montantHT + montantTaxe;
-
-    // Choisir un bordereau aléatoirement
-    const bordereau = randomChoice(sortedBordereaux);
-    const exercice = bordereau.annee;
-    const bordereauId = bordereau.id;
-
-    // La date d'encaissement doit être cohérente avec le mois du bordereau
-    const bordereauMois = bordereau.mois || 1;
-    const startOfMonth = new Date(exercice, bordereauMois - 1, 1);
-    const endOfMonth = new Date(exercice, bordereauMois, 0); // Dernier jour du mois
-
-    // Date d'encaissement dans le mois du bordereau
-    let dateEncaissement = randomDate(startOfMonth, endOfMonth);
-
-    // Si c'est 2025 et la date dépasse maintenant, ajuster
-    if (exercice === 2025 && dateEncaissement > now) {
-      dateEncaissement = new Date(now.getTime() - randomAmount(1, 30) * 24 * 60 * 60 * 1000);
-    }
-
-    const personnelId = randomChoice(personnelIds);
-    const obs = Math.random() > 0.7 ? 'Observations diverses sur la déclaration' : undefined;
-
-    const declaration: Partial<Declaration> = {
-      personnelId,
-      mairieId: DEFAULT_MAIRIE_ID,
-      taxeId: randomChoice(taxeIds),
-      exercice,
-      numeroPiece: String(i + 1),
-      nomPartieVersante: `Contribuable ${String(i + 1).padStart(4, '0')}`,
-      adresse: `${randomChoice(['Rue', 'Avenue', 'Boulevard'])} ${Math.floor(Math.random() * 100)} ${randomChoice(['Dakar', 'Thiès', 'Saint-Louis'])}`,
-      dateEncaissement,
-      numeroLivre: 'T31T',
-      numeroEncaissement: `ENC-${String(i + 1).padStart(6, '0')}`,
-      montantRecette: montantTTC,
-      statut: 'validee',
-      createdAt: dateEncaissement,
-      updatedAt: now,
-    };
-
-    // Lier la déclaration au bordereau
-    if (bordereauId) {
-      declaration.bordereauId = bordereauId;
-
-      // Mettre à jour les statistiques du bordereau
-      const current = bordereauUpdates.get(bordereauId) || { count: 0, total: 0 };
-      bordereauUpdates.set(bordereauId, {
-        count: current.count + 1,
-        total: current.total + montantTTC,
-      });
-    }
-
-    if (obs) {
-      declaration.observations = obs;
-    }
-
-    declarations.push(declaration as Declaration);
-  }
-
-  await db.declarations.bulkAdd(declarations as Declaration[]);
-
-  // Update bordereaux avec le nombre réel de déclarations et le montant total
-  for (const [id, stats] of bordereauUpdates.entries()) {
-    await db.bordereauxRecette.update(id, {
-      nombreDeclarations: stats.count,
-      montantTotal: stats.total,
-      updatedAt: now,
-    });
-  }
-
-  console.log(`✅ ${count} déclarations créées et liées aux bordereaux`);
-  return declarations;
-}
-
-export async function seedApprovisionnements(personnelIds: number[], count: number = 20) {
-  console.log(`🌱 Seeding ${count} approvisionnements...`);
-
-  const approvisionnements: Partial<Approvisionnement>[] = [];
-  const now = new Date();
-  const exercices = [2023, 2024, 2025];
-
-  for (let i = 0; i < count; i++) {
-    const exercice = randomChoice(exercices);
-    const date = randomDate(
-      new Date(exercice, 0, 1),
-      exercice === 2025 ? now : new Date(exercice, 11, 31),
-    );
-    const type = 'appro';
-    // Générer des quantités aléatoires pour chaque valeur de timbre
-    const timbres: Timbres = {
-      100: randomAmount(100, 1000),
-      200: randomAmount(80, 800),
-      300: randomAmount(50, 500),
-      500: randomAmount(30, 300),
-      600: randomAmount(20, 200),
-      1000: randomAmount(10, 100),
-    };
-
-    // Calculer le total
-    const total =
-      timbres[100] * 100 +
-      timbres[200] * 200 +
-      timbres[300] * 300 +
-      timbres[500] * 500 +
-      timbres[600] * 600 +
-      timbres[1000] * 1000;
-
-    const obs =
-      Math.random() > 0.7 ? `Approvisionnement ${type} de l'exercice ${exercice}` : undefined;
-
-    const approvisionnement: Partial<Approvisionnement> = {
-      mairieId: DEFAULT_MAIRIE_ID,
-      exercice,
-      date,
-      type,
-      timbres,
-      detailsQuotites: await buildDetailsQuotitesFromTimbres(timbres),
-      total,
-      personnelId: randomChoice(personnelIds),
-      createdAt: date,
-      updatedAt: now,
-    };
-
-    if (obs) {
-      approvisionnement.observations = obs;
-    }
-
-    approvisionnements.push(approvisionnement);
-  }
-
-  await db.approvisionnements.bulkAdd(approvisionnements as unknown as Approvisionnement[]);
-  console.log(`✅ ${count} approvisionnements créés`);
-  return approvisionnements;
-}
-
-export async function seedRemises(personnelIds: number[], count: number = 50) {
-  console.log(`🌱 Seeding ${count} remises...`);
-
-  const remises: Partial<Remise>[] = [];
-  const now = new Date();
-  const exercices = [2023, 2024, 2025];
-
-  for (let i = 0; i < count; i++) {
-    const exercice = randomChoice(exercices);
-    const date = randomDate(
-      new Date(exercice, 0, 1),
-      exercice === 2025 ? now : new Date(exercice, 11, 31),
-    );
-    const numeroRemise = `REM-${exercice}-${String(i + 1).padStart(4, '0')}`;
-
-    // Générer des quantités aléatoires pour chaque valeur de timbre
-    const timbres: Timbres = {
-      100: randomAmount(50, 500),
-      200: randomAmount(40, 400),
-      300: randomAmount(30, 300),
-      500: randomAmount(20, 200),
-      600: randomAmount(10, 100),
-      1000: randomAmount(5, 50),
-    };
-
-    // Calculer le total
-    const total =
-      timbres[100] * 100 +
-      timbres[200] * 200 +
-      timbres[300] * 300 +
-      timbres[500] * 500 +
-      timbres[600] * 600 +
-      timbres[1000] * 1000;
-
-    const obs = Math.random() > 0.6 ? `Remise de l'imprimerie nationale` : undefined;
-
-    const remise: Partial<Remise> = {
-      mairieId: DEFAULT_MAIRIE_ID,
-      exercice,
-      date,
-      numeroRemise,
-      timbres,
-      detailsQuotites: await buildDetailsQuotitesFromTimbres(timbres),
-      total,
-      personnelId: randomChoice(personnelIds),
-      createdAt: date,
-      updatedAt: now,
-    };
-
-    if (obs) {
-      remise.observations = obs;
-    }
-
-    remises.push(remise);
-  }
-
-  await db.remises.bulkAdd(remises as unknown as Remise[]);
-  console.log(`✅ ${count} remises créées`);
-  return remises;
-}
-
-export async function seedVersements(personnelIds: number[], count: number = 60) {
-  console.log(`🌱 Seeding ${count} versements...`);
-
-  const versements: Partial<Versement>[] = [];
-  const now = new Date();
-  const exercices = [2023, 2024, 2025];
-
-  for (let i = 0; i < count; i++) {
-    const exercice = randomChoice(exercices);
-    const date = randomDate(
-      new Date(exercice, 0, 1),
-      exercice === 2025 ? now : new Date(exercice, 11, 31),
-    );
-    const numeroVersement = `VERS-${exercice}-${String(i + 1).padStart(4, '0')}`;
-
-    // Générer des quantités aléatoires pour chaque valeur de timbre (vendus)
-    const timbres: Timbres = {
-      100: randomAmount(20, 200),
-      200: randomAmount(15, 150),
-      300: randomAmount(10, 100),
-      500: randomAmount(8, 80),
-      600: randomAmount(5, 50),
-      1000: randomAmount(2, 20),
-    };
-
-    // Calculer le total
-    const total =
-      timbres[100] * 100 +
-      timbres[200] * 200 +
-      timbres[300] * 300 +
-      timbres[500] * 500 +
-      timbres[600] * 600 +
-      timbres[1000] * 1000;
-
-    const obs = Math.random() > 0.7 ? `Versement journalier` : undefined;
-
-    const versement: Partial<Versement> = {
-      mairieId: DEFAULT_MAIRIE_ID,
-      exercice,
-      date,
-      numeroVersement,
-      timbres,
-      detailsQuotites: await buildDetailsQuotitesFromTimbres(timbres),
-      total,
-      personnelId: randomChoice(personnelIds),
-      createdAt: date,
-      updatedAt: now,
-    };
-
-    if (obs) {
-      versement.observations = obs;
-    }
-
-    versements.push(versement);
-  }
-
-  await db.versements.bulkAdd(versements as unknown as Versement[]);
-  console.log(`✅ ${count} versements créés`);
-  return versements;
-}
-
-export async function seedBalancesEntree(personnelIds: number[], count: number = 5) {
-  console.log(`🌱 Seeding ${count} balances d'entrée...`);
-
-  const balances: Partial<BalanceEntree>[] = [];
-  const now = new Date();
-  const exercices = [2023, 2024, 2025];
-
-  for (let i = 0; i < count; i++) {
-    const exercice = randomChoice(exercices);
-    const date = new Date(exercice, 0, 1); // 1er janvier de l'exercice
-
-    const types = ['BE-S1', 'BE-S2', 'BE-S3'];
-    const type = types[i % types.length]!;
-
-    // Générer des quantités aléatoires pour le stock initial
-    const timbres: Timbres = {
-      100: randomAmount(500, 2000),
-      200: randomAmount(400, 1500),
-      300: randomAmount(300, 1000),
-      500: randomAmount(200, 800),
-      600: randomAmount(100, 500),
-      1000: randomAmount(50, 300),
-    };
-
-    // Calculer le total
-    const total =
-      timbres[100] * 100 +
-      timbres[200] * 200 +
-      timbres[300] * 300 +
-      timbres[500] * 500 +
-      timbres[600] * 600 +
-      timbres[1000] * 1000;
-
-    const balance: Partial<BalanceEntree> = {
-      mairieId: DEFAULT_MAIRIE_ID,
-      exercice,
-      date,
-      type,
-      timbres,
-      detailsQuotites: await buildDetailsQuotitesFromTimbres(timbres),
-      total,
-      commentaires: `Stock initial de l'exercice ${exercice}`,
-      personnelId: randomChoice(personnelIds),
-      createdAt: date,
-      updatedAt: now,
-    };
-
-    balances.push(balance);
-  }
-
-  await db.balancesEntree.bulkAdd(balances as unknown as BalanceEntree[]);
-  console.log(`✅ ${count} balances d'entrée créées`);
-  return balances;
-}
 
 export async function seedPrevisions(
   chapitreIds: number[],
@@ -1450,58 +939,7 @@ export async function seedBordereauMandats(personnelIds: number[], count: number
   return result;
 }
 
-export async function seedQuotites(count: number = 10) {
-  console.log(`🌱 Seeding ${count} quotités...`);
 
-  const quotites: Partial<Quotite>[] = [];
-  const now = new Date();
-  const types = ['Marché', 'Abattoirs', 'Stationnement'];
-  const descriptions = ['Ticket', 'Macaron', 'Droit de place', 'Autocollant'];
-  // Prix obligatoires pour correspondre aux timbres (100, 200, 300, 500, 600, 1000)
-  const requiredPrices = [100, 200, 300, 500, 600, 1000];
-
-  // D'abord, créer une quotité pour chaque prix obligatoire
-  for (const prix of requiredPrices) {
-    const type = randomChoice(types);
-    const code = `${type.substring(0, 2).toUpperCase()}${prix}`;
-
-    const quotite: Partial<Quotite> = {
-      code,
-      prix,
-      description: randomChoice(descriptions),
-      type,
-      mairieId: DEFAULT_MAIRIE_ID,
-      actif: true, // Toujours actif pour les quotités obligatoires
-      createdAt: randomDate(new Date(2023, 0, 1), now),
-      updatedAt: now,
-    };
-    quotites.push(quotite);
-  }
-
-  // Ensuite, créer des quotités supplémentaires aléatoires
-  const additionalCount = Math.max(0, count - requiredPrices.length);
-  for (let i = 0; i < additionalCount; i++) {
-    const type = randomChoice(types);
-    const prix = randomChoice([100, 200, 300, 500, 600, 1000, 2000]);
-    const code = `${type.substring(0, 2).toUpperCase()}${prix}-${i}`;
-
-    const quotite: Partial<Quotite> = {
-      code,
-      prix,
-      description: randomChoice(descriptions),
-      type,
-      mairieId: DEFAULT_MAIRIE_ID,
-      actif: Math.random() > 0.2, // 80% chance of being active
-      createdAt: randomDate(new Date(2023, 0, 1), now),
-      updatedAt: now,
-    };
-    quotites.push(quotite);
-  }
-
-  await db.quotites.bulkAdd(quotites as Quotite[]);
-  console.log(`✅ ${quotites.length} quotités créées`);
-  return quotites;
-}
 
 // =================================================================
 //                SEEDERS APP5 - INVESTISSEMENTS
