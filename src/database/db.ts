@@ -166,8 +166,9 @@ export interface Mandat {
   exercice: number; // Année
   numeroMandat: string; // Numéro unique du mandat
   dateMandat: Date; // Date d'émission du mandat
-  chapitreId: number; // Chapitre budgétaire (01..08)
-  sousChapitreId?: number; // Sous-chapitre budgétaire (codes 600xx)
+  chapitreId: number; // Chapitre budgétaire (01..08) - OBLIGATOIRE
+  sousChapitreId: number; // Sous-chapitre budgétaire (codes 600xx) - OBLIGATOIRE
+  etatMensuelId?: string; // Format: {année-mois}--{sousChapitreCode}/{chapitreCode}
   previsionId?: number; // Lien vers la prévision
   bordereauMandatId?: number; // ID du bordereau d'émission des mandats
   mairieId: number;

@@ -26,6 +26,31 @@ function randomChoice<T>(array: T[]): T {
   return array[index]!;
 }
 
+/**
+ * Génère l'etatMensuelId d'un mandat au format: {année-mois}--{sousChapitreCode}/{chapitreCode}
+ * @param date Date du mandat
+ * @param sousChapitreCode Code du sous-chapitre
+ * @param chapitreCode Code du chapitre
+ * @returns L'etatMensuelId formaté
+ */
+function generateEtatMensuelId(date: Date, sousChapitreCode: string, chapitreCode: string): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  return `${year}-${month}--${sousChapitreCode}/${chapitreCode}`;
+}
+
+/**
+ * Génère l'etatMensuelId d'un mandat (version exportable)
+ * Format: {année-mois}--{sousChapitreCode}/{chapitreCode}
+ */
+export function computeEtatMensuelId(
+  date: Date,
+  sousChapitreCode: string,
+  chapitreCode: string,
+): string {
+  return generateEtatMensuelId(date, sousChapitreCode, chapitreCode);
+}
+
 // =================================================================
 //                      INTERFACES
 // =================================================================
@@ -173,10 +198,11 @@ export async function seedDefaultData() {
     },
   ]);
 
-  // 4. Sous-chapitres par défaut (App3) - Hiérarchisé
-  console.log('🌱 Seeding sous-chapitres (hierarchical)...');
+  // 4. Sous-chapitres par défaut (App3) - Liste complète avec hiérarchie
+  console.log('🌱 Seeding sous-chapitres (hierarchical - complete list)...');
 
   const sousChapitresData = [
+    // SECTION 60 - DÉPENSES DES SERVICES GÉNÉRAUX
     { code: '60', libelle: 'SECTION 60- DEPENSES DES SERVICES GENERAUX', parent: null },
     { code: '600', libelle: 'CHAP. ADMINISTRATION GENERALE', parent: '60' },
     { code: '6000', libelle: 'ADMINISTRATION', parent: '600' },
@@ -185,22 +211,131 @@ export async function seedDefaultData() {
     { code: '60011', libelle: 'FONCTIONNEMENT DE LA MUNICIPALITE', parent: '6001' },
     { code: '60012', libelle: 'FONCTIONNEMENT CABINET DU MAIRE', parent: '6001' },
     { code: '60013', libelle: 'INDEMNITE DE FONCTION ET DE REPRESENTATION', parent: '6001' },
+    {
+      code: '60015',
+      libelle: 'FRAIS DE MISSIONS EN DEHORS DU TERRITOIRE NATIONAL (COMMUNE)',
+      parent: '6001',
+    },
+    {
+      code: '60016',
+      libelle: 'AUTRES DEPENSES AU TITRE DES AUTORITES MUNICIPALES',
+      parent: '6001',
+    },
     { code: '6002', libelle: 'ETAT CIVIL ET POPULATION', parent: '600' },
     { code: '6006', libelle: "AUTRES DEPENSES D'ADMINISTRATION GENERALE", parent: '600' },
+
     { code: '601', libelle: 'CHAP. 601- ADMINISTRATION FINANCIERE ET DOM.', parent: '60' },
     { code: '6010', libelle: 'ADMINISTRATION', parent: '601' },
+    { code: '6016', libelle: 'AUTRES DEPENSES RELATIVES AU DOMAINE COMMUNAL', parent: '601' },
+
     { code: '602', libelle: 'CHAP. 602-RECETTE MUNICIPALE', parent: '60' },
     { code: '6020', libelle: 'ADMINISTRATION', parent: '602' },
+    { code: '6021', libelle: 'FRAIS DE RECOUVREMENT ET POURSUITES', parent: '602' },
+
+    { code: '603', libelle: 'CHAP.603-POLICE ET ORDRE PUBLIC-FOURRIERE', parent: '60' },
+    { code: '6031', libelle: 'GARDES MUNICIPAUX', parent: '603' },
+    { code: '6033', libelle: 'PROGRAMMES SPECIAUX ET OPERATIONS DIVERSES', parent: '603' },
+
+    // SECTION 61 - DÉPENSES DES SERVICES DE COLLECTIVITÉ
     { code: '61', libelle: 'SECTION 61- DEPENSES DES SERVICES DE COLLECTIVITE', parent: null },
     { code: '610', libelle: 'CHAP. 610-VOIRIES ET RESEAUX', parent: '61' },
     { code: '6100', libelle: 'ADMINISTRATION', parent: '610' },
-    { code: '62', libelle: 'SECTION 62- DEPENSES DES SERVICES SOCIAUX', parent: null },
+    { code: '6101', libelle: 'VOIRIES - ROUTES - CHEMINS', parent: '610' },
+
+    {
+      code: '613',
+      libelle: "CHAP. 613-HYGIENE ET SALUBRITE PUBLIQUES - HYDRAULIQUE - ADDUCTION D'EAU",
+      parent: '61',
+    },
+    { code: '6133', libelle: 'NETTOIEMENT VOIRIE-ENLEVEMENT ORDURES', parent: '613' },
+    { code: '6136', libelle: "Autres depenses d'hygiène et de salubrité", parent: '613' },
+
+    {
+      code: '614',
+      libelle: "CHAP. 614- PROTECTION CIVILE - LUTTE CONTRE L'INCENDIE",
+      parent: '61',
+    },
+    { code: '6141', libelle: 'PROTECTION CIVILE', parent: '614' },
+    { code: '6142', libelle: 'LUTTE CONTRE INCENDIE', parent: '614' },
+
+    { code: '615', libelle: 'CHAP. 615- CIMETIERES - SERVICES FUNERAIRES', parent: '61' },
+    { code: '6151', libelle: 'CIMETIERE-INHUMATIONS-EXHUMATIONS', parent: '615' },
+    { code: '6152', libelle: 'CREUSEMENT DE FOSSES', parent: '615' },
+
+    // SECTION 62 - DÉPENSES DES SERVICES SOCIAUX CULTURELS ET DE PROMOTION HUMAINE
+    {
+      code: '62',
+      libelle: 'SECTION 62- DEPENSES DES SERVICES SOCIAUX CULTURELS ET DE PROMOTION HUMAINE',
+      parent: null,
+    },
     { code: '620', libelle: 'CHAP. 620- EDUCATION', parent: '62' },
     { code: '6201', libelle: "Crèche, jardin d'enfants et ecoles primaire", parent: '620' },
+    { code: '6206', libelle: "AUTRES DEPENSES D'EDUCATION", parent: '620' },
+
+    { code: '621', libelle: 'CHAP. 621 : SANTE PUBLIQUE', parent: '62' },
+    { code: '6214', libelle: 'Evacuation sanitaire - service ambulance', parent: '621' },
+
+    { code: '622', libelle: 'CHAP. 622- ASSISTANCE SOCIALE', parent: '62' },
+    { code: '6223', libelle: 'HANDICAPES', parent: '622' },
+    { code: '6224', libelle: 'AIDE FAMILIALE, SOCIALE ET PERSONNES A.', parent: '622' },
+    { code: '6225', libelle: 'AIDES AUX INDIGENTS', parent: '622' },
+    { code: '6226', libelle: "AUTRES DEPENSES D'ASSISTANCE SOCIALE", parent: '622' },
+
+    { code: '624', libelle: 'CHAP. 624- SPORTS ET LOISIRS', parent: '62' },
+    { code: '6242', libelle: 'MANIFESTATIONS SPORTIVES', parent: '624' },
+
+    { code: '625', libelle: 'CHAP.625- ACTIVITES CULTURELLES', parent: '62' },
+    { code: '6250', libelle: 'ADMINISTRATION', parent: '625' },
+    { code: '6256', libelle: 'AUTRES DEPENSES DES ACTIVITES CULTURELLES', parent: '625' },
+
+    {
+      code: '626',
+      libelle: 'CHAP.626- AUTRES DEPENSES DES SERVICE SOCIAUX .CULTURELS ET DE PROMOTION HUMAINE',
+      parent: '62',
+    },
+
+    // SECTION 63 - DÉPENSES DES SERVICES ÉCONOMIQUES
     { code: '63', libelle: 'SECTION 63- DEPENSES DES SERVICES ECONOMIQUES', parent: null },
+    { code: '630', libelle: 'CHAP. 630- AGRICULTURE ET ELEVAGE', parent: '63' },
+    { code: '633', libelle: 'CHAP.633-TRANSPORT-COMMUNICATIONS', parent: '63' },
+    { code: '634', libelle: 'CHAP. 634- INDUSTRIE ET COMMERCE', parent: '63' },
+    { code: '6341', libelle: 'ABATTOIRS-CONSERVATION ET TRANSPORTS DE VIANDE', parent: '634' },
+
+    // SECTION 64 - DÉPENSES DIVERSES
     { code: '64', libelle: 'SECTION 64 - DEPENSES DIVERSES', parent: null },
     { code: '640', libelle: 'CHAP. 640- DETTES', parent: '64' },
     { code: '6406', libelle: 'AUTRES DETTES DE LA COMMUNE', parent: '640' },
+
+    {
+      code: '641',
+      libelle: 'CHAP. 641-CONTRIBUTIONS FONDS DE CONCOURS ET TRANSFERTS',
+      parent: '64',
+    },
+    {
+      code: '6415',
+      libelle: 'CONFERENCES INTERNATIONALES, ASSOCIATION DES VILLES ET COMMUNES',
+      parent: '641',
+    },
+
+    { code: '642', libelle: 'CHAP. 642- ASSURANCE DE LA COMMUNE', parent: '64' },
+    { code: '6420', libelle: 'RESPONSABILITE CIVILE', parent: '642' },
+    { code: '6422', libelle: 'ASSURANCE DES VEHICULES', parent: '642' },
+    { code: '6426', libelle: 'AUTRES ASSURANCES (ELUS)', parent: '642' },
+
+    {
+      code: '643',
+      libelle: 'CHAP.643- CEREMONIES PUBLIQUES - FETES ET RECEPTIONS OFFICIELLES',
+      parent: '64',
+    },
+    { code: '6430', libelle: 'CEREMONIES PUBLIQUES', parent: '643' },
+    { code: '6431', libelle: 'FETES ET RECEPTIONS OFFICIELLES', parent: '643' },
+
+    { code: '644', libelle: 'CHAP.644-VERSEMENT AUX FONDS DE RESERVE', parent: '64' },
+    { code: '6440', libelle: 'FONDS DE RESERVES ORDINAIRE', parent: '644' },
+    { code: '6441', libelle: "FONDS D'INVESTISSEMENT", parent: '644' },
+
+    { code: '645', libelle: 'CHAP.645- DEPENSES ACCIDENTELLES', parent: '64' },
+    { code: '6451', libelle: 'INDEMNITES -FRAIS ET DOMMAGE ET INTERETS', parent: '645' },
   ];
 
   const codeToIdMap = new Map<string, number>();
@@ -466,46 +601,72 @@ async function seedPrevisions(
   sousChapitreIds: number[] = [],
 ) {
   const previsions: Partial<Prevision>[] = [];
-  const exercices = [2023, 2024, 2025];
+  const exercices = [2023, 2024];
 
-  for (let i = 0; i < count; i++) {
-    const montantPrevu = randomAmount(500000, 10000000);
-    const montantEngage = Math.round((montantPrevu * randomAmount(0, 80)) / 100);
-    const montantDisponible = montantPrevu - montantEngage;
+  // En 2025: créer une prévision pour CHAQUE combinaison sous-chapitre/chapitre
+  // Chaque sous-chapitre doit avoir les 8 chapitres:
+  // 1-Salaires, 2-Charges sociales, 3-Transport, 4-Carburants,
+  // 5-Matériels, 6-Abonnements, 7-Travaux, 8-Interventions
+  console.log('🌱 Creating previsions 2025 for all sous-chapitres with all 8 chapitres...');
+
+  for (const sousChapitreId of sousChapitreIds) {
+    for (const chapitreId of chapitreIds) {
+      const montantPrevu = randomAmount(500000, 15000000);
+      const montantEngage = Math.round((montantPrevu * randomAmount(5, 50)) / 100);
+      const montantDisponible = montantPrevu - montantEngage;
+
+      const prevision: Partial<Prevision> = {
+        exercice: 2025,
+        chapitreId,
+        sousChapitreId,
+        mairieId: DEFAULT_MAIRIE_ID,
+        montantPrevu,
+        montantEngage,
+        montantDisponible,
+        statut: 'validee',
+        personnelId: randomChoice(personnelIds),
+        createdAt: new Date(2024, 11, 15),
+        updatedAt: now,
+      };
+
+      previsions.push(prevision);
+    }
+  }
+
+  const previsions2025Count = previsions.length;
+  console.log(
+    `📊 ${previsions2025Count} prévisions 2025 créées (${sousChapitreIds.length} sous-chapitres x ${chapitreIds.length} chapitres)`,
+  );
+
+  // Ajouter quelques prévisions pour 2023/2024 (historique)
+  const historicalCount = Math.min(count, 50);
+  for (let i = 0; i < historicalCount; i++) {
     const exercice = randomChoice(exercices);
-
-    const statuts: Array<'brouillon' | 'validee' | 'cloturee'> = [
-      'brouillon',
-      'validee',
-      'cloturee',
-    ];
-    const statut =
-      exercice < 2025
-        ? randomChoice(['validee' as const, 'cloturee' as const])
-        : randomChoice(statuts);
+    const montantPrevu = randomAmount(500000, 10000000);
+    const montantEngage = Math.round((montantPrevu * randomAmount(60, 95)) / 100);
+    const montantDisponible = montantPrevu - montantEngage;
 
     const prevision: Partial<Prevision> = {
       exercice,
       chapitreId: randomChoice(chapitreIds),
+      sousChapitreId: randomChoice(sousChapitreIds),
       mairieId: DEFAULT_MAIRIE_ID,
       montantPrevu,
       montantEngage,
       montantDisponible,
-      statut,
+      statut: 'cloturee',
       personnelId: randomChoice(personnelIds),
       createdAt: randomDate(new Date(exercice - 1, 10, 1), new Date(exercice, 0, 31)),
       updatedAt: now,
     };
 
-    if (sousChapitreIds.length > 0 && Math.random() > 0.3) {
-      prevision.sousChapitreId = randomChoice(sousChapitreIds);
-    }
-
     previsions.push(prevision);
   }
 
   await db.previsions.bulkAdd(previsions as Prevision[]);
-  console.log(`✅ ${count} prévisions créées`);
+  console.log(
+    `✅ ${previsions.length} prévisions créées au total (${previsions2025Count} pour 2025 + ${historicalCount} historiques)`,
+  );
 
   const created = await db.previsions.toArray();
   return created;
@@ -555,7 +716,7 @@ async function seedMandats(
   previsionIds: number[],
   personnelIds: number[],
   bordereauMandats: BordereauMandat[],
-  count: number = 200,
+  _count: number = 200, // Ignoré, on génère 3 mandats par couple chapitre/sous-chapitre
 ) {
   const beneficiaires = [
     'THEODULE DIRO LAHUET',
@@ -576,63 +737,81 @@ async function seedMandats(
     'autre',
   ];
 
+  // Récupérer les chapitres et sous-chapitres pour avoir les codes
+  const chapitresData = await db.chapitres.toArray();
+  const sousChapitresData = await db.sousChapitres.toArray();
+
   const mandats: Partial<Mandat>[] = [];
   const bordereauUpdates = new Map<number, { count: number; total: number }>();
 
-  for (let i = 0; i < count; i++) {
-    const bordereau = randomChoice(bordereauMandats);
-    const exercice = bordereau.exercice;
-    const bordereauId = bordereau.id;
+  let numeroOrdre = 0;
+  const MANDATS_PAR_COUPLE = 3;
 
-    const bordereauDate = bordereau.dateEmission
-      ? new Date(bordereau.dateEmission)
-      : new Date(exercice, 11, 31);
-    const startOfYear = new Date(exercice, 0, 1);
-    const dateMandat = randomDate(startOfYear, bordereauDate);
+  // Générer 3 mandats pour chaque couple chapitre/sous-chapitre
+  for (const chapitreId of chapitreIds) {
+    for (const sousChapitreId of sousChapitreIds) {
+      const chapitre = chapitresData.find((c) => c.id === chapitreId);
+      const sousChapitre = sousChapitresData.find((s) => s.id === sousChapitreId);
+      const chapitreCode = chapitre?.code || String(chapitreId);
+      const sousChapitreCode = sousChapitre?.code || String(sousChapitreId);
 
-    const numeroMandat = String(i + 1);
-    const montant = randomAmount(5000, 500000);
+      for (let m = 0; m < MANDATS_PAR_COUPLE; m++) {
+        numeroOrdre++;
+        const bordereau = randomChoice(bordereauMandats);
+        const bordereauId = bordereau.id;
 
-    const statuts: Array<'emis' | 'paye'> = ['emis', 'paye'];
-    const statut = bordereau.statut === 'ferme' ? randomChoice(statuts) : randomChoice(statuts);
+        // Tous les mandats sont en décembre 2025
+        const exercice = 2025;
+        const startOfDecember = new Date(2025, 11, 1); // 1er décembre 2025
+        const endOfDecember = new Date(2025, 11, 21); // 21 décembre 2025 (date actuelle)
+        const dateMandat = randomDate(startOfDecember, endOfDecember);
 
-    const mandat: Partial<Mandat> = {
-      exercice,
-      numeroMandat,
-      numeroOrdre: i + 1,
-      dateMandat,
-      chapitreId: randomChoice(chapitreIds),
-      mairieId: DEFAULT_MAIRIE_ID,
-      beneficiaire: randomChoice(beneficiaires),
-      objet: randomChoice(objets),
-      montant,
-      modePaiement: randomChoice(modesPaiement),
-      statut,
-      personnelId: randomChoice(personnelIds),
-      createdAt: dateMandat,
-      updatedAt: now,
-    };
+        const numeroMandat = String(numeroOrdre);
+        const montant = randomAmount(5000, 500000);
 
-    if (bordereauId) {
-      mandat.bordereauMandatId = bordereauId;
-    }
+        const statuts: Array<'emis' | 'paye'> = ['emis', 'paye'];
+        const statut = bordereau.statut === 'ferme' ? randomChoice(statuts) : randomChoice(statuts);
 
-    if (sousChapitreIds.length > 0 && Math.random() > 0.2) {
-      mandat.sousChapitreId = randomChoice(sousChapitreIds);
-    }
+        // Générer l'etatMensuelId
+        const etatMensuelId = generateEtatMensuelId(dateMandat, sousChapitreCode, chapitreCode);
 
-    if (previsionIds.length > 0 && Math.random() > 0.2) {
-      mandat.previsionId = randomChoice(previsionIds);
-    }
+        const mandat: Partial<Mandat> = {
+          exercice,
+          numeroMandat,
+          numeroOrdre,
+          dateMandat,
+          chapitreId,
+          sousChapitreId,
+          etatMensuelId,
+          mairieId: DEFAULT_MAIRIE_ID,
+          beneficiaire: randomChoice(beneficiaires),
+          objet: randomChoice(objets),
+          montant,
+          modePaiement: randomChoice(modesPaiement),
+          statut,
+          personnelId: randomChoice(personnelIds),
+          createdAt: dateMandat,
+          updatedAt: now,
+        };
 
-    mandats.push(mandat);
+        if (bordereauId) {
+          mandat.bordereauMandatId = bordereauId;
+        }
 
-    if (bordereauId) {
-      const current = bordereauUpdates.get(bordereauId) || { count: 0, total: 0 };
-      bordereauUpdates.set(bordereauId, {
-        count: current.count + 1,
-        total: current.total + montant,
-      });
+        if (previsionIds.length > 0 && Math.random() > 0.2) {
+          mandat.previsionId = randomChoice(previsionIds);
+        }
+
+        mandats.push(mandat);
+
+        if (bordereauId) {
+          const current = bordereauUpdates.get(bordereauId) || { count: 0, total: 0 };
+          bordereauUpdates.set(bordereauId, {
+            count: current.count + 1,
+            total: current.total + montant,
+          });
+        }
+      }
     }
   }
 
@@ -646,7 +825,9 @@ async function seedMandats(
     });
   }
 
-  console.log(`✅ ${count} mandats créés et liés aux bordereaux`);
+  console.log(
+    `✅ ${mandats.length} mandats créés (${MANDATS_PAR_COUPLE} par couple chapitre/sous-chapitre: ${chapitreIds.length} chapitres x ${sousChapitreIds.length} sous-chapitres)`,
+  );
 }
 
 async function seedBordereauMandatsInvestissement(personnelIds: number[], count: number = 8) {

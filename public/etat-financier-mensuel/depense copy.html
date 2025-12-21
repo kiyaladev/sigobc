@@ -1,0 +1,674 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Etat Mensuel d'Exécution des Dépenses - Septembre 2025</title>
+    <style>
+      @page {
+        size: A4 landscape;
+        margin: 10mm;
+      }
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 10px;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        width: 100%;
+      }
+      .header {
+        text-align: center;
+        font-weight: bold;
+        margin-bottom: 10px;
+        position: relative;
+        height: 60px;
+      }
+      .header-left {
+        text-align: left;
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+      .header-center {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        text-align: center;
+      }
+      .header-right {
+        text-align: right;
+        position: absolute;
+        top: 0;
+        right: 0;
+      }
+      .main-title {
+        text-decoration: underline;
+        font-size: 14px;
+        margin: 5px 0;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 5px;
+      }
+      th,
+      td {
+        border: 1px solid #000;
+        padding: 3px 4px;
+      }
+      th {
+        background-color: #f0f0f0;
+        text-align: center;
+        vertical-align: middle;
+        font-size: 9px;
+      }
+      .col-code {
+        width: 6%;
+        text-align: center;
+      }
+      .col-libelle {
+        width: 20%;
+        text-align: left;
+      }
+      .col-num {
+        width: 6.5%;
+        text-align: right;
+        white-space: nowrap;
+      }
+      .col-percent {
+        width: 4%;
+        text-align: center;
+      }
+
+      .section-header {
+        background-color: #e0e0e0;
+        font-weight: bold;
+      }
+      .chap-header {
+        font-weight: bold;
+        background-color: #f5f5f5;
+      }
+      .sous-total {
+        background-color: #f9f9f9;
+        font-weight: bold;
+        font-style: italic;
+      }
+      .total-section {
+        background-color: #d0d0d0;
+        font-weight: bold;
+        border-top: 2px solid #000;
+      }
+      .footer-text {
+        margin-top: 15px;
+        font-style: italic;
+        border-top: 1px solid #000;
+        padding-top: 5px;
+      }
+      .signatures {
+        margin-top: 30px;
+        display: flex;
+        justify-content: space-between;
+        padding: 0 50px;
+      }
+      .signature-box {
+        text-align: center;
+        width: 200px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="header-left">
+          DEPARTEMENT DE VAVOUA<br />
+          COMMUNE DE VAVOUA<br />
+          CODE : 433
+        </div>
+        <div class="header-center">
+          <div class="main-title">ETAT MENSUEL D'EXECUTION DES DEPENSES</div>
+          ARTICLE 4 DE LA LOI 81-1129 DU 30/12/1981<br />
+          MOIS DE : <strong>SEPTEMBRE</strong>
+        </div>
+        <div class="header-right">
+          ANNEE : <strong>2025</strong><br />
+          N° 08
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th rowspan="2" class="col-code">COMPTES</th>
+            <th rowspan="2" class="col-libelle">RUBRIQUES BUDGETAIRES</th>
+            <th rowspan="2" class="col-num">PREVISIONS</th>
+            <th colspan="3">E N G A G E M E N T S</th>
+            <th colspan="3">L I Q U I D A T I O N S</th>
+            <th colspan="3">M A N D A T S</th>
+            <th rowspan="2" class="col-percent">%<br />TM/P</th>
+          </tr>
+          <tr>
+            <th class="col-num">ANT.</th>
+            <th class="col-num">MOIS</th>
+            <th class="col-num">TOTAL</th>
+            <th class="col-num">ANT.</th>
+            <th class="col-num">MOIS</th>
+            <th class="col-num">TOTAL</th>
+            <th class="col-num">ANT.</th>
+            <th class="col-num">MOIS</th>
+            <th class="col-num">TOTAL</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- SECTION 60 -->
+          <tr class="section-header">
+            <td>60</td>
+            <td colspan="12">SECTION 60- DEPENSES DES SERVICES GENERAUX</td>
+          </tr>
+
+          <!-- CHAP 600 -->
+          <tr class="chap-header">
+            <td>600</td>
+            <td colspan="12">CHAP. ADMINISTRATION GENERALE</td>
+          </tr>
+
+          <!-- 6000 ADMINISTRATION -->
+          <tr>
+            <td>6000</td>
+            <td colspan="12"><strong>ADMINISTRATION</strong></td>
+          </tr>
+          <tr>
+            <td>6000/1</td>
+            <td>Salaires et indemnités</td>
+            <td class="col-num">4 848 000</td>
+            <td class="col-num">3 483 276</td>
+            <td class="col-num">409 390</td>
+            <td class="col-num">3 892 666</td>
+            <td class="col-num">3 483 276</td>
+            <td class="col-num">409 390</td>
+            <td class="col-num">3 892 666</td>
+            <td class="col-num">3 483 276</td>
+            <td class="col-num">409 390</td>
+            <td class="col-num">3 892 666</td>
+            <td class="col-percent">80.29</td>
+          </tr>
+          <tr>
+            <td>6000/2</td>
+            <td>Charges sociales</td>
+            <td class="col-num">330 000</td>
+            <td class="col-num">0</td>
+            <td class="col-num">0</td>
+            <td class="col-num">0</td>
+            <td class="col-num">0</td>
+            <td class="col-num">0</td>
+            <td class="col-num">0</td>
+            <td class="col-num">0</td>
+            <td class="col-num">0</td>
+            <td class="col-num">0</td>
+            <td class="col-percent">0.00</td>
+          </tr>
+          <tr>
+            <td>6000/3</td>
+            <td>Transport et frais de mission</td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-percent"></td>
+          </tr>
+          <tr>
+            <td>6000/4</td>
+            <td>Carburants et lubrifiants</td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-percent"></td>
+          </tr>
+          <tr>
+            <td>6000/5</td>
+            <td>Matériels et fournitures</td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-percent"></td>
+          </tr>
+          <tr>
+            <td>6000/6</td>
+            <td>Abonnement eau - électricité - téléphone</td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-percent"></td>
+          </tr>
+          <tr>
+            <td>6000/7</td>
+            <td>Travaux et service à l'entreprise</td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-percent"></td>
+          </tr>
+          <tr>
+            <td>6000/8</td>
+            <td>Intervention et transferts</td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-percent"></td>
+          </tr>
+          <tr class="sous-total">
+            <td>S/T 6000</td>
+            <td>SOUS TOTAL CHAP. 6000</td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-percent"></td>
+          </tr>
+
+          <!-- 60010 FONCTIONNEMENT CONSEILS ET COMMISSIONS -->
+          <tr>
+            <td>60010</td>
+            <td colspan="12"><strong>FONCTIONNEMENT CONSEILS ET COMMISSIONS</strong></td>
+          </tr>
+          <tr>
+            <td>60010/1</td>
+            <td>Salaires et indemnités</td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-percent"></td>
+          </tr>
+          <tr>
+            <td>60010/2</td>
+            <td>Charges sociales</td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-percent"></td>
+          </tr>
+          <tr>
+            <td>60010/3</td>
+            <td>Transport et frais de mission</td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-percent"></td>
+          </tr>
+          <tr>
+            <td>60010/4</td>
+            <td>Carburants et lubrifiants</td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-percent"></td>
+          </tr>
+          <tr>
+            <td>60010/5</td>
+            <td>Matériels et fournitures</td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-percent"></td>
+          </tr>
+          <tr>
+            <td>60010/6</td>
+            <td>Abonnement eau - électricité - téléphone</td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-percent"></td>
+          </tr>
+          <tr>
+            <td>60010/7</td>
+            <td>Travaux et service à l'entreprise</td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-percent"></td>
+          </tr>
+          <tr>
+            <td>60010/8</td>
+            <td>Intervention et transferts</td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-percent"></td>
+          </tr>
+          <tr class="sous-total">
+            <td>S/T 60010</td>
+            <td>SOUS TOTAL CHAP. 60010</td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-percent"></td>
+          </tr>
+
+          <!-- 60011 FONCTIONNEMENT DE LA MUNICIPALITE -->
+          <tr>
+            <td>60011</td>
+            <td colspan="12"><strong>FONCTIONNEMENT DE LA MUNICIPALITE</strong></td>
+          </tr>
+          <tr>
+            <td>60011/1</td>
+            <td>Salaires et indemnités</td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-percent"></td>
+          </tr>
+          <tr>
+            <td>60011/2</td>
+            <td>Charges sociales</td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-percent"></td>
+          </tr>
+          <tr>
+            <td>60011/3</td>
+            <td>Transport et frais de mission</td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-percent"></td>
+          </tr>
+          <tr>
+            <td>60011/4</td>
+            <td>Carburants et lubrifiants</td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-percent"></td>
+          </tr>
+          <tr>
+            <td>60011/5</td>
+            <td>Matériels et fournitures</td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-percent"></td>
+          </tr>
+          <tr>
+            <td>60011/6</td>
+            <td>Abonnement eau - électricité - téléphone</td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-percent"></td>
+          </tr>
+          <tr>
+            <td>60011/7</td>
+            <td>Travaux et service à l'entreprise</td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-percent"></td>
+          </tr>
+          <tr>
+            <td>60011/8</td>
+            <td>Intervention et transferts</td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-percent"></td>
+          </tr>
+          <tr class="sous-total">
+            <td>S/T 60011</td>
+            <td>SOUS TOTAL CHAP. 60011</td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-num"></td>
+            <td class="col-percent"></td>
+          </tr>
+
+          <!-- SECTION 64 -->
+          <!-- CHAP 645 -->
+          <tr class="chap-header">
+            <td>645</td>
+            <td colspan="12">CHAP. 645- DEPENSES ACCIDENTELLES</td>
+          </tr>
+          <tr>
+            <td>6451</td>
+            <td colspan="12"><strong>INDEMNITES - FRAIS ET DOMMAGES ET INTERETS</strong></td>
+          </tr>
+          <tr>
+            <td>6451/8</td>
+            <td>Intervention et transferts</td>
+            <td class="col-num">150 000</td>
+            <td class="col-num">0</td>
+            <td class="col-num">0</td>
+            <td class="col-num">0</td>
+            <td class="col-num">0</td>
+            <td class="col-num">0</td>
+            <td class="col-num">0</td>
+            <td class="col-num">0</td>
+            <td class="col-num">0</td>
+            <td class="col-num">0</td>
+            <td class="col-percent">0.00</td>
+          </tr>
+          <tr class="sous-total">
+            <td>S/T 645</td>
+            <td>SOUS TOTAL CHAP. 645</td>
+            <td class="col-num">150 000</td>
+            <td class="col-num">0</td>
+            <td class="col-num">0</td>
+            <td class="col-num">0</td>
+            <td class="col-num">0</td>
+            <td class="col-num">0</td>
+            <td class="col-num">0</td>
+            <td class="col-num">0</td>
+            <td class="col-num">0</td>
+            <td class="col-num">0</td>
+            <td class="col-percent">0.00</td>
+          </tr>
+          <tr class="total-section">
+            <td>TOTAL</td>
+            <td>TOTAL GENERAL DES DEPENSES</td>
+            <td class="col-num">--</td>
+            <td class="col-num">--</td>
+            <td class="col-num">--</td>
+            <td class="col-num">--</td>
+            <td class="col-num">--</td>
+            <td class="col-num">--</td>
+            <td class="col-num">--</td>
+            <td class="col-num">--</td>
+            <td class="col-num">--</td>
+            <td class="col-num">--</td>
+            <td class="col-percent">--</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="footer-text">
+        Arrêté le présent état à la somme de : [SOMME EN LETTRES] FRANCS CFA.
+      </div>
+
+      <div class="signatures">
+        <div class="signature-box">
+          Vavoua, le 31 MARS 2025<br />
+          <strong>Le Trésorier Principal</strong>
+        </div>
+        <div class="signature-box">
+          <br />
+          <strong>Le Maire</strong>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
