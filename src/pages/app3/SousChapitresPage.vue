@@ -181,6 +181,13 @@ interface SousChapitreForm {
   actif: boolean;
 }
 
+interface ParentOption {
+  id?: number;
+  code: string;
+  libelle: string;
+  label: string;
+}
+
 const form = ref<SousChapitreForm>({
   code: '',
   libelle: '',
@@ -236,7 +243,7 @@ function getParentCode(parentId: number) {
 
 const allParentOptions = computed(() => {
   return sousChapitres.value.map((sc) => {
-    const option: { id?: number; code: string; libelle: string; label: string } = {
+    const option: ParentOption = {
       code: sc.code,
       libelle: sc.libelle,
       label: `${sc.code} - ${sc.libelle}`,
@@ -248,7 +255,7 @@ const allParentOptions = computed(() => {
   });
 });
 
-const parentOptions = ref<Array<{ id?: number; code: string; libelle: string; label: string }>>([]);
+const parentOptions = ref<ParentOption[]>([]);
 
 function filterParents(val: string, update: (fn: () => void) => void) {
   if (val === '') {
