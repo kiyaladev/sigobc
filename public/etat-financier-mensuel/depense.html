@@ -52,7 +52,7 @@
       table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 5px;
+        margin-top: 0;
       }
       th,
       td {
@@ -129,9 +129,36 @@
       }
 
       .doc-header-cell {
-        border: none !important;
         padding: 0 !important;
-        background: transparent !important;
+        background: #fff !important;
+      }
+
+      .doc-header-grid {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 2fr 1fr;
+      }
+      .doc-header-block {
+        padding: 4px 6px;
+        min-height: 70px;
+      }
+      .doc-header-block + .doc-header-block {
+        border-left: 1px solid #000;
+      }
+      .doc-header-left {
+        text-align: left;
+        font-weight: bold;
+      }
+      .doc-header-center {
+        text-align: center;
+        font-weight: bold;
+      }
+      .doc-header-right {
+        text-align: right;
+        font-weight: bold;
+      }
+      .doc-header-center .main-title {
+        margin: 0 0 4px 0;
       }
 
       .print-footer {
@@ -168,18 +195,18 @@
           <thead>
             <tr>
               <th colspan="13" class="doc-header-cell">
-                <div class="header">
-                  <div class="header-left">
+                <div class="doc-header-grid">
+                  <div class="doc-header-block doc-header-left">
                     <span id="departement">DEPARTEMENT</span><br />
                     <span id="commune">COMMUNE</span><br />
                     CODE : <span id="codeCommune">---</span>
                   </div>
-                  <div class="header-center">
+                  <div class="doc-header-block doc-header-center">
                     <div class="main-title">ETAT MENSUEL D'EXECUTION DES DEPENSES</div>
                     ARTICLE 4 DE LA LOI 81-1129 DU 30/12/1981<br />
                     MOIS DE : <strong id="moisNom">---</strong>
                   </div>
-                  <div class="header-right">
+                  <div class="doc-header-block doc-header-right">
                     ANNEE : <strong id="annee">----</strong><br />
                     N° <span id="numeroMois">--</span>
                   </div>

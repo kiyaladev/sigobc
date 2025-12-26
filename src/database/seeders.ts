@@ -746,69 +746,85 @@ async function seedMandats(
   let numeroOrdre = 0;
   const MANDATS_PAR_COUPLE = 3;
 
-  // Générer 3 mandats pour chaque couple chapitre/sous-chapitre
-  for (const chapitreId of chapitreIds) {
-    for (const sousChapitreId of sousChapitreIds) {
-      const chapitre = chapitresData.find((c) => c.id === chapitreId);
-      const sousChapitre = sousChapitresData.find((s) => s.id === sousChapitreId);
-      const chapitreCode = chapitre?.code || String(chapitreId);
-      const sousChapitreCode = sousChapitre?.code || String(sousChapitreId);
+  const MONTH_SPECS: Array<{ label: string; start: Date; end: Date; exercice: number }> = [
+    {
+      label: 'novembre',
+      exercice: 2025,
+      start: new Date(2025, 10, 1),
+      end: new Date(2025, 10, 30),
+    },
+    {
+      label: 'décembre',
+      exercice: 2025,
+      start: new Date(2025, 11, 1),
+      // 21 décembre 2025 (date actuelle dans le projet)
+      end: new Date(2025, 11, 21),
+    },
+  ];
 
-      for (let m = 0; m < MANDATS_PAR_COUPLE; m++) {
-        numeroOrdre++;
-        const bordereau = randomChoice(bordereauMandats);
-        const bordereauId = bordereau.id;
+  // Générer 3 mandats pour chaque couple chapitre/sous-chapitre, pour novembre ET décembre 2025
+  for (const monthSpec of MONTH_SPECS) {
+    for (const chapitreId of chapitreIds) {
+      for (const sousChapitreId of sousChapitreIds) {
+        const chapitre = chapitresData.find((c) => c.id === chapitreId);
+        const sousChapitre = sousChapitresData.find((s) => s.id === sousChapitreId);
+        const chapitreCode = chapitre?.code || String(chapitreId);
+        const sousChapitreCode = sousChapitre?.code || String(sousChapitreId);
 
-        // Tous les mandats sont en décembre 2025
-        const exercice = 2025;
-        const startOfDecember = new Date(2025, 11, 1); // 1er décembre 2025
-        const endOfDecember = new Date(2025, 11, 21); // 21 décembre 2025 (date actuelle)
-        const dateMandat = randomDate(startOfDecember, endOfDecember);
+        for (let m = 0; m < MANDATS_PAR_COUPLE; m++) {
+          numeroOrdre++;
+          const bordereau = randomChoice(bordereauMandats);
+          const bordereauId = bordereau.id;
 
-        const numeroMandat = String(numeroOrdre);
-        const montant = randomAmount(5000, 500000);
+          const exercice = monthSpec.exercice;
+          const dateMandat = randomDate(monthSpec.start, monthSpec.end);
 
-        const statuts: Array<'emis' | 'paye'> = ['emis', 'paye'];
-        const statut = bordereau.statut === 'ferme' ? randomChoice(statuts) : randomChoice(statuts);
+          const numeroMandat = String(numeroOrdre);
+          const montant = randomAmount(5000, 500000);
 
-        // Générer l'etatMensuelId
-        const etatMensuelId = generateEtatMensuelId(dateMandat, sousChapitreCode, chapitreCode);
+          const statuts: Array<'emis' | 'paye'> = ['emis', 'paye'];
+          const statut =
+            bordereau.statut === 'ferme' ? randomChoice(statuts) : randomChoice(statuts);
 
-        const mandat: Partial<Mandat> = {
-          exercice,
-          numeroMandat,
-          numeroOrdre,
-          dateMandat,
-          chapitreId,
-          sousChapitreId,
-          etatMensuelId,
-          mairieId: DEFAULT_MAIRIE_ID,
-          beneficiaire: randomChoice(beneficiaires),
-          objet: randomChoice(objets),
-          montant,
-          modePaiement: randomChoice(modesPaiement),
-          statut,
-          personnelId: randomChoice(personnelIds),
-          createdAt: dateMandat,
-          updatedAt: now,
-        };
+          // Générer l'etatMensuelId
+          const etatMensuelId = generateEtatMensuelId(dateMandat, sousChapitreCode, chapitreCode);
 
-        if (bordereauId) {
-          mandat.bordereauMandatId = bordereauId;
-        }
+          const mandat: Partial<Mandat> = {
+            exercice,
+            numeroMandat,
+            numeroOrdre,
+            dateMandat,
+            chapitreId,
+            sousChapitreId,
+            etatMensuelId,
+            mairieId: DEFAULT_MAIRIE_ID,
+            beneficiaire: randomChoice(beneficiaires),
+            objet: randomChoice(objets),
+            montant,
+            modePaiement: randomChoice(modesPaiement),
+            statut,
+            personnelId: randomChoice(personnelIds),
+            createdAt: dateMandat,
+            updatedAt: now,
+          };
 
-        if (previsionIds.length > 0 && Math.random() > 0.2) {
-          mandat.previsionId = randomChoice(previsionIds);
-        }
+          if (bordereauId) {
+            mandat.bordereauMandatId = bordereauId;
+          }
 
-        mandats.push(mandat);
+          if (previsionIds.length > 0 && Math.random() > 0.2) {
+            mandat.previsionId = randomChoice(previsionIds);
+          }
 
-        if (bordereauId) {
-          const current = bordereauUpdates.get(bordereauId) || { count: 0, total: 0 };
-          bordereauUpdates.set(bordereauId, {
-            count: current.count + 1,
-            total: current.total + montant,
-          });
+          mandats.push(mandat);
+
+          if (bordereauId) {
+            const current = bordereauUpdates.get(bordereauId) || { count: 0, total: 0 };
+            bordereauUpdates.set(bordereauId, {
+              count: current.count + 1,
+              total: current.total + montant,
+            });
+          }
         }
       }
     }
@@ -825,7 +841,7 @@ async function seedMandats(
   }
 
   console.log(
-    `✅ ${mandats.length} mandats créés (${MANDATS_PAR_COUPLE} par couple chapitre/sous-chapitre: ${chapitreIds.length} chapitres x ${sousChapitreIds.length} sous-chapitres)`,
+    `✅ ${mandats.length} mandats créés (${MANDATS_PAR_COUPLE} par couple chapitre/sous-chapitre, pour ${MONTH_SPECS.length} mois: ${chapitreIds.length} chapitres x ${sousChapitreIds.length} sous-chapitres)`,
   );
 }
 
