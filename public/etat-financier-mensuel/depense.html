@@ -296,113 +296,213 @@
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = '';
 
-        // Grouper par sous-chapitre
-        const groupedBySousChapitre = {};
+        // Grouper les données dans une structure hiérarchique
+        // Section (60, 61...) -> Chapitre (600, 601...) -> SousChapitre (6000, 6001...)
+        const hierarchy = {};
 
         for (const ligne of data.lignes) {
-          const sousChapitreCode = ligne.sousChapitreCode;
-          if (!isEligibleSousChapitreCode(sousChapitreCode)) continue;
-          if (!groupedBySousChapitre[sousChapitreCode]) {
-            groupedBySousChapitre[sousChapitreCode] = {
-              code: sousChapitreCode,
-              libelle: ligne.sousChapitreLibelle || sousChapitreCode,
+          const sousChapitreCode = (ligne.sousChapitreCode || '').trim();
+          if (!sousChapitreCode || sousChapitreCode.length < 4) continue;
+
+          const codeNum = parseInt(sousChapitreCode, 10);
+          if (isNaN(codeNum)) continue;
+
+          // Déterminer la section (premiers 2 chiffres)
+          const sectionCode = sousChapitreCode.substring(0, 2);
+          // Déterminer le chapitre (premiers 3 chiffres)
+          const chapitreCode = sousChapitreCode.substring(0, 3);
+
+          // Créer la section si nécessaire
+          if (!hierarchy[sectionCode]) {
+            hierarchy[sectionCode] = {
+              code: sectionCode,
+              libelle: getSectionLibelle(sectionCode),
               chapitres: {},
               totaux: { prevision: 0, antecedent: 0, depenseMois: 0, total: 0 },
             };
           }
 
-          groupedBySousChapitre[sousChapitreCode].chapitres[ligne.chapitreCode] = ligne;
-          groupedBySousChapitre[sousChapitreCode].totaux.prevision += ligne.prevision || 0;
-          groupedBySousChapitre[sousChapitreCode].totaux.antecedent += ligne.antecedent || 0;
-          groupedBySousChapitre[sousChapitreCode].totaux.depenseMois += ligne.depenseMois || 0;
-          groupedBySousChapitre[sousChapitreCode].totaux.total += ligne.total || 0;
-        }
-
-        // Trier par code sous-chapitre (numérique)
-        const sortedSousChapitres = Object.values(groupedBySousChapitre).sort((a, b) => {
-          const numA = parseInt(a.code, 10);
-          const numB = parseInt(b.code, 10);
-          if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
-          return a.code.localeCompare(b.code);
-        });
-
-        // Générer les lignes du tableau
-        for (const sousChapitre of sortedSousChapitres) {
-          // Entête du sous-chapitre
-          const headerRow = document.createElement('tr');
-          headerRow.className = 'sous-chapitre-header';
-          headerRow.innerHTML = `
-            <td>${sousChapitre.code}</td>
-            <td colspan="12"><strong>${sousChapitre.libelle}</strong></td>
-          `;
-          tbody.appendChild(headerRow);
-
-          // Lignes pour chaque chapitre (1 à 8)
-          for (let i = 1; i <= 8; i++) {
-            const chapCode = String(i);
-            const ligne = sousChapitre.chapitres[chapCode];
-            const row = document.createElement('tr');
-
-            if (ligne) {
-              const percent = calculatePercent(ligne.total, ligne.prevision);
-              row.innerHTML = `
-                <td class="col-code">${sousChapitre.code}/${chapCode}</td>
-                <td class="col-libelle">${chapitreLibelles[chapCode]}</td>
-                <td class="col-num">${formatNumber(ligne.prevision)}</td>
-                <td class="col-num">${formatNumber(ligne.antecedent)}</td>
-                <td class="col-num">${formatNumber(ligne.depenseMois)}</td>
-                <td class="col-num">${formatNumber(ligne.total)}</td>
-                <td class="col-num">${formatNumber(ligne.antecedent)}</td>
-                <td class="col-num">${formatNumber(ligne.depenseMois)}</td>
-                <td class="col-num">${formatNumber(ligne.total)}</td>
-                <td class="col-num">${formatNumber(ligne.antecedent)}</td>
-                <td class="col-num">${formatNumber(ligne.depenseMois)}</td>
-                <td class="col-num">${formatNumber(ligne.total)}</td>
-                <td class="col-percent">${percent}</td>
-              `;
-            } else {
-              row.innerHTML = `
-                <td class="col-code">${sousChapitre.code}/${chapCode}</td>
-                <td class="col-libelle">${chapitreLibelles[chapCode]}</td>
-                <td class="col-num">0</td>
-                <td class="col-num">0</td>
-                <td class="col-num">0</td>
-                <td class="col-num">0</td>
-                <td class="col-num">0</td>
-                <td class="col-num">0</td>
-                <td class="col-num">0</td>
-                <td class="col-num">0</td>
-                <td class="col-num">0</td>
-                <td class="col-num">0</td>
-                <td class="col-percent">0.00</td>
-              `;
-            }
-            tbody.appendChild(row);
+          // Créer le chapitre si nécessaire
+          if (!hierarchy[sectionCode].chapitres[chapitreCode]) {
+            hierarchy[sectionCode].chapitres[chapitreCode] = {
+              code: chapitreCode,
+              libelle: getChapitreLibelle(chapitreCode),
+              sousChapitres: {},
+              totaux: { prevision: 0, antecedent: 0, depenseMois: 0, total: 0 },
+            };
           }
 
-          // Sous-total du sous-chapitre
-          const subTotalRow = document.createElement('tr');
-          subTotalRow.className = 'sous-total';
-          const subPercent = calculatePercent(
-            sousChapitre.totaux.total,
-            sousChapitre.totaux.prevision,
-          );
-          subTotalRow.innerHTML = `
-            <td>S/T ${sousChapitre.code}</td>
-            <td>SOUS TOTAL ${sousChapitre.code}</td>
-            <td class="col-num">${formatNumber(sousChapitre.totaux.prevision)}</td>
-            <td class="col-num">${formatNumber(sousChapitre.totaux.antecedent)}</td>
-            <td class="col-num">${formatNumber(sousChapitre.totaux.depenseMois)}</td>
-            <td class="col-num">${formatNumber(sousChapitre.totaux.total)}</td>
-            <td class="col-num">${formatNumber(sousChapitre.totaux.antecedent)}</td>
-            <td class="col-num">${formatNumber(sousChapitre.totaux.depenseMois)}</td>
-            <td class="col-num">${formatNumber(sousChapitre.totaux.total)}</td>
-            <td class="col-num">${formatNumber(sousChapitre.totaux.antecedent)}</td>
-            <td class="col-num">${formatNumber(sousChapitre.totaux.depenseMois)}</td>
-            <td class="col-num">${formatNumber(sousChapitre.totaux.total)}</td>
-            <td class="col-percent">${subPercent}</td>
+          // Créer le sous-chapitre si nécessaire
+          if (!hierarchy[sectionCode].chapitres[chapitreCode].sousChapitres[sousChapitreCode]) {
+            hierarchy[sectionCode].chapitres[chapitreCode].sousChapitres[sousChapitreCode] = {
+              code: sousChapitreCode,
+              libelle: ligne.sousChapitreLibelle || sousChapitreCode,
+              lignes: {},
+              totaux: { prevision: 0, antecedent: 0, depenseMois: 0, total: 0 },
+            };
+          }
+
+          // Ajouter la ligne
+          const sousChapitre =
+            hierarchy[sectionCode].chapitres[chapitreCode].sousChapitres[sousChapitreCode];
+          sousChapitre.lignes[ligne.chapitreCode] = ligne;
+
+          // Mettre à jour les totaux
+          sousChapitre.totaux.prevision += ligne.prevision || 0;
+          sousChapitre.totaux.antecedent += ligne.antecedent || 0;
+          sousChapitre.totaux.depenseMois += ligne.depenseMois || 0;
+          sousChapitre.totaux.total += ligne.total || 0;
+
+          hierarchy[sectionCode].chapitres[chapitreCode].totaux.prevision += ligne.prevision || 0;
+          hierarchy[sectionCode].chapitres[chapitreCode].totaux.antecedent += ligne.antecedent || 0;
+          hierarchy[sectionCode].chapitres[chapitreCode].totaux.depenseMois +=
+            ligne.depenseMois || 0;
+          hierarchy[sectionCode].chapitres[chapitreCode].totaux.total += ligne.total || 0;
+
+          hierarchy[sectionCode].totaux.prevision += ligne.prevision || 0;
+          hierarchy[sectionCode].totaux.antecedent += ligne.antecedent || 0;
+          hierarchy[sectionCode].totaux.depenseMois += ligne.depenseMois || 0;
+          hierarchy[sectionCode].totaux.total += ligne.total || 0;
+        }
+
+        // Trier et rendre la hiérarchie
+        const sortedSections = Object.keys(hierarchy).sort((a, b) => parseInt(a) - parseInt(b));
+
+        for (const sectionCode of sortedSections) {
+          const section = hierarchy[sectionCode];
+
+          // Entête de section
+          const sectionRow = document.createElement('tr');
+          sectionRow.className = 'section-header';
+          sectionRow.innerHTML = `
+            <td>${section.code}</td>
+            <td colspan="12">SECTION ${section.code} - ${section.libelle}</td>
           `;
-          tbody.appendChild(subTotalRow);
+          tbody.appendChild(sectionRow);
+
+          // Trier les chapitres
+          const sortedChapitres = Object.keys(section.chapitres).sort(
+            (a, b) => parseInt(a) - parseInt(b),
+          );
+
+          for (const chapCode of sortedChapitres) {
+            const chapitre = section.chapitres[chapCode];
+
+            // Entête de chapitre
+            const chapRow = document.createElement('tr');
+            chapRow.className = 'chap-header';
+            chapRow.innerHTML = `
+              <td>${chapitre.code}</td>
+              <td colspan="12">CHAP. ${chapitre.libelle}</td>
+            `;
+            tbody.appendChild(chapRow);
+
+            // Trier les sous-chapitres
+            const sortedSousChapitres = Object.keys(chapitre.sousChapitres).sort(
+              (a, b) => parseInt(a) - parseInt(b),
+            );
+
+            for (const scCode of sortedSousChapitres) {
+              const sousChapitre = chapitre.sousChapitres[scCode];
+
+              // Entête du sous-chapitre
+              const scHeaderRow = document.createElement('tr');
+              scHeaderRow.className = 'sous-chapitre-header';
+              scHeaderRow.innerHTML = `
+                <td>${sousChapitre.code}</td>
+                <td colspan="12"><strong>${sousChapitre.libelle}</strong></td>
+              `;
+              tbody.appendChild(scHeaderRow);
+
+              // Lignes pour chaque chapitre (1 à 8)
+              for (let i = 1; i <= 8; i++) {
+                const chapCodeStr = String(i);
+                const ligne = sousChapitre.lignes[chapCodeStr];
+                const row = document.createElement('tr');
+
+                if (ligne) {
+                  const percent = calculatePercent(ligne.total, ligne.prevision);
+                  row.innerHTML = `
+                    <td class="col-code">${sousChapitre.code}/${chapCodeStr}</td>
+                    <td class="col-libelle">${chapitreLibelles[chapCodeStr]}</td>
+                    <td class="col-num">${formatNumber(ligne.prevision)}</td>
+                    <td class="col-num">${formatNumber(ligne.antecedent)}</td>
+                    <td class="col-num">${formatNumber(ligne.depenseMois)}</td>
+                    <td class="col-num">${formatNumber(ligne.total)}</td>
+                    <td class="col-num">${formatNumber(ligne.antecedent)}</td>
+                    <td class="col-num">${formatNumber(ligne.depenseMois)}</td>
+                    <td class="col-num">${formatNumber(ligne.total)}</td>
+                    <td class="col-num">${formatNumber(ligne.antecedent)}</td>
+                    <td class="col-num">${formatNumber(ligne.depenseMois)}</td>
+                    <td class="col-num">${formatNumber(ligne.total)}</td>
+                    <td class="col-percent">${percent}</td>
+                  `;
+                } else {
+                  row.innerHTML = `
+                    <td class="col-code">${sousChapitre.code}/${chapCodeStr}</td>
+                    <td class="col-libelle">${chapitreLibelles[chapCodeStr]}</td>
+                    <td class="col-num">0</td>
+                    <td class="col-num">0</td>
+                    <td class="col-num">0</td>
+                    <td class="col-num">0</td>
+                    <td class="col-num">0</td>
+                    <td class="col-num">0</td>
+                    <td class="col-num">0</td>
+                    <td class="col-num">0</td>
+                    <td class="col-num">0</td>
+                    <td class="col-num">0</td>
+                    <td class="col-percent">0.00</td>
+                  `;
+                }
+                tbody.appendChild(row);
+              }
+
+              // Sous-total du sous-chapitre
+              const subTotalRow = document.createElement('tr');
+              subTotalRow.className = 'sous-total';
+              const subPercent = calculatePercent(
+                sousChapitre.totaux.total,
+                sousChapitre.totaux.prevision,
+              );
+              subTotalRow.innerHTML = `
+                <td>S/T ${sousChapitre.code}</td>
+                <td>SOUS TOTAL ${sousChapitre.code}</td>
+                <td class="col-num">${formatNumber(sousChapitre.totaux.prevision)}</td>
+                <td class="col-num">${formatNumber(sousChapitre.totaux.antecedent)}</td>
+                <td class="col-num">${formatNumber(sousChapitre.totaux.depenseMois)}</td>
+                <td class="col-num">${formatNumber(sousChapitre.totaux.total)}</td>
+                <td class="col-num">${formatNumber(sousChapitre.totaux.antecedent)}</td>
+                <td class="col-num">${formatNumber(sousChapitre.totaux.depenseMois)}</td>
+                <td class="col-num">${formatNumber(sousChapitre.totaux.total)}</td>
+                <td class="col-num">${formatNumber(sousChapitre.totaux.antecedent)}</td>
+                <td class="col-num">${formatNumber(sousChapitre.totaux.depenseMois)}</td>
+                <td class="col-num">${formatNumber(sousChapitre.totaux.total)}</td>
+                <td class="col-percent">${subPercent}</td>
+              `;
+              tbody.appendChild(subTotalRow);
+            }
+
+            // Sous-total du chapitre (600, 601, 610, etc.)
+            const chapTotalRow = document.createElement('tr');
+            chapTotalRow.className = 'sous-total';
+            const chapPercent = calculatePercent(chapitre.totaux.total, chapitre.totaux.prevision);
+            chapTotalRow.innerHTML = `
+              <td>S/T ${chapitre.code}</td>
+              <td>SOUS TOTAL CHAP. ${chapitre.code}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.prevision)}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.antecedent)}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.depenseMois)}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.total)}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.antecedent)}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.depenseMois)}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.total)}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.antecedent)}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.depenseMois)}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.total)}</td>
+              <td class="col-percent">${chapPercent}</td>
+            `;
+            tbody.appendChild(chapTotalRow);
+          }
         }
 
         // Total général
@@ -425,6 +525,51 @@
           <td class="col-percent">${totalPercent}</td>
         `;
         tbody.appendChild(totalRow);
+      }
+
+      // Libellés des sections
+      function getSectionLibelle(code) {
+        const libelles = {
+          60: 'DEPENSES DES SERVICES GENERAUX',
+          61: 'DEPENSES DE SECURITE ET PROTECTION CIVILE',
+          62: 'DEPENSES DES SERVICES SOCIAUX',
+          63: 'DEPENSES DES SERVICES ECONOMIQUES',
+          64: 'AUTRES DEPENSES',
+          65: 'DEPENSES DIVERSES',
+          66: 'FRAIS FINANCIERS',
+          67: 'DEPENSES EXCEPTIONNELLES',
+          68: 'DOTATIONS AUX AMORTISSEMENTS',
+          69: 'IMPOTS SUR LES BENEFICES',
+        };
+        return libelles[code] || `SECTION ${code}`;
+      }
+
+      // Libellés des chapitres
+      function getChapitreLibelle(code) {
+        const libelles = {
+          600: 'ADMINISTRATION GENERALE',
+          601: 'SERVICES TECHNIQUES',
+          602: 'SERVICES FINANCIERS',
+          603: 'ETAT CIVIL',
+          604: 'SERVICES SOCIAUX',
+          605: 'URBANISME ET HABITAT',
+          610: 'POLICE MUNICIPALE',
+          611: 'PROTECTION CIVILE',
+          620: 'ACTION SOCIALE',
+          621: 'SANTE',
+          622: 'EDUCATION',
+          623: 'CULTURE ET JEUNESSE',
+          624: 'SPORTS ET LOISIRS',
+          630: 'AGRICULTURE',
+          631: 'COMMERCE ET ARTISANAT',
+          640: 'DEPENSES DIVERSES',
+          645: 'DEPENSES ACCIDENTELLES',
+          650: 'AUTRES CHARGES',
+          660: 'CHARGES FINANCIERES',
+          670: 'CHARGES EXCEPTIONNELLES',
+          680: 'AMORTISSEMENTS',
+        };
+        return libelles[code] || code;
       }
 
       // Écouter les messages de l'application Vue

@@ -775,7 +775,9 @@ async function generateEtatFinancierMensuel() {
         };
       }
 
-      entry.depenses[moisIndex] += mandat.montant;
+      if (entry && moisIndex >= 0 && moisIndex < 12) {
+        entry.depenses[moisIndex] = (entry.depenses[moisIndex] ?? 0) + mandat.montant;
+      }
     }
 
     // Calculer les antécédents et préparer les données pour l'affichage

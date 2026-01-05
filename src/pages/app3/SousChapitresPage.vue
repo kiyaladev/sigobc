@@ -36,7 +36,14 @@
     </FilterBar>
 
     <!-- Table des sous-chapitres -->
-    <DataTable :rows="filteredSousChapitres" :columns="columns" :loading="loading" row-key="id">
+    <DataTable
+      :rows="filteredSousChapitres"
+      :columns="columns"
+      :loading="loading"
+      row-key="id"
+      @edit="openDialog"
+      @delete="confirmDelete"
+    >
       <template v-slot:body-cell-code="props">
         <q-td :props="props">
           <q-badge color="accent" :label="props.row.code" />
@@ -57,24 +64,6 @@
           <q-badge :color="props.row.actif ? 'positive' : 'negative'">
             {{ props.row.actif ? 'Actif' : 'Inactif' }}
           </q-badge>
-        </q-td>
-      </template>
-
-      <template v-slot:body-cell-actions="props">
-        <q-td :props="props">
-          <q-btn flat round dense icon="edit" color="primary" @click.stop="openDialog(props.row)">
-            <q-tooltip>Modifier</q-tooltip>
-          </q-btn>
-          <q-btn
-            flat
-            round
-            dense
-            icon="delete"
-            color="negative"
-            @click.stop="confirmDelete(props.row)"
-          >
-            <q-tooltip>Supprimer</q-tooltip>
-          </q-btn>
         </q-td>
       </template>
     </DataTable>
