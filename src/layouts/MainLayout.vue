@@ -252,129 +252,84 @@
 
         <q-separator class="q-my-md" />
 
-        <!-- ===== 5. GESTION DES INVESTISSEMENTS ===== -->
+        <!-- ===== 5. GESTION DES RECETTES ===== -->
         <q-item-label header class="text-grey-7 text-weight-medium q-px-md">
-          <q-icon name="account_balance" size="18px" class="q-mr-xs" />
-          Gestion des Investissements
+          <q-icon name="payments" size="18px" class="q-mr-xs" />
+          Gestion des Recettes
         </q-item-label>
 
         <q-item
           clickable
           v-ripple
-          to="/app5/dashboard"
+          to="/app6/dashboard"
           class="nav-item q-mb-xs"
           active-class="nav-item-active"
         >
           <q-item-section avatar>
-            <q-icon name="dashboard" color="teal" />
+            <q-icon name="dashboard" color="green" />
           </q-item-section>
           <q-item-section>
-            <q-item-label>Dashboard Invest.</q-item-label>
+            <q-item-label>Dashboard Recettes</q-item-label>
           </q-item-section>
         </q-item>
 
         <q-item
           clickable
           v-ripple
-          to="/app5/chapitres"
+          to="/app6/titres"
           class="nav-item q-mb-xs"
           active-class="nav-item-active"
         >
           <q-item-section avatar>
-            <q-icon name="category" color="teal" />
+            <q-icon name="category" color="green" />
           </q-item-section>
           <q-item-section>
-            <q-item-label>Chapitres Invest.</q-item-label>
+            <q-item-label>Titres de Recettes</q-item-label>
           </q-item-section>
         </q-item>
 
         <q-item
           clickable
           v-ripple
-          to="/app5/sous-chapitres"
+          to="/app6/declarations"
           class="nav-item q-mb-xs"
           active-class="nav-item-active"
         >
           <q-item-section avatar>
-            <q-icon name="view_list" color="teal" />
+            <q-icon name="receipt" color="green" />
           </q-item-section>
           <q-item-section>
-            <q-item-label>Sous-Chapitres Invest.</q-item-label>
+            <q-item-label>Déclarations</q-item-label>
           </q-item-section>
         </q-item>
 
         <q-item
           clickable
           v-ripple
-          to="/app5/previsions"
+          to="/app6/bordereaux"
           class="nav-item q-mb-xs"
           active-class="nav-item-active"
         >
           <q-item-section avatar>
-            <q-icon name="pie_chart" color="teal" />
+            <q-icon name="folder_open" color="green" />
           </q-item-section>
           <q-item-section>
-            <q-item-label>Prévisions Invest.</q-item-label>
+            <q-item-label>Bordereaux Recettes</q-item-label>
           </q-item-section>
         </q-item>
 
         <q-item
           clickable
           v-ripple
-          to="/app5/mandats"
+          to="/app6/statistiques"
           class="nav-item q-mb-xs"
           active-class="nav-item-active"
         >
           <q-item-section avatar>
-            <q-icon name="receipt_long" color="teal" />
+            <q-icon name="bar_chart" color="green" />
           </q-item-section>
           <q-item-section>
-            <q-item-label>Mandats Invest.</q-item-label>
-          </q-item-section>
-        </q-item>
-
-        <q-item
-          clickable
-          v-ripple
-          to="/app5/bordereaux-mandats"
-          class="nav-item q-mb-xs"
-          active-class="nav-item-active"
-        >
-          <q-item-section avatar>
-            <q-icon name="folder_open" color="teal" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>Bordereaux Invest.</q-item-label>
-          </q-item-section>
-        </q-item>
-
-        <q-item
-          clickable
-          v-ripple
-          to="/app5/ct02"
-          class="nav-item q-mb-xs"
-          active-class="nav-item-active"
-        >
-          <q-item-section avatar>
-            <q-icon name="description" color="teal" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>CT02 Invest.</q-item-label>
-          </q-item-section>
-        </q-item>
-
-        <q-item
-          clickable
-          v-ripple
-          to="/app5/statistiques"
-          class="nav-item q-mb-xs"
-          active-class="nav-item-active"
-        >
-          <q-item-section avatar>
-            <q-icon name="bar_chart" color="teal" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>Statistiques Invest.</q-item-label>
+            <q-item-label>Statistiques Recettes</q-item-label>
           </q-item-section>
         </q-item>
 
