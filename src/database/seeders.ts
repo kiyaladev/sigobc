@@ -2,6 +2,7 @@ import { db, DEFAULT_MAIRIE_ID } from './db';
 import type { SousChapitre, Prevision, Mandat, BordereauMandat } from './db';
 import type {
   ChapitreInvestissement,
+  SousChapitreInvestissement,
   MandatInvestissement,
   BordereauMandatInvestissement,
 } from './db';
@@ -337,6 +338,149 @@ export async function seedDefaultData() {
 
     { code: '645', libelle: 'CHAP.645- DEPENSES ACCIDENTELLES', parent: '64' },
     { code: '6451', libelle: 'INDEMNITES -FRAIS ET DOMMAGE ET INTERETS', parent: '645' },
+
+    // ========== RECETTES ==========
+
+    // SECTION 70 - RECETTES FISCALES
+    { code: '70', libelle: 'SECTION 70- RECETTES FISCALES', parent: null },
+
+    {
+      code: '700',
+      libelle: 'CHAP.700-IMPOTS DONT LE PRODUIT EST ATTRIBUE AUX COMMUNES',
+      parent: '70',
+    },
+    { code: '7000', libelle: 'Contribution foncière des propriétés bâties', parent: '700' },
+    { code: '7001', libelle: 'Contribution foncière des propriétés non bâties', parent: '700' },
+    { code: '7004', libelle: 'Contribution des patentes', parent: '700' },
+    { code: '7005', libelle: 'Contribution des licences', parent: '700' },
+
+    { code: '702', libelle: 'CHAP. 702- TAXES COMMUNALES PERCUES PAR VOIE DE ROLE', parent: '70' },
+    { code: '70261', libelle: 'Impôt synthétique', parent: '702' },
+    {
+      code: '70262',
+      libelle: 'Taxes forfaitaires des petits commerçants et artisans',
+      parent: '702',
+    },
+    { code: '7027', libelle: 'Taxe sur les locaux loués en garnis', parent: '702' },
+
+    {
+      code: '703',
+      libelle: 'CHAP. 703- TAXES COMMUNALES PERCUES SUR TITRE DE RECETTES PROPRES AUX COMMUNES',
+      parent: '70',
+    },
+    { code: '7030', libelle: 'Taxes sur les pompes distributrices de carburant', parent: '703' },
+    { code: '7031', libelle: 'Taxes sur les charrettes', parent: '703' },
+    { code: '7036', libelle: 'Taxes sur les spectacles et galas', parent: '703' },
+    { code: '7038', libelle: 'Taxes sur les établissements de nuit', parent: '703' },
+
+    {
+      code: '704',
+      libelle: 'CHAP. 704- TAXES COMMUNALES PERCUES SUR TITRE DE RECETTES PAR LES COMMUNES',
+      parent: '70',
+    },
+    { code: '7041', libelle: 'Taxes sur les taxis', parent: '704' },
+    { code: '7042', libelle: 'Taxes sur la publicité', parent: '704' },
+
+    // SECTION 71 - RECETTES DES PRESTATIONS ET SERVICES
+    { code: '71', libelle: 'SECTION 71-RECETTES DES PRESTATIONS ET SERVICES', parent: null },
+
+    { code: '710', libelle: 'CHAP. 710- RECETTES DES SERVICES GENERAUX', parent: '71' },
+    { code: '7100', libelle: 'Administration générale', parent: '710' },
+    { code: '71000', libelle: 'Légalisation de signatures et certifications', parent: '7100' },
+    {
+      code: '71001',
+      libelle: 'Délivrance de livrets de famille et autres documents',
+      parent: '7100',
+    },
+    {
+      code: '71006',
+      libelle: "Autres recettes de prestations et services de l'administration générale",
+      parent: '7100',
+    },
+    { code: '7101', libelle: 'Administration financière et domaniale', parent: '710' },
+    { code: '71010', libelle: "Taxe sur les délivrances des permis d'habiter", parent: '7101' },
+    {
+      code: '71016',
+      libelle:
+        "Autres recettes de prestations et services de l'administration financière et domaniale",
+      parent: '7101',
+    },
+    { code: '71030', libelle: 'Taxe de séquestre', parent: '710' },
+    {
+      code: '71031',
+      libelle: 'Produits de ventes effectuées au titre de la fourrière',
+      parent: '710',
+    },
+
+    { code: '711', libelle: 'CHAP. 711- RECETTES DES SERVICES DE COLLECTIVITE', parent: '71' },
+    { code: '7112', libelle: 'Urbanisme et environnement', parent: '711' },
+    { code: '71120', libelle: 'Taxes ou redevance de bornage', parent: '7112' },
+    {
+      code: '71126',
+      libelle:
+        "Autres recettes de prestations et services au titre de l'urbanisme et de l'environnement",
+      parent: '7112',
+    },
+    {
+      code: '7113',
+      libelle: "Hygiène et salubrité publiques - hydraulique - adduction d'eau",
+      parent: '711',
+    },
+    {
+      code: '7130',
+      libelle: "Taxe d'enlèvement des ordures ménagères et redevances",
+      parent: '7113',
+    },
+    {
+      code: '71150',
+      libelle: 'Cimetières - services funéraires, taxes, redevances, autres recettes',
+      parent: '711',
+    },
+    { code: '71152', libelle: 'Morgue - Dépôts de cercueils', parent: '711' },
+    {
+      code: '71154',
+      libelle: 'Autres recettes de prestations et services funéraires',
+      parent: '711',
+    },
+
+    {
+      code: '712',
+      libelle: 'CHAP. 712- RECETTES DES SERVICES SOCIAUX, CULTURELS ET DE LA PROMOTION HUMAINE',
+      parent: '71',
+    },
+    {
+      code: '7125',
+      libelle: 'Activités culturelles - Taxes, Redevances, Autres recettes',
+      parent: '712',
+    },
+    { code: '71250', libelle: 'Administration des activités culturelles', parent: '7125' },
+    {
+      code: '71256',
+      libelle:
+        'Autres recettes de prestations et services au titre des services sociaux, culturels et de la promotion humaine',
+      parent: '7125',
+    },
+
+    { code: '713', libelle: 'CHAP. 713- RECETTES DES SERVICES ECONOMIQUES', parent: '71' },
+    {
+      code: '7133',
+      libelle: 'Transports - communications, taxes, redevances, autres recettes',
+      parent: '713',
+    },
+    { code: '71330', libelle: 'Administration des transports et communications', parent: '7133' },
+    {
+      code: '71331',
+      libelle: 'Transports par routes - gare routière - stations de taxis',
+      parent: '7133',
+    },
+    {
+      code: '7134',
+      libelle: 'Industrie et commerce - taxes - redevances, autres recettes',
+      parent: '713',
+    },
+    { code: '71341', libelle: 'Abattoirs, conservation et transport de viande', parent: '7134' },
+    { code: '71344', libelle: 'Marchés', parent: '7134' },
+    { code: '71345', libelle: 'Foires et expositions', parent: '7134' },
   ];
 
   const codeToIdMap = new Map<string, number>();
@@ -408,68 +552,95 @@ export async function seedDefaultData() {
     },
   ]);
 
-  // 6. Seed Investissements Sous-Chapitres (App5)
-  console.log('🌱 Seeding default investissement sous-chapitres...');
-  const chapitres = await db.chapitresInvestissement.toArray();
-  const getChapId = (code: string) =>
-    chapitres.find((c: ChapitreInvestissement) => c.code === code)?.id;
+  // 6. Seed Investissements Sous-Chapitres (App5) - Structure hiérarchique complète
+  console.log('🌱 Seeding default investissement sous-chapitres (hierarchical)...');
 
-  await db.sousChapitresInvestissement.bulkAdd([
+  const sousChapitresInvestData = [
+    // SECTION 90 - EQUIPEMENT DES SERVICES GENERAUX
+    { code: '90', libelle: 'SECTION 90 - EQUIPEMENT DES SERVICES GENERAUX', parent: null },
+    { code: '900', libelle: 'CHAP.900-ADMINISTRATION GENERALE', parent: '90' },
+    { code: '903', libelle: 'CHAP.903-POLICE ET ORDRE PUBLIC FOURRIERE', parent: '90' },
     {
-      code: '211',
-      libelle: 'TERRAINS',
-      chapitreInvestissementId: getChapId('21')!,
+      code: '9030',
+      libelle: 'Police et ordre publique - fourrière SOUS TOTAL CHAP. 903',
+      parent: '903',
+    },
+
+    // SECTION 91 - EQUIPEMENT DES SERVICES DE COLLECTIVITE
+    { code: '91', libelle: 'SECTION 91-EQUIPEMENT DES SCES DE COLLECTIVITE', parent: null },
+    { code: '910', libelle: 'CHAP.910-VOIRIES ET RESEAUX', parent: '91' },
+    { code: '9101', libelle: 'VOIRIES', parent: '910' },
+    { code: '9102', libelle: "Réseaux d'assainissement & Drainage", parent: '910' },
+    { code: '9103', libelle: 'Electricité - éclairage public', parent: '910' },
+    {
+      code: '913',
+      libelle: "CHAP. 913- HYGIENE & SALUBRITE PUBLIQ. HYDRAULIQUE- ADDUCTION D'EAU Articles",
+      parent: '91',
+    },
+    { code: '9134', libelle: 'Hydraulique - pompages puits lavoirs', parent: '913' },
+    { code: '9136', libelle: "Autres dépenses d'équipement au titre", parent: '913' },
+
+    // SECTION 92 - EQUIPEMENT DES SERVICES SOCIAUX, CULTURELS ET DE LA PROMOTION HUMAINE
+    {
+      code: '92',
+      libelle: 'SECTION 92-EQUIPEMENT DES SERVICES SOCIAUX, CULTURELS ET DE LA PROMOTION HUMAINE',
+      parent: null,
+    },
+    { code: '921', libelle: 'CHAP. 921- SANTE PUBLIQUE Articles', parent: '92' },
+    { code: '9212', libelle: 'Hôpitaux & Dispensaires', parent: '921' },
+
+    // SECTION 93 - EQUIPEMENT DES SERVICES ECONOMIQUES
+    { code: '93', libelle: 'SECTION 93- EQUIPEMENT DES SERVICES ECONOMIQUES', parent: null },
+    { code: '934', libelle: 'CHAP. 934- INDUSTRIES & COMMERCES Articles', parent: '93' },
+    { code: '9341', libelle: 'Abattoir- Conservation de viande & Transp.', parent: '934' },
+    { code: '9344', libelle: 'Marchés', parent: '934' },
+
+    // ========== RECETTES D'INVESTISSEMENT ==========
+
+    // SECTION 02 - PRELEVEMENT SUR FONDS D'INVESTISSEMENT
+    { code: '02', libelle: "SECTION 02- PRELEVEMENT SUR FONDS D'INVESTISSEMENT", parent: null },
+
+    // SECTION 04 - AIDE DE L'ETAT - FONDS DE CONCOURS - AIDES EXTERIEURES
+    {
+      code: '04',
+      libelle: "SECTION 04-AIDE DE L'ETAT-FONDS DE CONCOURS-AIDES EXTERIEURES",
+      parent: null,
+    },
+    { code: '040', libelle: "CHAP.040-AIDE ET CONCOURS DE L'ETAT", parent: '04' },
+    {
+      code: '0401',
+      libelle: "Subvention d'équipement de l'Etat SOUS TOTAL CHAP. 040",
+      parent: '040',
+    },
+
+    // SECTION 06 - RECETTES DIVERSES AU TITRE II
+    { code: '06', libelle: 'SECTION 06- RECETTES DIVERSES AU TITRE II', parent: null },
+    { code: '066', libelle: 'CHAP. 063-AUTRES RECETTES DIVERSES AU TITRE II', parent: '06' },
+  ];
+
+  const investCodeToIdMap = new Map<string, number>();
+
+  for (const item of sousChapitresInvestData) {
+    let chapitreInvestissementId = undefined;
+    if (item.parent) {
+      chapitreInvestissementId = investCodeToIdMap.get(item.parent);
+    }
+
+    const newItem: Omit<SousChapitreInvestissement, 'id'> = {
+      code: item.code,
+      libelle: item.libelle,
       mairieId: mairieId as number,
       actif: true,
       createdAt: now,
       updatedAt: now,
-    },
-    {
-      code: '212',
-      libelle: 'BATIMENTS',
-      chapitreInvestissementId: getChapId('21')!,
-      mairieId: mairieId as number,
-      actif: true,
-      createdAt: now,
-      updatedAt: now,
-    },
-    {
-      code: '221',
-      libelle: 'VOIRIE ET RESEAUX DIVERS',
-      chapitreInvestissementId: getChapId('22')!,
-      mairieId: mairieId as number,
-      actif: true,
-      createdAt: now,
-      updatedAt: now,
-    },
-    {
-      code: '231',
-      libelle: 'VEHICULES AUTOMOBILES',
-      chapitreInvestissementId: getChapId('23')!,
-      mairieId: mairieId as number,
-      actif: true,
-      createdAt: now,
-      updatedAt: now,
-    },
-    {
-      code: '241',
-      libelle: 'MATERIEL TECHNIQUE',
-      chapitreInvestissementId: getChapId('24')!,
-      mairieId: mairieId as number,
-      actif: true,
-      createdAt: now,
-      updatedAt: now,
-    },
-    {
-      code: '251',
-      libelle: 'MOBILIER DE BUREAU',
-      chapitreInvestissementId: getChapId('25')!,
-      mairieId: mairieId as number,
-      actif: true,
-      createdAt: now,
-      updatedAt: now,
-    },
-  ]);
+    };
+    if (chapitreInvestissementId !== undefined) {
+      newItem.chapitreInvestissementId = chapitreInvestissementId;
+    }
+
+    const id = await db.sousChapitresInvestissement.add(newItem);
+    investCodeToIdMap.set(item.code, id as number);
+  }
 
   console.log('✅ Default data seeded successfully.');
 }
