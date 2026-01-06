@@ -121,24 +121,6 @@
       </q-item>
 
       <q-list padding class="q-px-sm">
-        <q-item
-          clickable
-          v-ripple
-          to="/"
-          exact
-          class="nav-item q-mb-xs"
-          active-class="nav-item-active"
-        >
-          <q-item-section avatar>
-            <q-icon name="dashboard" color="primary" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>Tableau de Bord</q-item-label>
-          </q-item-section>
-        </q-item>
-
-        <q-separator class="q-my-md" />
-
         <!-- ===== 4. GESTION DES DÉPENSES ===== -->
         <q-item-label header class="text-grey-7 text-weight-medium q-px-md">
           <q-icon name="receipt" size="18px" class="q-mr-xs" />
@@ -270,21 +252,6 @@
           </q-item-section>
           <q-item-section>
             <q-item-label>Dashboard Recettes</q-item-label>
-          </q-item-section>
-        </q-item>
-
-        <q-item
-          clickable
-          v-ripple
-          to="/app6/titres"
-          class="nav-item q-mb-xs"
-          active-class="nav-item-active"
-        >
-          <q-item-section avatar>
-            <q-icon name="category" color="green" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>Titres de Recettes</q-item-label>
           </q-item-section>
         </q-item>
 

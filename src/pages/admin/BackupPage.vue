@@ -87,21 +87,33 @@
 
               <q-item>
                 <q-item-section avatar>
-                  <q-icon name="check_circle" color="teal" />
+                  <q-icon name="check_circle" color="green" />
                 </q-item-section>
                 <q-item-section>
-                  <q-item-label>Chapitres (Investissements)</q-item-label>
-                  <q-item-label caption>{{ stats.chapitresInvest }} enregistrement(s)</q-item-label>
+                  <q-item-label>Taxes (Recettes)</q-item-label>
+                  <q-item-label caption>{{ stats.taxes }} enregistrement(s)</q-item-label>
                 </q-item-section>
               </q-item>
 
               <q-item>
                 <q-item-section avatar>
-                  <q-icon name="check_circle" color="teal" />
+                  <q-icon name="check_circle" color="green" />
                 </q-item-section>
                 <q-item-section>
-                  <q-item-label>Mandats (Investissements)</q-item-label>
-                  <q-item-label caption>{{ stats.mandatsInvest }} enregistrement(s)</q-item-label>
+                  <q-item-label>Déclarations (Recettes)</q-item-label>
+                  <q-item-label caption>{{ stats.declarations }} enregistrement(s)</q-item-label>
+                </q-item-section>
+              </q-item>
+
+              <q-item>
+                <q-item-section avatar>
+                  <q-icon name="check_circle" color="green" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>Bordereaux Recette (Recettes)</q-item-label>
+                  <q-item-label caption
+                    >{{ stats.bordereauxRecette }} enregistrement(s)</q-item-label
+                  >
                 </q-item-section>
               </q-item>
             </q-list>
@@ -232,11 +244,9 @@ const stats = ref({
   previsions: 0,
   mandats: 0,
   bordereauMandats: 0,
-  chapitresInvest: 0,
-  sousChapitresInvest: 0,
-  previsionsInvest: 0,
-  mandatsInvest: 0,
-  bordereauMandatsInvest: 0,
+  taxes: 0,
+  declarations: 0,
+  bordereauxRecette: 0,
 });
 
 interface HistoryItem {
@@ -257,11 +267,9 @@ async function loadStats() {
       previsions,
       mandats,
       bordereauMandats,
-      chapitresInvest,
-      sousChapitresInvest,
-      previsionsInvest,
-      mandatsInvest,
-      bordereauMandatsInvest,
+      taxes,
+      declarations,
+      bordereauxRecette,
     ] = await Promise.all([
       db.utilisateurs.count(),
       db.chapitres.count(),
@@ -269,11 +277,9 @@ async function loadStats() {
       db.previsions.count(),
       db.mandats.count(),
       db.bordereauMandats.count(),
-      db.chapitresInvestissement.count(),
-      db.sousChapitresInvestissement.count(),
-      db.previsionsInvestissement.count(),
-      db.mandatsInvestissement.count(),
-      db.bordereauMandatsInvestissement.count(),
+      db.taxes.count(),
+      db.declarations.count(),
+      db.bordereauxRecette.count(),
     ]);
 
     stats.value = {
@@ -283,11 +289,9 @@ async function loadStats() {
       previsions,
       mandats,
       bordereauMandats,
-      chapitresInvest,
-      sousChapitresInvest,
-      previsionsInvest,
-      mandatsInvest,
-      bordereauMandatsInvest,
+      taxes,
+      declarations,
+      bordereauxRecette,
     };
   } catch (error) {
     console.error('Erreur lors du chargement des statistiques:', error);
@@ -335,11 +339,9 @@ async function exportDatabase() {
       previsions,
       mandats,
       bordereauMandats,
-      chapitresInvest,
-      sousChapitresInvest,
-      previsionsInvest,
-      mandatsInvest,
-      bordereauMandatsInvest,
+      taxes,
+      declarations,
+      bordereauxRecette,
     ] = await Promise.all([
       db.utilisateurs.toArray(),
       db.chapitres.toArray(),
@@ -347,11 +349,9 @@ async function exportDatabase() {
       db.previsions.toArray(),
       db.mandats.toArray(),
       db.bordereauMandats.toArray(),
-      db.chapitresInvestissement.toArray(),
-      db.sousChapitresInvestissement.toArray(),
-      db.previsionsInvestissement.toArray(),
-      db.mandatsInvestissement.toArray(),
-      db.bordereauMandatsInvestissement.toArray(),
+      db.taxes.toArray(),
+      db.declarations.toArray(),
+      db.bordereauxRecette.toArray(),
     ]);
 
     // Créer l'objet de sauvegarde
@@ -366,11 +366,9 @@ async function exportDatabase() {
         previsions,
         mandats,
         bordereauMandats,
-        chapitresInvest,
-        sousChapitresInvest,
-        previsionsInvest,
-        mandatsInvest,
-        bordereauMandatsInvest,
+        taxes,
+        declarations,
+        bordereauxRecette,
       },
       stats: {
         utilisateurs: utilisateurs.length,
@@ -379,11 +377,9 @@ async function exportDatabase() {
         previsions: previsions.length,
         mandats: mandats.length,
         bordereauMandats: bordereauMandats.length,
-        chapitresInvest: chapitresInvest.length,
-        sousChapitresInvest: sousChapitresInvest.length,
-        previsionsInvest: previsionsInvest.length,
-        mandatsInvest: mandatsInvest.length,
-        bordereauMandatsInvest: bordereauMandatsInvest.length,
+        taxes: taxes.length,
+        declarations: declarations.length,
+        bordereauxRecette: bordereauxRecette.length,
       },
     };
 
@@ -477,11 +473,9 @@ function importDatabase() {
                   db.previsions.clear(),
                   db.mandats.clear(),
                   db.bordereauMandats.clear(),
-                  db.chapitresInvestissement.clear(),
-                  db.sousChapitresInvestissement.clear(),
-                  db.previsionsInvestissement.clear(),
-                  db.mandatsInvestissement.clear(),
-                  db.bordereauMandatsInvestissement.clear(),
+                  db.taxes.clear(),
+                  db.declarations.clear(),
+                  db.bordereauxRecette.clear(),
                 ]);
 
                 // Restaurer les données
@@ -510,27 +504,17 @@ function importDatabase() {
                   await db.bordereauMandats.bulkAdd(backup.data.bordereauMandats);
                   restored += backup.data.bordereauMandats.length;
                 }
-                if (backup.data.chapitresInvest?.length) {
-                  await db.chapitresInvestissement.bulkAdd(backup.data.chapitresInvest);
-                  restored += backup.data.chapitresInvest.length;
+                if (backup.data.taxes?.length) {
+                  await db.taxes.bulkAdd(backup.data.taxes);
+                  restored += backup.data.taxes.length;
                 }
-                if (backup.data.sousChapitresInvest?.length) {
-                  await db.sousChapitresInvestissement.bulkAdd(backup.data.sousChapitresInvest);
-                  restored += backup.data.sousChapitresInvest.length;
+                if (backup.data.declarations?.length) {
+                  await db.declarations.bulkAdd(backup.data.declarations);
+                  restored += backup.data.declarations.length;
                 }
-                if (backup.data.previsionsInvest?.length) {
-                  await db.previsionsInvestissement.bulkAdd(backup.data.previsionsInvest);
-                  restored += backup.data.previsionsInvest.length;
-                }
-                if (backup.data.mandatsInvest?.length) {
-                  await db.mandatsInvestissement.bulkAdd(backup.data.mandatsInvest);
-                  restored += backup.data.mandatsInvest.length;
-                }
-                if (backup.data.bordereauMandatsInvest?.length) {
-                  await db.bordereauMandatsInvestissement.bulkAdd(
-                    backup.data.bordereauMandatsInvest,
-                  );
-                  restored += backup.data.bordereauMandatsInvest.length;
+                if (backup.data.bordereauxRecette?.length) {
+                  await db.bordereauxRecette.bulkAdd(backup.data.bordereauxRecette);
+                  restored += backup.data.bordereauxRecette.length;
                 }
 
                 addToHistory('import', `Restauration réussie (${restored} enregistrements)`, true);

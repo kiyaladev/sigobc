@@ -43,6 +43,11 @@ const routes: RouteRecordRaw[] = [
         meta: { requiresAdmin: true },
       },
       {
+        path: 'statistiques',
+        component: () => import('pages/StatistiquesGlobalesPage.vue'),
+        name: 'statistiques-globales',
+      },
+      {
         path: 'app3/dashboard',
         component: () => import('pages/app3/DashboardPage.vue'),
         name: 'app3-dashboard',
@@ -82,11 +87,6 @@ const routes: RouteRecordRaw[] = [
         path: 'app6/dashboard',
         component: () => import('pages/app6/DashboardPage.vue'),
         name: 'app6-dashboard',
-      },
-      {
-        path: 'app6/titres',
-        component: () => import('pages/app6/TitresPage.vue'),
-        name: 'app6-titres',
       },
       {
         path: 'app6/declarations',

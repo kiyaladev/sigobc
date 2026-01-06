@@ -76,9 +76,16 @@
             <q-btn
               color="accent"
               icon="description"
-              label="État Financier Mensuel"
+              label="État Fonctionnel"
               unelevated
-              @click="openEtatFinancierMensuel"
+              @click="openEtatFinancierMensuel('fonctionnel')"
+            />
+            <q-btn
+              color="teal"
+              icon="business_center"
+              label="État Investissement"
+              unelevated
+              @click="openEtatFinancierMensuel('investissement')"
             />
             <q-btn
               color="secondary"
@@ -235,11 +242,23 @@
       </q-card>
     </q-dialog>
 
-    <!-- Dialog État Financier Mensuel -->
     <q-dialog v-model="showEtatFinancierDialog" persistent>
       <q-card style="min-width: 400px">
         <q-card-section class="row items-center q-pb-none">
-          <div class="text-h6">État Financier Mensuel</div>
+          <div class="text-h6">
+            État Financier Mensuel
+            <q-chip
+              :color="etatFinancierFilters.type === 'fonctionnel' ? 'accent' : 'teal'"
+              text-color="white"
+              size="sm"
+            >
+              {{
+                etatFinancierFilters.type === 'fonctionnel'
+                  ? 'Fonctionnel (6xxx)'
+                  : 'Investissement (9xxx)'
+              }}
+            </q-chip>
+          </div>
           <q-space />
           <q-btn icon="close" flat round dense v-close-popup />
         </q-card-section>
@@ -330,6 +349,7 @@ const ct02Filters = ref({
 const etatFinancierFilters = ref({
   annee: new Date().getFullYear(),
   mois: new Date().getMonth() + 1, // Mois courant (1-12)
+  type: 'fonctionnel' as 'fonctionnel' | 'investissement',
 });
 
 // Options pour les mois
@@ -633,7 +653,8 @@ async function printCT02() {
 /**
  * Ouvre le dialogue pour sélectionner l'année et le mois de l'état financier
  */
-function openEtatFinancierMensuel() {
+function openEtatFinancierMensuel(type: 'fonctionnel' | 'investissement') {
+  etatFinancierFilters.value.type = type;
   showEtatFinancierDialog.value = true;
 }
 
@@ -665,8 +686,14 @@ async function generateEtatFinancierMensuel() {
     const isEligibleSousChapitreCode = (code: string) => {
       const trimmed = (code || '').trim();
       if (trimmed.length < 4) return false;
-      const num = parseInt(trimmed, 10);
-      return !Number.isNaN(num) && num >= 6000;
+      const firstChar = trimmed.charAt(0);
+      // Fonctionnel: codes commençant par 6
+      // Investissement: codes commençant par 9
+      if (etatFinancierFilters.value.type === 'fonctionnel') {
+        return firstChar === '6';
+      } else {
+        return firstChar === '9';
+      }
     };
 
     const parseEtatMensuelId = (etatMensuelId: string) => {
@@ -853,7 +880,11 @@ async function generateEtatFinancierMensuel() {
     };
 
     // Ouvrir la page HTML et envoyer les données
-    const etatWindow = window.open('/etat-financier-mensuel/depense.html', '_blank');
+    const pageUrl =
+      etatFinancierFilters.value.type === 'fonctionnel'
+        ? '/etat-financier-mensuel/depense.html'
+        : '/etat-financier-mensuel/investissement.html';
+    const etatWindow = window.open(pageUrl, '_blank');
     if (etatWindow) {
       // Attendre que la page soit chargée avant d'envoyer les données
       const sendData = () => {

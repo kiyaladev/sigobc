@@ -35,85 +35,18 @@ export interface Utilisateur {
   updatedAt: Date;
 }
 
-// ========== Interfaces pour App5 - Gestion des Investissements ==========
+// ========== Interface pour les Taxes (App6 - Recettes) ==========
 
-export interface ChapitreInvestissement {
+export interface Taxe {
   id?: number;
-  code: string; // Ex: 21, 22, 23...
-  libelle: string; // Ex: "Immobilisations incorporelles"
-  description?: string;
-  mairieId: number;
-  actif: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface SousChapitreInvestissement {
-  id?: number;
-  code: string; // Ex: 211, 212, 221...
+  code: string;
   libelle: string;
   description?: string;
-  chapitreInvestissementId?: number; // Lien optionnel vers le chapitre parent
+  taux?: number;
+  montant?: number;
+  type: 'fixe' | 'variable';
   mairieId: number;
   actif: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface PrevisionInvestissement {
-  id?: number;
-  exercice: number;
-  chapitreInvestissementId: number;
-  sousChapitreInvestissementId?: number;
-  mairieId: number;
-  montantPrevu: number;
-  montantEngage: number;
-  montantDisponible: number;
-  observations?: string;
-  statut: 'brouillon' | 'validee' | 'cloturee';
-  personnelId: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface MandatInvestissement {
-  id?: number;
-  numeroOrdre?: number;
-  exercice: number;
-  numeroMandat: string;
-  dateMandat: Date;
-  chapitreInvestissementId: number;
-  sousChapitreInvestissementId?: number;
-  previsionInvestissementId?: number;
-  bordereauMandatInvestissementId?: number;
-  mairieId: number;
-  beneficiaire: string;
-  rib?: string;
-  patrimonial?: string;
-  objet: string;
-  montant: number;
-  numeroFacture?: string;
-  dateFacture?: Date;
-  modePaiement: 'virement' | 'cheque' | 'especes' | 'autre';
-  statut: 'brouillon' | 'emis' | 'paye' | 'annule';
-  observations?: string;
-  personnelId: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface BordereauMandatInvestissement {
-  id?: number;
-  numero: number;
-  exercice: number;
-  dateEmission?: Date;
-  mairieId: number;
-  montantTotal: number;
-  totalPrecedent?: number;
-  nombreMandats: number;
-  statut: 'ouvert' | 'ferme';
-  observations?: string;
-  personnelId: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -215,6 +148,7 @@ export interface BordereauRecette {
   montantTotal: number;
   totalPrecedent?: number;
   nombreDeclarations: number;
+  dateTransmission?: Date;
   statut: 'ouvert' | 'ferme';
   observations?: string;
   personnelId?: number;
@@ -317,17 +251,15 @@ class TresorDatabase extends Dexie {
   bordereauMandats!: EntityTable<BordereauMandat, 'id'>;
   etatFinancierMensuel!: EntityTable<EtatFinancierMensuel, 'id'>;
 
-  // App5 - Gestion des Investissements
-  chapitresInvestissement!: EntityTable<ChapitreInvestissement, 'id'>;
-  sousChapitresInvestissement!: EntityTable<SousChapitreInvestissement, 'id'>;
-  previsionsInvestissement!: EntityTable<PrevisionInvestissement, 'id'>;
-  mandatsInvestissement!: EntityTable<MandatInvestissement, 'id'>;
-  bordereauMandatsInvestissement!: EntityTable<BordereauMandatInvestissement, 'id'>;
+  // App6 - Gestion des Recettes
+  taxes!: EntityTable<Taxe, 'id'>;
+  declarations!: EntityTable<Declaration, 'id'>;
+  bordereauxRecette!: EntityTable<BordereauRecette, 'id'>;
 
   constructor() {
     super('TresorDatabase');
 
-    this.version(19).stores({
+    this.version(20).stores({
       mairies: '++id, nom, code, ville',
       utilisateurs: '++id, username, email, role, mairieId, actif',
 
@@ -341,14 +273,11 @@ class TresorDatabase extends Dexie {
       etatFinancierMensuel:
         '++id, annee, sousChapitreId, chapitreId, mairieId, [annee+sousChapitreId+chapitreId]',
 
-      // App5 - Investissements
-      chapitresInvestissement: '++id, code, libelle, mairieId, actif',
-      sousChapitresInvestissement: '++id, code, libelle, chapitreInvestissementId, mairieId, actif',
-      previsionsInvestissement:
-        '++id, exercice, chapitreInvestissementId, sousChapitreInvestissementId, mairieId, statut, personnelId',
-      mandatsInvestissement:
-        '++id, numeroMandat, dateMandat, exercice, chapitreInvestissementId, sousChapitreInvestissementId, previsionInvestissementId, bordereauMandatInvestissementId, mairieId, statut, personnelId',
-      bordereauMandatsInvestissement: '++id, numero, exercice, mairieId, statut, personnelId',
+      // App6 - Recettes
+      taxes: '++id, code, libelle, mairieId, type, actif',
+      declarations:
+        '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
+      bordereauxRecette: '++id, numero, annee, mairieId, statut, personnelId',
     });
   }
 }
@@ -389,6 +318,91 @@ export async function initializeDatabase() {
       createdAt: now,
       updatedAt: now,
     });
+
+    // Créer les taxes par défaut pour App6 - Recettes
+    await db.taxes.bulkAdd([
+      {
+        code: '7000',
+        libelle: 'Contribution foncière bâties',
+        description: 'Taxe sur les propriétés bâties',
+        type: 'variable',
+        mairieId: mairieId as number,
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        code: '7001',
+        libelle: 'Contribution foncière non bâties',
+        description: 'Taxe sur les terrains non construits',
+        type: 'variable',
+        mairieId: mairieId as number,
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        code: '7004',
+        libelle: 'Contribution des patentes',
+        description: 'Taxe sur les activités commerciales',
+        type: 'variable',
+        mairieId: mairieId as number,
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        code: '7005',
+        libelle: 'Contribution des licences',
+        description: 'Taxe sur les licences commerciales',
+        type: 'variable',
+        mairieId: mairieId as number,
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        code: '7130',
+        libelle: 'Taxe ordures ménagères',
+        description: 'Taxe pour le service de collecte des ordures',
+        montant: 15000,
+        type: 'fixe',
+        mairieId: mairieId as number,
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        code: '71330',
+        libelle: 'Gare routière',
+        description: 'Recettes de la gare routière',
+        type: 'variable',
+        mairieId: mairieId as number,
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        code: '71344',
+        libelle: 'Marchés',
+        description: 'Recettes des marchés',
+        type: 'variable',
+        mairieId: mairieId as number,
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        code: '7041',
+        libelle: 'Taxes sur les taxis',
+        description: 'Taxe sur les véhicules de transport',
+        type: 'variable',
+        mairieId: mairieId as number,
+        actif: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+    ]);
 
     // Créer quelques rubriques et chapitres par défaut pour App3
     await db.chapitres.bulkAdd([

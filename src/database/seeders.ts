@@ -1,11 +1,5 @@
 import { db, DEFAULT_MAIRIE_ID } from './db';
 import type { SousChapitre, Prevision, Mandat, BordereauMandat } from './db';
-import type {
-  ChapitreInvestissement,
-  SousChapitreInvestissement,
-  MandatInvestissement,
-  BordereauMandatInvestissement,
-} from './db';
 
 const now = new Date();
 
@@ -59,8 +53,6 @@ export interface SeedOptions {
   previsions?: number;
   mandats?: number;
   bordereauMandats?: number;
-  mandatsInvest?: number;
-  bordereauMandatsInvest?: number;
 }
 
 // =================================================================
@@ -339,6 +331,45 @@ export async function seedDefaultData() {
     { code: '645', libelle: 'CHAP.645- DEPENSES ACCIDENTELLES', parent: '64' },
     { code: '6451', libelle: 'INDEMNITES -FRAIS ET DOMMAGE ET INTERETS', parent: '645' },
 
+    // SECTION 90 - EQUIPEMENT DES SERVICES GENERAUX
+    { code: '90', libelle: 'SECTION 90 - EQUIPEMENT DES SERVICES GENERAUX', parent: null },
+    { code: '900', libelle: 'CHAP.900-ADMINISTRATION GENERALE', parent: '90' },
+    { code: '903', libelle: 'CHAP.903-POLICE ET ORDRE PUBLIC FOURRIERE', parent: '90' },
+    {
+      code: '9030',
+      libelle: 'Police et ordre publique - fourrière SOUS TOTAL CHAP. 903',
+      parent: '903',
+    },
+
+    // SECTION 91 - EQUIPEMENT DES SERVICES DE COLLECTIVITE
+    { code: '91', libelle: 'SECTION 91-EQUIPEMENT DES SCES DE COLLECTIVITE', parent: null },
+    { code: '910', libelle: 'CHAP.910-VOIRIES ET RESEAUX', parent: '91' },
+    { code: '9101', libelle: 'VOIRIES', parent: '910' },
+    { code: '9102', libelle: "Réseaux d'assainissement & Drainage", parent: '910' },
+    { code: '9103', libelle: 'Electricité - éclairage public', parent: '910' },
+    {
+      code: '913',
+      libelle: "CHAP. 913- HYGIENE & SALUBRITE PUBLIQ. HYDRAULIQUE- ADDUCTION D'EAU Articles",
+      parent: '91',
+    },
+    { code: '9134', libelle: 'Hydraulique - pompages puits lavoirs', parent: '913' },
+    { code: '9136', libelle: "Autres dépenses d'équipement au tritre", parent: '913' },
+
+    // SECTION 92 - EQUIPEMENT DES SERVICES SOCIAUX, CULTURELS ET DE LA PROMOTION HUMAINE
+    {
+      code: '92',
+      libelle: 'SECTION 92-EQUIPEMENT DES SERVICES SOCIAUX, CULTURELS ET DE LA PROMOTION HUMAINE',
+      parent: null,
+    },
+    { code: '921', libelle: 'CHAP. 921- SANTE PUBLIQUE Articles', parent: '92' },
+    { code: '9212', libelle: 'Hôpitaux & Dispensaires', parent: '921' },
+
+    // SECTION 93 - EQUIPEMENT DES SERVICES ECONOMIQUES
+    { code: '93', libelle: 'SECTION 93- EQUIPEMENT DES SERVICES ECONOMIQUES', parent: null },
+    { code: '934', libelle: 'CHAP. 934- INDUSTRIES & COMMERCES Articles', parent: '93' },
+    { code: '9341', libelle: 'Abattoir- Conservation de viande & Transp.', parent: '934' },
+    { code: '9344', libelle: 'Marchés', parent: '934' },
+
     // ========== RECETTES ==========
 
     // SECTION 70 - RECETTES FISCALES
@@ -507,141 +538,6 @@ export async function seedDefaultData() {
     codeToIdMap.set(item.code, id as number);
   }
 
-  // 5. Seed Investissements Chapitres (App5)
-  console.log('🌱 Seeding default investissement chapitres...');
-  await db.chapitresInvestissement.bulkAdd([
-    {
-      code: '21',
-      libelle: 'ACQUISITIONS IMMOBILIERES',
-      mairieId: mairieId as number,
-      actif: true,
-      createdAt: now,
-      updatedAt: now,
-    },
-    {
-      code: '22',
-      libelle: 'AGENCEMENTS ET AMENAGEMENTS',
-      mairieId: mairieId as number,
-      actif: true,
-      createdAt: now,
-      updatedAt: now,
-    },
-    {
-      code: '23',
-      libelle: 'MATERIEL DE TRANSPORT',
-      mairieId: mairieId as number,
-      actif: true,
-      createdAt: now,
-      updatedAt: now,
-    },
-    {
-      code: '24',
-      libelle: 'MATERIEL ET OUTILLAGE',
-      mairieId: mairieId as number,
-      actif: true,
-      createdAt: now,
-      updatedAt: now,
-    },
-    {
-      code: '25',
-      libelle: 'MOBILIER DE BUREAU ET MATERIEL INFORMATIQUE',
-      mairieId: mairieId as number,
-      actif: true,
-      createdAt: now,
-      updatedAt: now,
-    },
-  ]);
-
-  // 6. Seed Investissements Sous-Chapitres (App5) - Structure hiérarchique complète
-  console.log('🌱 Seeding default investissement sous-chapitres (hierarchical)...');
-
-  const sousChapitresInvestData = [
-    // SECTION 90 - EQUIPEMENT DES SERVICES GENERAUX
-    { code: '90', libelle: 'SECTION 90 - EQUIPEMENT DES SERVICES GENERAUX', parent: null },
-    { code: '900', libelle: 'CHAP.900-ADMINISTRATION GENERALE', parent: '90' },
-    { code: '903', libelle: 'CHAP.903-POLICE ET ORDRE PUBLIC FOURRIERE', parent: '90' },
-    {
-      code: '9030',
-      libelle: 'Police et ordre publique - fourrière SOUS TOTAL CHAP. 903',
-      parent: '903',
-    },
-
-    // SECTION 91 - EQUIPEMENT DES SERVICES DE COLLECTIVITE
-    { code: '91', libelle: 'SECTION 91-EQUIPEMENT DES SCES DE COLLECTIVITE', parent: null },
-    { code: '910', libelle: 'CHAP.910-VOIRIES ET RESEAUX', parent: '91' },
-    { code: '9101', libelle: 'VOIRIES', parent: '910' },
-    { code: '9102', libelle: "Réseaux d'assainissement & Drainage", parent: '910' },
-    { code: '9103', libelle: 'Electricité - éclairage public', parent: '910' },
-    {
-      code: '913',
-      libelle: "CHAP. 913- HYGIENE & SALUBRITE PUBLIQ. HYDRAULIQUE- ADDUCTION D'EAU Articles",
-      parent: '91',
-    },
-    { code: '9134', libelle: 'Hydraulique - pompages puits lavoirs', parent: '913' },
-    { code: '9136', libelle: "Autres dépenses d'équipement au titre", parent: '913' },
-
-    // SECTION 92 - EQUIPEMENT DES SERVICES SOCIAUX, CULTURELS ET DE LA PROMOTION HUMAINE
-    {
-      code: '92',
-      libelle: 'SECTION 92-EQUIPEMENT DES SERVICES SOCIAUX, CULTURELS ET DE LA PROMOTION HUMAINE',
-      parent: null,
-    },
-    { code: '921', libelle: 'CHAP. 921- SANTE PUBLIQUE Articles', parent: '92' },
-    { code: '9212', libelle: 'Hôpitaux & Dispensaires', parent: '921' },
-
-    // SECTION 93 - EQUIPEMENT DES SERVICES ECONOMIQUES
-    { code: '93', libelle: 'SECTION 93- EQUIPEMENT DES SERVICES ECONOMIQUES', parent: null },
-    { code: '934', libelle: 'CHAP. 934- INDUSTRIES & COMMERCES Articles', parent: '93' },
-    { code: '9341', libelle: 'Abattoir- Conservation de viande & Transp.', parent: '934' },
-    { code: '9344', libelle: 'Marchés', parent: '934' },
-
-    // ========== RECETTES D'INVESTISSEMENT ==========
-
-    // SECTION 02 - PRELEVEMENT SUR FONDS D'INVESTISSEMENT
-    { code: '02', libelle: "SECTION 02- PRELEVEMENT SUR FONDS D'INVESTISSEMENT", parent: null },
-
-    // SECTION 04 - AIDE DE L'ETAT - FONDS DE CONCOURS - AIDES EXTERIEURES
-    {
-      code: '04',
-      libelle: "SECTION 04-AIDE DE L'ETAT-FONDS DE CONCOURS-AIDES EXTERIEURES",
-      parent: null,
-    },
-    { code: '040', libelle: "CHAP.040-AIDE ET CONCOURS DE L'ETAT", parent: '04' },
-    {
-      code: '0401',
-      libelle: "Subvention d'équipement de l'Etat SOUS TOTAL CHAP. 040",
-      parent: '040',
-    },
-
-    // SECTION 06 - RECETTES DIVERSES AU TITRE II
-    { code: '06', libelle: 'SECTION 06- RECETTES DIVERSES AU TITRE II', parent: null },
-    { code: '066', libelle: 'CHAP. 063-AUTRES RECETTES DIVERSES AU TITRE II', parent: '06' },
-  ];
-
-  const investCodeToIdMap = new Map<string, number>();
-
-  for (const item of sousChapitresInvestData) {
-    let chapitreInvestissementId = undefined;
-    if (item.parent) {
-      chapitreInvestissementId = investCodeToIdMap.get(item.parent);
-    }
-
-    const newItem: Omit<SousChapitreInvestissement, 'id'> = {
-      code: item.code,
-      libelle: item.libelle,
-      mairieId: mairieId as number,
-      actif: true,
-      createdAt: now,
-      updatedAt: now,
-    };
-    if (chapitreInvestissementId !== undefined) {
-      newItem.chapitreInvestissementId = chapitreInvestissementId;
-    }
-
-    const id = await db.sousChapitresInvestissement.add(newItem);
-    investCodeToIdMap.set(item.code, id as number);
-  }
-
   console.log('✅ Default data seeded successfully.');
 }
 
@@ -659,8 +555,6 @@ export async function seedTestData(options: SeedOptions = {}) {
     previsions = 30,
     // mandats = 200,
     bordereauMandats = 20,
-    mandatsInvest = 50,
-    bordereauMandatsInvest = 8,
   } = options;
 
   try {
@@ -700,27 +594,6 @@ export async function seedTestData(options: SeedOptions = {}) {
       bordereauMandatsCreated,
     );
 
-    // Seeding App5 - Investissements
-    const chapitresInvestCreated = await db.chapitresInvestissement.toArray();
-    const chapitreInvestIds = chapitresInvestCreated.map((c) => c.id!);
-    const sousChapitresInvestCreated = await db.sousChapitresInvestissement.toArray();
-    const sousChapitreInvestIds = sousChapitresInvestCreated.map((s) => s.id!);
-
-    console.log(`🌱 Seeding ${bordereauMandatsInvest} test bordereau mandats investissement...`);
-    const bordereauMandatsInvestCreated = await seedBordereauMandatsInvestissement(
-      utilisateurIds,
-      bordereauMandatsInvest,
-    );
-
-    console.log(`🌱 Seeding ${mandatsInvest} test mandats investissement...`);
-    await seedMandatsInvestissement(
-      chapitreInvestIds,
-      sousChapitreInvestIds,
-      utilisateurIds,
-      bordereauMandatsInvestCreated,
-      mandatsInvest,
-    );
-
     console.log('\n✨ All test data seeders have been executed successfully!');
   } catch (error) {
     console.error('❌ Error during test data seeding:', error);
@@ -744,12 +617,6 @@ export async function clearDatabase() {
     await db.previsions.clear();
     await db.sousChapitres.clear();
     await db.chapitres.clear();
-
-    await db.mandatsInvestissement.clear();
-    await db.bordereauMandatsInvestissement.clear();
-    await db.previsionsInvestissement.clear();
-    await db.sousChapitresInvestissement.clear();
-    await db.chapitresInvestissement.clear();
 
     await db.utilisateurs.clear();
     await db.mairies.clear();
@@ -1014,130 +881,4 @@ async function seedMandats(
   console.log(
     `✅ ${mandats.length} mandats créés (${MANDATS_PAR_COUPLE} par couple chapitre/sous-chapitre, pour ${MONTH_SPECS.length} mois: ${chapitreIds.length} chapitres x ${sousChapitreIds.length} sous-chapitres)`,
   );
-}
-
-async function seedBordereauMandatsInvestissement(personnelIds: number[], count: number = 8) {
-  const bordereaux: Partial<BordereauMandatInvestissement>[] = [];
-  const exercices = [2023, 2024, 2025];
-
-  for (let i = 0; i < count; i++) {
-    const exercice = randomChoice(exercices);
-    const numero = i + 1;
-    const dateEmission = randomDate(new Date(exercice, 0, 1), new Date(exercice, 11, 31));
-    const statut: 'ouvert' | 'ferme' = Math.random() > 0.3 ? 'ferme' : 'ouvert';
-
-    bordereaux.push({
-      numero,
-      exercice,
-      dateEmission,
-      mairieId: DEFAULT_MAIRIE_ID,
-      montantTotal: 0,
-      nombreMandats: 0,
-      statut,
-      personnelId: randomChoice(personnelIds),
-      createdAt: randomDate(new Date(exercice, 0, 1), dateEmission),
-      updatedAt: now,
-    });
-  }
-
-  await db.bordereauMandatsInvestissement.bulkAdd(bordereaux as BordereauMandatInvestissement[]);
-  console.log(`✅ ${count} bordereaux mandats investissement créés`);
-
-  const created = await db.bordereauMandatsInvestissement.toArray();
-  return created;
-}
-
-async function seedMandatsInvestissement(
-  chapitreInvestIds: number[],
-  sousChapitreInvestIds: number[],
-  personnelIds: number[],
-  bordereauMandats: BordereauMandatInvestissement[],
-  count: number = 50,
-) {
-  const beneficiaires = [
-    'ENTREPRISE BTP AZAGUIE',
-    'SARL CONSTRUCTION MODERNE',
-    'ETS FOURNITURES ÉQUIPEMENTS',
-    'SOCIÉTÉ TRAVAUX PUBLICS',
-    'INFORMATIQUE SOLUTIONS CI',
-  ];
-
-  const objets = [
-    'Acquisition terrain',
-    'Construction bâtiment',
-    'Achat véhicule',
-    'Équipement informatique',
-    'Mobilier de bureau',
-  ];
-  const modesPaiement: Array<'virement' | 'cheque' | 'especes' | 'autre'> = [
-    'virement',
-    'cheque',
-    'autre',
-  ];
-
-  const mandats: Partial<MandatInvestissement>[] = [];
-  const bordereauUpdates = new Map<number, { count: number; total: number }>();
-
-  for (let i = 0; i < count; i++) {
-    const bordereau = randomChoice(bordereauMandats);
-    const exercice = bordereau.exercice;
-    const bordereauId = bordereau.id;
-
-    const bordereauDate = bordereau.dateEmission
-      ? new Date(bordereau.dateEmission)
-      : new Date(exercice, 11, 31);
-    const startOfYear = new Date(exercice, 0, 1);
-    const dateMandat = randomDate(startOfYear, bordereauDate);
-
-    const numeroMandat = String(i + 1);
-    const montant = randomAmount(100000, 10000000);
-
-    const statuts: Array<'emis' | 'paye'> = ['emis', 'paye'];
-    const statut = bordereau.statut === 'ferme' ? randomChoice(statuts) : randomChoice(statuts);
-
-    const mandat: Partial<MandatInvestissement> = {
-      numeroMandat,
-      exercice,
-      dateMandat,
-      chapitreInvestissementId: randomChoice(chapitreInvestIds),
-      mairieId: DEFAULT_MAIRIE_ID,
-      objet: randomChoice(objets),
-      beneficiaire: randomChoice(beneficiaires),
-      montant,
-      modePaiement: randomChoice(modesPaiement),
-      statut,
-      personnelId: randomChoice(personnelIds),
-      createdAt: randomDate(startOfYear, dateMandat),
-      updatedAt: now,
-    };
-
-    if (sousChapitreInvestIds.length > 0 && Math.random() > 0.3) {
-      mandat.sousChapitreInvestissementId = randomChoice(sousChapitreInvestIds);
-    }
-
-    if (bordereauId) {
-      mandat.bordereauMandatInvestissementId = bordereauId;
-    }
-
-    mandats.push(mandat);
-
-    if (bordereauId) {
-      const current = bordereauUpdates.get(bordereauId) || { count: 0, total: 0 };
-      bordereauUpdates.set(bordereauId, {
-        count: current.count + 1,
-        total: current.total + montant,
-      });
-    }
-  }
-
-  await db.mandatsInvestissement.bulkAdd(mandats as MandatInvestissement[]);
-
-  for (const [bordereauId, update] of bordereauUpdates) {
-    await db.bordereauMandatsInvestissement.update(bordereauId, {
-      nombreMandats: update.count,
-      montantTotal: update.total,
-    });
-  }
-
-  console.log(`✅ ${count} mandats d'investissement créés`);
 }

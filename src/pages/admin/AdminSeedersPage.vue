@@ -86,21 +86,11 @@
                   dense
                 />
                 <q-separator />
-                <div class="text-subtitle2">App5 - Investissements</div>
-                <q-input
-                  v-model.number="testDataOptions.mandatsInvest"
-                  type="number"
-                  label="Mandats Investissements"
-                  filled
-                  dense
-                />
-                <q-input
-                  v-model.number="testDataOptions.bordereauMandatsInvest"
-                  type="number"
-                  label="Bordereaux Mandats Invest."
-                  filled
-                  dense
-                />
+                <div class="text-subtitle2">Génération des données</div>
+                <div class="text-caption">
+                  Les données seront générées pour l'exercice 2025 ainsi que des historiques pour
+                  2023-2024.
+                </div>
               </div>
             </q-expansion-item>
           </q-card-section>
@@ -187,8 +177,6 @@ const logs = ref<string[]>([]);
 const testDataOptions = ref<SeedOptions>({
   mandats: 50,
   bordereauMandats: 6,
-  mandatsInvest: 30,
-  bordereauMandatsInvest: 4,
 });
 
 const stats = ref([
@@ -198,11 +186,10 @@ const stats = ref([
   { label: 'Prévisions Dép.', count: 0, table: 'previsions' },
   { label: 'Mandats Dép.', count: 0, table: 'mandats' },
   { label: 'Bordereaux Mandats Dép.', count: 0, table: 'bordereauMandats' },
-  { label: 'Chapitres Inv.', count: 0, table: 'chapitresInvestissement' },
-  { label: 'Sous-chapitres Inv.', count: 0, table: 'sousChapitresInvestissement' },
-  { label: 'Prévisions Inv.', count: 0, table: 'previsionsInvestissement' },
-  { label: 'Mandats Inv.', count: 0, table: 'mandatsInvestissement' },
-  { label: 'Bordereaux Mandats Inv.', count: 0, table: 'bordereauMandatsInvestissement' },
+  { label: 'Bordereaux Mandats Dép.', count: 0, table: 'bordereauMandats' },
+  { label: 'Taxes/Recettes', count: 0, table: 'taxes' },
+  { label: 'Déclarations', count: 0, table: 'declarations' },
+  { label: 'Bordereaux Recettes', count: 0, table: 'bordereauxRecette' },
 ]);
 
 function addLog(message: string) {

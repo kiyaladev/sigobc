@@ -1,0 +1,617 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Etat Mensuel d'Exécution des Dépenses d'Investissement</title>
+    <style>
+      @page {
+        size: A4 landscape;
+        margin: 10mm;
+      }
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 10px;
+        margin: 0;
+        padding: 10px;
+      }
+      .container {
+        width: 100%;
+      }
+      .header {
+        text-align: center;
+        font-weight: bold;
+        margin-bottom: 10px;
+        position: relative;
+        height: 70px;
+      }
+      .header-left {
+        text-align: left;
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+      .header-center {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        text-align: center;
+      }
+      .header-right {
+        text-align: right;
+        position: absolute;
+        top: 0;
+        right: 0;
+      }
+      .main-title {
+        text-decoration: underline;
+        font-size: 14px;
+        margin: 5px 0;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 0;
+      }
+      th,
+      td {
+        border: 1px solid #000;
+        padding: 3px 4px;
+      }
+      th {
+        background-color: #f0f0f0;
+        text-align: center;
+        vertical-align: middle;
+        font-size: 9px;
+      }
+      .col-code {
+        width: 6%;
+        text-align: center;
+      }
+      .col-libelle {
+        width: 20%;
+        text-align: left;
+      }
+      .col-num {
+        width: 6.5%;
+        text-align: right;
+        white-space: nowrap;
+      }
+      .col-percent {
+        width: 4%;
+        text-align: center;
+      }
+
+      .section-header {
+        background-color: #e0e0e0;
+        font-weight: bold;
+      }
+      .chap-header {
+        font-weight: bold;
+        background-color: #f5f5f5;
+      }
+      .sous-chapitre-header {
+        font-weight: bold;
+        background-color: #fafafa;
+      }
+      .sous-total {
+        background-color: #f9f9f9;
+        font-weight: bold;
+        font-style: italic;
+      }
+      .total-section {
+        background-color: #d0d0d0;
+        font-weight: bold;
+        border-top: 2px solid #000;
+      }
+      .footer-text {
+        margin-top: 15px;
+        font-style: italic;
+        border-top: 1px solid #000;
+        padding-top: 5px;
+      }
+      .signatures {
+        margin-top: 30px;
+        display: flex;
+        justify-content: space-between;
+        padding: 0 50px;
+      }
+      .signature-box {
+        text-align: center;
+        width: 200px;
+      }
+      .loading {
+        text-align: center;
+        padding: 50px;
+        font-size: 16px;
+        color: #666;
+      }
+
+      .doc-header-cell {
+        padding: 0 !important;
+        background: #fff !important;
+      }
+
+      .doc-header-grid {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 2fr 1fr;
+      }
+      .doc-header-block {
+        padding: 4px 6px;
+        min-height: 70px;
+      }
+      .doc-header-block + .doc-header-block {
+        border-left: 1px solid #000;
+      }
+      .doc-header-left {
+        text-align: left;
+        font-weight: bold;
+      }
+      .doc-header-center {
+        text-align: center;
+        font-weight: bold;
+      }
+      .doc-header-right {
+        text-align: right;
+        font-weight: bold;
+      }
+      .doc-header-center .main-title {
+        margin: 0 0 4px 0;
+      }
+
+      .print-footer {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      @media print {
+        body {
+          padding: 0;
+        }
+        .no-print {
+          display: none;
+        }
+
+        thead {
+          display: table-header-group;
+        }
+
+        .footer-text,
+        .signatures,
+        .print-footer {
+          break-inside: avoid;
+          page-break-inside: avoid;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div id="loading" class="loading">Chargement des données...</div>
+
+      <div id="content" style="display: none">
+        <table>
+          <thead>
+            <tr>
+              <th colspan="13" class="doc-header-cell">
+                <div class="doc-header-grid">
+                  <div class="doc-header-block doc-header-left">
+                    <span id="departement">DEPARTEMENT</span><br />
+                    <span id="commune">COMMUNE</span><br />
+                    CODE : <span id="codeCommune">---</span>
+                  </div>
+                  <div class="doc-header-block doc-header-center">
+                    <div class="main-title">
+                      ETAT MENSUEL D'EXECUTION DES DEPENSES D'INVESTISSEMENT
+                    </div>
+                    ARTICLE 4 DE LA LOI 81-1129 DU 30/12/1981<br />
+                    MOIS DE : <strong id="moisNom">---</strong>
+                  </div>
+                  <div class="doc-header-block doc-header-right">
+                    ANNEE : <strong id="annee">----</strong><br />
+                    N° <span id="numeroMois">--</span>
+                  </div>
+                </div>
+              </th>
+            </tr>
+            <tr>
+              <th rowspan="2" class="col-code">COMPTES</th>
+              <th rowspan="2" class="col-libelle">RUBRIQUES BUDGETAIRES</th>
+              <th rowspan="2" class="col-num">PREVISIONS</th>
+              <th colspan="3">E N G A G E M E N T S</th>
+              <th colspan="3">L I Q U I D A T I O N S</th>
+              <th colspan="3">M A N D A T S</th>
+              <th rowspan="2" class="col-percent">%<br />TM/P</th>
+            </tr>
+            <tr>
+              <th class="col-num">ANT.</th>
+              <th class="col-num">MOIS</th>
+              <th class="col-num">TOTAL</th>
+              <th class="col-num">ANT.</th>
+              <th class="col-num">MOIS</th>
+              <th class="col-num">TOTAL</th>
+              <th class="col-num">ANT.</th>
+              <th class="col-num">MOIS</th>
+              <th class="col-num">TOTAL</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <!-- Données générées dynamiquement -->
+          </tbody>
+        </table>
+
+        <div class="print-footer">
+          <div class="footer-text" id="footerText">
+            Arrêté le présent état à la somme de : [SOMME EN LETTRES] FRANCS CFA.
+          </div>
+
+          <div class="signatures">
+            <div class="signature-box">
+              <span id="lieuSignature">---</span>, le <span id="dateSignature">---</span><br />
+              <strong>Le Trésorier Principal</strong>
+            </div>
+            <div class="signature-box">
+              <br />
+              <strong>Le Maire</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Libellés des chapitres (1 à 8)
+      const chapitreLibelles = {
+        1: 'Salaires et indemnités',
+        2: 'Charges sociales',
+        3: 'Transport et frais de mission',
+        4: 'Carburants et lubrifiants',
+        5: 'Matériels et fournitures',
+        6: 'Abonnement eau - électricité - téléphone',
+        7: "Travaux et service à l'entreprise",
+        8: 'Intervention et transferts',
+      };
+
+      // Formater un nombre en format monétaire
+      function formatNumber(num) {
+        if (num === 0 || num === undefined || num === null) return '0';
+        return Math.round(num).toLocaleString('fr-FR');
+      }
+
+      // Calculer le pourcentage
+      function calculatePercent(total, prevision) {
+        if (!prevision || prevision === 0) return '0.00';
+        return ((total / prevision) * 100).toFixed(2);
+      }
+
+      function isEligibleSousChapitreCode(code) {
+        if (!code || typeof code !== 'string') return false;
+        const trimmed = code.trim();
+        if (trimmed.length < 4) return false;
+        // Investissement: codes commençant par 9
+        return trimmed.charAt(0) === '9';
+      }
+
+      // Remplir le tableau avec les données
+      function fillTable(data) {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+
+        // Grouper les données dans une structure hiérarchique
+        // Section (60, 61...) -> Chapitre (600, 601...) -> SousChapitre (6000, 6001...)
+        const hierarchy = {};
+
+        for (const ligne of data.lignes) {
+          const sousChapitreCode = (ligne.sousChapitreCode || '').trim();
+          if (!sousChapitreCode || sousChapitreCode.length < 4) continue;
+
+          const codeNum = parseInt(sousChapitreCode, 10);
+          if (isNaN(codeNum)) continue;
+
+          // Déterminer la section (premiers 2 chiffres)
+          const sectionCode = sousChapitreCode.substring(0, 2);
+          // Déterminer le chapitre (premiers 3 chiffres)
+          const chapitreCode = sousChapitreCode.substring(0, 3);
+
+          // Créer la section si nécessaire
+          if (!hierarchy[sectionCode]) {
+            hierarchy[sectionCode] = {
+              code: sectionCode,
+              libelle: getSectionLibelle(sectionCode),
+              chapitres: {},
+              totaux: { prevision: 0, antecedent: 0, depenseMois: 0, total: 0 },
+            };
+          }
+
+          // Créer le chapitre si nécessaire
+          if (!hierarchy[sectionCode].chapitres[chapitreCode]) {
+            hierarchy[sectionCode].chapitres[chapitreCode] = {
+              code: chapitreCode,
+              libelle: getChapitreLibelle(chapitreCode),
+              sousChapitres: {},
+              totaux: { prevision: 0, antecedent: 0, depenseMois: 0, total: 0 },
+            };
+          }
+
+          // Créer le sous-chapitre si nécessaire
+          if (!hierarchy[sectionCode].chapitres[chapitreCode].sousChapitres[sousChapitreCode]) {
+            hierarchy[sectionCode].chapitres[chapitreCode].sousChapitres[sousChapitreCode] = {
+              code: sousChapitreCode,
+              libelle: ligne.sousChapitreLibelle || sousChapitreCode,
+              lignes: {},
+              totaux: { prevision: 0, antecedent: 0, depenseMois: 0, total: 0 },
+            };
+          }
+
+          // Ajouter la ligne
+          const sousChapitre =
+            hierarchy[sectionCode].chapitres[chapitreCode].sousChapitres[sousChapitreCode];
+          sousChapitre.lignes[ligne.chapitreCode] = ligne;
+
+          // Mettre à jour les totaux
+          sousChapitre.totaux.prevision += ligne.prevision || 0;
+          sousChapitre.totaux.antecedent += ligne.antecedent || 0;
+          sousChapitre.totaux.depenseMois += ligne.depenseMois || 0;
+          sousChapitre.totaux.total += ligne.total || 0;
+
+          hierarchy[sectionCode].chapitres[chapitreCode].totaux.prevision += ligne.prevision || 0;
+          hierarchy[sectionCode].chapitres[chapitreCode].totaux.antecedent += ligne.antecedent || 0;
+          hierarchy[sectionCode].chapitres[chapitreCode].totaux.depenseMois +=
+            ligne.depenseMois || 0;
+          hierarchy[sectionCode].chapitres[chapitreCode].totaux.total += ligne.total || 0;
+
+          hierarchy[sectionCode].totaux.prevision += ligne.prevision || 0;
+          hierarchy[sectionCode].totaux.antecedent += ligne.antecedent || 0;
+          hierarchy[sectionCode].totaux.depenseMois += ligne.depenseMois || 0;
+          hierarchy[sectionCode].totaux.total += ligne.total || 0;
+        }
+
+        // Trier et rendre la hiérarchie
+        const sortedSections = Object.keys(hierarchy).sort((a, b) => parseInt(a) - parseInt(b));
+
+        for (const sectionCode of sortedSections) {
+          const section = hierarchy[sectionCode];
+
+          // Entête de section
+          const sectionRow = document.createElement('tr');
+          sectionRow.className = 'section-header';
+          sectionRow.innerHTML = `
+            <td>${section.code}</td>
+            <td colspan="12">SECTION ${section.code} - ${section.libelle}</td>
+          `;
+          tbody.appendChild(sectionRow);
+
+          // Trier les chapitres
+          const sortedChapitres = Object.keys(section.chapitres).sort(
+            (a, b) => parseInt(a) - parseInt(b),
+          );
+
+          for (const chapCode of sortedChapitres) {
+            const chapitre = section.chapitres[chapCode];
+
+            // Entête de chapitre
+            const chapRow = document.createElement('tr');
+            chapRow.className = 'chap-header';
+            chapRow.innerHTML = `
+              <td>${chapitre.code}</td>
+              <td colspan="12">CHAP. ${chapitre.libelle}</td>
+            `;
+            tbody.appendChild(chapRow);
+
+            // Trier les sous-chapitres
+            const sortedSousChapitres = Object.keys(chapitre.sousChapitres).sort(
+              (a, b) => parseInt(a) - parseInt(b),
+            );
+
+            for (const scCode of sortedSousChapitres) {
+              const sousChapitre = chapitre.sousChapitres[scCode];
+
+              // Entête du sous-chapitre
+              const scHeaderRow = document.createElement('tr');
+              scHeaderRow.className = 'sous-chapitre-header';
+              scHeaderRow.innerHTML = `
+                <td>${sousChapitre.code}</td>
+                <td colspan="12"><strong>${sousChapitre.libelle}</strong></td>
+              `;
+              tbody.appendChild(scHeaderRow);
+
+              // Lignes pour chaque chapitre (1 à 8)
+              for (let i = 1; i <= 8; i++) {
+                const chapCodeStr = String(i);
+                const ligne = sousChapitre.lignes[chapCodeStr];
+                const row = document.createElement('tr');
+
+                if (ligne) {
+                  const percent = calculatePercent(ligne.total, ligne.prevision);
+                  row.innerHTML = `
+                    <td class="col-code">${sousChapitre.code}/${chapCodeStr}</td>
+                    <td class="col-libelle">${chapitreLibelles[chapCodeStr]}</td>
+                    <td class="col-num">${formatNumber(ligne.prevision)}</td>
+                    <td class="col-num">${formatNumber(ligne.antecedent)}</td>
+                    <td class="col-num">${formatNumber(ligne.depenseMois)}</td>
+                    <td class="col-num">${formatNumber(ligne.total)}</td>
+                    <td class="col-num">${formatNumber(ligne.antecedent)}</td>
+                    <td class="col-num">${formatNumber(ligne.depenseMois)}</td>
+                    <td class="col-num">${formatNumber(ligne.total)}</td>
+                    <td class="col-num">${formatNumber(ligne.antecedent)}</td>
+                    <td class="col-num">${formatNumber(ligne.depenseMois)}</td>
+                    <td class="col-num">${formatNumber(ligne.total)}</td>
+                    <td class="col-percent">${percent}</td>
+                  `;
+                } else {
+                  row.innerHTML = `
+                    <td class="col-code">${sousChapitre.code}/${chapCodeStr}</td>
+                    <td class="col-libelle">${chapitreLibelles[chapCodeStr]}</td>
+                    <td class="col-num">0</td>
+                    <td class="col-num">0</td>
+                    <td class="col-num">0</td>
+                    <td class="col-num">0</td>
+                    <td class="col-num">0</td>
+                    <td class="col-num">0</td>
+                    <td class="col-num">0</td>
+                    <td class="col-num">0</td>
+                    <td class="col-num">0</td>
+                    <td class="col-num">0</td>
+                    <td class="col-percent">0.00</td>
+                  `;
+                }
+                tbody.appendChild(row);
+              }
+
+              // Sous-total du sous-chapitre
+              const subTotalRow = document.createElement('tr');
+              subTotalRow.className = 'sous-total';
+              const subPercent = calculatePercent(
+                sousChapitre.totaux.total,
+                sousChapitre.totaux.prevision,
+              );
+              subTotalRow.innerHTML = `
+                <td>S/T ${sousChapitre.code}</td>
+                <td>SOUS TOTAL ${sousChapitre.code}</td>
+                <td class="col-num">${formatNumber(sousChapitre.totaux.prevision)}</td>
+                <td class="col-num">${formatNumber(sousChapitre.totaux.antecedent)}</td>
+                <td class="col-num">${formatNumber(sousChapitre.totaux.depenseMois)}</td>
+                <td class="col-num">${formatNumber(sousChapitre.totaux.total)}</td>
+                <td class="col-num">${formatNumber(sousChapitre.totaux.antecedent)}</td>
+                <td class="col-num">${formatNumber(sousChapitre.totaux.depenseMois)}</td>
+                <td class="col-num">${formatNumber(sousChapitre.totaux.total)}</td>
+                <td class="col-num">${formatNumber(sousChapitre.totaux.antecedent)}</td>
+                <td class="col-num">${formatNumber(sousChapitre.totaux.depenseMois)}</td>
+                <td class="col-num">${formatNumber(sousChapitre.totaux.total)}</td>
+                <td class="col-percent">${subPercent}</td>
+              `;
+              tbody.appendChild(subTotalRow);
+            }
+
+            // Sous-total du chapitre (600, 601, 610, etc.)
+            const chapTotalRow = document.createElement('tr');
+            chapTotalRow.className = 'sous-total';
+            const chapPercent = calculatePercent(chapitre.totaux.total, chapitre.totaux.prevision);
+            chapTotalRow.innerHTML = `
+              <td>S/T ${chapitre.code}</td>
+              <td>SOUS TOTAL CHAP. ${chapitre.code}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.prevision)}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.antecedent)}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.depenseMois)}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.total)}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.antecedent)}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.depenseMois)}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.total)}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.antecedent)}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.depenseMois)}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.total)}</td>
+              <td class="col-percent">${chapPercent}</td>
+            `;
+            tbody.appendChild(chapTotalRow);
+          }
+        }
+
+        // Total général
+        const totalRow = document.createElement('tr');
+        totalRow.className = 'total-section';
+        const totalPercent = calculatePercent(data.totaux.total, data.totaux.prevision);
+        totalRow.innerHTML = `
+          <td>TOTAL</td>
+          <td>TOTAL GEN. DES DEPENSES D'INVESTISSEMENT</td>
+          <td class="col-num">${formatNumber(data.totaux.prevision)}</td>
+          <td class="col-num">${formatNumber(data.totaux.antecedent)}</td>
+          <td class="col-num">${formatNumber(data.totaux.depenseMois)}</td>
+          <td class="col-num">${formatNumber(data.totaux.total)}</td>
+          <td class="col-num">${formatNumber(data.totaux.antecedent)}</td>
+          <td class="col-num">${formatNumber(data.totaux.depenseMois)}</td>
+          <td class="col-num">${formatNumber(data.totaux.total)}</td>
+          <td class="col-num">${formatNumber(data.totaux.antecedent)}</td>
+          <td class="col-num">${formatNumber(data.totaux.depenseMois)}</td>
+          <td class="col-num">${formatNumber(data.totaux.total)}</td>
+          <td class="col-percent">${totalPercent}</td>
+        `;
+        tbody.appendChild(totalRow);
+      }
+
+      // Libellés des sections
+      function getSectionLibelle(code) {
+        const libelles = {
+          90: 'EQUIPEMENT DES SERVICES GENERAUX',
+          91: 'EQUIPEMENT DES SERVICES DE COLLECTIVITE',
+          92: 'EQUIPEMENT DES SERVICES SOCIAUX, CULTURELS ET DE PROMOTION HUMAINE',
+          93: 'EQUIPEMENT DES SERVICES ECONOMIQUES',
+          94: 'AUTRES EQUIPEMENTS',
+          95: "TRAVAUX D'INFRASTRUCTURE",
+          96: 'ACQUISITIONS IMMOBILIERES',
+          97: 'ACQUISITIONS MOBILIERES',
+          98: 'PARTICIPATIONS ET PRETS',
+          99: 'AUTRES INVESTISSEMENTS',
+        };
+        return libelles[code] || `SECTION ${code}`;
+      }
+
+      // Libellés des chapitres
+      function getChapitreLibelle(code) {
+        const libelles = {
+          900: 'ADMINISTRATION GENERALE',
+          903: 'POLICE ET ORDRE PUBLIC FOURRIERE',
+          910: 'VOIRIES ET RESEAUX',
+          913: 'HYGIENE ET SALUBRITE PUBLIQUE - HYDRAULIQUE',
+          921: 'SANTE PUBLIQUE',
+          934: 'INDUSTRIES ET COMMERCES',
+          940: 'AUTRES EQUIPEMENTS',
+        };
+        return libelles[code] || code;
+      }
+
+      // Écouter les messages de l'application Vue
+      window.addEventListener('message', function (event) {
+        if (event.data && event.data.type === 'FILL_ETAT_FINANCIER_DATA') {
+          const data = event.data.data;
+
+          // Mettre à jour l'en-tête
+          document.getElementById('annee').textContent = data.annee;
+          document.getElementById('moisNom').textContent = data.moisNom.toUpperCase();
+          document.getElementById('numeroMois').textContent = String(data.mois).padStart(2, '0');
+
+          // Informations de la mairie si disponibles
+          if (data.mairie) {
+            document.getElementById('departement').textContent =
+              'DEPARTEMENT DE ' + (data.mairie.departement || '').toUpperCase();
+            document.getElementById('commune').textContent =
+              'COMMUNE DE ' + (data.mairie.nom || '').toUpperCase();
+            document.getElementById('codeCommune').textContent = data.mairie.code || '---';
+            document.getElementById('lieuSignature').textContent = data.mairie.nom || '---';
+          }
+
+          // Date de signature
+          const today = new Date();
+          const dateOptions = { day: 'numeric', month: 'long', year: 'numeric' };
+          document.getElementById('dateSignature').textContent = today.toLocaleDateString(
+            'fr-FR',
+            dateOptions,
+          );
+
+          // Remplir le tableau
+          fillTable(data);
+
+          // Mettre à jour le pied de page
+          document.getElementById('footerText').textContent =
+            `Arrêté le présent état à la somme de : ${formatNumber(data.totaux.total)} FRANCS CFA.`;
+
+          // Afficher le contenu
+          document.getElementById('loading').style.display = 'none';
+          document.getElementById('content').style.display = 'block';
+
+          // Mettre à jour le titre de la page
+          document.title = `Etat Mensuel d'Exécution des Dépenses d'Investissement - ${data.moisNom} ${data.annee}`;
+        }
+      });
+
+      // Si pas de données après 5 secondes, afficher un message
+      setTimeout(function () {
+        const loading = document.getElementById('loading');
+        if (loading.style.display !== 'none') {
+          loading.innerHTML =
+            "Aucune donnée reçue. Veuillez générer l'état depuis la page des prévisions.";
+        }
+      }, 5000);
+    </script>
+  </body>
+</html>
