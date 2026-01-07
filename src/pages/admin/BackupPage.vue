@@ -1,6 +1,10 @@
 <template>
   <q-page class="q-pa-md">
-    <div class="text-h5 q-mb-md">💾 Sauvegarde & Restauration</div>
+    <PageHeader
+      title="Sauvegarde & Restauration"
+      subtitle="Exportation et importation des données"
+      icon="backup"
+    />
 
     <div class="row q-col-gutter-md">
       <!-- Sauvegarde -->
@@ -231,6 +235,7 @@
 import { ref, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { db } from 'src/database/db';
+import PageHeader from 'src/components/PageHeader.vue';
 
 const $q = useQuasar();
 

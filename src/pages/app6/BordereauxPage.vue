@@ -1,9 +1,14 @@
 <template>
   <q-page class="q-pa-md">
-    <div class="row q-mb-md justify-between items-center no-print">
-      <div class="text-h5">Gestion des Bordereaux de Recettes</div>
-      <q-btn color="primary" icon="add" label="Nouveau Bordereau" @click="openDialog()" />
-    </div>
+    <PageHeader
+      title="Gestion des Bordereaux de Recettes"
+      subtitle="Bordereaux pour les déclarations de recettes"
+      icon="receipt_long"
+    >
+      <template #actions>
+        <q-btn color="primary" icon="add" label="Nouveau Bordereau" @click="openDialog()" />
+      </template>
+    </PageHeader>
 
     <!-- Recherche et filtres -->
     <FilterBar
@@ -180,6 +185,7 @@ import {
 } from 'src/database/db';
 import FilterBar from 'src/components/FilterBar.vue';
 import DataTable from 'src/components/DataTable.vue';
+import PageHeader from 'src/components/PageHeader.vue';
 
 const $q = useQuasar();
 

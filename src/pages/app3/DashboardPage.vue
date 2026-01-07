@@ -1,47 +1,44 @@
 <template>
-  <q-page class="dashboard-page">
+  <q-page class="dashboard-page q-pa-md">
+    <PageHeader
+      title="Gestion des Dépenses"
+      subtitle="Vue d'ensemble de vos prévisions et mandats"
+      icon="payments"
+    />
+
     <div class="row q-col-gutter-md">
-      <!-- En-tête avec statistiques -->
-      <div class="col-12">
-        <div class="page-header fade-in">
-          <h1 class="text-h4 text-weight-bold q-mb-xs gradient-text">Gestion des Dépenses</h1>
-          <p class="text-grey-6">Vue d'ensemble de vos prévisions et mandats</p>
-        </div>
-
-        <div class="row q-col-gutter-md q-mt-md">
-          <div class="col-12 col-sm-6 col-md-3" v-for="(stat, index) in statsCards" :key="index">
-            <q-card
-              class="stat-card hover-lift"
-              :class="`stat-card-${index}`"
-              :style="{
-                animationDelay: `${index * 0.1}s`,
-                borderLeft: `4px solid var(--q-${stat.color})`,
-              }"
-            >
-              <q-card-section class="stat-card-content">
-                <div class="row items-center no-wrap">
-                  <div class="col">
-                    <div class="stat-value text-grey-8">{{ stat.value }}</div>
-                    <div class="stat-label text-grey-6">{{ stat.label }}</div>
-                  </div>
-                  <div class="col-auto">
-                    <div class="stat-icon-wrapper" :class="`bg-${stat.color}-1`">
-                      <q-icon :name="stat.icon" class="stat-icon" :color="stat.color" />
-                    </div>
-                  </div>
+      <!-- Cartes de statistiques -->
+      <div class="col-12 col-sm-6 col-md-3" v-for="(stat, index) in statsCards" :key="index">
+        <q-card
+          class="stat-card hover-lift"
+          :class="`stat-card-${index}`"
+          :style="{
+            animationDelay: `${index * 0.1}s`,
+            borderLeft: `4px solid var(--q-${stat.color})`,
+          }"
+        >
+          <q-card-section class="stat-card-content">
+            <div class="row items-center no-wrap">
+              <div class="col">
+                <div class="stat-value text-grey-8">{{ stat.value }}</div>
+                <div class="stat-label text-grey-6">{{ stat.label }}</div>
+              </div>
+              <div class="col-auto">
+                <div class="stat-icon-wrapper" :class="`bg-${stat.color}-1`">
+                  <q-icon :name="stat.icon" class="stat-icon" :color="stat.color" />
                 </div>
+              </div>
+            </div>
 
-                <!-- Indicateur de progression -->
-                <q-linear-progress
-                  :value="stat.progress || 1"
-                  :color="stat.color"
-                  class="stat-progress q-mt-md"
-                  :class="{ 'pulse-animation': stat.progress < 1 }"
-                />
-              </q-card-section>
-            </q-card>
-          </div>
-        </div>
+            <!-- Indicateur de progression -->
+            <q-linear-progress
+              :value="stat.progress || 1"
+              :color="stat.color"
+              class="stat-progress q-mt-md"
+              :class="{ 'pulse-animation': stat.progress < 1 }"
+            />
+          </q-card-section>
+        </q-card>
       </div>
 
       <!-- Accès rapide -->
@@ -209,6 +206,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { db, type Mandat, type Prevision } from 'src/database/db';
+import PageHeader from 'src/components/PageHeader.vue';
 
 const stats = ref({
   totalChapitres: 0,

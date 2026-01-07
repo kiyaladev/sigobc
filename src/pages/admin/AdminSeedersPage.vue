@@ -1,6 +1,10 @@
 <template>
   <q-page class="q-pa-md">
-    <div class="text-h5 q-mb-md">⚙️ Gestion de la Base de Données</div>
+    <PageHeader
+      title="Gestion de la Base de Données"
+      subtitle="Initialisation et génération de données de test"
+      icon="database"
+    />
 
     <q-banner class="bg-warning text-white q-mb-md" rounded>
       <template v-slot:avatar>
@@ -158,6 +162,7 @@
 import { ref, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { db } from 'src/database/db';
+import PageHeader from 'src/components/PageHeader.vue';
 import {
   seedDefaultData,
   seedTestData,
