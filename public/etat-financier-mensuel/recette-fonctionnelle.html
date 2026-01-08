@@ -175,7 +175,7 @@
         <table>
           <thead>
             <tr>
-              <th colspan="12" class="doc-header-cell">
+              <th colspan="13" class="doc-header-cell">
                 <div class="doc-header-grid">
                   <div class="doc-header-block doc-header-left">
                     <span id="departement">DEPARTEMENT</span><br />
@@ -200,7 +200,7 @@
               <th rowspan="2" class="col-libelle">RUBRIQUES BUDGETAIRES</th>
               <th rowspan="2" class="col-num">PREVISIONS</th>
               <th colspan="4">E M I S S I O N S</th>
-              <th colspan="3">R E C O U V R E M E N T S</th>
+              <th colspan="4">R E C O U V R E M E N T S</th>
               <th rowspan="2" class="col-percent">%<br />TR/P</th>
             </tr>
             <tr>
@@ -211,6 +211,7 @@
               <th class="col-num">ANT.</th>
               <th class="col-num">MOIS</th>
               <th class="col-num">TOTAL</th>
+              <th class="col-num">RESTE A<br />RECOUVRER</th>
             </tr>
           </thead>
           <tbody id="tableBody">
@@ -376,7 +377,7 @@
           sectionRow.className = 'section-header';
           sectionRow.innerHTML = `
             <td>${section.code}</td>
-            <td colspan="11">SECTION ${section.code} - ${section.libelle}</td>
+            <td colspan="12">SECTION ${section.code} - ${section.libelle}</td>
           `;
           tbody.appendChild(sectionRow);
 
@@ -393,7 +394,7 @@
             chapRow.className = 'chap-header';
             chapRow.innerHTML = `
               <td>${chapitre.code}</td>
-              <td colspan="11">CHAP. ${chapitre.libelle}</td>
+              <td colspan="12">CHAP. ${chapitre.libelle}</td>
             `;
             tbody.appendChild(chapRow);
 
@@ -414,6 +415,7 @@
               const emissionMois = ligne.emissionMois || ligne.recetteMois || 0;
               const emissionTotal = ligne.emissionTotal || ligne.total || 0;
               const resteAEmettre = (ligne.prevision || 0) - emissionTotal;
+              const resteARecouvrer = emissionTotal - (ligne.total || 0);
 
               row.innerHTML = `
                 <td class="col-code">${ligne.code}</td>
@@ -426,6 +428,7 @@
                 <td class="col-num">${formatNumber(ligne.antecedent)}</td>
                 <td class="col-num">${formatNumber(ligne.recetteMois)}</td>
                 <td class="col-num">${formatNumber(ligne.total)}</td>
+                <td class="col-num">${formatNumber(resteARecouvrer)}</td>
                 <td class="col-percent">${percent}</td>
               `;
               tbody.appendChild(row);
@@ -436,6 +439,7 @@
             chapTotalRow.className = 'sous-total';
             const chapPercent = calculatePercent(chapitre.totaux.total, chapitre.totaux.prevision);
             const chapResteAEmettre = chapitre.totaux.prevision - chapitre.totaux.emissionTotal;
+            const chapResteARecouvrer = chapitre.totaux.emissionTotal - chapitre.totaux.total;
             chapTotalRow.innerHTML = `
               <td>S/T ${chapitre.code}</td>
               <td>SOUS TOTAL CHAP. ${chapitre.code}</td>
@@ -447,6 +451,7 @@
               <td class="col-num">${formatNumber(chapitre.totaux.antecedent)}</td>
               <td class="col-num">${formatNumber(chapitre.totaux.recetteMois)}</td>
               <td class="col-num">${formatNumber(chapitre.totaux.total)}</td>
+              <td class="col-num">${formatNumber(chapResteARecouvrer)}</td>
               <td class="col-percent">${chapPercent}</td>
             `;
             tbody.appendChild(chapTotalRow);
@@ -457,6 +462,7 @@
           sectionTotalRow.className = 'sous-total';
           const sectionPercent = calculatePercent(section.totaux.total, section.totaux.prevision);
           const sectionResteAEmettre = section.totaux.prevision - section.totaux.emissionTotal;
+          const sectionResteARecouvrer = section.totaux.emissionTotal - section.totaux.total;
           sectionTotalRow.innerHTML = `
             <td>S/T ${section.code}</td>
             <td>SOUS TOTAL SECTION ${section.code}</td>
@@ -468,6 +474,7 @@
             <td class="col-num">${formatNumber(section.totaux.antecedent)}</td>
             <td class="col-num">${formatNumber(section.totaux.recetteMois)}</td>
             <td class="col-num">${formatNumber(section.totaux.total)}</td>
+            <td class="col-num">${formatNumber(sectionResteARecouvrer)}</td>
             <td class="col-percent">${sectionPercent}</td>
           `;
           tbody.appendChild(sectionTotalRow);
@@ -479,6 +486,8 @@
         const totalPercent = calculatePercent(data.totaux.total, data.totaux.prevision);
         const totalResteAEmettre =
           data.totaux.prevision - (data.totaux.emissionTotal || data.totaux.total);
+        const totalResteARecouvrer =
+          (data.totaux.emissionTotal || data.totaux.total) - data.totaux.total;
         totalRow.innerHTML = `
           <td>TOTAL</td>
           <td>TOTAL GENERAL DES RECETTES TITRE I</td>
@@ -490,6 +499,7 @@
           <td class="col-num">${formatNumber(data.totaux.antecedent)}</td>
           <td class="col-num">${formatNumber(data.totaux.recetteMois)}</td>
           <td class="col-num">${formatNumber(data.totaux.total)}</td>
+          <td class="col-num">${formatNumber(totalResteARecouvrer)}</td>
           <td class="col-percent">${totalPercent}</td>
         `;
         tbody.appendChild(totalRow);
