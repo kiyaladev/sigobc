@@ -72,6 +72,10 @@
         font-weight: bold;
         background-color: #e8f5e9;
       }
+      .sous-chapitre-header {
+        font-weight: bold;
+        background-color: #f1f8e9;
+      }
       .sous-total {
         background-color: #f1f8e9;
         font-weight: bold;
@@ -242,34 +246,88 @@
         return ((total / prevision) * 100).toFixed(2);
       }
 
-      // Remplir le tableau avec les données
+      // Libellés des sections (recettes fonctionnelles - 70, 71, etc.)
+      function getSectionLibelle(code) {
+        const libelles = {
+          70: 'RECETTES FISCALES',
+          71: 'RECETTES DES PRESTATIONS ET SERVICES',
+          72: 'REVENU DU PATRIMOINE ET DU PORTEFEUILLE',
+          73: "AIDE DE L'ETAT - FONDS DE CONCOURS",
+          74: 'RECETTES DIVERSES AU TITRE I',
+        };
+        return libelles[code] || `SECTION ${code}`;
+      }
+
+      // Libellés des chapitres
+      function getChapitreLibelle(code) {
+        const libelles = {
+          700: 'IMPOTS DIRECTS',
+          701: 'IMPOTS INDIRECTS',
+          710: 'PRESTATIONS ADMINISTRATIVES',
+          711: 'ACTIVITES SOCIALES ET CULTURELLES',
+          713: 'ACTIVITES ECONOMIQUES',
+          720: 'REVENU DU PATRIMOINE IMMOBILIER',
+          721: 'REVENU DU PORTEFEUILLE',
+          730: 'DOTATION GLOBALE DE FONCTIONNEMENT',
+          731: 'SUBVENTIONS DE FONCTIONNEMENT',
+          742: 'PRELEVEMENT SUR FONDS DE RESERVE',
+          743: 'RECETTES ACCIDENTELLES',
+        };
+        return libelles[code] || `CHAP. ${code}`;
+      }
+
+      // Remplir le tableau avec les données - format hiérarchique comme depense.html
       function fillTable(data) {
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = '';
 
-        // Grouper les données par section (70, 71, etc.)
+        // Grouper les données dans une structure hiérarchique
+        // Section (70, 71...) -> Chapitre (700, 701...) -> Lignes (taxes)
         const hierarchy = {};
 
         for (const ligne of data.lignes) {
           const code = (ligne.code || '').trim();
-          if (!code || code.length < 2) continue;
+          if (!code || code.length < 4) continue;
+
+          const codeNum = parseInt(code, 10);
+          if (isNaN(codeNum) || codeNum < 7000) continue;
 
           // Déterminer la section (premiers 2 chiffres)
           const sectionCode = code.substring(0, 2);
+          // Déterminer le chapitre (premiers 3 chiffres)
+          const chapitreCode = code.substring(0, 3);
 
           // Créer la section si nécessaire
           if (!hierarchy[sectionCode]) {
             hierarchy[sectionCode] = {
               code: sectionCode,
               libelle: getSectionLibelle(sectionCode),
+              chapitres: {},
+              totaux: { prevision: 0, antecedent: 0, recetteMois: 0, total: 0 },
+            };
+          }
+
+          // Créer le chapitre si nécessaire
+          if (!hierarchy[sectionCode].chapitres[chapitreCode]) {
+            hierarchy[sectionCode].chapitres[chapitreCode] = {
+              code: chapitreCode,
+              libelle: getChapitreLibelle(chapitreCode),
               lignes: [],
               totaux: { prevision: 0, antecedent: 0, recetteMois: 0, total: 0 },
             };
           }
 
-          hierarchy[sectionCode].lignes.push(ligne);
+          // Ajouter la ligne au chapitre
+          hierarchy[sectionCode].chapitres[chapitreCode].lignes.push(ligne);
 
-          // Mettre à jour les totaux
+          // Mettre à jour les totaux du chapitre
+          hierarchy[sectionCode].chapitres[chapitreCode].totaux.prevision += ligne.prevision || 0;
+          hierarchy[sectionCode].chapitres[chapitreCode].totaux.antecedent += ligne.antecedent || 0;
+          hierarchy[sectionCode].chapitres[chapitreCode].totaux.recetteMois +=
+            ligne.recetteMois || 0;
+          hierarchy[sectionCode].chapitres[chapitreCode].totaux.total += ligne.total || 0;
+
+          // Mettre à jour les totaux de la section
           hierarchy[sectionCode].totaux.prevision += ligne.prevision || 0;
           hierarchy[sectionCode].totaux.antecedent += ligne.antecedent || 0;
           hierarchy[sectionCode].totaux.recetteMois += ligne.recetteMois || 0;
@@ -291,23 +349,65 @@
           `;
           tbody.appendChild(sectionRow);
 
-          // Lignes de la section
-          for (const ligne of section.lignes) {
-            const row = document.createElement('tr');
-            const percent = calculatePercent(ligne.total, ligne.prevision);
-            const resteARecouvrer = (ligne.prevision || 0) - (ligne.total || 0);
+          // Trier les chapitres
+          const sortedChapitres = Object.keys(section.chapitres).sort(
+            (a, b) => parseInt(a) - parseInt(b),
+          );
 
-            row.innerHTML = `
-              <td class="col-code">${ligne.code}</td>
-              <td class="col-libelle">${ligne.libelle}</td>
-              <td class="col-num">${formatNumber(ligne.prevision)}</td>
-              <td class="col-num">${formatNumber(ligne.antecedent)}</td>
-              <td class="col-num">${formatNumber(ligne.recetteMois)}</td>
-              <td class="col-num">${formatNumber(ligne.total)}</td>
-              <td class="col-num">${formatNumber(resteARecouvrer)}</td>
-              <td class="col-percent">${percent}</td>
+          for (const chapCode of sortedChapitres) {
+            const chapitre = section.chapitres[chapCode];
+
+            // Entête de chapitre
+            const chapRow = document.createElement('tr');
+            chapRow.className = 'chap-header';
+            chapRow.innerHTML = `
+              <td>${chapitre.code}</td>
+              <td colspan="7">CHAP. ${chapitre.libelle}</td>
             `;
-            tbody.appendChild(row);
+            tbody.appendChild(chapRow);
+
+            // Lignes du chapitre (taxes)
+            const sortedLignes = chapitre.lignes.sort((a, b) => {
+              const aNum = parseInt(a.code, 10);
+              const bNum = parseInt(b.code, 10);
+              if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
+              return a.code.localeCompare(b.code);
+            });
+
+            for (const ligne of sortedLignes) {
+              const row = document.createElement('tr');
+              const percent = calculatePercent(ligne.total, ligne.prevision);
+              const resteARecouvrer = (ligne.prevision || 0) - (ligne.total || 0);
+
+              row.innerHTML = `
+                <td class="col-code">${ligne.code}</td>
+                <td class="col-libelle">${ligne.libelle}</td>
+                <td class="col-num">${formatNumber(ligne.prevision)}</td>
+                <td class="col-num">${formatNumber(ligne.antecedent)}</td>
+                <td class="col-num">${formatNumber(ligne.recetteMois)}</td>
+                <td class="col-num">${formatNumber(ligne.total)}</td>
+                <td class="col-num">${formatNumber(resteARecouvrer)}</td>
+                <td class="col-percent">${percent}</td>
+              `;
+              tbody.appendChild(row);
+            }
+
+            // Sous-total du chapitre
+            const chapTotalRow = document.createElement('tr');
+            chapTotalRow.className = 'sous-total';
+            const chapPercent = calculatePercent(chapitre.totaux.total, chapitre.totaux.prevision);
+            const chapReste = chapitre.totaux.prevision - chapitre.totaux.total;
+            chapTotalRow.innerHTML = `
+              <td>S/T ${chapitre.code}</td>
+              <td>SOUS TOTAL CHAP. ${chapitre.code}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.prevision)}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.antecedent)}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.recetteMois)}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.total)}</td>
+              <td class="col-num">${formatNumber(chapReste)}</td>
+              <td class="col-percent">${chapPercent}</td>
+            `;
+            tbody.appendChild(chapTotalRow);
           }
 
           // Sous-total de la section
@@ -344,19 +444,6 @@
           <td class="col-percent">${totalPercent}</td>
         `;
         tbody.appendChild(totalRow);
-      }
-
-      // Libellés des sections (recettes fonctionnelles - 70, 71, etc.)
-      function getSectionLibelle(code) {
-        const libelles = {
-          70: 'RECETTES FISCALES',
-          71: 'RECETTES DES PRESTATIONS ET SERVICES',
-          72: 'RECETTES PATRIMONIALES',
-          73: 'RECETTES DIVERSES',
-          74: 'DOTATIONS ET SUBVENTIONS',
-          75: 'AUTRES RECETTES DE FONCTIONNEMENT',
-        };
-        return libelles[code] || `SECTION ${code}`;
       }
 
       // Écouter les messages de l'application Vue

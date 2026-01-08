@@ -1408,8 +1408,13 @@ async function seedPrevisionsRecettes(personnelIds: number[]) {
 async function seedDeclarations(personnelIds: number[], bordereaux: BordereauRecette[]) {
   const taxes = await db.taxes.toArray();
 
-  // Filtrer les taxes App6 (codes commençant par 7 ou 0)
-  const app6Taxes = taxes.filter((t) => t.code.startsWith('7') || t.code.startsWith('0'));
+  // Filtrer les taxes App6 fonctionnelles avec codes >= 7000
+  // Exclure les sections/chapitres (70, 700, 71, 710, etc.) et les taxes d'investissement (0x)
+  const app6Taxes = taxes.filter((t) => {
+    if (!t.code.startsWith('7')) return false;
+    const codeNum = parseInt(t.code, 10);
+    return !isNaN(codeNum) && codeNum >= 7000;
+  });
 
   if (app6Taxes.length === 0) {
     console.warn('⚠️ Aucune taxe App6 trouvée, skip des déclarations');

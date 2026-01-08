@@ -9,7 +9,7 @@
     <q-card class="main-card">
       <q-card-section>
         <!-- Filtres -->
-        <div class="row q-col-gutter-md q-mb-md">
+        <div class="row q-col-gutter-sm q-mb-md">
           <div class="col-12 col-md-3">
             <q-select
               v-model="filterExercice"
@@ -76,14 +76,14 @@
             <q-btn
               color="green"
               icon="description"
-              label="État Fonctionnel"
+              label="Recette Fonctionnelle"
               unelevated
               @click="openEtatMensuel('fonctionnel')"
             />
             <q-btn
               color="grey"
               icon="business_center"
-              label="État Investissement"
+              label="Recette Investissement"
               unelevated
               @click="openEtatMensuel('investissement')"
             />
@@ -136,7 +136,7 @@
         </q-table>
 
         <!-- Totaux -->
-        <div class="row q-mt-md">
+        <div class="row q-col-gutter-sm q-mt-md">
           <q-card class="col-12 col-md-4 bg-blue-1">
             <q-card-section>
               <div class="text-subtitle2 text-grey-7">Total Prévu</div>
@@ -528,15 +528,18 @@ async function generateEtatMensuel() {
     // Récupérer toutes les taxes
     const allTaxes = await db.taxes.toArray();
 
-    // Filtrer les taxes par type (fonctionnel = 70-79, investissement = 02, 04, 06)
+    // Filtrer les taxes par type
+    // Fonctionnel: codes >= 7000 (exclure sections/chapitres 70, 700, 71, 710, etc.)
+    // Investissement: codes commençant par 0 (02, 04, 06, etc.)
     const filteredTaxes = allTaxes.filter((t) => {
       const code = t.code || '';
       if (type === 'fonctionnel') {
-        // Codes commençant par 7 (70, 71, 72, etc.)
-        return code.startsWith('7');
+        if (!code.startsWith('7')) return false;
+        const codeNum = parseInt(code, 10);
+        return !isNaN(codeNum) && codeNum >= 7000;
       } else {
         // Codes 02, 04, 06 (investissement)
-        return code.startsWith('0') || code === '02' || code === '04' || code === '06';
+        return code.startsWith('0');
       }
     });
 
@@ -584,30 +587,38 @@ async function generateEtatMensuel() {
     }
 
     // Préparer les données pour le rapport
-    const lignes = Object.values(recettesByTaxe).map((item) => {
-      const antecedents: number[] = [];
-      let cumul = 0;
+    const lignes = Object.values(recettesByTaxe)
+      .map((item) => {
+        const antecedents: number[] = [];
+        let cumul = 0;
 
-      // Calculer les antécédents pour chaque mois
-      for (let m = 0; m < 12; m++) {
-        antecedents[m] = cumul;
-        cumul += item.recettesParMois[m] || 0;
-      }
+        // Calculer les antécédents pour chaque mois
+        for (let m = 0; m < 12; m++) {
+          antecedents[m] = cumul;
+          cumul += item.recettesParMois[m] || 0;
+        }
 
-      const moisIndex = moisSelectionne - 1;
-      const antecedent = antecedents[moisIndex] || 0;
-      const recetteMois = item.recettesParMois[moisIndex] || 0;
-      const total = antecedent + recetteMois;
+        const moisIndex = moisSelectionne - 1;
+        const antecedent = antecedents[moisIndex] || 0;
+        const recetteMois = item.recettesParMois[moisIndex] || 0;
+        const total = antecedent + recetteMois;
 
-      return {
-        code: item.taxe.code,
-        libelle: item.taxe.libelle,
-        prevision: item.prevision,
-        antecedent,
-        recetteMois,
-        total,
-      };
-    });
+        return {
+          code: item.taxe.code,
+          libelle: item.taxe.libelle,
+          prevision: item.prevision,
+          antecedent,
+          recetteMois,
+          total,
+        };
+      })
+      // Trier par code numérique pour un affichage cohérent
+      .sort((a, b) => {
+        const aNum = parseInt(a.code, 10);
+        const bNum = parseInt(b.code, 10);
+        if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
+        return a.code.localeCompare(b.code);
+      });
 
     // Calculer les totaux
     const totaux = {
