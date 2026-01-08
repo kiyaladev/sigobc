@@ -47,20 +47,20 @@
         font-size: 9px;
       }
       .col-code {
-        width: 8%;
+        width: 6%;
         text-align: center;
       }
       .col-libelle {
-        width: 25%;
+        width: 18%;
         text-align: left;
       }
       .col-num {
-        width: 10%;
+        width: 6.5%;
         text-align: right;
         white-space: nowrap;
       }
       .col-percent {
-        width: 5%;
+        width: 4%;
         text-align: center;
       }
 
@@ -175,7 +175,7 @@
         <table>
           <thead>
             <tr>
-              <th colspan="8" class="doc-header-cell">
+              <th colspan="12" class="doc-header-cell">
                 <div class="doc-header-grid">
                   <div class="doc-header-block doc-header-left">
                     <span id="departement">DEPARTEMENT</span><br />
@@ -199,11 +199,15 @@
               <th rowspan="2" class="col-code">COMPTES</th>
               <th rowspan="2" class="col-libelle">RUBRIQUES BUDGETAIRES</th>
               <th rowspan="2" class="col-num">PREVISIONS</th>
+              <th colspan="4">E M I S S I O N S</th>
               <th colspan="3">R E C O U V R E M E N T S</th>
-              <th rowspan="2" class="col-num">RESTE A<br />RECOUVRER</th>
               <th rowspan="2" class="col-percent">%<br />TR/P</th>
             </tr>
             <tr>
+              <th class="col-num">ANT.</th>
+              <th class="col-num">MOIS</th>
+              <th class="col-num">TOTAL</th>
+              <th class="col-num">RESTE A<br />EMETTRE</th>
               <th class="col-num">ANT.</th>
               <th class="col-num">MOIS</th>
               <th class="col-num">TOTAL</th>
@@ -303,7 +307,15 @@
               code: sectionCode,
               libelle: getSectionLibelle(sectionCode),
               chapitres: {},
-              totaux: { prevision: 0, antecedent: 0, recetteMois: 0, total: 0 },
+              totaux: {
+                prevision: 0,
+                emissionAnt: 0,
+                emissionMois: 0,
+                emissionTotal: 0,
+                antecedent: 0,
+                recetteMois: 0,
+                total: 0,
+              },
             };
           }
 
@@ -313,15 +325,31 @@
               code: chapitreCode,
               libelle: getChapitreLibelle(chapitreCode),
               lignes: [],
-              totaux: { prevision: 0, antecedent: 0, recetteMois: 0, total: 0 },
+              totaux: {
+                prevision: 0,
+                emissionAnt: 0,
+                emissionMois: 0,
+                emissionTotal: 0,
+                antecedent: 0,
+                recetteMois: 0,
+                total: 0,
+              },
             };
           }
 
           // Ajouter la ligne au chapitre
           hierarchy[sectionCode].chapitres[chapitreCode].lignes.push(ligne);
 
+          // Valeurs des émissions (utiliser les mêmes valeurs que recouvrements si non fournies)
+          const emissionAnt = ligne.emissionAnt || ligne.antecedent || 0;
+          const emissionMois = ligne.emissionMois || ligne.recetteMois || 0;
+          const emissionTotal = ligne.emissionTotal || ligne.total || 0;
+
           // Mettre à jour les totaux du chapitre
           hierarchy[sectionCode].chapitres[chapitreCode].totaux.prevision += ligne.prevision || 0;
+          hierarchy[sectionCode].chapitres[chapitreCode].totaux.emissionAnt += emissionAnt;
+          hierarchy[sectionCode].chapitres[chapitreCode].totaux.emissionMois += emissionMois;
+          hierarchy[sectionCode].chapitres[chapitreCode].totaux.emissionTotal += emissionTotal;
           hierarchy[sectionCode].chapitres[chapitreCode].totaux.antecedent += ligne.antecedent || 0;
           hierarchy[sectionCode].chapitres[chapitreCode].totaux.recetteMois +=
             ligne.recetteMois || 0;
@@ -329,6 +357,9 @@
 
           // Mettre à jour les totaux de la section
           hierarchy[sectionCode].totaux.prevision += ligne.prevision || 0;
+          hierarchy[sectionCode].totaux.emissionAnt += emissionAnt;
+          hierarchy[sectionCode].totaux.emissionMois += emissionMois;
+          hierarchy[sectionCode].totaux.emissionTotal += emissionTotal;
           hierarchy[sectionCode].totaux.antecedent += ligne.antecedent || 0;
           hierarchy[sectionCode].totaux.recetteMois += ligne.recetteMois || 0;
           hierarchy[sectionCode].totaux.total += ligne.total || 0;
@@ -345,7 +376,7 @@
           sectionRow.className = 'section-header';
           sectionRow.innerHTML = `
             <td>${section.code}</td>
-            <td colspan="7">SECTION ${section.code} - ${section.libelle}</td>
+            <td colspan="11">SECTION ${section.code} - ${section.libelle}</td>
           `;
           tbody.appendChild(sectionRow);
 
@@ -362,7 +393,7 @@
             chapRow.className = 'chap-header';
             chapRow.innerHTML = `
               <td>${chapitre.code}</td>
-              <td colspan="7">CHAP. ${chapitre.libelle}</td>
+              <td colspan="11">CHAP. ${chapitre.libelle}</td>
             `;
             tbody.appendChild(chapRow);
 
@@ -377,16 +408,24 @@
             for (const ligne of sortedLignes) {
               const row = document.createElement('tr');
               const percent = calculatePercent(ligne.total, ligne.prevision);
-              const resteARecouvrer = (ligne.prevision || 0) - (ligne.total || 0);
+
+              // Emissions (utiliser les mêmes valeurs que recouvrements si non fournies)
+              const emissionAnt = ligne.emissionAnt || ligne.antecedent || 0;
+              const emissionMois = ligne.emissionMois || ligne.recetteMois || 0;
+              const emissionTotal = ligne.emissionTotal || ligne.total || 0;
+              const resteAEmettre = (ligne.prevision || 0) - emissionTotal;
 
               row.innerHTML = `
                 <td class="col-code">${ligne.code}</td>
                 <td class="col-libelle">${ligne.libelle}</td>
                 <td class="col-num">${formatNumber(ligne.prevision)}</td>
+                <td class="col-num">${formatNumber(emissionAnt)}</td>
+                <td class="col-num">${formatNumber(emissionMois)}</td>
+                <td class="col-num">${formatNumber(emissionTotal)}</td>
+                <td class="col-num">${formatNumber(resteAEmettre)}</td>
                 <td class="col-num">${formatNumber(ligne.antecedent)}</td>
                 <td class="col-num">${formatNumber(ligne.recetteMois)}</td>
                 <td class="col-num">${formatNumber(ligne.total)}</td>
-                <td class="col-num">${formatNumber(resteARecouvrer)}</td>
                 <td class="col-percent">${percent}</td>
               `;
               tbody.appendChild(row);
@@ -396,15 +435,18 @@
             const chapTotalRow = document.createElement('tr');
             chapTotalRow.className = 'sous-total';
             const chapPercent = calculatePercent(chapitre.totaux.total, chapitre.totaux.prevision);
-            const chapReste = chapitre.totaux.prevision - chapitre.totaux.total;
+            const chapResteAEmettre = chapitre.totaux.prevision - chapitre.totaux.emissionTotal;
             chapTotalRow.innerHTML = `
               <td>S/T ${chapitre.code}</td>
               <td>SOUS TOTAL CHAP. ${chapitre.code}</td>
               <td class="col-num">${formatNumber(chapitre.totaux.prevision)}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.emissionAnt)}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.emissionMois)}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.emissionTotal)}</td>
+              <td class="col-num">${formatNumber(chapResteAEmettre)}</td>
               <td class="col-num">${formatNumber(chapitre.totaux.antecedent)}</td>
               <td class="col-num">${formatNumber(chapitre.totaux.recetteMois)}</td>
               <td class="col-num">${formatNumber(chapitre.totaux.total)}</td>
-              <td class="col-num">${formatNumber(chapReste)}</td>
               <td class="col-percent">${chapPercent}</td>
             `;
             tbody.appendChild(chapTotalRow);
@@ -414,15 +456,18 @@
           const sectionTotalRow = document.createElement('tr');
           sectionTotalRow.className = 'sous-total';
           const sectionPercent = calculatePercent(section.totaux.total, section.totaux.prevision);
-          const sectionReste = section.totaux.prevision - section.totaux.total;
+          const sectionResteAEmettre = section.totaux.prevision - section.totaux.emissionTotal;
           sectionTotalRow.innerHTML = `
             <td>S/T ${section.code}</td>
             <td>SOUS TOTAL SECTION ${section.code}</td>
             <td class="col-num">${formatNumber(section.totaux.prevision)}</td>
+            <td class="col-num">${formatNumber(section.totaux.emissionAnt)}</td>
+            <td class="col-num">${formatNumber(section.totaux.emissionMois)}</td>
+            <td class="col-num">${formatNumber(section.totaux.emissionTotal)}</td>
+            <td class="col-num">${formatNumber(sectionResteAEmettre)}</td>
             <td class="col-num">${formatNumber(section.totaux.antecedent)}</td>
             <td class="col-num">${formatNumber(section.totaux.recetteMois)}</td>
             <td class="col-num">${formatNumber(section.totaux.total)}</td>
-            <td class="col-num">${formatNumber(sectionReste)}</td>
             <td class="col-percent">${sectionPercent}</td>
           `;
           tbody.appendChild(sectionTotalRow);
@@ -432,15 +477,19 @@
         const totalRow = document.createElement('tr');
         totalRow.className = 'total-section';
         const totalPercent = calculatePercent(data.totaux.total, data.totaux.prevision);
-        const totalReste = data.totaux.prevision - data.totaux.total;
+        const totalResteAEmettre =
+          data.totaux.prevision - (data.totaux.emissionTotal || data.totaux.total);
         totalRow.innerHTML = `
           <td>TOTAL</td>
           <td>TOTAL GENERAL DES RECETTES TITRE I</td>
           <td class="col-num">${formatNumber(data.totaux.prevision)}</td>
+          <td class="col-num">${formatNumber(data.totaux.emissionAnt || data.totaux.antecedent)}</td>
+          <td class="col-num">${formatNumber(data.totaux.emissionMois || data.totaux.recetteMois)}</td>
+          <td class="col-num">${formatNumber(data.totaux.emissionTotal || data.totaux.total)}</td>
+          <td class="col-num">${formatNumber(totalResteAEmettre)}</td>
           <td class="col-num">${formatNumber(data.totaux.antecedent)}</td>
           <td class="col-num">${formatNumber(data.totaux.recetteMois)}</td>
           <td class="col-num">${formatNumber(data.totaux.total)}</td>
-          <td class="col-num">${formatNumber(totalReste)}</td>
           <td class="col-percent">${totalPercent}</td>
         `;
         tbody.appendChild(totalRow);
