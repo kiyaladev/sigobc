@@ -99,6 +99,16 @@ const routes: RouteRecordRaw[] = [
         name: 'app6-bordereaux',
       },
       {
+        path: 'app6/previsions',
+        component: () => import('pages/app6/PrevisionRecettesPage.vue'),
+        name: 'app6-previsions',
+      },
+      {
+        path: 'app6/taxes',
+        component: () => import('pages/app6/TaxesPage.vue'),
+        name: 'app6-taxes',
+      },
+      {
         path: 'app6/statistiques',
         component: () => import('pages/app6/StatistiquesPage.vue'),
         name: 'app6-statistiques',

@@ -1,5 +1,13 @@
 import { db, DEFAULT_MAIRIE_ID } from './db';
-import type { SousChapitre, Prevision, Mandat, BordereauMandat } from './db';
+import type {
+  SousChapitre,
+  Prevision,
+  Mandat,
+  BordereauMandat,
+  BordereauRecette,
+  PrevisionRecette,
+  Declaration,
+} from './db';
 
 const now = new Date();
 
@@ -538,6 +546,686 @@ export async function seedDefaultData() {
     codeToIdMap.set(item.code, id as number);
   }
 
+  // 5. Taxes par défaut pour App6 - Recettes (Nomenclature complète)
+  console.log('🌱 Seeding taxes (App6 - Recettes)...');
+  await db.taxes.bulkAdd([
+    // ========== SECTION 70 - RECETTES FISCALES ==========
+    {
+      code: '70',
+      libelle: 'SECTION 70 - RECETTES FISCALES',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '700',
+      libelle: 'CHAP.700 - IMPOTS ATTRIBUES AUX COMMUNES',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '7000',
+      libelle: 'Contribution foncière des propriétés bâties',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '7001',
+      libelle: 'Contribution foncière des propriétés non bâties',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '7004',
+      libelle: 'Contribution des patentes',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '7005',
+      libelle: 'Contribution des licences',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '702',
+      libelle: 'CHAP.702 - TAXES COMMUNALES PAR VOIE DE ROLE',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '70261',
+      libelle: 'Impôt synthétique',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '70262',
+      libelle: 'Taxes forfaitaires petits commerçants/artisans',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '7027',
+      libelle: 'Taxe sur les locaux loués en garnis',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '703',
+      libelle: 'CHAP.703 - TAXES SUR TITRE DE RECETTES PROPRES',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '7030',
+      libelle: 'Taxes sur les pompes distributrices de carburant',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '7031',
+      libelle: 'Taxes sur les charrettes',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '7036',
+      libelle: 'Taxes sur les spectacles et galas',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '7038',
+      libelle: 'Taxes sur les établissements de nuit',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '704',
+      libelle: 'CHAP.704 - TAXES SUR TITRE DE RECETTES PAR LES COMMUNES',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '7041',
+      libelle: 'Taxes sur les taxis',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '7042',
+      libelle: 'Taxes sur la publicité',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+
+    // ========== SECTION 71 - RECETTES DES PRESTATIONS ET SERVICES ==========
+    {
+      code: '71',
+      libelle: 'SECTION 71 - RECETTES DES PRESTATIONS ET SERVICES',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '710',
+      libelle: 'CHAP.710 - RECETTES DES SERVICES GENERAUX',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '7100',
+      libelle: 'Administration générale',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '71000',
+      libelle: 'Légalisation de signatures et certifications',
+      type: 'fixe',
+      montant: 500,
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '71001',
+      libelle: 'Délivrance livrets de famille et documents',
+      type: 'fixe',
+      montant: 1000,
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '71006',
+      libelle: 'Autres recettes administration générale',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '7101',
+      libelle: 'Administration financière et domaniale',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '71010',
+      libelle: "Taxe sur délivrance permis d'habiter",
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '71016',
+      libelle: 'Autres recettes admin. financière/domaniale',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '71030',
+      libelle: 'Taxe de séquestre',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '71031',
+      libelle: 'Produits de ventes de la fourrière',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '711',
+      libelle: 'CHAP.711 - RECETTES DES SERVICES DE COLLECTIVITE',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '7112',
+      libelle: 'Urbanisme et environnement',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '71120',
+      libelle: 'Taxes ou redevance de bornage',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '71126',
+      libelle: 'Autres recettes urbanisme/environnement',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '7113',
+      libelle: "Hygiène, salubrité, hydraulique, adduction d'eau",
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '7130',
+      libelle: "Taxe d'enlèvement des ordures ménagères",
+      type: 'fixe',
+      montant: 15000,
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '71150',
+      libelle: 'Cimetières - services funéraires',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '71152',
+      libelle: 'Morgue - Dépôts de cercueils',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '71154',
+      libelle: 'Autres recettes services funéraires',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '712',
+      libelle: 'CHAP.712 - RECETTES SERVICES SOCIAUX/CULTURELS',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '7125',
+      libelle: 'Activités culturelles - Taxes, Redevances',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '71250',
+      libelle: 'Administration activités culturelles',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '71256',
+      libelle: 'Autres recettes services sociaux/culturels',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '713',
+      libelle: 'CHAP.713 - RECETTES DES SERVICES ECONOMIQUES',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '7133',
+      libelle: 'Transports - communications',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '71330',
+      libelle: 'Administration transports et communications',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '71331',
+      libelle: 'Gare routière - stations de taxis',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '7134',
+      libelle: 'Industrie et commerce',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '71341',
+      libelle: 'Abattoirs, conservation et transport de viande',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '71344',
+      libelle: 'Marchés',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '71345',
+      libelle: 'Foires et expositions',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+
+    // ========== SECTION 72 - REVENU DU PATRIMOINE ET DU PORTEFEUILLE ==========
+    {
+      code: '72',
+      libelle: 'SECTION 72 - REVENU DU PATRIMOINE',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '720',
+      libelle: 'CHAP.720 - REVENU DU PATRIMOINE IMMOBILIER',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '7200',
+      libelle: 'Location terrains et immeubles domaine privé',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '72000',
+      libelle: 'Baux à loyer',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '7203',
+      libelle: 'Revenus occupations temporaires domaine public',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '72031',
+      libelle: 'Concessions sur accord conventionnel',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '72032',
+      libelle: 'Droit de dépôts temporaires',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+
+    // ========== SECTION 73 - AIDE DE L'ETAT - FONDS DE CONCOURS ==========
+    {
+      code: '73',
+      libelle: "SECTION 73 - AIDE DE L'ETAT - FONDS DE CONCOURS",
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '730',
+      libelle: 'CHAP.730 - DOTATION GLOBALE DE FONCTIONNEMENT',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '7300',
+      libelle: 'Partie minimale',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '7301',
+      libelle: 'Partie complémentaire, versement général',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '7302',
+      libelle: 'Partie complémentaire, versement spécial',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+
+    // ========== SECTION 74 - RECETTES DIVERSES AU TITRE I ==========
+    {
+      code: '74',
+      libelle: 'SECTION 74 - RECETTES DIVERSES AU TITRE I',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '742',
+      libelle: 'CHAP.742 - PRELEVEMENT SUR FONDS DE RESERVE',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '743',
+      libelle: 'CHAP.743 - RECETTES ACCIDENTELLES',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '7406',
+      libelle: 'Autres versements (Vignettes auto)',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '7436',
+      libelle: 'Recettes accidentelles',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+
+    // ========== SECTION 02 - PRELEVEMENT SUR FONDS D'INVESTISSEMENT ==========
+    {
+      code: '02',
+      libelle: "SECTION 02 - PRELEVEMENT SUR FONDS D'INVESTISSEMENT",
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+
+    // ========== SECTION 04 - AIDE DE L'ETAT - FONDS DE CONCOURS - AIDES EXTERIEURES ==========
+    {
+      code: '04',
+      libelle: "SECTION 04 - AIDE DE L'ETAT - FONDS DE CONCOURS",
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '040',
+      libelle: "CHAP.040 - AIDE ET CONCOURS DE L'ETAT",
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '0401',
+      libelle: "Subvention d'équipement de l'Etat",
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+
+    // ========== SECTION 06 - RECETTES DIVERSES AU TITRE II ==========
+    {
+      code: '06',
+      libelle: 'SECTION 06 - RECETTES DIVERSES AU TITRE II',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '066',
+      libelle: 'CHAP.066 - AUTRES RECETTES DIVERSES AU TITRE II',
+      type: 'variable',
+      mairieId: mairieId as number,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+  ]);
+
   console.log('✅ Default data seeded successfully.');
 }
 
@@ -568,7 +1256,11 @@ export async function seedTestData(options: SeedOptions = {}) {
     const chapitresCreated = await db.chapitres.toArray();
     const chapitreIds = chapitresCreated.map((c) => c.id!);
     const sousChapitresCreated = await db.sousChapitres.toArray();
-    const sousChapitreIds = sousChapitresCreated.map((s) => s.id!);
+    // App3 : Seulement les sous-chapitres commençant par 6 ou 9
+    const app3SousChapitres = sousChapitresCreated.filter(
+      (s) => s.code.startsWith('6') || s.code.startsWith('9'),
+    );
+    const sousChapitreIds = app3SousChapitres.map((s) => s.id!);
 
     // Seeding prévisions
     console.log(`🌱 Seeding ${previsions} test previsions...`);
@@ -594,6 +1286,22 @@ export async function seedTestData(options: SeedOptions = {}) {
       bordereauMandatsCreated,
     );
 
+    // =================================================================
+    // APP6 - RECETTES SEEDERS
+    // =================================================================
+
+    // Seeding des prévisions de recettes
+    console.log('🌱 Seeding prévisions de recettes...');
+    await seedPrevisionsRecettes(utilisateurIds);
+
+    // Seeding bordereaux recettes
+    console.log('🌱 Seeding bordereaux recettes...');
+    const bordereauxRecetteCreated = await seedBordereauxRecettes(utilisateurIds);
+
+    // Seeding déclarations de recettes
+    console.log('🌱 Seeding déclarations de recettes...');
+    await seedDeclarations(utilisateurIds, bordereauxRecetteCreated);
+
     console.log('\n✨ All test data seeders have been executed successfully!');
   } catch (error) {
     console.error('❌ Error during test data seeding:', error);
@@ -617,6 +1325,13 @@ export async function clearDatabase() {
     await db.previsions.clear();
     await db.sousChapitres.clear();
     await db.chapitres.clear();
+    await db.etatFinancierMensuel.clear();
+
+    // App6
+    await db.taxes.clear();
+    await db.declarations.clear();
+    await db.bordereauxRecette.clear();
+    await db.previsionsRecettes.clear();
 
     await db.utilisateurs.clear();
     await db.mairies.clear();
@@ -632,6 +1347,163 @@ export async function clearDatabase() {
 //                      FONCTIONS DE GÉNÉRATION
 // =================================================================
 
+async function seedBordereauxRecettes(personnelIds: number[]) {
+  const bordereaux: Partial<BordereauRecette>[] = [];
+
+  // Générer 8 bordereaux validés pour Novembre et Décembre 2025
+  for (let i = 1; i <= 8; i++) {
+    // Alterner entre Novembre et Décembre
+    const mois = i <= 4 ? 10 : 11; // 10 = Novembre, 11 = Décembre
+    const jour = randomAmount(1, 28);
+    const dateEmission = new Date(2025, mois, jour);
+
+    bordereaux.push({
+      numero: i,
+      annee: 2025,
+      mairieId: DEFAULT_MAIRIE_ID,
+      montantTotal: 0, // Sera mis à jour après
+      nombreDeclarations: 0,
+      statut: 'ferme',
+      personnelId: randomChoice(personnelIds),
+      createdAt: dateEmission,
+      updatedAt: now,
+      dateTransmission: new Date(2025, mois, jour + 5),
+    });
+  }
+
+  await db.bordereauxRecette.bulkAdd(bordereaux as BordereauRecette[]);
+  console.log(`✅ ${bordereaux.length} bordereaux de recettes créés (validés, Nov-Déc 2025)`);
+
+  return await db.bordereauxRecette.toArray();
+}
+
+async function seedPrevisionsRecettes(personnelIds: number[]) {
+  const taxes = await db.taxes.toArray();
+  const previsions: Partial<PrevisionRecette>[] = [];
+
+  // Une prévision par taxe pour 2025 uniquement
+  for (const taxe of taxes) {
+    if (!taxe.id) continue;
+
+    const montantPrevu = randomAmount(100000, 5000000);
+    const montantRealise = Math.round(montantPrevu * (randomAmount(70, 120) / 100));
+
+    previsions.push({
+      exercice: 2025,
+      taxeId: taxe.id,
+      mairieId: DEFAULT_MAIRIE_ID,
+      montantPrevu,
+      montantRealise,
+      statut: 'validee',
+      personnelId: randomChoice(personnelIds),
+      createdAt: new Date(2024, 11, 15),
+      updatedAt: now,
+    });
+  }
+
+  await db.previsionsRecettes.bulkAdd(previsions as PrevisionRecette[]);
+  console.log(`✅ ${previsions.length} prévisions de recettes créées (1 par taxe, 2025)`);
+}
+
+async function seedDeclarations(personnelIds: number[], bordereaux: BordereauRecette[]) {
+  const taxes = await db.taxes.toArray();
+
+  // Filtrer les taxes App6 (codes commençant par 7 ou 0)
+  const app6Taxes = taxes.filter((t) => t.code.startsWith('7') || t.code.startsWith('0'));
+
+  if (app6Taxes.length === 0) {
+    console.warn('⚠️ Aucune taxe App6 trouvée, skip des déclarations');
+    return;
+  }
+
+  const declarations: Partial<Declaration>[] = [];
+  const contribuables = [
+    'ENTREPRISE BTP KOUASSI',
+    'PHARMACIE DE LA PAIX',
+    'SUPERMARCHÉ BON PRIX',
+    'BOULANGERIE MODERNE',
+    'STATION SERVICE TOTAL',
+    'MAQUIS LE ZOUGLOU',
+    'HOTEL LES PALMIERS',
+    'TRANSPORT KONE & FRÈRES',
+    'GARAGE AUTO PREMIER',
+    'RESTAURANT LE GOURMET',
+    'QUINCAILLERIE CENTRALE',
+    'LIBRAIRIE PAPETERIE PLUS',
+  ];
+
+  let numeroPiece = 1000;
+  const bordereauMontants: Map<number, { total: number; count: number }> = new Map();
+
+  // Pour chaque taxe, créer 2 ou 3 déclarations validées
+  for (const taxe of app6Taxes) {
+    if (!taxe.id) continue;
+
+    const nombreDecls = randomAmount(2, 3);
+
+    for (let i = 0; i < nombreDecls; i++) {
+      // Assigner à un bordereau aléatoire
+      const bordereau = randomChoice(bordereaux);
+      if (!bordereau || !bordereau.id) continue;
+
+      const montant = taxe.montant || randomAmount(5000, 500000);
+
+      // Alterner entre Novembre et Décembre 2025
+      const mois = randomChoice([10, 11]);
+      const jour = randomAmount(1, 28);
+      const d = new Date(2025, mois, jour);
+
+      declarations.push({
+        exercice: 2025,
+        numeroPiece: `P-${numeroPiece++}`,
+        dateDeclaration: d,
+        dateEncaissement: d,
+        bordereauId: bordereau.id,
+        taxeId: taxe.id,
+        mairieId: DEFAULT_MAIRIE_ID,
+        contribuable: randomChoice(contribuables),
+        nomPartieVersante: randomChoice([
+          'Le Gérant',
+          'Le Comptable',
+          'Le Directeur',
+          'Le Propriétaire',
+        ]),
+        adresse: randomChoice([
+          "Abidjan, Côte d'Ivoire",
+          'Bouaké, CI',
+          'Yamoussoukro, CI',
+          'Korhogo, CI',
+        ]),
+        montant: montant,
+        montantRecette: montant,
+        modePaiement: randomChoice(['especes', 'cheque', 'virement', 'autre']),
+        statut: 'validee',
+        personnelId: randomChoice(personnelIds),
+        createdAt: d,
+        updatedAt: now,
+      });
+
+      // Accumuler les montants par bordereau
+      const existing = bordereauMontants.get(bordereau.id) || { total: 0, count: 0 };
+      bordereauMontants.set(bordereau.id, {
+        total: existing.total + montant,
+        count: existing.count + 1,
+      });
+    }
+  }
+
+  // Mettre à jour chaque bordereau avec ses totaux
+  for (const [bordereauId, data] of bordereauMontants.entries()) {
+    await db.bordereauxRecette.update(bordereauId, {
+      montantTotal: data.total,
+      nombreDeclarations: data.count,
+    });
+  }
+
+  await db.declarations.bulkAdd(declarations as Declaration[]);
+  console.log(`✅ ${declarations.length} déclarations de recettes créées (2-3 par taxe, validées)`);
+}
+
 async function seedPrevisions(
   chapitreIds: number[],
   personnelIds: number[],
@@ -639,22 +1511,19 @@ async function seedPrevisions(
   sousChapitreIds: number[] = [],
 ) {
   const previsions: Partial<Prevision>[] = [];
-  const exercices = [2023, 2024];
+  const exercices = [2024, 2025];
 
-  // En 2025: créer une prévision pour CHAQUE combinaison sous-chapitre/chapitre
-  // Chaque sous-chapitre doit avoir les 8 chapitres:
-  // 1-Salaires, 2-Charges sociales, 3-Transport, 4-Carburants,
-  // 5-Matériels, 6-Abonnements, 7-Travaux, 8-Interventions
-  console.log('🌱 Creating previsions 2025 for all sous-chapitres with all 8 chapitres...');
+  // En 2026: créer une prévision pour CHAQUE combinaison sous-chapitre/chapitre
+  console.log('🌱 Creating previsions 2026 for all sous-chapitres with all 8 chapitres...');
 
   for (const sousChapitreId of sousChapitreIds) {
     for (const chapitreId of chapitreIds) {
       const montantPrevu = randomAmount(500000, 15000000);
-      const montantEngage = Math.round((montantPrevu * randomAmount(5, 50)) / 100);
-      const montantDisponible = montantPrevu - montantEngage;
+      const montantEngage = 0;
+      const montantDisponible = montantPrevu;
 
       const prevision: Partial<Prevision> = {
-        exercice: 2025,
+        exercice: 2026,
         chapitreId,
         sousChapitreId,
         mairieId: DEFAULT_MAIRIE_ID,
@@ -663,7 +1532,7 @@ async function seedPrevisions(
         montantDisponible,
         statut: 'validee',
         personnelId: randomChoice(personnelIds),
-        createdAt: new Date(2024, 11, 15),
+        createdAt: new Date(2025, 11, 15),
         updatedAt: now,
       };
 
@@ -671,12 +1540,12 @@ async function seedPrevisions(
     }
   }
 
-  const previsions2025Count = previsions.length;
+  const previsions2026Count = previsions.length;
   console.log(
-    `📊 ${previsions2025Count} prévisions 2025 créées (${sousChapitreIds.length} sous-chapitres x ${chapitreIds.length} chapitres)`,
+    `📊 ${previsions2026Count} prévisions 2026 créées (${sousChapitreIds.length} sous-chapitres x ${chapitreIds.length} chapitres)`,
   );
 
-  // Ajouter quelques prévisions pour 2023/2024 (historique)
+  // Ajouter quelques prévisions pour 2024/2025 (historique)
   const historicalCount = Math.min(count, 50);
   for (let i = 0; i < historicalCount; i++) {
     const exercice = randomChoice(exercices);
@@ -703,7 +1572,7 @@ async function seedPrevisions(
 
   await db.previsions.bulkAdd(previsions as Prevision[]);
   console.log(
-    `✅ ${previsions.length} prévisions créées au total (${previsions2025Count} pour 2025 + ${historicalCount} historiques)`,
+    `✅ ${previsions.length} prévisions créées au total (${previsions2026Count} pour 2026 + ${historicalCount} historiques)`,
   );
 
   const created = await db.previsions.toArray();
@@ -712,7 +1581,7 @@ async function seedPrevisions(
 
 async function seedBordereauMandats(personnelIds: number[], count: number = 20) {
   const bordereauMandats: Partial<BordereauMandat>[] = [];
-  const exercices = [2023, 2024, 2025];
+  const exercices = [2024, 2025, 2026];
   let numeroGlobal = 1;
 
   for (let i = 0; i < count; i++) {
@@ -720,12 +1589,12 @@ async function seedBordereauMandats(personnelIds: number[], count: number = 20) 
     const mois = Math.floor((i / count) * 12);
     const dateEmission = new Date(exercice, mois, randomAmount(1, 28));
 
-    if (exercice === 2025 && dateEmission > now) {
+    if (exercice === 2026 && dateEmission > now) {
       dateEmission.setTime(now.getTime() - randomAmount(1, 30) * 24 * 60 * 60 * 1000);
     }
 
     const statuts: Array<'ouvert' | 'ferme'> = ['ouvert', 'ferme'];
-    const statut = exercice < 2025 ? 'ferme' : randomChoice(statuts);
+    const statut = exercice < 2026 ? 'ferme' : randomChoice(statuts);
 
     bordereauMandats.push({
       numero: numeroGlobal++,
@@ -795,8 +1664,7 @@ async function seedMandats(
       label: 'décembre',
       exercice: 2025,
       start: new Date(2025, 11, 1),
-      // 21 décembre 2025 (date actuelle dans le projet)
-      end: new Date(2025, 11, 21),
+      end: new Date(2025, 11, 31),
     },
   ];
 

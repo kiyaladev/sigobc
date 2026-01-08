@@ -4,6 +4,7 @@
       title="Gestion des Dépenses"
       subtitle="Vue d'ensemble de vos prévisions et mandats"
       icon="payments"
+      style="margin-left: 15px !important"
     />
 
     <div class="row q-col-gutter-md">
@@ -141,7 +142,7 @@
           <q-card-section>
             <div class="section-header q-mb-md">
               <div class="flex items-center">
-                <q-icon name="pie_chart" color="orange" size="24px" class="q-mr-sm" />
+                <q-icon name="pie_chart" color="warning" size="24px" class="q-mr-sm" />
                 <span class="text-h6 text-weight-bold">Prévisions en cours</span>
               </div>
               <div class="section-decoration"></div>
@@ -155,7 +156,7 @@
                 :style="{ animationDelay: `${index * 0.1}s` }"
               >
                 <q-item-section avatar>
-                  <q-avatar color="orange" text-color="white" class="pulse-soft">
+                  <q-avatar color="warning" text-color="white" class="pulse-soft">
                     <q-icon name="account_balance_wallet" />
                   </q-avatar>
                 </q-item-section>
@@ -224,28 +225,28 @@ const statsCards = computed(() => [
     value: stats.value.totalChapitres,
     label: 'Chapitres',
     icon: 'category',
-    color: 'blue',
+    color: 'primary',
     progress: 0.75,
   },
   {
     value: stats.value.totalPrevisions,
     label: 'Prévisions',
     icon: 'pie_chart',
-    color: 'orange',
+    color: 'warning',
     progress: 0.85,
   },
   {
     value: stats.value.totalMandats,
     label: 'Mandats',
     icon: 'receipt',
-    color: 'green',
+    color: 'secondary',
     progress: 0.6,
   },
   {
     value: formatMontant(stats.value.montantTotal),
     label: 'Montant Total',
     icon: 'payments',
-    color: 'purple',
+    color: 'dark',
     progress: 0.9,
   },
 ]);
@@ -255,7 +256,7 @@ const quickActions = [
   { label: 'Chapitres', icon: 'category', color: 'accent', route: '/app3/chapitres' },
   { label: 'Prévisions', icon: 'pie_chart', color: 'warning', route: '/app3/previsions' },
   { label: 'Mandats', icon: 'receipt', color: 'positive', route: '/app3/mandats' },
-  { label: 'Statistiques', icon: 'bar_chart', color: 'info', route: '/app3/statistiques' },
+  { label: 'Statistiques', icon: 'bar_chart', color: 'dark', route: '/app3/statistiques' },
 ];
 
 function formatMontant(montant: number): string {
@@ -269,11 +270,11 @@ function formatMontant(montant: number): string {
 function getStatutColor(statut: string): string {
   const colors: Record<string, string> = {
     brouillon: 'grey',
-    validee: 'blue',
-    emis: 'orange',
-    paye: 'green',
-    annule: 'red',
-    cloturee: 'purple',
+    validee: 'primary',
+    emis: 'warning',
+    paye: 'secondary',
+    annule: 'negative',
+    cloturee: 'dark',
   };
   return colors[statut] || 'grey';
 }
@@ -321,7 +322,7 @@ onMounted(() => {
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #d946ef 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, #e67e22 0%, #2e7d32 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -418,7 +419,7 @@ onMounted(() => {
   animation: fadeInLeft 0.5s ease-out both;
 
   &:hover {
-    background-color: rgba(217, 70, 239, 0.05);
+    background-color: rgba(230, 126, 34, 0.05);
     transform: translateX(8px);
   }
 }
@@ -431,11 +432,11 @@ onMounted(() => {
   0%,
   100% {
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(217, 70, 239, 0.4);
+    box-shadow: 0 0 0 0 rgba(230, 126, 34, 0.4);
   }
   50% {
     transform: scale(1.05);
-    box-shadow: 0 0 0 8px rgba(217, 70, 239, 0);
+    box-shadow: 0 0 0 8px rgba(230, 126, 34, 0);
   }
 }
 
@@ -445,13 +446,13 @@ onMounted(() => {
 }
 
 .amount-badge {
-  background: linear-gradient(135deg, #d946ef 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, #e67e22 0%, #2e7d32 100%);
   color: white;
   padding: 8px 12px;
   border-radius: 8px;
   font-weight: 700;
   font-size: 0.875rem;
-  box-shadow: 0 2px 8px rgba(217, 70, 239, 0.3);
+  box-shadow: 0 2px 8px rgba(230, 126, 34, 0.3);
 }
 
 .empty-state {
@@ -475,7 +476,7 @@ onMounted(() => {
 
   .section-decoration {
     height: 3px;
-    background: linear-gradient(90deg, #d946ef 0%, transparent 100%);
+    background: linear-gradient(90deg, #e67e22 0%, transparent 100%);
     border-radius: 2px;
     margin-top: 8px;
   }

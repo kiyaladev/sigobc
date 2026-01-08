@@ -4,6 +4,7 @@
       title="Tableau de Bord - Recettes"
       subtitle="Vue d'ensemble de la gestion des recettes"
       icon="payments"
+      style="margin-left: 15px !important"
     />
 
     <div class="row q-col-gutter-md">
@@ -155,7 +156,7 @@
           <q-card-section>
             <div class="section-header q-mb-md">
               <div class="flex items-center">
-                <q-icon name="folder_open" color="orange" size="24px" class="q-mr-sm" />
+                <q-icon name="folder_open" color="warning" size="24px" class="q-mr-sm" />
                 <span class="text-h6 text-weight-bold">Bordereaux Ouverts</span>
               </div>
               <div class="section-decoration"></div>
@@ -169,7 +170,7 @@
                 :style="{ animationDelay: `${index * 0.1}s` }"
               >
                 <q-item-section avatar>
-                  <q-avatar color="orange" text-color="white" class="pulse-soft">
+                  <q-avatar color="warning" text-color="white" class="pulse-soft">
                     <q-icon name="receipt_long" />
                   </q-avatar>
                 </q-item-section>
@@ -244,28 +245,28 @@ const statsCards = computed(() => [
     value: stats.value.totalTaxes,
     label: 'Taxes / Recettes',
     icon: 'category',
-    color: 'blue',
+    color: 'primary',
     progress: 0.75,
   },
   {
     value: stats.value.totalDeclarations,
     label: 'Déclarations',
     icon: 'description',
-    color: 'green',
+    color: 'secondary',
     progress: 0.85,
   },
   {
     value: stats.value.totalBordereaux,
     label: 'Bordereaux',
     icon: 'receipt_long',
-    color: 'orange',
+    color: 'warning',
     progress: 0.6,
   },
   {
     value: formatMontant(stats.value.montantTotal),
     label: 'Montant Total (CFA)',
     icon: 'payments',
-    color: 'purple',
+    color: 'dark',
     progress: 0.9,
   },
 ]);
@@ -276,11 +277,12 @@ const quickActions = [
     label: 'Déclarations',
     icon: 'description',
     color: 'positive',
-    route: '/recettes/declarations',
+    route: '/app6/declarations',
   },
-  { label: 'Bordereaux', icon: 'receipt_long', color: 'warning', route: '/recettes/bordereaux' },
-  { label: 'Titres', icon: 'payments', color: 'primary', route: '/recettes/titres' },
-  { label: 'Statistiques', icon: 'bar_chart', color: 'info', route: '/recettes/statistiques' },
+  { label: 'Bordereaux', icon: 'receipt_long', color: 'warning', route: '/app6/bordereaux' },
+  { label: 'Prévisions', icon: 'trending_up', color: 'secondary', route: '/app6/previsions' },
+  { label: 'Taxes', icon: 'account_balance', color: 'primary', route: '/app6/taxes' },
+  { label: 'Statistiques', icon: 'bar_chart', color: 'dark', route: '/app6/statistiques' },
 ];
 
 function formatMontant(montant: number): string {
@@ -304,9 +306,9 @@ function formatNumeroBordereau(numero: number, annee: number): string {
 function getStatutColor(statut: string): string {
   const colors: Record<string, string> = {
     brouillon: 'grey',
-    validee: 'blue',
-    payee: 'green',
-    annulee: 'red',
+    validee: 'primary',
+    payee: 'secondary',
+    annulee: 'negative',
   };
   return colors[statut] || 'grey';
 }
@@ -367,7 +369,7 @@ onMounted(() => {
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #ff6600 0%, #22c55e 100%);
+  background: linear-gradient(135deg, #e67e22 0%, #2e7d32 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -464,7 +466,7 @@ onMounted(() => {
   animation: fadeInLeft 0.5s ease-out both;
 
   &:hover {
-    background-color: rgba(255, 102, 0, 0.05);
+    background-color: rgba(230, 126, 34, 0.05);
     transform: translateX(8px);
   }
 }
@@ -477,11 +479,11 @@ onMounted(() => {
   0%,
   100% {
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4);
+    box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.4);
   }
   50% {
     transform: scale(1.05);
-    box-shadow: 0 0 0 8px rgba(102, 126, 234, 0);
+    box-shadow: 0 0 0 8px rgba(46, 125, 50, 0);
   }
 }
 
@@ -491,13 +493,13 @@ onMounted(() => {
 }
 
 .amount-badge {
-  background: linear-gradient(135deg, #ff6600 0%, #22c55e 100%);
+  background: linear-gradient(135deg, #e67e22 0%, #2e7d32 100%);
   color: white;
   padding: 8px 12px;
   border-radius: 8px;
   font-weight: 700;
   font-size: 0.875rem;
-  box-shadow: 0 2px 8px rgba(255, 102, 0, 0.3);
+  box-shadow: 0 2px 8px rgba(230, 126, 34, 0.3);
 }
 
 .empty-state {
@@ -521,7 +523,7 @@ onMounted(() => {
 
   .section-decoration {
     height: 3px;
-    background: linear-gradient(90deg, #ff6600 0%, transparent 100%);
+    background: linear-gradient(90deg, #e67e22 0%, transparent 100%);
     border-radius: 2px;
     margin-top: 8px;
   }

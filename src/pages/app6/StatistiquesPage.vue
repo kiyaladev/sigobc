@@ -69,7 +69,7 @@
           :subtitle="`${stats.declarationsValidees} validées`"
           icon="description"
           icon-color="grey-7"
-          border-color="#2196F3"
+          border-color="#E67E22"
         />
       </div>
 
@@ -103,7 +103,7 @@
           subtitle="Déclarations validées"
           icon="trending_up"
           icon-color="grey-7"
-          border-color="#9C27B0"
+          border-color="#1A1A1A"
           suffix="%"
         />
       </div>
@@ -216,7 +216,7 @@
                   <q-item-label caption>Sur la période sélectionnée</q-item-label>
                 </q-item-section>
                 <q-item-section side>
-                  <q-item-label class="text-h6" style="color: #2196f3">
+                  <q-item-label class="text-h6" style="color: #e67e22">
                     {{ formatNumber(stats.totalDeclarations) }}
                   </q-item-label>
                 </q-item-section>
@@ -231,7 +231,7 @@
                   <q-item-label caption>Prêtes pour émission</q-item-label>
                 </q-item-section>
                 <q-item-section side>
-                  <q-item-label class="text-h6" style="color: #4caf50">
+                  <q-item-label class="text-h6" style="color: #2e7d32">
                     {{ formatNumber(stats.declarationsValidees) }}
                   </q-item-label>
                 </q-item-section>
@@ -254,14 +254,14 @@
 
               <q-item>
                 <q-item-section avatar>
-                  <q-avatar style="background-color: #9c27b0" text-color="white" icon="calculate" />
+                  <q-avatar style="background-color: #1a1a1a" text-color="white" icon="calculate" />
                 </q-item-section>
                 <q-item-section>
                   <q-item-label class="text-weight-bold">Montant Moyen</q-item-label>
                   <q-item-label caption>Par déclaration</q-item-label>
                 </q-item-section>
                 <q-item-section side>
-                  <q-item-label class="text-h6" style="color: #9c27b0">
+                  <q-item-label class="text-h6" style="color: #1a1a1a">
                     {{ formatMontant(stats.montantMoyen) }}
                   </q-item-label>
                 </q-item-section>
@@ -489,7 +489,7 @@ function getPartColor(part: number): string {
 }
 
 function getTopColor(index: number): string {
-  const colors = ['amber-8', 'blue-grey-5', 'brown-5', 'grey-6', 'grey-7'];
+  const colors = ['orange-8', 'green-8', 'grey-8', 'orange-6', 'green-6'];
   return colors[index] || 'grey-7';
 }
 
@@ -575,7 +575,7 @@ const statutChartConfig = computed<ChartConfiguration>(() => {
         {
           label: 'Déclarations',
           data: [brouillon, validee],
-          backgroundColor: ['#9E9E9E', '#4CAF50'],
+          backgroundColor: ['#9E9E9E', '#2E7D32'],
         },
       ],
     },
@@ -609,7 +609,7 @@ const taxeChartConfig = computed<ChartConfiguration>(() => {
         {
           label: 'Montant',
           data: top5.map((t) => t.montant),
-          backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726', '#AB47BC', '#26C6DA'],
+          backgroundColor: ['#E67E22', '#2E7D32', '#F57C00', '#388E3C', '#757575'],
         },
       ],
     },
@@ -680,8 +680,8 @@ const evolutionChartConfig = computed<ChartConfiguration>(() => {
         {
           label: 'Montant des recettes',
           data: monthlyData,
-          borderColor: '#2196F3',
-          backgroundColor: 'rgba(33, 150, 243, 0.1)',
+          borderColor: '#E67E22',
+          backgroundColor: 'rgba(230, 126, 34, 0.1)',
           tension: 0.4,
           fill: true,
         },

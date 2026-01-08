@@ -288,6 +288,36 @@
         <q-item
           clickable
           v-ripple
+          to="/app6/previsions"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="trending_up" color="green" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Prévisions Recettes</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          clickable
+          v-ripple
+          to="/app6/taxes"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="account_balance" color="green" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Taxes</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          clickable
+          v-ripple
           to="/app6/statistiques"
           class="nav-item q-mb-xs"
           active-class="nav-item-active"

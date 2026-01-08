@@ -605,14 +605,14 @@ const depensesChartConfig = computed<ChartConfiguration>(() => {
           label: 'Dépenses',
           data: data.map((d) => d.value),
           backgroundColor: [
-            '#E67E22',
-            '#2E7D32',
-            '#42A5F5',
-            '#AB47BC',
-            '#FFA726',
-            '#66BB6A',
-            '#26C6DA',
-            '#EF5350',
+            '#E67E22', // Orange (Primary)
+            '#2E7D32', // Green (Secondary)
+            '#757575', // Grey
+            '#f57c00', // Dark Orange
+            '#388e3c', // Light Green
+            '#616161', // Dark Grey
+            '#ffb74d', // Light Orange
+            '#81c784', // Pale Green
           ],
         },
       ],

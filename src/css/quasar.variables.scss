@@ -11,10 +11,10 @@ $accent: #777777; // Gris très clair
 $dark: #1a1a1a;
 $dark-page: #121212;
 
-// Couleurs fonctionnelles (simplifiées)
+// Couleurs fonctionnelles (simplifiées - strictes)
 $positive: #2e7d32; // Succès (vert)
-$negative: #dc2626; // Erreur (rouge)
-$info: #6b7280; // Info (gris)
+$negative: #1a1a1a; // Erreur (noir - suite à la demande 'pas d'autres couleurs')
+$info: #757575; // Info (gris pur)
 $warning: #e67e22; // Avertissement (orange)
 
 // Échelle de gris épurée (entreprise)
