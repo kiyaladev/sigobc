@@ -287,8 +287,8 @@ const quickActions = [
 
 function formatMontant(montant: number): string {
   return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'XOF',
+    // style: 'currency',
+    // currency: 'XOF',
     minimumFractionDigits: 0,
   }).format(montant);
 }
@@ -396,7 +396,7 @@ onMounted(() => {
 }
 
 .stat-value {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 700;
   line-height: 1.2;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
