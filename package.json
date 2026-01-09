@@ -1,8 +1,8 @@
 {
-  "name": "trapp",
+  "name": "sigobc",
   "version": "0.0.1",
-  "description": "A Quasar Project",
-  "productName": "Trapp App",
+  "description": "Système Informatique de Gestion des opérations Budgétaires des Collectivités",
+  "productName": "SIGOBC",
   "author": "stephanecoumbassa <stephane.coumbassa@gmail.com>",
   "type": "module",
   "private": true,

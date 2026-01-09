@@ -1,6 +1,5 @@
 <template>
   <q-page class="flex flex-center login-page">
-
     <!-- Carte de connexion -->
     <q-card class="login-card q-pa-lg">
       <!-- En-tête avec logo -->
@@ -8,8 +7,10 @@
         <div class="logo-wrapper q-mb-md">
           <q-icon name="account_balance" class="logo-icon" />
         </div>
-        <div class="text-h4 text-weight-bold q-mb-xs">Trésor App</div>
-        <div class="text-subtitle1 text-grey-7">Système de Gestion des Taxes Municipales</div>
+        <div class="text-h4 text-weight-bold q-mb-xs">SIGOBC</div>
+        <div class="text-subtitle1 text-grey-7">
+          Système Informatique de Gestion des opérations Budgétaires des Collectivités
+        </div>
       </q-card-section>
 
       <q-card-section>
@@ -99,7 +100,7 @@
         <q-separator class="q-mb-md" />
         <div class="footer-info">
           <div>Version 1.0.0</div>
-          <div class="q-mt-xs">© 2025 Trésor App - Tous droits réservés</div>
+          <div class="q-mt-xs">© 2025 SIGOBC - Tous droits réservés</div>
         </div>
       </q-card-section>
     </q-card>

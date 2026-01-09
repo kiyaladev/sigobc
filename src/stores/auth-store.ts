@@ -33,7 +33,7 @@ export const useAuthStore = defineStore('auth', () => {
           password: 'admin123',
           nom: 'Administrateur',
           prenom: 'Système',
-          email: 'admin@tresor.gov',
+          email: 'admin@sigobc.gov',
           role: 'admin',
           actif: true,
           createdAt: new Date(),

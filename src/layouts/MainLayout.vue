@@ -115,8 +115,10 @@
           </div>
         </q-item-section>
         <q-item-section>
-          <q-item-label class="text-h5 text-weight-bold">Trésor App</q-item-label>
-          <q-item-label caption class="text-grey-7">Gestion Municipale</q-item-label>
+          <q-item-label class="text-h5 text-weight-bold">SIGOBC</q-item-label>
+          <q-item-label caption class="text-grey-7"
+            >Gestion Budgétaire des Collectivités</q-item-label
+          >
         </q-item-section>
       </q-item>
 

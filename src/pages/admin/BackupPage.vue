@@ -362,7 +362,7 @@ async function exportDatabase() {
     // Créer l'objet de sauvegarde
     const backup = {
       version: '2.0',
-      appName: 'TresorApp-MAIRIE',
+      appName: 'SIGOBC-MAIRIE',
       exportDate: new Date().toISOString(),
       data: {
         utilisateurs,
@@ -398,7 +398,7 @@ async function exportDatabase() {
     link.href = url;
     const dateStr = new Date().toISOString().split('T')[0];
     const timeStr = new Date().toTimeString().split(' ')[0]?.replace(/:/g, '-');
-    link.download = `tresor-mairie-backup-${dateStr}-${timeStr}.json`;
+    link.download = `sigobc-mairie-backup-${dateStr}-${timeStr}.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -445,7 +445,11 @@ function importDatabase() {
         const backup = JSON.parse(json);
 
         // Vérifier la structure du backup
-        if (!backup.data || !backup.appName || !backup.appName.startsWith('TresorApp')) {
+        if (
+          !backup.data ||
+          !backup.appName ||
+          (!backup.appName.startsWith('TresorApp') && !backup.appName.startsWith('SIGOBC'))
+        ) {
           throw new Error('Format de fichier invalide ou incompatible');
         }
 
