@@ -1,12 +1,17 @@
 <template>
   <q-page class="q-pa-md">
     <PageHeader
-      title="Gestion des Sous-Chapitres Budgétaires"
-      subtitle="Sous-chapitres budgétaires pour les mandats de dépense"
+      title="Gestion des Comptes Fonctionnels"
+      subtitle="Comptes fonctionnels pour les mandats de dépense"
       icon="account_balance_wallet"
     >
       <template #actions>
-        <q-btn color="primary" icon="add" label="Nouveau Sous-Chapitre" @click="openDialog()" />
+        <q-btn
+          color="primary"
+          icon="add"
+          label="Nouveau Compte Fonctionnel"
+          @click="openDialog()"
+        />
       </template>
     </PageHeader>
 
@@ -72,7 +77,7 @@
     <q-dialog v-model="dialogVisible" persistent>
       <q-card style="min-width: 500px">
         <q-card-section class="accent-left">
-          <div class="text-h6">{{ isEditing ? 'Modifier' : 'Nouveau' }} Sous-Chapitre</div>
+          <div class="text-h6">{{ isEditing ? 'Modifier' : 'Nouveau' }} Compte Fonctionnel</div>
         </q-card-section>
 
         <q-card-section>
@@ -80,7 +85,7 @@
             <q-input
               v-model="form.code"
               filled
-              label="Code du sous-chapitre *"
+              label="Code du compte fonctionnel *"
               hint="Ex: 6000, 60010, 60011, etc."
               :rules="[(val) => !!val || 'Le code est requis']"
             />
@@ -98,7 +103,7 @@
               :options="parentOptions"
               filled
               label="Parent (Optionnel)"
-              hint="Sélectionnez le chapitre ou sous-chapitre parent"
+              hint="Sélectionnez le compte fonctionnel parent"
               option-value="id"
               option-label="label"
               emit-value
@@ -123,10 +128,10 @@
               type="textarea"
               label="Description"
               rows="3"
-              hint="Description détaillée du sous-chapitre"
+              hint="Description détaillée du compte fonctionnel"
             />
 
-            <q-toggle v-model="form.actif" label="Sous-chapitre actif" color="positive" />
+            <q-toggle v-model="form.actif" label="Compte fonctionnel actif" color="positive" />
 
             <div class="row q-gutter-sm justify-end">
               <q-btn label="Annuler" color="grey-7" flat @click="dialogVisible = false" />

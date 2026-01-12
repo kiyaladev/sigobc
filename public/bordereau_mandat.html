@@ -284,9 +284,45 @@
           print-color-adjust: exact;
         }
       }
+
+      /* Barre d'options en haut */
+      .options-bar {
+        background: #f0f0f0;
+        padding: 10px 20px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .options-bar label {
+        font-weight: bold;
+        font-size: 14px;
+      }
+      .options-bar select {
+        padding: 5px 10px;
+        font-size: 14px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background: white;
+      }
+      @media print {
+        .options-bar {
+          display: none !important;
+        }
+      }
     </style>
   </head>
   <body>
+    <!-- Barre d'options (cachée à l'impression) -->
+    <div class="options-bar">
+      <label for="columnTypeSelect">Type de colonne :</label>
+      <select id="columnTypeSelect" onchange="updateColumnHeader()">
+        <option value="creancier">Nom et adresse du créancier</option>
+        <option value="beneficiaire">Nom et adresse du bénéficiaire</option>
+      </select>
+    </div>
+
     <div class="page-container">
       <div class="main-border">
         <!-- TABLEAU PRINCIPAL (Prend toute la place disponible sauf le footer) -->
@@ -400,7 +436,7 @@
             <tr style="height: 40px; font-weight: bold; text-align: center">
               <th>N°</th>
               <th>Nature de la Dépense</th>
-              <th>Nom et adresse du Créancier</th>
+              <th id="column-nom-adresse">Nom et adresse du créancier</th>
               <th style="font-size: 10px">Fonction-<br />nelle</th>
               <th style="font-size: 10px">Patrimo-<br />niale</th>
               <th style="border: none">SOMME<br />MANDATÉE</th>
@@ -651,6 +687,21 @@
     <script src="dexie.min.js"></script>
     <script>
       /**
+       * Met à jour le titre de la colonne selon le choix du select
+       */
+      function updateColumnHeader() {
+        const select = document.getElementById('columnTypeSelect');
+        const columnHeader = document.getElementById('column-nom-adresse');
+        if (select && columnHeader) {
+          if (select.value === 'beneficiaire') {
+            columnHeader.textContent = 'Nom et adresse du bénéficiaire';
+          } else {
+            columnHeader.textContent = 'Nom et adresse du créancier';
+          }
+        }
+      }
+
+      /**
        * Convertit un nombre en lettres en français
        * @param num - Le nombre à convertir (de 0 à 999 999 999 999)
        * @returns La représentation en lettres du nombre
@@ -888,7 +939,7 @@
             const row = document.createElement('tr');
             row.innerHTML = `
                     <td class="text-center" style="color: #666;">${mandat.numeroMandat}</td>
-                    <td>${chapitre ? chapitre.libelle : 'N/A'}</td>
+                    <td>${mandat.objet || 'N/A'}</td>
                     <td>${mandat.beneficiaire}</td>
                     <td class="center" style="font-family: monospace;">${imputationFonctionnelle}</td>
                     <td class="center" style="font-family: monospace;">${imputationPatrimoniale}</td>

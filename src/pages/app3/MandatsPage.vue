@@ -171,7 +171,7 @@
                 <q-select
                   v-model="formData.chapitreId"
                   :options="filteredChapitreOptions"
-                  label="Chapitre *"
+                  label="Nature de la dépense (barre) *"
                   outlined
                   dense
                   emit-value
@@ -187,7 +187,7 @@
                 <q-select
                   v-model="formData.sousChapitreId"
                   :options="filteredSousChapitreOptions"
-                  label="Sous-chapitre"
+                  label="Compte fonctionnel"
                   outlined
                   dense
                   emit-value
@@ -664,7 +664,7 @@ async function loadData() {
       await Promise.all([
         db.mandats.toArray(),
         db.chapitres.filter((c) => c.actif).toArray(),
-        db.sousChapitres.filter((s) => s.actif).toArray(),
+        db.sousChapitres.filter((s) => s.actif && !s.code.startsWith('7')).toArray(),
         db.bordereauMandats.toArray(),
         db.mairies.toArray(),
       ]);
@@ -703,9 +703,10 @@ function resetForm() {
 
 async function openAddDialog() {
   resetForm();
-  // Générer automatiquement le numéro de mandat
-  const count = await db.mandats.count();
-  formData.value.numeroMandat = `M${new Date().getFullYear()}-${String(count + 1).padStart(4, '0')}`;
+  // Générer automatiquement le numéro de mandat (nombre de mandats de l'année en cours + 1)
+  const currentYear = new Date().getFullYear();
+  const countCurrentYear = await db.mandats.where('exercice').equals(currentYear).count();
+  formData.value.numeroMandat = String(countCurrentYear + 1);
   showAddDialog.value = true;
 }
 

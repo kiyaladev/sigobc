@@ -155,7 +155,7 @@
             <q-icon name="category" color="deep-orange" />
           </q-item-section>
           <q-item-section>
-            <q-item-label>Chapitres</q-item-label>
+            <q-item-label>Natures de Dépense</q-item-label>
           </q-item-section>
         </q-item>
 
@@ -170,7 +170,7 @@
             <q-icon name="view_list" color="deep-orange" />
           </q-item-section>
           <q-item-section>
-            <q-item-label>Sous-Chapitres</q-item-label>
+            <q-item-label>Comptes Fonctionnels</q-item-label>
           </q-item-section>
         </q-item>
 

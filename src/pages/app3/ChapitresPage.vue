@@ -1,12 +1,17 @@
 <template>
   <q-page class="q-pa-md">
     <PageHeader
-      title="Gestion des Chapitres Budgétaires"
-      subtitle="Chapitres budgétaires pour les mandats de dépense"
+      title="Gestion des Natures de Dépense"
+      subtitle="Natures de dépense pour les mandats"
       icon="account_balance_wallet"
     >
       <template #actions>
-        <q-btn color="primary" icon="add" label="Nouveau Chapitre" @click="openDialog()" />
+        <q-btn
+          color="primary"
+          icon="add"
+          label="Nouvelle Nature de Dépense"
+          @click="openDialog()"
+        />
       </template>
     </PageHeader>
 
@@ -63,7 +68,7 @@
     <q-dialog v-model="dialogVisible" persistent>
       <q-card style="min-width: 500px">
         <q-card-section class="accent-left">
-          <div class="text-h6">{{ isEditing ? 'Modifier' : 'Nouveau' }} Chapitre</div>
+          <div class="text-h6">{{ isEditing ? 'Modifier' : 'Nouvelle' }} Nature de Dépense</div>
         </q-card-section>
 
         <q-card-section>
@@ -71,7 +76,7 @@
             <q-input
               v-model="form.code"
               filled
-              label="Code du chapitre *"
+              label="Code de la nature de dépense *"
               hint="Ex: 6011, 6013, 6020, etc."
               :rules="[(val) => !!val || 'Le code est requis']"
             />
@@ -90,10 +95,10 @@
               type="textarea"
               label="Description"
               rows="3"
-              hint="Description détaillée du chapitre"
+              hint="Description détaillée de la nature de dépense"
             />
 
-            <q-toggle v-model="form.actif" label="Chapitre actif" color="positive" />
+            <q-toggle v-model="form.actif" label="Nature de dépense active" color="positive" />
 
             <div class="row q-gutter-sm justify-end">
               <q-btn label="Annuler" color="grey-7" flat @click="dialogVisible = false" />
