@@ -94,9 +94,19 @@ const routes: RouteRecordRaw[] = [
         name: 'app6-declarations',
       },
       {
+        path: 'app6/mandats-recette',
+        component: () => import('pages/app6/MandatsRecettePage.vue'),
+        name: 'app6-mandats-recette',
+      },
+      {
         path: 'app6/bordereaux',
         component: () => import('pages/app6/BordereauxPage.vue'),
         name: 'app6-bordereaux',
+      },
+      {
+        path: 'app6/bordereaux-mandats-recette',
+        component: () => import('pages/app6/BordereauMandatsRecettePage.vue'),
+        name: 'app6-bordereaux-mandats-recette',
       },
       {
         path: 'app6/previsions',

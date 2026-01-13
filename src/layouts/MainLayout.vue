@@ -265,10 +265,25 @@
           active-class="nav-item-active"
         >
           <q-item-section avatar>
-            <q-icon name="receipt" color="green" />
+            <q-icon name="description" color="green" />
           </q-item-section>
           <q-item-section>
             <q-item-label>Déclarations</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          clickable
+          v-ripple
+          to="/app6/mandats-recette"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="receipt" color="green" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Mandats de Recette</q-item-label>
           </q-item-section>
         </q-item>
 
@@ -280,10 +295,25 @@
           active-class="nav-item-active"
         >
           <q-item-section avatar>
-            <q-icon name="folder_open" color="green" />
+            <q-icon name="folder" color="green" />
           </q-item-section>
           <q-item-section>
             <q-item-label>Bordereaux Recettes</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item
+          clickable
+          v-ripple
+          to="/app6/bordereaux-mandats-recette"
+          class="nav-item q-mb-xs"
+          active-class="nav-item-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="folder_open" color="green" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Bordereaux Mandats</q-item-label>
           </q-item-section>
         </q-item>
 
