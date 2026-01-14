@@ -196,6 +196,45 @@ export interface PrevisionRecette {
   updatedAt: Date;
 }
 
+// Interface MandatRecette (similaire à Mandat mais pour recettes)
+export interface MandatRecette {
+  id?: number;
+  exercice: number;
+  numeroMandat: string;
+  dateMandat: Date;
+  chapitreId: number; // Même chapitres que App3 (1-8)
+  taxeId: number; // Taxe = équivalent de sous-chapitre
+  previsionRecetteId?: number;
+  bordereauMandatRecetteId?: number;
+  mairieId: number;
+  partieVersante: string; // Équivalent de bénéficiaire
+  objet: string;
+  montant: number;
+  modePaiement: 'virement' | 'cheque' | 'especes' | 'autre';
+  statut: 'brouillon' | 'emis' | 'encaisse' | 'annule';
+  observations?: string;
+  personnelId: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Interface BordereauMandatRecette (similaire à BordereauMandat)
+export interface BordereauMandatRecette {
+  id?: number;
+  numero: number;
+  exercice: number;
+  dateEmission?: Date;
+  mairieId: number;
+  montantTotal: number;
+  totalPrecedent?: number;
+  nombreMandats: number;
+  statut: 'ouvert' | 'ferme';
+  observations?: string;
+  personnelId: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // ========== Interface pour l'État Financier Mensuel ==========
 
 /**
@@ -270,11 +309,13 @@ class TresorDatabase extends Dexie {
   declarations!: EntityTable<Declaration, 'id'>;
   bordereauxRecette!: EntityTable<BordereauRecette, 'id'>;
   previsionsRecettes!: EntityTable<PrevisionRecette, 'id'>;
+  mandatsRecette!: EntityTable<MandatRecette, 'id'>;
+  bordereauMandatsRecette!: EntityTable<BordereauMandatRecette, 'id'>;
 
   constructor() {
     super('TresorDatabase');
 
-    this.version(21).stores({
+    this.version(22).stores({
       mairies: '++id, nom, code, ville',
       utilisateurs: '++id, username, email, role, mairieId, actif',
 
@@ -294,6 +335,11 @@ class TresorDatabase extends Dexie {
         '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
       bordereauxRecette: '++id, numero, annee, mairieId, statut, personnelId',
       previsionsRecettes: '++id, exercice, taxeId, mairieId, statut, personnelId',
+
+      // App6 - Mandats de Recettes (nouveau)
+      mandatsRecette:
+        '++id, numeroMandat, dateMandat, exercice, chapitreId, taxeId, previsionRecetteId, bordereauMandatRecetteId, mairieId, statut, personnelId',
+      bordereauMandatsRecette: '++id, numero, exercice, mairieId, statut, personnelId',
     });
   }
 }

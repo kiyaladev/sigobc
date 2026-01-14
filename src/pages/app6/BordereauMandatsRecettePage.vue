@@ -23,6 +23,42 @@
       @reset="resetFilters"
     />
 
+    <!-- Statistiques -->
+    <div class="row q-col-gutter-sm q-mb-md">
+      <div class="col-12 col-md-3">
+        <q-card>
+          <q-card-section>
+            <div class="text-caption text-grey-7">Total Bordereaux</div>
+            <div class="text-h6">{{ filteredBordereaux.length }}</div>
+          </q-card-section>
+        </q-card>
+      </div>
+      <div class="col-12 col-md-3">
+        <q-card>
+          <q-card-section>
+            <div class="text-caption text-grey-7">Montant Total</div>
+            <div class="text-h6">{{ formatMontant(totalMontant) }}</div>
+          </q-card-section>
+        </q-card>
+      </div>
+      <div class="col-12 col-md-3">
+        <q-card>
+          <q-card-section>
+            <div class="text-caption text-grey-7">Bordereaux Ouverts</div>
+            <div class="text-h6">{{ bordereauxOuverts }}</div>
+          </q-card-section>
+        </q-card>
+      </div>
+      <div class="col-12 col-md-3">
+        <q-card>
+          <q-card-section>
+            <div class="text-caption text-grey-7">Bordereaux Fermés</div>
+            <div class="text-h6">{{ bordereauxFermes }}</div>
+          </q-card-section>
+        </q-card>
+      </div>
+    </div>
+
     <!-- Table des bordereaux -->
     <DataTable
       :rows="filteredBordereaux"
@@ -31,7 +67,7 @@
       show-view
       show-print
       show-download
-      @view="viewDeclarations"
+      @view="viewMandats"
       @print="printBordereau"
       @download="downloadBordereauPDF"
       @edit="openDialog"
@@ -40,7 +76,7 @@
     >
       <template v-slot:body-cell-numero="props">
         <q-td :props="props">
-          {{ formatNumeroBordereau(props.row.numero, props.row.annee) }}
+          {{ formatNumeroBordereau(props.row.numero, props.row.exercice) }}
         </q-td>
       </template>
 
@@ -57,9 +93,10 @@
           {{ formatMontant(props.row.montantTotal) }}
         </q-td>
       </template>
-      <template v-slot:body-cell-totalPrecedent="props">
+
+      <template v-slot:body-cell-dateEmission="props">
         <q-td :props="props">
-          {{ formatMontant(props.row.totalPrecedent || 0) }}
+          {{ props.row.dateEmission ? formatDate(props.row.dateEmission) : '-' }}
         </q-td>
       </template>
     </DataTable>
@@ -84,13 +121,13 @@
             />
 
             <q-select
-              v-model="form.annee"
+              v-model="form.exercice"
               :options="exerciceOptions"
               label="Exercice (Année) *"
               outlined
             />
 
-            <q-input v-model="formDateStr" type="date" label="Date de transmission" outlined />
+            <q-input v-model="formDateStr" type="date" label="Date d'émission" outlined />
 
             <q-input
               v-model.number="form.totalPrecedent"
@@ -114,7 +151,7 @@
     </q-dialog>
 
     <!-- Dialog pour voir les mandats -->
-    <q-dialog v-model="declarationsDialogVisible" maximized>
+    <q-dialog v-model="mandatsDialogVisible" maximized>
       <q-card>
         <q-card-section class="bg-primary text-white">
           <div class="row items-center">
@@ -123,13 +160,13 @@
                 Mandats du Bordereau N°
                 {{
                   selectedBordereau
-                    ? formatNumeroBordereau(selectedBordereau.numero, selectedBordereau.annee)
+                    ? formatNumeroBordereau(selectedBordereau.numero, selectedBordereau.exercice)
                     : ''
                 }}
               </div>
               <div class="text-caption">
-                {{ bordereauDeclarations.length }} mandat(s) -
-                {{ formatMontant(bordereauDeclarationsTotal) }}
+                {{ bordereauMandats.length }} mandat(s) -
+                {{ formatMontant(bordereauMandatsTotal) }}
               </div>
             </div>
             <q-btn flat round dense icon="close" v-close-popup />
@@ -138,29 +175,29 @@
 
         <q-card-section>
           <q-table
-            :rows="bordereauDeclarations"
-            :columns="declarationsColumns"
+            :rows="bordereauMandats"
+            :columns="mandatsColumns"
             row-key="id"
-            :loading="loadingDeclarations"
+            :loading="loadingMandats"
             :pagination="{ rowsPerPage: 20 }"
             title="Liste des Mandats de Recette"
           >
-            <template v-slot:body-cell-dateEncaissement="props">
+            <template v-slot:body-cell-dateMandat="props">
               <q-td :props="props">
-                {{ formatDate(props.row.dateEncaissement) }}
+                {{ formatDate(props.row.dateMandat) }}
               </q-td>
             </template>
 
-            <template v-slot:body-cell-montantRecette="props">
+            <template v-slot:body-cell-montant="props">
               <q-td :props="props">
-                {{ formatMontant(props.row.montantRecette || props.row.montant || 0) }}
+                {{ formatMontant(props.row.montant) }}
               </q-td>
             </template>
 
             <template v-slot:body-cell-statut="props">
               <q-td :props="props">
                 <q-chip
-                  :color="getStatutDeclarationColor(props.row.statut)"
+                  :color="getMandatStatutColor(props.row.statut)"
                   text-color="white"
                   size="sm"
                 >
@@ -180,9 +217,8 @@ import { ref, computed, onMounted } from 'vue';
 import { useQuasar, date } from 'quasar';
 import {
   db,
-  type BordereauRecette,
-  type Declaration,
-  type Taxe,
+  type BordereauMandatRecette,
+  type MandatRecette,
   DEFAULT_MAIRIE_ID,
 } from 'src/database/db';
 import FilterBar from 'src/components/FilterBar.vue';
@@ -191,33 +227,32 @@ import PageHeader from 'src/components/PageHeader.vue';
 
 const $q = useQuasar();
 
-const bordereaux = ref<BordereauRecette[]>([]);
-const taxes = ref<Taxe[]>([]);
+const bordereaux = ref<BordereauMandatRecette[]>([]);
 const loading = ref(false);
 const saving = ref(false);
 const dialogVisible = ref(false);
 const isEditing = ref(false);
-const currentBordereau = ref<BordereauRecette | null>(null);
+const currentBordereau = ref<BordereauMandatRecette | null>(null);
 const search = ref('');
 const filterStatut = ref('');
 const filterDateDebut = ref('');
 const filterDateFin = ref('');
-const declarationsDialogVisible = ref(false);
-const bordereauDeclarations = ref<Declaration[]>([]);
-const loadingDeclarations = ref(false);
-const selectedBordereau = ref<BordereauRecette | null>(null);
+const mandatsDialogVisible = ref(false);
+const bordereauMandats = ref<MandatRecette[]>([]);
+const loadingMandats = ref(false);
+const selectedBordereau = ref<BordereauMandatRecette | null>(null);
 const formDateStr = ref('');
 
 const currentYear = new Date().getFullYear();
 const exerciceOptions = [2023, 2024, 2025, 2026];
 const statutOptions = ['ouvert', 'ferme'];
 
-const form = ref<Partial<BordereauRecette>>({
+const form = ref<Partial<BordereauMandatRecette>>({
   numero: 1,
-  annee: currentYear,
+  exercice: currentYear,
   mairieId: DEFAULT_MAIRIE_ID,
   montantTotal: 0,
-  nombreDeclarations: 0,
+  nombreMandats: 0,
   totalPrecedent: 0,
   statut: 'ouvert',
   observations: '',
@@ -227,16 +262,16 @@ const columns = [
   { name: 'id', label: 'ID', field: 'id', align: 'center' as const, sortable: true },
   { name: 'numero', label: 'N°', field: 'numero', align: 'center' as const, sortable: true },
   {
-    name: 'annee',
-    label: 'Année',
-    field: 'annee',
+    name: 'exercice',
+    label: 'Exercice',
+    field: 'exercice',
     align: 'center' as const,
     sortable: true,
   },
   {
-    name: 'nombreDeclarations',
+    name: 'nombreMandats',
     label: 'Nb Mandats',
-    field: 'nombreDeclarations',
+    field: 'nombreMandats',
     align: 'center' as const,
     sortable: true,
   },
@@ -248,66 +283,45 @@ const columns = [
     sortable: true,
   },
   {
-    name: 'totalPrecedent',
-    label: 'Total Précédent',
-    field: 'totalPrecedent',
-    align: 'right' as const,
+    name: 'dateEmission',
+    label: 'Date Émission',
+    field: 'dateEmission',
+    align: 'left' as const,
     sortable: true,
   },
   { name: 'statut', label: 'Statut', field: 'statut', align: 'center' as const, sortable: true },
   { name: 'actions', label: 'Actions', field: 'actions', align: 'center' as const },
 ];
 
-const declarationsColumns = [
+const mandatsColumns = [
   {
-    name: 'numeroPiece',
-    label: 'N° Pièce',
-    field: 'numeroPiece',
+    name: 'numeroMandat',
+    label: 'N° Mandat',
+    field: 'numeroMandat',
     align: 'left' as const,
     sortable: true,
   },
   {
-    name: 'exercice',
-    label: 'Exercice',
-    field: 'exercice',
-    align: 'center' as const,
-    sortable: true,
-  },
-  {
-    name: 'dateEncaissement',
-    label: 'Date Encaissement',
-    field: 'dateEncaissement',
+    name: 'dateMandat',
+    label: 'Date',
+    field: 'dateMandat',
     align: 'left' as const,
     sortable: true,
   },
   {
-    name: 'nomPartieVersante',
+    name: 'partieVersante',
     label: 'Partie Versante',
-    field: 'nomPartieVersante',
+    field: 'partieVersante',
     align: 'left' as const,
     sortable: true,
   },
-  {
-    name: 'montantRecette',
-    label: 'Montant',
-    field: 'montantRecette',
-    align: 'right' as const,
-    sortable: true,
-  },
-  {
-    name: 'statut',
-    label: 'Statut',
-    field: 'statut',
-    align: 'center' as const,
-    sortable: true,
-  },
+  { name: 'objet', label: 'Objet', field: 'objet', align: 'left' as const },
+  { name: 'montant', label: 'Montant', field: 'montant', align: 'right' as const, sortable: true },
+  { name: 'statut', label: 'Statut', field: 'statut', align: 'center' as const, sortable: true },
 ];
 
-const bordereauDeclarationsTotal = computed(() => {
-  return bordereauDeclarations.value.reduce(
-    (sum, decl) => sum + (decl.montantRecette || decl.montant || 0),
-    0,
-  );
+const bordereauMandatsTotal = computed(() => {
+  return bordereauMandats.value.reduce((sum, m) => sum + (m.montant || 0), 0);
 });
 
 const filteredBordereaux = computed(() => {
@@ -319,12 +333,12 @@ const filteredBordereaux = computed(() => {
 
   if (filterDateDebut.value) {
     const anneeDebut = new Date(filterDateDebut.value).getFullYear();
-    result = result.filter((b) => b.annee >= anneeDebut);
+    result = result.filter((b) => b.exercice >= anneeDebut);
   }
 
   if (filterDateFin.value) {
     const anneeFin = new Date(filterDateFin.value).getFullYear();
-    result = result.filter((b) => b.annee <= anneeFin);
+    result = result.filter((b) => b.exercice <= anneeFin);
   }
 
   if (search.value) {
@@ -333,6 +347,18 @@ const filteredBordereaux = computed(() => {
   }
 
   return result;
+});
+
+const totalMontant = computed(() => {
+  return filteredBordereaux.value.reduce((sum, b) => sum + (b.montantTotal || 0), 0);
+});
+
+const bordereauxOuverts = computed(() => {
+  return filteredBordereaux.value.filter((b) => b.statut === 'ouvert').length;
+});
+
+const bordereauxFermes = computed(() => {
+  return filteredBordereaux.value.filter((b) => b.statut === 'ferme').length;
 });
 
 function resetFilters() {
@@ -358,10 +384,12 @@ function getStatutColor(statut: string): string {
   return colors[statut] || 'grey';
 }
 
-function getStatutDeclarationColor(statut: string): string {
+function getMandatStatutColor(statut: string): string {
   const colors: Record<string, string> = {
     brouillon: 'grey',
-    validee: 'green',
+    emis: 'warning',
+    encaisse: 'positive',
+    annule: 'negative',
   };
   return colors[statut] || 'grey';
 }
@@ -371,52 +399,49 @@ function formatDate(dateValue: Date | undefined): string {
   return date.formatDate(dateValue, 'DD/MM/YYYY');
 }
 
-async function viewDeclarations(bordereau: BordereauRecette) {
+async function viewMandats(bordereau: BordereauMandatRecette) {
   selectedBordereau.value = bordereau;
-  loadingDeclarations.value = true;
-  declarationsDialogVisible.value = true;
+  loadingMandats.value = true;
+  mandatsDialogVisible.value = true;
 
   try {
     if (!bordereau.id) {
-      bordereauDeclarations.value = [];
+      bordereauMandats.value = [];
       return;
     }
-    bordereauDeclarations.value = await db.declarations
-      .where('bordereauId')
+    bordereauMandats.value = await db.mandatsRecette
+      .where('bordereauMandatRecetteId')
       .equals(bordereau.id)
       .toArray();
 
     // Trier par date décroissante
-    bordereauDeclarations.value.sort((a, b) => {
-      const dateA = a.dateEncaissement ? new Date(a.dateEncaissement).getTime() : 0;
-      const dateB = b.dateEncaissement ? new Date(b.dateEncaissement).getTime() : 0;
+    bordereauMandats.value.sort((a, b) => {
+      const dateA = a.dateMandat ? new Date(a.dateMandat).getTime() : 0;
+      const dateB = b.dateMandat ? new Date(b.dateMandat).getTime() : 0;
       return dateB - dateA;
     });
   } catch (error) {
     console.error('Erreur:', error);
     $q.notify({ type: 'negative', message: 'Erreur lors du chargement des mandats' });
   } finally {
-    loadingDeclarations.value = false;
+    loadingMandats.value = false;
   }
 }
 
-function formatNumeroBordereau(numero: number, annee: number): string {
-  const anneeShort = annee % 100;
+function formatNumeroBordereau(numero: number, exercice: number): string {
+  const anneeShort = exercice % 100;
   return `${numero}-${anneeShort.toString().padStart(2, '0')}`;
 }
 
 async function loadData() {
   loading.value = true;
   try {
-    [bordereaux.value, taxes.value] = await Promise.all([
-      db.bordereauxRecette.toArray(),
-      db.taxes.toArray(),
-    ]);
+    bordereaux.value = await db.bordereauMandatsRecette.toArray();
 
-    // Trier par année puis par numéro décroissant
+    // Trier par exercice puis par numéro décroissant
     bordereaux.value.sort((a, b) => {
-      if (a.annee !== b.annee) {
-        return b.annee - a.annee;
+      if (a.exercice !== b.exercice) {
+        return b.exercice - a.exercice;
       }
       return b.numero - a.numero;
     });
@@ -428,27 +453,27 @@ async function loadData() {
   }
 }
 
-function openDialog(bordereau?: BordereauRecette) {
+function openDialog(bordereau?: BordereauMandatRecette) {
   isEditing.value = !!bordereau;
   currentBordereau.value = bordereau || null;
 
   if (bordereau) {
     form.value = { ...bordereau };
-    formDateStr.value = bordereau.dateTransmission
-      ? date.formatDate(bordereau.dateTransmission, 'YYYY-MM-DD')
+    formDateStr.value = bordereau.dateEmission
+      ? date.formatDate(bordereau.dateEmission, 'YYYY-MM-DD')
       : '';
   } else {
     // Calculer le prochain numéro
-    const bordereauxThisYear = bordereaux.value.filter((b) => b.annee === currentYear);
+    const bordereauxThisYear = bordereaux.value.filter((b) => b.exercice === currentYear);
     const nextNum =
       bordereauxThisYear.length > 0 ? Math.max(...bordereauxThisYear.map((b) => b.numero)) + 1 : 1;
 
     form.value = {
       numero: nextNum,
-      annee: currentYear,
+      exercice: currentYear,
       mairieId: DEFAULT_MAIRIE_ID,
       montantTotal: 0,
-      nombreDeclarations: 0,
+      nombreMandats: 0,
       totalPrecedent: 0,
       statut: 'ouvert',
       observations: '',
@@ -467,22 +492,23 @@ async function onSubmit() {
   saving.value = true;
   try {
     const now = new Date();
-    const data: Partial<BordereauRecette> = {
+    const data: Partial<BordereauMandatRecette> = {
       ...form.value,
       updatedAt: now,
     };
 
-    // Only set dateTransmission if there's a value
+    // Only set dateEmission if there's a value
     if (formDateStr.value) {
-      data.dateTransmission = new Date(formDateStr.value);
+      data.dateEmission = new Date(formDateStr.value);
     }
 
     if (isEditing.value && form.value.id) {
-      await db.bordereauxRecette.update(form.value.id, data);
+      await db.bordereauMandatsRecette.update(form.value.id, data);
       $q.notify({ type: 'positive', message: 'Bordereau modifié' });
     } else {
       data.createdAt = now;
-      await db.bordereauxRecette.add(data as BordereauRecette);
+      data.personnelId = 1;
+      await db.bordereauMandatsRecette.add(data as BordereauMandatRecette);
       $q.notify({ type: 'positive', message: 'Bordereau créé' });
     }
 
@@ -496,7 +522,7 @@ async function onSubmit() {
   }
 }
 
-function confirmDelete(bordereau: BordereauRecette) {
+function confirmDelete(bordereau: BordereauMandatRecette) {
   $q.dialog({
     title: 'Confirmation',
     message: `Supprimer le bordereau "${bordereau.numero}" ?`,
@@ -505,7 +531,7 @@ function confirmDelete(bordereau: BordereauRecette) {
   }).onOk(() => {
     void (async () => {
       try {
-        await db.bordereauxRecette.delete(bordereau.id);
+        await db.bordereauMandatsRecette.delete(bordereau.id);
         $q.notify({ type: 'positive', message: 'Bordereau supprimé' });
         await loadData();
       } catch (error) {
@@ -516,13 +542,15 @@ function confirmDelete(bordereau: BordereauRecette) {
   });
 }
 
-function printBordereau(bordereau: BordereauRecette) {
-  // Ouvrir le template HTML créé : bordereau_recette.html
-  window.open('/bordereau_recette.html?bordereauId=' + bordereau.id, '_blank');
+function printBordereau(bordereau: BordereauMandatRecette) {
+  window.open('/bordereau_mandat_recette.html?bordereauId=' + bordereau.id, '_blank');
 }
 
-function downloadBordereauPDF(bordereau: BordereauRecette) {
-  window.open('/bordereau_recette.html?bordereauId=' + bordereau.id + '&print=true', '_blank');
+function downloadBordereauPDF(bordereau: BordereauMandatRecette) {
+  window.open(
+    '/bordereau_mandat_recette.html?bordereauId=' + bordereau.id + '&print=true',
+    '_blank',
+  );
 }
 
 onMounted(() => {

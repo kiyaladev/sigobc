@@ -7,6 +7,8 @@ import type {
   BordereauRecette,
   PrevisionRecette,
   Declaration,
+  MandatRecette,
+  BordereauMandatRecette,
 } from './db';
 
 const now = new Date();
@@ -58,7 +60,6 @@ export function computeEtatMensuelId(
 // =================================================================
 
 export interface SeedOptions {
-  previsions?: number;
   mandats?: number;
   bordereauMandats?: number;
 }
@@ -1240,7 +1241,6 @@ export async function seedTestData(options: SeedOptions = {}) {
   console.log('🚀 Starting test data seeders...');
 
   const {
-    previsions = 30,
     // mandats = 200,
     bordereauMandats = 20,
   } = options;
@@ -1263,13 +1263,10 @@ export async function seedTestData(options: SeedOptions = {}) {
     const sousChapitreIds = app3SousChapitres.map((s) => s.id!);
 
     // Seeding prévisions
-    console.log(`🌱 Seeding ${previsions} test previsions...`);
-    const previsionsCreated = await seedPrevisions(
-      chapitreIds,
-      utilisateurIds,
-      previsions,
-      sousChapitreIds,
+    console.log(
+      `🌱 Seeding test previsions (1 per chapitre/sous-chapitre couple for 2025 & 2026)...`,
     );
+    const previsionsCreated = await seedPrevisions(chapitreIds, utilisateurIds, sousChapitreIds);
     const previsionIds = previsionsCreated.map((p) => p.id!);
 
     // Seeding bordereaux mandats
@@ -1302,6 +1299,16 @@ export async function seedTestData(options: SeedOptions = {}) {
     console.log('🌱 Seeding déclarations de recettes...');
     await seedDeclarations(utilisateurIds, bordereauxRecetteCreated);
 
+    // Seeding bordereaux mandats de recettes
+    console.log('🌱 Seeding bordereaux mandats de recettes...');
+    const bordereauMandatsRecetteCreated = await seedBordereauMandatsRecette(utilisateurIds, 10);
+
+    // Seeding mandats de recettes
+    console.log('🌱 Seeding mandats de recettes...');
+    const taxeList = await db.taxes.toArray();
+    const taxeIds = taxeList.map((t) => t.id!);
+    await seedMandatsRecette(chapitreIds, taxeIds, utilisateurIds, bordereauMandatsRecetteCreated);
+
     console.log('\n✨ All test data seeders have been executed successfully!');
   } catch (error) {
     console.error('❌ Error during test data seeding:', error);
@@ -1332,6 +1339,8 @@ export async function clearDatabase() {
     await db.declarations.clear();
     await db.bordereauxRecette.clear();
     await db.previsionsRecettes.clear();
+    await db.mandatsRecette.clear();
+    await db.bordereauMandatsRecette.clear();
 
     await db.utilisateurs.clear();
     await db.mairies.clear();
@@ -1512,11 +1521,9 @@ async function seedDeclarations(personnelIds: number[], bordereaux: BordereauRec
 async function seedPrevisions(
   chapitreIds: number[],
   personnelIds: number[],
-  count: number = 30,
   sousChapitreIds: number[] = [],
 ) {
   const previsions: Partial<Prevision>[] = [];
-  const exercices = [2024, 2025];
 
   // En 2026: créer une prévision pour CHAQUE combinaison sous-chapitre/chapitre
   console.log('🌱 Creating previsions 2026 for all sous-chapitres with all 8 chapitres...');
@@ -1550,34 +1557,41 @@ async function seedPrevisions(
     `📊 ${previsions2026Count} prévisions 2026 créées (${sousChapitreIds.length} sous-chapitres x ${chapitreIds.length} chapitres)`,
   );
 
-  // Ajouter quelques prévisions pour 2024/2025 (historique)
-  const historicalCount = Math.min(count, 50);
-  for (let i = 0; i < historicalCount; i++) {
-    const exercice = randomChoice(exercices);
-    const montantPrevu = randomAmount(500000, 10000000);
-    const montantEngage = Math.round((montantPrevu * randomAmount(60, 95)) / 100);
-    const montantDisponible = montantPrevu - montantEngage;
+  // Créer UNE prévision pour CHAQUE couple chapitre/sous-chapitre pour 2025 (exactement 1 par couple)
+  console.log('🌱 Creating previsions 2025 for all sous-chapitres/chapitres (1 per couple)...');
 
-    const prevision: Partial<Prevision> = {
-      exercice,
-      chapitreId: randomChoice(chapitreIds),
-      sousChapitreId: randomChoice(sousChapitreIds),
-      mairieId: DEFAULT_MAIRIE_ID,
-      montantPrevu,
-      montantEngage,
-      montantDisponible,
-      statut: 'cloturee',
-      personnelId: randomChoice(personnelIds),
-      createdAt: randomDate(new Date(exercice - 1, 10, 1), new Date(exercice, 0, 31)),
-      updatedAt: now,
-    };
+  for (const sousChapitreId of sousChapitreIds) {
+    for (const chapitreId of chapitreIds) {
+      const montantPrevu = randomAmount(500000, 10000000);
+      const montantEngage = Math.round((montantPrevu * randomAmount(60, 95)) / 100);
+      const montantDisponible = montantPrevu - montantEngage;
 
-    previsions.push(prevision);
+      const prevision: Partial<Prevision> = {
+        exercice: 2025,
+        chapitreId,
+        sousChapitreId,
+        mairieId: DEFAULT_MAIRIE_ID,
+        montantPrevu,
+        montantEngage,
+        montantDisponible,
+        statut: 'validee',
+        personnelId: randomChoice(personnelIds),
+        createdAt: new Date(2024, 11, 15), // Créée en décembre 2024
+        updatedAt: now,
+      };
+
+      previsions.push(prevision);
+    }
   }
+
+  const previsions2025Count = previsions.length - previsions2026Count;
+  console.log(
+    `📊 ${previsions2025Count} prévisions 2025 créées (${sousChapitreIds.length} sous-chapitres x ${chapitreIds.length} chapitres)`,
+  );
 
   await db.previsions.bulkAdd(previsions as Prevision[]);
   console.log(
-    `✅ ${previsions.length} prévisions créées au total (${previsions2026Count} pour 2026 + ${historicalCount} historiques)`,
+    `✅ ${previsions.length} prévisions créées au total (${previsions2026Count} pour 2026 + ${previsions2025Count} pour 2025)`,
   );
 
   const created = await db.previsions.toArray();
@@ -1753,5 +1767,165 @@ async function seedMandats(
 
   console.log(
     `✅ ${mandats.length} mandats créés (${MANDATS_PAR_COUPLE} par couple chapitre/sous-chapitre, pour ${MONTH_SPECS.length} mois: ${chapitreIds.length} chapitres x ${sousChapitreIds.length} sous-chapitres)`,
+  );
+}
+
+// =================================================================
+//           SEEDERS POUR MANDATS DE RECETTES (App6)
+// =================================================================
+
+async function seedBordereauMandatsRecette(personnelIds: number[], count: number = 10) {
+  const bordereaux: Partial<BordereauMandatRecette>[] = [];
+  const exercices = [2024, 2025];
+  let numeroGlobal = 1;
+
+  for (let i = 0; i < count; i++) {
+    const exercice = exercices[i % exercices.length]!;
+    const mois = Math.floor((i / count) * 12);
+    const dateEmission = new Date(exercice, mois, randomAmount(1, 28));
+
+    const statuts: ('ouvert' | 'ferme')[] = ['ouvert', 'ferme'];
+    const statut = exercice < 2025 ? 'ferme' : randomChoice(statuts);
+
+    bordereaux.push({
+      numero: numeroGlobal++,
+      exercice,
+      dateEmission,
+      mairieId: DEFAULT_MAIRIE_ID,
+      montantTotal: 0,
+      nombreMandats: 0,
+      statut,
+      personnelId: randomChoice(personnelIds),
+      createdAt: dateEmission,
+      updatedAt: now,
+    });
+  }
+
+  await db.bordereauMandatsRecette.bulkAdd(bordereaux as BordereauMandatRecette[]);
+  console.log(`✅ ${count} bordereaux mandats recettes créés`);
+  return await db.bordereauMandatsRecette.toArray();
+}
+
+async function seedMandatsRecette(
+  chapitreIds: number[],
+  taxeIds: number[],
+  personnelIds: number[],
+  bordereauxRecette: BordereauMandatRecette[],
+) {
+  const mandatsRecette: Partial<MandatRecette>[] = [];
+
+  const partiesVersantes = [
+    'ENTREPRISE ABC SARL',
+    'COMMERCE GENERAL KOUASSI',
+    'BOULANGERIE LA PAIX',
+    'STATION SERVICE TOTAL',
+    'PHARMACIE CENTRALE',
+    'RESTAURANT LE GOURMET',
+    'TRANSPORT KONE FRERES',
+    'HOTEL LES PALMIERS',
+  ];
+
+  const objets = [
+    'Taxe annuelle',
+    'Redevance mensuelle',
+    'Droit de place marché',
+    'Taxe de publicité',
+    'Contribution foncière',
+    'Patente commerciale',
+  ];
+
+  const modePaiements: ('virement' | 'cheque' | 'especes' | 'autre')[] = [
+    'virement',
+    'cheque',
+    'especes',
+    'autre',
+  ];
+
+  const MONTH_SPECS = [
+    {
+      label: 'novembre',
+      exercice: 2025,
+      start: new Date(2025, 10, 1),
+      end: new Date(2025, 10, 30),
+    },
+    {
+      label: 'décembre',
+      exercice: 2025,
+      start: new Date(2025, 11, 1),
+      end: new Date(2025, 11, 31),
+    },
+  ];
+
+  const bordereauUpdates = new Map<number, { count: number; total: number }>();
+  let numeroOrdre = 1000;
+  const MANDATS_PAR_COUPLE = 2;
+
+  // Créer 2 mandats par couple chapitre/taxe pour chaque mois
+  for (const monthSpec of MONTH_SPECS) {
+    for (const chapitreId of chapitreIds) {
+      for (const taxeId of taxeIds) {
+        for (let m = 0; m < MANDATS_PAR_COUPLE; m++) {
+          numeroOrdre++;
+
+          const bordereau = randomChoice(bordereauxRecette);
+          const bordereauId = bordereau.id;
+          const exercice = monthSpec.exercice;
+          const dateMandat = randomDate(monthSpec.start, monthSpec.end);
+          const numeroMandat = String(numeroOrdre);
+          const montant = randomAmount(10000, 500000);
+
+          const statutsOptions: ('brouillon' | 'emis' | 'encaisse' | 'annule')[] = [
+            'emis',
+            'encaisse',
+          ];
+          const statut = bordereau.statut === 'ferme' ? 'encaisse' : randomChoice(statutsOptions);
+
+          const mandat: Partial<MandatRecette> = {
+            exercice,
+            numeroMandat,
+            dateMandat,
+            chapitreId,
+            taxeId,
+            mairieId: DEFAULT_MAIRIE_ID,
+            partieVersante: randomChoice(partiesVersantes),
+            objet: randomChoice(objets),
+            montant,
+            modePaiement: randomChoice(modePaiements),
+            statut,
+            personnelId: randomChoice(personnelIds),
+            createdAt: dateMandat,
+            updatedAt: now,
+          };
+
+          if (bordereauId) {
+            mandat.bordereauMandatRecetteId = bordereauId;
+          }
+
+          mandatsRecette.push(mandat);
+
+          if (bordereauId) {
+            const current = bordereauUpdates.get(bordereauId) || { count: 0, total: 0 };
+            bordereauUpdates.set(bordereauId, {
+              count: current.count + 1,
+              total: current.total + montant,
+            });
+          }
+        }
+      }
+    }
+  }
+
+  await db.mandatsRecette.bulkAdd(mandatsRecette as MandatRecette[]);
+
+  for (const [id, stats] of bordereauUpdates.entries()) {
+    await db.bordereauMandatsRecette.update(id, {
+      nombreMandats: stats.count,
+      montantTotal: stats.total,
+      updatedAt: now,
+    });
+  }
+
+  console.log(
+    `✅ ${mandatsRecette.length} mandats de recettes créés (${MANDATS_PAR_COUPLE} par couple chapitre/taxe)`,
   );
 }
