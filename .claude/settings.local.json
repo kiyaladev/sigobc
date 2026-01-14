@@ -20,7 +20,20 @@
       "Bash(bun pm:*)",
       "Bash(./node_modules/.bin/esbuild:*)",
       "Bash(node install.js:*)",
-      "Bash(ln:*)"
+      "Bash(ln:*)",
+      "Bash(xargs ls:*)",
+      "Bash(find:*)",
+      "Bash(git -C /opt/apps/declarapp log --oneline -15)",
+      "Bash(nginx -t:*)",
+      "Bash(/usr/sbin/nginx:*)",
+      "Bash(dpkg:*)",
+      "Bash(apt-get update:*)",
+      "Bash(apt-get install:*)",
+      "Bash(a2enmod:*)",
+      "Bash(a2ensite:*)",
+      "Bash(apache2ctl configtest:*)",
+      "Bash(systemctl reload:*)",
+      "Bash(certbot:*)"
     ],
     "deny": [],
     "ask": []
