@@ -28,7 +28,7 @@
           </div>
           <div class="col-12 col-md-2">
             <q-select
-              v-model="filterChapitre"
+              v-model="filterChapitreId"
               :options="chapitreOptions"
               label="Chapitre"
               outlined
@@ -147,7 +147,7 @@
               <div class="col-4">
                 <q-input
                   v-model="formData.numeroMandat"
-                  label="Numéro *"
+                  label="Numéro Mandat *"
                   outlined
                   dense
                   :rules="[(val) => !!val || 'Numéro requis']"
@@ -156,7 +156,7 @@
               <div class="col-4">
                 <q-input
                   v-model="formDataDateStr"
-                  label="Date *"
+                  label="Date Mandat *"
                   outlined
                   dense
                   type="date"
@@ -179,25 +179,33 @@
               <div class="col-6">
                 <q-select
                   v-model="formData.chapitreId"
-                  :options="chapitreOptions"
-                  label="Chapitre *"
+                  :options="filteredChapitreOptions"
+                  label="Nature de la recette (barre)"
                   outlined
                   dense
                   emit-value
                   map-options
-                  :rules="[(val) => !!val || 'Chapitre requis']"
+                  use-input
+                  input-debounce="0"
+                  clearable
+                  hint="Sélectionner un chapitre budgétaire"
+                  @filter="filterChapitre"
                 />
               </div>
               <div class="col-6">
                 <q-select
                   v-model="formData.taxeId"
-                  :options="taxeOptions"
-                  label="Taxe (Nature de recette) *"
+                  :options="filteredTaxeOptions"
+                  label="Compte fonctionnel"
                   outlined
                   dense
                   emit-value
                   map-options
-                  :rules="[(val) => !!val || 'Taxe requise']"
+                  clearable
+                  use-input
+                  input-debounce="0"
+                  hint="Sélectionner une taxe"
+                  @filter="filterTaxe"
                 />
               </div>
             </div>
@@ -210,18 +218,43 @@
               :rules="[(val) => !!val || 'Partie versante requise']"
             />
 
-            <!-- Bordereau -->
+            <!-- Bordereau, RIB, Patrimonial sur la même ligne -->
             <div class="row q-col-gutter-md">
-              <div class="col-12">
+              <div class="col-4">
                 <q-select
                   v-model="formData.bordereauMandatRecetteId"
-                  :options="bordereauOptions"
-                  label="Bordereau (optionnel)"
+                  :options="filteredBordereauOptions"
+                  label="Bordereau de Mandat"
                   outlined
                   dense
                   emit-value
                   map-options
+                  use-input
+                  input-debounce="0"
                   clearable
+                  @filter="filterBordereau"
+                >
+                  <template v-slot:prepend>
+                    <q-icon name="description" />
+                  </template>
+                </q-select>
+              </div>
+              <div class="col-4">
+                <q-input
+                  v-model="formData.rib"
+                  label="RIB"
+                  outlined
+                  dense
+                  placeholder="Ex: SN001 01234 123456789012 12"
+                />
+              </div>
+              <div class="col-4">
+                <q-input
+                  v-model="formData.patrimonial"
+                  label="Imputation Patrimoniale"
+                  outlined
+                  dense
+                  placeholder="Ex: 6000/1"
                 />
               </div>
             </div>
@@ -237,16 +270,32 @@
             />
 
             <div class="row q-col-gutter-md">
-              <div class="col-6">
+              <div class="col-4">
                 <q-input
                   v-model.number="formData.montant"
-                  label="Montant (FCFA) *"
+                  label="Montant *"
                   outlined
                   dense
                   type="number"
+                  prefix="XOF"
                   :rules="[(val) => val > 0 || 'Montant requis']"
                 />
               </div>
+              <div class="col-4">
+                <q-input v-model="formData.numeroFacture" label="N° Facture" outlined dense />
+              </div>
+              <div class="col-4">
+                <q-input
+                  v-model="formDataDateFactureStr"
+                  label="Date Facture"
+                  outlined
+                  dense
+                  type="date"
+                />
+              </div>
+            </div>
+
+            <div class="row q-col-gutter-md">
               <div class="col-6">
                 <q-select
                   v-model="formData.modePaiement"
@@ -256,15 +305,16 @@
                   dense
                 />
               </div>
+              <div class="col-6">
+                <q-select
+                  v-model="formData.statut"
+                  :options="['brouillon', 'emis', 'encaisse', 'annule']"
+                  label="Statut *"
+                  outlined
+                  dense
+                />
+              </div>
             </div>
-
-            <q-select
-              v-model="formData.statut"
-              :options="statutOptions"
-              label="Statut"
-              outlined
-              dense
-            />
 
             <q-input
               v-model="formData.observations"
@@ -287,7 +337,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useQuasar, date } from 'quasar';
 import {
   db,
@@ -310,7 +360,7 @@ const loading = ref(false);
 
 const filter = ref('');
 const filterExercice = ref<number | null>(null);
-const filterChapitre = ref<number | null>(null);
+const filterChapitreId = ref<number | null>(null);
 const filterStatut = ref<string | null>(null);
 const filterDateDebut = ref('');
 const filterDateFin = ref('');
@@ -318,6 +368,7 @@ const filterDateFin = ref('');
 const showAddDialog = ref(false);
 const editingId = ref<number | null>(null);
 const formDataDateStr = ref('');
+const formDataDateFactureStr = ref('');
 
 const currentYear = new Date().getFullYear();
 
@@ -326,14 +377,15 @@ const formData = ref<Partial<MandatRecette>>({
   numeroMandat: '',
   dateMandat: new Date(),
   partieVersante: '',
+  rib: '',
+  patrimonial: '',
   objet: '',
   montant: 0,
+  numeroFacture: '',
   modePaiement: 'virement',
   statut: 'brouillon',
   observations: '',
 });
-
-const statutOptions = ['brouillon', 'emis', 'encaisse', 'annule'];
 
 const columns = [
   {
@@ -391,8 +443,27 @@ const taxeOptions = computed(() =>
 const bordereauOptions = computed(() =>
   bordereaux.value
     .filter((b) => b.statut === 'ouvert')
-    .map((b) => ({ label: `N° ${b.numero} - ${b.exercice}`, value: b.id! })),
+    .map((b) => ({
+      label: `Bordereau ${b.numero}-${b.exercice % 100} (${b.nombreMandats || 0} mandats)`,
+      value: b.id!,
+    })),
 );
+
+const filteredChapitreOptions = ref(chapitreOptions.value);
+const filteredTaxeOptions = ref(taxeOptions.value);
+const filteredBordereauOptions = ref(bordereauOptions.value);
+
+watch(chapitreOptions, (newOptions) => {
+  filteredChapitreOptions.value = newOptions;
+});
+
+watch(taxeOptions, (newOptions) => {
+  filteredTaxeOptions.value = newOptions;
+});
+
+watch(bordereauOptions, (newOptions) => {
+  filteredBordereauOptions.value = newOptions;
+});
 
 const statutFilterOptions = [
   { label: 'Brouillon', value: 'brouillon' },
@@ -408,8 +479,8 @@ const filteredMandats = computed(() => {
     result = result.filter((m) => m.exercice === filterExercice.value);
   }
 
-  if (filterChapitre.value) {
-    result = result.filter((m) => m.chapitreId === filterChapitre.value);
+  if (filterChapitreId.value) {
+    result = result.filter((m) => m.chapitreId === filterChapitreId.value);
   }
 
   if (filterStatut.value) {
@@ -443,10 +514,55 @@ const filteredMandats = computed(() => {
 function resetFilters() {
   filter.value = '';
   filterExercice.value = null;
-  filterChapitre.value = null;
+  filterChapitreId.value = null;
   filterStatut.value = null;
   filterDateDebut.value = '';
   filterDateFin.value = '';
+}
+
+function filterChapitre(val: string, update: (callback: () => void) => void) {
+  if (val === '') {
+    update(() => {
+      filteredChapitreOptions.value = chapitreOptions.value;
+    });
+    return;
+  }
+  update(() => {
+    const needle = val.toLowerCase();
+    filteredChapitreOptions.value = chapitreOptions.value.filter(
+      (v) => v.label.toLowerCase().indexOf(needle) > -1,
+    );
+  });
+}
+
+function filterTaxe(val: string, update: (callback: () => void) => void) {
+  if (val === '') {
+    update(() => {
+      filteredTaxeOptions.value = taxeOptions.value;
+    });
+    return;
+  }
+  update(() => {
+    const needle = val.toLowerCase();
+    filteredTaxeOptions.value = taxeOptions.value.filter(
+      (v) => v.label.toLowerCase().indexOf(needle) > -1,
+    );
+  });
+}
+
+function filterBordereau(val: string, update: (callback: () => void) => void) {
+  if (val === '') {
+    update(() => {
+      filteredBordereauOptions.value = bordereauOptions.value;
+    });
+    return;
+  }
+  update(() => {
+    const needle = val.toLowerCase();
+    filteredBordereauOptions.value = bordereauOptions.value.filter(
+      (v) => v.label.toLowerCase().indexOf(needle) > -1,
+    );
+  });
 }
 
 function formatMontant(montant: number): string {
@@ -516,6 +632,9 @@ function openDialog(mandat?: MandatRecette) {
     editingId.value = mandat.id!;
     formData.value = { ...mandat };
     formDataDateStr.value = date.formatDate(mandat.dateMandat, 'YYYY-MM-DD');
+    formDataDateFactureStr.value = mandat.dateFacture
+      ? date.formatDate(mandat.dateFacture, 'YYYY-MM-DD')
+      : '';
   } else {
     editingId.value = null;
     const nextNum = mandats.value.length + 1;
@@ -526,13 +645,17 @@ function openDialog(mandat?: MandatRecette) {
       ...(chapitres.value[0]?.id !== undefined && { chapitreId: chapitres.value[0].id }),
       ...(taxes.value[0]?.id !== undefined && { taxeId: taxes.value[0].id }),
       partieVersante: '',
+      rib: '',
+      patrimonial: '',
       objet: '',
       montant: 0,
+      numeroFacture: '',
       modePaiement: 'virement',
       statut: 'brouillon',
       observations: '',
     };
     formDataDateStr.value = date.formatDate(new Date(), 'YYYY-MM-DD');
+    formDataDateFactureStr.value = '';
   }
   showAddDialog.value = true;
 }
@@ -540,8 +663,6 @@ function openDialog(mandat?: MandatRecette) {
 async function saveMandat() {
   if (
     !formData.value.numeroMandat ||
-    !formData.value.chapitreId ||
-    !formData.value.taxeId ||
     !formData.value.partieVersante ||
     !formData.value.objet ||
     !formData.value.montant ||
@@ -556,6 +677,9 @@ async function saveMandat() {
     const data: Partial<MandatRecette> = {
       ...formData.value,
       dateMandat: new Date(formDataDateStr.value),
+      ...(formDataDateFactureStr.value
+        ? { dateFacture: new Date(formDataDateFactureStr.value) }
+        : {}),
       mairieId: DEFAULT_MAIRIE_ID,
       updatedAt: now,
     };
@@ -599,11 +723,14 @@ function confirmDelete(mandat: MandatRecette) {
 }
 
 function printMandat(mandat: MandatRecette) {
-  window.open('/mandat_recette.html?mandatRecetteId=' + mandat.id, '_blank');
+  window.open('/mandat/ordre_de_recette.html?mandatRecetteId=' + mandat.id, '_blank');
 }
 
 function downloadMandatPDF(mandat: MandatRecette) {
-  window.open('/mandat_recette.html?mandatRecetteId=' + mandat.id + '&print=true', '_blank');
+  window.open(
+    '/mandat/ordre_de_recette.html?mandatRecetteId=' + mandat.id + '&print=true',
+    '_blank',
+  );
 }
 
 onMounted(() => {

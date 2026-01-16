@@ -208,8 +208,12 @@ export interface MandatRecette {
   bordereauMandatRecetteId?: number;
   mairieId: number;
   partieVersante: string; // Équivalent de bénéficiaire
+  rib?: string; // RIB de la partie versante
+  patrimonial?: string; // Imputation patrimoniale
   objet: string;
   montant: number;
+  numeroFacture?: string; // Numéro de facture
+  dateFacture?: Date;
   modePaiement: 'virement' | 'cheque' | 'especes' | 'autre';
   statut: 'brouillon' | 'emis' | 'encaisse' | 'annule';
   observations?: string;

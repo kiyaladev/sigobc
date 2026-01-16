@@ -1,0 +1,683 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ordre de Recette</title>
+    <script src="dexie.min.js"></script>
+    <script src="vue.global.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Times New Roman', Times, serif;
+        font-size: 11pt;
+        line-height: 1.3;
+        background: #f0f0f0;
+        color: #000;
+      }
+
+      .page {
+        width: 210mm;
+        height: 297mm;
+        padding: 4mm 5mm 5mm 5mm;
+        margin: 10mm auto;
+        background: white;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        position: relative;
+      }
+
+      @media print {
+        body {
+          background: white;
+        }
+        .page {
+          margin: 0;
+          padding: 10mm 12mm 12mm 12mm;
+          box-shadow: none;
+          page-break-after: always;
+        }
+        .page:last-child {
+          page-break-after: auto;
+        }
+      }
+
+      @page {
+        size: A4;
+        margin: 0;
+      }
+
+      /* Header layout */
+      .header {
+        display: table;
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid #000;
+      }
+
+      .header-row {
+        display: table-row;
+      }
+
+      .header-cell {
+        display: table-cell;
+        border: 1px solid #000;
+        padding: 3mm;
+        vertical-align: top;
+      }
+
+      .header-left {
+        width: 32%;
+      }
+
+      .header-center {
+        width: 36%;
+      }
+
+      .header-right {
+        width: 32%;
+      }
+
+      .country-name {
+        text-transform: uppercase;
+        font-size: 10pt;
+        text-decoration: underline;
+      }
+
+      .department {
+        font-size: 10pt;
+        margin-top: 2mm;
+      }
+
+      .document-title {
+        font-weight: bold;
+        font-size: 12pt;
+        text-transform: uppercase;
+        text-align: center;
+        margin-bottom: 3mm;
+      }
+
+      .field-line {
+        font-size: 10pt;
+        margin: 1.5mm 0;
+      }
+
+      .recette-title {
+        text-transform: uppercase;
+        font-size: 10pt;
+      }
+
+      .underline {
+        text-decoration: underline;
+      }
+
+      .section-title {
+        font-weight: bold;
+        text-align: center;
+        font-size: 10pt;
+        margin: 3mm 0 2mm 0;
+        text-decoration: underline;
+      }
+
+      /* Main content */
+      .content {
+        border: 1px solid #000;
+        border-top: none;
+      }
+
+      .content-row {
+        padding: 3mm 5mm;
+        border-bottom: 1px solid #000;
+      }
+
+      .content-row:last-child {
+        border-bottom: none;
+      }
+
+      .ordonnateur-section {
+        min-height: 25mm;
+        display: flex;
+        align-items: flex-start;
+        gap: 10mm;
+      }
+
+      .ordonnateur-text {
+        flex: 1;
+      }
+
+      .ordonnateur-line {
+        margin: 2mm 0;
+      }
+
+      .signature-space {
+        flex: 1;
+        border-bottom: 1px dotted #000;
+        min-height: 15mm;
+      }
+
+      .dotted-line {
+        border-bottom: 1px dotted #000;
+        height: 5mm;
+        margin: 1mm 0;
+      }
+
+      .debiteur-section .dotted-line {
+        height: 4mm;
+      }
+
+      /* Somme section */
+      .somme-section {
+        display: flex;
+        align-items: stretch;
+        padding: 4mm 5mm;
+      }
+
+      .somme-label {
+        margin-right: 3mm;
+        display: flex;
+        align-items: center;
+      }
+
+      .brace {
+        font-size: 40pt;
+        line-height: 1;
+        margin-right: 3mm;
+        font-weight: 100;
+      }
+
+      .somme-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .somme-row {
+        margin: 2mm 0;
+      }
+
+      /* Footer */
+      .footer {
+        position: absolute;
+        bottom: 12mm;
+        left: 15mm;
+        right: 15mm;
+        display: flex;
+        justify-content: space-between;
+        font-size: 10pt;
+      }
+
+      .footer-left {
+        font-weight: bold;
+      }
+
+      .footer-right {
+        font-style: normal;
+      }
+
+      /* Handwritten style */
+      .handwritten {
+        font-family: 'Brush Script MT', 'Segoe Script', cursive;
+        font-size: 13pt;
+        color: #00008b;
+      }
+
+      .ville-section {
+        margin-top: 4mm;
+      }
+
+      .small-text {
+        font-size: 9pt;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- PAGE 1: ORDRE DE RECETTE -->
+    <div class="page" v-if="mandat">
+      <div class="header">
+        <div class="header-row">
+          <div class="header-cell header-left">
+            <div class="country-name">REPUBLIQUE DE COTE D'IVOIRE</div>
+            <div class="department">Département</div>
+            <div class="department">De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}</div>
+            <div class="ville-section">
+              <div class="underline" style="font-weight: bold">
+                VILLE De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}.
+              </div>
+              <div class="underline" style="margin-top: 3mm">
+                COMMUNE De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}
+              </div>
+              <div style="margin-top: 3mm">
+                Code &nbsp;&nbsp;{{ mairie?.code || '422' }}...............................
+              </div>
+            </div>
+          </div>
+
+          <div class="header-cell header-center">
+            <div class="document-title">ORDRE DE RECETTE</div>
+            <div class="field-line">
+              EXERCICE :......................{{ mandat.exercice }}..........................
+            </div>
+            <div class="field-line">
+              TITRE DU BUDGET :..............I............................
+            </div>
+            <div class="section-title">IMPUTATION</div>
+            <div class="field-line">
+              Fonctionnelle :...................{{ taxeCode }}..........................
+            </div>
+            <div class="field-line">
+              Patrimoniale : ......{{ mandat.patrimonial || ''
+              }}......................................................
+            </div>
+            <div class="field-line">
+              Année d'origine :.............{{ mandat.exercice }}..........................
+            </div>
+          </div>
+
+          <div class="header-cell header-right">
+            <div class="recette-title">RECETTE MUNICIPALE</div>
+            <div class="field-line">
+              De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}.................................
+            </div>
+            <div class="field-line" style="margin-top: 4mm">
+              N° d'ordre :.........<span class="handwritten">{{ mandat.numeroMandat }}</span
+              >...................
+            </div>
+            <div class="field-line">N° du bordereau d'émission</div>
+            <div class="field-line" style="margin-top: 2mm">
+              .......................<span class="handwritten">{{ bordereauNumero }}</span
+              >.............................
+            </div>
+            <div class="field-line" style="margin-top: 2mm">Date d'émission :</div>
+            <div class="field-line">
+              .........<span class="handwritten">{{ formatDate(mandat.dateMandat) }}</span
+              >...............
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="content-row ordonnateur-section">
+          <div class="ordonnateur-text">
+            <div class="ordonnateur-line">
+              L'ordonnateur :
+              .........................................................................
+            </div>
+            <div class="ordonnateur-line" style="margin-top: 4mm">
+              Maire de la
+              Commune..................................................................................................
+            </div>
+          </div>
+        </div>
+
+        <div class="content-row debiteur-section">
+          <div>
+            Nom et adresse du débiteur : &nbsp;<strong>{{ mandat.partieVersante }}</strong>
+            .................................................................
+          </div>
+          <div class="dotted-line"></div>
+          <div class="dotted-line"></div>
+          <div class="dotted-line"></div>
+          <div class="dotted-line"></div>
+          <div class="dotted-line"></div>
+          <div class="dotted-line"></div>
+        </div>
+
+        <div class="content-row">
+          <div>Objet de la recette et du décompte : <strong>{{ mandat.objet }}</strong></div>
+          <div class="dotted-line"></div>
+          <div class="dotted-line"></div>
+          <div class="dotted-line"></div>
+          <div style="margin-top: 1mm">..........</div>
+          <div style="margin-top: 3mm">
+            Ordre de recette rendu exécutoire conformément à l'article 28 de la loi n° 81-1129 du 30
+            décembre 1981
+          </div>
+        </div>
+
+        <div class="somme-section">
+          <div class="somme-label">Somme du</div>
+          <div class="brace">{</div>
+          <div class="somme-content">
+            <div class="somme-row">
+              en chiffres :......................{{ formatMontant(mandat.montant) }}
+              FCFA................................................................................
+            </div>
+            <div class="somme-row" style="margin-top: 4mm">
+              en lettres : {{ montantEnLettres.toUpperCase() }} FRANCS CFA..........................
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div class="footer-left">CT51</div>
+        <div class="footer-right">Original : Chambre des Comptes</div>
+      </div>
+    </div>
+
+    <!-- PAGE 2: BULLETIN DE LIQUIDATION RECETTE -->
+    <div class="page" v-if="mandat">
+      <div class="header">
+        <div class="header-row">
+          <div class="header-cell header-left">
+            <div class="country-name">REPUBLIQUE DE COTE D'IVOIRE</div>
+            <div class="department">Département</div>
+            <div class="department">
+              De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}.................................
+            </div>
+            <div class="ville-section">
+              <div>
+                VILLE De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}.....................
+              </div>
+              <div style="margin-top: 3mm">
+                COMMUNE De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}..........
+              </div>
+              <div style="margin-top: 3mm">
+                Code {{ mairie?.code || '422' }}.................................
+              </div>
+            </div>
+          </div>
+
+          <div class="header-cell header-center">
+            <div class="document-title">BULLETIN DE LIQUIDATION RECETTE</div>
+            <div class="field-line">
+              EXERCICE :.........................{{ mandat.exercice }}..........................
+            </div>
+            <div class="field-line">...</div>
+            <div class="field-line">
+              TITRE DU BUDGET :..............I..............................
+            </div>
+            <div class="section-title">IMPUTATION</div>
+            <div class="field-line">
+              Fonctionnelle :................{{ taxeCode }}..........................
+            </div>
+            <div class="field-line">
+              Patrimoniale : ......{{ mandat.patrimonial || ''
+              }}......................................................
+            </div>
+            <div class="field-line">
+              Année d'origine :.................{{ mandat.exercice }}..........................
+            </div>
+          </div>
+
+          <div class="header-cell header-right">
+            <div class="recette-title">RECETTE MUNICIPALE</div>
+            <div class="field-line">
+              De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}.................................
+            </div>
+            <div class="field-line" style="margin-top: 4mm">
+              N° d'ordre :.........<span class="handwritten">{{ mandat.numeroMandat }}</span
+              >...................
+            </div>
+            <div class="field-line">N° du bordereau d'émission</div>
+            <div class="field-line" style="margin-top: 2mm">
+              .......................<span class="handwritten">{{ bordereauNumero }}</span
+              >.............................
+            </div>
+            <div class="field-line" style="margin-top: 2mm">Date d'émission :</div>
+            <div class="field-line">
+              .........<span class="handwritten">{{ formatDate(mandat.dateMandat) }}</span
+              >...............
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="content-row ordonnateur-section">
+          <div class="ordonnateur-text">
+            <div class="ordonnateur-line">
+              L'ordonnateur :
+              .........................................................................
+            </div>
+            <div class="ordonnateur-line" style="margin-top: 4mm">
+              Maire de la
+              Commune..................................................................................................
+            </div>
+            <div class="dotted-line" style="margin-top: 3mm"></div>
+          </div>
+        </div>
+
+        <div class="content-row debiteur-section">
+          <div>
+            Nom et adresse du débiteur :
+            <strong>{{ mandat.partieVersante }}</strong
+            >...................................................................
+          </div>
+          <div class="dotted-line"></div>
+          <div class="dotted-line"></div>
+          <div class="dotted-line"></div>
+        </div>
+
+        <div class="content-row">
+          <div>Objet de la recette et du décompte : <strong>{{ mandat.objet }}</strong></div>
+          <div class="dotted-line"></div>
+          <div class="dotted-line"></div>
+          <div style="margin-top: 3mm">
+            Ordre de recette rendu exécutoire conformément à l'article 28 de la loi n° 81-1129 du 30
+            décembre 1981
+          </div>
+        </div>
+
+        <div class="somme-section">
+          <div class="somme-label">Somme du</div>
+          <div class="brace">{</div>
+          <div class="somme-content">
+            <div class="somme-row">
+              en chiffres :.................................{{ formatMontant(mandat.montant) }}
+              FCFA................................................................................
+            </div>
+            <div class="somme-row" style="margin-top: 4mm">
+              en lettres : {{ montantEnLettres.toUpperCase() }} FRANCS CFA.........................
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div class="footer-left">CT51</div>
+        <div class="footer-right">Archives Du Receveur Municipal</div>
+      </div>
+    </div>
+
+    <script type="module">
+      const { createApp } = Vue;
+
+      // Initialiser Dexie
+      const db = new Dexie('TresorDatabase');
+      db.version(22).stores({
+        mairies: '++id, nom, code, ville',
+        taxes: '++id, code, libelle, mairieId, type, actif',
+        mandatsRecette:
+          '++id, numeroMandat, dateMandat, exercice, chapitreId, taxeId, previsionRecetteId, bordereauMandatRecetteId, mairieId, statut, personnelId',
+        bordereauMandatsRecette: '++id, numero, exercice, mairieId, statut, personnelId',
+      });
+
+      createApp({
+        data() {
+          return {
+            mandat: null,
+            mairie: null,
+            taxe: null,
+            bordereau: null,
+            loading: true,
+            error: null,
+          };
+        },
+        computed: {
+          taxeCode() {
+            return this.taxe?.code || '';
+          },
+          bordereauNumero() {
+            if (!this.bordereau) return '';
+            return `${this.bordereau.numero}-${this.bordereau.exercice % 100}`;
+          },
+          montantEnLettres() {
+            if (!this.mandat) return '';
+            return this.nombreEnLettres(this.mandat.montant);
+          },
+        },
+        methods: {
+          formatDate(dateValue) {
+            if (!dateValue) return '';
+            const date = new Date(dateValue);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day} - ${month} - ${year}`;
+          },
+          formatMontant(montant) {
+            if (!montant) return '0';
+            return new Intl.NumberFormat('fr-FR').format(montant);
+          },
+          nombreEnLettres(nombre) {
+            if (nombre === 0) return 'zéro';
+
+            const unites = [
+              '',
+              'un',
+              'deux',
+              'trois',
+              'quatre',
+              'cinq',
+              'six',
+              'sept',
+              'huit',
+              'neuf',
+            ];
+            const dizaines = [
+              '',
+              '',
+              'vingt',
+              'trente',
+              'quarante',
+              'cinquante',
+              'soixante',
+              'soixante',
+              'quatre-vingt',
+              'quatre-vingt',
+            ];
+            const dizainesSpeciales = [
+              'dix',
+              'onze',
+              'douze',
+              'treize',
+              'quatorze',
+              'quinze',
+              'seize',
+              'dix-sept',
+              'dix-huit',
+              'dix-neuf',
+            ];
+
+            function convertirMoinsDeMillions(n) {
+              if (n === 0) return '';
+              if (n < 10) return unites[n];
+              if (n < 20) return dizainesSpeciales[n - 10];
+              if (n < 100) {
+                const d = Math.floor(n / 10);
+                const u = n % 10;
+                if (d === 7 || d === 9) {
+                  return (
+                    dizaines[d] + (u === 0 ? (d === 9 ? 's' : '') : '-' + dizainesSpeciales[u])
+                  );
+                }
+                return (
+                  dizaines[d] +
+                  (u === 0 ? (d === 8 ? 's' : '') : u === 1 && d < 8 ? ' et un' : '-' + unites[u])
+                );
+              }
+              if (n < 1000) {
+                const c = Math.floor(n / 100);
+                const r = n % 100;
+                return (
+                  (c === 1 ? 'cent' : unites[c] + ' cent') +
+                  (r === 0 ? (c > 1 ? 's' : '') : ' ' + convertirMoinsDeMillions(r))
+                );
+              }
+              if (n < 1000000) {
+                const m = Math.floor(n / 1000);
+                const r = n % 1000;
+                return (
+                  (m === 1 ? 'mille' : convertirMoinsDeMillions(m) + ' mille') +
+                  (r === 0 ? '' : ' ' + convertirMoinsDeMillions(r))
+                );
+              }
+              const millions = Math.floor(n / 1000000);
+              const reste = n % 1000000;
+              return (
+                (millions === 1 ? 'un million' : convertirMoinsDeMillions(millions) + ' millions') +
+                (reste === 0 ? '' : ' ' + convertirMoinsDeMillions(reste))
+              );
+            }
+
+            return convertirMoinsDeMillions(Math.floor(nombre));
+          },
+          async loadMandat() {
+            try {
+              this.loading = true;
+              const urlParams = new URLSearchParams(window.location.search);
+              const mandatRecetteId = urlParams.get('mandatRecetteId');
+
+              if (!mandatRecetteId) {
+                this.error = 'Aucun mandat fourni';
+                return;
+              }
+
+              // Charger le mandat depuis la base de données
+              this.mandat = await db.mandatsRecette.get(parseInt(mandatRecetteId));
+
+              if (!this.mandat) {
+                this.error = 'Mandat non trouvé';
+                return;
+              }
+
+              // Charger la mairie
+              if (this.mandat.mairieId) {
+                this.mairie = await db.mairies.get(this.mandat.mairieId);
+              }
+
+              // Charger la taxe
+              if (this.mandat.taxeId) {
+                this.taxe = await db.taxes.get(this.mandat.taxeId);
+              }
+
+              // Charger le bordereau
+              if (this.mandat.bordereauMandatRecetteId) {
+                this.bordereau = await db.bordereauMandatsRecette.get(
+                  this.mandat.bordereauMandatRecetteId,
+                );
+              }
+
+              console.log('Mandat chargé:', this.mandat);
+              console.log('Mairie:', this.mairie);
+              console.log('Taxe:', this.taxe);
+              console.log('Bordereau:', this.bordereau);
+            } catch (err) {
+              console.error('Erreur lors du chargement:', err);
+              this.error = 'Erreur lors du chargement du mandat';
+            } finally {
+              this.loading = false;
+            }
+          },
+        },
+        async mounted() {
+          console.log('Application Vue montée');
+          await this.loadMandat();
+
+          // Auto-print après le chargement si demandé
+          const urlParams = new URLSearchParams(window.location.search);
+          if (urlParams.get('print') === 'true' && !this.error) {
+            setTimeout(() => window.print(), 500);
+          }
+        },
+      }).mount('body');
+    </script>
+  </body>
+</html>
