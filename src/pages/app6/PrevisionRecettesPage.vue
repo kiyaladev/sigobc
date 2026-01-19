@@ -546,6 +546,9 @@ async function generateEtatMensuel() {
     // Récupérer les déclarations de l'année
     const declarations = await db.declarations.filter((d) => d.exercice === annee).toArray();
 
+    // Récupérer les mandats de recettes de l'année
+    const mandatsRecette = await db.mandatsRecette.filter((m) => m.exercice === annee).toArray();
+
     // Récupérer les prévisions de l'année en cours
     const previsionsAnnee = previsions.value.filter((p) => p.exercice === annee);
 
@@ -580,6 +583,22 @@ async function generateEtatMensuel() {
       const moisIndex = new Date(dateDecl).getMonth();
       const montant = decl.montantRecette || decl.montant || 0;
       const taxeEntry = recettesByTaxe[decl.taxeId];
+      if (taxeEntry) {
+        const currentValue = taxeEntry.recettesParMois[moisIndex] ?? 0;
+        taxeEntry.recettesParMois[moisIndex] = currentValue + montant;
+      }
+    }
+
+    // Ajouter les recettes des mandats de recettes
+    for (const mandat of mandatsRecette) {
+      if (!mandat.taxeId || !recettesByTaxe[mandat.taxeId]) continue;
+
+      const dateMandat = mandat.dateMandat;
+      if (!dateMandat) continue;
+
+      const moisIndex = new Date(dateMandat).getMonth();
+      const montant = mandat.montant || 0;
+      const taxeEntry = recettesByTaxe[mandat.taxeId];
       if (taxeEntry) {
         const currentValue = taxeEntry.recettesParMois[moisIndex] ?? 0;
         taxeEntry.recettesParMois[moisIndex] = currentValue + montant;

@@ -239,6 +239,24 @@ export interface BordereauMandatRecette {
   updatedAt: Date;
 }
 
+// ========== Interface ChapitreRecette (Nature des Recettes) pour App6 ==========
+
+/**
+ * Chapitre pour les recettes (Nature des recettes)
+ * Équivalent du Chapitre pour les dépenses mais spécifique aux recettes
+ * Inclut un chapitre par défaut "Autres"
+ */
+export interface ChapitreRecette {
+  id?: number;
+  code: string; // Ex: 1, 2, 3... ou "99" pour Autres
+  libelle: string; // Ex: "RECETTES FISCALES", "Autres"
+  description?: string;
+  mairieId: number;
+  actif: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // ========== Interface pour l'État Financier Mensuel ==========
 
 /**
@@ -295,6 +313,61 @@ export interface EtatFinancierMensuel {
   updatedAt: Date;
 }
 
+/**
+ * État financier mensuel pour les recettes (App6)
+ * Stocke les antécédents et recettes pour chaque mois de l'année
+ * Par couple taxe/chapitreRecette
+ *
+ * Logique des antécédents:
+ * - ant1 (Janvier) = 0 (pas d'antécédent)
+ * - ant2 (Février) = total des recettes de janvier
+ * - ant3 (Mars) = total des recettes de janvier + février
+ * - ...
+ * - ant12 (Décembre) = total des recettes de janvier à novembre
+ *
+ * Total du mois = antécédent + recettes du mois
+ */
+export interface EtatFinancierMensuelRecette {
+  id?: number;
+  annee: number; // Année de l'état financier (ex: 2025)
+  taxeId: number; // Référence à la taxe
+  chapitreRecetteId: number; // Référence au chapitre recette
+  taxeCode?: string; // Code de la taxe
+  chapitreRecetteCode?: string; // Code du chapitre recette
+  mairieId: number;
+
+  // Antécédents pour chaque mois (cumul des mois précédents)
+  ant1: number; // Janvier = 0
+  ant2: number; // Février = total janvier
+  ant3: number; // Mars = total janvier + février
+  ant4: number; // Avril
+  ant5: number; // Mai
+  ant6: number; // Juin
+  ant7: number; // Juillet
+  ant8: number; // Août
+  ant9: number; // Septembre
+  ant10: number; // Octobre
+  ant11: number; // Novembre
+  ant12: number; // Décembre = total janvier à novembre
+
+  // Recettes par mois
+  rec1: number; // Recettes Janvier
+  rec2: number; // Recettes Février
+  rec3: number; // Recettes Mars
+  rec4: number; // Recettes Avril
+  rec5: number; // Recettes Mai
+  rec6: number; // Recettes Juin
+  rec7: number; // Recettes Juillet
+  rec8: number; // Recettes Août
+  rec9: number; // Recettes Septembre
+  rec10: number; // Recettes Octobre
+  rec11: number; // Recettes Novembre
+  rec12: number; // Recettes Décembre
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // Classe Dexie pour la base de données
 class TresorDatabase extends Dexie {
   mairies!: EntityTable<Mairie, 'id'>;
@@ -315,11 +388,13 @@ class TresorDatabase extends Dexie {
   previsionsRecettes!: EntityTable<PrevisionRecette, 'id'>;
   mandatsRecette!: EntityTable<MandatRecette, 'id'>;
   bordereauMandatsRecette!: EntityTable<BordereauMandatRecette, 'id'>;
+  chapitresRecette!: EntityTable<ChapitreRecette, 'id'>;
+  etatFinancierMensuelRecette!: EntityTable<EtatFinancierMensuelRecette, 'id'>;
 
   constructor() {
     super('TresorDatabase');
 
-    this.version(22).stores({
+    this.version(23).stores({
       mairies: '++id, nom, code, ville',
       utilisateurs: '++id, username, email, role, mairieId, actif',
 
@@ -340,10 +415,15 @@ class TresorDatabase extends Dexie {
       bordereauxRecette: '++id, numero, annee, mairieId, statut, personnelId',
       previsionsRecettes: '++id, exercice, taxeId, mairieId, statut, personnelId',
 
-      // App6 - Mandats de Recettes (nouveau)
+      // App6 - Mandats de Recettes
       mandatsRecette:
         '++id, numeroMandat, dateMandat, exercice, chapitreId, taxeId, previsionRecetteId, bordereauMandatRecetteId, mairieId, statut, personnelId',
       bordereauMandatsRecette: '++id, numero, exercice, mairieId, statut, personnelId',
+
+      // App6 - Chapitres Recettes (Nature des recettes) et États Mensuels
+      chapitresRecette: '++id, code, libelle, mairieId, actif',
+      etatFinancierMensuelRecette:
+        '++id, annee, taxeId, chapitreRecetteId, mairieId, [annee+taxeId+chapitreRecetteId]',
     });
   }
 }

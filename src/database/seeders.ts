@@ -9,6 +9,8 @@ import type {
   Declaration,
   MandatRecette,
   BordereauMandatRecette,
+  ChapitreRecette,
+  EtatFinancierMensuelRecette,
 } from './db';
 
 const now = new Date();
@@ -1309,6 +1311,16 @@ export async function seedTestData(options: SeedOptions = {}) {
     const taxeIds = taxeList.map((t) => t.id!);
     await seedMandatsRecette(chapitreIds, taxeIds, utilisateurIds, bordereauMandatsRecetteCreated);
 
+    // Seeding chapitres recettes (Nature des recettes avec Autres par défaut)
+    console.log('🌱 Seeding chapitres recettes (Nature des recettes)...');
+    await seedChapitresRecette();
+
+    // Seeding états financiers mensuels recettes
+    console.log('🌱 Seeding états financiers mensuels recettes...');
+    const chapitresRecetteList = await db.chapitresRecette.toArray();
+    const chapitreRecetteIds = chapitresRecetteList.map((c) => c.id!);
+    await seedEtatFinancierMensuelRecette(taxeIds, chapitreRecetteIds);
+
     console.log('\n✨ All test data seeders have been executed successfully!');
   } catch (error) {
     console.error('❌ Error during test data seeding:', error);
@@ -1341,6 +1353,8 @@ export async function clearDatabase() {
     await db.previsionsRecettes.clear();
     await db.mandatsRecette.clear();
     await db.bordereauMandatsRecette.clear();
+    await db.chapitresRecette.clear();
+    await db.etatFinancierMensuelRecette.clear();
 
     await db.utilisateurs.clear();
     await db.mairies.clear();
@@ -1350,6 +1364,229 @@ export async function clearDatabase() {
     console.error('❌ Error clearing database:', error);
     throw error;
   }
+}
+
+// =================================================================
+//           SEEDERS POUR CHAPITRES RECETTES (Nature des recettes)
+// =================================================================
+
+/**
+ * Seed les chapitres recettes (Nature des recettes) pour App6
+ * Inclut un chapitre par défaut "Autres"
+ */
+async function seedChapitresRecette() {
+  const chapitresRecette: Partial<ChapitreRecette>[] = [
+    {
+      code: '1',
+      libelle: 'RECETTES FISCALES',
+      description: 'Impôts et taxes fiscales',
+      mairieId: DEFAULT_MAIRIE_ID,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '2',
+      libelle: 'PRESTATIONS ET SERVICES',
+      description: 'Recettes des prestations et services communaux',
+      mairieId: DEFAULT_MAIRIE_ID,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '3',
+      libelle: 'REVENUS DU PATRIMOINE',
+      description: 'Revenus du patrimoine immobilier et mobilier',
+      mairieId: DEFAULT_MAIRIE_ID,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '4',
+      libelle: "AIDE DE L'ETAT",
+      description: "Dotations et subventions de l'État",
+      mairieId: DEFAULT_MAIRIE_ID,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '5',
+      libelle: 'FONDS DE CONCOURS',
+      description: 'Participations et fonds de concours',
+      mairieId: DEFAULT_MAIRIE_ID,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '6',
+      libelle: 'EMPRUNTS ET DETTES',
+      description: 'Produits des emprunts et dettes',
+      mairieId: DEFAULT_MAIRIE_ID,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '7',
+      libelle: 'RECETTES EXCEPTIONNELLES',
+      description: 'Recettes exceptionnelles et extraordinaires',
+      mairieId: DEFAULT_MAIRIE_ID,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      code: '99',
+      libelle: 'Autres',
+      description: 'Autres recettes non classifiées',
+      mairieId: DEFAULT_MAIRIE_ID,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+  ];
+
+  await db.chapitresRecette.bulkAdd(chapitresRecette as ChapitreRecette[]);
+  console.log(`✅ ${chapitresRecette.length} chapitres recettes créés (dont "Autres" par défaut)`);
+}
+
+// =================================================================
+//           SEEDERS POUR ÉTATS FINANCIERS MENSUELS RECETTES
+// =================================================================
+
+/**
+ * Seed les états financiers mensuels pour les recettes (App6)
+ * Calcule les états à partir des déclarations existantes (comme les mandats impactent les états des dépenses)
+ */
+async function seedEtatFinancierMensuelRecette(taxeIds: number[], chapitreRecetteIds: number[]) {
+  const etats: Partial<EtatFinancierMensuelRecette>[] = [];
+
+  const taxes = await db.taxes.toArray();
+  const chapitresRecette = await db.chapitresRecette.toArray();
+  const declarations = await db.declarations.filter((d) => d.exercice === 2025).toArray();
+  const mandatsRecette = await db.mandatsRecette.filter((m) => m.exercice === 2025).toArray();
+
+  // Filtrer les taxes App6 fonctionnelles (codes >= 7000)
+  const app6Taxes = taxes.filter((t) => {
+    if (!t.code.startsWith('7')) return false;
+    const codeNum = parseInt(t.code, 10);
+    return !isNaN(codeNum) && codeNum >= 7000;
+  });
+
+  // Calculer les recettes par taxe et par mois à partir des déclarations ET mandats
+  const recettesByTaxe: Map<number, number[]> = new Map();
+
+  // Ajouter les déclarations
+  for (const decl of declarations) {
+    if (!decl.taxeId) continue;
+
+    // Initialiser le tableau des recettes mensuelles si nécessaire
+    if (!recettesByTaxe.has(decl.taxeId)) {
+      recettesByTaxe.set(decl.taxeId, Array(12).fill(0));
+    }
+
+    // Déterminer le mois de la déclaration
+    const dateDecl = decl.dateEncaissement || decl.dateDeclaration;
+    if (!dateDecl) continue;
+
+    const moisIndex = new Date(dateDecl).getMonth();
+    const montant = decl.montantRecette || decl.montant || 0;
+
+    const monthlyRecettes = recettesByTaxe.get(decl.taxeId)!;
+    monthlyRecettes[moisIndex] = (monthlyRecettes[moisIndex] || 0) + montant;
+  }
+
+  // Ajouter les mandats de recettes
+  for (const mandat of mandatsRecette) {
+    if (!mandat.taxeId) continue;
+
+    // Initialiser le tableau des recettes mensuelles si nécessaire
+    if (!recettesByTaxe.has(mandat.taxeId)) {
+      recettesByTaxe.set(mandat.taxeId, Array(12).fill(0));
+    }
+
+    // Déterminer le mois du mandat
+    const dateMandat = mandat.dateMandat;
+    if (!dateMandat) continue;
+
+    const moisIndex = new Date(dateMandat).getMonth();
+    const montant = mandat.montant || 0;
+
+    const monthlyRecettes = recettesByTaxe.get(mandat.taxeId)!;
+    monthlyRecettes[moisIndex] = (monthlyRecettes[moisIndex] || 0) + montant;
+  }
+
+  // Créer un état par taxe (basé sur les déclarations) pour chaque chapitreRecette
+  for (const taxeId of taxeIds) {
+    const taxe = app6Taxes.find((t) => t.id === taxeId);
+    if (!taxe) continue;
+
+    // Récupérer les recettes mensuelles pour cette taxe (ou tableau vide si pas de déclarations)
+    const monthlyRecettes = recettesByTaxe.get(taxeId) || Array(12).fill(0);
+
+    // Calculer les antécédents (cumul des mois précédents)
+    const antecedents: number[] = [];
+    let cumul = 0;
+    for (let m = 0; m < 12; m++) {
+      antecedents[m] = cumul;
+      cumul += monthlyRecettes[m] || 0;
+    }
+
+    // Créer un état pour le premier chapitreRecette (ou associer à "Autres" si pas de correspondance)
+    const chapitreRecetteId =
+      chapitreRecetteIds.length > 0
+        ? chapitreRecetteIds[0] // Utiliser le premier chapitre par défaut
+        : null;
+
+    if (!chapitreRecetteId) continue;
+
+    const chapitreRecette = chapitresRecette.find((c) => c.id === chapitreRecetteId);
+    if (!chapitreRecette) continue;
+
+    etats.push({
+      annee: 2025,
+      taxeId,
+      chapitreRecetteId,
+      taxeCode: taxe.code,
+      chapitreRecetteCode: chapitreRecette.code,
+      mairieId: DEFAULT_MAIRIE_ID,
+      ant1: antecedents[0] || 0,
+      ant2: antecedents[1] || 0,
+      ant3: antecedents[2] || 0,
+      ant4: antecedents[3] || 0,
+      ant5: antecedents[4] || 0,
+      ant6: antecedents[5] || 0,
+      ant7: antecedents[6] || 0,
+      ant8: antecedents[7] || 0,
+      ant9: antecedents[8] || 0,
+      ant10: antecedents[9] || 0,
+      ant11: antecedents[10] || 0,
+      ant12: antecedents[11] || 0,
+      rec1: monthlyRecettes[0] || 0,
+      rec2: monthlyRecettes[1] || 0,
+      rec3: monthlyRecettes[2] || 0,
+      rec4: monthlyRecettes[3] || 0,
+      rec5: monthlyRecettes[4] || 0,
+      rec6: monthlyRecettes[5] || 0,
+      rec7: monthlyRecettes[6] || 0,
+      rec8: monthlyRecettes[7] || 0,
+      rec9: monthlyRecettes[8] || 0,
+      rec10: monthlyRecettes[9] || 0,
+      rec11: monthlyRecettes[10] || 0,
+      rec12: monthlyRecettes[11] || 0,
+      createdAt: now,
+      updatedAt: now,
+    });
+  }
+
+  await db.etatFinancierMensuelRecette.bulkAdd(etats as EtatFinancierMensuelRecette[]);
+  console.log(
+    `✅ ${etats.length} états financiers mensuels recettes créés pour 2025 (calculés à partir des déclarations)`,
+  );
 }
 
 // =================================================================
