@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ordre de Recette</title>
-    <script src="dexie.min.js"></script>
-    <script src="vue.global.js"></script>
+    <script src="/dexie.min.js"></script>
+    <script src="/vue.global.js"></script>
     <style>
       * {
         margin: 0;
@@ -236,267 +236,420 @@
     </style>
   </head>
   <body>
-    <!-- PAGE 1: ORDRE DE RECETTE -->
-    <div class="page" v-if="mandat">
-      <div class="header">
-        <div class="header-row">
-          <div class="header-cell header-left">
-            <div class="country-name">REPUBLIQUE DE COTE D'IVOIRE</div>
-            <div class="department">Département</div>
-            <div class="department">De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}</div>
-            <div class="ville-section">
-              <div class="underline" style="font-weight: bold">
-                VILLE De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}.
+    <div id="app">
+      <!-- PAGE 1: ORDRE DE RECETTE -->
+      <div class="page" v-if="mandat">
+        <div class="header">
+          <div class="header-row">
+            <div class="header-cell header-left">
+              <div class="country-name">REPUBLIQUE DE COTE D'IVOIRE</div>
+              <div class="department">Département</div>
+              <div class="department">De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}</div>
+              <div class="ville-section">
+                <div class="underline" style="font-weight: bold">
+                  VILLE De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}.
+                </div>
+                <div class="underline" style="margin-top: 3mm">
+                  COMMUNE De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}
+                </div>
+                <div style="margin-top: 3mm">
+                  Code &nbsp;&nbsp;{{ mairie?.code || '422' }}...............................
+                </div>
               </div>
-              <div class="underline" style="margin-top: 3mm">
-                COMMUNE De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}
+            </div>
+
+            <div class="header-cell header-center">
+              <div class="document-title">ORDRE DE RECETTE</div>
+              <div class="field-line">
+                EXERCICE :......................{{ mandat.exercice }}..........................
               </div>
-              <div style="margin-top: 3mm">
-                Code &nbsp;&nbsp;{{ mairie?.code || '422' }}...............................
+              <div class="field-line">
+                TITRE DU BUDGET :..............I............................
+              </div>
+              <div class="section-title">IMPUTATION</div>
+              <div class="field-line">
+                Fonctionnelle :...................{{ taxeCode }}..........................
+              </div>
+              <div class="field-line">
+                Patrimoniale : ......{{ mandat.patrimonial || ''
+                }}......................................................
+              </div>
+              <div class="field-line">
+                Année d'origine :.............{{ mandat.exercice }}..........................
+              </div>
+            </div>
+
+            <div class="header-cell header-right">
+              <div class="recette-title">RECETTE MUNICIPALE</div>
+              <div class="field-line">
+                De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}.................................
+              </div>
+              <div class="field-line" style="margin-top: 4mm">
+                N° d'ordre :.........<span class="handwritten">{{ mandat.numeroMandat }}</span
+                >...................
+              </div>
+              <div class="field-line">N° du bordereau d'émission</div>
+              <div class="field-line" style="margin-top: 2mm">
+                .......................<span class="handwritten">{{ bordereauNumero }}</span
+                >.............................
+              </div>
+              <div class="field-line" style="margin-top: 2mm">Date d'émission :</div>
+              <div class="field-line">
+                .........<span class="handwritten">{{ formatDate(mandat.dateMandat) }}</span
+                >...............
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="content">
+          <div class="content-row ordonnateur-section">
+            <div class="ordonnateur-text">
+              <div class="ordonnateur-line">
+                L'ordonnateur :
+                .........................................................................
+              </div>
+              <div class="ordonnateur-line" style="margin-top: 4mm">
+                Maire de la
+                Commune..................................................................................................
               </div>
             </div>
           </div>
 
-          <div class="header-cell header-center">
-            <div class="document-title">ORDRE DE RECETTE</div>
-            <div class="field-line">
-              EXERCICE :......................{{ mandat.exercice }}..........................
+          <div class="content-row debiteur-section">
+            <div>
+              Nom et adresse du débiteur : &nbsp;<strong>{{ mandat.partieVersante }}</strong>
+              .................................................................
             </div>
-            <div class="field-line">
-              TITRE DU BUDGET :..............I............................
-            </div>
-            <div class="section-title">IMPUTATION</div>
-            <div class="field-line">
-              Fonctionnelle :...................{{ taxeCode }}..........................
-            </div>
-            <div class="field-line">
-              Patrimoniale : ......{{ mandat.patrimonial || ''
-              }}......................................................
-            </div>
-            <div class="field-line">
-              Année d'origine :.............{{ mandat.exercice }}..........................
+            <div class="dotted-line"></div>
+            <div class="dotted-line"></div>
+            <div class="dotted-line"></div>
+            <div class="dotted-line"></div>
+            <div class="dotted-line"></div>
+            <div class="dotted-line"></div>
+          </div>
+
+          <div class="content-row">
+            <div>Objet de la recette et du décompte : <strong>{{ mandat.objet }}</strong></div>
+            <div class="dotted-line"></div>
+            <div class="dotted-line"></div>
+            <div class="dotted-line"></div>
+            <div style="margin-top: 1mm">..........</div>
+            <div style="margin-top: 3mm">
+              Ordre de recette rendu exécutoire conformément à l'article 28 de la loi n° 81-1129 du
+              30 décembre 1981
             </div>
           </div>
 
-          <div class="header-cell header-right">
-            <div class="recette-title">RECETTE MUNICIPALE</div>
-            <div class="field-line">
-              De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}.................................
-            </div>
-            <div class="field-line" style="margin-top: 4mm">
-              N° d'ordre :.........<span class="handwritten">{{ mandat.numeroMandat }}</span
-              >...................
-            </div>
-            <div class="field-line">N° du bordereau d'émission</div>
-            <div class="field-line" style="margin-top: 2mm">
-              .......................<span class="handwritten">{{ bordereauNumero }}</span
-              >.............................
-            </div>
-            <div class="field-line" style="margin-top: 2mm">Date d'émission :</div>
-            <div class="field-line">
-              .........<span class="handwritten">{{ formatDate(mandat.dateMandat) }}</span
-              >...............
+          <div class="somme-section">
+            <div class="somme-label">Somme du</div>
+            <div class="brace">{</div>
+            <div class="somme-content">
+              <div class="somme-row">
+                en chiffres :......................{{ formatMontant(mandat.montant) }}
+                FCFA................................................................................
+              </div>
+              <div class="somme-row" style="margin-top: 4mm">
+                en lettres : {{ montantEnLettres.toUpperCase() }} FRANCS
+                CFA..........................
+              </div>
             </div>
           </div>
+        </div>
+
+        <div class="footer">
+          <div class="footer-left">CT51</div>
+          <div class="footer-right">Original : Chambre des Comptes</div>
         </div>
       </div>
 
-      <div class="content">
-        <div class="content-row ordonnateur-section">
-          <div class="ordonnateur-text">
-            <div class="ordonnateur-line">
-              L'ordonnateur :
-              .........................................................................
+      <!-- PAGE 2: BULLETIN DE LIQUIDATION RECETTE -->
+      <div class="page" v-if="mandat">
+        <div class="header">
+          <div class="header-row">
+            <div class="header-cell header-left">
+              <div class="country-name">REPUBLIQUE DE COTE D'IVOIRE</div>
+              <div class="department">Département</div>
+              <div class="department">
+                De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}.................................
+              </div>
+              <div class="ville-section">
+                <div>
+                  VILLE De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}.....................
+                </div>
+                <div style="margin-top: 3mm">
+                  COMMUNE De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}..........
+                </div>
+                <div style="margin-top: 3mm">
+                  Code {{ mairie?.code || '422' }}.................................
+                </div>
+              </div>
             </div>
-            <div class="ordonnateur-line" style="margin-top: 4mm">
-              Maire de la
-              Commune..................................................................................................
+
+            <div class="header-cell header-center">
+              <div class="document-title">BULLETIN DE LIQUIDATION RECETTE</div>
+              <div class="field-line">
+                EXERCICE :.........................{{ mandat.exercice }}..........................
+              </div>
+              <div class="field-line">...</div>
+              <div class="field-line">
+                TITRE DU BUDGET :..............I..............................
+              </div>
+              <div class="section-title">IMPUTATION</div>
+              <div class="field-line">
+                Fonctionnelle :................{{ taxeCode }}..........................
+              </div>
+              <div class="field-line">
+                Patrimoniale : ......{{ mandat.patrimonial || ''
+                }}......................................................
+              </div>
+              <div class="field-line">
+                Année d'origine :.................{{ mandat.exercice }}..........................
+              </div>
+            </div>
+
+            <div class="header-cell header-right">
+              <div class="recette-title">RECETTE MUNICIPALE</div>
+              <div class="field-line">
+                De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}.................................
+              </div>
+              <div class="field-line" style="margin-top: 4mm">
+                N° d'ordre :.........<span class="handwritten">{{ mandat.numeroMandat }}</span
+                >...................
+              </div>
+              <div class="field-line">N° du bordereau d'émission</div>
+              <div class="field-line" style="margin-top: 2mm">
+                .......................<span class="handwritten">{{ bordereauNumero }}</span
+                >.............................
+              </div>
+              <div class="field-line" style="margin-top: 2mm">Date d'émission :</div>
+              <div class="field-line">
+                .........<span class="handwritten">{{ formatDate(mandat.dateMandat) }}</span
+                >...............
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="content-row debiteur-section">
-          <div>
-            Nom et adresse du débiteur : &nbsp;<strong>{{ mandat.partieVersante }}</strong>
-            .................................................................
-          </div>
-          <div class="dotted-line"></div>
-          <div class="dotted-line"></div>
-          <div class="dotted-line"></div>
-          <div class="dotted-line"></div>
-          <div class="dotted-line"></div>
-          <div class="dotted-line"></div>
-        </div>
-
-        <div class="content-row">
-          <div>Objet de la recette et du décompte : <strong>{{ mandat.objet }}</strong></div>
-          <div class="dotted-line"></div>
-          <div class="dotted-line"></div>
-          <div class="dotted-line"></div>
-          <div style="margin-top: 1mm">..........</div>
-          <div style="margin-top: 3mm">
-            Ordre de recette rendu exécutoire conformément à l'article 28 de la loi n° 81-1129 du 30
-            décembre 1981
-          </div>
-        </div>
-
-        <div class="somme-section">
-          <div class="somme-label">Somme du</div>
-          <div class="brace">{</div>
-          <div class="somme-content">
-            <div class="somme-row">
-              en chiffres :......................{{ formatMontant(mandat.montant) }}
-              FCFA................................................................................
-            </div>
-            <div class="somme-row" style="margin-top: 4mm">
-              en lettres : {{ montantEnLettres.toUpperCase() }} FRANCS CFA..........................
+        <div class="content">
+          <div class="content-row ordonnateur-section">
+            <div class="ordonnateur-text">
+              <div class="ordonnateur-line">
+                L'ordonnateur :
+                .........................................................................
+              </div>
+              <div class="ordonnateur-line" style="margin-top: 4mm">
+                Maire de la
+                Commune..................................................................................................
+              </div>
+              <div class="dotted-line" style="margin-top: 3mm"></div>
             </div>
           </div>
+
+          <div class="content-row debiteur-section">
+            <div>
+              Nom et adresse du débiteur :
+              <strong>{{ mandat.partieVersante }}</strong
+              >...................................................................
+            </div>
+            <div class="dotted-line"></div>
+            <div class="dotted-line"></div>
+            <div class="dotted-line"></div>
+          </div>
+
+          <div class="content-row">
+            <div>Objet de la recette et du décompte : <strong>{{ mandat.objet }}</strong></div>
+            <div class="dotted-line"></div>
+            <div class="dotted-line"></div>
+            <div style="margin-top: 3mm">
+              Ordre de recette rendu exécutoire conformément à l'article 28 de la loi n° 81-1129 du
+              30 décembre 1981
+            </div>
+          </div>
+
+          <div class="somme-section">
+            <div class="somme-label">Somme du</div>
+            <div class="brace">{</div>
+            <div class="somme-content">
+              <div class="somme-row">
+                en chiffres :.................................{{ formatMontant(mandat.montant) }}
+                FCFA................................................................................
+              </div>
+              <div class="somme-row" style="margin-top: 4mm">
+                en lettres : {{ montantEnLettres.toUpperCase() }} FRANCS
+                CFA.........................
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer">
+          <div class="footer-left">CT51</div>
+          <div class="footer-right">Archives Du Receveur Municipal</div>
         </div>
       </div>
 
-      <div class="footer">
-        <div class="footer-left">CT51</div>
-        <div class="footer-right">Original : Chambre des Comptes</div>
+      <!-- PAGE 3: ORDRE DE RECETTE (CONTRIBUABLE) -->
+      <div class="page" v-if="mandat">
+        <div class="header">
+          <div class="header-row">
+            <div class="header-cell header-left">
+              <div class="country-name">REPUBLIQUE DE COTE D'IVOIRE</div>
+              <div class="department">Département</div>
+              <div class="department">De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}</div>
+              <div class="ville-section">
+                <div class="underline" style="font-weight: bold">
+                  VILLE De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}.
+                </div>
+                <div class="underline" style="margin-top: 3mm">
+                  COMMUNE De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}
+                </div>
+                <div style="margin-top: 3mm">
+                  Code &nbsp;&nbsp;{{ mairie?.code || '422' }}...............................
+                </div>
+              </div>
+            </div>
+
+            <div class="header-cell header-center">
+              <div class="document-title">ORDRE DE RECETTE</div>
+              <div class="field-line">
+                EXERCICE :......................{{ mandat.exercice }}..........................
+              </div>
+              <div class="field-line">
+                TITRE DU BUDGET :..............I............................
+              </div>
+              <div class="section-title">IMPUTATION</div>
+              <div class="field-line">
+                Fonctionnelle :...................{{ taxeCode }}..........................
+              </div>
+              <div class="field-line">
+                Patrimoniale : ......{{ mandat.patrimonial || ''
+                }}......................................................
+              </div>
+              <div class="field-line">
+                Année d'origine :.............{{ mandat.exercice }}..........................
+              </div>
+            </div>
+
+            <div class="header-cell header-right">
+              <div class="recette-title">RECETTE MUNICIPALE</div>
+              <div class="field-line">
+                De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}.................................
+              </div>
+              <div class="field-line" style="margin-top: 4mm">
+                N° d'ordre :.........<span class="handwritten">{{ mandat.numeroMandat }}</span
+                >...................
+              </div>
+              <div class="field-line">N° du bordereau d'émission</div>
+              <div class="field-line" style="margin-top: 2mm">
+                .......................<span class="handwritten">{{ bordereauNumero }}</span
+                >.............................
+              </div>
+              <div class="field-line" style="margin-top: 2mm">Date d'émission :</div>
+              <div class="field-line">
+                .........<span class="handwritten">{{ formatDate(mandat.dateMandat) }}</span
+                >...............
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="content">
+          <div class="content-row ordonnateur-section">
+            <div class="ordonnateur-text">
+              <div class="ordonnateur-line">
+                L'ordonnateur :
+                .........................................................................
+              </div>
+              <div class="ordonnateur-line" style="margin-top: 4mm">
+                Maire de la
+                Commune..................................................................................................
+              </div>
+            </div>
+          </div>
+
+          <div class="content-row debiteur-section">
+            <div>
+              Nom et adresse du débiteur : &nbsp;<strong>{{ mandat.partieVersante }}</strong>
+              .................................................................
+            </div>
+            <div class="dotted-line"></div>
+            <div class="dotted-line"></div>
+            <div class="dotted-line"></div>
+            <div class="dotted-line"></div>
+            <div class="dotted-line"></div>
+            <div class="dotted-line"></div>
+          </div>
+
+          <div class="content-row">
+            <div>Objet de la recette et du décompte : <strong>{{ mandat.objet }}</strong></div>
+            <div class="dotted-line"></div>
+            <div class="dotted-line"></div>
+            <div class="dotted-line"></div>
+            <div style="margin-top: 1mm">..........</div>
+            <div style="margin-top: 3mm">
+              Ordre de recette rendu exécutoire conformément à l'article 28 de la loi n° 81-1129 du
+              30 décembre 1981
+            </div>
+          </div>
+
+          <div class="somme-section">
+            <div class="somme-label">Somme du</div>
+            <div class="brace">{</div>
+            <div class="somme-content">
+              <div class="somme-row">
+                en chiffres :......................{{ formatMontant(mandat.montant) }}
+                FCFA................................................................................
+              </div>
+              <div class="somme-row" style="margin-top: 4mm">
+                en lettres : {{ montantEnLettres.toUpperCase() }} FRANCS
+                CFA..........................
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer">
+          <div class="footer-left">CT51</div>
+          <div class="footer-right">Contribuable</div>
+        </div>
       </div>
     </div>
-
-    <!-- PAGE 2: BULLETIN DE LIQUIDATION RECETTE -->
-    <div class="page" v-if="mandat">
-      <div class="header">
-        <div class="header-row">
-          <div class="header-cell header-left">
-            <div class="country-name">REPUBLIQUE DE COTE D'IVOIRE</div>
-            <div class="department">Département</div>
-            <div class="department">
-              De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}.................................
-            </div>
-            <div class="ville-section">
-              <div>
-                VILLE De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}.....................
-              </div>
-              <div style="margin-top: 3mm">
-                COMMUNE De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}..........
-              </div>
-              <div style="margin-top: 3mm">
-                Code {{ mairie?.code || '422' }}.................................
-              </div>
-            </div>
-          </div>
-
-          <div class="header-cell header-center">
-            <div class="document-title">BULLETIN DE LIQUIDATION RECETTE</div>
-            <div class="field-line">
-              EXERCICE :.........................{{ mandat.exercice }}..........................
-            </div>
-            <div class="field-line">...</div>
-            <div class="field-line">
-              TITRE DU BUDGET :..............I..............................
-            </div>
-            <div class="section-title">IMPUTATION</div>
-            <div class="field-line">
-              Fonctionnelle :................{{ taxeCode }}..........................
-            </div>
-            <div class="field-line">
-              Patrimoniale : ......{{ mandat.patrimonial || ''
-              }}......................................................
-            </div>
-            <div class="field-line">
-              Année d'origine :.................{{ mandat.exercice }}..........................
-            </div>
-          </div>
-
-          <div class="header-cell header-right">
-            <div class="recette-title">RECETTE MUNICIPALE</div>
-            <div class="field-line">
-              De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}.................................
-            </div>
-            <div class="field-line" style="margin-top: 4mm">
-              N° d'ordre :.........<span class="handwritten">{{ mandat.numeroMandat }}</span
-              >...................
-            </div>
-            <div class="field-line">N° du bordereau d'émission</div>
-            <div class="field-line" style="margin-top: 2mm">
-              .......................<span class="handwritten">{{ bordereauNumero }}</span
-              >.............................
-            </div>
-            <div class="field-line" style="margin-top: 2mm">Date d'émission :</div>
-            <div class="field-line">
-              .........<span class="handwritten">{{ formatDate(mandat.dateMandat) }}</span
-              >...............
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="content">
-        <div class="content-row ordonnateur-section">
-          <div class="ordonnateur-text">
-            <div class="ordonnateur-line">
-              L'ordonnateur :
-              .........................................................................
-            </div>
-            <div class="ordonnateur-line" style="margin-top: 4mm">
-              Maire de la
-              Commune..................................................................................................
-            </div>
-            <div class="dotted-line" style="margin-top: 3mm"></div>
-          </div>
-        </div>
-
-        <div class="content-row debiteur-section">
-          <div>
-            Nom et adresse du débiteur :
-            <strong>{{ mandat.partieVersante }}</strong
-            >...................................................................
-          </div>
-          <div class="dotted-line"></div>
-          <div class="dotted-line"></div>
-          <div class="dotted-line"></div>
-        </div>
-
-        <div class="content-row">
-          <div>Objet de la recette et du décompte : <strong>{{ mandat.objet }}</strong></div>
-          <div class="dotted-line"></div>
-          <div class="dotted-line"></div>
-          <div style="margin-top: 3mm">
-            Ordre de recette rendu exécutoire conformément à l'article 28 de la loi n° 81-1129 du 30
-            décembre 1981
-          </div>
-        </div>
-
-        <div class="somme-section">
-          <div class="somme-label">Somme du</div>
-          <div class="brace">{</div>
-          <div class="somme-content">
-            <div class="somme-row">
-              en chiffres :.................................{{ formatMontant(mandat.montant) }}
-              FCFA................................................................................
-            </div>
-            <div class="somme-row" style="margin-top: 4mm">
-              en lettres : {{ montantEnLettres.toUpperCase() }} FRANCS CFA.........................
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="footer">
-        <div class="footer-left">CT51</div>
-        <div class="footer-right">Archives Du Receveur Municipal</div>
-      </div>
-    </div>
-
     <script type="module">
       const { createApp } = Vue;
 
       // Initialiser Dexie
       const db = new Dexie('TresorDatabase');
-      db.version(22).stores({
+      db.version(23).stores({
         mairies: '++id, nom, code, ville',
+        utilisateurs: '++id, username, email, role, mairieId, actif',
+
+        // App3
+        chapitres: '++id, code, libelle, mairieId, actif',
+        sousChapitres: '++id, code, libelle, parentId, mairieId, actif',
+        previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
+        mandats:
+          '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
+        bordereauMandats: '++id, numero, exercice, mairieId, statut, personnelId',
+        etatFinancierMensuel:
+          '++id, annee, sousChapitreId, chapitreId, mairieId, [annee+sousChapitreId+chapitreId]',
+
+        // App6 - Recettes
         taxes: '++id, code, libelle, mairieId, type, actif',
+        declarations:
+          '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
+        bordereauxRecette: '++id, numero, annee, mairieId, statut, personnelId',
+        previsionsRecettes: '++id, exercice, taxeId, mairieId, statut, personnelId',
+
+        // App6 - Mandats de Recettes
         mandatsRecette:
           '++id, numeroMandat, dateMandat, exercice, chapitreId, taxeId, previsionRecetteId, bordereauMandatRecetteId, mairieId, statut, personnelId',
         bordereauMandatsRecette: '++id, numero, exercice, mairieId, statut, personnelId',
+
+        // App6 - Chapitres Recettes (Nature des recettes) et États Mensuels
+        chapitresRecette: '++id, code, libelle, mairieId, actif',
+        etatFinancierMensuelRecette:
+          '++id, annee, taxeId, chapitreRecetteId, mairieId, [annee+taxeId+chapitreRecetteId]',
       });
 
       createApp({
@@ -677,7 +830,7 @@
             setTimeout(() => window.print(), 500);
           }
         },
-      }).mount('body');
+      }).mount('#app');
     </script>
   </body>
 </html>
