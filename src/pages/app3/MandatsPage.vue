@@ -307,6 +307,56 @@
               </div>
             </div>
 
+            <!-- Nouveaux champs -->
+            <div class="row q-col-gutter-md">
+              <div class="col-6">
+                <q-input
+                  v-model="formData.referenceMarche"
+                  label="Référence du Marché"
+                  outlined
+                  dense
+                />
+              </div>
+              <div class="col-6">
+                <q-input
+                  v-model="formData.avisMunicipalite"
+                  label="Avis de la Municipalité"
+                  outlined
+                  dense
+                />
+              </div>
+            </div>
+
+            <div class="row q-col-gutter-md">
+              <div class="col-4">
+                <q-input
+                  v-model="formData.numeroDeliberation"
+                  label="N° Délibération"
+                  outlined
+                  dense
+                />
+              </div>
+              <div class="col-4">
+                <q-input
+                  v-model="formData.dateDeliberation"
+                  label="Date de Délibération"
+                  outlined
+                  dense
+                  type="date"
+                />
+              </div>
+              <div class="col-4">
+                <q-input
+                  v-model.number="formData.montantPrecompter"
+                  label="Montant à précompter"
+                  outlined
+                  dense
+                  type="number"
+                  prefix="XOF"
+                />
+              </div>
+            </div>
+
             <q-input
               v-model="formData.observations"
               label="Observations"
@@ -378,6 +428,12 @@ const formData = ref({
   modePaiement: 'virement' as 'virement' | 'cheque' | 'especes' | 'autre',
   statut: 'emis' as 'brouillon' | 'emis' | 'paye' | 'annule',
   observations: '',
+  // Nouveaux champs
+  referenceMarche: '',
+  avisMunicipalite: '',
+  numeroDeliberation: '',
+  dateDeliberation: '',
+  montantPrecompter: 0,
 });
 
 const chapitreOptions = computed(() =>
@@ -641,9 +697,20 @@ function printMandat(mandat: Mandat) {
             beneficiaireDetails: '', // This field is not in the Mandat interface
             rib: mandat.rib || '',
             montantBrut: mandat.montant,
-            montantNet: mandat.montant,
+            montantNet: mandat.montant - (mandat.montantPrecompter || 0),
+            montantPrecompter: mandat.montantPrecompter || 0,
+            montantPrecompterLettres: mandat.montantPrecompter
+              ? amountToWords(mandat.montantPrecompter).toUpperCase()
+              : '',
             montantLettres: amountToWords(mandat.montant).toUpperCase(),
             dateEmission: new Date(mandat.dateMandat).toLocaleDateString('fr-FR'),
+            // Nouveaux champs
+            referenceMarche: mandat.referenceMarche || '',
+            avisMunicipalite: mandat.avisMunicipalite || '',
+            numeroDeliberation: mandat.numeroDeliberation || '',
+            dateDeliberation: mandat.dateDeliberation
+              ? new Date(mandat.dateDeliberation).toLocaleDateString('fr-FR')
+              : '',
             // Mairie info
             mairieDepartement: mairie?.ville ?? '',
             mairieCommune: mairie?.ville ?? '',
@@ -697,6 +764,12 @@ function resetForm() {
     modePaiement: 'virement',
     statut: 'emis',
     observations: '',
+    // Nouveaux champs
+    referenceMarche: '',
+    avisMunicipalite: '',
+    numeroDeliberation: '',
+    dateDeliberation: '',
+    montantPrecompter: 0,
   };
   editingId.value = null;
 }
@@ -717,7 +790,7 @@ async function saveMandat() {
     const personnelId = 1;
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { dateFacture, dateMandat, ...otherFormData } = formData.value;
+    const { dateFacture, dateMandat, dateDeliberation, ...otherFormData } = formData.value;
 
     const data = {
       ...otherFormData,
@@ -725,6 +798,7 @@ async function saveMandat() {
       ...(formData.value.sousChapitreId ? { sousChapitreId: formData.value.sousChapitreId } : {}),
       dateMandat: new Date(formData.value.dateMandat),
       ...(dateFacture ? { dateFacture: new Date(dateFacture) } : {}),
+      ...(dateDeliberation ? { dateDeliberation: new Date(dateDeliberation) } : {}),
       ...(formData.value.bordereauMandatId
         ? { bordereauMandatId: formData.value.bordereauMandatId }
         : {}),
@@ -788,6 +862,14 @@ function editMandat(row: Mandat) {
     modePaiement: row.modePaiement,
     statut: row.statut,
     observations: row.observations || '',
+    // Nouveaux champs
+    referenceMarche: row.referenceMarche || '',
+    avisMunicipalite: row.avisMunicipalite || '',
+    numeroDeliberation: row.numeroDeliberation || '',
+    dateDeliberation: row.dateDeliberation
+      ? date.formatDate(row.dateDeliberation, 'YYYY-MM-DD')
+      : '',
+    montantPrecompter: row.montantPrecompter || 0,
   };
   showAddDialog.value = true;
 }

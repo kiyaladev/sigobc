@@ -116,9 +116,9 @@
         </q-item-section>
         <q-item-section>
           <q-item-label class="text-h5 text-weight-bold">SIGOBC</q-item-label>
-          <q-item-label caption class="text-grey-7"
-            >Gestion Budgétaire des Collectivités</q-item-label
-          >
+          <small style="font-size: 0.5rem">
+            Système Informatique de Gestion des Opérations Budgétaires des Collectivités
+          </small>
         </q-item-section>
       </q-item>
 

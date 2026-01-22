@@ -117,6 +117,12 @@ export interface Mandat {
   modePaiement: 'virement' | 'cheque' | 'especes' | 'autre';
   statut: 'brouillon' | 'emis' | 'paye' | 'annule';
   observations?: string;
+  // Nouveaux champs
+  referenceMarche?: string; // Référence du Marché
+  avisMunicipalite?: string; // Avis de la Municipalité
+  numeroDeliberation?: string; // N° Délibération
+  dateDeliberation?: Date; // Date de Délibération
+  montantPrecompter?: number; // Montant à précompter
   personnelId: number; // Agent qui a créé le mandat
   createdAt: Date;
   updatedAt: Date;

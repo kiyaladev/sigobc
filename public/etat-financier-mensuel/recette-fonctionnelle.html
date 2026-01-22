@@ -239,6 +239,154 @@
     </div>
 
     <script>
+      // Convertir un nombre en lettres (français)
+      function numberToWords(num) {
+        if (num === 0) return 'zéro';
+        if (num === undefined || num === null) return 'zéro';
+
+        num = Math.round(num);
+        if (num < 0) return 'moins ' + numberToWords(-num);
+
+        const units = [
+          '',
+          'un',
+          'deux',
+          'trois',
+          'quatre',
+          'cinq',
+          'six',
+          'sept',
+          'huit',
+          'neuf',
+          'dix',
+          'onze',
+          'douze',
+          'treize',
+          'quatorze',
+          'quinze',
+          'seize',
+          'dix-sept',
+          'dix-huit',
+          'dix-neuf',
+        ];
+        const tens = [
+          '',
+          '',
+          'vingt',
+          'trente',
+          'quarante',
+          'cinquante',
+          'soixante',
+          'soixante',
+          'quatre-vingt',
+          'quatre-vingt',
+        ];
+
+        function convertLessThanThousand(n) {
+          if (n === 0) return '';
+
+          let result = '';
+
+          // Centaines
+          if (n >= 100) {
+            if (Math.floor(n / 100) === 1) {
+              result = 'cent';
+            } else {
+              result = units[Math.floor(n / 100)] + ' cent';
+            }
+            n = n % 100;
+            if (n > 0) result += ' ';
+            else if (Math.floor(n / 100) > 1 && n === 0) result += 's';
+          }
+
+          // Dizaines et unités
+          if (n >= 20) {
+            const tenIndex = Math.floor(n / 10);
+            const unit = n % 10;
+
+            if (tenIndex === 7 || tenIndex === 9) {
+              // 70-79 et 90-99
+              result += tens[tenIndex];
+              if (unit === 1 && tenIndex === 7) {
+                result += '-et-onze';
+              } else {
+                result += '-' + units[10 + unit];
+              }
+            } else if (tenIndex === 8) {
+              // 80-89
+              result += tens[tenIndex];
+              if (unit === 0) {
+                result += 's';
+              } else {
+                result += '-' + units[unit];
+              }
+            } else {
+              result += tens[tenIndex];
+              if (unit === 1) {
+                result += '-et-un';
+              } else if (unit > 0) {
+                result += '-' + units[unit];
+              }
+            }
+          } else if (n > 0) {
+            result += units[n];
+          }
+
+          return result;
+        }
+
+        function convertToWords(n) {
+          if (n === 0) return 'zéro';
+
+          let result = '';
+
+          // Milliards
+          if (n >= 1000000000) {
+            const billions = Math.floor(n / 1000000000);
+            if (billions === 1) {
+              result += 'un milliard';
+            } else {
+              result += convertLessThanThousand(billions) + ' milliards';
+            }
+            n = n % 1000000000;
+            if (n > 0) result += ' ';
+          }
+
+          // Millions
+          if (n >= 1000000) {
+            const millions = Math.floor(n / 1000000);
+            if (millions === 1) {
+              result += 'un million';
+            } else {
+              result += convertLessThanThousand(millions) + ' millions';
+            }
+            n = n % 1000000;
+            if (n > 0) result += ' ';
+          }
+
+          // Milliers
+          if (n >= 1000) {
+            const thousands = Math.floor(n / 1000);
+            if (thousands === 1) {
+              result += 'mille';
+            } else {
+              result += convertLessThanThousand(thousands) + ' mille';
+            }
+            n = n % 1000;
+            if (n > 0) result += ' ';
+          }
+
+          // Reste
+          if (n > 0) {
+            result += convertLessThanThousand(n);
+          }
+
+          return result.trim();
+        }
+
+        return convertToWords(num).toUpperCase();
+      }
+
       // Formater un nombre en format monétaire
       function formatNumber(num) {
         if (num === 0 || num === undefined || num === null) return '0';
@@ -414,8 +562,8 @@
               const emissionAnt = ligne.emissionAnt || ligne.antecedent || 0;
               const emissionMois = ligne.emissionMois || ligne.recetteMois || 0;
               const emissionTotal = ligne.emissionTotal || ligne.total || 0;
-              const resteAEmettre = (ligne.prevision || 0) - emissionTotal;
-              const resteARecouvrer = emissionTotal - (ligne.total || 0);
+              // RESTE A EMETTRE est vide, RESTE A RECOUVRER = Prévision - Total Recouvré
+              const resteARecouvrer = (ligne.prevision || 0) - (ligne.total || 0);
 
               row.innerHTML = `
                 <td class="col-code">${ligne.code}</td>
@@ -424,7 +572,7 @@
                 <td class="col-num">${formatNumber(emissionAnt)}</td>
                 <td class="col-num">${formatNumber(emissionMois)}</td>
                 <td class="col-num">${formatNumber(emissionTotal)}</td>
-                <td class="col-num">${formatNumber(resteAEmettre)}</td>
+                <td class="col-num"></td>
                 <td class="col-num">${formatNumber(ligne.antecedent)}</td>
                 <td class="col-num">${formatNumber(ligne.recetteMois)}</td>
                 <td class="col-num">${formatNumber(ligne.total)}</td>
@@ -438,8 +586,8 @@
             const chapTotalRow = document.createElement('tr');
             chapTotalRow.className = 'sous-total';
             const chapPercent = calculatePercent(chapitre.totaux.total, chapitre.totaux.prevision);
-            const chapResteAEmettre = chapitre.totaux.prevision - chapitre.totaux.emissionTotal;
-            const chapResteARecouvrer = chapitre.totaux.emissionTotal - chapitre.totaux.total;
+            // RESTE A RECOUVRER = Prévision - Total Recouvré
+            const chapResteARecouvrer = chapitre.totaux.prevision - chapitre.totaux.total;
             chapTotalRow.innerHTML = `
               <td>S/T ${chapitre.code}</td>
               <td>SOUS TOTAL CHAP. ${chapitre.code}</td>
@@ -447,7 +595,7 @@
               <td class="col-num">${formatNumber(chapitre.totaux.emissionAnt)}</td>
               <td class="col-num">${formatNumber(chapitre.totaux.emissionMois)}</td>
               <td class="col-num">${formatNumber(chapitre.totaux.emissionTotal)}</td>
-              <td class="col-num">${formatNumber(chapResteAEmettre)}</td>
+              <td class="col-num"></td>
               <td class="col-num">${formatNumber(chapitre.totaux.antecedent)}</td>
               <td class="col-num">${formatNumber(chapitre.totaux.recetteMois)}</td>
               <td class="col-num">${formatNumber(chapitre.totaux.total)}</td>
@@ -461,8 +609,8 @@
           const sectionTotalRow = document.createElement('tr');
           sectionTotalRow.className = 'sous-total';
           const sectionPercent = calculatePercent(section.totaux.total, section.totaux.prevision);
-          const sectionResteAEmettre = section.totaux.prevision - section.totaux.emissionTotal;
-          const sectionResteARecouvrer = section.totaux.emissionTotal - section.totaux.total;
+          // RESTE A RECOUVRER = Prévision - Total Recouvré
+          const sectionResteARecouvrer = section.totaux.prevision - section.totaux.total;
           sectionTotalRow.innerHTML = `
             <td>S/T ${section.code}</td>
             <td>SOUS TOTAL SECTION ${section.code}</td>
@@ -470,7 +618,7 @@
             <td class="col-num">${formatNumber(section.totaux.emissionAnt)}</td>
             <td class="col-num">${formatNumber(section.totaux.emissionMois)}</td>
             <td class="col-num">${formatNumber(section.totaux.emissionTotal)}</td>
-            <td class="col-num">${formatNumber(sectionResteAEmettre)}</td>
+            <td class="col-num"></td>
             <td class="col-num">${formatNumber(section.totaux.antecedent)}</td>
             <td class="col-num">${formatNumber(section.totaux.recetteMois)}</td>
             <td class="col-num">${formatNumber(section.totaux.total)}</td>
@@ -484,10 +632,8 @@
         const totalRow = document.createElement('tr');
         totalRow.className = 'total-section';
         const totalPercent = calculatePercent(data.totaux.total, data.totaux.prevision);
-        const totalResteAEmettre =
-          data.totaux.prevision - (data.totaux.emissionTotal || data.totaux.total);
-        const totalResteARecouvrer =
-          (data.totaux.emissionTotal || data.totaux.total) - data.totaux.total;
+        // RESTE A RECOUVRER = Prévision - Total Recouvré
+        const totalResteARecouvrer = data.totaux.prevision - data.totaux.total;
         totalRow.innerHTML = `
           <td>TOTAL</td>
           <td>TOTAL GENERAL DES RECETTES TITRE I</td>
@@ -495,7 +641,7 @@
           <td class="col-num">${formatNumber(data.totaux.emissionAnt || data.totaux.antecedent)}</td>
           <td class="col-num">${formatNumber(data.totaux.emissionMois || data.totaux.recetteMois)}</td>
           <td class="col-num">${formatNumber(data.totaux.emissionTotal || data.totaux.total)}</td>
-          <td class="col-num">${formatNumber(totalResteAEmettre)}</td>
+          <td class="col-num"></td>
           <td class="col-num">${formatNumber(data.totaux.antecedent)}</td>
           <td class="col-num">${formatNumber(data.totaux.recetteMois)}</td>
           <td class="col-num">${formatNumber(data.totaux.total)}</td>
@@ -536,9 +682,9 @@
           // Remplir le tableau
           fillTable(data);
 
-          // Mettre à jour le pied de page
+          // Mettre à jour le pied de page avec le montant en lettres
           document.getElementById('footerText').textContent =
-            `Arrêté le présent état à la somme de : ${formatNumber(data.totaux.total)} FRANCS CFA.`;
+            `Arrêté le présent état à la somme de : ${numberToWords(data.totaux.total)} FRANCS CFA.`;
 
           // Afficher le contenu
           document.getElementById('loading').style.display = 'none';
