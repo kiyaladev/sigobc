@@ -29,10 +29,8 @@
       :columns="columns"
       :loading="loading"
       show-view
-      show-print
       show-download
       @view="viewDeclarations"
-      @print="printBordereau"
       @download="downloadBordereauPDF"
       @edit="openDialog"
       @delete="confirmDelete"
@@ -512,71 +510,6 @@ function confirmDelete(bordereau: BordereauRecette) {
       }
     })();
   });
-}
-
-async function printBordereau(bordereau: BordereauRecette) {
-  try {
-    if (!bordereau.id) return;
-    const declarationsList = await db.declarations
-      .where('bordereauId')
-      .equals(bordereau.id)
-      .toArray();
-    const mairie = await db.mairies.get(bordereau.mairieId);
-
-    const declarationsAvecTaxes = await Promise.all(
-      declarationsList.map(async (decl) => {
-        const taxe = await db.taxes.get(decl.taxeId);
-        return {
-          natureRecette: taxe?.libelle || '',
-          montant: decl.montantRecette || decl.montant || 0,
-          dateEncaissement: decl.dateEncaissement
-            ? date.formatDate(decl.dateEncaissement, 'DD/MM/YYYY')
-            : '-',
-          nomPartieVersante: decl.nomPartieVersante || '',
-          article: taxe?.code || '',
-          numeroPiece: decl.numeroPiece || '',
-          statut: decl.statut || '',
-          adresse: decl.adresse || '',
-        };
-      }),
-    );
-
-    // Ouvrir le template HTML
-    const printWindow = window.open(
-      '/bordereau_recouvrements_v2.html?bordereauId=' + bordereau.id,
-      '_blank',
-    );
-
-    if (printWindow) {
-      printWindow.addEventListener('load', () => {
-        printWindow.postMessage(
-          {
-            type: 'FILL_BORDEREAU',
-            data: {
-              mairie: mairie?.nom || "Mairie d'Azaguié",
-              codeCommune: mairie?.code || '422',
-              ville: mairie?.ville || 'Azaguié',
-              numeroBordereau: formatNumeroBordereau(bordereau.numero, bordereau.annee),
-              annee: bordereau.annee,
-              nombreDeclarations: bordereau.nombreDeclarations,
-              montantTotal: bordereau.montantTotal,
-              totalPrecedent: bordereau.totalPrecedent || 0,
-              nouveauTotal: (bordereau.totalPrecedent || 0) + bordereau.montantTotal,
-              statut: bordereau.statut,
-              declarations: declarationsAvecTaxes,
-            },
-          },
-          '*',
-        );
-      });
-    }
-  } catch (error) {
-    console.error("Erreur lors de l'impression du bordereau:", error);
-    $q.notify({
-      type: 'negative',
-      message: "Erreur lors de l'impression du bordereau",
-    });
-  }
 }
 
 async function downloadBordereauPDF(bordereau: BordereauRecette) {
