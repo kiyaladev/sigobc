@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { db, type Utilisateur } from 'src/database/db';
+import { useDemoStore } from './demo-store';
 
 export const useAuthStore = defineStore('auth', () => {
   // State
@@ -20,6 +21,9 @@ export const useAuthStore = defineStore('auth', () => {
   const isGestionnaire = computed(
     () => currentUser.value?.role === 'admin' || currentUser.value?.role === 'gestionnaire',
   );
+
+  // Vérifier si l'utilisateur est en mode démo
+  const isDemoUser = computed(() => currentUser.value?.username === 'demo');
 
   // Actions
   async function ensureAdminExists(): Promise<void> {
@@ -41,8 +45,67 @@ export const useAuthStore = defineStore('auth', () => {
         });
         console.log('✅ Compte admin créé avec succès');
       }
+
+      // Créer le compte démo s'il n'existe pas
+      const demoUser = await db.utilisateurs.where('username').equals('demo').first();
+      if (!demoUser) {
+        console.log('🎮 Création du compte démo...');
+        await db.utilisateurs.add({
+          username: 'demo',
+          password: 'demo',
+          nom: 'Utilisateur',
+          prenom: 'Démo',
+          email: 'demo@sigobc.gov',
+          role: 'operateur', // Rôle limité pour le mode démo
+          actif: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+        console.log('✅ Compte démo créé avec succès');
+      }
     } catch (error) {
       console.error('Erreur lors de la création du compte admin:', error);
+    }
+  }
+
+  async function loginDemo(): Promise<boolean> {
+    try {
+      console.log('🎮 Connexion en mode démo...');
+
+      // S'assurer que le compte démo existe
+      await ensureAdminExists();
+
+      const demoStore = useDemoStore();
+
+      const user = await db.utilisateurs.where('username').equals('demo').first();
+
+      if (user && user.actif) {
+        currentUser.value = user;
+        isAuthenticated.value = true;
+
+        // Générer un token démo
+        const demoToken = btoa(`demo:${Date.now()}:demo_session`);
+        token.value = demoToken;
+        localStorage.setItem('auth_token', demoToken);
+
+        // Activer le mode démo
+        demoStore.activateDemoMode();
+
+        // Mettre à jour la dernière connexion
+        await db.utilisateurs.update(user.id, {
+          derniereConnexion: new Date(),
+          updatedAt: new Date(),
+        });
+
+        console.log('✅ Connexion démo réussie');
+        return true;
+      }
+
+      console.log('❌ Échec de la connexion démo');
+      return false;
+    } catch (error) {
+      console.error('Erreur lors de la connexion démo:', error);
+      return false;
     }
   }
 
@@ -94,6 +157,12 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function logout() {
+    // Désactiver le mode démo si actif
+    const demoStore = useDemoStore();
+    if (demoStore.isActive) {
+      demoStore.deactivateDemoMode();
+    }
+
     currentUser.value = null;
     isAuthenticated.value = false;
     token.value = null;
@@ -196,9 +265,11 @@ export const useAuthStore = defineStore('auth', () => {
     userRole,
     isAdmin,
     isGestionnaire,
+    isDemoUser,
 
     // Actions
     login,
+    loginDemo,
     logout,
     checkAuth,
     updateProfile,

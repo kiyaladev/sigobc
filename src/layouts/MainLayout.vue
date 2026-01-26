@@ -1,5 +1,8 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
+  <q-layout view="lHh Lpr lFf" :class="{ 'demo-mode-active': demoStore.isActive }">
+    <!-- Bannière Mode Démo -->
+    <DemoBanner />
+    
     <q-header elevated class="modern-header print-hide">
       <q-toolbar class="q-py-sm">
         <q-btn
@@ -477,18 +480,24 @@ import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useAuthStore } from 'src/stores/auth-store';
 import { useLicenseStore } from 'src/stores/license-store';
+import { useDemoStore } from 'src/stores/demo-store';
 import ThemeToggle from 'src/components/ThemeToggle.vue';
 import LicenseDialog from 'src/components/LicenseDialog.vue';
+import DemoBanner from 'src/components/DemoBanner.vue';
 
 const router = useRouter();
 const $q = useQuasar();
 const authStore = useAuthStore();
 const licenseStore = useLicenseStore();
+const demoStore = useDemoStore();
 
 const leftDrawerOpen = ref(false);
 const showLicenseDialog = ref(false);
 
 onMounted(async () => {
+  // Vérifier si une session démo est active
+  demoStore.checkDemoSession();
+  
   // Vérifier la licence au démarrage
   await licenseStore.checkLicense();
 
@@ -756,6 +765,17 @@ function onLogout() {
   }
 }
 
+// Mode démo actif - décaler le contenu pour la bannière
+.demo-mode-active {
+  .modern-header {
+    margin-top: 40px;
+  }
+  
+  .q-drawer {
+    top: 40px !important;
+  }
+}
+
 // Responsive
 @media (max-width: 1024px) {
   .modern-page-container {
@@ -766,6 +786,16 @@ function onLogout() {
 @media (max-width: 600px) {
   .modern-page-container {
     padding: 12px;
+  }
+  
+  .demo-mode-active {
+    .modern-header {
+      margin-top: 80px;
+    }
+    
+    .q-drawer {
+      top: 80px !important;
+    }
   }
 }
 </style>

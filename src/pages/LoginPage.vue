@@ -93,6 +93,25 @@
               </template>
             </q-btn>
           </div>
+
+          <!-- Bouton Mode Démo -->
+          <div class="q-mt-md">
+            <q-btn
+              label="Essayer en mode démo"
+              color="warning"
+              class="full-width demo-btn"
+              size="md"
+              icon="science"
+              :loading="demoLoading"
+              :disable="loading || demoLoading"
+              outline
+              @click="onDemoLogin"
+            >
+              <template v-slot:loading>
+                <q-spinner-dots />
+              </template>
+            </q-btn>
+          </div>
         </q-form>
       </q-card-section>
 
@@ -108,9 +127,31 @@
     <!-- Informations de démonstration -->
     <q-card class="demo-info scale-in q-pa-md q-mt-md" flat bordered>
       <div class="text-subtitle2 text-weight-bold q-mb-sm flex items-center">
-        <q-icon name="info" color="grey-7" size="20px" class="q-mr-xs" />
-        Comptes de démonstration
+        <q-icon name="science" color="warning" size="20px" class="q-mr-xs" />
+        Mode Démonstration
       </div>
+      <div class="text-caption text-grey-7 q-mb-sm">
+        Testez l'application avec des fonctionnalités limitées :
+      </div>
+      <div class="demo-restrictions q-mb-md">
+        <div class="demo-restriction-item">
+          <q-icon name="check_circle" color="positive" size="16px" />
+          <span>Accès en lecture à toutes les fonctionnalités</span>
+        </div>
+        <div class="demo-restriction-item">
+          <q-icon name="warning" color="warning" size="16px" />
+          <span>Création limitée (max 100 par type)</span>
+        </div>
+        <div class="demo-restriction-item">
+          <q-icon name="cancel" color="negative" size="16px" />
+          <span>Suppression et export complet désactivés</span>
+        </div>
+        <div class="demo-restriction-item">
+          <q-icon name="schedule" color="info" size="16px" />
+          <span>Session de 30 minutes</span>
+        </div>
+      </div>
+      <q-separator class="q-my-sm" />
       <div class="text-caption text-grey-7">
         <div class="q-mb-xs demo-account" @click="fillAdminCredentials" role="button" tabindex="0">
           <q-chip size="sm" color="accent" text-color="grey-9" dense> Admin </q-chip>
@@ -137,6 +178,7 @@ const password = ref('');
 const rememberMe = ref(false);
 const isPwd = ref(true);
 const loading = ref(false);
+const demoLoading = ref(false);
 
 //
 
@@ -174,6 +216,45 @@ async function onSubmit() {
     });
   } finally {
     loading.value = false;
+  }
+}
+
+async function onDemoLogin() {
+  demoLoading.value = true;
+
+  try {
+    const success = await authStore.loginDemo();
+
+    if (success) {
+      $q.notify({
+        type: 'positive',
+        message: 'Bienvenue en mode démonstration !',
+        caption: 'Session limitée à 30 minutes',
+        icon: 'science',
+        position: 'top',
+        progress: true,
+        timeout: 4000,
+      });
+
+      await router.push('/');
+    } else {
+      $q.notify({
+        type: 'negative',
+        message: 'Erreur lors de la connexion en mode démo',
+        icon: 'error',
+        position: 'top',
+      });
+    }
+  } catch (error) {
+    console.error('Erreur de connexion démo:', error);
+    $q.notify({
+      type: 'negative',
+      message: 'Une erreur est survenue',
+      icon: 'error',
+      position: 'top',
+    });
+  } finally {
+    demoLoading.value = false;
   }
 }
 
@@ -325,6 +406,20 @@ function onForgotPassword() {
   background: #e67e22;
 }
 
+// Bouton Mode Démo
+.demo-btn {
+  border-radius: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border-width: 2px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(243, 156, 18, 0.3);
+  }
+}
+
 // Carte de démonstration
 .demo-info {
   max-width: 480px;
@@ -335,6 +430,24 @@ function onForgotPassword() {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
   position: relative;
   z-index: 1;
+}
+
+// Liste des restrictions démo
+.demo-restrictions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.demo-restriction-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+
+  .q-icon {
+    flex-shrink: 0;
+  }
 }
 
 .demo-account {

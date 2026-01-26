@@ -7,6 +7,7 @@ import {
 } from 'vue-router';
 import routes from './routes';
 import { useAuthStore } from 'src/stores/auth-store';
+import { useDemoStore } from 'src/stores/demo-store';
 
 /*
  * If not building with SSR mode, you can
@@ -37,6 +38,7 @@ export default defineRouter(function (/* { store, ssrContext } */) {
   // Guard d'authentification
   Router.beforeEach(async (to, from, next) => {
     const authStore = useAuthStore();
+    const demoStore = useDemoStore();
 
     // Vérifier l'authentification si pas déjà fait
     if (!authStore.isAuthenticated) {
@@ -51,6 +53,12 @@ export default defineRouter(function (/* { store, ssrContext } */) {
 
     // Si la route nécessite des droits admin
     if (to.meta.requiresAdmin && !authStore.isAdmin) {
+      next('/');
+      return;
+    }
+
+    // Restriction mode démo : bloquer l'accès aux routes admin
+    if (to.meta.requiresAdmin && demoStore.isActive) {
       next('/');
       return;
     }
