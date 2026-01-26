@@ -348,7 +348,7 @@ const $q = useQuasar();
 // État
 const loading = ref(false);
 const currentYear = new Date().getFullYear();
-const selectedExercice = ref(currentYear);
+const selectedExercice = ref(currentYear - 1); // Année précédente par défaut pour voir les données de test
 const periodFilter = ref('annee');
 const dateDebut = ref('');
 const dateFin = ref('');
@@ -359,7 +359,7 @@ const mandats = ref<Mandat[]>([]);
 const chapitres = ref<Chapitre[]>([]);
 
 // Options
-const exerciceOptions = ref<number[]>([currentYear - 1, currentYear, currentYear + 1]);
+const exerciceOptions = ref<number[]>([currentYear - 2, currentYear - 1, currentYear]);
 
 const periodOptions = [
   { label: "Aujourd'hui", value: 'jour' },
@@ -508,32 +508,35 @@ function filterMandatsByPeriod(mandatsList: Mandat[]): Mandat[] {
 
 // Gestion des périodes
 function onPeriodChange() {
-  const today = new Date();
+  const exercice = selectedExercice.value;
   let debut = new Date();
   let fin = new Date();
 
   switch (periodFilter.value) {
     case 'jour':
-      debut = new Date(today);
-      fin = new Date(today);
+      // Pour l'exercice sélectionné, on montre le dernier jour de l'année
+      debut = new Date(exercice, 11, 31);
+      fin = new Date(exercice, 11, 31);
       break;
     case 'semaine':
-      debut = new Date(today.setDate(today.getDate() - today.getDay()));
-      fin = new Date();
+      // Dernière semaine de l'exercice
+      debut = new Date(exercice, 11, 25);
+      fin = new Date(exercice, 11, 31);
       break;
     case 'mois':
-      debut = new Date(today.getFullYear(), today.getMonth(), 1);
-      fin = new Date();
+      // Dernier mois de l'exercice (décembre)
+      debut = new Date(exercice, 11, 1);
+      fin = new Date(exercice, 11, 31);
       break;
     case 'trimestre': {
-      const quarter = Math.floor(today.getMonth() / 3);
-      debut = new Date(today.getFullYear(), quarter * 3, 1);
-      fin = new Date();
+      // Dernier trimestre (Oct-Déc)
+      debut = new Date(exercice, 9, 1);
+      fin = new Date(exercice, 11, 31);
       break;
     }
     case 'annee':
-      debut = new Date(today.getFullYear(), 0, 1);
-      fin = new Date();
+      debut = new Date(exercice, 0, 1);
+      fin = new Date(exercice, 11, 31);
       break;
     default:
       return;
@@ -547,7 +550,7 @@ function onPeriodChange() {
 
 function resetFilters() {
   periodFilter.value = 'annee';
-  selectedExercice.value = currentYear;
+  selectedExercice.value = currentYear - 1;
   onPeriodChange();
 }
 
@@ -555,21 +558,29 @@ function resetFilters() {
 async function loadStatistics() {
   loading.value = true;
   try {
-    const mairieId = 1;
+    // Récupérer la première mairie disponible
+    const mairie = await db.mairies.orderBy('id').first();
+    const mairieId = mairie?.id || 1; // Fallback à 1 si aucune mairie n'est trouvée
+
+    if (!mairieId) {
+      console.warn('Aucune mairie trouvée et ID par défaut invalide');
+      return;
+    }
+
     const exercice = selectedExercice.value;
 
     const [previsionsList, mandatsList, chapitresList] = await Promise.all([
       db.previsions
-        .where('exercice')
-        .equals(exercice)
-        .and((p) => p.mairieId === mairieId)
+        .where('mairieId')
+        .equals(mairieId)
+        .filter((p) => p.exercice === exercice)
         .toArray(),
       db.mandats
-        .where('exercice')
-        .equals(exercice)
-        .and((m) => m.mairieId === mairieId)
+        .where('mairieId')
+        .equals(mairieId)
+        .filter((m) => m.exercice === exercice)
         .toArray(),
-      db.chapitres.filter((c) => c.actif && c.mairieId === mairieId).toArray(),
+      db.chapitres.where('mairieId').equals(mairieId).filter((c) => c.actif).toArray(),
     ]);
 
     previsions.value = previsionsList;

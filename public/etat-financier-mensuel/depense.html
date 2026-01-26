@@ -604,8 +604,9 @@
           fillTable(data);
 
           // Mettre à jour le pied de page
+          const montantLettres = NumberToLettres(data.totaux.total).toUpperCase();
           document.getElementById('footerText').textContent =
-            `Arrêté le présent état à la somme de : ${formatNumber(data.totaux.total)} FRANCS CFA.`;
+            `Arrêté le présent état à la somme de : ${montantLettres} FRANCS CFA.`;
 
           // Afficher le contenu
           document.getElementById('loading').style.display = 'none';
@@ -615,6 +616,92 @@
           document.title = `Etat Mensuel d'Exécution des Dépenses - ${data.moisNom} ${data.annee}`;
         }
       });
+
+      // Fonction de conversion nombre en lettres
+      function NumberToLettres(nombre) {
+        if (nombre === 0) return 'zéro';
+
+        const unites = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf'];
+        const dizaines = [
+          '',
+          '',
+          'vingt',
+          'trente',
+          'quarante',
+          'cinquante',
+          'soixante',
+          'soixante',
+          'quatre-vingt',
+          'quatre-vingt',
+        ];
+        const dizainesSpeciales = [
+          'dix',
+          'onze',
+          'douze',
+          'treize',
+          'quatorze',
+          'quinze',
+          'seize',
+          'dix-sept',
+          'dix-huit',
+          'dix-neuf',
+        ];
+
+        function convertirMoinsDeMillions(n) {
+          if (n === 0) return '';
+          if (n < 10) return unites[n];
+          if (n < 20) return dizainesSpeciales[n - 10];
+          if (n < 100) {
+            const d = Math.floor(n / 10);
+            const u = n % 10;
+            if (d === 7 || d === 9) {
+              return dizaines[d] + (u === 0 ? (d === 9 ? 's' : '') : '-' + dizainesSpeciales[u]);
+            }
+            return (
+              dizaines[d] +
+              (u === 0 ? (d === 8 ? 's' : '') : u === 1 && d < 8 ? ' et un' : '-' + unites[u])
+            );
+          }
+          if (n < 1000) {
+            const c = Math.floor(n / 100);
+            const r = n % 100;
+            return (
+              (c === 1 ? 'cent' : unites[c] + ' cent') +
+              (r === 0 ? (c > 1 ? 's' : '') : ' ' + convertirMoinsDeMillions(r))
+            );
+          }
+          if (n < 1000000) {
+            const m = Math.floor(n / 1000);
+            const r = n % 1000;
+            return (
+              (m === 1 ? 'mille' : convertirMoinsDeMillions(m) + ' mille') +
+              (r === 0 ? '' : ' ' + convertirMoinsDeMillions(r))
+            );
+          }
+          const millions = Math.floor(n / 1000000);
+          const reste = n % 1000000;
+          return (
+            (millions === 1 ? 'un million' : convertirMoinsDeMillions(millions) + ' millions') +
+            (reste === 0 ? '' : ' ' + convertirMoinsDeMillions(reste))
+          );
+        }
+
+        function convertir(n) {
+          if (n >= 1000000000) {
+            const milliards = Math.floor(n / 1000000000);
+            const reste = n % 1000000000;
+            return (
+              (milliards === 1
+                ? 'un milliard'
+                : convertirMoinsDeMillions(milliards) + ' milliards') +
+              (reste === 0 ? '' : ' ' + convertir(reste))
+            );
+          }
+          return convertirMoinsDeMillions(n);
+        }
+
+        return convertir(Math.floor(nombre));
+      }
 
       // Si pas de données après 5 secondes, afficher un message
       setTimeout(function () {

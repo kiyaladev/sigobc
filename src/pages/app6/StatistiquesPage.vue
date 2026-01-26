@@ -10,8 +10,20 @@
     <q-card class="filter-card q-mb-md">
       <q-card-section>
         <div class="row q-col-gutter-md items-end">
+          <!-- Exercice -->
+          <div class="col-12 col-sm-6 col-md-2">
+            <q-select
+              v-model="selectedExercice"
+              :options="exerciceOptions"
+              label="Exercice"
+              outlined
+              dense
+              @update:model-value="loadStatistics"
+            />
+          </div>
+
           <!-- Sélecteur de période -->
-          <div class="col-12 col-sm-6 col-md-3">
+          <div class="col-12 col-sm-6 col-md-2">
             <q-select
               v-model="periodFilter"
               :options="periodOptions"
@@ -25,17 +37,17 @@
           </div>
 
           <!-- Date début -->
-          <div class="col-12 col-sm-6 col-md-3">
+          <div class="col-12 col-sm-6 col-md-2">
             <q-input v-model="dateDebut" type="date" label="Date début" outlined dense clearable />
           </div>
 
           <!-- Date fin -->
-          <div class="col-12 col-sm-6 col-md-3">
+          <div class="col-12 col-sm-6 col-md-2">
             <q-input v-model="dateFin" type="date" label="Date fin" outlined dense clearable />
           </div>
 
           <!-- Boutons d'action -->
-          <div class="col-12 col-sm-6 col-md-3 row q-gutter-sm">
+          <div class="col-12 col-sm-6 col-md-4 row q-gutter-sm">
             <q-btn
               color="grey-7"
               icon="clear"
@@ -322,9 +334,14 @@ const $q = useQuasar();
 
 // Refs
 const loading = ref(false);
-const periodFilter = ref('mois');
+const currentYear = new Date().getFullYear();
+const selectedExercice = ref(currentYear - 1); // Année précédente par défaut pour voir les données de test
+const periodFilter = ref('annee');
 const dateDebut = ref('');
 const dateFin = ref('');
+
+// Options d'exercice
+const exerciceOptions = ref<number[]>([currentYear - 2, currentYear - 1, currentYear]);
 
 // Données brutes de la base
 const declarations = ref<Declaration[]>([]);
@@ -495,32 +512,35 @@ function getTopColor(index: number): string {
 
 // Gestion des périodes
 function onPeriodChange() {
-  const today = new Date();
+  const exercice = selectedExercice.value;
   let debut = new Date();
   let fin = new Date();
 
   switch (periodFilter.value) {
     case 'jour':
-      debut = new Date(today);
-      fin = new Date(today);
+      // Pour l'exercice sélectionné, on montre le dernier jour de l'année
+      debut = new Date(exercice, 11, 31);
+      fin = new Date(exercice, 11, 31);
       break;
     case 'semaine':
-      debut = new Date(today.setDate(today.getDate() - today.getDay()));
-      fin = new Date();
+      // Dernière semaine de l'exercice
+      debut = new Date(exercice, 11, 25);
+      fin = new Date(exercice, 11, 31);
       break;
     case 'mois':
-      debut = new Date(today.getFullYear(), today.getMonth(), 1);
-      fin = new Date();
+      // Dernier mois de l'exercice (décembre)
+      debut = new Date(exercice, 11, 1);
+      fin = new Date(exercice, 11, 31);
       break;
     case 'trimestre': {
-      const quarter = Math.floor(today.getMonth() / 3);
-      debut = new Date(today.getFullYear(), quarter * 3, 1);
-      fin = new Date();
+      // Dernier trimestre (Oct-Déc)
+      debut = new Date(exercice, 9, 1);
+      fin = new Date(exercice, 11, 31);
       break;
     }
     case 'annee':
-      debut = new Date(today.getFullYear(), 0, 1);
-      fin = new Date();
+      debut = new Date(exercice, 0, 1);
+      fin = new Date(exercice, 11, 31);
       break;
     default:
       return;
@@ -533,7 +553,8 @@ function onPeriodChange() {
 }
 
 function resetFilters() {
-  periodFilter.value = 'mois';
+  periodFilter.value = 'annee';
+  selectedExercice.value = currentYear - 1;
   onPeriodChange();
 }
 
@@ -541,10 +562,29 @@ function resetFilters() {
 async function loadStatistics() {
   loading.value = true;
   try {
+    // Récupérer la première mairie disponible
+    const mairie = await db.mairies.orderBy('id').first();
+    const mairieId = mairie?.id || 1; // Fallback à 1 si aucune mairie n'est trouvée
+
+    if (!mairieId) {
+      console.warn('Aucune mairie trouvée et ID par défaut invalide');
+      return;
+    }
+
+    const exercice = selectedExercice.value;
+
     const [decl, taxesList, bordereauxList] = await Promise.all([
-      db.declarations.toArray(),
-      db.taxes.toArray(),
-      db.bordereauxRecette.toArray(),
+      db.declarations
+        .where('mairieId')
+        .equals(mairieId)
+        .filter((d) => d.exercice === exercice)
+        .toArray(),
+      db.taxes.where('mairieId').equals(mairieId).toArray(),
+      db.bordereauxRecette
+        .where('mairieId')
+        .equals(mairieId)
+        .filter((b) => b.annee === exercice)
+        .toArray(),
     ]);
 
     declarations.value = decl;
@@ -657,17 +697,14 @@ const evolutionChartConfig = computed<ChartConfiguration>(() => {
     'Nov',
     'Déc',
   ];
-  const currentYear = new Date().getFullYear();
   const monthlyData = new Array(12).fill(0);
 
   filteredDeclarations.value.forEach((d) => {
     if (d.dateEncaissement) {
       const dateVal = new Date(d.dateEncaissement);
-      if (dateVal.getFullYear() === currentYear) {
-        const month = dateVal.getMonth();
-        if (month >= 0 && month < 12) {
-          monthlyData[month] += d.montantRecette || d.montant || 0;
-        }
+      const month = dateVal.getMonth();
+      if (month >= 0 && month < 12) {
+        monthlyData[month] += d.montantRecette || d.montant || 0;
       }
     }
   });

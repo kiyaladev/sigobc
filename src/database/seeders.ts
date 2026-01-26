@@ -14,6 +14,7 @@ import type {
 } from './db';
 
 const now = new Date();
+const CURRENT_YEAR = now.getFullYear();
 
 // =================================================================
 //                      HELPERS
@@ -82,10 +83,10 @@ export async function seedDefaultData() {
 
   // 1. Mairie
   const mairieId = await db.mairies.add({
-    nom: "Mairie d'Azaguié",
+    nom: "Mairie de Vavoua",
     code: '422',
     adresse: 'Avenue Principale',
-    ville: 'Azaguié',
+    ville: 'Vavoua',
     departement: 'Agboville',
     region: 'Agnéby-Tiassa',
     codePostal: '00225',
@@ -1266,7 +1267,7 @@ export async function seedTestData(options: SeedOptions = {}) {
 
     // Seeding prévisions
     console.log(
-      `🌱 Seeding test previsions (1 per chapitre/sous-chapitre couple for 2025 & 2026)...`,
+      `🌱 Seeding test previsions (1 per chapitre/sous-chapitre couple for ${CURRENT_YEAR} & ${CURRENT_YEAR - 1})...`,
     );
     const previsionsCreated = await seedPrevisions(chapitreIds, utilisateurIds, sousChapitreIds);
     const previsionIds = previsionsCreated.map((p) => p.id!);
@@ -1467,8 +1468,8 @@ async function seedEtatFinancierMensuelRecette(taxeIds: number[], chapitreRecett
 
   const taxes = await db.taxes.toArray();
   const chapitresRecette = await db.chapitresRecette.toArray();
-  const declarations = await db.declarations.filter((d) => d.exercice === 2025).toArray();
-  const mandatsRecette = await db.mandatsRecette.filter((m) => m.exercice === 2025).toArray();
+  const declarations = await db.declarations.filter((d) => d.exercice === CURRENT_YEAR - 1).toArray();
+  const mandatsRecette = await db.mandatsRecette.filter((m) => m.exercice === CURRENT_YEAR - 1).toArray();
 
   // Filtrer les taxes App6 fonctionnelles (codes >= 7000)
   const app6Taxes = taxes.filter((t) => {
@@ -1548,7 +1549,7 @@ async function seedEtatFinancierMensuelRecette(taxeIds: number[], chapitreRecett
     if (!chapitreRecette) continue;
 
     etats.push({
-      annee: 2025,
+      annee: CURRENT_YEAR - 1,
       taxeId,
       chapitreRecetteId,
       taxeCode: taxe.code,
@@ -1585,7 +1586,7 @@ async function seedEtatFinancierMensuelRecette(taxeIds: number[], chapitreRecett
 
   await db.etatFinancierMensuelRecette.bulkAdd(etats as EtatFinancierMensuelRecette[]);
   console.log(
-    `✅ ${etats.length} états financiers mensuels recettes créés pour 2025 (calculés à partir des déclarations)`,
+    `✅ ${etats.length} états financiers mensuels recettes créés pour ${CURRENT_YEAR - 1} (calculés à partir des déclarations)`,
   );
 }
 
@@ -1596,16 +1597,16 @@ async function seedEtatFinancierMensuelRecette(taxeIds: number[], chapitreRecett
 async function seedBordereauxRecettes(personnelIds: number[]) {
   const bordereaux: Partial<BordereauRecette>[] = [];
 
-  // Générer 8 bordereaux validés pour Novembre et Décembre 2025
+  // Générer 8 bordereaux validés pour les derniers mois de l'année précédente (pour avoir des données dans le passé)
   for (let i = 1; i <= 8; i++) {
     // Alterner entre Novembre et Décembre
     const mois = i <= 4 ? 10 : 11; // 10 = Novembre, 11 = Décembre
     const jour = randomAmount(1, 28);
-    const dateEmission = new Date(2025, mois, jour);
+    const dateEmission = new Date(CURRENT_YEAR - 1, mois, jour);
 
     bordereaux.push({
       numero: i,
-      annee: 2025,
+      annee: CURRENT_YEAR - 1,
       mairieId: DEFAULT_MAIRIE_ID,
       montantTotal: 0, // Sera mis à jour après
       nombreDeclarations: 0,
@@ -1613,12 +1614,12 @@ async function seedBordereauxRecettes(personnelIds: number[]) {
       personnelId: randomChoice(personnelIds),
       createdAt: dateEmission,
       updatedAt: now,
-      dateTransmission: new Date(2025, mois, jour + 5),
+      dateTransmission: new Date(CURRENT_YEAR - 1, mois, jour + 5),
     });
   }
 
   await db.bordereauxRecette.bulkAdd(bordereaux as BordereauRecette[]);
-  console.log(`✅ ${bordereaux.length} bordereaux de recettes créés (validés, Nov-Déc 2025)`);
+  console.log(`✅ ${bordereaux.length} bordereaux de recettes créés (validés, Nov-Déc ${CURRENT_YEAR - 1})`);
 
   return await db.bordereauxRecette.toArray();
 }
@@ -1627,7 +1628,7 @@ async function seedPrevisionsRecettes(personnelIds: number[]) {
   const taxes = await db.taxes.toArray();
   const previsions: Partial<PrevisionRecette>[] = [];
 
-  // Une prévision par taxe pour 2025 uniquement
+  // Une prévision par taxe pour l'année précédente (pour avoir des données cohérentes avec les déclarations)
   for (const taxe of taxes) {
     if (!taxe.id) continue;
 
@@ -1635,20 +1636,20 @@ async function seedPrevisionsRecettes(personnelIds: number[]) {
     const montantRealise = Math.round(montantPrevu * (randomAmount(70, 120) / 100));
 
     previsions.push({
-      exercice: 2025,
+      exercice: CURRENT_YEAR - 1,
       taxeId: taxe.id,
       mairieId: DEFAULT_MAIRIE_ID,
       montantPrevu,
       montantRealise,
       statut: 'validee',
       personnelId: randomChoice(personnelIds),
-      createdAt: new Date(2024, 11, 15),
+      createdAt: new Date(CURRENT_YEAR - 2, 11, 15),
       updatedAt: now,
     });
   }
 
   await db.previsionsRecettes.bulkAdd(previsions as PrevisionRecette[]);
-  console.log(`✅ ${previsions.length} prévisions de recettes créées (1 par taxe, 2025)`);
+  console.log(`✅ ${previsions.length} prévisions de recettes créées (1 par taxe, ${CURRENT_YEAR - 1})`);
 }
 
 async function seedDeclarations(personnelIds: number[], bordereaux: BordereauRecette[]) {
@@ -1699,13 +1700,13 @@ async function seedDeclarations(personnelIds: number[], bordereaux: BordereauRec
 
       const montant = taxe.montant || randomAmount(5000, 500000);
 
-      // Alterner entre Novembre et Décembre 2025
+      // Alterner entre Novembre et Décembre de l'année précédente (pour avoir des données dans le passé)
       const mois = randomChoice([10, 11]);
       const jour = randomAmount(1, 28);
-      const d = new Date(2025, mois, jour);
+      const d = new Date(CURRENT_YEAR - 1, mois, jour);
 
       declarations.push({
-        exercice: 2025,
+        exercice: CURRENT_YEAR - 1,
         numeroPiece: `P-${numeroPiece++}`,
         dateDeclaration: d,
         dateEncaissement: d,
@@ -1762,8 +1763,8 @@ async function seedPrevisions(
 ) {
   const previsions: Partial<Prevision>[] = [];
 
-  // En 2026: créer une prévision pour CHAQUE combinaison sous-chapitre/chapitre
-  console.log('🌱 Creating previsions 2026 for all sous-chapitres with all 8 chapitres...');
+  // Année courante: créer une prévision pour CHAQUE combinaison sous-chapitre/chapitre
+  console.log(`🌱 Creating previsions ${CURRENT_YEAR} for all sous-chapitres with all 8 chapitres...`);
 
   for (const sousChapitreId of sousChapitreIds) {
     for (const chapitreId of chapitreIds) {
@@ -1772,7 +1773,7 @@ async function seedPrevisions(
       const montantDisponible = montantPrevu;
 
       const prevision: Partial<Prevision> = {
-        exercice: 2026,
+        exercice: CURRENT_YEAR,
         chapitreId,
         sousChapitreId,
         mairieId: DEFAULT_MAIRIE_ID,
@@ -1781,7 +1782,7 @@ async function seedPrevisions(
         montantDisponible,
         statut: 'validee',
         personnelId: randomChoice(personnelIds),
-        createdAt: new Date(2025, 11, 15),
+        createdAt: new Date(CURRENT_YEAR - 1, 11, 15),
         updatedAt: now,
       };
 
@@ -1789,13 +1790,13 @@ async function seedPrevisions(
     }
   }
 
-  const previsions2026Count = previsions.length;
+  const previsionsCurrentYearCount = previsions.length;
   console.log(
-    `📊 ${previsions2026Count} prévisions 2026 créées (${sousChapitreIds.length} sous-chapitres x ${chapitreIds.length} chapitres)`,
+    `📊 ${previsionsCurrentYearCount} prévisions ${CURRENT_YEAR} créées (${sousChapitreIds.length} sous-chapitres x ${chapitreIds.length} chapitres)`,
   );
 
-  // Créer UNE prévision pour CHAQUE couple chapitre/sous-chapitre pour 2025 (exactement 1 par couple)
-  console.log('🌱 Creating previsions 2025 for all sous-chapitres/chapitres (1 per couple)...');
+  // Créer UNE prévision pour CHAQUE couple chapitre/sous-chapitre pour l'année précédente (exactement 1 par couple)
+  console.log(`🌱 Creating previsions ${CURRENT_YEAR - 1} for all sous-chapitres/chapitres (1 per couple)...`);
 
   for (const sousChapitreId of sousChapitreIds) {
     for (const chapitreId of chapitreIds) {
@@ -1804,7 +1805,7 @@ async function seedPrevisions(
       const montantDisponible = montantPrevu - montantEngage;
 
       const prevision: Partial<Prevision> = {
-        exercice: 2025,
+        exercice: CURRENT_YEAR - 1,
         chapitreId,
         sousChapitreId,
         mairieId: DEFAULT_MAIRIE_ID,
@@ -1813,7 +1814,7 @@ async function seedPrevisions(
         montantDisponible,
         statut: 'validee',
         personnelId: randomChoice(personnelIds),
-        createdAt: new Date(2024, 11, 15), // Créée en décembre 2024
+        createdAt: new Date(CURRENT_YEAR - 2, 11, 15), // Créée en décembre de l'année précédente
         updatedAt: now,
       };
 
@@ -1821,14 +1822,14 @@ async function seedPrevisions(
     }
   }
 
-  const previsions2025Count = previsions.length - previsions2026Count;
+  const previsionsPreviousYearCount = previsions.length - previsionsCurrentYearCount;
   console.log(
-    `📊 ${previsions2025Count} prévisions 2025 créées (${sousChapitreIds.length} sous-chapitres x ${chapitreIds.length} chapitres)`,
+    `📊 ${previsionsPreviousYearCount} prévisions ${CURRENT_YEAR - 1} créées (${sousChapitreIds.length} sous-chapitres x ${chapitreIds.length} chapitres)`,
   );
 
   await db.previsions.bulkAdd(previsions as Prevision[]);
   console.log(
-    `✅ ${previsions.length} prévisions créées au total (${previsions2026Count} pour 2026 + ${previsions2025Count} pour 2025)`,
+    `✅ ${previsions.length} prévisions créées au total (${previsionsCurrentYearCount} pour ${CURRENT_YEAR} + ${previsionsPreviousYearCount} pour ${CURRENT_YEAR - 1})`,
   );
 
   const created = await db.previsions.toArray();
@@ -1837,7 +1838,7 @@ async function seedPrevisions(
 
 async function seedBordereauMandats(personnelIds: number[], count: number = 20) {
   const bordereauMandats: Partial<BordereauMandat>[] = [];
-  const exercices = [2024, 2025, 2026];
+  const exercices = [CURRENT_YEAR - 2, CURRENT_YEAR - 1, CURRENT_YEAR];
   let numeroGlobal = 1;
 
   for (let i = 0; i < count; i++) {
@@ -1845,12 +1846,12 @@ async function seedBordereauMandats(personnelIds: number[], count: number = 20) 
     const mois = Math.floor((i / count) * 12);
     const dateEmission = new Date(exercice, mois, randomAmount(1, 28));
 
-    if (exercice === 2026 && dateEmission > now) {
+    if (exercice === CURRENT_YEAR && dateEmission > now) {
       dateEmission.setTime(now.getTime() - randomAmount(1, 30) * 24 * 60 * 60 * 1000);
     }
 
     const statuts: Array<'ouvert' | 'ferme'> = ['ouvert', 'ferme'];
-    const statut = exercice < 2026 ? 'ferme' : randomChoice(statuts);
+    const statut = exercice < CURRENT_YEAR ? 'ferme' : randomChoice(statuts);
 
     bordereauMandats.push({
       numero: numeroGlobal++,
@@ -1912,19 +1913,19 @@ async function seedMandats(
   const MONTH_SPECS: Array<{ label: string; start: Date; end: Date; exercice: number }> = [
     {
       label: 'novembre',
-      exercice: 2025,
-      start: new Date(2025, 10, 1),
-      end: new Date(2025, 10, 30),
+      exercice: CURRENT_YEAR,
+      start: new Date(CURRENT_YEAR, 10, 1),
+      end: new Date(CURRENT_YEAR, 10, 30),
     },
     {
       label: 'décembre',
-      exercice: 2025,
-      start: new Date(2025, 11, 1),
-      end: new Date(2025, 11, 31),
+      exercice: CURRENT_YEAR,
+      start: new Date(CURRENT_YEAR, 11, 1),
+      end: new Date(CURRENT_YEAR, 11, 31),
     },
   ];
 
-  // Générer 3 mandats pour chaque couple chapitre/sous-chapitre, pour novembre ET décembre 2025
+  // Générer 3 mandats pour chaque couple chapitre/sous-chapitre, pour novembre ET décembre de l'année courante
   for (const monthSpec of MONTH_SPECS) {
     for (const chapitreId of chapitreIds) {
       for (const sousChapitreId of sousChapitreIds) {
@@ -2081,15 +2082,15 @@ async function seedMandatsRecette(
   const MONTH_SPECS = [
     {
       label: 'novembre',
-      exercice: 2025,
-      start: new Date(2025, 10, 1),
-      end: new Date(2025, 10, 30),
+      exercice: CURRENT_YEAR,
+      start: new Date(CURRENT_YEAR, 10, 1),
+      end: new Date(CURRENT_YEAR, 10, 30),
     },
     {
       label: 'décembre',
-      exercice: 2025,
-      start: new Date(2025, 11, 1),
-      end: new Date(2025, 11, 31),
+      exercice: CURRENT_YEAR,
+      start: new Date(CURRENT_YEAR, 11, 1),
+      end: new Date(CURRENT_YEAR, 11, 31),
     },
   ];
 

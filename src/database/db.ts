@@ -1,6 +1,6 @@
 import Dexie, { type EntityTable } from 'dexie';
 
-// Constante pour l'ID de la mairie par défaut (Mairie d'Azaguié)
+// Constante pour l'ID de la mairie par défaut (Mairie de Vavoua)
 export const DEFAULT_MAIRIE_ID = 1;
 
 // Interfaces pour les modèles de données
@@ -445,12 +445,12 @@ export async function initializeDatabase() {
     // Données de démonstration
     const now = new Date();
 
-    // Créer la Mairie d'Azaguié (mairie unique de l'application)
+    // Créer la Mairie de Vavoua (mairie unique de l'application)
     const mairieId = await db.mairies.add({
-      nom: "Mairie d'Azaguié",
+      nom: "Mairie de Vavoua",
       code: '422',
       adresse: 'Avenue Principale',
-      ville: 'Azaguié',
+      ville: 'Vavoua',
       codePostal: '00225',
       telephone: '+225 XX XX XX XX',
       email: 'contact@mairie-azaguie.ci',

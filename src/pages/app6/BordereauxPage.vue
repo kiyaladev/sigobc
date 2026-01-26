@@ -551,9 +551,9 @@ async function downloadBordereauPDF(bordereau: BordereauRecette) {
           {
             type: 'FILL_AND_PRINT',
             data: {
-              mairie: mairie?.nom || "Mairie d'Azaguié",
+              mairie: mairie?.nom || "Mairie de Vavoua",
               codeCommune: mairie?.code || '422',
-              ville: mairie?.ville || 'Azaguié',
+              ville: mairie?.ville || 'Vavoua',
               numeroBordereau: formatNumeroBordereau(bordereau.numero, bordereau.annee),
               annee: bordereau.annee,
               nombreDeclarations: bordereau.nombreDeclarations,

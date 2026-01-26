@@ -323,7 +323,7 @@ const $q = useQuasar();
 // État
 const loading = ref(false);
 const currentYear = new Date().getFullYear();
-const selectedExercice = ref(currentYear);
+const selectedExercice = ref(currentYear - 1); // Année précédente par défaut pour voir les données de test
 
 // Données brutes
 const previsions = ref<Prevision[]>([]);
@@ -332,7 +332,7 @@ const declarations = ref<Declaration[]>([]);
 const bordereaux = ref<BordereauRecette[]>([]);
 
 // Options
-const exerciceOptions = ref<number[]>([currentYear - 1, currentYear, currentYear + 1]);
+const exerciceOptions = ref<number[]>([currentYear - 2, currentYear - 1, currentYear]);
 
 // Statistiques des dépenses
 const depensesStats = computed(() => {
@@ -402,22 +402,32 @@ function formatMontant(montant: number): string {
 async function loadStatistics() {
   loading.value = true;
   try {
-    const mairieId = 1;
+    // Récupérer la première mairie disponible
+    const mairie = await db.mairies.orderBy('id').first();
+    const mairieId = mairie?.id || 1;
     const exercice = selectedExercice.value;
 
     const [previsionsList, mandatsList, declarationsList, bordereauxList] = await Promise.all([
       db.previsions
-        .where('exercice')
-        .equals(exercice)
-        .and((p) => p.mairieId === mairieId)
+        .where('mairieId')
+        .equals(mairieId)
+        .filter((p) => p.exercice === exercice)
         .toArray(),
       db.mandats
-        .where('exercice')
-        .equals(exercice)
-        .and((m) => m.mairieId === mairieId)
+        .where('mairieId')
+        .equals(mairieId)
+        .filter((m) => m.exercice === exercice)
         .toArray(),
-      db.declarations.filter((d) => d.exercice === exercice).toArray(),
-      db.bordereauxRecette.filter((b) => b.annee === exercice).toArray(),
+      db.declarations
+        .where('mairieId')
+        .equals(mairieId)
+        .filter((d) => d.exercice === exercice)
+        .toArray(),
+      db.bordereauxRecette
+        .where('mairieId')
+        .equals(mairieId)
+        .filter((b) => b.annee === exercice)
+        .toArray(),
     ]);
 
     previsions.value = previsionsList;

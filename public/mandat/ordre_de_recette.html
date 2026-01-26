@@ -233,6 +233,26 @@
       .small-text {
         font-size: 9pt;
       }
+      .warning-box {
+        border: 1px solid #000;
+        margin-top: 5mm;
+        padding: 3mm;
+        font-size: 10pt;
+      }
+      .warning-title {
+        text-align: center;
+        font-weight: bold;
+        font-size: 11pt;
+        margin-bottom: 2mm;
+        text-transform: uppercase;
+      }
+      .warning-box p {
+        margin-bottom: 2mm;
+        text-align: justify;
+      }
+      .warning-box p:last-child {
+        margin-bottom: 0;
+      }
     </style>
   </head>
   <body>
@@ -244,13 +264,13 @@
             <div class="header-cell header-left">
               <div class="country-name">REPUBLIQUE DE COTE D'IVOIRE</div>
               <div class="department">Département</div>
-              <div class="department">De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}</div>
+              <div class="department">De {{ mairie?.ville?.toUpperCase() || 'Vavoua' }}</div>
               <div class="ville-section">
                 <div class="underline" style="font-weight: bold">
-                  VILLE De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}.
+                  VILLE De {{ mairie?.ville?.toUpperCase() || 'Vavoua' }}.
                 </div>
                 <div class="underline" style="margin-top: 3mm">
-                  COMMUNE De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}
+                  COMMUNE De {{ mairie?.ville?.toUpperCase() || 'Vavoua' }}
                 </div>
                 <div style="margin-top: 3mm">
                   Code &nbsp;&nbsp;{{ mairie?.code || '422' }}...............................
@@ -282,7 +302,7 @@
             <div class="header-cell header-right">
               <div class="recette-title">RECETTE MUNICIPALE</div>
               <div class="field-line">
-                De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}.................................
+                De {{ mairie?.ville?.toUpperCase() || 'Vavoua' }}.................................
               </div>
               <div class="field-line" style="margin-top: 4mm">
                 N° d'ordre :.........<span class="handwritten">{{ mandat.numeroMandat }}</span
@@ -371,14 +391,14 @@
               <div class="country-name">REPUBLIQUE DE COTE D'IVOIRE</div>
               <div class="department">Département</div>
               <div class="department">
-                De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}.................................
+                De {{ mairie?.ville?.toUpperCase() || 'Vavoua' }}.................................
               </div>
               <div class="ville-section">
                 <div>
-                  VILLE De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}.....................
+                  VILLE De {{ mairie?.ville?.toUpperCase() || 'Vavoua' }}.....................
                 </div>
                 <div style="margin-top: 3mm">
-                  COMMUNE De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}..........
+                  COMMUNE De {{ mairie?.ville?.toUpperCase() || 'Vavoua' }}..........
                 </div>
                 <div style="margin-top: 3mm">
                   Code {{ mairie?.code || '422' }}.................................
@@ -411,7 +431,7 @@
             <div class="header-cell header-right">
               <div class="recette-title">RECETTE MUNICIPALE</div>
               <div class="field-line">
-                De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}.................................
+                De {{ mairie?.ville?.toUpperCase() || 'Vavoua' }}.................................
               </div>
               <div class="field-line" style="margin-top: 4mm">
                 N° d'ordre :.........<span class="handwritten">{{ mandat.numeroMandat }}</span
@@ -496,13 +516,13 @@
             <div class="header-cell header-left">
               <div class="country-name">REPUBLIQUE DE COTE D'IVOIRE</div>
               <div class="department">Département</div>
-              <div class="department">De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}</div>
+              <div class="department">De {{ mairie?.ville?.toUpperCase() || 'Vavoua' }}</div>
               <div class="ville-section">
                 <div class="underline" style="font-weight: bold">
-                  VILLE De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}.
+                  VILLE De {{ mairie?.ville?.toUpperCase() || 'Vavoua' }}.
                 </div>
                 <div class="underline" style="margin-top: 3mm">
-                  COMMUNE De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}
+                  COMMUNE De {{ mairie?.ville?.toUpperCase() || 'Vavoua' }}
                 </div>
                 <div style="margin-top: 3mm">
                   Code &nbsp;&nbsp;{{ mairie?.code || '422' }}...............................
@@ -511,7 +531,7 @@
             </div>
 
             <div class="header-cell header-center">
-              <div class="document-title">ORDRE DE RECETTE</div>
+              <div class="document-title">AVERTISSEMENT</div>
               <div class="field-line">
                 EXERCICE :......................{{ mandat.exercice }}..........................
               </div>
@@ -534,7 +554,7 @@
             <div class="header-cell header-right">
               <div class="recette-title">RECETTE MUNICIPALE</div>
               <div class="field-line">
-                De {{ mairie?.ville?.toUpperCase() || 'AZAGUIÉ' }}.................................
+                De {{ mairie?.ville?.toUpperCase() || 'Vavoua' }}.................................
               </div>
               <div class="field-line" style="margin-top: 4mm">
                 N° d'ordre :.........<span class="handwritten">{{ mandat.numeroMandat }}</span
@@ -609,9 +629,27 @@
           </div>
         </div>
 
+        <div class="warning-box">
+          <div class="warning-title">AVERTISSEMENT</div>
+          <p>
+            J'ai l'honneur de vous prier de verser le plus tôt possible à ma caisse la somme dont le
+            montant est inscrit dans le cadre ci-dessus pour le motif indiqué sous la rubrique Objet
+            de la recette.
+          </p>
+          <p>
+            Je vous remercie de votre règlement et vous prie d'agréer l'assurance de mes sentiments
+            distingués.
+          </p>
+          <p>Veuillez toujours rappeler le numéro de d'ordre.</p>
+          <p>
+            Au cas où vous auriez déjà effectué le règlement de cette somme, veillez ne pas tenir
+            compte du présent avertissement.
+          </p>
+        </div>
+
         <div class="footer">
           <div class="footer-left">CT51</div>
-          <div class="footer-right">Contribuable</div>
+          <div class="footer-right">Redevable</div>
         </div>
       </div>
     </div>

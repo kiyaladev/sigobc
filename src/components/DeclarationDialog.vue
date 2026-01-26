@@ -268,7 +268,7 @@ watch(
           ? date.formatDate(props.declaration.dateEncaissement, 'YYYY-MM-DD')
           : '';
       } else {
-        // Auto-assigner la Mairie d'Azaguié
+        // Auto-assigner la Mairie de Vavoua
         localForm.value = {
           mairieId: DEFAULT_MAIRIE_ID,
           exercice: new Date().getFullYear(),
