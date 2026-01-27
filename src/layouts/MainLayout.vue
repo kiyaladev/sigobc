@@ -1,8 +1,5 @@
 <template>
-  <q-layout view="lHh Lpr lFf" :class="{ 'demo-mode-active': demoStore.isActive }">
-    <!-- Bannière Mode Démo -->
-    <DemoBanner />
-
+  <q-layout view="lHh Lpr lFf">
     <q-header elevated class="modern-header print-hide">
       <q-toolbar class="q-py-sm">
         <q-btn
@@ -64,26 +61,6 @@
                 </q-item-section>
                 <q-item-section>
                   <q-item-label>Paramètres</q-item-label>
-                </q-item-section>
-              </q-item>
-
-              <q-item clickable v-close-popup @click="openLicenseDialog" class="menu-item">
-                <q-item-section avatar>
-                  <q-icon
-                    name="verified"
-                    :color="licenseStore.isLicensed ? 'positive' : 'warning'"
-                  />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label>
-                    Licence
-                    <q-chip v-if="licenseStore.licenseType" size="sm" dense class="q-ml-xs">
-                      {{ licenseStore.licenseType }}
-                    </q-chip>
-                  </q-item-label>
-                  <q-item-label caption v-if="licenseStore.daysRemaining">
-                    {{ licenseStore.daysRemaining }} jours restants
-                  </q-item-label>
                 </q-item-section>
               </q-item>
 
@@ -464,13 +441,6 @@
         </transition>
       </router-view>
     </q-page-container>
-
-    <!-- Dialog de gestion de licence -->
-    <LicenseDialog
-      v-model="showLicenseDialog"
-      @close="showLicenseDialog = false"
-      @activated="licenseStore.checkLicense()"
-    />
   </q-layout>
 </template>
 
@@ -479,54 +449,20 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useAuthStore } from 'src/stores/auth-store';
-import { useLicenseStore } from 'src/stores/license-store';
-import { useDemoStore } from 'src/stores/demo-store';
 import ThemeToggle from 'src/components/ThemeToggle.vue';
-import LicenseDialog from 'src/components/LicenseDialog.vue';
-import DemoBanner from 'src/components/DemoBanner.vue';
 
 const router = useRouter();
 const $q = useQuasar();
 const authStore = useAuthStore();
-const licenseStore = useLicenseStore();
-const demoStore = useDemoStore();
 
 const leftDrawerOpen = ref(false);
-const showLicenseDialog = ref(false);
 
 onMounted(async () => {
-  // Vérifier si une session démo est active
-  demoStore.checkDemoSession();
-
-  // Vérifier la licence au démarrage
-  await licenseStore.checkLicense();
-
-  // Afficher un avertissement si la licence expire bientôt
-  if (licenseStore.isExpiringSoon && licenseStore.daysRemaining) {
-    $q.notify({
-      type: 'warning',
-      message: `Votre licence expire dans ${licenseStore.daysRemaining} jour(s)`,
-      caption: 'Veuillez renouveler votre licence',
-      timeout: 5000,
-      actions: [
-        {
-          label: 'Voir',
-          color: 'white',
-          handler: () => {
-            showLicenseDialog.value = true;
-          },
-        },
-      ],
-    });
-  }
+  // Application initialisée
 });
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
-}
-
-function openLicenseDialog() {
-  showLicenseDialog.value = true;
 }
 
 function onLogout() {
