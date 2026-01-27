@@ -83,7 +83,7 @@ export async function seedDefaultData() {
 
   // 1. Mairie
   const mairieId = await db.mairies.add({
-    nom: "Mairie de Vavoua",
+    nom: 'Mairie de Vavoua',
     code: '422',
     adresse: 'Avenue Principale',
     ville: 'Vavoua',
@@ -91,7 +91,7 @@ export async function seedDefaultData() {
     region: 'Agnéby-Tiassa',
     codePostal: '00225',
     telephone: '+225 23 54 00 00',
-    email: 'contact@mairie-azaguie.ci',
+    email: 'contact@mairie-vavoua.ci',
     createdAt: now,
     updatedAt: now,
   });
@@ -1468,8 +1468,12 @@ async function seedEtatFinancierMensuelRecette(taxeIds: number[], chapitreRecett
 
   const taxes = await db.taxes.toArray();
   const chapitresRecette = await db.chapitresRecette.toArray();
-  const declarations = await db.declarations.filter((d) => d.exercice === CURRENT_YEAR - 1).toArray();
-  const mandatsRecette = await db.mandatsRecette.filter((m) => m.exercice === CURRENT_YEAR - 1).toArray();
+  const declarations = await db.declarations
+    .filter((d) => d.exercice === CURRENT_YEAR - 1)
+    .toArray();
+  const mandatsRecette = await db.mandatsRecette
+    .filter((m) => m.exercice === CURRENT_YEAR - 1)
+    .toArray();
 
   // Filtrer les taxes App6 fonctionnelles (codes >= 7000)
   const app6Taxes = taxes.filter((t) => {
@@ -1619,7 +1623,9 @@ async function seedBordereauxRecettes(personnelIds: number[]) {
   }
 
   await db.bordereauxRecette.bulkAdd(bordereaux as BordereauRecette[]);
-  console.log(`✅ ${bordereaux.length} bordereaux de recettes créés (validés, Nov-Déc ${CURRENT_YEAR - 1})`);
+  console.log(
+    `✅ ${bordereaux.length} bordereaux de recettes créés (validés, Nov-Déc ${CURRENT_YEAR - 1})`,
+  );
 
   return await db.bordereauxRecette.toArray();
 }
@@ -1649,7 +1655,9 @@ async function seedPrevisionsRecettes(personnelIds: number[]) {
   }
 
   await db.previsionsRecettes.bulkAdd(previsions as PrevisionRecette[]);
-  console.log(`✅ ${previsions.length} prévisions de recettes créées (1 par taxe, ${CURRENT_YEAR - 1})`);
+  console.log(
+    `✅ ${previsions.length} prévisions de recettes créées (1 par taxe, ${CURRENT_YEAR - 1})`,
+  );
 }
 
 async function seedDeclarations(personnelIds: number[], bordereaux: BordereauRecette[]) {
@@ -1764,7 +1772,9 @@ async function seedPrevisions(
   const previsions: Partial<Prevision>[] = [];
 
   // Année courante: créer une prévision pour CHAQUE combinaison sous-chapitre/chapitre
-  console.log(`🌱 Creating previsions ${CURRENT_YEAR} for all sous-chapitres with all 8 chapitres...`);
+  console.log(
+    `🌱 Creating previsions ${CURRENT_YEAR} for all sous-chapitres with all 8 chapitres...`,
+  );
 
   for (const sousChapitreId of sousChapitreIds) {
     for (const chapitreId of chapitreIds) {
@@ -1796,7 +1806,9 @@ async function seedPrevisions(
   );
 
   // Créer UNE prévision pour CHAQUE couple chapitre/sous-chapitre pour l'année précédente (exactement 1 par couple)
-  console.log(`🌱 Creating previsions ${CURRENT_YEAR - 1} for all sous-chapitres/chapitres (1 per couple)...`);
+  console.log(
+    `🌱 Creating previsions ${CURRENT_YEAR - 1} for all sous-chapitres/chapitres (1 per couple)...`,
+  );
 
   for (const sousChapitreId of sousChapitreIds) {
     for (const chapitreId of chapitreIds) {

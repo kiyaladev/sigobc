@@ -447,13 +447,13 @@ export async function initializeDatabase() {
 
     // Créer la Mairie de Vavoua (mairie unique de l'application)
     const mairieId = await db.mairies.add({
-      nom: "Mairie de Vavoua",
+      nom: 'Mairie de Vavoua',
       code: '422',
       adresse: 'Avenue Principale',
       ville: 'Vavoua',
       codePostal: '00225',
       telephone: '+225 XX XX XX XX',
-      email: 'contact@mairie-azaguie.ci',
+      email: 'contact@mairie-vavoua.ci',
       createdAt: now,
       updatedAt: now,
     });
