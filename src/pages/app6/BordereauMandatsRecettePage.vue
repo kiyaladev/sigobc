@@ -543,7 +543,28 @@ function confirmDelete(bordereau: BordereauMandatRecette) {
 }
 
 function printBordereau(bordereau: BordereauMandatRecette) {
-  window.open('/bordereau_mandat_recette.html?bordereauId=' + bordereau.id, '_blank');
+  // Afficher un dialog avec les deux options d'impression
+  $q.dialog({
+    title: 'Impression du Bordereau',
+    message: 'Choisissez le type de bordereau à imprimer :',
+    options: {
+      type: 'checkbox',
+      model: ['emission', 'rejet'],
+      items: [
+        { label: "Bordereau d'Émission", value: 'emission' },
+        { label: 'Bordereau de Rejet', value: 'rejet' },
+      ],
+    },
+    cancel: true,
+    persistent: true,
+  }).onOk((selected: string[]) => {
+    if (selected.includes('emission')) {
+      window.open('/bordereau_mandat_recette.html?bordereauId=' + bordereau.id, '_blank');
+    }
+    if (selected.includes('rejet')) {
+      window.open('/bordereau_mandat_recette_rejet.html?bordereauId=' + bordereau.id, '_blank');
+    }
+  });
 }
 
 function downloadBordereauPDF(bordereau: BordereauMandatRecette) {

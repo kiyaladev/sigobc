@@ -308,7 +308,7 @@
               <div class="col-6">
                 <q-select
                   v-model="formData.statut"
-                  :options="['brouillon', 'emis', 'encaisse', 'annule']"
+                  :options="['brouillon', 'emis', 'encaisse', 'rejete']"
                   label="Statut *"
                   outlined
                   dense
@@ -469,7 +469,7 @@ const statutFilterOptions = [
   { label: 'Brouillon', value: 'brouillon' },
   { label: 'Émis', value: 'emis' },
   { label: 'Encaissé', value: 'encaisse' },
-  { label: 'Annulé', value: 'annule' },
+  { label: 'Rejeté', value: 'rejete' },
 ];
 
 const filteredMandats = computed(() => {
@@ -583,7 +583,7 @@ function getStatutColor(statut: string): string {
     brouillon: 'grey',
     emis: 'warning',
     encaisse: 'positive',
-    annule: 'negative',
+    rejete: 'negative',
   };
   return colors[statut] || 'grey';
 }
@@ -593,7 +593,7 @@ function formatStatut(statut: string): string {
     brouillon: 'Brouillon',
     emis: 'Émis',
     encaisse: 'Encaissé',
-    annule: 'Annulé',
+    rejete: 'Rejeté',
   };
   return labels[statut] || statut;
 }

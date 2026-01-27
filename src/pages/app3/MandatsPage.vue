@@ -132,10 +132,12 @@
           <q-btn icon="close" flat round dense v-close-popup />
         </q-card-section>
 
-        <q-card-section>
-          <q-form @submit="saveMandat" class="q-gutter-md">
-            <div class="row q-col-gutter-md">
-              <div class="col-4">
+        <q-card-section class="q-pt-md">
+          <q-form @submit="saveMandat" class="q-gutter-sm">
+            <!-- Section 1: Informations générales -->
+            <div class="text-subtitle2 text-grey-8 q-mb-xs">Informations générales</div>
+            <div class="row q-col-gutter-sm">
+              <div class="col-12 col-md-4">
                 <q-input
                   v-model="formData.numeroMandat"
                   label="Numéro Mandat *"
@@ -144,7 +146,7 @@
                   :rules="[(val) => !!val || 'Numéro requis']"
                 />
               </div>
-              <div class="col-4">
+              <div class="col-12 col-md-4">
                 <q-input
                   v-model="formData.dateMandat"
                   label="Date Mandat *"
@@ -154,7 +156,7 @@
                   :rules="[(val) => !!val || 'Date requise']"
                 />
               </div>
-              <div class="col-4">
+              <div class="col-12 col-md-4">
                 <q-input
                   v-model.number="formData.exercice"
                   label="Exercice *"
@@ -166,8 +168,12 @@
               </div>
             </div>
 
-            <div class="row q-col-gutter-md">
-              <div class="col-6">
+            <q-separator class="q-my-sm" />
+
+            <!-- Section 2: Classification budgétaire -->
+            <div class="text-subtitle2 text-grey-8 q-mb-xs">Classification budgétaire</div>
+            <div class="row q-col-gutter-sm">
+              <div class="col-12 col-md-6">
                 <q-select
                   v-model="formData.chapitreId"
                   :options="filteredChapitreOptions"
@@ -179,11 +185,10 @@
                   use-input
                   input-debounce="0"
                   :rules="[(val) => !!val || 'Chapitre requis']"
-                  hint="Sélectionner un chapitre budgétaire"
                   @filter="filterChapitre"
                 />
               </div>
-              <div class="col-6">
+              <div class="col-12 col-md-6">
                 <q-select
                   v-model="formData.sousChapitreId"
                   :options="filteredSousChapitreOptions"
@@ -195,23 +200,13 @@
                   clearable
                   use-input
                   input-debounce="0"
-                  hint="Sélectionner un sous-chapitre budgétaire"
                   @filter="filterSousChapitre"
                 />
               </div>
             </div>
 
-            <q-input
-              v-model="formData.beneficiaire"
-              label="Bénéficiaire *"
-              outlined
-              dense
-              :rules="[(val) => !!val || 'Bénéficiaire requis']"
-            />
-
-            <!-- Bordereau, RIB, Patrimonial sur la même ligne -->
-            <div class="row q-col-gutter-md">
-              <div class="col-4">
+            <div class="row q-col-gutter-sm">
+              <div class="col-12 col-md-6">
                 <q-select
                   v-model="formData.bordereauMandatId"
                   :options="filteredBordereauMandatOptions"
@@ -230,16 +225,7 @@
                   </template>
                 </q-select>
               </div>
-              <div class="col-4">
-                <q-input
-                  v-model="formData.rib"
-                  label="RIB"
-                  outlined
-                  dense
-                  placeholder="Ex: SN001 01234 123456789012 12"
-                />
-              </div>
-              <div class="col-4">
+              <div class="col-12 col-md-6">
                 <q-input
                   v-model="formData.patrimonial"
                   label="Imputation Patrimoniale"
@@ -250,9 +236,34 @@
               </div>
             </div>
 
+            <q-separator class="q-my-sm" />
+
+            <!-- Section 3: Bénéficiaire et paiement -->
+            <div class="text-subtitle2 text-grey-8 q-mb-xs">Bénéficiaire et paiement</div>
+            <div class="row q-col-gutter-sm">
+              <div class="col-12 col-md-6">
+                <q-input
+                  v-model="formData.beneficiaire"
+                  label="Bénéficiaire *"
+                  outlined
+                  dense
+                  :rules="[(val) => !!val || 'Bénéficiaire requis']"
+                />
+              </div>
+              <div class="col-12 col-md-6">
+                <q-input
+                  v-model="formData.rib"
+                  label="RIB / Compte bancaire"
+                  outlined
+                  dense
+                  placeholder="Ex: SN001 01234 123456789012 12"
+                />
+              </div>
+            </div>
+
             <q-input
               v-model="formData.objet"
-              label="Objet *"
+              label="Objet de la dépense *"
               outlined
               dense
               type="textarea"
@@ -260,34 +271,24 @@
               :rules="[(val) => !!val || 'Objet requis']"
             />
 
-            <div class="row q-col-gutter-md">
-              <div class="col-4">
+            <q-separator class="q-my-sm" />
+
+            <!-- Section 4: Détails financiers -->
+            <div class="text-subtitle2 text-grey-8 q-mb-xs">Détails financiers</div>
+
+            <div class="row q-col-gutter-sm">
+              <div class="col-12 col-md-4">
                 <q-input
                   v-model.number="formData.montant"
-                  label="Montant *"
+                  label="Montant brut *"
                   outlined
                   dense
                   type="number"
-                  prefix="XOF"
+                  suffix="XOF"
                   :rules="[(val) => !!val || 'Montant requis']"
                 />
               </div>
-              <div class="col-4">
-                <q-input v-model="formData.numeroFacture" label="N° Facture" outlined dense />
-              </div>
-              <div class="col-4">
-                <q-input
-                  v-model="formData.dateFacture"
-                  label="Date Facture"
-                  outlined
-                  dense
-                  type="date"
-                />
-              </div>
-            </div>
-
-            <div class="row q-col-gutter-md">
-              <div class="col-6">
+              <div class="col-12 col-md-4">
                 <q-select
                   v-model="formData.modePaiement"
                   :options="['virement', 'cheque', 'especes', 'autre']"
@@ -296,7 +297,7 @@
                   dense
                 />
               </div>
-              <div class="col-6">
+              <div class="col-12 col-md-4">
                 <q-select
                   v-model="formData.statut"
                   :options="['brouillon', 'emis', 'paye', 'annule']"
@@ -307,9 +308,37 @@
               </div>
             </div>
 
-            <!-- Nouveaux champs -->
-            <div class="row q-col-gutter-md">
-              <div class="col-6">
+            <div class="row q-col-gutter-sm">
+              <div class="col-12 col-md-4">
+                <q-input v-model="formData.numeroFacture" label="N° Facture" outlined dense />
+              </div>
+              <div class="col-12 col-md-4">
+                <q-input
+                  v-model="formData.dateFacture"
+                  label="Date Facture"
+                  outlined
+                  dense
+                  type="date"
+                />
+              </div>
+              <div class="col-12 col-md-4">
+                <q-input
+                  v-model.number="formData.montantPrecompter"
+                  label="Montant à précompter"
+                  outlined
+                  dense
+                  type="number"
+                  suffix="XOF"
+                />
+              </div>
+            </div>
+
+            <q-separator class="q-my-sm" />
+
+            <!-- Section 5: Informations complémentaires -->
+            <div class="text-subtitle2 text-grey-8 q-mb-xs">Informations complémentaires</div>
+            <div class="row q-col-gutter-sm">
+              <div class="col-12 col-md-6">
                 <q-input
                   v-model="formData.referenceMarche"
                   label="Référence du Marché"
@@ -317,7 +346,7 @@
                   dense
                 />
               </div>
-              <div class="col-6">
+              <div class="col-12 col-md-6">
                 <q-input
                   v-model="formData.avisMunicipalite"
                   label="Avis de la Municipalité"
@@ -327,8 +356,8 @@
               </div>
             </div>
 
-            <div class="row q-col-gutter-md">
-              <div class="col-4">
+            <div class="row q-col-gutter-sm">
+              <div class="col-12 col-md-6">
                 <q-input
                   v-model="formData.numeroDeliberation"
                   label="N° Délibération"
@@ -336,7 +365,7 @@
                   dense
                 />
               </div>
-              <div class="col-4">
+              <div class="col-12 col-md-6">
                 <q-input
                   v-model="formData.dateDeliberation"
                   label="Date de Délibération"
@@ -345,18 +374,12 @@
                   type="date"
                 />
               </div>
-              <div class="col-4">
-                <q-input
-                  v-model.number="formData.montantPrecompter"
-                  label="Montant à précompter"
-                  outlined
-                  dense
-                  type="number"
-                  prefix="XOF"
-                />
-              </div>
             </div>
 
+            <q-separator class="q-my-sm" />
+
+            <!-- Section 6: Observations -->
+            <div class="text-subtitle2 text-grey-8 q-mb-xs">Notes</div>
             <q-input
               v-model="formData.observations"
               label="Observations"
@@ -697,8 +720,8 @@ function printMandat(mandat: Mandat) {
             beneficiaireDetails: '', // This field is not in the Mandat interface
             rib: mandat.rib || '',
             montantBrut: mandat.montant,
-            montantNet: mandat.montant - (mandat.montantPrecompter || 0),
-            montantPrecompter: mandat.montantPrecompter || 0,
+            montantNet: mandat.montant,
+            montantPrecompter: '',
             montantPrecompterLettres: mandat.montantPrecompter
               ? amountToWords(mandat.montantPrecompter).toUpperCase()
               : '',

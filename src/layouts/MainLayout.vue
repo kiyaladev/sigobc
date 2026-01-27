@@ -2,7 +2,7 @@
   <q-layout view="lHh Lpr lFf" :class="{ 'demo-mode-active': demoStore.isActive }">
     <!-- Bannière Mode Démo -->
     <DemoBanner />
-    
+
     <q-header elevated class="modern-header print-hide">
       <q-toolbar class="q-py-sm">
         <q-btn
@@ -316,7 +316,7 @@
             <q-icon name="folder_open" color="green" />
           </q-item-section>
           <q-item-section>
-            <q-item-label>Bordereaux Mandats</q-item-label>
+            <q-item-label>Bordereaux Ordres Recettes</q-item-label>
           </q-item-section>
         </q-item>
 
@@ -497,7 +497,7 @@ const showLicenseDialog = ref(false);
 onMounted(async () => {
   // Vérifier si une session démo est active
   demoStore.checkDemoSession();
-  
+
   // Vérifier la licence au démarrage
   await licenseStore.checkLicense();
 
@@ -770,7 +770,7 @@ function onLogout() {
   .modern-header {
     margin-top: 40px;
   }
-  
+
   .q-drawer {
     top: 40px !important;
   }
@@ -787,12 +787,12 @@ function onLogout() {
   .modern-page-container {
     padding: 12px;
   }
-  
+
   .demo-mode-active {
     .modern-header {
       margin-top: 80px;
     }
-    
+
     .q-drawer {
       top: 80px !important;
     }

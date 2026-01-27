@@ -154,7 +154,7 @@ function exitDemoMode() {
   }).onOk(() => {
     demoStore.deactivateDemoMode();
     authStore.logout();
-    router.push('/login');
+    void router.push('/login');
   });
 }
 
@@ -172,7 +172,7 @@ function exitAndRedirect() {
   showExpirationDialog.value = false;
   demoStore.deactivateDemoMode();
   authStore.logout();
-  router.push('/login');
+  void router.push('/login');
 }
 </script>
 
