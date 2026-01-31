@@ -1180,7 +1180,12 @@ async function parseCSV(csvText: string) {
   }
 
   // Parser l'en-tête
-  const header = lines[0].split(';').map((h) => h.trim().replace(/^"|"$/g, ''));
+  const headerLine = lines[0];
+  if (!headerLine) {
+    importErrors.value.push('En-tête CSV manquant');
+    return;
+  }
+  const header = headerLine.split(';').map((h) => h.trim().replace(/^"|"$/g, ''));
 
   // Compter les mandats existants pour l'année en cours pour générer les numéros auto
   const currentYear = new Date().getFullYear();
@@ -1189,7 +1194,7 @@ async function parseCSV(csvText: string) {
   const rows: ImportMandatRow[] = [];
 
   for (let i = 1; i < lines.length; i++) {
-    const line = lines[i].trim();
+    const line = lines[i]?.trim();
     if (!line) continue;
 
     const values = line.split(';').map((v) => v.trim().replace(/^"|"$/g, ''));
@@ -1225,8 +1230,8 @@ async function parseCSV(csvText: string) {
     }
 
     const exercice = row.exercice ? parseInt(row.exercice) : currentYear;
-    const montant = parseFloat(row.montant) || 0;
-    const montantPrecompter = parseFloat(row.montantPrecompter) || 0;
+    const montant = parseFloat(row.montant || '0') || 0;
+    const montantPrecompter = parseFloat(row.montantPrecompter || '0') || 0;
 
     rows.push({
       _rowIndex: i,
@@ -1296,7 +1301,7 @@ async function executeImport() {
       if (row.bordereauNumero) {
         const bordereau = bordereauMandats.value.find((b) => {
           const bNumero = `${b.numero}-${b.exercice % 100}`;
-          return bNumero === row.bordereauNumero || b.numero === row.bordereauNumero;
+          return bNumero === row.bordereauNumero || String(b.numero) === row.bordereauNumero;
         });
         if (bordereau) {
           bordereauMandatId = bordereau.id;
@@ -1311,8 +1316,8 @@ async function executeImport() {
         dateMandat: new Date(row.dateMandat),
         exercice: row.exercice,
         chapitreId: chapitreId || 0,
-        sousChapitreId,
-        bordereauMandatId,
+        ...(sousChapitreId !== undefined && { sousChapitreId }),
+        ...(bordereauMandatId !== undefined && { bordereauMandatId }),
         beneficiaire: row.beneficiaire,
         rib: row.rib,
         patrimonial: row.patrimonial,

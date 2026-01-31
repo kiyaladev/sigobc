@@ -6,7 +6,24 @@
       icon="receipt"
     >
       <template #actions>
+        <q-btn
+          color="secondary"
+          icon="upload_file"
+          label="Importer CSV"
+          unelevated
+          class="q-mr-sm"
+          @click="triggerFileUpload"
+        >
+          <q-tooltip>Importer des mandats depuis un fichier CSV</q-tooltip>
+        </q-btn>
         <q-btn color="primary" icon="add" label="Nouveau Mandat" @click="openDialog()" />
+        <input
+          ref="fileInputRef"
+          type="file"
+          accept=".csv"
+          style="display: none"
+          @change="handleFileUpload"
+        />
       </template>
     </PageHeader>
 
@@ -333,6 +350,92 @@
         </q-card-section>
       </q-card>
     </q-dialog>
+
+    <!-- Dialog d'import CSV -->
+    <q-dialog v-model="showImportDialog" persistent maximized>
+      <q-card>
+        <q-card-section class="row items-center q-pb-none">
+          <div class="text-h6">
+            <q-icon name="upload_file" class="q-mr-sm" />
+            Import de mandats de recettes depuis CSV
+          </div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+
+        <q-card-section>
+          <q-banner v-if="importErrors.length > 0" class="bg-negative text-white q-mb-md">
+            <template v-slot:avatar>
+              <q-icon name="warning" />
+            </template>
+            {{ importErrors.length }} erreur(s) détectée(s) dans le fichier
+          </q-banner>
+
+          <div class="text-subtitle1 q-mb-sm">
+            {{ importPreviewData.length }} mandat(s) à importer
+          </div>
+
+          <q-table
+            :rows="importPreviewData"
+            :columns="importPreviewColumns"
+            row-key="_rowIndex"
+            dense
+            flat
+            bordered
+            :rows-per-page-options="[10, 25, 50, 0]"
+            class="import-preview-table"
+          >
+            <template v-slot:body-cell-_status="props">
+              <q-td :props="props">
+                <q-icon
+                  :name="props.row._hasError ? 'error' : 'check_circle'"
+                  :color="props.row._hasError ? 'negative' : 'positive'"
+                />
+                <q-tooltip v-if="props.row._errorMessage">
+                  {{ props.row._errorMessage }}
+                </q-tooltip>
+              </q-td>
+            </template>
+
+            <template v-slot:body-cell-numeroMandat="props">
+              <q-td :props="props">
+                <span :class="{ 'text-primary': props.row._autoNumero }">
+                  {{ props.row.numeroMandat }}
+                  <q-tooltip v-if="props.row._autoNumero">Numéro généré automatiquement</q-tooltip>
+                </span>
+              </q-td>
+            </template>
+
+            <template v-slot:body-cell-montant="props">
+              <q-td :props="props" class="text-right">
+                {{ formatMontant(props.row.montant) }}
+              </q-td>
+            </template>
+          </q-table>
+        </q-card-section>
+
+        <q-card-actions align="right" class="q-pa-md">
+          <q-btn
+            label="Télécharger le template"
+            flat
+            color="grey-7"
+            icon="download"
+            @click="downloadTemplate"
+          />
+          <q-space />
+          <q-btn label="Annuler" flat color="grey-7" v-close-popup />
+          <q-btn
+            label="Importer"
+            color="primary"
+            unelevated
+            icon="upload"
+            :disable="importPreviewData.length === 0 || importErrors.length > 0"
+            :loading="importLoading"
+            @click="executeImport"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
@@ -358,6 +461,52 @@ const chapitres = ref<Chapitre[]>([]);
 const taxes = ref<Taxe[]>([]);
 const bordereaux = ref<BordereauMandatRecette[]>([]);
 const loading = ref(false);
+
+// Import CSV
+const fileInputRef = ref<HTMLInputElement | null>(null);
+const showImportDialog = ref(false);
+const importLoading = ref(false);
+const importPreviewData = ref<ImportMandatRecetteRow[]>([]);
+const importErrors = ref<string[]>([]);
+
+interface ImportMandatRecetteRow {
+  _rowIndex: number;
+  _hasError: boolean;
+  _errorMessage: string;
+  _autoNumero: boolean;
+  numeroMandat: string;
+  dateMandat: string;
+  exercice: number;
+  chapitreCode: string;
+  taxeCode: string;
+  bordereauNumero: string;
+  partieVersante: string;
+  rib: string;
+  patrimonial: string;
+  objet: string;
+  montant: number;
+  numeroFacture: string;
+  dateFacture: string;
+  modePaiement: string;
+  statut: string;
+  observations: string;
+}
+
+const importPreviewColumns = [
+  { name: '_status', label: '', field: '_status', align: 'center' as const, style: 'width: 40px' },
+  { name: 'numeroMandat', label: 'N° Mandat', field: 'numeroMandat', align: 'left' as const },
+  { name: 'dateMandat', label: 'Date', field: 'dateMandat', align: 'left' as const },
+  { name: 'exercice', label: 'Exercice', field: 'exercice', align: 'center' as const },
+  {
+    name: 'partieVersante',
+    label: 'Partie Versante',
+    field: 'partieVersante',
+    align: 'left' as const,
+  },
+  { name: 'objet', label: 'Objet', field: 'objet', align: 'left' as const },
+  { name: 'montant', label: 'Montant', field: 'montant', align: 'right' as const },
+  { name: 'statut', label: 'Statut', field: 'statut', align: 'center' as const },
+];
 
 const filter = ref('');
 const filterExercice = ref<number | null>(null);
@@ -731,6 +880,244 @@ function downloadMandatPDF(mandat: MandatRecette) {
   openPrintWindow('mandat/ordre_de_recette.html', { mandatRecetteId: mandat.id!, print: 'true' });
 }
 
+// ============================================
+// IMPORT CSV FUNCTIONS
+// ============================================
+
+function triggerFileUpload() {
+  fileInputRef.value?.click();
+}
+
+function downloadTemplate() {
+  window.open('/templates/mandat_recette_template.csv', '_blank');
+}
+
+async function handleFileUpload(event: Event) {
+  const target = event.target as HTMLInputElement;
+  const file = target.files?.[0];
+
+  if (!file) return;
+
+  try {
+    const text = await file.text();
+    await parseCSV(text);
+    showImportDialog.value = true;
+  } catch (error) {
+    console.error('Erreur lors de la lecture du fichier:', error);
+    $q.notify({
+      type: 'negative',
+      message: 'Erreur lors de la lecture du fichier CSV',
+    });
+  }
+
+  // Reset input pour permettre de sélectionner le même fichier
+  target.value = '';
+}
+
+async function parseCSV(csvText: string) {
+  importPreviewData.value = [];
+  importErrors.value = [];
+
+  const lines = csvText.trim().split('\n');
+  if (lines.length < 2) {
+    importErrors.value.push('Le fichier CSV doit contenir au moins une ligne de données');
+    return;
+  }
+
+  // Parser l'en-tête
+  const headerLine = lines[0];
+  if (!headerLine) {
+    importErrors.value.push('En-tête CSV manquant');
+    return;
+  }
+  const header = headerLine.split(';').map((h) => h.trim().replace(/^"|"$/g, ''));
+
+  // Compter les mandats existants pour l'année en cours pour générer les numéros auto
+  let nextNumero = (await db.mandatsRecette.where('exercice').equals(currentYear).count()) + 1;
+
+  const rows: ImportMandatRecetteRow[] = [];
+
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i]?.trim();
+    if (!line) continue;
+
+    const values = line.split(';').map((v) => v.trim().replace(/^"|"$/g, ''));
+    const row: Record<string, string> = {};
+
+    header.forEach((h, idx) => {
+      row[h] = values[idx] || '';
+    });
+
+    let hasError = false;
+    let errorMessage = '';
+    let autoNumero = false;
+
+    // Validation des champs obligatoires
+    if (!row.partieVersante) {
+      hasError = true;
+      errorMessage = 'Partie versante requise';
+    }
+    if (!row.objet) {
+      hasError = true;
+      errorMessage = errorMessage ? `${errorMessage}, Objet requis` : 'Objet requis';
+    }
+    if (!row.montant || isNaN(Number(row.montant))) {
+      hasError = true;
+      errorMessage = errorMessage ? `${errorMessage}, Montant invalide` : 'Montant invalide';
+    }
+
+    // Si pas de numéro de mandat, générer automatiquement
+    let numeroMandat = row.numeroMandat || '';
+    if (!numeroMandat) {
+      numeroMandat = String(nextNumero++).padStart(4, '0');
+      autoNumero = true;
+    }
+
+    const exercice = row.exercice ? parseInt(row.exercice) : currentYear;
+    const montant = parseFloat(row.montant || '0') || 0;
+
+    rows.push({
+      _rowIndex: i,
+      _hasError: hasError,
+      _errorMessage: errorMessage,
+      _autoNumero: autoNumero,
+      numeroMandat,
+      dateMandat: row.dateMandat || date.formatDate(new Date(), 'YYYY-MM-DD'),
+      exercice,
+      chapitreCode: row.chapitreCode || '',
+      taxeCode: row.taxeCode || '',
+      bordereauNumero: row.bordereauNumero || '',
+      partieVersante: row.partieVersante || '',
+      rib: row.rib || '',
+      patrimonial: row.patrimonial || '',
+      objet: row.objet || '',
+      montant,
+      numeroFacture: row.numeroFacture || '',
+      dateFacture: row.dateFacture || '',
+      modePaiement: row.modePaiement || 'virement',
+      statut: row.statut || 'brouillon',
+      observations: row.observations || '',
+    });
+
+    if (hasError) {
+      importErrors.value.push(`Ligne ${i}: ${errorMessage}`);
+    }
+  }
+
+  importPreviewData.value = rows;
+}
+
+async function executeImport() {
+  importLoading.value = true;
+
+  try {
+    const now = new Date();
+    let successCount = 0;
+
+    for (const row of importPreviewData.value) {
+      if (row._hasError) continue;
+
+      // Trouver le chapitreId par code
+      let chapitreId: number | undefined;
+      if (row.chapitreCode) {
+        const chapitre = chapitres.value.find((c) => c.code === row.chapitreCode);
+        if (chapitre) chapitreId = chapitre.id;
+      }
+
+      // Trouver le taxeId par code
+      let taxeId: number | undefined;
+      if (row.taxeCode) {
+        const taxe = taxes.value.find((t) => t.code === row.taxeCode);
+        if (taxe) taxeId = taxe.id;
+      }
+
+      // Trouver le bordereauMandatRecetteId par numéro
+      let bordereauMandatRecetteId: number | undefined;
+      if (row.bordereauNumero) {
+        const bordereau = bordereaux.value.find((b) => {
+          const bNumero = `${b.numero}-${b.exercice % 100}`;
+          return bNumero === row.bordereauNumero || String(b.numero) === row.bordereauNumero;
+        });
+        if (bordereau) {
+          bordereauMandatRecetteId = bordereau.id;
+        }
+      }
+
+      // Parser la date au format DD/MM/YYYY ou YYYY-MM-DD
+      let dateMandat: Date;
+      if (row.dateMandat.includes('/')) {
+        const dateParts = row.dateMandat.split('/');
+        const day = dateParts[0] || '1';
+        const month = dateParts[1] || '1';
+        const year = dateParts[2] || String(currentYear);
+        dateMandat = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      } else {
+        dateMandat = new Date(row.dateMandat);
+      }
+
+      let dateFacture: Date | undefined;
+      if (row.dateFacture) {
+        if (row.dateFacture.includes('/')) {
+          const dateParts = row.dateFacture.split('/');
+          const day = dateParts[0] || '1';
+          const month = dateParts[1] || '1';
+          const year = dateParts[2] || String(currentYear);
+          dateFacture = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        } else {
+          dateFacture = new Date(row.dateFacture);
+        }
+      }
+
+      // Mapper le statut 'rejete' vers 'annule' si nécessaire
+      const statutValue = row.statut === 'rejete' ? 'annule' : row.statut;
+
+      const insertData: Omit<MandatRecette, 'id'> = {
+        numeroMandat: row.numeroMandat,
+        dateMandat,
+        exercice: row.exercice,
+        ...(chapitreId !== undefined && { chapitreId }),
+        ...(taxeId !== undefined && { taxeId }),
+        ...(bordereauMandatRecetteId !== undefined && { bordereauMandatRecetteId }),
+        partieVersante: row.partieVersante,
+        rib: row.rib,
+        patrimonial: row.patrimonial,
+        objet: row.objet,
+        montant: row.montant,
+        numeroFacture: row.numeroFacture,
+        dateFacture,
+        modePaiement: row.modePaiement as 'virement' | 'cheque' | 'especes' | 'autre',
+        statut: statutValue as 'brouillon' | 'emis' | 'encaisse' | 'annule',
+        observations: row.observations,
+        mairieId: DEFAULT_MAIRIE_ID,
+        personnelId: 1,
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      await db.mandatsRecette.add(insertData as MandatRecette);
+      successCount++;
+    }
+
+    $q.notify({
+      type: 'positive',
+      message: `${successCount} mandat(s) de recette importé(s) avec succès`,
+    });
+
+    showImportDialog.value = false;
+    importPreviewData.value = [];
+    importErrors.value = [];
+    await loadData();
+  } catch (error) {
+    console.error("Erreur lors de l'import:", error);
+    $q.notify({
+      type: 'negative',
+      message: "Erreur lors de l'import des mandats",
+    });
+  } finally {
+    importLoading.value = false;
+  }
+}
+
 onMounted(() => {
   void loadData();
 });
@@ -741,6 +1128,14 @@ onMounted(() => {
   .main-card {
     border-radius: 12px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  }
+}
+
+.import-preview-table {
+  max-height: 60vh;
+
+  :deep(.q-table__container) {
+    max-height: 60vh;
   }
 }
 </style>
