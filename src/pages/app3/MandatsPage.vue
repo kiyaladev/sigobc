@@ -119,6 +119,14 @@
               {{ getBordereauNumero(props.row.bordereauMandatId) }}
             </q-td>
           </template>
+
+          <template v-slot:body-cell-statut="props">
+            <q-td :props="props">
+              <q-chip :color="getStatutColor(props.row.statut)" text-color="white" size="sm" dense>
+                {{ getStatutLabel(props.row.statut) }}
+              </q-chip>
+            </q-td>
+          </template>
         </DataTable>
       </q-card-section>
     </q-card>
@@ -376,9 +384,29 @@
               </div>
             </div>
 
+            <!-- Section 6: Motif d'annulation (visible uniquement si statut = annulé) -->
+            <template v-if="formData.statut === 'annule'">
+              <q-separator class="q-my-sm" />
+              <div class="text-subtitle2 text-red q-mb-xs">Motif d'annulation</div>
+              <div class="row q-col-gutter-sm">
+                <div class="col-12">
+                  <q-input
+                    v-model="formData.motifAnnulation"
+                    label="Motif d'annulation *"
+                    outlined
+                    dense
+                    type="textarea"
+                    rows="2"
+                    :rules="[(val) => !!val || 'Le motif d\'annulation est requis']"
+                    class="bg-red-1"
+                  />
+                </div>
+              </div>
+            </template>
+
             <q-separator class="q-my-sm" />
 
-            <!-- Section 6: Observations -->
+            <!-- Section 7: Observations -->
             <div class="text-subtitle2 text-grey-8 q-mb-xs">Notes</div>
             <q-input
               v-model="formData.observations"
@@ -413,7 +441,7 @@ import {
 } from 'src/database/db';
 import PageHeader from 'src/components/PageHeader.vue';
 import DataTable from 'src/components/DataTable.vue';
-import { amountToWords } from 'src/utils/numberToWords';
+import { openPrintWindow } from 'src/utils/printUrl';
 
 const $q = useQuasar();
 const loading = ref(false);
@@ -451,6 +479,7 @@ const formData = ref({
   modePaiement: 'virement' as 'virement' | 'cheque' | 'especes' | 'autre',
   statut: 'emis' as 'brouillon' | 'emis' | 'paye' | 'annule',
   observations: '',
+  motifAnnulation: '',
   // Nouveaux champs
   referenceMarche: '',
   avisMunicipalite: '',
@@ -690,61 +719,42 @@ function getBordereauNumero(bordereauMandatId?: number): string {
   return `${bordereau.numero}-${bordereau.exercice}`;
 }
 
-function printMandat(mandat: Mandat) {
-  const printWindow = window.open(
-    `/mandat_depense.html?mandatId=${mandat.id}&print=true`,
-    '_blank',
-  );
-
-  if (printWindow) {
-    printWindow.addEventListener('load', () => {
-      const chapitre = chapitres.value.find((c) => c.id === mandat.chapitreId);
-      const sousChapitre = sousChapitres.value.find((s) => s.id === mandat.sousChapitreId);
-      const bordereau = bordereauMandats.value.find((b) => b.id === mandat.bordereauMandatId);
-      const mairie = mairies.value[0]; // Get the first mairie
-
-      printWindow.postMessage(
-        {
-          type: 'FILL_MANDAT',
-          data: {
-            exercice: mandat.exercice,
-            imputationFonctionnelle: sousChapitre
-              ? `${sousChapitre.code}/${chapitre?.code}`
-              : chapitre?.code,
-            imputationPatrimoniale: mandat.patrimonial || '',
-            numeroOrdre: mandat.numeroMandat || '',
-            numeroBordereau: bordereau ? `${bordereau.numero}-${bordereau.exercice % 100}` : '',
-            objetDepense: mandat.objet,
-            periode: '', // This field is not in the Mandat interface
-            beneficiaire: mandat.beneficiaire,
-            beneficiaireDetails: '', // This field is not in the Mandat interface
-            rib: mandat.rib || '',
-            montantBrut: mandat.montant,
-            montantNet: mandat.montant,
-            montantPrecompter: '',
-            montantPrecompterLettres: mandat.montantPrecompter
-              ? amountToWords(mandat.montantPrecompter).toUpperCase()
-              : '',
-            montantLettres: amountToWords(mandat.montant).toUpperCase(),
-            dateEmission: new Date(mandat.dateMandat).toLocaleDateString('fr-FR'),
-            // Nouveaux champs
-            referenceMarche: mandat.referenceMarche || '',
-            avisMunicipalite: mandat.avisMunicipalite || '',
-            numeroDeliberation: mandat.numeroDeliberation || '',
-            dateDeliberation: mandat.dateDeliberation
-              ? new Date(mandat.dateDeliberation).toLocaleDateString('fr-FR')
-              : '',
-            // Mairie info
-            mairieDepartement: mairie?.ville ?? '',
-            mairieCommune: mairie?.ville ?? '',
-            mairieCode: mairie?.code ?? '',
-            mairieVille: mairie?.nom ?? '',
-          },
-        },
-        '*',
-      );
-    });
+function getStatutColor(statut: string): string {
+  switch (statut) {
+    case 'brouillon':
+      return 'grey';
+    case 'emis':
+      return 'primary';
+    case 'paye':
+      return 'positive';
+    case 'annule':
+      return 'red';
+    default:
+      return 'grey';
   }
+}
+
+function getStatutLabel(statut: string): string {
+  switch (statut) {
+    case 'brouillon':
+      return 'Brouillon';
+    case 'emis':
+      return 'Émis';
+    case 'paye':
+      return 'Payé';
+    case 'annule':
+      return 'Annulé';
+    default:
+      return statut;
+  }
+}
+
+function printMandat(mandat: Mandat) {
+  // Le fichier HTML charge les données directement depuis IndexedDB
+  openPrintWindow('mandat_depense.html', {
+    mandatId: mandat.id!,
+    print: 'true',
+  });
 }
 
 async function loadData() {
@@ -787,6 +797,7 @@ function resetForm() {
     modePaiement: 'virement',
     statut: 'emis',
     observations: '',
+    motifAnnulation: '',
     // Nouveaux champs
     referenceMarche: '',
     avisMunicipalite: '',
@@ -806,11 +817,38 @@ async function openAddDialog() {
   showAddDialog.value = true;
 }
 
+/**
+ * Recalcule les statistiques d'un bordereau (nombreMandats, montantTotal)
+ * Note: Les mandats annulés ne sont pas comptabilisés
+ */
+async function recalculateBordereauStats(bordereauId: number): Promise<void> {
+  const allMandats = await db.mandats.where('bordereauMandatId').equals(bordereauId).toArray();
+
+  // Exclure les mandats annulés du calcul
+  const mandatsDuBordereau = allMandats.filter((m) => m.statut !== 'annule');
+
+  const nombreMandats = mandatsDuBordereau.length;
+  const montantTotal = mandatsDuBordereau.reduce((sum, m) => sum + (m.montant || 0), 0);
+
+  await db.bordereauMandats.update(bordereauId, {
+    nombreMandats,
+    montantTotal,
+    updatedAt: new Date(),
+  });
+}
+
 async function saveMandat() {
   try {
     const now = new Date();
     const mairieId = 1;
     const personnelId = 1;
+
+    // Garder trace de l'ancien bordereauMandatId pour la mise à jour des stats
+    let oldBordereauMandatId: number | undefined;
+    if (editingId.value) {
+      const existingMandat = await db.mandats.get(editingId.value);
+      oldBordereauMandatId = existingMandat?.bordereauMandatId;
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { dateFacture, dateMandat, dateDeliberation, ...otherFormData } = formData.value;
@@ -836,6 +874,18 @@ async function saveMandat() {
       };
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await db.mandats.update(editingId.value, updateData as any);
+
+      // Recalculer les stats des bordereaux impactés
+      const newBordereauId = formData.value.bordereauMandatId;
+      if (oldBordereauMandatId && oldBordereauMandatId !== newBordereauId) {
+        // L'ancien bordereau a perdu ce mandat
+        await recalculateBordereauStats(oldBordereauMandatId);
+      }
+      if (newBordereauId) {
+        // Le nouveau bordereau (ou le même si montant changé) doit être recalculé
+        await recalculateBordereauStats(newBordereauId);
+      }
+
       $q.notify({
         type: 'positive',
         message: 'Mandat modifié avec succès',
@@ -848,6 +898,12 @@ async function saveMandat() {
         updatedAt: now,
       } as MandatInsert;
       await db.mandats.add(insertData);
+
+      // Recalculer les stats du bordereau si un bordereau est sélectionné
+      if (formData.value.bordereauMandatId) {
+        await recalculateBordereauStats(formData.value.bordereauMandatId);
+      }
+
       $q.notify({
         type: 'positive',
         message: 'Mandat ajouté avec succès',
@@ -885,6 +941,7 @@ function editMandat(row: Mandat) {
     modePaiement: row.modePaiement,
     statut: row.statut,
     observations: row.observations || '',
+    motifAnnulation: row.motifAnnulation || '',
     // Nouveaux champs
     referenceMarche: row.referenceMarche || '',
     avisMunicipalite: row.avisMunicipalite || '',
@@ -906,7 +963,14 @@ function deleteMandat(row: Mandat) {
   }).onOk(() => {
     void (async () => {
       try {
+        const bordereauIdToUpdate = row.bordereauMandatId;
         await db.mandats.delete(row.id);
+
+        // Recalculer les stats du bordereau si le mandat en avait un
+        if (bordereauIdToUpdate) {
+          await recalculateBordereauStats(bordereauIdToUpdate);
+        }
+
         $q.notify({
           type: 'positive',
           message: 'Mandat supprimé avec succès',

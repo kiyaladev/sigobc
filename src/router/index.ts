@@ -57,10 +57,36 @@ export default defineRouter(function (/* { store, ssrContext } */) {
       return;
     }
 
-    // Restriction mode démo : bloquer l'accès aux routes admin
-    if (to.meta.requiresAdmin && demoStore.isActive) {
-      next('/');
-      return;
+    // Initialiser le mode démo si pas encore fait
+    if (!demoStore.firstUseDate) {
+      demoStore.initializeDemo();
+    }
+
+    // Restriction période d'essai expirée : seul l'export est accessible
+    if (demoStore.isExpired) {
+      // Permettre l'accès à la page de backup/export et login
+      const allowedPaths = ['/admin/backup', '/login'];
+      const isAllowed = allowedPaths.some((path) => to.path.startsWith(path));
+
+      if (!isAllowed && to.path !== '/') {
+        next('/admin/backup');
+        return;
+      }
+    }
+
+    // Restriction mode démo : bloquer l'accès aux routes admin pour les utilisateurs démo uniquement
+    // Les vrais administrateurs (admin) peuvent toujours accéder aux pages admin
+    if (
+      to.meta.requiresAdmin &&
+      demoStore.isActive &&
+      !demoStore.isExpired &&
+      authStore.isDemoUser
+    ) {
+      // En mode démo actif (non expiré), bloquer admin sauf backup pour les utilisateurs démo
+      if (to.path !== '/admin/backup') {
+        next('/');
+        return;
+      }
     }
 
     // Si l'utilisateur est déjà connecté et va sur /login, rediriger vers /

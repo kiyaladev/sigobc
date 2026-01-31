@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { db, type Utilisateur } from 'src/database/db';
-import { useDemoStore } from './demo-store';
 
 export const useAuthStore = defineStore('auth', () => {
   // State
@@ -44,6 +43,15 @@ export const useAuthStore = defineStore('auth', () => {
           updatedAt: new Date(),
         });
         console.log('✅ Compte admin créé avec succès');
+      } else if (!adminUser.actif || adminUser.password !== 'admin123') {
+        // S'assurer que le compte admin est actif et a le bon mot de passe par défaut
+        console.log('🔧 Réinitialisation du compte admin...');
+        await db.utilisateurs.update(adminUser.id, {
+          password: 'admin123',
+          actif: true,
+          updatedAt: new Date(),
+        });
+        console.log('✅ Compte admin réinitialisé avec succès');
       }
 
       // Créer le compte démo s'il n'existe pas
@@ -62,6 +70,13 @@ export const useAuthStore = defineStore('auth', () => {
           updatedAt: new Date(),
         });
         console.log('✅ Compte démo créé avec succès');
+      } else if (!demoUser.actif) {
+        // S'assurer que le compte démo est actif
+        await db.utilisateurs.update(demoUser.id, {
+          actif: true,
+          updatedAt: new Date(),
+        });
+        console.log('✅ Compte démo réactivé');
       }
     } catch (error) {
       console.error('Erreur lors de la création du compte admin:', error);
@@ -75,8 +90,6 @@ export const useAuthStore = defineStore('auth', () => {
       // S'assurer que le compte démo existe
       await ensureAdminExists();
 
-      const demoStore = useDemoStore();
-
       const user = await db.utilisateurs.where('username').equals('demo').first();
 
       if (user && user.actif) {
@@ -88,8 +101,7 @@ export const useAuthStore = defineStore('auth', () => {
         token.value = demoToken;
         localStorage.setItem('auth_token', demoToken);
 
-        // Activer le mode démo
-        demoStore.activateDemoMode();
+        // Le mode démo est automatiquement initialisé dans MainLayout
 
         // Mettre à jour la dernière connexion
         await db.utilisateurs.update(user.id, {
@@ -157,12 +169,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function logout() {
-    // Désactiver le mode démo si actif
-    const demoStore = useDemoStore();
-    if (demoStore.isActive) {
-      demoStore.deactivateDemoMode();
-    }
-
+    // Le mode démo reste actif (basé sur la date de première utilisation)
     currentUser.value = null;
     isAuthenticated.value = false;
     token.value = null;

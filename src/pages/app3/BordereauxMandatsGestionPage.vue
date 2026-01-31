@@ -178,6 +178,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useQuasar, date } from 'quasar';
 import { db, type BordereauMandat, type Mairie, type Mandat } from 'src/database/db';
 import { useAuthStore } from 'src/stores/auth-store';
+import { openPrintWindow } from 'src/utils/printUrl';
 import FilterBar from 'src/components/FilterBar.vue';
 import DataTable from 'src/components/DataTable.vue';
 import PageHeader from 'src/components/PageHeader.vue';
@@ -483,11 +484,32 @@ function confirmDelete(bordereau: BordereauMandat) {
 }
 
 function printBordereau(bordereau: BordereauMandat) {
-  window.open(`/bordereau_mandat.html?bordereauId=${bordereau.id}`, '_blank');
+  // Afficher un dialog avec les deux options d'impression
+  $q.dialog({
+    title: 'Impression du Bordereau',
+    message: 'Choisissez le type de bordereau à imprimer :',
+    options: {
+      type: 'checkbox',
+      model: ['emission'],
+      items: [
+        { label: "Bordereau d'Émission", value: 'emission' },
+        { label: 'Bordereau de Rejet (mandats annulés)', value: 'rejet' },
+      ],
+    },
+    cancel: true,
+    persistent: true,
+  }).onOk((selected: string[]) => {
+    if (selected.includes('emission')) {
+      openPrintWindow('bordereau_mandat.html', { bordereauId: bordereau.id! });
+    }
+    if (selected.includes('rejet')) {
+      openPrintWindow('bordereau_mandat_rejet.html', { bordereauId: bordereau.id! });
+    }
+  });
 }
 
 function downloadBordereauPDF(bordereau: BordereauMandat) {
-  window.open(`/bordereau_mandat.html?bordereauId=${bordereau.id}&print=true`, '_blank');
+  openPrintWindow('bordereau_mandat.html', { bordereauId: bordereau.id!, print: 'true' });
 }
 
 onMounted(() => {

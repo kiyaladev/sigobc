@@ -40,7 +40,7 @@ const routes: RouteRecordRaw[] = [
         path: 'admin/backup',
         component: () => import('pages/admin/BackupPage.vue'),
         name: 'admin-backup',
-        meta: { requiresAdmin: true },
+        meta: { allowAfterExpiration: true }, // Accessible même après expiration
       },
       {
         path: 'statistiques',

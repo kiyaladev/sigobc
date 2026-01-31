@@ -313,6 +313,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { db, type Taxe, type PrevisionRecette, DEFAULT_MAIRIE_ID } from 'src/database/db';
 import PageHeader from 'src/components/PageHeader.vue';
+import { openPrintWindow, sendMessageToWindow } from 'src/utils/printUrl';
 
 const $q = useQuasar();
 const loading = ref(false);
@@ -666,20 +667,12 @@ async function generateEtatMensuel() {
     // Ouvrir la page HTML et envoyer les données
     const pageUrl =
       type === 'fonctionnel'
-        ? '/etat-financier-mensuel/recette-fonctionnelle.html'
-        : '/etat-financier-mensuel/recette-investissement.html';
+        ? 'etat-financier-mensuel/recette-fonctionnelle.html'
+        : 'etat-financier-mensuel/recette-investissement.html';
 
-    const etatWindow = window.open(pageUrl, '_blank');
+    const etatWindow = openPrintWindow(pageUrl);
     if (etatWindow) {
-      // Attendre que la page soit chargée avant d'envoyer les données
-      const sendData = () => {
-        etatWindow.postMessage({ type: 'FILL_ETAT_RECETTE_DATA', data: dataToSend }, '*');
-      };
-
-      // Tenter d'envoyer après un délai
-      setTimeout(sendData, 500);
-      setTimeout(sendData, 1000);
-      setTimeout(sendData, 2000);
+      sendMessageToWindow(etatWindow, { type: 'FILL_ETAT_RECETTE_DATA', data: dataToSend });
     }
 
     showEtatMensuelDialog.value = false;

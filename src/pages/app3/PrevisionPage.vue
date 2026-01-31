@@ -309,6 +309,7 @@ import { useQuasar } from 'quasar';
 import { db, type Prevision, type Chapitre, type SousChapitre, type Mandat } from 'src/database/db';
 import PageHeader from 'src/components/PageHeader.vue';
 import DataTable from 'src/components/DataTable.vue';
+import { openPrintWindow, sendMessageToWindow } from 'src/utils/printUrl';
 
 const $q = useQuasar();
 const loading = ref(false);
@@ -631,11 +632,9 @@ async function printCT02() {
     };
 
     // Ouvrir CT02.html dans une nouvelle fenêtre et lui envoyer les données
-    const ct02Window = window.open('/CT02.html', '_blank');
+    const ct02Window = openPrintWindow('CT02.html');
     if (ct02Window) {
-      ct02Window.addEventListener('load', () => {
-        ct02Window.postMessage({ type: 'FILL_CT02_DATA', data: ct02Data }, '*');
-      });
+      sendMessageToWindow(ct02Window, { type: 'FILL_CT02_DATA', data: ct02Data });
     }
 
     showCT02Dialog.value = false;
@@ -882,19 +881,11 @@ async function generateEtatFinancierMensuel() {
     // Ouvrir la page HTML et envoyer les données
     const pageUrl =
       etatFinancierFilters.value.type === 'fonctionnel'
-        ? '/etat-financier-mensuel/depense.html'
-        : '/etat-financier-mensuel/investissement.html';
-    const etatWindow = window.open(pageUrl, '_blank');
+        ? 'etat-financier-mensuel/depense.html'
+        : 'etat-financier-mensuel/investissement.html';
+    const etatWindow = openPrintWindow(pageUrl);
     if (etatWindow) {
-      // Attendre que la page soit chargée avant d'envoyer les données
-      const sendData = () => {
-        etatWindow.postMessage({ type: 'FILL_ETAT_FINANCIER_DATA', data: dataToSend }, '*');
-      };
-
-      // Tenter d'envoyer après un délai pour s'assurer que la page est prête
-      setTimeout(sendData, 500);
-      setTimeout(sendData, 1000);
-      setTimeout(sendData, 2000);
+      sendMessageToWindow(etatWindow, { type: 'FILL_ETAT_FINANCIER_DATA', data: dataToSend });
     }
 
     showEtatFinancierDialog.value = false;

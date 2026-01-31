@@ -349,6 +349,7 @@ import {
 } from 'src/database/db';
 import DataTable from 'src/components/DataTable.vue';
 import PageHeader from 'src/components/PageHeader.vue';
+import { openPrintWindow } from 'src/utils/printUrl';
 
 const $q = useQuasar();
 
@@ -723,14 +724,11 @@ function confirmDelete(mandat: MandatRecette) {
 }
 
 function printMandat(mandat: MandatRecette) {
-  window.open('/mandat/ordre_de_recette.html?mandatRecetteId=' + mandat.id, '_blank');
+  openPrintWindow('mandat/ordre_de_recette.html', { mandatRecetteId: mandat.id! });
 }
 
 function downloadMandatPDF(mandat: MandatRecette) {
-  window.open(
-    '/mandat/ordre_de_recette.html?mandatRecetteId=' + mandat.id + '&print=true',
-    '_blank',
-  );
+  openPrintWindow('mandat/ordre_de_recette.html', { mandatRecetteId: mandat.id!, print: 'true' });
 }
 
 onMounted(() => {

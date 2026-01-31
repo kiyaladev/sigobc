@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Déclaration de Recettes - A4</title>
+    <script src="dexie.min.js"></script>
     <style>
       /* Configuration générale pour l'impression A4 */
       @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
@@ -187,8 +188,31 @@
         padding-top: 10px;
       }
 
+      /* Print button styles */
+      .print-button {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 24px;
+        background-color: #1976d2;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        z-index: 1000;
+      }
+      .print-button:hover {
+        background-color: #1565c0;
+      }
+
       /* Styles spécifiques pour l'impression */
       @media print {
+        .no-print {
+          display: none !important;
+        }
         body {
           background: none;
           margin: 0;
@@ -209,6 +233,7 @@
     </style>
   </head>
   <body>
+    <button class="print-button no-print" onclick="window.print()">🖨️ Imprimer</button>
     <!-- PAGE 1 : ORIGINAL + DUPLICATA -->
     <div class="page">
       <!-- EXEMPLAIRE 1 (ORIGINAL) -->
@@ -235,7 +260,7 @@
           <div class="header-right">
             <div class="field-row">
               <span class="field-label" style="width: 120px">Code Commune :</span>
-              <span class="field-value filled right-align" data-field="codeCommune">422</span>
+              <span class="field-value filled right-align" data-field="codeCommune">433</span>
             </div>
             <div class="field-row">
               <span class="field-label" style="width: 120px">Exercice :</span>
@@ -350,7 +375,7 @@
           <div class="header-right">
             <div class="field-row">
               <span class="field-label" style="width: 120px">Code Commune :</span>
-              <span class="field-value filled right-align" data-field="codeCommune">422</span>
+              <span class="field-value filled right-align" data-field="codeCommune">433</span>
             </div>
             <div class="field-row">
               <span class="field-label" style="width: 120px">Exercice :</span>
@@ -467,7 +492,7 @@
             <div class="header-right">
                 <div class="field-row">
                     <span class="field-label" style="width: 120px;">Code Commune :</span>
-                    <span class="field-value filled right-align" data-field="codeCommune">422</span>
+                    <span class="field-value filled right-align" data-field="codeCommune">433</span>
                 </div>
                 <div class="field-row">
                     <span class="field-label" style="width: 120px;">Exercice :</span>
@@ -684,9 +709,75 @@
         }
       });
 
-      // Au chargement de la page, vérifier s'il y a des données en localStorage (pour test)
+      // Configuration IndexedDB avec Dexie
+      const db = new Dexie('TresorDatabase');
+      db.version(12).stores({
+        mairies: '++id, nom, code, ville',
+        taxes: '++id, code, libelle, mairieId, type, actif',
+        declarations: '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauRecetteId, personnelId, exercice',
+        bordereauxRecette: '++id, numero, annee, mairieId, statut, personnelId',
+      });
+
+      // Charger les données depuis IndexedDB si declarationId est fourni
+      async function loadFromDatabase() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const declarationId = parseInt(urlParams.get('declarationId'), 10);
+        const shouldPrint = urlParams.get('print') === 'true';
+
+        if (!declarationId) {
+          console.log('Pas de declarationId - en attente de message postMessage');
+          return;
+        }
+
+        try {
+          console.log('Chargement de la déclaration depuis IndexedDB:', declarationId);
+          const declaration = await db.declarations.get(declarationId);
+          
+          if (!declaration) {
+            console.error('Déclaration non trouvée:', declarationId);
+            return;
+          }
+
+          // Récupérer la mairie et la taxe
+          const mairie = await db.mairies.toCollection().first();
+          const taxe = declaration.taxeId ? await db.taxes.get(declaration.taxeId) : null;
+
+          // Formater la date
+          const dateEncaissement = declaration.dateEncaissement 
+            ? new Date(declaration.dateEncaissement).toLocaleDateString('fr-FR')
+            : '';
+
+          // Préparer les données pour le remplissage
+          const data = {
+            mairie: mairie?.nom || 'Mairie de Vavoua',
+            codeCommune: mairie?.code || '433',
+            exercice: declaration.exercice,
+            article: taxe?.code || '',
+            numeroPiece: declaration.numeroPiece,
+            nomPartieVersante: declaration.nomPartieVersante || '',
+            adresse: declaration.adresse || '',
+            numeroLivre: declaration.numeroLivre || 'T31T',
+            numeroEncaissement: declaration.numeroEncaissement || '',
+            dateEncaissement: dateEncaissement,
+            natureRecette: taxe?.libelle || '',
+            montantRecette: declaration.montantRecette || declaration.montant || 0,
+            ville: mairie?.ville || 'Vavoua',
+          };
+
+          remplirFormulaire(data);
+
+          if (shouldPrint) {
+            setTimeout(() => window.print(), 500);
+          }
+        } catch (error) {
+          console.error('Erreur lors du chargement depuis IndexedDB:', error);
+        }
+      }
+
+      // Au chargement de la page
       document.addEventListener('DOMContentLoaded', () => {
         console.log('Page de déclaration chargée');
+        loadFromDatabase();
       });
     </script>
   </body>

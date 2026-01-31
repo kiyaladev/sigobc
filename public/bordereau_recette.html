@@ -212,8 +212,31 @@
         background: white;
       }
 
+      /* Print button styles */
+      .print-button {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 24px;
+        background-color: #1976d2;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+      }
+      .print-button:hover {
+        background-color: #1565c0;
+      }
+
       /* MEDIA QUERIES IMPRESSION */
       @media print {
+        .no-print {
+          display: none !important;
+        }
         body {
           background: none;
           padding: 0;
@@ -239,6 +262,7 @@
     </style>
   </head>
   <body>
+    <button class="print-button no-print" onclick="window.print()">🖨️ Imprimer</button>
     <!-- Barre d'options (cachée à l'impression) -->
     <div class="options-bar">
       <label for="columnTypeSelect">Type de colonne :</label>

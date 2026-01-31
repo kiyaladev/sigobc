@@ -445,7 +445,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useAuthStore } from 'src/stores/auth-store';
@@ -456,10 +456,6 @@ const $q = useQuasar();
 const authStore = useAuthStore();
 
 const leftDrawerOpen = ref(false);
-
-onMounted(async () => {
-  // Application initialisée
-});
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
@@ -698,17 +694,6 @@ function onLogout() {
   to {
     opacity: 0;
     transform: translateY(-10px);
-  }
-}
-
-// Mode démo actif - décaler le contenu pour la bannière
-.demo-mode-active {
-  .modern-header {
-    margin-top: 40px;
-  }
-
-  .q-drawer {
-    top: 40px !important;
   }
 }
 

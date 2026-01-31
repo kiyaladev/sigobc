@@ -224,6 +224,7 @@ import {
 import FilterBar from 'src/components/FilterBar.vue';
 import DataTable from 'src/components/DataTable.vue';
 import PageHeader from 'src/components/PageHeader.vue';
+import { openPrintWindow } from 'src/utils/printUrl';
 
 const $q = useQuasar();
 
@@ -543,35 +544,12 @@ function confirmDelete(bordereau: BordereauMandatRecette) {
 }
 
 function printBordereau(bordereau: BordereauMandatRecette) {
-  // Afficher un dialog avec les deux options d'impression
-  $q.dialog({
-    title: 'Impression du Bordereau',
-    message: 'Choisissez le type de bordereau à imprimer :',
-    options: {
-      type: 'checkbox',
-      model: ['emission', 'rejet'],
-      items: [
-        { label: "Bordereau d'Émission", value: 'emission' },
-        { label: 'Bordereau de Rejet', value: 'rejet' },
-      ],
-    },
-    cancel: true,
-    persistent: true,
-  }).onOk((selected: string[]) => {
-    if (selected.includes('emission')) {
-      window.open('/bordereau_mandat_recette.html?bordereauId=' + bordereau.id, '_blank');
-    }
-    if (selected.includes('rejet')) {
-      window.open('/bordereau_mandat_recette_rejet.html?bordereauId=' + bordereau.id, '_blank');
-    }
-  });
+  // Impression directe du bordereau d'émission (pas de bordereau de rejet pour les recettes)
+  openPrintWindow('bordereau_mandat_recette.html', { bordereauId: bordereau.id! });
 }
 
 function downloadBordereauPDF(bordereau: BordereauMandatRecette) {
-  window.open(
-    '/bordereau_mandat_recette.html?bordereauId=' + bordereau.id + '&print=true',
-    '_blank',
-  );
+  openPrintWindow('bordereau_mandat_recette.html', { bordereauId: bordereau.id!, print: 'true' });
 }
 
 onMounted(() => {

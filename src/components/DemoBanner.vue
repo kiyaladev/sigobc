@@ -1,13 +1,16 @@
 <template>
-  <div v-if="demoStore.isActive" class="demo-banner">
+  <div v-if="demoStore.isActive && !demoStore.isExpired" class="demo-banner" :class="bannerClass">
     <div class="demo-banner-content">
-      <q-icon name="science" size="20px" class="q-mr-sm" />
+      <q-icon :name="bannerIcon" size="20px" class="q-mr-sm" />
       <span class="demo-text">
-        <strong>Mode Démonstration</strong>
+        <strong>Période d'essai</strong>
         <span class="demo-separator">|</span>
         <span class="demo-time">
-          <q-icon name="schedule" size="14px" class="q-mr-xs" />
-          {{ demoStore.sessionTimeRemainingMinutes }} min restantes
+          <q-icon name="event" size="14px" class="q-mr-xs" />
+          {{ demoStore.trialDaysRemaining }} jour{{
+            demoStore.trialDaysRemaining > 1 ? 's' : ''
+          }}
+          restant{{ demoStore.trialDaysRemaining > 1 ? 's' : '' }}
         </span>
       </span>
       <q-space />
@@ -16,9 +19,9 @@
         dense
         size="sm"
         color="white"
-        label="Quitter le mode démo"
-        icon="close"
-        @click="exitDemoMode"
+        label="Activer la licence"
+        icon="key"
+        @click="showActivationDialog = true"
         class="demo-exit-btn"
       />
     </div>
@@ -26,153 +29,92 @@
     <!-- Tooltip d'informations -->
     <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 8]">
       <div class="text-center">
-        <div class="text-weight-bold q-mb-xs">Restrictions du mode démo :</div>
-        <ul class="q-ma-none q-pl-md text-left">
-          <li>Création limitée (max 100 par type)</li>
-          <li>Suppression désactivée</li>
-          <li>Export limité à 5 enregistrements</li>
-          <li>Fonctions admin désactivées</li>
-          <li>Session de 30 minutes</li>
-        </ul>
+        <div class="text-weight-bold q-mb-xs">Période d'essai de 30 jours</div>
+        <p class="q-ma-none">Après expiration, seul l'export des données sera disponible.</p>
       </div>
     </q-tooltip>
   </div>
 
-  <!-- Dialog d'expiration -->
-  <q-dialog v-model="showExpirationDialog" persistent>
-    <q-card class="demo-expiration-card">
-      <q-card-section class="text-center">
-        <q-icon name="timer_off" size="64px" color="warning" class="q-mb-md" />
-        <div class="text-h5 text-weight-bold q-mb-sm">Session démo expirée</div>
-        <div class="text-body1 text-grey-7">
-          Votre session de démonstration de 30 minutes est terminée.
+  <!-- Dialog d'activation -->
+  <q-dialog v-model="showActivationDialog">
+    <q-card style="min-width: 400px">
+      <q-card-section class="bg-primary text-white">
+        <div class="text-h6">
+          <q-icon name="key" class="q-mr-sm" />
+          Activer la licence
         </div>
       </q-card-section>
 
-      <q-card-section class="q-pt-none">
-        <div class="demo-stats q-pa-md bg-grey-2 rounded-borders">
-          <div class="text-subtitle2 text-weight-bold q-mb-sm">Résumé de votre session :</div>
-          <div class="row q-gutter-md">
-            <div class="col">
-              <div class="text-h6">{{ demoStore.actionsCount.creates }}</div>
-              <div class="text-caption text-grey-7">Créations</div>
-            </div>
-            <div class="col">
-              <div class="text-h6">{{ demoStore.actionsCount.updates }}</div>
-              <div class="text-caption text-grey-7">Modifications</div>
-            </div>
-            <div class="col">
-              <div class="text-h6">{{ demoStore.actionsCount.views }}</div>
-              <div class="text-caption text-grey-7">Consultations</div>
-            </div>
-          </div>
-        </div>
-      </q-card-section>
-
-      <q-card-actions align="center" class="q-pb-md">
-        <q-btn
-          color="primary"
-          label="Nouvelle session démo"
-          icon="refresh"
-          @click="restartDemoSession"
-          class="q-mr-sm"
+      <q-card-section>
+        <p class="text-body1 q-mb-md">
+          Pour continuer à utiliser l'application après la période d'essai, veuillez contacter le
+          support pour obtenir une clé de licence.
+        </p>
+        <q-input
+          v-model="licenseKey"
+          label="Clé de licence"
+          outlined
+          placeholder="XXXX-XXXX-XXXX-XXXX"
         />
-        <q-btn outline color="primary" label="Quitter" icon="logout" @click="exitAndRedirect" />
+      </q-card-section>
+
+      <q-card-actions align="right">
+        <q-btn flat label="Annuler" v-close-popup />
+        <q-btn color="primary" label="Activer" @click="activateLicense" :loading="activating" />
       </q-card-actions>
     </q-card>
   </q-dialog>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, computed } from 'vue';
 import { useQuasar } from 'quasar';
 import { useDemoStore } from 'src/stores/demo-store';
-import { useAuthStore } from 'src/stores/auth-store';
 
-const router = useRouter();
 const $q = useQuasar();
 const demoStore = useDemoStore();
-const authStore = useAuthStore();
 
-const showExpirationDialog = ref(false);
-let expirationCheckInterval: ReturnType<typeof setInterval> | null = null;
+const showActivationDialog = ref(false);
+const licenseKey = ref('');
+const activating = ref(false);
 
-onMounted(() => {
-  // Vérifier périodiquement l'expiration de la session
-  expirationCheckInterval = setInterval(() => {
-    if (demoStore.isActive && demoStore.isSessionExpired) {
-      showExpirationDialog.value = true;
-    }
-
-    // Avertissement à 5 minutes
-    if (
-      demoStore.isActive &&
-      demoStore.sessionTimeRemainingMinutes <= 5 &&
-      demoStore.sessionTimeRemainingMinutes > 0 &&
-      !demoStore.demoWarningShown
-    ) {
-      demoStore.showDemoWarning();
-      $q.notify({
-        type: 'warning',
-        message: `Votre session démo expire dans ${demoStore.sessionTimeRemainingMinutes} minutes`,
-        icon: 'schedule',
-        timeout: 5000,
-      });
-    }
-  }, 30000); // Vérifier toutes les 30 secondes
-});
-
-onUnmounted(() => {
-  if (expirationCheckInterval) {
-    clearInterval(expirationCheckInterval);
+const bannerClass = computed(() => {
+  if (demoStore.trialDaysRemaining <= 3) {
+    return 'banner-critical';
+  } else if (demoStore.trialDaysRemaining <= 7) {
+    return 'banner-warning';
   }
+  return 'banner-info';
 });
 
-watch(
-  () => demoStore.isSessionExpired,
-  (expired) => {
-    if (expired) {
-      showExpirationDialog.value = true;
-    }
-  },
-);
+const bannerIcon = computed(() => {
+  if (demoStore.trialDaysRemaining <= 3) {
+    return 'warning';
+  } else if (demoStore.trialDaysRemaining <= 7) {
+    return 'schedule';
+  }
+  return 'science';
+});
 
-function exitDemoMode() {
-  $q.dialog({
-    title: 'Quitter le mode démo',
-    message:
-      'Voulez-vous vraiment quitter le mode démonstration ? Les données créées seront conservées.',
-    cancel: {
-      label: 'Annuler',
-      flat: true,
-    },
-    ok: {
-      label: 'Quitter',
-      color: 'warning',
-    },
-  }).onOk(() => {
-    demoStore.deactivateDemoMode();
-    authStore.logout();
-    void router.push('/login');
-  });
-}
+function activateLicense() {
+  if (!licenseKey.value.trim()) {
+    $q.notify({
+      type: 'warning',
+      message: 'Veuillez entrer une clé de licence',
+    });
+    return;
+  }
 
-function restartDemoSession() {
-  showExpirationDialog.value = false;
-  demoStore.activateDemoMode();
-  $q.notify({
-    type: 'positive',
-    message: 'Nouvelle session démo démarrée',
-    icon: 'refresh',
-  });
-}
+  activating.value = true;
 
-function exitAndRedirect() {
-  showExpirationDialog.value = false;
-  demoStore.deactivateDemoMode();
-  authStore.logout();
-  void router.push('/login');
+  // Simuler la vérification
+  setTimeout(() => {
+    activating.value = false;
+    $q.notify({
+      type: 'negative',
+      message: 'Clé de licence invalide. Contactez le support.',
+    });
+  }, 1500);
 }
 </script>
 
@@ -183,10 +125,32 @@ function exitAndRedirect() {
   left: 0;
   right: 0;
   z-index: 9999;
-  background: linear-gradient(135deg, #f39c12 0%, #e74c3c 100%);
   color: white;
   padding: 8px 16px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.banner-info {
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+}
+
+.banner-warning {
+  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+}
+
+.banner-critical {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
 }
 
 .demo-banner-content {
@@ -221,15 +185,6 @@ function exitAndRedirect() {
   }
 }
 
-.demo-expiration-card {
-  min-width: 400px;
-  max-width: 500px;
-}
-
-.demo-stats {
-  border-radius: 8px;
-}
-
 @media (max-width: 600px) {
   .demo-banner-content {
     flex-wrap: wrap;
@@ -245,11 +200,6 @@ function exitAndRedirect() {
   .demo-exit-btn {
     width: 100%;
     margin-top: 8px;
-  }
-
-  .demo-expiration-card {
-    min-width: unset;
-    width: 90vw;
   }
 }
 </style>

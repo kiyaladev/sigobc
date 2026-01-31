@@ -84,7 +84,7 @@ export async function seedDefaultData() {
   // 1. Mairie
   const mairieId = await db.mairies.add({
     nom: 'Mairie de Vavoua',
-    code: '422',
+    code: '433',
     adresse: 'Avenue Principale',
     ville: 'Vavoua',
     departement: 'Agboville',

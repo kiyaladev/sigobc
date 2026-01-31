@@ -5,32 +5,38 @@ import { ref, computed } from 'vue';
 export const DEMO_CONFIG = {
   // Nombre maximum d'enregistrements autorisés par type
   maxRecords: {
-    declarations: 100,
-    mandats: 100,
-    bordereaux: 100,
-    taxes: 100,
-    chapitres: 100,
-    sousChapitres: 100,
-    previsions: 100,
-    utilisateurs: 1, // Seulement le compte démo
+    declarations: 200,
+    mandats: 200,
+    bordereaux: 200,
+    taxes: 200,
+    chapitres: 200,
+    sousChapitres: 200,
+    previsions: 200,
+    utilisateurs: 3, // Seulement le compte démo
   },
-  // Délai d'expiration de la session démo (en millisecondes) - 30 minutes
-  sessionTimeout: 30 * 60 * 1000,
+  // Délai d'expiration de la démo (en millisecondes) - 30 jours
+  trialDuration: 30 * 24 * 60 * 60 * 1000,
   // Message affiché pour les restrictions
   restrictionMessages: {
     create: 'Mode démo : création limitée. Maximum {max} enregistrements autorisés.',
     update: 'Mode démo : modification limitée.',
     delete: 'Mode démo : suppression non autorisée.',
-    export: 'Mode démo : export limité à 5 enregistrements.',
+    export: 'Exportation des données.',
     admin: 'Mode démo : fonctionnalités administrateur désactivées.',
     backup: 'Mode démo : sauvegarde/restauration non disponible.',
+    expired: "Période d'essai expirée. Seul l'export des données est disponible.",
   },
 };
 
+// Clé pour stocker la date de première utilisation
+const FIRST_USE_KEY = 'tresor_app_first_use';
+const TRIAL_EXPIRED_KEY = 'tresor_app_trial_expired';
+
 export const useDemoStore = defineStore('demo', () => {
   // State
-  const isDemoMode = ref(false);
-  const demoSessionStart = ref<Date | null>(null);
+  const isDemoMode = ref(true); // Toujours en mode démo
+  const firstUseDate = ref<Date | null>(null);
+  const isTrialExpired = ref(false);
   const demoWarningShown = ref(false);
   const actionsCount = ref({
     creates: 0,
@@ -41,101 +47,107 @@ export const useDemoStore = defineStore('demo', () => {
   // Getters
   const isActive = computed(() => isDemoMode.value);
 
-  const sessionTimeRemaining = computed(() => {
-    if (!demoSessionStart.value) return 0;
-    const elapsed = Date.now() - demoSessionStart.value.getTime();
-    const remaining = DEMO_CONFIG.sessionTimeout - elapsed;
+  const trialTimeRemaining = computed(() => {
+    if (!firstUseDate.value) return DEMO_CONFIG.trialDuration;
+    const elapsed = Date.now() - firstUseDate.value.getTime();
+    const remaining = DEMO_CONFIG.trialDuration - elapsed;
     return Math.max(0, remaining);
   });
 
-  const sessionTimeRemainingMinutes = computed(() => {
-    return Math.ceil(sessionTimeRemaining.value / 60000);
+  const trialDaysRemaining = computed(() => {
+    return Math.ceil(trialTimeRemaining.value / (24 * 60 * 60 * 1000));
   });
 
-  const isSessionExpired = computed(() => {
-    return isDemoMode.value && sessionTimeRemaining.value <= 0;
+  const isExpired = computed(() => {
+    return trialTimeRemaining.value <= 0;
   });
 
   const demoStats = computed(() => ({
     ...actionsCount.value,
-    sessionMinutes: sessionTimeRemainingMinutes.value,
+    daysRemaining: trialDaysRemaining.value,
+    expired: isExpired.value,
   }));
 
   // Actions
-  function activateDemoMode() {
-    isDemoMode.value = true;
-    demoSessionStart.value = new Date();
-    demoWarningShown.value = false;
-    actionsCount.value = {
-      creates: 0,
-      updates: 0,
-      views: 0,
-    };
-    localStorage.setItem('demo_mode', 'true');
-    localStorage.setItem('demo_session_start', demoSessionStart.value.toISOString());
-    console.log('🎮 Mode démo activé');
-  }
+  function initializeDemo() {
+    // Vérifier si c'est la première utilisation
+    const storedFirstUse = localStorage.getItem(FIRST_USE_KEY);
+    const storedExpired = localStorage.getItem(TRIAL_EXPIRED_KEY);
 
-  function deactivateDemoMode() {
-    isDemoMode.value = false;
-    demoSessionStart.value = null;
-    demoWarningShown.value = false;
-    localStorage.removeItem('demo_mode');
-    localStorage.removeItem('demo_session_start');
-    console.log('🎮 Mode démo désactivé');
-  }
-
-  function checkDemoSession(): boolean {
-    const storedMode = localStorage.getItem('demo_mode');
-    const storedStart = localStorage.getItem('demo_session_start');
-
-    if (storedMode === 'true' && storedStart) {
-      demoSessionStart.value = new Date(storedStart);
-      isDemoMode.value = true;
-
-      // Vérifier si la session a expiré
-      if (isSessionExpired.value) {
-        deactivateDemoMode();
-        return false;
-      }
-      return true;
+    if (storedFirstUse) {
+      firstUseDate.value = new Date(storedFirstUse);
+    } else {
+      // Première utilisation - enregistrer la date
+      firstUseDate.value = new Date();
+      localStorage.setItem(FIRST_USE_KEY, firstUseDate.value.toISOString());
+      console.log("🎮 Première utilisation - Période d'essai démarrée");
     }
-    return false;
+
+    // Vérifier si la période d'essai est expirée
+    if (storedExpired === 'true' || isExpired.value) {
+      isTrialExpired.value = true;
+      localStorage.setItem(TRIAL_EXPIRED_KEY, 'true');
+      console.log("⏰ Période d'essai expirée");
+    }
+
+    isDemoMode.value = true;
+    console.log(`🎮 Mode démo initialisé - ${trialDaysRemaining.value} jours restants`);
+  }
+
+  function checkTrialStatus(): { expired: boolean; daysRemaining: number } {
+    initializeDemo();
+    return {
+      expired: isExpired.value,
+      daysRemaining: trialDaysRemaining.value,
+    };
   }
 
   function canCreate(
     entityType: keyof typeof DEMO_CONFIG.maxRecords,
     currentCount: number,
   ): boolean {
+    // Si la période d'essai est expirée, bloquer la création
+    if (isExpired.value) return false;
     if (!isDemoMode.value) return true;
     const max = DEMO_CONFIG.maxRecords[entityType];
     return currentCount < max;
   }
 
   function canUpdate(): boolean {
+    // Si la période d'essai est expirée, bloquer les modifications
+    if (isExpired.value) return false;
     if (!isDemoMode.value) return true;
     // En mode démo, les mises à jour sont autorisées mais limitées
-    return actionsCount.value.updates < 20;
+    return actionsCount.value.updates < 50;
   }
 
   function canDelete(): boolean {
-    // Suppression désactivée en mode démo
-    return !isDemoMode.value;
+    // Si la période d'essai est expirée, bloquer la suppression
+    if (isExpired.value) return false;
+    // Suppression autorisée en mode démo
+    return true;
   }
 
   function canExport(): boolean {
-    // Export limité en mode démo
-    return true; // Autorisé mais limité à 5 enregistrements
+    // Export TOUJOURS autorisé, même après expiration
+    return true;
   }
 
   function canAccessAdmin(): boolean {
-    // Accès admin désactivé en mode démo
-    return !isDemoMode.value;
+    // Si la période d'essai est expirée, bloquer l'accès admin
+    if (isExpired.value) return false;
+    return true;
   }
 
   function canBackup(): boolean {
-    // Backup/Restore désactivé en mode démo
-    return !isDemoMode.value;
+    // Backup/Restore désactivé après expiration
+    if (isExpired.value) return false;
+    return true;
+  }
+
+  function canAccessApp(): boolean {
+    // Si la période d'essai est expirée, l'app est bloquée sauf export
+    return !isExpired.value;
   }
 
   function recordAction(action: 'creates' | 'updates' | 'views') {
@@ -164,27 +176,28 @@ export const useDemoStore = defineStore('demo', () => {
   return {
     // State
     isDemoMode,
-    demoSessionStart,
+    firstUseDate,
+    isTrialExpired,
     demoWarningShown,
     actionsCount,
 
     // Getters
     isActive,
-    sessionTimeRemaining,
-    sessionTimeRemainingMinutes,
-    isSessionExpired,
+    trialTimeRemaining,
+    trialDaysRemaining,
+    isExpired,
     demoStats,
 
     // Actions
-    activateDemoMode,
-    deactivateDemoMode,
-    checkDemoSession,
+    initializeDemo,
+    checkTrialStatus,
     canCreate,
     canUpdate,
     canDelete,
     canExport,
     canAccessAdmin,
     canBackup,
+    canAccessApp,
     recordAction,
     getRestrictionMessage,
     showDemoWarning,

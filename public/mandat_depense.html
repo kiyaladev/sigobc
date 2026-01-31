@@ -234,7 +234,30 @@
               margin: 0;
               padding: 3mm; /* Ajustement marge imprimante */
           }
+          .no-print {
+              display: none !important;
+          }
       }
+
+      .print-button {
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          padding: 12px 24px;
+          background-color: #1976d2;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 14px;
+          font-weight: bold;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+          z-index: 1000;
+      }
+      .print-button:hover {
+          background-color: #1565c0;
+      }
+
       .ct-code {
         position: absolute;
         bottom: 10mm;
@@ -245,6 +268,7 @@
     </style>
   </head>
   <body>
+    <button class="print-button no-print" onclick="window.print()">🖨️ Imprimer</button>
     <div class="page">
       <!-- HEADER -->
       <div class="header-grid">
@@ -428,26 +452,107 @@
       <div class="footer-note">Pour acquit de la somme indiquée ci-dessus (A) :</div>
       <div class="ct-code">CT 21</div>
     </div>
+    <script src="dexie.min.js"></script>
     <script>
+      // Fonction pour convertir un nombre en lettres en français
+      function numberToWords(num) {
+        if (num === 0) return 'ZÉRO';
+
+        const units = [
+          '',
+          'UN',
+          'DEUX',
+          'TROIS',
+          'QUATRE',
+          'CINQ',
+          'SIX',
+          'SEPT',
+          'HUIT',
+          'NEUF',
+          'DIX',
+          'ONZE',
+          'DOUZE',
+          'TREIZE',
+          'QUATORZE',
+          'QUINZE',
+          'SEIZE',
+          'DIX-SEPT',
+          'DIX-HUIT',
+          'DIX-NEUF',
+        ];
+        const tens = [
+          '',
+          '',
+          'VINGT',
+          'TRENTE',
+          'QUARANTE',
+          'CINQUANTE',
+          'SOIXANTE',
+          'SOIXANTE',
+          'QUATRE-VINGT',
+          'QUATRE-VINGT',
+        ];
+
+        function convertLessThanThousand(n) {
+          if (n < 20) return units[n];
+          if (n < 100) {
+            const t = Math.floor(n / 10);
+            const u = n % 10;
+            if (t === 7 || t === 9) {
+              return tens[t] + (u === 1 && t !== 9 ? ' ET ' : '-') + units[10 + u];
+            }
+            if (u === 0) return tens[t] + (t === 8 ? 'S' : '');
+            return tens[t] + (u === 1 && t !== 8 ? ' ET ' : '-') + units[u];
+          }
+          const h = Math.floor(n / 100);
+          const rest = n % 100;
+          let result = h === 1 ? 'CENT' : units[h] + ' CENT';
+          if (rest === 0 && h > 1) result += 'S';
+          else if (rest > 0) result += ' ' + convertLessThanThousand(rest);
+          return result;
+        }
+
+        function convert(n) {
+          if (n < 1000) return convertLessThanThousand(n);
+          if (n < 1000000) {
+            const thousands = Math.floor(n / 1000);
+            const rest = n % 1000;
+            let result = thousands === 1 ? 'MILLE' : convertLessThanThousand(thousands) + ' MILLE';
+            if (rest > 0) result += ' ' + convertLessThanThousand(rest);
+            return result;
+          }
+          if (n < 1000000000) {
+            const millions = Math.floor(n / 1000000);
+            const rest = n % 1000000;
+            let result = convertLessThanThousand(millions) + ' MILLION' + (millions > 1 ? 'S' : '');
+            if (rest > 0) result += ' ' + convert(rest);
+            return result;
+          }
+          const milliards = Math.floor(n / 1000000000);
+          const rest = n % 1000000000;
+          let result =
+            convertLessThanThousand(milliards) + ' MILLIARD' + (milliards > 1 ? 'S' : '');
+          if (rest > 0) result += ' ' + convert(rest);
+          return result;
+        }
+
+        return convert(Math.floor(num)) + ' FRANCS';
+      }
+
       // Fonction pour formater un nombre avec espaces
       function formatMontant(montant) {
-        // we receive a number so we format it
         if (typeof montant === 'number') {
           return new Intl.NumberFormat('fr-FR').format(montant);
         }
-        // if we receive a string, we assume it's already formatted
         return montant;
       }
 
       // Fonction pour remplir les deux formulaires
       function remplirFormulaire(data) {
-        // Remplacer le titre
         document.title = `Mandat de Paiement - ${data.mairieVille || 'Mairie'}`;
 
-        // Calculer les champs dérivés
         data.montantBrut = formatMontant(data.montantBrut);
         data.montantNet = formatMontant(data.montantNet);
-        // data.montantLettres est maintenant fourni directement
 
         for (const key in data) {
           const elements = document.querySelectorAll(`[data-field="${key}"]`);
@@ -457,7 +562,92 @@
         }
       }
 
-      // Écouter les messages de la fenêtre parent
+      // Initialiser la base de données IndexedDB
+      const db = new Dexie('TresorDatabase');
+      db.version(1).stores({
+        mairies: '++id, nom, code, ville, departement, actif',
+        chapitres: '++id, code, libelle, actif, type',
+        sousChapitres: '++id, code, libelle, chapitreId, actif',
+        mandats:
+          '++id, numeroMandat, dateMandat, beneficiaire, objet, montant, exercice, chapitreId, sousChapitreId, bordereauMandatId, statut',
+        bordereauMandats: '++id, numero, exercice, dateCreation, statut',
+      });
+
+      // Charger les données du mandat depuis IndexedDB
+      async function loadMandatData() {
+        try {
+          const urlParams = new URLSearchParams(window.location.search);
+          const mandatId = parseInt(urlParams.get('mandatId'));
+          const shouldPrint = urlParams.get('print') === 'true';
+
+          if (!mandatId) {
+            console.error('No mandatId provided in URL');
+            return;
+          }
+
+          // Récupérer le mandat
+          const mandat = await db.mandats.get(mandatId);
+          if (!mandat) {
+            console.error('Mandat not found:', mandatId);
+            return;
+          }
+
+          // Récupérer les données associées
+          const [mairie, chapitre, sousChapitre, bordereau] = await Promise.all([
+            db.mairies.toCollection().first(),
+            mandat.chapitreId ? db.chapitres.get(mandat.chapitreId) : null,
+            mandat.sousChapitreId ? db.sousChapitres.get(mandat.sousChapitreId) : null,
+            mandat.bordereauMandatId ? db.bordereauMandats.get(mandat.bordereauMandatId) : null,
+          ]);
+
+          // Préparer les données pour l'affichage
+          const data = {
+            exercice: mandat.exercice,
+            imputationFonctionnelle: sousChapitre
+              ? `${sousChapitre.code}/${chapitre?.code || ''}`
+              : chapitre?.code || '',
+            imputationPatrimoniale: mandat.patrimonial || '',
+            numeroOrdre: mandat.numeroMandat || '',
+            numeroBordereau: bordereau ? `${bordereau.numero}-${bordereau.exercice % 100}` : '',
+            objetDepense: mandat.objet || '',
+            periode: '',
+            beneficiaire: mandat.beneficiaire || '',
+            beneficiaireDetails: '',
+            rib: mandat.rib || '',
+            montantBrut: mandat.montant,
+            montantNet: mandat.montant,
+            montantPrecompter: '',
+            montantPrecompterLettres: mandat.montantPrecompter
+              ? numberToWords(mandat.montantPrecompter)
+              : '',
+            montantLettres: numberToWords(mandat.montant),
+            dateEmission: new Date(mandat.dateMandat).toLocaleDateString('fr-FR'),
+            referenceMarche: mandat.referenceMarche || '',
+            avisMunicipalite: mandat.avisMunicipalite || '',
+            numeroDeliberation: mandat.numeroDeliberation || '',
+            dateDeliberation: mandat.dateDeliberation
+              ? new Date(mandat.dateDeliberation).toLocaleDateString('fr-FR')
+              : '',
+            mairieDepartement: mairie?.ville || '',
+            mairieCommune: mairie?.ville || '',
+            mairieCode: mairie?.code || '',
+            mairieVille: mairie?.nom || mairie?.ville || '',
+          };
+
+          remplirFormulaire(data);
+
+          if (shouldPrint) {
+            setTimeout(() => window.print(), 500);
+          }
+        } catch (error) {
+          console.error('Error loading mandat data:', error);
+        }
+      }
+
+      // Charger les données au chargement de la page
+      document.addEventListener('DOMContentLoaded', loadMandatData);
+
+      // Écouter aussi les messages pour la compatibilité avec l'ancienne méthode
       window.addEventListener('message', (event) => {
         console.log('Message received:', event.data);
         if (event.data.type === 'FILL_MANDAT') {

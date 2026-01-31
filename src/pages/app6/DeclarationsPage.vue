@@ -202,6 +202,7 @@ import {
 import FilterBar from 'src/components/FilterBar.vue';
 import DataTable from 'src/components/DataTable.vue';
 import PageHeader from 'src/components/PageHeader.vue';
+import { openPrintWindow, sendMessageToWindow } from 'src/utils/printUrl';
 
 const $q = useQuasar();
 
@@ -528,38 +529,31 @@ function printDeclaration(declaration: Declaration) {
   const taxe = taxes.value.find((t) => t.id === declaration.taxeId);
 
   // Ouvrir le nouveau template HTML
-  const printWindow = window.open(
-    '/declaration_recette_new.html?declarationId=' + declaration.id,
-    '_blank',
-  );
+  const printWindow = openPrintWindow('declaration_recette_new.html', {
+    declarationId: declaration.id!,
+  });
 
   if (printWindow) {
-    printWindow.addEventListener('load', () => {
-      // Envoyer toutes les données nécessaires
-      printWindow.postMessage(
-        {
-          type: 'FILL_DECLARATION',
-          data: {
-            mairie: mairie?.nom || '',
-            codeCommune: mairie?.code || '422',
-            exercice: declaration.exercice,
-            article: taxe?.code || '',
-            numeroPiece: declaration.numeroPiece,
-            nomPartieVersante: declaration.nomPartieVersante || '',
-            adresse: declaration.adresse || '',
-            numeroLivre: declaration.numeroLivre || 'T31T',
-            numeroEncaissement: declaration.numeroEncaissement || '',
-            dateEncaissement: declaration.dateEncaissement
-              ? date.formatDate(declaration.dateEncaissement, 'DD/MM/YYYY')
-              : '',
-            natureRecette: taxe?.libelle || '',
-            montantRecette: declaration.montantRecette || declaration.montant || 0,
-            ville: mairie?.ville || 'Vavoua',
-            observations: declaration.observations || '',
-          },
-        },
-        '*',
-      );
+    sendMessageToWindow(printWindow, {
+      type: 'FILL_DECLARATION',
+      data: {
+        mairie: mairie?.nom || '',
+        codeCommune: mairie?.code || '433',
+        exercice: declaration.exercice,
+        article: taxe?.code || '',
+        numeroPiece: declaration.numeroPiece,
+        nomPartieVersante: declaration.nomPartieVersante || '',
+        adresse: declaration.adresse || '',
+        numeroLivre: declaration.numeroLivre || 'T31T',
+        numeroEncaissement: declaration.numeroEncaissement || '',
+        dateEncaissement: declaration.dateEncaissement
+          ? date.formatDate(declaration.dateEncaissement, 'DD/MM/YYYY')
+          : '',
+        natureRecette: taxe?.libelle || '',
+        montantRecette: declaration.montantRecette || declaration.montant || 0,
+        ville: mairie?.ville || 'Vavoua',
+        observations: declaration.observations || '',
+      },
     });
   }
 }
@@ -569,38 +563,32 @@ function downloadDeclarationPDF(declaration: Declaration) {
   const taxe = taxes.value.find((t) => t.id === declaration.taxeId);
 
   // Ouvrir le template et lancer l'impression automatiquement
-  const printWindow = window.open(
-    '/declaration_recette_new.html?declarationId=' + declaration.id,
-    '_blank',
-  );
+  const printWindow = openPrintWindow('declaration_recette_new.html', {
+    declarationId: declaration.id!,
+    print: 'true',
+  });
 
   if (printWindow) {
-    printWindow.addEventListener('load', () => {
-      // Envoyer les données et demander l'impression
-      printWindow.postMessage(
-        {
-          type: 'FILL_AND_PRINT',
-          data: {
-            mairie: mairie?.nom || '',
-            codeCommune: mairie?.code || '422',
-            exercice: declaration.exercice,
-            article: taxe?.code || '',
-            numeroPiece: declaration.numeroPiece,
-            nomPartieVersante: declaration.nomPartieVersante || '',
-            adresse: declaration.adresse || '',
-            numeroLivre: declaration.numeroLivre || 'T31T',
-            numeroEncaissement: declaration.numeroEncaissement || '',
-            dateEncaissement: declaration.dateEncaissement
-              ? date.formatDate(declaration.dateEncaissement, 'DD/MM/YYYY')
-              : '',
-            natureRecette: taxe?.libelle || '',
-            montantRecette: declaration.montantRecette || declaration.montant || 0,
-            ville: mairie?.ville || 'Vavoua',
-            observations: declaration.observations || '',
-          },
-        },
-        '*',
-      );
+    sendMessageToWindow(printWindow, {
+      type: 'FILL_AND_PRINT',
+      data: {
+        mairie: mairie?.nom || '',
+        codeCommune: mairie?.code || '433',
+        exercice: declaration.exercice,
+        article: taxe?.code || '',
+        numeroPiece: declaration.numeroPiece,
+        nomPartieVersante: declaration.nomPartieVersante || '',
+        adresse: declaration.adresse || '',
+        numeroLivre: declaration.numeroLivre || 'T31T',
+        numeroEncaissement: declaration.numeroEncaissement || '',
+        dateEncaissement: declaration.dateEncaissement
+          ? date.formatDate(declaration.dateEncaissement, 'DD/MM/YYYY')
+          : '',
+        natureRecette: taxe?.libelle || '',
+        montantRecette: declaration.montantRecette || declaration.montant || 0,
+        ville: mairie?.ville || 'Vavoua',
+        observations: declaration.observations || '',
+      },
     });
   }
 }

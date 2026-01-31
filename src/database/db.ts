@@ -116,6 +116,7 @@ export interface Mandat {
   dateFacture?: Date;
   modePaiement: 'virement' | 'cheque' | 'especes' | 'autre';
   statut: 'brouillon' | 'emis' | 'paye' | 'annule';
+  motifAnnulation?: string; // Motif d'annulation du mandat
   observations?: string;
   // Nouveaux champs
   referenceMarche?: string; // Référence du Marché
@@ -448,7 +449,7 @@ export async function initializeDatabase() {
     // Créer la Mairie de Vavoua (mairie unique de l'application)
     const mairieId = await db.mairies.add({
       nom: 'Mairie de Vavoua',
-      code: '422',
+      code: '433',
       adresse: 'Avenue Principale',
       ville: 'Vavoua',
       codePostal: '00225',

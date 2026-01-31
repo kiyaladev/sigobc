@@ -184,6 +184,7 @@ import {
 import FilterBar from 'src/components/FilterBar.vue';
 import DataTable from 'src/components/DataTable.vue';
 import PageHeader from 'src/components/PageHeader.vue';
+import { openPrintWindow, sendMessageToWindow } from 'src/utils/printUrl';
 
 const $q = useQuasar();
 
@@ -540,32 +541,27 @@ async function downloadBordereauPDF(bordereau: BordereauRecette) {
     );
 
     // Ouvrir le template et demander l'impression
-    const printWindow = window.open(
-      '/bordereau_recouvrements_v2.html?bordereauId=' + bordereau.id,
-      '_blank',
-    );
+    const printWindow = openPrintWindow('bordereau_recouvrements_v2.html', {
+      bordereauId: bordereau.id,
+      print: 'true',
+    });
 
     if (printWindow) {
-      printWindow.addEventListener('load', () => {
-        printWindow.postMessage(
-          {
-            type: 'FILL_AND_PRINT',
-            data: {
-              mairie: mairie?.nom || "Mairie de Vavoua",
-              codeCommune: mairie?.code || '422',
-              ville: mairie?.ville || 'Vavoua',
-              numeroBordereau: formatNumeroBordereau(bordereau.numero, bordereau.annee),
-              annee: bordereau.annee,
-              nombreDeclarations: bordereau.nombreDeclarations,
-              montantTotal: bordereau.montantTotal,
-              totalPrecedent: bordereau.totalPrecedent || 0,
-              nouveauTotal: (bordereau.totalPrecedent || 0) + bordereau.montantTotal,
-              statut: bordereau.statut,
-              declarations: declarationsAvecTaxes,
-            },
-          },
-          '*',
-        );
+      sendMessageToWindow(printWindow, {
+        type: 'FILL_AND_PRINT',
+        data: {
+          mairie: mairie?.nom || 'Mairie de Vavoua',
+          codeCommune: mairie?.code || '433',
+          ville: mairie?.ville || 'Vavoua',
+          numeroBordereau: formatNumeroBordereau(bordereau.numero, bordereau.annee),
+          annee: bordereau.annee,
+          nombreDeclarations: bordereau.nombreDeclarations,
+          montantTotal: bordereau.montantTotal,
+          totalPrecedent: bordereau.totalPrecedent || 0,
+          nouveauTotal: (bordereau.totalPrecedent || 0) + bordereau.montantTotal,
+          statut: bordereau.statut,
+          declarations: declarationsAvecTaxes,
+        },
       });
     }
   } catch (error) {

@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Bordereau des Recouvrements</title>
+    <script src="dexie.min.js"></script>
     <style>
       @page {
         size: A4 landscape;
@@ -201,10 +202,33 @@
           box-shadow: none;
           margin: 0;
         }
+        .no-print {
+          display: none !important;
+        }
+      }
+
+      .print-button {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 24px;
+        background-color: #1976d2;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+      }
+      .print-button:hover {
+        background-color: #1565c0;
       }
     </style>
   </head>
   <body>
+    <button class="print-button no-print" onclick="window.print()">🖨️ Imprimer</button>
     <div class="page">
       <div class="header">
         <div class="header-left">
@@ -220,7 +244,7 @@
           <tr style="border-left: 1px solid #000">
             <div class="commune-info">
               COMMUNE DE : <span data-field="mairie">Mairie de Vavoua</span><br />
-              CODE COMMUNE : <span data-field="codeCommune">422</span>
+              CODE COMMUNE : <span data-field="codeCommune">433</span>
             </div>
           </tr>
           <tr>
@@ -450,7 +474,7 @@
           .forEach((el) => (el.textContent = data.ville));
         document
           .querySelectorAll('[data-field="codeCommune"]')
-          .forEach((el) => (el.textContent = data.codeCommune ?? 422));
+          .forEach((el) => (el.textContent = data.codeCommune ?? 433));
         document
           .querySelectorAll('[data-field="exercice"]')
           .forEach((el) => (el.textContent = data.exercice));
@@ -537,9 +561,94 @@
         }
       });
 
+      // Configuration IndexedDB avec Dexie
+      const db = new Dexie('TresorDatabase');
+      db.version(12).stores({
+        mairies: '++id, nom, code, ville',
+        taxes: '++id, code, libelle, mairieId, type, actif',
+        declarations:
+          '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauRecetteId, personnelId, exercice',
+        bordereauxRecette: '++id, numero, annee, mairieId, statut, personnelId',
+        utilisateurs: '++id, username, email, role, mairieId, actif',
+      });
+
+      // Charger les données depuis IndexedDB si bordereauId est fourni
+      async function loadFromDatabase() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const bordereauId = parseInt(urlParams.get('bordereauId'), 10);
+        const shouldPrint = urlParams.get('print') === 'true';
+
+        if (!bordereauId) {
+          console.log('Pas de bordereauId - en attente de message postMessage');
+          return;
+        }
+
+        try {
+          console.log('Chargement du bordereau depuis IndexedDB:', bordereauId);
+          const bordereau = await db.bordereauxRecette.get(bordereauId);
+
+          if (!bordereau) {
+            console.error('Bordereau non trouvé:', bordereauId);
+            return;
+          }
+
+          // Récupérer la mairie
+          const mairie = await db.mairies.toCollection().first();
+
+          // Récupérer les déclarations liées à ce bordereau
+          const declarations = await db.declarations
+            .where('bordereauRecetteId')
+            .equals(bordereauId)
+            .toArray();
+
+          // Récupérer toutes les taxes pour le mapping
+          const taxes = await db.taxes.toArray();
+          const taxesMap = new Map(taxes.map((t) => [t.id, t]));
+
+          // Formater les déclarations pour l'affichage
+          const declarationsFormatted = declarations.map((decl) => {
+            const taxe = taxesMap.get(decl.taxeId);
+            return {
+              numeroPiece: decl.numeroPiece || '',
+              natureRecette: taxe ? taxe.libelle : '',
+              nomPartieVersante: decl.nomPartieVersante || 'RÉGISSEUR',
+              article: taxe ? taxe.code : '',
+              patrimonial: decl.patrimonial || '',
+              montant: decl.montantRecette || decl.montant || 0,
+              dateEncaissement: decl.dateEncaissement
+                ? new Date(decl.dateEncaissement).toLocaleDateString('fr-FR')
+                : '-',
+            };
+          });
+
+          // Préparer les données pour le remplissage
+          const data = {
+            mairie: mairie?.nom || 'Mairie de Vavoua',
+            ville: mairie?.ville || 'Vavoua',
+            codeCommune: mairie?.code || '433',
+            exercice: bordereau.annee,
+            numeroBordereau: `${bordereau.numero}-${bordereau.annee % 100}`,
+            numeroSimple: bordereau.numero,
+            dateBordereau: new Date().toLocaleDateString('fr-FR'),
+            montantTotal: bordereau.montantTotal,
+            totalPrecedent: bordereau.totalPrecedent || 0,
+            declarations: declarationsFormatted,
+          };
+
+          remplirBordereau(data);
+
+          if (shouldPrint) {
+            setTimeout(() => window.print(), 500);
+          }
+        } catch (error) {
+          console.error('Erreur lors du chargement depuis IndexedDB:', error);
+        }
+      }
+
       // Au chargement
       document.addEventListener('DOMContentLoaded', () => {
         console.log('Page de bordereau chargée et prête');
+        loadFromDatabase();
       });
     </script>
   </body>

@@ -172,7 +172,30 @@
         font-weight: bold;
       }
 
+      /* Print button styles */
+      .print-button {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 24px;
+        background-color: #1976d2;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+      }
+      .print-button:hover {
+        background-color: #1565c0;
+      }
+
       @media print {
+        .no-print {
+          display: none !important;
+        }
         body {
           background: white;
           padding: 0;
@@ -187,6 +210,7 @@
     </style>
   </head>
   <body>
+    <button class="print-button no-print" onclick="window.print()">🖨️ Imprimer</button>
     <div class="page" v-if="bordereauData">
       <!-- En-tête -->
       <div class="header">
@@ -196,7 +220,7 @@
             <div style="margin-top: 5px">
               <strong>COMMUNE DE {{ mairie?.ville?.toUpperCase() || 'Vavoua' }}</strong>
             </div>
-            <div style="margin-top: 5px"><strong>CODE : {{ mairie?.code || '422' }}</strong></div>
+            <div style="margin-top: 5px"><strong>CODE : {{ mairie?.code || '433' }}</strong></div>
           </div>
           <div class="header-cell header-title">
             <div>BORDEREAU D' ÉMISSION DES MANDATS</div>
