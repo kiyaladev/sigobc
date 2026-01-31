@@ -352,6 +352,12 @@
         <option value="creancier">Nom et adresse du créancier</option>
         <option value="beneficiaire">Nom et adresse du bénéficiaire</option>
       </select>
+      <label for="statusSelect" style="margin-left: 20px">Statut :</label>
+      <select id="statusSelect" onchange="filterByStatus()">
+        <option value="all">Tous les mandats</option>
+        <option value="paye">Payés</option>
+        <option value="annule">Annulés</option>
+      </select>
     </div>
 
     <div class="page-container">
@@ -913,6 +919,101 @@
         bordereauMandats: '++id, numero, exercice, mairieId, statut, personnelId',
       });
 
+      // Variables globales pour le filtrage
+      let allMandatsData = [];
+      let chapitresMap = new Map();
+      let sousChapitresMap = new Map();
+      let currentBordereau = null;
+      let currentMairie = null;
+
+      /**
+       * Filtre et affiche les mandats selon le statut sélectionné
+       */
+      function filterByStatus() {
+        const statusSelect = document.getElementById('statusSelect');
+        const selectedStatus = statusSelect ? statusSelect.value : 'all';
+
+        let filteredMandats = allMandatsData;
+        if (selectedStatus === 'paye') {
+          filteredMandats = allMandatsData.filter((m) => m.statut === 'paye');
+        } else if (selectedStatus === 'annule') {
+          filteredMandats = allMandatsData.filter((m) => m.statut === 'annule');
+        }
+
+        renderMandats(filteredMandats);
+      }
+
+      /**
+       * Affiche les mandats dans le tableau
+       */
+      function renderMandats(mandats) {
+        const tableBody = document.getElementById('mandats-table-body');
+        tableBody.innerHTML = '';
+        let totalBordereau = 0;
+
+        mandats.forEach((mandat) => {
+          const chapitre = chapitresMap.get(mandat.chapitreId);
+          const sousChapitre = mandat.sousChapitreId
+            ? sousChapitresMap.get(mandat.sousChapitreId)
+            : null;
+
+          // Imputation fonctionnelle: sous-chapitre/chapitre
+          let imputationFonctionnelle = '';
+          if (sousChapitre && chapitre) {
+            imputationFonctionnelle = `${sousChapitre.code}/${chapitre.code}`;
+          } else if (chapitre) {
+            imputationFonctionnelle = chapitre.code;
+          }
+
+          // Imputation patrimoniale
+          const imputationPatrimoniale = mandat.patrimonial || '';
+
+          const row = document.createElement('tr');
+          row.innerHTML = `
+              <td class="text-center" style="color: #666;">${mandat.numeroMandat}</td>
+              <td>${mandat.objet || 'N/A'}</td>
+              <td>${mandat.beneficiaire}</td>
+              <td class="center" style="font-family: monospace;">${imputationFonctionnelle}</td>
+              <td class="center" style="font-family: monospace;">${imputationPatrimoniale}</td>
+              <td style="text-align: right; font-weight: bold; font-family: monospace;">${mandat.montant.toLocaleString('fr-FR')}</td>
+              <td></td><td></td><td></td><td></td>
+          `;
+          tableBody.appendChild(row);
+          totalBordereau += mandat.montant;
+        });
+
+        // Add empty rows if less than 8
+        const minRows = 8;
+        const rowsToAdd = minRows - mandats.length;
+        if (rowsToAdd > 0) {
+          for (let i = 0; i < rowsToAdd; i++) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>&nbsp;</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td><td></td><td></td><td></td>
+            `;
+            tableBody.appendChild(row);
+          }
+        }
+
+        // Update totals
+        const totalPrecedent = currentBordereau.totalPrecedent || 0;
+        const totalGeneral = totalPrecedent + totalBordereau;
+
+        document.getElementById('total-bordereau').textContent =
+          totalBordereau.toLocaleString('fr-FR');
+        document.getElementById('total-precedent').textContent =
+          totalPrecedent.toLocaleString('fr-FR');
+        document.getElementById('total-general').textContent = totalGeneral.toLocaleString('fr-FR');
+        document.getElementById('total-en-lettres').textContent =
+          numberToWords(totalBordereau) + ' francs CFA';
+      }
+
       document.addEventListener('DOMContentLoaded', async () => {
         const params = new URLSearchParams(window.location.search);
         const bordereauId = parseInt(params.get('bordereauId'), 10);
@@ -929,19 +1030,22 @@
             document.body.innerHTML = `Bordereau avec ID ${bordereauId} non trouvé.`;
             return;
           }
+          currentBordereau = bordereau;
 
           // Récupérer la première mairie de la base de données
           const mairie = await db.mairies.toCollection().first();
-          // Récupérer les mandats du bordereau, en excluant les mandats annulés
-          const allMandats = await db.mandats
+          currentMairie = mairie;
+
+          // Récupérer tous les mandats du bordereau
+          allMandatsData = await db.mandats
             .where('bordereauMandatId')
             .equals(bordereauId)
             .toArray();
-          const mandats = allMandats.filter((m) => m.statut !== 'annule');
+
           const chapitres = await db.chapitres.toArray();
-          const chapitresMap = new Map(chapitres.map((c) => [c.id, c]));
+          chapitresMap = new Map(chapitres.map((c) => [c.id, c]));
           const sousChapitres = await db.sousChapitres.toArray();
-          const sousChapitresMap = new Map(sousChapitres.map((sc) => [sc.id, sc]));
+          sousChapitresMap = new Map(sousChapitres.map((sc) => [sc.id, sc]));
 
           // Populate header avec la ville et le code de la mairie
           if (mairie) {
@@ -953,72 +1057,10 @@
           document.getElementById('bordereau-numero').textContent = bordereau.numero;
           document.getElementById('bordereau-annee-folio').textContent = bordereau.exercice;
 
-          // Populate mandats table
-          const tableBody = document.getElementById('mandats-table-body');
-          let totalBordereau = 0;
-          mandats.forEach((mandat) => {
-            const chapitre = chapitresMap.get(mandat.chapitreId);
-            const sousChapitre = mandat.sousChapitreId
-              ? sousChapitresMap.get(mandat.sousChapitreId)
-              : null;
+          // Afficher tous les mandats initialement
+          renderMandats(allMandatsData);
 
-            // Imputation fonctionnelle: sous-chapitre/chapitre
-            let imputationFonctionnelle = '';
-            if (sousChapitre && chapitre) {
-              imputationFonctionnelle = `${sousChapitre.code}/${chapitre.code}`;
-            } else if (chapitre) {
-              imputationFonctionnelle = chapitre.code;
-            }
-
-            // Imputation patrimoniale
-            const imputationPatrimoniale = mandat.patrimonial || '';
-
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                    <td class="text-center" style="color: #666;">${mandat.numeroMandat}</td>
-                    <td>${mandat.objet || 'N/A'}</td>
-                    <td>${mandat.beneficiaire}</td>
-                    <td class="center" style="font-family: monospace;">${imputationFonctionnelle}</td>
-                    <td class="center" style="font-family: monospace;">${imputationPatrimoniale}</td>
-                    <td style="text-align: right; font-weight: bold; font-family: monospace;">${mandat.montant.toLocaleString('fr-FR')}</td>
-                    <td></td><td></td><td></td><td></td>
-                `;
-            tableBody.appendChild(row);
-            totalBordereau += mandat.montant;
-          });
-
-          // Add empty rows if less than 8
-          const minRows = 8;
-          const rowsToAdd = minRows - mandats.length;
-          if (rowsToAdd > 0) {
-            for (let i = 0; i < rowsToAdd; i++) {
-              const row = document.createElement('tr');
-              row.innerHTML = `
-                        <td>&nbsp;</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td><td></td><td></td><td></td>
-                    `;
-              tableBody.appendChild(row);
-            }
-          }
-
-          // Populate footer
-          const totalPrecedent = bordereau.totalPrecedent || 0;
-          const totalGeneral = totalPrecedent + totalBordereau;
-
-          document.getElementById('total-bordereau').textContent =
-            totalBordereau.toLocaleString('fr-FR');
-          document.getElementById('total-precedent').textContent =
-            totalPrecedent.toLocaleString('fr-FR');
-          document.getElementById('total-general').textContent =
-            totalGeneral.toLocaleString('fr-FR');
-          document.getElementById('total-en-lettres').textContent =
-            numberToWords(totalBordereau) + ' francs CFA';
-
+          // Signature date
           const emissionDate = bordereau.dateEmission
             ? new Date(bordereau.dateEmission)
             : new Date();

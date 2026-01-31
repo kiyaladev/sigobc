@@ -3,18 +3,30 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Bordereau de Rejet des Mandats - Paysage</title>
+    <title>Bordereau de Rejet des Mandats de Dépense</title>
     <style>
-      /* RESET & GENERAL */
+      @import url('https://fonts.googleapis.com/css2?family=Arimo:wght@400;700&display=swap');
+
+      :root {
+        --border-color: #000;
+        --border-width: 1.5px;
+        --border-width-thick: 2.5px;
+      }
+
       * {
         box-sizing: border-box;
+        margin: 0;
+        padding: 0;
       }
 
       body {
-        margin: 0;
+        background-color: #f0f0f0;
+        font-family: 'Arimo', sans-serif; /* Police proche de l'original */
+        font-size: 11pt;
+        line-height: 1.3;
+        display: body;
+        justify-content: center;
         padding: 20px;
-        background-color: #f3f4f6;
-        font-family: Arial, Helvetica, sans-serif;
         -webkit-print-color-adjust: exact;
       }
 
@@ -28,15 +40,6 @@
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         position: relative;
       }
-
-      /* CONTENEUR PRINCIPAL (BORDURE DOUBLE EXTERNE) */
-      /*.main-border {
-            border: 2px solid black;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            min-height: 200mm;
-        }*/
 
       /* TABLEAU GLOBAL */
       table {
@@ -285,7 +288,35 @@
         }
       }
 
+      /* Print button styles */
+      .print-button {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 24px;
+        background-color: #1976d2;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+      }
+      .print-button:hover {
+        background-color: #1565c0;
+      }
+
       /* Barre d'options en haut */
+      @media print {
+        .no-print {
+          display: none !important;
+        }
+        .options-bar {
+          display: none !important;
+        }
+      }
       .options-bar {
         background: #f0f0f0;
         padding: 10px 20px;
@@ -306,33 +337,6 @@
         border-radius: 4px;
         background: white;
       }
-      @media print {
-        .options-bar {
-          display: none !important;
-        }
-        .no-print {
-          display: none !important;
-        }
-      }
-
-      .print-button {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 12px 24px;
-        background-color: #1976d2;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: bold;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        z-index: 1000;
-      }
-      .print-button:hover {
-        background-color: #1565c0;
-      }
 
       .ct-code {
         position: absolute;
@@ -340,6 +344,12 @@
         left: 5mm;
         font-weight: bold;
         font-size: 12px;
+      }
+      .noRightBorder {
+        border-right: none !important;
+      }
+      .noLeftBorder {
+        border-left: none !important;
       }
     </style>
   </head>
@@ -349,8 +359,14 @@
     <div class="options-bar">
       <label for="columnTypeSelect">Type de colonne :</label>
       <select id="columnTypeSelect" onchange="updateColumnHeader()">
-        <option value="creancier">Nom et adresse du créancier</option>
         <option value="beneficiaire">Nom et adresse du bénéficiaire</option>
+        <option value="fournisseur">Nom et adresse du fournisseur</option>
+      </select>
+      <label for="statusSelect" style="margin-left: 20px">Statut :</label>
+      <select id="statusSelect" onchange="filterByStatus()">
+        <option value="all">Tous les mandats</option>
+        <option value="paye">Payés</option>
+        <option value="annule">Annulés</option>
       </select>
     </div>
 
@@ -402,7 +418,7 @@
 
               <!-- TITRE BORDEREAU (Sur Nom, Fonc, Pat, Somme) -->
               <th colspan="4" style="padding: 0; height: 40px" class="align-top">
-                <div class="title-bordereau">BORDEREAU DE REJET DES MANDATS</div>
+                <div class="title-bordereau">BORDEREAU DE REJET DES MANDATS DE DÉPENSE</div>
               </th>
 
               <!-- TITRE RECEVEUR (Sur les 4 dernières colonnes) -->
@@ -434,32 +450,11 @@
               <!-- CASE VIDE (Au-dessus de Somme) -->
               <th style="border: none"></th>
 
-              <!-- RECEVEUR COL 1 (Dates / Reste / C 4690) -->
-              <th rowspan="2" style="padding: 0; font-size: 10px">
-                <div class="flex flex-col h-100">
-                  <div class="flex center bb" style="flex: 1; border-bottom: 1px solid">
-                    DATES<br />de Paiement
-                  </div>
-                  <hr />
-                  <div class="flex center bb" style="flex: 1">
-                    Reste à Payer
-                    <br />
-                    C/ 4690
-                  </div>
+              <!-- MANDATS NON MIS EN PAIEMENT (Sur les 4 dernières colonnes) -->
+              <th colspan="4" style="padding: 0; height: 30px" class="align-top">
+                <div class="flex center h-100 bb" style="font-size: 11px; font-weight: bold">
+                  MANDATS NON MIS EN PAIEMENT
                 </div>
-              </th>
-
-              <!-- RECEVEUR COL 2 (Créditeurs / Divers) -->
-              <th rowspan="2" style="padding: 0; font-size: 10px">
-                <div class="flex flex-col h-100">
-                  <div class="flex center bb" style="flex: 1; font-weight: bold">CREDITEURS</div>
-                  <div class="flex center" style="flex: 1">DIVERS</div>
-                </div>
-              </th>
-
-              <!-- RECEVEUR COL 3 (Autres Opérations Titre) -->
-              <th colspan="2" style="padding: 0; height: 30px" class="align-top">
-                <div class="flex center h-100 bb" style="font-size: 10px">AUTRES OPERATIONS</div>
               </th>
             </tr>
 
@@ -467,16 +462,15 @@
             <tr style="height: 40px; font-weight: bold; text-align: center">
               <th>N°</th>
               <th>Nature de la Dépense</th>
-              <th id="column-nom-adresse">Nom et adresse du créancier</th>
+              <th id="column-nom-adresse">Nom et adresse du bénéficiaire</th>
               <th style="font-size: 10px">Fonction-<br />nelle</th>
               <th style="font-size: 10px">Patrimo-<br />niale</th>
-              <th style="border: none">SOMME<br />MANDATÉE</th>
+              <th style="border: none">SOMME<br />A RECOUVRER</th>
 
-              <!-- Sous-colonnes Autres Opérations -->
-              <th style="font-size: 10px">Montants</th>
-              <th style="font-size: 9px; line-height: 1.1">
-                N° de compte<br />autres comptes<br />de tiers
-              </th>
+              <!-- Sous-colonnes Mandats Non Mis En Paiement -->
+              <th style="font-size: 10px">N° des<br />mandats</th>
+              <th colspan="2" style="font-size: 10px">Motifs</th>
+              <th style="font-size: 10px">Montants<br />des mandats</th>
             </tr>
           </thead>
 
@@ -522,24 +516,35 @@
                 "
               ></td>
               <!-- Partie Receveur Totaux (Fusionnée verticalement pour le schéma) -->
-              <td
-                colspan="4"
-                rowspan="3"
-                style="vertical-align: bottom; position: relative; padding: 0"
-              >
+              <td colspan="4" rowspan="3">
+                <!-- Total des mandats non mis en paiement <br>
+              ( à deduire du total ci contre ) -->
                 <!-- Dessin des cases à cocher style ancien -->
                 <div
                   style="
-                    width: 152px;
-                    height: 40px;
-                    border: 1px solid black;
+                    width: 100%;
+                    height: 45px;
+                    border: none;
                     background: white;
-                    margin: 0 auto 10px auto;
                     position: relative;
-                    top: -10px;
                   "
-                ></div>
+                >
+                  Total des mandats non mis en paiement <br />
+                  ( à deduire du total ci contre )
+                </div>
+                <hr />
                 <div
+                  style="
+                    width: 100%;
+                    height: 20px;
+                    border: none;
+                    background: white;
+                    position: relative;
+                  "
+                >
+                  Nouveau Total du présent bordereau
+                </div>
+                <!-- <div
                   style="
                     width: 76px;
                     height: 30px;
@@ -550,7 +555,7 @@
                     position: relative;
                     top: -10px;
                   "
-                ></div>
+                ></div> -->
               </td>
             </tr>
             <!-- TOTAUX 2 -->
@@ -714,7 +719,7 @@
           </div>
         </div>
       </div>
-      <div class="ct-code">CT 20</div>
+      <div class="ct-code">CT 51</div>
     </div>
     <script src="dexie.min.js"></script>
     <script>
@@ -725,10 +730,10 @@
         const select = document.getElementById('columnTypeSelect');
         const columnHeader = document.getElementById('column-nom-adresse');
         if (select && columnHeader) {
-          if (select.value === 'beneficiaire') {
-            columnHeader.textContent = 'Nom et adresse du bénéficiaire';
+          if (select.value === 'fournisseur') {
+            columnHeader.textContent = 'Nom et adresse du fournisseur';
           } else {
-            columnHeader.textContent = 'Nom et adresse du créancier';
+            columnHeader.textContent = 'Nom et adresse du bénéficiaire';
           }
         }
       }
@@ -891,27 +896,123 @@
       }
 
       const db = new Dexie('TresorDatabase');
-      db.version(12).stores({
+      db.version(23).stores({
         mairies: '++id, nom, code, ville',
         taxes: '++id, code, libelle, mairieId, type, actif',
         declarations:
           '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
         bordereauxRecette: '++id, numero, annee, mairieId, statut, personnelId',
-        utilisateurs: '++id, username, email, role, mairieId, actif',
-        // App2
-        approvisionnements: '++id, date, exercice, mairieId, type, personnelId',
-        remises: '++id, numeroRemise, date, exercice, mairieId, personnelId',
-        versements: '++id, numeroVersement, date, exercice, mairieId, personnelId',
-        balancesEntree: '++id, date, exercice, mairieId, type, personnelId, [exercice+mairieId]',
-        quotites: '++id, code, prix, type, mairieId, actif',
-        // App3
-        chapitres: '++id, code, libelle, mairieId, actif',
-        sousChapitres: '++id, code, libelle, mairieId, actif',
-        previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
+        // App3 - Dépenses
         mandats:
           '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
         bordereauMandats: '++id, numero, exercice, mairieId, statut, personnelId',
+        chapitres: '++id, code, libelle, mairieId, actif',
+        sousChapitres: '++id, code, libelle, mairieId, actif',
       });
+
+      // Variables globales pour le filtrage
+      let allMandatsData = [];
+      let chapitresMap = new Map();
+      let sousChapitresMap = new Map();
+      let currentBordereau = null;
+      let currentMairie = null;
+
+      /**
+       * Filtre et affiche les mandats selon le statut sélectionné
+       */
+      function filterByStatus() {
+        const statusSelect = document.getElementById('statusSelect');
+        const selectedStatus = statusSelect ? statusSelect.value : 'all';
+
+        let filteredMandats = allMandatsData;
+        if (selectedStatus === 'paye') {
+          filteredMandats = allMandatsData.filter((m) => m.statut === 'paye');
+        } else if (selectedStatus === 'annule') {
+          filteredMandats = allMandatsData.filter((m) => m.statut === 'annule');
+        }
+
+        renderMandats(filteredMandats);
+      }
+
+      /**
+       * Affiche les mandats dans le tableau
+       */
+      function renderMandats(mandats) {
+        const tableBody = document.getElementById('mandats-table-body');
+        tableBody.innerHTML = '';
+        let totalBordereau = 0;
+
+        mandats.forEach((mandat) => {
+          const chapitre = chapitresMap.get(mandat.chapitreId);
+          const sousChapitre = mandat.sousChapitreId
+            ? sousChapitresMap.get(mandat.sousChapitreId)
+            : null;
+
+          // Imputation fonctionnelle: sous-chapitre/chapitre
+          let imputationFonctionnelle = '';
+          if (sousChapitre && chapitre) {
+            imputationFonctionnelle = `${sousChapitre.code}/${chapitre.code}`;
+          } else if (chapitre) {
+            imputationFonctionnelle = chapitre.code;
+          }
+
+          // Imputation patrimoniale
+          const imputationPatrimoniale = mandat.patrimonial || '';
+
+          // Bénéficiaire
+          const beneficiaire = mandat.beneficiaire || 'N/A';
+
+          const row = document.createElement('tr');
+          row.innerHTML = `
+              <td class="text-center" style="color: #666;">${mandat.numeroMandat}</td>
+              <td>${mandat.objet || 'N/A'}</td>
+              <td>${beneficiaire}</td>
+              <td class="center" style="font-family: monospace;">${imputationFonctionnelle}</td>
+              <td class="center" style="font-family: monospace;">${imputationPatrimoniale}</td>
+              <td style="text-align: right; font-weight: bold; font-family: monospace;">${mandat.montant.toLocaleString('fr-FR')}</td>
+              <td></td>
+              <td class="noRightBorder" style="border-right: none !important;"></td>
+              <td class="noLeftBorder" style="border-left: none !important;"></td>
+              <td></td>
+          `;
+          tableBody.appendChild(row);
+          totalBordereau += mandat.montant;
+        });
+
+        // Add empty rows if less than 8
+        const minRows = 8;
+        const rowsToAdd = minRows - mandats.length;
+        if (rowsToAdd > 0) {
+          for (let i = 0; i < rowsToAdd; i++) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>&nbsp;</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td class="noRightBorder"></td>
+                <td class="noLeftBorder"></td>
+                <td></td>
+            `;
+            tableBody.appendChild(row);
+          }
+        }
+
+        // Update totals
+        const totalPrecedent = currentBordereau.totalPrecedent || 0;
+        const totalGeneral = totalPrecedent + totalBordereau;
+
+        document.getElementById('total-bordereau').textContent =
+          totalBordereau.toLocaleString('fr-FR');
+        document.getElementById('total-precedent').textContent =
+          totalPrecedent.toLocaleString('fr-FR');
+        document.getElementById('total-general').textContent = totalGeneral.toLocaleString('fr-FR');
+        document.getElementById('total-en-lettres').textContent =
+          numberToWords(totalBordereau) + ' francs CFA';
+      }
 
       document.addEventListener('DOMContentLoaded', async () => {
         const params = new URLSearchParams(window.location.search);
@@ -929,19 +1030,22 @@
             document.body.innerHTML = `Bordereau avec ID ${bordereauId} non trouvé.`;
             return;
           }
+          currentBordereau = bordereau;
 
           // Récupérer la première mairie de la base de données
           const mairie = await db.mairies.toCollection().first();
-          // Récupérer UNIQUEMENT les mandats annulés du bordereau
-          const allMandats = await db.mandats
+          currentMairie = mairie;
+
+          // Récupérer tous les mandats du bordereau
+          allMandatsData = await db.mandats
             .where('bordereauMandatId')
             .equals(bordereauId)
             .toArray();
-          const mandats = allMandats.filter((m) => m.statut === 'annule');
+
           const chapitres = await db.chapitres.toArray();
-          const chapitresMap = new Map(chapitres.map((c) => [c.id, c]));
           const sousChapitres = await db.sousChapitres.toArray();
-          const sousChapitresMap = new Map(sousChapitres.map((sc) => [sc.id, sc]));
+          chapitresMap = new Map(chapitres.map((c) => [c.id, c]));
+          sousChapitresMap = new Map(sousChapitres.map((sc) => [sc.id, sc]));
 
           // Populate header avec la ville et le code de la mairie
           if (mairie) {
@@ -953,72 +1057,10 @@
           document.getElementById('bordereau-numero').textContent = bordereau.numero;
           document.getElementById('bordereau-annee-folio').textContent = bordereau.exercice;
 
-          // Populate mandats table
-          const tableBody = document.getElementById('mandats-table-body');
-          let totalBordereau = 0;
-          mandats.forEach((mandat) => {
-            const chapitre = chapitresMap.get(mandat.chapitreId);
-            const sousChapitre = mandat.sousChapitreId
-              ? sousChapitresMap.get(mandat.sousChapitreId)
-              : null;
+          // Afficher tous les mandats initialement
+          renderMandats(allMandatsData);
 
-            // Imputation fonctionnelle: sous-chapitre/chapitre
-            let imputationFonctionnelle = '';
-            if (sousChapitre && chapitre) {
-              imputationFonctionnelle = `${sousChapitre.code}/${chapitre.code}`;
-            } else if (chapitre) {
-              imputationFonctionnelle = chapitre.code;
-            }
-
-            // Imputation patrimoniale
-            const imputationPatrimoniale = mandat.patrimonial || '';
-
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                    <td class="text-center" style="color: #666;">${mandat.numeroMandat}</td>
-                    <td>${mandat.objet || 'N/A'}</td>
-                    <td>${mandat.beneficiaire}</td>
-                    <td class="center" style="font-family: monospace;">${imputationFonctionnelle}</td>
-                    <td class="center" style="font-family: monospace;">${imputationPatrimoniale}</td>
-                    <td style="text-align: right; font-weight: bold; font-family: monospace;">${mandat.montant.toLocaleString('fr-FR')}</td>
-                    <td></td><td></td><td></td><td></td>
-                `;
-            tableBody.appendChild(row);
-            totalBordereau += mandat.montant;
-          });
-
-          // Add empty rows if less than 8
-          const minRows = 8;
-          const rowsToAdd = minRows - mandats.length;
-          if (rowsToAdd > 0) {
-            for (let i = 0; i < rowsToAdd; i++) {
-              const row = document.createElement('tr');
-              row.innerHTML = `
-                        <td>&nbsp;</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td><td></td><td></td><td></td>
-                    `;
-              tableBody.appendChild(row);
-            }
-          }
-
-          // Populate footer
-          const totalPrecedent = bordereau.totalPrecedent || 0;
-          const totalGeneral = totalPrecedent + totalBordereau;
-
-          document.getElementById('total-bordereau').textContent =
-            totalBordereau.toLocaleString('fr-FR');
-          document.getElementById('total-precedent').textContent =
-            totalPrecedent.toLocaleString('fr-FR');
-          document.getElementById('total-general').textContent =
-            totalGeneral.toLocaleString('fr-FR');
-          document.getElementById('total-en-lettres').textContent =
-            numberToWords(totalBordereau) + ' francs CFA';
-
+          // Signature date
           const emissionDate = bordereau.dateEmission
             ? new Date(bordereau.dateEmission)
             : new Date();

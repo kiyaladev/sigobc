@@ -484,13 +484,13 @@ function confirmDelete(bordereau: BordereauMandat) {
 }
 
 function printBordereau(bordereau: BordereauMandat) {
-  // Afficher un dialog avec les deux options d'impression
+  // Afficher un dialog avec les deux options d'impression (radio)
   $q.dialog({
     title: 'Impression du Bordereau',
     message: 'Choisissez le type de bordereau à imprimer :',
     options: {
-      type: 'checkbox',
-      model: ['emission'],
+      type: 'radio',
+      model: 'emission',
       items: [
         { label: "Bordereau d'Émission", value: 'emission' },
         { label: 'Bordereau de Rejet (mandats annulés)', value: 'rejet' },
@@ -498,11 +498,10 @@ function printBordereau(bordereau: BordereauMandat) {
     },
     cancel: true,
     persistent: true,
-  }).onOk((selected: string[]) => {
-    if (selected.includes('emission')) {
+  }).onOk((selected: string) => {
+    if (selected === 'emission') {
       openPrintWindow('bordereau_mandat.html', { bordereauId: bordereau.id! });
-    }
-    if (selected.includes('rejet')) {
+    } else if (selected === 'rejet') {
       openPrintWindow('bordereau_mandat_rejet.html', { bordereauId: bordereau.id! });
     }
   });
