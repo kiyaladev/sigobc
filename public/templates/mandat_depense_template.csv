@@ -1,0 +1,4 @@
+numeroMandat;dateMandat;exercice;chapitreCode;sousChapitreCode;bordereauNumero;beneficiaire;rib;patrimonial;objet;montant;montantPrecompter;numeroFacture;dateFacture;modePaiement;statut;referenceMarche;avisMunicipalite;numeroDeliberation;dateDeliberation;observations
+MD-2026-001;2026-01-15;2026;6100;6110;BM-001-26;KOUASSI JEAN PIERRE;CI001 01234 123456789012 12;6000/1;Paiement de salaire janvier 2026;250000;0;FAC-2026-001;2026-01-10;virement;emis;MARCHE-2025-045;Favorable;DEL-2025-089;2025-12-15;Paiement mensuel
+MD-2026-002;2026-01-20;2026;6200;6210;BM-001-26;SOCIETE ABC SARL;CI002 05678 987654321098 34;6000/2;Fournitures de bureau;75000;5000;FAC-2026-002;2026-01-18;cheque;brouillon;;;DEL-2025-090;2025-12-20;Achat urgent
+MD-2026-003;2026-01-25;2026;6300;;BM-002-26;ENTREPRISE XYZ;CI003 09012 456789012345 56;;Travaux de réparation;450000;25000;FAC-2026-003;2026-01-22;virement;paye;MARCHE-2026-001;Favorable;DEL-2026-001;2026-01-10;Travaux terminés

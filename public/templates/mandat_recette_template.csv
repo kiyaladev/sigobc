@@ -1,0 +1,5 @@
+numeroMandat;dateMandat;exercice;chapitreCode;taxeCode;bordereauNumero;partieVersante;rib;patrimonial;objet;montant;numeroFacture;dateFacture;modePaiement;statut;observations
+MR-2026-001;15/01/2026;2026;7100;TX-001;BMR-001-26;ENTREPRISE ALPHA;CI001 01234 123456789012 12;7000/1;Paiement taxe foncière 2026;150000;FAC-2026-001;10/01/2026;virement;encaisse;Paiement annuel
+MR-2026-002;20/01/2026;2026;7200;TX-002;BMR-001-26;SOCIETE BETA SARL;CI002 05678 987654321098 34;7000/2;Patente commerciale;85000;FAC-2026-002;18/01/2026;cheque;emis;Première échéance
+MR-2026-003;25/01/2026;2026;7300;TX-003;BMR-002-26;PARTICULIER DUPONT;;7000/3;Légalisation de documents;25000;;;especes;brouillon;10 documents légaliser
+MR-2026-004;28/01/2026;2026;7100;TX-001;BMR-002-26;COMMERCE GAMMA;CI004 03456 234567890123 78;;Location de terrain;200000;FAC-2026-004;26/01/2026;virement;rejete;Rejet pour montant insuffisant
