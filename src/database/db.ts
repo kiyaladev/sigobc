@@ -115,7 +115,7 @@ export interface Mandat {
   numeroFacture?: string; // Numéro de facture
   dateFacture?: Date;
   modePaiement: 'virement' | 'cheque' | 'especes' | 'autre';
-  statut: 'brouillon' | 'emis' | 'paye' | 'annule';
+  statut: 'brouillon' | 'paye' | 'annule';
   motifAnnulation?: string; // Motif d'annulation du mandat
   observations?: string;
   // Nouveaux champs

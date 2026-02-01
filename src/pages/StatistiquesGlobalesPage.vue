@@ -342,7 +342,6 @@ const depensesStats = computed(() => {
 
   const nombreMandats = mandats.value.length;
   const mandatsBrouillon = mandats.value.filter((m) => m.statut === 'brouillon').length;
-  const mandatsEmis = mandats.value.filter((m) => m.statut === 'emis').length;
   const mandatsPayes = mandats.value.filter((m) => m.statut === 'paye').length;
   const mandatsAnnules = mandats.value.filter((m) => m.statut === 'annule').length;
 
@@ -354,7 +353,6 @@ const depensesStats = computed(() => {
     montantDisponible,
     nombreMandats,
     mandatsBrouillon,
-    mandatsEmis,
     mandatsPayes,
     mandatsAnnules,
     tauxExecution,
@@ -491,17 +489,16 @@ const mandatsStatutChartConfig = computed<ChartConfiguration>(() => {
   return {
     type: 'doughnut',
     data: {
-      labels: ['Brouillon', 'Émis', 'Payés', 'Annulés'],
+      labels: ['Brouillon', 'Payés', 'Annulés'],
       datasets: [
         {
           label: 'Mandats',
           data: [
             depensesStats.value.mandatsBrouillon,
-            depensesStats.value.mandatsEmis,
             depensesStats.value.mandatsPayes,
             depensesStats.value.mandatsAnnules,
           ],
-          backgroundColor: ['#9E9E9E', '#E67E22', '#4CAF50', '#F44336'],
+          backgroundColor: ['#9E9E9E', '#4CAF50', '#F44336'],
         },
       ],
     },

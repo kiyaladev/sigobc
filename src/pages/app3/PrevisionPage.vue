@@ -543,9 +543,9 @@ async function printCT02() {
         )
       : previsionsExercice;
 
-    // Récupérer les mandats de l'exercice (émis ou payés)
+    // Récupérer les mandats de l'exercice (payés)
     const mandatsExercice = (await db.mandats.where('exercice').equals(exercice).toArray()).filter(
-      (m) => m.statut === 'emis' || m.statut === 'paye',
+      (m) => m.statut === 'paye',
     );
 
     // Si un sous-chapitre est sélectionné, filtrer les mandats
@@ -753,7 +753,7 @@ async function generateEtatFinancierMensuel() {
     // Ajouter les dépenses des mandats (utiliser etatMensuelId pour grouper)
     const anneePrefix = `${annee}-`;
     for (const mandat of mandatsAnnee) {
-      if (mandat.statut !== 'emis' && mandat.statut !== 'paye') continue;
+      if (mandat.statut !== 'paye') continue;
 
       let sousChapitreCode = '';
       let chapitreCode = '';

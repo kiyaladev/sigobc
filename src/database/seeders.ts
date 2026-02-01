@@ -1924,16 +1924,16 @@ async function seedMandats(
 
   const MONTH_SPECS: Array<{ label: string; start: Date; end: Date; exercice: number }> = [
     {
-      label: 'novembre',
-      exercice: CURRENT_YEAR,
-      start: new Date(CURRENT_YEAR, 10, 1),
-      end: new Date(CURRENT_YEAR, 10, 30),
+      label: 'janvier',
+      exercice: 2026,
+      start: new Date(2026, 0, 1),
+      end: new Date(2026, 0, 31),
     },
     {
-      label: 'décembre',
-      exercice: CURRENT_YEAR,
-      start: new Date(CURRENT_YEAR, 11, 1),
-      end: new Date(CURRENT_YEAR, 11, 31),
+      label: 'février',
+      exercice: 2026,
+      start: new Date(2026, 1, 1),
+      end: new Date(2026, 1, 28),
     },
   ];
 
@@ -1957,7 +1957,7 @@ async function seedMandats(
           const numeroMandat = String(numeroOrdre);
           const montant = randomAmount(5000, 500000);
 
-          const statuts: Array<'emis' | 'paye'> = ['emis', 'paye'];
+          const statuts: Array<'brouillon' | 'paye'> = ['brouillon', 'paye'];
           const statut =
             bordereau.statut === 'ferme' ? randomChoice(statuts) : randomChoice(statuts);
 

@@ -324,7 +324,7 @@
               <div class="col-12 col-md-4">
                 <q-select
                   v-model="formData.statut"
-                  :options="['brouillon', 'emis', 'paye', 'annule']"
+                  :options="['brouillon', 'paye', 'annule']"
                   label="Statut *"
                   outlined
                   dense
@@ -625,7 +625,7 @@ const formData = ref({
   numeroFacture: '',
   dateFacture: '',
   modePaiement: 'virement' as 'virement' | 'cheque' | 'especes' | 'autre',
-  statut: 'emis' as 'brouillon' | 'emis' | 'paye' | 'annule',
+  statut: 'brouillon' as 'brouillon' | 'paye' | 'annule',
   observations: '',
   motifAnnulation: '',
   // Nouveaux champs
@@ -871,8 +871,6 @@ function getStatutColor(statut: string): string {
   switch (statut) {
     case 'brouillon':
       return 'grey';
-    case 'emis':
-      return 'primary';
     case 'paye':
       return 'positive';
     case 'annule':
@@ -886,8 +884,6 @@ function getStatutLabel(statut: string): string {
   switch (statut) {
     case 'brouillon':
       return 'Brouillon';
-    case 'emis':
-      return 'Émis';
     case 'paye':
       return 'Payé';
     case 'annule':
@@ -943,7 +939,7 @@ function resetForm() {
     numeroFacture: '',
     dateFacture: '',
     modePaiement: 'virement',
-    statut: 'emis',
+    statut: 'brouillon',
     observations: '',
     motifAnnulation: '',
     // Nouveaux champs
@@ -1253,7 +1249,7 @@ async function parseCSV(csvText: string) {
       numeroFacture: row.numeroFacture || '',
       dateFacture: row.dateFacture || '',
       modePaiement: row.modePaiement || 'virement',
-      statut: row.statut || 'emis',
+      statut: row.statut || 'brouillon',
       referenceMarche: row.referenceMarche || '',
       avisMunicipalite: row.avisMunicipalite || '',
       numeroDeliberation: row.numeroDeliberation || '',
@@ -1316,7 +1312,7 @@ async function executeImport() {
         dateMandat: new Date(row.dateMandat),
         exercice: row.exercice,
         chapitreId: chapitreId || 0,
-        ...(sousChapitreId !== undefined && { sousChapitreId }),
+        sousChapitreId: sousChapitreId ?? 0,
         ...(bordereauMandatId !== undefined && { bordereauMandatId }),
         beneficiaire: row.beneficiaire,
         rib: row.rib,
@@ -1325,13 +1321,13 @@ async function executeImport() {
         montant: row.montant,
         montantPrecompter: row.montantPrecompter,
         numeroFacture: row.numeroFacture,
-        dateFacture: row.dateFacture ? new Date(row.dateFacture) : undefined,
+        ...(row.dateFacture && { dateFacture: new Date(row.dateFacture) }),
         modePaiement: row.modePaiement as 'virement' | 'cheque' | 'especes' | 'autre',
-        statut: row.statut as 'brouillon' | 'emis' | 'paye' | 'annule',
+        statut: row.statut as 'brouillon' | 'paye' | 'annule',
         referenceMarche: row.referenceMarche,
         avisMunicipalite: row.avisMunicipalite,
         numeroDeliberation: row.numeroDeliberation,
-        dateDeliberation: row.dateDeliberation ? new Date(row.dateDeliberation) : undefined,
+        ...(row.dateDeliberation && { dateDeliberation: new Date(row.dateDeliberation) }),
         observations: row.observations,
         mairieId,
         personnelId,

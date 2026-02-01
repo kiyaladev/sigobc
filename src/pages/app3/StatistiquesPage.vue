@@ -98,7 +98,7 @@
         <StatisticsCard
           :value="stats.nombreMandats"
           title="Mandats"
-          :subtitle="`${stats.mandatsEmis} émis / ${stats.mandatsPayes} payés`"
+          :subtitle="`${stats.mandatsBrouillon} brouillon / ${stats.mandatsPayes} payés`"
           icon="receipt"
           icon-color="grey-7"
           border-color="#E67E22"
@@ -243,15 +243,15 @@
 
               <q-item>
                 <q-item-section avatar>
-                  <q-avatar color="primary" text-color="white" icon="send" />
+                  <q-avatar color="grey" text-color="white" icon="edit" />
                 </q-item-section>
                 <q-item-section>
-                  <q-item-label class="text-weight-bold">Émis</q-item-label>
-                  <q-item-label caption>Mandats émis</q-item-label>
+                  <q-item-label class="text-weight-bold">Brouillon</q-item-label>
+                  <q-item-label caption>Mandats en brouillon</q-item-label>
                 </q-item-section>
                 <q-item-section side>
-                  <q-item-label class="text-h6" style="color: #e67e22">
-                    {{ stats.mandatsEmis }}
+                  <q-item-label class="text-h6" style="color: #9e9e9e">
+                    {{ stats.mandatsBrouillon }}
                   </q-item-label>
                   <q-item-label caption>mandats</q-item-label>
                 </q-item-section>
@@ -381,7 +381,6 @@ const stats = computed(() => {
 
   const nombreMandats = mandatsFiltered.length;
   const mandatsBrouillon = mandatsFiltered.filter((m) => m.statut === 'brouillon').length;
-  const mandatsEmis = mandatsFiltered.filter((m) => m.statut === 'emis').length;
   const mandatsPayes = mandatsFiltered.filter((m) => m.statut === 'paye').length;
   const mandatsAnnules = mandatsFiltered.filter((m) => m.statut === 'annule').length;
 
@@ -393,7 +392,6 @@ const stats = computed(() => {
     montantDisponible,
     nombreMandats,
     mandatsBrouillon,
-    mandatsEmis,
     mandatsPayes,
     mandatsAnnules,
     tauxExecution,
@@ -580,7 +578,11 @@ async function loadStatistics() {
         .equals(mairieId)
         .filter((m) => m.exercice === exercice)
         .toArray(),
-      db.chapitres.where('mairieId').equals(mairieId).filter((c) => c.actif).toArray(),
+      db.chapitres
+        .where('mairieId')
+        .equals(mairieId)
+        .filter((c) => c.actif)
+        .toArray(),
     ]);
 
     previsions.value = previsionsList;
@@ -725,7 +727,6 @@ const evolutionChartConfig = computed<ChartConfiguration>(() => {
     'Déc',
   ];
   const brouillonData = new Array(12).fill(0);
-  const emisData = new Array(12).fill(0);
   const payeData = new Array(12).fill(0);
 
   mandats.value.forEach((m) => {
@@ -737,11 +738,6 @@ const evolutionChartConfig = computed<ChartConfiguration>(() => {
           const val = brouillonData[month];
           if (typeof val === 'number') {
             brouillonData[month] = val + m.montant;
-          }
-        } else if (m.statut === 'emis') {
-          const val = emisData[month];
-          if (typeof val === 'number') {
-            emisData[month] = val + m.montant;
           }
         } else if (m.statut === 'paye') {
           const val = payeData[month];
@@ -763,13 +759,6 @@ const evolutionChartConfig = computed<ChartConfiguration>(() => {
           data: brouillonData,
           borderColor: '#6B7280',
           backgroundColor: 'rgba(107, 114, 128, 0.1)',
-          tension: 0.4,
-        },
-        {
-          label: 'Émis',
-          data: emisData,
-          borderColor: '#E67E22',
-          backgroundColor: 'rgba(230, 126, 34, 0.1)',
           tension: 0.4,
         },
         {
