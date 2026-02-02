@@ -1634,7 +1634,29 @@ async function seedPrevisionsRecettes(personnelIds: number[]) {
   const taxes = await db.taxes.toArray();
   const previsions: Partial<PrevisionRecette>[] = [];
 
-  // Une prévision par taxe pour l'année précédente (pour avoir des données cohérentes avec les déclarations)
+  // Prévisions pour l'année courante (2026)
+  for (const taxe of taxes) {
+    if (!taxe.id) continue;
+
+    const montantPrevu = randomAmount(100000, 5000000);
+    const montantRealise = 0; // Pas encore réalisé pour l'année courante
+
+    previsions.push({
+      exercice: CURRENT_YEAR,
+      taxeId: taxe.id,
+      mairieId: DEFAULT_MAIRIE_ID,
+      montantPrevu,
+      montantRealise,
+      statut: 'validee',
+      personnelId: randomChoice(personnelIds),
+      createdAt: new Date(CURRENT_YEAR - 1, 11, 15),
+      updatedAt: now,
+    });
+  }
+
+  console.log(`✅ ${previsions.length} prévisions de recettes créées pour ${CURRENT_YEAR}`);
+
+  // Prévisions pour l'année précédente (2025) - avec des données réalisées
   for (const taxe of taxes) {
     if (!taxe.id) continue;
 
@@ -1656,7 +1678,7 @@ async function seedPrevisionsRecettes(personnelIds: number[]) {
 
   await db.previsionsRecettes.bulkAdd(previsions as PrevisionRecette[]);
   console.log(
-    `✅ ${previsions.length} prévisions de recettes créées (1 par taxe, ${CURRENT_YEAR - 1})`,
+    `✅ ${previsions.length} prévisions de recettes créées au total (${CURRENT_YEAR} + ${CURRENT_YEAR - 1})`,
   );
 }
 

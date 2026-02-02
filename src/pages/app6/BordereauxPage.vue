@@ -547,7 +547,7 @@ async function downloadBordereauPDF(bordereau: BordereauRecette) {
     });
 
     if (printWindow) {
-      sendMessageToWindow(printWindow, {
+      void sendMessageToWindow(printWindow, {
         type: 'FILL_AND_PRINT',
         data: {
           mairie: mairie?.nom || 'Mairie de Vavoua',

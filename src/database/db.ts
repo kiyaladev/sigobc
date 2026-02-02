@@ -375,6 +375,15 @@ export interface EtatFinancierMensuelRecette {
   updatedAt: Date;
 }
 
+// Interface pour stocker temporairement les données d'impression
+// Utilisé pour passer les données aux pages d'impression en mode Electron
+export interface PrintData {
+  id?: number;
+  type: string; // Type de document (FILL_ETAT_FINANCIER_DATA, FILL_CT02_DATA, etc.)
+  data: unknown; // Données à imprimer (sérialisées en JSON)
+  createdAt: Date;
+}
+
 // Classe Dexie pour la base de données
 class TresorDatabase extends Dexie {
   mairies!: EntityTable<Mairie, 'id'>;
@@ -398,10 +407,13 @@ class TresorDatabase extends Dexie {
   chapitresRecette!: EntityTable<ChapitreRecette, 'id'>;
   etatFinancierMensuelRecette!: EntityTable<EtatFinancierMensuelRecette, 'id'>;
 
+  // Table temporaire pour les données d'impression
+  printData!: EntityTable<PrintData, 'id'>;
+
   constructor() {
     super('TresorDatabase');
 
-    this.version(23).stores({
+    this.version(24).stores({
       mairies: '++id, nom, code, ville',
       utilisateurs: '++id, username, email, role, mairieId, actif',
 
@@ -431,6 +443,9 @@ class TresorDatabase extends Dexie {
       chapitresRecette: '++id, code, libelle, mairieId, actif',
       etatFinancierMensuelRecette:
         '++id, annee, taxeId, chapitreRecetteId, mairieId, [annee+taxeId+chapitreRecetteId]',
+
+      // Table temporaire pour les données d'impression (utilisée en mode Electron)
+      printData: '++id, type, createdAt',
     });
   }
 }

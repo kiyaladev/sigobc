@@ -1,7 +1,9 @@
+import { db } from 'src/database/db';
+
 /**
  * Détecte si l'application s'exécute dans Electron
  */
-function isElectron(): boolean {
+export function isElectron(): boolean {
   // Méthodes de détection d'Electron
   if (
     typeof window !== 'undefined' &&
@@ -89,9 +91,72 @@ export function openPrintWindow(
 }
 
 /**
+ * Stocke les données dans IndexedDB pour les pages d'impression
+ * Doit être appelé AVANT d'ouvrir la fenêtre d'impression en mode Electron
+ */
+export async function storePrintData(message: unknown): Promise<number | undefined> {
+  if (!isElectron()) {
+    return undefined;
+  }
+
+  try {
+    // Nettoyer les anciennes données d'impression (plus de 5 minutes)
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    await db.printData.where('createdAt').below(fiveMinutesAgo).delete();
+
+    // Stocker les nouvelles données
+    const messageWithType = message as { type?: string };
+    const printDataId = await db.printData.add({
+      type: messageWithType?.type || 'UNKNOWN',
+      data: message,
+      createdAt: new Date(),
+    });
+    console.log('[PrintUrl] Data stored in IndexedDB with id:', printDataId);
+    return printDataId;
+  } catch (e) {
+    console.warn('[PrintUrl] Failed to store data in IndexedDB:', e);
+    return undefined;
+  }
+}
+
+/**
+ * Ouvre une fenêtre d'impression et envoie les données
+ * En mode Electron, stocke d'abord les données dans IndexedDB puis ouvre la fenêtre
+ */
+export async function openPrintWindowWithMessage(
+  htmlFile: string,
+  message: unknown,
+  params?: Record<string, string | number>,
+  windowName?: string,
+): Promise<Window | null> {
+  // En mode Electron, stocker d'abord les données AVANT d'ouvrir la fenêtre
+  if (isElectron()) {
+    await storePrintData(message);
+  }
+
+  const printWindow = openPrintWindow(htmlFile, params, windowName);
+
+  if (printWindow) {
+    // Envoyer aussi via postMessage (pour le mode web)
+    void sendMessageToWindow(printWindow, message);
+  }
+
+  return printWindow;
+}
+
+// Déclarer la propriété globale pour TypeScript
+declare global {
+  interface Window {
+    __printData__?: unknown;
+  }
+}
+
+/**
  * Envoie un message à une fenêtre avec des retries pour Electron
  * Cette fonction gère les problèmes de timing dans Electron où
- * l'événement 'load' peut ne pas être fiable
+ * l'événement 'load' peut ne pas être fiable.
+ * Note: Pour le mode Electron, utilisez openPrintWindowWithMessage qui stocke
+ * les données dans IndexedDB AVANT d'ouvrir la fenêtre.
  */
 export function sendMessageToWindow(
   targetWindow: Window,
@@ -127,6 +192,7 @@ export function sendMessageToWindow(
 /**
  * Ouvre une fenêtre et envoie un message une fois chargée
  * Combine openPrintWindow et sendMessageToWindow avec une meilleure gestion du timing
+ * @deprecated Utilisez openPrintWindowWithMessage à la place pour le support Electron
  */
 export function openPrintWindowWithData(
   htmlFile: string,

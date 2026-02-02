@@ -4,10 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Etat Mensuel d'Exécution des Dépenses</title>
+    <!-- Charger Dexie pour accéder à IndexedDB -->
+    <script src="../dexie.min.js"></script>
     <style>
       @page {
         size: A4 landscape;
-        margin: 10mm;
+        margin: 5mm;
       }
       body {
         font-family: Arial, Helvetica, sans-serif;
@@ -210,9 +212,7 @@
   <body>
     <button class="print-button no-print" onclick="window.print()">🖨️ Imprimer</button>
     <div class="container">
-      <div id="loading" class="loading">Chargement des données...</div>
-
-      <div id="content" style="display: none">
+      <div id="content">
         <table>
           <thead>
             <tr>
@@ -317,6 +317,10 @@
       // Remplir le tableau avec les données
       function fillTable(data) {
         const tbody = document.getElementById('tableBody');
+        if (!tbody) {
+          console.error('[Depense] tableBody element not found!');
+          return;
+        }
         tbody.innerHTML = '';
 
         // Grouper les données dans une structure hiérarchique
@@ -595,48 +599,114 @@
         return libelles[code] || code;
       }
 
-      // Écouter les messages de l'application Vue
-      window.addEventListener('message', function (event) {
-        if (event.data && event.data.type === 'FILL_ETAT_FINANCIER_DATA') {
-          const data = event.data.data;
+      // Variable pour éviter de traiter les données plusieurs fois
+      var dataProcessed = false;
+
+      // Fonction pour traiter les données reçues
+      function processEtatData(messageData) {
+        if (dataProcessed) return;
+        if (messageData && messageData.type === 'FILL_ETAT_FINANCIER_DATA') {
+          dataProcessed = true;
+          const data = messageData.data;
+
+          // Helper pour mise à jour sécurisée
+          const setText = (id, value) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = value;
+          };
 
           // Mettre à jour l'en-tête
-          document.getElementById('annee').textContent = data.annee;
-          document.getElementById('moisNom').textContent = data.moisNom.toUpperCase();
-          document.getElementById('numeroMois').textContent = String(data.mois).padStart(2, '0');
+          setText('annee', data.annee);
+          setText('moisNom', data.moisNom.toUpperCase());
+          setText('numeroMois', String(data.mois).padStart(2, '0'));
 
           // Informations de la mairie si disponibles
           if (data.mairie) {
-            document.getElementById('departement').textContent =
-              'DEPARTEMENT DE ' + (data.mairie.departement || '').toUpperCase();
-            document.getElementById('commune').textContent =
-              'COMMUNE DE ' + (data.mairie.nom || '').toUpperCase();
-            document.getElementById('codeCommune').textContent = data.mairie.code || '---';
-            document.getElementById('lieuSignature').textContent = data.mairie.nom || '---';
+            setText(
+              'departement',
+              'DEPARTEMENT DE ' + (data.mairie.departement || '').toUpperCase(),
+            );
+            setText('commune', 'COMMUNE DE ' + (data.mairie.nom || '').toUpperCase());
+            setText('codeCommune', data.mairie.code || '---');
+            setText('lieuSignature', data.mairie.nom || '---');
           }
 
           // Date de signature
           const today = new Date();
           const dateOptions = { day: 'numeric', month: 'long', year: 'numeric' };
-          document.getElementById('dateSignature').textContent = today.toLocaleDateString(
-            'fr-FR',
-            dateOptions,
-          );
+          setText('dateSignature', today.toLocaleDateString('fr-FR', dateOptions));
 
           // Remplir le tableau
           fillTable(data);
 
           // Mettre à jour le pied de page
           const montantLettres = NumberToLettres(data.totaux.total).toUpperCase();
-          document.getElementById('footerText').textContent =
-            `Arrêté le présent état à la somme de : ${montantLettres} FRANCS CFA.`;
-
-          // Afficher le contenu
-          document.getElementById('loading').style.display = 'none';
-          document.getElementById('content').style.display = 'block';
+          setText(
+            'footerText',
+            `Arrêté le présent état à la somme de : ${montantLettres} FRANCS CFA.`,
+          );
 
           // Mettre à jour le titre de la page
           document.title = `Etat Mensuel d'Exécution des Dépenses - ${data.moisNom} ${data.annee}`;
+        }
+      }
+
+      // Variable pour stocker les données reçues avant que le DOM soit prêt
+      let pendingData = null;
+
+      // Écouter les messages de l'application Vue via postMessage
+      window.addEventListener('message', function (event) {
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+          processEtatData(event.data);
+        } else {
+          pendingData = event.data;
+        }
+      });
+
+      // Fallback: Vérifier IndexedDB pour Electron (où postMessage ne fonctionne pas entre fenêtres file://)
+      window.addEventListener('DOMContentLoaded', async function () {
+        console.log('[Depense] DOMContentLoaded fired');
+
+        // Traiter les données pendantes si elles existent
+        if (pendingData && !dataProcessed) {
+          console.log('[Depense] Processing pending data from postMessage');
+          processEtatData(pendingData);
+          return;
+        }
+
+        // Attendre un peu pour laisser le temps à postMessage de fonctionner
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        if (!dataProcessed) {
+          try {
+            // Initialiser Dexie pour accéder à la table printData
+            var db = new Dexie('TresorDatabase');
+            db.version(24).stores({
+              printData: '++id, type, createdAt',
+            });
+
+            // Chercher les données d'impression les plus récentes pour ce type
+            var printDataRecords = await db
+              .table('printData')
+              .where('type')
+              .equals('FILL_ETAT_FINANCIER_DATA')
+              .toArray();
+
+            if (printDataRecords.length > 0) {
+              // Prendre le plus récent
+              var latestRecord = printDataRecords.sort(function (a, b) {
+                return new Date(b.createdAt) - new Date(a.createdAt);
+              })[0];
+
+              console.log('[Depense] Data loaded from IndexedDB:', latestRecord);
+              processEtatData(latestRecord.data);
+
+              // Supprimer les données après utilisation
+              await db.table('printData').delete(latestRecord.id);
+            }
+          } catch (e) {
+            console.warn('Erreur lors de la lecture de IndexedDB:', e);
+          }
         }
       });
 
@@ -725,15 +795,6 @@
 
         return convertir(Math.floor(nombre));
       }
-
-      // Si pas de données après 5 secondes, afficher un message
-      setTimeout(function () {
-        const loading = document.getElementById('loading');
-        if (loading.style.display !== 'none') {
-          loading.innerHTML =
-            "Aucune donnée reçue. Veuillez générer l'état depuis la page des prévisions.";
-        }
-      }, 5000);
     </script>
   </body>
 </html>

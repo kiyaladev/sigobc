@@ -596,17 +596,67 @@
       </table>
     </div>
 
+    <!-- Charger Dexie pour accéder à IndexedDB -->
+    <script src="dexie.min.js"></script>
+
     <script>
       function formatNumber(num) {
         if (!num && num !== 0) return '';
         return new Intl.NumberFormat('fr-FR').format(num);
       }
 
-      // Écouter les données envoyées depuis PrevisionPage.vue
-      window.addEventListener('message', (event) => {
-        if (event.data.type === 'FILL_CT02_DATA') {
-          const data = event.data.data;
-          fillCT02(data);
+      // Variable pour éviter de traiter les données plusieurs fois
+      var dataProcessed = false;
+
+      // Fonction pour traiter les données reçues
+      function processData(messageData) {
+        if (dataProcessed) return;
+        if (messageData && messageData.type === 'FILL_CT02_DATA') {
+          dataProcessed = true;
+          fillCT02(messageData.data);
+        }
+      }
+
+      // Écouter les données envoyées depuis PrevisionPage.vue via postMessage
+      window.addEventListener('message', function (event) {
+        processData(event.data);
+      });
+
+      // Fallback: Vérifier IndexedDB pour Electron (où postMessage ne fonctionne pas entre fenêtres file://)
+      window.addEventListener('DOMContentLoaded', async function () {
+        // Attendre un peu pour laisser le temps à postMessage de fonctionner
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        if (!dataProcessed) {
+          try {
+            // Initialiser Dexie pour accéder à la table printData
+            var db = new Dexie('TresorDatabase');
+            db.version(24).stores({
+              printData: '++id, type, createdAt',
+            });
+
+            // Chercher les données d'impression les plus récentes pour ce type
+            var printDataRecords = await db
+              .table('printData')
+              .where('type')
+              .equals('FILL_CT02_DATA')
+              .toArray();
+
+            if (printDataRecords.length > 0) {
+              // Prendre le plus récent
+              var latestRecord = printDataRecords.sort(function (a, b) {
+                return new Date(b.createdAt) - new Date(a.createdAt);
+              })[0];
+
+              console.log('[CT02] Data loaded from IndexedDB:', latestRecord);
+              processData(latestRecord.data);
+
+              // Supprimer les données après utilisation
+              await db.table('printData').delete(latestRecord.id);
+            }
+          } catch (e) {
+            console.warn('Erreur lors de la lecture de IndexedDB:', e);
+          }
         }
       });
 

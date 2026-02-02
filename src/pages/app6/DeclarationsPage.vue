@@ -534,7 +534,7 @@ function printDeclaration(declaration: Declaration) {
   });
 
   if (printWindow) {
-    sendMessageToWindow(printWindow, {
+    void sendMessageToWindow(printWindow, {
       type: 'FILL_DECLARATION',
       data: {
         mairie: mairie?.nom || '',
@@ -569,7 +569,7 @@ function downloadDeclarationPDF(declaration: Declaration) {
   });
 
   if (printWindow) {
-    sendMessageToWindow(printWindow, {
+    void sendMessageToWindow(printWindow, {
       type: 'FILL_AND_PRINT',
       data: {
         mairie: mairie?.nom || '',

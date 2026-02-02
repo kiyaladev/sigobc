@@ -313,7 +313,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { db, type Taxe, type PrevisionRecette, DEFAULT_MAIRIE_ID } from 'src/database/db';
 import PageHeader from 'src/components/PageHeader.vue';
-import { openPrintWindow, sendMessageToWindow } from 'src/utils/printUrl';
+import { openPrintWindowWithMessage } from 'src/utils/printUrl';
 
 const $q = useQuasar();
 const loading = ref(false);
@@ -670,10 +670,7 @@ async function generateEtatMensuel() {
         ? 'etat-financier-mensuel/recette-fonctionnelle.html'
         : 'etat-financier-mensuel/recette-investissement.html';
 
-    const etatWindow = openPrintWindow(pageUrl);
-    if (etatWindow) {
-      sendMessageToWindow(etatWindow, { type: 'FILL_ETAT_RECETTE_DATA', data: dataToSend });
-    }
+    await openPrintWindowWithMessage(pageUrl, { type: 'FILL_ETAT_RECETTE_DATA', data: dataToSend });
 
     showEtatMensuelDialog.value = false;
   } catch (error) {
