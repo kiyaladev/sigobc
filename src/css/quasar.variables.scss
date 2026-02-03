@@ -1,21 +1,21 @@
 // Quasar SCSS (& Sass) Variables
 // --------------------------------------------------
-// Version Entreprise - Palette épurée : Orange, Blanc, Vert
+// Version Mairie de Vavoua - Palette basée sur le logo : Vert, Or
 
-// Couleurs principales de la marque
-$primary: #e67e22; // Orange (désaturé)
-$secondary: #2e7d32; // Vert (désaturé)
-$accent: #777777; // Gris très clair
+// Couleurs principales de la marque (logo Mairie de Vavoua)
+$primary: #1B5E3B; // Vert foncé Vavoua
+$secondary: #C5A84D; // Or/Doré Vavoua
+$accent: #737373; // Gris pour badges et accents
 
 // Mode sombre
 $dark: #1a1a1a;
 $dark-page: #121212;
 
 // Couleurs fonctionnelles (simplifiées - strictes)
-$positive: #2e7d32; // Succès (vert)
-$negative: #1a1a1a; // Erreur (noir - suite à la demande 'pas d'autres couleurs')
+$positive: #1B5E3B; // Succès (vert Vavoua)
+$negative: #1a1a1a; // Erreur (noir)
 $info: #757575; // Info (gris pur)
-$warning: #e67e22; // Avertissement (orange)
+$warning: #C5A84D; // Avertissement (or Vavoua)
 
 // Échelle de gris épurée (entreprise)
 $grey-1: #fafafa;

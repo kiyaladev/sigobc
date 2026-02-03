@@ -178,7 +178,7 @@
             >
               <template v-slot:body-cell-chapitre="props">
                 <q-td :props="props">
-                  <q-badge color="primary" :label="props.row.chapitre" />
+                  <q-badge color="primary" text-color="white" :label="props.row.chapitre" />
                 </q-td>
               </template>
               <template v-slot:body-cell-prevu="props">

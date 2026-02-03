@@ -142,7 +142,7 @@
           <q-card-section>
             <div class="section-header q-mb-md">
               <div class="flex items-center">
-                <q-icon name="pie_chart" color="warning" size="24px" class="q-mr-sm" />
+                <q-icon name="pie_chart" color="secondary" size="24px" class="q-mr-sm" />
                 <span class="text-h6 text-weight-bold">Prévisions en cours</span>
               </div>
               <div class="section-decoration"></div>
@@ -232,31 +232,31 @@ const statsCards = computed(() => [
     value: stats.value.totalPrevisions,
     label: 'Prévisions',
     icon: 'pie_chart',
-    color: 'warning',
+    color: 'secondary',
     progress: 0.85,
   },
   {
     value: stats.value.totalMandats,
     label: 'Mandats',
     icon: 'receipt',
-    color: 'secondary',
+    color: 'primary',
     progress: 0.6,
   },
   {
     value: formatMontant(stats.value.montantTotal),
     label: 'Montant Total (CFA)',
     icon: 'payments',
-    color: 'dark',
+    color: 'secondary',
     progress: 0.9,
   },
 ]);
 
 // Actions rapides
 const quickActions = [
-  { label: 'Chapitres', icon: 'category', color: 'accent', route: '/app3/chapitres' },
-  { label: 'Prévisions', icon: 'pie_chart', color: 'warning', route: '/app3/previsions' },
-  { label: 'Mandats', icon: 'receipt', color: 'positive', route: '/app3/mandats' },
-  { label: 'Statistiques', icon: 'bar_chart', color: 'dark', route: '/app3/statistiques' },
+  { label: 'Chapitres', icon: 'category', color: 'primary', route: '/app3/chapitres' },
+  { label: 'Prévisions', icon: 'pie_chart', color: 'secondary', route: '/app3/previsions' },
+  { label: 'Mandats', icon: 'receipt', color: 'primary', route: '/app3/mandats' },
+  { label: 'Statistiques', icon: 'bar_chart', color: 'secondary', route: '/app3/statistiques' },
 ];
 
 function formatMontant(montant: number): string {
@@ -271,10 +271,10 @@ function getStatutColor(statut: string): string {
   const colors: Record<string, string> = {
     brouillon: 'grey',
     validee: 'primary',
-    emis: 'warning',
-    paye: 'secondary',
+    emis: 'secondary',
+    paye: 'primary',
     annule: 'negative',
-    cloturee: 'dark',
+    cloturee: 'grey-8',
   };
   return colors[statut] || 'grey';
 }
@@ -322,7 +322,7 @@ onMounted(() => {
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #e67e22 0%, #2e7d32 100%);
+  background: linear-gradient(135deg, $primary 0%, $secondary 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

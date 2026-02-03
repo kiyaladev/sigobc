@@ -63,7 +63,7 @@
       >
         <template v-slot:body-cell-role="props">
           <q-td :props="props">
-            <q-chip :color="'accent'" text-color="grey-9" size="sm">
+            <q-chip :color="'primary'" text-color="white" size="sm">
               {{ getRoleLabel(props.row.role) }}
             </q-chip>
           </q-td>
@@ -71,7 +71,7 @@
 
         <template v-slot:body-cell-actif="props">
           <q-td :props="props">
-            <q-chip :color="props.row.actif ? 'positive' : 'grey'" text-color="white" size="sm">
+            <q-chip :color="props.row.actif ? 'primary' : 'grey'" text-color="white" size="sm">
               {{ props.row.actif ? 'Actif' : 'Inactif' }}
             </q-chip>
           </q-td>

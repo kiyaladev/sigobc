@@ -51,13 +51,13 @@
     >
       <template v-slot:body-cell-code="props">
         <q-td :props="props">
-          <q-badge color="accent" :label="props.row.code" />
+          <q-badge color="primary" text-color="white" :label="props.row.code" />
         </q-td>
       </template>
 
       <template v-slot:body-cell-actif="props">
         <q-td :props="props">
-          <q-badge :color="props.row.actif ? 'positive' : 'negative'">
+          <q-badge :color="props.row.actif ? 'primary' : 'negative'" text-color="white">
             {{ props.row.actif ? 'Actif' : 'Inactif' }}
           </q-badge>
         </q-td>
