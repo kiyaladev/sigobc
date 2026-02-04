@@ -1,5 +1,17 @@
 <template>
   <q-card>
+    <q-card-section v-if="showExportCsv" class="q-pb-none">
+      <div class="row justify-end">
+        <q-btn
+          flat
+          color="primary"
+          icon="download"
+          label="Exporter CSV"
+          @click="handleExportCsv"
+          no-caps
+        />
+      </div>
+    </q-card-section>
     <q-table
       :rows="rows"
       :columns="columns"
@@ -82,6 +94,7 @@
 
 <script setup lang="ts" generic="T extends Record<string, unknown>">
 import type { QTableColumn } from 'quasar';
+import { exportToCsv } from 'src/utils/exportCsv';
 
 interface Props {
   rows: T[];
@@ -96,9 +109,11 @@ interface Props {
   showEdit?: boolean;
   showDelete?: boolean;
   showCustomActions?: boolean;
+  showExportCsv?: boolean;
+  exportFilename?: string;
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   rowKey: 'id',
   loading: false,
   pagination: () => ({ rowsPerPage: 10 }),
@@ -109,6 +124,8 @@ withDefaults(defineProps<Props>(), {
   showEdit: true,
   showDelete: true,
   showCustomActions: false,
+  showExportCsv: false,
+  exportFilename: 'export',
 });
 
 defineEmits<{
@@ -118,4 +135,8 @@ defineEmits<{
   edit: [row: T];
   delete: [row: T];
 }>();
+
+function handleExportCsv() {
+  exportToCsv(props.rows, props.columns, props.exportFilename);
+}
 </script>

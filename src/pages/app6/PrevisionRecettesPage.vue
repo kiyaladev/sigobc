@@ -98,6 +98,16 @@
         </div>
 
         <!-- Tableau des prévisions -->
+        <div class="row justify-end q-mb-sm">
+          <q-btn
+            flat
+            color="primary"
+            icon="download"
+            label="Exporter CSV"
+            @click="exportCsv"
+            no-caps
+          />
+        </div>
         <q-table
           :rows="filteredPrevisions"
           :columns="columns"
@@ -314,6 +324,7 @@ import { useQuasar } from 'quasar';
 import { db, type Taxe, type PrevisionRecette, DEFAULT_MAIRIE_ID } from 'src/database/db';
 import PageHeader from 'src/components/PageHeader.vue';
 import { openPrintWindowWithMessage } from 'src/utils/printUrl';
+import { exportToCsv } from 'src/utils/exportCsv';
 
 const $q = useQuasar();
 const loading = ref(false);
@@ -485,6 +496,14 @@ const totalRealise = computed(() =>
 );
 
 const ecart = computed(() => totalRealise.value - totalPrevu.value);
+
+function exportCsv() {
+  exportToCsv(
+    filteredPrevisions.value as Record<string, unknown>[],
+    columns,
+    'previsions-recettes',
+  );
+}
 
 function resetFilters() {
   filterExercice.value = null;

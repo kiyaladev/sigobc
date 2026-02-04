@@ -108,6 +108,8 @@
           :rows="filteredPrevisions"
           :columns="columns"
           :loading="loading"
+          show-export-csv
+          export-filename="previsions"
           @edit="editPrevision"
           @delete="deletePrevision"
         >

@@ -98,6 +98,8 @@
           :loading="loading"
           show-print
           show-download
+          show-export-csv
+          export-filename="mandats-recette"
           @edit="openDialog"
           @delete="confirmDelete"
           @print="printMandat"

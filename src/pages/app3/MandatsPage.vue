@@ -104,6 +104,8 @@
           :columns="columns"
           :loading="loading"
           show-print
+          show-export-csv
+          export-filename="mandats"
           @print="printMandat"
           @edit="editMandat"
           @delete="deleteMandat"

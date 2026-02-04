@@ -46,6 +46,8 @@
       :columns="columns"
       :loading="loading"
       row-key="id"
+      show-export-csv
+      export-filename="sous-chapitres"
       @edit="openDialog"
       @delete="confirmDelete"
     >
