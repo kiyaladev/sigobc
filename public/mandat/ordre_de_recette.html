@@ -41,8 +41,8 @@
       .page {
         width: 210mm;
         height: 297mm;
-        padding: 4mm 5mm 5mm 5mm;
-        margin: 10mm auto;
+        padding: 3mm 4mm 4mm 4mm;
+        margin: 5mm auto;
         background: white;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         position: relative;
@@ -323,22 +323,12 @@
 
             <div class="header-cell header-center">
               <div class="document-title">ORDRE DE RECETTE</div>
-              <div class="field-line">
-                EXERCICE : {{ mandat.exercice }}
-              </div>
-              <div class="field-line">
-                TITRE DU BUDGET : I
-              </div>
+              <div class="field-line">EXERCICE : {{ mandat.exercice }}</div>
+              <div class="field-line">TITRE DU BUDGET : I</div>
               <div class="section-title">IMPUTATION</div>
-              <div class="field-line">
-                Fonctionnelle : {{ taxeCode }}
-              </div>
-              <div class="field-line">
-                Patrimoniale : {{ mandat.patrimonial || ''}}
-              </div>
-              <div class="field-line">
-                Année d'origine : {{ mandat.exercice }}
-              </div>
+              <div class="field-line">Fonctionnelle : {{ taxeCode }}</div>
+              <div class="field-line">Patrimoniale : {{ mandat.patrimonial || ''}}</div>
+              <div class="field-line">Année d'origine : {{ mandat.exercice }}</div>
             </div>
 
             <div class="header-cell header-right">
@@ -368,8 +358,8 @@
           <div class="content-row ordonnateur-section" :contenteditable="true">
             <div class="ordonnateur-text">
               <div class="ordonnateur-line">
-                L'ordonnateur :
-                ....KALOU BONAVENTURE.....................................................................
+                L'ordonnateur : ....KALOU
+                BONAVENTURE.....................................................................
               </div>
               <div class="ordonnateur-line" style="margin-top: 4mm">
                 Maire de la
@@ -450,22 +440,12 @@
 
             <div class="header-cell header-center">
               <div class="document-title">ORDRE DE RECETTE</div>
-              <div class="field-line">
-                EXERCICE : {{ mandat.exercice }}
-              </div>
-              <div class="field-line">
-                TITRE DU BUDGET : I
-              </div>
+              <div class="field-line">EXERCICE : {{ mandat.exercice }}</div>
+              <div class="field-line">TITRE DU BUDGET : I</div>
               <div class="section-title">IMPUTATION</div>
-              <div class="field-line">
-                Fonctionnelle : {{ taxeCode }}
-              </div>
-              <div class="field-line">
-                Patrimoniale : {{ mandat.patrimonial || ''}}
-              </div>
-              <div class="field-line">
-                Année d'origine : {{ mandat.exercice }}
-              </div>
+              <div class="field-line">Fonctionnelle : {{ taxeCode }}</div>
+              <div class="field-line">Patrimoniale : {{ mandat.patrimonial || ''}}</div>
+              <div class="field-line">Année d'origine : {{ mandat.exercice }}</div>
             </div>
 
             <div class="header-cell header-right">
@@ -474,7 +454,8 @@
                 De {{ mairie?.ville?.toUpperCase() || 'Vavoua' }}.................................
               </div>
               <div class="field-line" style="margin-top: 4mm">
-                N° d'ordre :.........<span class="handwritten">{{ mandat.numeroMandat }}</span>...................
+                N° d'ordre :.........<span class="handwritten">{{ mandat.numeroMandat }}</span
+                >...................
               </div>
               <div class="field-line">N° du bordereau d'émission</div>
               <div class="field-line" style="margin-top: 2mm">
@@ -482,7 +463,8 @@
               </div>
               <div class="field-line" style="margin-top: 2mm">Date d'émission :</div>
               <div class="field-line">
-                .........<span class="handwritten">{{ formatDate(mandat.dateMandat) }}</span>...............
+                .........<span class="handwritten">{{ formatDate(mandat.dateMandat) }}</span
+                >...............
               </div>
             </div>
           </div>
@@ -569,22 +551,12 @@
 
             <div class="header-cell header-center">
               <div class="document-title">ORDRE DE RECETTE</div>
-              <div class="field-line">
-                EXERCICE : {{ mandat.exercice }}
-              </div>
-              <div class="field-line">
-                TITRE DU BUDGET : I
-              </div>
+              <div class="field-line">EXERCICE : {{ mandat.exercice }}</div>
+              <div class="field-line">TITRE DU BUDGET : I</div>
               <div class="section-title">IMPUTATION</div>
-              <div class="field-line">
-                Fonctionnelle : {{ taxeCode }}
-              </div>
-              <div class="field-line">
-                Patrimoniale : {{ mandat.patrimonial || ''}}
-              </div>
-              <div class="field-line">
-                Année d'origine : {{ mandat.exercice }}
-              </div>
+              <div class="field-line">Fonctionnelle : {{ taxeCode }}</div>
+              <div class="field-line">Patrimoniale : {{ mandat.patrimonial || ''}}</div>
+              <div class="field-line">Année d'origine : {{ mandat.exercice }}</div>
             </div>
 
             <div class="header-cell header-right">
