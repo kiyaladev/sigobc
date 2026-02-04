@@ -10,7 +10,7 @@
       /* Configuration impression portrait avec marges minimales */
       @page {
         size: A4 portrait;
-        margin: 5mm;
+        margin: 3mm;
       }
 
       :root {
@@ -38,7 +38,7 @@
       .page {
           background-color: white;
           width: 210mm;
-          min-height: 297mm;
+          min-height: 287mm;
           padding: 3mm 5mm; /* Marges intérieures */
           box-shadow: 0 0 15px rgba(0,0,0,0.1);
           display: flex;
@@ -228,21 +228,54 @@
 
       /* Print styles */
       @media print {
+          html, body {
+            width: 210mm;
+            height: 297mm;
+            margin: 0;
+          }
           body {
               background: none;
               padding: 0;
               -webkit-print-color-adjust: exact;
+            font-size: 9.5pt;
+            line-height: 1.18;
           }
           .page {
               width: 100%;
-              height: auto;
+            height: 297mm;
+            min-height: 0;
               box-shadow: none;
               margin: 0;
-              padding: 3mm; /* Ajustement marge imprimante */
+            padding: 2mm 3mm; /* Ajustement marge imprimante */
+            overflow: hidden;
           }
           .no-print {
               display: none !important;
           }
+          .creditor-section {
+            padding-bottom: 34px;
+          }
+          .payment-mode-section {
+            padding-top: 20px;
+            padding-bottom: 20px;
+          }
+            .header-col {
+              padding: 8px;
+            }
+            .object-section {
+              padding: 10px 0;
+            }
+            .amount-row {
+              padding: 8px;
+              padding-right: 14px;
+            }
+          .signature-section {
+              padding-bottom: 90px;
+              min-height: 110px;
+          }
+            .footer-note {
+              margin-top: 3px;
+            }
       }
 
       .print-button {
