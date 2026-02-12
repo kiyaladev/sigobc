@@ -120,7 +120,7 @@
   thead tr {
     background-color: #ffffff;
     color: #111827;
-    border-bottom: 2px solid #e67e22;
+    border-bottom: 2px solid $primary;
   }
 
   tbody tr {
@@ -238,7 +238,7 @@
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #e67e22 0%, #2e7d32 100%);
+  background: linear-gradient(135deg, $primary 0%, $secondary 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -250,7 +250,7 @@
 
 // Focus visible pour l'accessibilité
 *:focus-visible {
-  outline: 2px solid #e67e22;
+  outline: 2px solid $primary;
   outline-offset: 2px;
 }
 
@@ -281,8 +281,8 @@ body.body--dark {
 
   .drawer-header {
     background: #1f2937;
-    border-bottom: 2px solid #e67e22;
-  } // Page container
+    border-bottom: 2px solid $primary;
+  }// Page container
   .modern-page-container {
     background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
   }
@@ -304,14 +304,14 @@ body.body--dark {
 
   .nav-item-active {
     background-color: rgba(255, 255, 255, 0.06);
-    border-left: 3px solid #e67e22;
+    border-left: 3px solid $primary;
   }
 
   // Tables
   .q-table {
     thead tr {
       background: #111827;
-      border-bottom: 2px solid #e67e22;
+      border-bottom: 2px solid $primary;
     }
 
     tbody tr:hover {
@@ -337,9 +337,9 @@ body.body--dark {
   }
 }
 .accent-left {
-  border-left: 3px solid #e67e22;
+  border-left: 3px solid $primary;
 }
 
 .accent-bottom {
-  border-bottom: 2px solid #e67e22;
+  border-bottom: 2px solid $primary;
 }

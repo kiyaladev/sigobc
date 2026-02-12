@@ -41,8 +41,8 @@
       .page {
         width: 210mm;
         height: 297mm;
-        padding: 4mm 5mm 5mm 5mm;
-        margin: 10mm auto;
+        padding: 3mm 4mm 4mm 4mm;
+        margin: 5mm auto;
         background: white;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         position: relative;
@@ -145,7 +145,7 @@
 
       .field-line {
         font-size: 10pt;
-        margin: 1.5mm 0;
+        margin: 3.5mm 0;
       }
 
       .recette-title {
@@ -264,7 +264,7 @@
       /* Handwritten style */
       .handwritten {
         font-family: 'Brush Script MT', 'Segoe Script', cursive;
-        font-size: 13pt;
+        font-size: 11pt;
         color: #00008b;
       }
 
@@ -323,23 +323,12 @@
 
             <div class="header-cell header-center">
               <div class="document-title">ORDRE DE RECETTE</div>
-              <div class="field-line">
-                EXERCICE :......................{{ mandat.exercice }}..........................
-              </div>
-              <div class="field-line">
-                TITRE DU BUDGET :..............I............................
-              </div>
+              <div class="field-line">EXERCICE : {{ mandat.exercice }}</div>
+              <div class="field-line">TITRE DU BUDGET : I</div>
               <div class="section-title">IMPUTATION</div>
-              <div class="field-line">
-                Fonctionnelle :...................{{ taxeCode }}..........................
-              </div>
-              <div class="field-line">
-                Patrimoniale : ......{{ mandat.patrimonial || ''
-                }}......................................................
-              </div>
-              <div class="field-line">
-                Année d'origine :.............{{ mandat.exercice }}..........................
-              </div>
+              <div class="field-line">Fonctionnelle : {{ taxeCode }}</div>
+              <div class="field-line">Patrimoniale : {{ mandat.patrimonial || ''}}</div>
+              <div class="field-line">Année d'origine : {{ mandat.exercice }}</div>
             </div>
 
             <div class="header-cell header-right">
@@ -366,15 +355,15 @@
         </div>
 
         <div class="content">
-          <div class="content-row ordonnateur-section">
+          <div class="content-row ordonnateur-section" :contenteditable="true">
             <div class="ordonnateur-text">
               <div class="ordonnateur-line">
-                L'ordonnateur :
-                .........................................................................
+                L'ordonnateur : ....KALOU
+                BONAVENTURE.....................................................................
               </div>
               <div class="ordonnateur-line" style="margin-top: 4mm">
                 Maire de la
-                Commune..................................................................................................
+                Commune...Vavoua...............................................................................................
               </div>
             </div>
           </div>
@@ -450,25 +439,13 @@
             </div>
 
             <div class="header-cell header-center">
-              <div class="document-title">BULLETIN DE LIQUIDATION RECETTE</div>
-              <div class="field-line">
-                EXERCICE :.........................{{ mandat.exercice }}..........................
-              </div>
-              <div class="field-line">...</div>
-              <div class="field-line">
-                TITRE DU BUDGET :..............I..............................
-              </div>
+              <div class="document-title">ORDRE DE RECETTE</div>
+              <div class="field-line">EXERCICE : {{ mandat.exercice }}</div>
+              <div class="field-line">TITRE DU BUDGET : I</div>
               <div class="section-title">IMPUTATION</div>
-              <div class="field-line">
-                Fonctionnelle :................{{ taxeCode }}..........................
-              </div>
-              <div class="field-line">
-                Patrimoniale : ......{{ mandat.patrimonial || ''
-                }}......................................................
-              </div>
-              <div class="field-line">
-                Année d'origine :.................{{ mandat.exercice }}..........................
-              </div>
+              <div class="field-line">Fonctionnelle : {{ taxeCode }}</div>
+              <div class="field-line">Patrimoniale : {{ mandat.patrimonial || ''}}</div>
+              <div class="field-line">Année d'origine : {{ mandat.exercice }}</div>
             </div>
 
             <div class="header-cell header-right">
@@ -482,8 +459,7 @@
               </div>
               <div class="field-line">N° du bordereau d'émission</div>
               <div class="field-line" style="margin-top: 2mm">
-                .......................<span class="handwritten">{{ bordereauNumero }}</span
-                >.............................
+                ...........<span class="handwritten">{{ bordereauNumero }}</span>...............
               </div>
               <div class="field-line" style="margin-top: 2mm">Date d'émission :</div>
               <div class="field-line">
@@ -574,24 +550,13 @@
             </div>
 
             <div class="header-cell header-center">
-              <div class="document-title">AVERTISSEMENT</div>
-              <div class="field-line">
-                EXERCICE :......................{{ mandat.exercice }}..........................
-              </div>
-              <div class="field-line">
-                TITRE DU BUDGET :..............I............................
-              </div>
+              <div class="document-title">ORDRE DE RECETTE</div>
+              <div class="field-line">EXERCICE : {{ mandat.exercice }}</div>
+              <div class="field-line">TITRE DU BUDGET : I</div>
               <div class="section-title">IMPUTATION</div>
-              <div class="field-line">
-                Fonctionnelle :...................{{ taxeCode }}..........................
-              </div>
-              <div class="field-line">
-                Patrimoniale : ......{{ mandat.patrimonial || ''
-                }}......................................................
-              </div>
-              <div class="field-line">
-                Année d'origine :.............{{ mandat.exercice }}..........................
-              </div>
+              <div class="field-line">Fonctionnelle : {{ taxeCode }}</div>
+              <div class="field-line">Patrimoniale : {{ mandat.patrimonial || ''}}</div>
+              <div class="field-line">Année d'origine : {{ mandat.exercice }}</div>
             </div>
 
             <div class="header-cell header-right">

@@ -10,7 +10,7 @@
       /* Configuration impression portrait avec marges minimales */
       @page {
         size: A4 portrait;
-        margin: 5mm;
+        margin: 3mm;
       }
 
       :root {
@@ -28,8 +28,8 @@
       body {
           background-color: #f0f0f0;
           font-family: 'Arimo', sans-serif; /* Police proche de l'original */
-          font-size: 11pt;
-          line-height: 1.3;
+          font-size: 13pt;
+          line-height: 1.4;
           display: flex;
           justify-content: center;
           padding: 20px;
@@ -38,9 +38,14 @@
       .page {
           background-color: white;
           width: 210mm;
+<<<<<<< HEAD
           height: 287mm; /* Hauteur fixe pour une page A4 moins les marges */
           max-height: 287mm;
           padding: 2mm 4mm; /* Marges intérieures réduites */
+=======
+          min-height: 287mm;
+          padding: 3mm 5mm; /* Marges intérieures */
+>>>>>>> f29b7f37d570686df35893ff2600d786da57a2aa
           box-shadow: 0 0 15px rgba(0,0,0,0.1);
           display: flex;
           flex-direction: column;
@@ -228,13 +233,21 @@
 
       /* Print styles */
       @media print {
+          html, body {
+            width: 210mm;
+            height: 297mm;
+            margin: 0;
+          }
           body {
               background: none;
               padding: 0;
               -webkit-print-color-adjust: exact;
+            font-size: 10.5pt;
+            line-height: 1.18;
           }
           .page {
               width: 100%;
+<<<<<<< HEAD
               height: 100vh;
               max-height: 100vh;
               box-shadow: none;
@@ -242,10 +255,19 @@
               padding: 2mm;
               page-break-after: avoid;
               page-break-inside: avoid;
+=======
+            height: 297mm;
+            min-height: 0;
+              box-shadow: none;
+              margin: 0;
+            padding: 2mm 3mm; /* Ajustement marge imprimante */
+            overflow: hidden;
+>>>>>>> f29b7f37d570686df35893ff2600d786da57a2aa
           }
           .no-print {
               display: none !important;
           }
+<<<<<<< HEAD
           .main-grid {
               flex-grow: 1;
           }
@@ -253,6 +275,32 @@
               padding-bottom: 40px;
               min-height: 60px;
           }
+=======
+          .creditor-section {
+            padding-bottom: 34px;
+          }
+          .payment-mode-section {
+            padding-top: 20px;
+            padding-bottom: 20px;
+          }
+            .header-col {
+              padding: 8px;
+            }
+            .object-section {
+              padding: 10px 0;
+            }
+            .amount-row {
+              padding: 8px;
+              padding-right: 14px;
+            }
+          .signature-section {
+              padding-bottom: 90px;
+              min-height: 110px;
+          }
+            .footer-note {
+              margin-top: 3px;
+            }
+>>>>>>> f29b7f37d570686df35893ff2600d786da57a2aa
       }
 
       .print-button {
@@ -292,7 +340,7 @@
           <p>République de Côte d'Ivoire</p>
           <p>Département de <span data-field="mairieVille"></span></p>
           <p>Commune de <span data-field="mairieVille"></span></p>
-          <p class="bold mt-2 text-center">Ville de <span data-field="mairieVille"></span></p>
+          <p class="bold mt-2">Ville de <span data-field="mairieVille"></span></p>
           <p class="bold mt-4">
             Code : <span style="font-style: italic" data-field="mairieCode"></span>
           </p>
@@ -449,6 +497,7 @@
             </p>
             <p class="text-sm italic mt-1">Signature et cachet de l'Ordonnateur</p>
             <p class="bold mt-2">P/ LE MAIRE & P.D.</p>
+            <br /><br /><br /><br /><br />
           </div>
 
           <div class="vu-bon-section">

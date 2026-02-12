@@ -108,9 +108,19 @@
           :rows="filteredPrevisions"
           :columns="columns"
           :loading="loading"
+          show-export-csv
+          export-filename="previsions"
           @edit="editPrevision"
           @delete="deletePrevision"
-        />
+        >
+          <template v-slot:body-cell-statut="props">
+            <q-td :props="props">
+              <q-badge :color="getStatutColor(props.row.statut)" text-color="white" size="sm">
+                {{ getStatutLabel(props.row.statut) }}
+              </q-badge>
+            </q-td>
+          </template>
+        </DataTable>
       </q-card-section>
     </q-card>
 
@@ -170,10 +180,12 @@
 
             <q-select
               v-model="formData.statut"
-              :options="['brouillon', 'validee', 'cloturee']"
+              :options="statutOptions"
               label="Statut *"
               outlined
               dense
+              emit-value
+              map-options
             />
 
             <q-input
@@ -369,6 +381,12 @@ const moisOptions = [
   { label: 'Décembre', value: 12 },
 ];
 
+const statutOptions = [
+  { label: 'Brouillon', value: 'brouillon' },
+  { label: 'Validée', value: 'validee' },
+  { label: 'Clôturée', value: 'cloturee' },
+];
+
 const chapitreOptions = computed(() =>
   chapitres.value.map((c) => ({ label: `${c.code} - ${c.libelle}`, value: c.id })),
 );
@@ -500,6 +518,24 @@ function formatMontant(montant: number): string {
     currency: 'XOF',
     minimumFractionDigits: 0,
   }).format(montant);
+}
+
+function getStatutColor(statut: string): string {
+  const colors: Record<string, string> = {
+    brouillon: 'grey-6',
+    validee: 'primary',
+    cloturee: 'secondary',
+  };
+  return colors[statut] || 'grey';
+}
+
+function getStatutLabel(statut: string): string {
+  const labels: Record<string, string> = {
+    brouillon: 'Brouillon',
+    validee: 'Validée',
+    cloturee: 'Clôturée',
+  };
+  return labels[statut] || statut;
 }
 
 async function loadData() {

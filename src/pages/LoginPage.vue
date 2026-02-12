@@ -5,7 +5,7 @@
       <!-- En-tête avec logo -->
       <q-card-section class="text-center q-pb-md">
         <div class="logo-wrapper q-mb-md">
-          <q-icon name="account_balance" class="logo-icon" />
+          <img :src="logoMairie" alt="Logo Mairie" class="logo-image" />
         </div>
         <div class="text-h4 text-weight-bold q-mb-xs">SIGOBC</div>
         <div class="text-subtitle1 text-grey-7">
@@ -154,7 +154,7 @@
       <q-separator class="q-my-sm" />
       <div class="text-caption text-grey-7">
         <div class="q-mb-xs demo-account" @click="fillAdminCredentials" role="button" tabindex="0">
-          <q-chip size="sm" color="accent" text-color="grey-9" dense> Admin </q-chip>
+          <q-chip size="sm" color="primary" text-color="white" dense> Admin </q-chip>
           <span class="q-ml-sm">admin / admin123</span>
           <q-icon name="edit" size="16px" class="q-ml-xs" />
         </div>
@@ -168,6 +168,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useAuthStore } from 'src/stores/auth-store';
+import logoMairie from '/logo-mairie-vavoua.png';
 
 const router = useRouter();
 const $q = useQuasar();
@@ -325,9 +326,11 @@ function onForgotPassword() {
   display: inline-block;
 }
 
-.logo-icon {
-  font-size: 80px;
-  color: #e67e22;
+.logo-image {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  animation: logoFloat 3s ease-in-out infinite;
 }
 
 @keyframes logoFloat {
@@ -403,7 +406,6 @@ function onForgotPassword() {
   border-radius: 12px;
   font-weight: 600;
   letter-spacing: 0.5px;
-  background: #e67e22;
 }
 
 // Bouton Mode Démo
@@ -511,8 +513,9 @@ function onForgotPassword() {
     max-width: 90%;
   }
 
-  .logo-icon {
-    font-size: 64px;
+  .logo-image {
+    width: 90px;
+    height: 90px;
   }
 
   .text-h4 {

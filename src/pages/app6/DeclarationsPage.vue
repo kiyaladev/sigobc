@@ -41,6 +41,8 @@
       :loading="loading"
       show-print
       show-download
+      show-export-csv
+      export-filename="declarations"
       @print="printDeclaration"
       @download="downloadDeclarationPDF"
       @edit="openDialog"

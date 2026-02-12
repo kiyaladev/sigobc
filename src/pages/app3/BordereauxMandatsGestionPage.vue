@@ -67,6 +67,8 @@
       show-view
       show-print
       show-download
+      show-export-csv
+      export-filename="bordereaux-mandats"
       @view="viewMandats"
       @print="printBordereau"
       @download="downloadBordereauPDF"

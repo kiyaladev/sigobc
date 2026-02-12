@@ -30,6 +30,8 @@
       :loading="loading"
       show-view
       show-download
+      show-export-csv
+      export-filename="bordereaux"
       @view="viewDeclarations"
       @download="downloadBordereauPDF"
       @edit="openDialog"

@@ -21,20 +21,20 @@
 
         <!-- Notifications -->
         <q-btn flat round dense icon="notifications" class="q-mr-sm hover-scale">
-          <q-badge color="negative" floating rounded>3</q-badge>
+          <q-badge color="negative" text-color="white" floating rounded>3</q-badge>
           <q-tooltip>Notifications</q-tooltip>
         </q-btn>
 
         <!-- Menu utilisateur -->
         <q-btn flat round dense class="user-menu-btn">
-          <q-avatar size="36px" color="accent" text-color="white" class="hover-glow">
+          <q-avatar size="36px" color="primary" text-color="white" class="hover-glow">
             <q-icon name="account_circle" size="24px" />
           </q-avatar>
           <q-menu transition-show="jump-down" transition-hide="jump-up" class="modern-menu">
             <q-list style="min-width: 220px" class="q-pa-sm">
               <q-item class="user-info-item q-mb-sm">
                 <q-item-section avatar>
-                  <q-avatar size="48px" color="accent" text-color="white">
+                  <q-avatar size="48px" color="primary" text-color="white">
                     <q-icon name="account_circle" size="32px" />
                   </q-avatar>
                 </q-item-section>
@@ -91,7 +91,7 @@
       <q-item class="drawer-header q-pa-lg">
         <q-item-section avatar>
           <div class="logo-container">
-            <q-icon name="account_balance" size="56px" class="logo-icon-large" />
+            <img :src="logoMairie" alt="Logo Mairie" class="logo-sidebar" />
           </div>
         </q-item-section>
         <q-item-section>
@@ -117,7 +117,7 @@
           active-class="nav-item-active"
         >
           <q-item-section avatar>
-            <q-icon name="dashboard" color="deep-orange" />
+            <q-icon name="dashboard" color="primary" />
           </q-item-section>
           <q-item-section>
             <q-item-label>Dashboard Dépenses</q-item-label>
@@ -132,7 +132,7 @@
           active-class="nav-item-active"
         >
           <q-item-section avatar>
-            <q-icon name="category" color="deep-orange" />
+            <q-icon name="category" color="primary" />
           </q-item-section>
           <q-item-section>
             <q-item-label>Natures de Dépense</q-item-label>
@@ -147,7 +147,7 @@
           active-class="nav-item-active"
         >
           <q-item-section avatar>
-            <q-icon name="view_list" color="deep-orange" />
+            <q-icon name="view_list" color="primary" />
           </q-item-section>
           <q-item-section>
             <q-item-label>Comptes Fonctionnels</q-item-label>
@@ -162,7 +162,7 @@
           active-class="nav-item-active"
         >
           <q-item-section avatar>
-            <q-icon name="pie_chart" color="deep-orange" />
+            <q-icon name="pie_chart" color="primary" />
           </q-item-section>
           <q-item-section>
             <q-item-label>Prévisions</q-item-label>
@@ -177,7 +177,7 @@
           active-class="nav-item-active"
         >
           <q-item-section avatar>
-            <q-icon name="receipt" color="deep-orange" />
+            <q-icon name="receipt" color="primary" />
           </q-item-section>
           <q-item-section>
             <q-item-label>Mandats</q-item-label>
@@ -192,7 +192,7 @@
           active-class="nav-item-active"
         >
           <q-item-section avatar>
-            <q-icon name="folder_open" color="deep-orange" />
+            <q-icon name="folder_open" color="primary" />
           </q-item-section>
           <q-item-section>
             <q-item-label>Bordereaux Mandats</q-item-label>
@@ -207,7 +207,7 @@
           active-class="nav-item-active"
         >
           <q-item-section avatar>
-            <q-icon name="bar_chart" color="deep-orange" />
+            <q-icon name="bar_chart" color="primary" />
           </q-item-section>
           <q-item-section>
             <q-item-label>Statistiques Dépenses</q-item-label>
@@ -230,7 +230,7 @@
           active-class="nav-item-active"
         >
           <q-item-section avatar>
-            <q-icon name="dashboard" color="green" />
+            <q-icon name="dashboard" color="secondary" />
           </q-item-section>
           <q-item-section>
             <q-item-label>Dashboard Recettes</q-item-label>
@@ -245,7 +245,7 @@
           active-class="nav-item-active"
         >
           <q-item-section avatar>
-            <q-icon name="description" color="green" />
+            <q-icon name="description" color="secondary" />
           </q-item-section>
           <q-item-section>
             <q-item-label>Déclarations</q-item-label>
@@ -260,7 +260,7 @@
           active-class="nav-item-active"
         >
           <q-item-section avatar>
-            <q-icon name="receipt" color="green" />
+            <q-icon name="receipt" color="secondary" />
           </q-item-section>
           <q-item-section>
             <q-item-label>Mandats de Recette</q-item-label>
@@ -275,7 +275,7 @@
           active-class="nav-item-active"
         >
           <q-item-section avatar>
-            <q-icon name="folder" color="green" />
+            <q-icon name="folder" color="secondary" />
           </q-item-section>
           <q-item-section>
             <q-item-label>Bordereaux Recettes</q-item-label>
@@ -290,7 +290,7 @@
           active-class="nav-item-active"
         >
           <q-item-section avatar>
-            <q-icon name="folder_open" color="green" />
+            <q-icon name="folder_open" color="secondary" />
           </q-item-section>
           <q-item-section>
             <q-item-label>Bordereaux Ordres Recettes</q-item-label>
@@ -305,7 +305,7 @@
           active-class="nav-item-active"
         >
           <q-item-section avatar>
-            <q-icon name="trending_up" color="green" />
+            <q-icon name="trending_up" color="secondary" />
           </q-item-section>
           <q-item-section>
             <q-item-label>Prévisions Recettes</q-item-label>
@@ -320,7 +320,7 @@
           active-class="nav-item-active"
         >
           <q-item-section avatar>
-            <q-icon name="account_balance" color="green" />
+            <q-icon name="account_balance" color="secondary" />
           </q-item-section>
           <q-item-section>
             <q-item-label>Taxes</q-item-label>
@@ -335,7 +335,7 @@
           active-class="nav-item-active"
         >
           <q-item-section avatar>
-            <q-icon name="bar_chart" color="green" />
+            <q-icon name="bar_chart" color="secondary" />
           </q-item-section>
           <q-item-section>
             <q-item-label>Statistiques Recettes</q-item-label>
@@ -450,6 +450,7 @@ import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useAuthStore } from 'src/stores/auth-store';
 import ThemeToggle from 'src/components/ThemeToggle.vue';
+import logoMairie from '/logo-mairie-vavoua.png';
 
 const router = useRouter();
 const $q = useQuasar();
@@ -528,19 +529,23 @@ function onLogout() {
 
 .drawer-header {
   background: #ffffff;
-  border-bottom: 3px solid #e67e22;
+  border-bottom: 3px solid $primary;
 }
 
 .logo-container {
-  background: rgba(255, 255, 255, 0.2);
-  padding: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 8px;
   border-radius: 12px;
   backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.logo-icon-large {
-  color: white;
-  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+.logo-sidebar {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
 }
 
 // Navigation items
@@ -558,7 +563,7 @@ function onLogout() {
     top: 0;
     height: 100%;
     width: 4px;
-    background: #e67e22;
+    background: $primary;
     transform: scaleY(0);
     transition: transform 0.3s ease;
   }
@@ -577,7 +582,7 @@ function onLogout() {
 
   &:hover .q-icon {
     transform: scale(1.1);
-    color: #ff6600;
+    color: $primary;
   }
 }
 
@@ -590,13 +595,13 @@ function onLogout() {
   }
 
   .q-icon {
-    color: #e67e22;
+    color: $primary;
   }
 
   .q-item-label {
-    color: #e67e22;
+    color: $primary;
   }
-} // Menu utilisateur
+}// Menu utilisateur
 .modern-menu {
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
@@ -604,7 +609,7 @@ function onLogout() {
 }
 
 .user-info-item {
-  background: linear-gradient(135deg, rgba(255, 102, 0, 0.1) 0%, rgba(34, 197, 94, 0.1) 100%);
+  background: linear-gradient(135deg, rgba(13, 117, 86, 0.1) 0%, rgba(201, 169, 97, 0.1) 100%);
   border-radius: 8px;
 }
 

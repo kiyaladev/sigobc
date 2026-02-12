@@ -259,14 +259,14 @@ const statsCards = computed(() => [
     value: stats.value.totalBordereaux,
     label: 'Bordereaux',
     icon: 'receipt_long',
-    color: 'warning',
+    color: 'primary',
     progress: 0.6,
   },
   {
     value: formatMontant(stats.value.montantTotal),
     label: 'Montant Total (CFA)',
     icon: 'payments',
-    color: 'dark',
+    color: 'secondary',
     progress: 0.9,
   },
 ]);
@@ -276,13 +276,13 @@ const quickActions = [
   {
     label: 'Déclarations',
     icon: 'description',
-    color: 'positive',
+    color: 'primary',
     route: '/app6/declarations',
   },
-  { label: 'Bordereaux', icon: 'receipt_long', color: 'warning', route: '/app6/bordereaux' },
-  { label: 'Prévisions', icon: 'trending_up', color: 'secondary', route: '/app6/previsions' },
-  { label: 'Taxes', icon: 'account_balance', color: 'primary', route: '/app6/taxes' },
-  { label: 'Statistiques', icon: 'bar_chart', color: 'dark', route: '/app6/statistiques' },
+  { label: 'Bordereaux', icon: 'receipt_long', color: 'secondary', route: '/app6/bordereaux' },
+  { label: 'Prévisions', icon: 'trending_up', color: 'primary', route: '/app6/previsions' },
+  { label: 'Taxes', icon: 'account_balance', color: 'secondary', route: '/app6/taxes' },
+  { label: 'Statistiques', icon: 'bar_chart', color: 'primary', route: '/app6/statistiques' },
 ];
 
 function formatMontant(montant: number): string {

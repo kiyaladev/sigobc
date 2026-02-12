@@ -427,8 +427,9 @@
               const emissionAnt = ligne.emissionAnt || ligne.antecedent || 0;
               const emissionMois = ligne.emissionMois || ligne.recetteMois || 0;
               const emissionTotal = ligne.emissionTotal || ligne.total || 0;
-              const resteAEmettre = (ligne.prevision || 0) - emissionTotal;
-              const resteARecouvrer = emissionTotal - (ligne.total || 0);
+              // RESTE A EMETTRE = 0, sa valeur va dans RESTE A RECOUVRER
+              const resteAEmettre = 0;
+              const resteARecouvrer = (ligne.prevision || 0) - (ligne.total || 0);
 
               row.innerHTML = `
                 <td class="col-code">${ligne.code}</td>
@@ -451,8 +452,9 @@
             const chapTotalRow = document.createElement('tr');
             chapTotalRow.className = 'sous-total';
             const chapPercent = calculatePercent(chapitre.totaux.total, chapitre.totaux.prevision);
-            const chapResteAEmettre = chapitre.totaux.prevision - chapitre.totaux.emissionTotal;
-            const chapResteARecouvrer = chapitre.totaux.emissionTotal - chapitre.totaux.total;
+            // RESTE A EMETTRE = 0, sa valeur va dans RESTE A RECOUVRER
+            const chapResteAEmettre = 0;
+            const chapResteARecouvrer = chapitre.totaux.prevision - chapitre.totaux.total;
             chapTotalRow.innerHTML = `
               <td>S/T ${chapitre.code}</td>
               <td>SOUS TOTAL CHAP. ${chapitre.code}</td>
@@ -474,8 +476,9 @@
           const sectionTotalRow = document.createElement('tr');
           sectionTotalRow.className = 'sous-total';
           const sectionPercent = calculatePercent(section.totaux.total, section.totaux.prevision);
-          const sectionResteAEmettre = section.totaux.prevision - section.totaux.emissionTotal;
-          const sectionResteARecouvrer = section.totaux.emissionTotal - section.totaux.total;
+          // RESTE A EMETTRE = 0, sa valeur va dans RESTE A RECOUVRER
+          const sectionResteAEmettre = 0;
+          const sectionResteARecouvrer = section.totaux.prevision - section.totaux.total;
           sectionTotalRow.innerHTML = `
             <td>S/T ${section.code}</td>
             <td>SOUS TOTAL SECTION ${section.code}</td>
@@ -497,10 +500,9 @@
         const totalRow = document.createElement('tr');
         totalRow.className = 'total-section';
         const totalPercent = calculatePercent(data.totaux.total, data.totaux.prevision);
-        const totalResteAEmettre =
-          data.totaux.prevision - (data.totaux.emissionTotal || data.totaux.total);
-        const totalResteARecouvrer =
-          (data.totaux.emissionTotal || data.totaux.total) - data.totaux.total;
+        // RESTE A EMETTRE = 0, sa valeur va dans RESTE A RECOUVRER
+        const totalResteAEmettre = 0;
+        const totalResteARecouvrer = data.totaux.prevision - data.totaux.total;
         totalRow.innerHTML = `
           <td>TOTAL</td>
           <td>TOTAL GENERAL DES RECETTES TITRE II</td>

@@ -53,6 +53,18 @@
 
     <!-- Table des utilisateurs -->
     <q-card>
+      <q-card-section class="q-pb-none">
+        <div class="row justify-end">
+          <q-btn
+            flat
+            color="primary"
+            icon="download"
+            label="Exporter CSV"
+            @click="exportCsv"
+            no-caps
+          />
+        </div>
+      </q-card-section>
       <q-table
         :rows="filteredUtilisateurs"
         :columns="columns"
@@ -63,7 +75,7 @@
       >
         <template v-slot:body-cell-role="props">
           <q-td :props="props">
-            <q-chip :color="'accent'" text-color="grey-9" size="sm">
+            <q-chip :color="'primary'" text-color="white" size="sm">
               {{ getRoleLabel(props.row.role) }}
             </q-chip>
           </q-td>
@@ -71,7 +83,7 @@
 
         <template v-slot:body-cell-actif="props">
           <q-td :props="props">
-            <q-chip :color="props.row.actif ? 'positive' : 'grey'" text-color="white" size="sm">
+            <q-chip :color="props.row.actif ? 'primary' : 'grey'" text-color="white" size="sm">
               {{ props.row.actif ? 'Actif' : 'Inactif' }}
             </q-chip>
           </q-td>
@@ -235,6 +247,7 @@ import { useQuasar, date } from 'quasar';
 import { db, type Utilisateur, type Mairie } from 'src/database/db';
 import { useAuthStore } from 'src/stores/auth-store';
 import PageHeader from 'src/components/PageHeader.vue';
+import { exportToCsv } from 'src/utils/exportCsv';
 
 const $q = useQuasar();
 const authStore = useAuthStore();
@@ -319,6 +332,10 @@ function getRoleLabel(role: string): string {
     operateur: 'Opérateur',
   };
   return labels[role] || role;
+}
+
+function exportCsv() {
+  exportToCsv(filteredUtilisateurs.value as Record<string, unknown>[], columns, 'utilisateurs');
 }
 
 //

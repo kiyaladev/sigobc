@@ -181,7 +181,7 @@
             >
               <template v-slot:body-cell-taxe="props">
                 <q-td :props="props">
-                  <q-badge color="primary" :label="props.row.label" />
+                  <q-badge color="primary" text-color="white" :label="props.row.label" />
                 </q-td>
               </template>
               <template v-slot:body-cell-count="props">
