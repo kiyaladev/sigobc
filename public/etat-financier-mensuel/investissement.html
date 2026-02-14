@@ -188,6 +188,34 @@
         background-color: #1565c0;
       }
 
+      .options-bar {
+        position: fixed;
+        top: 20px;
+        right: 180px;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #fff;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 6px 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        font-size: 13px;
+      }
+      .options-bar label {
+        font-weight: bold;
+        white-space: nowrap;
+      }
+      .options-bar input {
+        width: 60px;
+        padding: 4px 6px;
+        border: 1px solid #aaa;
+        border-radius: 3px;
+        font-size: 13px;
+        text-align: center;
+      }
+
       @media print {
         body {
           padding: 0;
@@ -210,78 +238,87 @@
     </style>
   </head>
   <body>
+    <div class="options-bar no-print">
+      <label for="inputNumero">N° Page Début :</label>
+      <input
+        type="text"
+        id="inputNumero"
+        placeholder="Ex: 5"
+        oninput="rerenderWithPageNumber(this.value)"
+      />
+    </div>
     <button class="print-button no-print" onclick="window.print()">🖨️ Imprimer</button>
     <div class="container">
       <div id="content">
-        <table>
-          <thead>
-            <tr>
-              <th colspan="13" class="doc-header-cell">
-                <div class="doc-header-grid">
-                  <div class="doc-header-block doc-header-left">
-                    <span id="departement">DÉPARTEMENT</span><br />
-                    <span id="commune">COMMUNE</span><br />
-                    CODE : <span id="codeCommune">---</span>
-                  </div>
-                  <div class="doc-header-block doc-header-center">
-                    <div class="main-title">
-                      ÉTAT MENSUEL D'EXÉCUTION DES DÉPENSES D'INVESTISSEMENT
-                    </div>
-                    ARTICLE 4 DE LA LOI 81-1129 DU 30/12/1981<br />
-                    MOIS DE : <strong id="moisNom">---</strong>
-                  </div>
-                  <div class="doc-header-block doc-header-right">
-                    ANNÉE : <strong id="annee">----</strong><br />
-                    N° &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <!-- <span id="numeroMois">--</span> -->
-                  </div>
-                </div>
-              </th>
-            </tr>
-            <tr>
-              <th rowspan="2" class="col-code">COMPTES</th>
-              <th rowspan="2" class="col-libelle">RUBRIQUES BUDGÉTAIRES</th>
-              <th rowspan="2" class="col-num">PRÉVISIONS</th>
-              <th colspan="3">E N G A G E M E N T S</th>
-              <th colspan="3">L I Q U I D A T I O N S</th>
-              <th colspan="3">M A N D A T S</th>
-              <th rowspan="2" class="col-percent">%<br />TM/P</th>
-            </tr>
-            <tr>
-              <th class="col-num">ANT.</th>
-              <th class="col-num">MOIS</th>
-              <th class="col-num">TOTAL</th>
-              <th class="col-num">ANT.</th>
-              <th class="col-num">MOIS</th>
-              <th class="col-num">TOTAL</th>
-              <th class="col-num">ANT.</th>
-              <th class="col-num">MOIS</th>
-              <th class="col-num">TOTAL</th>
-            </tr>
-          </thead>
-          <tbody id="tableBody">
-            <!-- Données générées dynamiquement -->
-          </tbody>
-        </table>
+        <!-- Les pages seront générées ici par JS -->
+      </div>
+    </div>
 
-        <div class="print-footer">
-          <div class="footer-text" id="footerText">
-            Arrêté le présent état à la somme de : [SOMME EN LETTRES] FRANCS CFA.
+    <!-- Templates cachés pour la génération -->
+    <template id="tableHeaderTemplate">
+      <thead>
+        <tr>
+          <th colspan="13" class="doc-header-cell">
+            <div class="doc-header-grid">
+              <div class="doc-header-block doc-header-left">
+                <span class="tpl-departement">DÉPARTEMENT</span><br />
+                <span class="tpl-commune">COMMUNE</span><br />
+                CODE : <span class="tpl-codeCommune">---</span>
+              </div>
+              <div class="doc-header-block doc-header-center">
+                <div class="main-title">ÉTAT MENSUEL D'EXÉCUTION DES DÉPENSES D'INVESTISSEMENT</div>
+                ARTICLE 4 DE LA LOI 81-1129 DU 30/12/1981<br />
+                MOIS DE : <strong class="tpl-moisNom">---</strong>
+              </div>
+              <div class="doc-header-block doc-header-right">
+                ANNÉE : <strong class="tpl-annee">----</strong><br />
+                N° <span class="tpl-numeroPage"></span>
+              </div>
+            </div>
+          </th>
+        </tr>
+        <tr>
+          <th rowspan="2" class="col-code">COMPTES</th>
+          <th rowspan="2" class="col-libelle">RUBRIQUES BUDGÉTAIRES</th>
+          <th rowspan="2" class="col-num">PRÉVISIONS</th>
+          <th colspan="3">E N G A G E M E N T S</th>
+          <th colspan="3">L I Q U I D A T I O N S</th>
+          <th colspan="3">M A N D A T S</th>
+          <th rowspan="2" class="col-percent">%<br />TM/P</th>
+        </tr>
+        <tr>
+          <th class="col-num">ANT.</th>
+          <th class="col-num">MOIS</th>
+          <th class="col-num">TOTAL</th>
+          <th class="col-num">ANT.</th>
+          <th class="col-num">MOIS</th>
+          <th class="col-num">TOTAL</th>
+          <th class="col-num">ANT.</th>
+          <th class="col-num">MOIS</th>
+          <th class="col-num">TOTAL</th>
+        </tr>
+      </thead>
+    </template>
+
+    <template id="footerTemplate">
+      <div class="print-footer">
+        <div class="footer-text tpl-footerText">
+          Arrêté le présent état à la somme de : [SOMME EN LETTRES] FRANCS CFA.
+        </div>
+
+        <div class="signatures">
+          <div class="signature-box">
+            <span class="tpl-lieuSignature">---</span>, le <span class="tpl-dateSignature">---</span
+            ><br />
+            <strong>Le Trésorier Principal</strong>
           </div>
-
-          <div class="signatures">
-            <div class="signature-box">
-              <span id="lieuSignature">---</span>, le <span id="dateSignature">---</span><br />
-              <strong>Le Trésorier Principal</strong>
-            </div>
-            <div class="signature-box">
-              <br />
-              <strong>Le Maire</strong>
-            </div>
+          <div class="signature-box">
+            <br />
+            <strong>Le Maire</strong>
           </div>
         </div>
       </div>
-    </div>
+    </template>
 
     <script>
       // Libellés des chapitres (1 à 8)
@@ -316,14 +353,9 @@
         return trimmed.charAt(0) === '9';
       }
 
-      // Remplir le tableau avec les données
-      function fillTable(data) {
-        const tbody = document.getElementById('tableBody');
-        if (!tbody) {
-          console.error('[Investissement] tableBody element not found!');
-          return;
-        }
-        tbody.innerHTML = '';
+      // Générer toutes les lignes du tableau sous forme d'éléments DOM
+      function generateRowsFromData(data) {
+        const rows = [];
 
         // Grouper les données dans une structure hiérarchique
         // Section (60, 61...) -> Chapitre (600, 601...) -> SousChapitre (6000, 6001...)
@@ -407,7 +439,7 @@
             <td>${section.code}</td>
             <td colspan="12">SECTION ${section.code} - ${section.libelle}</td>
           `;
-          tbody.appendChild(sectionRow);
+          rows.push(sectionRow);
 
           // Trier les chapitres
           const sortedChapitres = Object.keys(section.chapitres).sort(
@@ -424,7 +456,7 @@
               <td>${chapitre.code}</td>
               <td colspan="12">CHAP. ${chapitre.libelle}</td>
             `;
-            tbody.appendChild(chapRow);
+            rows.push(chapRow);
 
             // Trier les sous-chapitres
             const sortedSousChapitres = Object.keys(chapitre.sousChapitres).sort(
@@ -441,7 +473,7 @@
                 <td>${sousChapitre.code}</td>
                 <td colspan="12"><strong>${sousChapitre.libelle}</strong></td>
               `;
-              tbody.appendChild(scHeaderRow);
+              rows.push(scHeaderRow);
 
               // Lignes pour chaque chapitre (1 à 8)
               for (let i = 1; i <= 8; i++) {
@@ -483,7 +515,7 @@
                     <td class="col-percent">0.00</td>
                   `;
                 }
-                tbody.appendChild(row);
+                rows.push(row);
               }
 
               // Sous-total du sous-chapitre
@@ -508,7 +540,7 @@
                 <td class="col-num">${formatNumber(sousChapitre.totaux.total)}</td>
                 <td class="col-percent">${subPercent}</td>
               `;
-              tbody.appendChild(subTotalRow);
+              rows.push(subTotalRow);
             }
 
             // Sous-total du chapitre (600, 601, 610, etc.)
@@ -530,7 +562,7 @@
               <td class="col-num">${formatNumber(chapitre.totaux.total)}</td>
               <td class="col-percent">${chapPercent}</td>
             `;
-            tbody.appendChild(chapTotalRow);
+            rows.push(chapTotalRow);
           }
         }
 
@@ -553,7 +585,9 @@
           <td class="col-num">${formatNumber(data.totaux.total)}</td>
           <td class="col-percent">${totalPercent}</td>
         `;
-        tbody.appendChild(totalRow);
+        rows.push(totalRow);
+
+        return rows;
       }
 
       // Libellés des sections
@@ -587,57 +621,132 @@
         return libelles[code] || code;
       }
 
-      // Variable pour éviter de traiter les données plusieurs fois
-      var dataProcessed = false;
+      // Global state
+      let currentData = null;
+      let generatedRows = [];
+      let currentPageStart = 1;
 
-      // Fonction pour traiter les données reçues
+      // Fonction principale appelée quand les données arrivent
       function processEtatData(messageData) {
-        if (dataProcessed) return;
         if (messageData && messageData.type === 'FILL_ETAT_FINANCIER_DATA') {
-          dataProcessed = true;
-          const data = messageData.data;
+          currentData = messageData.data;
 
-          // Helper pour mise à jour sécurisée
-          const setText = (id, value) => {
-            const el = document.getElementById(id);
-            if (el) el.textContent = value;
-          };
-
-          // Mettre à jour l'en-tête
-          setText('annee', data.annee);
-          setText('moisNom', data.moisNom.toUpperCase());
-          setText('numeroMois', String(data.mois).padStart(2, '0'));
-
-          // Informations de la mairie si disponibles
-          if (data.mairie) {
-            setText(
-              'departement',
-              'DÉPARTEMENT DE ' + (data.mairie.departement || '').toUpperCase(),
-            );
-            setText('commune', 'COMMUNE DE ' + (data.mairie.nom || '').toUpperCase());
-            setText('codeCommune', data.mairie.code || '---');
-            setText('lieuSignature', data.mairie.nom || '---');
+          // Initialiser le numéro de page par défaut à 1 si l'input est vide
+          const input = document.getElementById('inputNumero');
+          if (!input.value) {
+            input.value = '1';
           }
 
-          // Date de signature
-          const today = new Date();
-          const dateOptions = { day: 'numeric', month: 'long', year: 'numeric' };
-          setText('dateSignature', today.toLocaleDateString('fr-FR', dateOptions));
+          currentPageStart = parseInt(input.value, 10) || 1;
 
-          // Remplir le tableau
-          fillTable(data);
+          // Générer les lignes (une seule fois)
+          generatedRows = generateRowsFromData(currentData);
 
-          // Mettre à jour le pied de page
-          const montantLettres = NumberToLettres(data.totaux.total).toUpperCase();
-          setText(
-            'footerText',
-            `Arrêté le présent état à la somme de : ${montantLettres} FRANCS CFA.`,
-          );
+          // Rendre les pages
+          renderPages();
 
-          // Mettre à jour le titre de la page
-          document.title = `État Mensuel d'Exécution des Dépenses d'Investissement - ${data.moisNom} ${data.annee}`;
+          // Titre du document
+          document.title = `État Mensuel d'Exécution des Dépenses d'Investissement - ${currentData.moisNom} ${currentData.annee}`;
         }
       }
+
+      function rerenderWithPageNumber(val) {
+        currentPageStart = parseInt(val, 10) || 1;
+        if (currentData && generatedRows.length > 0) {
+          renderPages();
+        }
+      }
+
+      function renderPages() {
+        const content = document.getElementById('content');
+        content.innerHTML = '';
+
+        const ROWS_PER_PAGE = 30;
+        let currentRowIndex = 0;
+        let pageIndex = 0;
+
+        while (currentRowIndex < generatedRows.length) {
+          const pageNum = currentPageStart + pageIndex;
+          pageIndex++;
+
+          const pageDiv = document.createElement('div');
+          pageDiv.className = 'print-page';
+          pageDiv.style.position = 'relative';
+          pageDiv.style.pageBreakAfter = 'always';
+          pageDiv.style.minHeight = '180mm';
+
+          const table = document.createElement('table');
+          const tableHeaderTpl = document.getElementById('tableHeaderTemplate');
+          const theadClone = tableHeaderTpl.content.cloneNode(true);
+          fillHeader(theadClone, currentData, pageNum);
+          table.appendChild(theadClone);
+
+          const tbody = document.createElement('tbody');
+          const rowsForThisPage = generatedRows.slice(
+            currentRowIndex,
+            currentRowIndex + ROWS_PER_PAGE,
+          );
+
+          rowsForThisPage.forEach((row) => tbody.appendChild(row.cloneNode(true)));
+          table.appendChild(tbody);
+          pageDiv.appendChild(table);
+
+          currentRowIndex += ROWS_PER_PAGE;
+
+          if (currentRowIndex >= generatedRows.length) {
+            const footerTpl = document.getElementById('footerTemplate');
+            const footerNode = footerTpl.content.cloneNode(true);
+            fillFooter(footerNode, currentData);
+            pageDiv.appendChild(footerNode);
+          }
+
+          content.appendChild(pageDiv);
+        }
+      }
+
+      function fillHeader(node, data, pageNum) {
+        const setText = (cls, val) => {
+          const el = node.querySelector('.' + cls);
+          if (el) el.textContent = val;
+        };
+
+        setText('tpl-annee', data.annee);
+        setText('tpl-moisNom', (data.moisNom || '').toUpperCase());
+        setText('tpl-numeroPage', String(pageNum).padStart(2, '0'));
+
+        if (data.mairie) {
+          setText(
+            'tpl-departement',
+            'DÉPARTEMENT DE ' + (data.mairie.departement || '').toUpperCase(),
+          );
+          setText('tpl-commune', 'COMMUNE DE ' + (data.mairie.nom || '').toUpperCase());
+          setText('tpl-codeCommune', data.mairie.code || '---');
+        }
+      }
+
+      function fillFooter(node, data) {
+        const setText = (cls, val) => {
+          const el = node.querySelector('.' + cls);
+          if (el) el.textContent = val;
+        };
+
+        const montantLettres = NumberToLettres(data.totaux.total).toUpperCase();
+        setText(
+          'tpl-footerText',
+          `Arrêté le présent état à la somme de : ${montantLettres} FRANCS CFA.`,
+        );
+
+        if (data.mairie) {
+          setText('tpl-lieuSignature', data.mairie.nom || '---');
+        }
+
+        const today = new Date();
+        const dateOptions = { day: 'numeric', month: 'long', year: 'numeric' };
+        setText('tpl-dateSignature', today.toLocaleDateString('fr-FR', dateOptions));
+      }
+
+      // Variable pour éviter de traiter les données plusieurs fois
+      var dataProcessed = false;
 
       // Variable pour stocker les données reçues avant que le DOM soit prêt
       let pendingData = null;
@@ -651,29 +760,25 @@
         }
       });
 
-      // Fallback: Vérifier IndexedDB pour Electron (où postMessage ne fonctionne pas entre fenêtres file://)
+      // Fallback: Vérifier IndexedDB pour Electron
       window.addEventListener('DOMContentLoaded', async function () {
         console.log('[Investissement] DOMContentLoaded fired');
 
-        // Traiter les données pendantes si elles existent
         if (pendingData && !dataProcessed) {
           console.log('[Investissement] Processing pending data from postMessage');
           processEtatData(pendingData);
           return;
         }
 
-        // Attendre un peu pour laisser le temps à postMessage de fonctionner
         await new Promise((resolve) => setTimeout(resolve, 500));
 
         if (!dataProcessed) {
           try {
-            // Initialiser Dexie pour accéder à la table printData
             var db = new Dexie('TresorDatabase');
             db.version(24).stores({
               printData: '++id, type, createdAt',
             });
 
-            // Chercher les données d'impression les plus récentes pour ce type
             var printDataRecords = await db
               .table('printData')
               .where('type')
@@ -681,15 +786,12 @@
               .toArray();
 
             if (printDataRecords.length > 0) {
-              // Prendre le plus récent
               var latestRecord = printDataRecords.sort(function (a, b) {
                 return new Date(b.createdAt) - new Date(a.createdAt);
               })[0];
 
               console.log('[Investissement] Data loaded from IndexedDB:', latestRecord);
               processEtatData(latestRecord.data);
-
-              // Supprimer les données après utilisation
               await db.table('printData').delete(latestRecord.id);
             }
           } catch (e) {
