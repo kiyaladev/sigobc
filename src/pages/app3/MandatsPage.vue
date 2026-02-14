@@ -135,7 +135,7 @@
 
     <!-- Dialog d'ajout/modification -->
     <q-dialog v-model="showAddDialog" persistent>
-      <q-card style="min-width: 700px">
+      <q-card style="min-width: 900px">
         <q-card-section class="row items-center q-pb-none">
           <div class="text-h6">{{ editingId ? 'Modifier le mandat' : 'Nouveau mandat' }}</div>
           <q-space />
@@ -310,10 +310,12 @@
               <div class="col-12 col-md-4">
                 <q-select
                   v-model="formData.statut"
-                  :options="['brouillon', 'paye', 'annule']"
+                  :options="statutOptions"
                   label="Statut *"
                   outlined
                   dense
+                  emit-value
+                  map-options
                 />
               </div>
             </div>
@@ -479,7 +481,7 @@ const formData = ref({
   numeroFacture: '',
   dateFacture: '',
   modePaiement: 'virement' as 'virement' | 'cheque' | 'especes' | 'autre',
-  statut: 'brouillon' as 'brouillon' | 'paye' | 'annule',
+  statut: 'paye' as 'brouillon' | 'paye' | 'annule',
   observations: '',
   motifAnnulation: '',
   // Nouveaux champs
@@ -734,12 +736,18 @@ function getStatutColor(statut: string): string {
   }
 }
 
+const statutOptions = [
+  { label: 'Mandaté', value: 'paye' },
+  { label: 'Annulé', value: 'annule' },
+  { label: 'Brouillon', value: 'brouillon' },
+];
+
 function getStatutLabel(statut: string): string {
   switch (statut) {
     case 'brouillon':
       return 'Brouillon';
     case 'paye':
-      return 'Payé';
+      return 'Mandaté';
     case 'annule':
       return 'Annulé';
     default:
@@ -793,7 +801,7 @@ function resetForm() {
     numeroFacture: '',
     dateFacture: '',
     modePaiement: 'virement',
-    statut: 'brouillon',
+    statut: 'paye',
     observations: '',
     motifAnnulation: '',
     // Nouveaux champs

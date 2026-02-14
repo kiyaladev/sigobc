@@ -45,8 +45,16 @@
 
       <template v-slot:body-cell-statut="props">
         <q-td :props="props">
-          <q-chip :color="getStatutColor(props.row.statut)" text-color="white" size="sm">
+          <q-chip
+            :color="getStatutColor(props.row.statut)"
+            text-color="white"
+            size="sm"
+            clickable
+            @click="toggleStatut(props.row)"
+            style="cursor: pointer"
+          >
             {{ props.row.statut }}
+            <q-tooltip>Cliquer pour changer le statut</q-tooltip>
           </q-chip>
         </q-td>
       </template>
@@ -368,6 +376,25 @@ function getStatutDeclarationColor(statut: string): string {
 function formatDate(dateValue: Date | undefined): string {
   if (!dateValue) return '-';
   return date.formatDate(dateValue, 'DD/MM/YYYY');
+}
+
+async function toggleStatut(bordereau: BordereauRecette) {
+  if (!bordereau.id) return;
+  const newStatut = bordereau.statut === 'ouvert' ? 'ferme' : 'ouvert';
+  try {
+    await db.bordereauxRecette.update(bordereau.id, {
+      statut: newStatut,
+      updatedAt: new Date(),
+    });
+    bordereau.statut = newStatut;
+    $q.notify({
+      type: 'positive',
+      message: `Bordereau ${formatNumeroBordereau(bordereau.numero, bordereau.annee)} → ${newStatut}`,
+    });
+  } catch (error) {
+    console.error('Erreur:', error);
+    $q.notify({ type: 'negative', message: 'Erreur lors du changement de statut' });
+  }
 }
 
 async function viewDeclarations(bordereau: BordereauRecette) {
