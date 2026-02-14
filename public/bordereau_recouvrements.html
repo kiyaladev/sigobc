@@ -195,7 +195,7 @@
           RECETTE MUNICIPALE<br />
           DE : {{ mairie?.ville || 'Non spécifié' }}
         </div>
-        <div class="header-center">BORDEREAU DES RECOUVREMENTS AVANT EMISSION DES ORDRES</div>
+        <div class="header-center">BORDEREAU DES RECOUVREMENTS AVANT ÉMISSION DES ORDRES</div>
         <div class="header-right">
           EXERCICE : <span class="handwritten">{{ bordereau.annee }}</span>
         </div>
@@ -218,18 +218,18 @@
                 >{{ formatNumeroBordereau(bordereau.numero, bordereau.annee) }}</span
               >
             </th>
-            <th colspan="2">NUMERO DECOMPTE</th>
+            <th colspan="2">NUMÉRO DÉCOMPTE</th>
             <th rowspan="2" class="col-montant">MONTANT<br />RECOUVRER C/457</th>
             <th rowspan="2" class="col-date">
-              DATE<br />D'ENCAISSEMENT<br />RESTE A<br />RECOUVRER
+              DATE<br />D'ENCAISSEMENT<br />RESTE À<br />RECOUVRER
             </th>
-            <th colspan="2">CONTROLE DES PRISES EN CHARGES</th>
+            <th colspan="2">CONTRÔLE DES PRISES EN CHARGES</th>
           </tr>
           <tr>
             <th style="padding-top: 0">NOM</th>
             <th class="col-fonctionnelle">Fonctionnelle</th>
             <th class="col-patrimoine">Patrimoine</th>
-            <th class="col-recoupre">NUMERO<br />RECOUPRE</th>
+            <th class="col-recoupre">NUMÉRO<br />RECOUPRÉ</th>
             <th class="col-montant-ctrl">MONTANT</th>
           </tr>
         </thead>

@@ -20,32 +20,7 @@
       .container {
         width: 100%;
       }
-      .header {
-        text-align: center;
-        font-weight: bold;
-        margin-bottom: 10px;
-        position: relative;
-        height: 70px;
-      }
-      .header-left {
-        text-align: left;
-        position: absolute;
-        top: 0;
-        left: 0;
-      }
-      .header-center {
-        position: absolute;
-        top: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        text-align: center;
-      }
-      .header-right {
-        text-align: right;
-        position: absolute;
-        top: 0;
-        right: 0;
-      }
+
       .main-title {
         text-decoration: underline;
         font-size: 14px;
@@ -239,83 +214,89 @@
   </head>
   <body>
     <div class="options-bar no-print">
-      <label for="inputNumero">N° :</label>
+      <label for="inputNumero">N° Page Début :</label>
       <input
         type="text"
         id="inputNumero"
-        placeholder="Ex: 01"
-        oninput="document.getElementById('numeroMois').textContent = this.value"
+        placeholder="Ex: 5"
+        oninput="rerenderWithPageNumber(this.value)"
       />
     </div>
     <button class="print-button no-print" onclick="window.print()">🖨️ Imprimer</button>
     <div class="container">
       <div id="content">
-        <table>
-          <thead>
-            <tr>
-              <th colspan="13" class="doc-header-cell">
-                <div class="doc-header-grid">
-                  <div class="doc-header-block doc-header-left">
-                    <span id="departement">DÉPARTEMENT</span><br />
-                    <span id="commune">COMMUNE</span><br />
-                    CODE : <span id="codeCommune">---</span>
-                  </div>
-                  <div class="doc-header-block doc-header-center">
-                    <div class="main-title">ÉTAT MENSUEL D'EXÉCUTION DES DÉPENSES</div>
-                    ARTICLE 4 DE LA LOI 81-1129 DU 30/12/1981<br />
-                    MOIS DE : <strong id="moisNom">---</strong>
-                  </div>
-                  <div class="doc-header-block doc-header-right">
-                    ANNÉE : <strong id="annee">----</strong><br />
-                    N° <span id="numeroMois"></span>
-                  </div>
-                </div>
-              </th>
-            </tr>
-            <tr>
-              <th rowspan="2" class="col-code">COMPTES</th>
-              <th rowspan="2" class="col-libelle">RUBRIQUES BUDGÉTAIRES</th>
-              <th rowspan="2" class="col-num">PRÉVISIONS</th>
-              <th colspan="3">E N G A G E M E N T S</th>
-              <th colspan="3">L I Q U I D A T I O N S</th>
-              <th colspan="3">M A N D A T S</th>
-              <th rowspan="2" class="col-percent">%<br />TM/P</th>
-            </tr>
-            <tr>
-              <th class="col-num">ANT.</th>
-              <th class="col-num">MOIS</th>
-              <th class="col-num">TOTAL</th>
-              <th class="col-num">ANT.</th>
-              <th class="col-num">MOIS</th>
-              <th class="col-num">TOTAL</th>
-              <th class="col-num">ANT.</th>
-              <th class="col-num">MOIS</th>
-              <th class="col-num">TOTAL</th>
-            </tr>
-          </thead>
-          <tbody id="tableBody">
-            <!-- Données générées dynamiquement -->
-          </tbody>
-        </table>
+        <!-- Les pages seront générées ici par JS -->
+      </div>
+    </div>
 
-        <div class="print-footer">
-          <div class="footer-text" id="footerText">
-            Arrêté le présent état à la somme de : [SOMME EN LETTRES] FRANCS CFA.
+    <!-- Templates cachés pour la génération -->
+    <template id="tableHeaderTemplate">
+      <thead>
+        <tr>
+          <th colspan="13" class="doc-header-cell">
+            <div class="doc-header-grid">
+              <div class="doc-header-block doc-header-left">
+                <span class="tpl-departement">DÉPARTEMENT</span><br />
+                <span class="tpl-commune">COMMUNE</span><br />
+                CODE : <span class="tpl-codeCommune">---</span>
+              </div>
+              <div class="doc-header-block doc-header-center">
+                <div class="main-title">ÉTAT MENSUEL D'EXÉCUTION DES DÉPENSES</div>
+                ARTICLE 4 DE LA LOI 81-1129 DU 30/12/1981<br />
+                MOIS DE : <strong class="tpl-moisNom">---</strong>
+              </div>
+              <div class="doc-header-block doc-header-right">
+                ANNÉE : <strong class="tpl-annee">----</strong><br />
+                N° <span class="tpl-numeroPage"></span>
+              </div>
+            </div>
+          </th>
+        </tr>
+        <tr>
+          <th rowspan="2" class="col-code">COMPTES</th>
+          <th rowspan="2" class="col-libelle">RUBRIQUES BUDGÉTAIRES</th>
+          <th rowspan="2" class="col-num">PRÉVISIONS</th>
+          <th colspan="3">E N G A G E M E N T S</th>
+          <th colspan="3">L I Q U I D A T I O N S</th>
+          <th colspan="3">M A N D A T S</th>
+          <th rowspan="2" class="col-percent">%<br />TM/P</th>
+        </tr>
+        <tr>
+          <th class="col-num">ANT.</th>
+          <th class="col-num">MOIS</th>
+          <th class="col-num">TOTAL</th>
+          <th class="col-num">ANT.</th>
+          <th class="col-num">MOIS</th>
+          <th class="col-num">TOTAL</th>
+          <th class="col-num">ANT.</th>
+          <th class="col-num">MOIS</th>
+          <th class="col-num">TOTAL</th>
+          <!-- <th class="col-num">ANT.</th>
+          <th class="col-num">MOIS</th>
+          <th class="col-num">TOTAL</th> -->
+        </tr>
+      </thead>
+    </template>
+
+    <template id="footerTemplate">
+      <div class="print-footer">
+        <div class="footer-text tpl-footerText">
+          Arrêté le présent état à la somme de : [SOMME EN LETTRES] FRANCS CFA.
+        </div>
+
+        <div class="signatures">
+          <div class="signature-box">
+            <span class="tpl-lieuSignature">---</span>, le <span class="tpl-dateSignature">---</span
+            ><br />
+            <strong>Le Trésorier Principal</strong>
           </div>
-
-          <div class="signatures">
-            <div class="signature-box">
-              <span id="lieuSignature">---</span>, le <span id="dateSignature">---</span><br />
-              <strong>Le Trésorier Principal</strong>
-            </div>
-            <div class="signature-box">
-              <br />
-              <strong>Le Maire</strong>
-            </div>
+          <div class="signature-box">
+            <br />
+            <strong>Le Maire</strong>
           </div>
         </div>
       </div>
-    </div>
+    </template>
 
     <script>
       // Libellés des chapitres (1 à 8)
@@ -340,254 +321,6 @@
       function calculatePercent(total, prevision) {
         if (!prevision || prevision === 0) return '0.00';
         return ((total / prevision) * 100).toFixed(2);
-      }
-
-      function isEligibleSousChapitreCode(code) {
-        if (!code || typeof code !== 'string') return false;
-        const trimmed = code.trim();
-        if (trimmed.length < 4) return false;
-        const num = parseInt(trimmed, 10);
-        return !Number.isNaN(num) && num >= 6000;
-      }
-
-      // Remplir le tableau avec les données
-      function fillTable(data) {
-        const tbody = document.getElementById('tableBody');
-        if (!tbody) {
-          console.error('[Depense] tableBody element not found!');
-          return;
-        }
-        tbody.innerHTML = '';
-
-        // Grouper les données dans une structure hiérarchique
-        // Section (60, 61...) -> Chapitre (600, 601...) -> SousChapitre (6000, 6001...)
-        const hierarchy = {};
-
-        for (const ligne of data.lignes) {
-          const sousChapitreCode = (ligne.sousChapitreCode || '').trim();
-          if (!sousChapitreCode || sousChapitreCode.length < 4) continue;
-
-          const codeNum = parseInt(sousChapitreCode, 10);
-          if (isNaN(codeNum)) continue;
-
-          // Déterminer la section (premiers 2 chiffres)
-          const sectionCode = sousChapitreCode.substring(0, 2);
-          // Déterminer le chapitre (premiers 3 chiffres)
-          const chapitreCode = sousChapitreCode.substring(0, 3);
-
-          // Créer la section si nécessaire
-          if (!hierarchy[sectionCode]) {
-            hierarchy[sectionCode] = {
-              code: sectionCode,
-              libelle: getSectionLibelle(sectionCode),
-              chapitres: {},
-              totaux: { prevision: 0, antecedent: 0, depenseMois: 0, total: 0 },
-            };
-          }
-
-          // Créer le chapitre si nécessaire
-          if (!hierarchy[sectionCode].chapitres[chapitreCode]) {
-            hierarchy[sectionCode].chapitres[chapitreCode] = {
-              code: chapitreCode,
-              libelle: getChapitreLibelle(chapitreCode),
-              sousChapitres: {},
-              totaux: { prevision: 0, antecedent: 0, depenseMois: 0, total: 0 },
-            };
-          }
-
-          // Créer le sous-chapitre si nécessaire
-          if (!hierarchy[sectionCode].chapitres[chapitreCode].sousChapitres[sousChapitreCode]) {
-            hierarchy[sectionCode].chapitres[chapitreCode].sousChapitres[sousChapitreCode] = {
-              code: sousChapitreCode,
-              libelle: ligne.sousChapitreLibelle || sousChapitreCode,
-              lignes: {},
-              totaux: { prevision: 0, antecedent: 0, depenseMois: 0, total: 0 },
-            };
-          }
-
-          // Ajouter la ligne
-          const sousChapitre =
-            hierarchy[sectionCode].chapitres[chapitreCode].sousChapitres[sousChapitreCode];
-          sousChapitre.lignes[ligne.chapitreCode] = ligne;
-
-          // Mettre à jour les totaux
-          sousChapitre.totaux.prevision += ligne.prevision || 0;
-          sousChapitre.totaux.antecedent += ligne.antecedent || 0;
-          sousChapitre.totaux.depenseMois += ligne.depenseMois || 0;
-          sousChapitre.totaux.total += ligne.total || 0;
-
-          hierarchy[sectionCode].chapitres[chapitreCode].totaux.prevision += ligne.prevision || 0;
-          hierarchy[sectionCode].chapitres[chapitreCode].totaux.antecedent += ligne.antecedent || 0;
-          hierarchy[sectionCode].chapitres[chapitreCode].totaux.depenseMois +=
-            ligne.depenseMois || 0;
-          hierarchy[sectionCode].chapitres[chapitreCode].totaux.total += ligne.total || 0;
-
-          hierarchy[sectionCode].totaux.prevision += ligne.prevision || 0;
-          hierarchy[sectionCode].totaux.antecedent += ligne.antecedent || 0;
-          hierarchy[sectionCode].totaux.depenseMois += ligne.depenseMois || 0;
-          hierarchy[sectionCode].totaux.total += ligne.total || 0;
-        }
-
-        // Trier et rendre la hiérarchie
-        const sortedSections = Object.keys(hierarchy).sort((a, b) => parseInt(a) - parseInt(b));
-
-        for (const sectionCode of sortedSections) {
-          const section = hierarchy[sectionCode];
-
-          // Entête de section
-          const sectionRow = document.createElement('tr');
-          sectionRow.className = 'section-header';
-          sectionRow.innerHTML = `
-            <td>${section.code}</td>
-            <td colspan="12">SECTION ${section.code} - ${section.libelle}</td>
-          `;
-          tbody.appendChild(sectionRow);
-
-          // Trier les chapitres
-          const sortedChapitres = Object.keys(section.chapitres).sort(
-            (a, b) => parseInt(a) - parseInt(b),
-          );
-
-          for (const chapCode of sortedChapitres) {
-            const chapitre = section.chapitres[chapCode];
-
-            // Entête de chapitre
-            const chapRow = document.createElement('tr');
-            chapRow.className = 'chap-header';
-            chapRow.innerHTML = `
-              <td>${chapitre.code}</td>
-              <td colspan="12">CHAP. ${chapitre.libelle}</td>
-            `;
-            tbody.appendChild(chapRow);
-
-            // Trier les sous-chapitres (tri lexicographique pour respecter la hiérarchie : 6000, 6001, 60010, 60011, ..., 6002, 60020, ...)
-            const sortedSousChapitres = Object.keys(chapitre.sousChapitres).sort((a, b) =>
-              a.localeCompare(b, undefined, { numeric: false }),
-            );
-
-            for (const scCode of sortedSousChapitres) {
-              const sousChapitre = chapitre.sousChapitres[scCode];
-
-              // Entête du sous-chapitre
-              const scHeaderRow = document.createElement('tr');
-              scHeaderRow.className = 'sous-chapitre-header';
-              scHeaderRow.innerHTML = `
-                <td>${sousChapitre.code}</td>
-                <td colspan="12"><strong>${sousChapitre.libelle}</strong></td>
-              `;
-              tbody.appendChild(scHeaderRow);
-
-              // Lignes pour chaque chapitre (1 à 8)
-              for (let i = 1; i <= 8; i++) {
-                const chapCodeStr = String(i);
-                const ligne = sousChapitre.lignes[chapCodeStr];
-                const row = document.createElement('tr');
-
-                if (ligne) {
-                  const percent = calculatePercent(ligne.total, ligne.prevision);
-                  row.innerHTML = `
-                    <td class="col-code">${sousChapitre.code}/${chapCodeStr}</td>
-                    <td class="col-libelle">${chapitreLibelles[chapCodeStr]}</td>
-                    <td class="col-num">${formatNumber(ligne.prevision)}</td>
-                    <td class="col-num">${formatNumber(ligne.antecedent)}</td>
-                    <td class="col-num">${formatNumber(ligne.depenseMois)}</td>
-                    <td class="col-num">${formatNumber(ligne.total)}</td>
-                    <td class="col-num">${formatNumber(ligne.antecedent)}</td>
-                    <td class="col-num">${formatNumber(ligne.depenseMois)}</td>
-                    <td class="col-num">${formatNumber(ligne.total)}</td>
-                    <td class="col-num">${formatNumber(ligne.antecedent)}</td>
-                    <td class="col-num">${formatNumber(ligne.depenseMois)}</td>
-                    <td class="col-num">${formatNumber(ligne.total)}</td>
-                    <td class="col-percent">${percent}</td>
-                  `;
-                } else {
-                  row.innerHTML = `
-                    <td class="col-code">${sousChapitre.code}/${chapCodeStr}</td>
-                    <td class="col-libelle">${chapitreLibelles[chapCodeStr]}</td>
-                    <td class="col-num">0</td>
-                    <td class="col-num">0</td>
-                    <td class="col-num">0</td>
-                    <td class="col-num">0</td>
-                    <td class="col-num">0</td>
-                    <td class="col-num">0</td>
-                    <td class="col-num">0</td>
-                    <td class="col-num">0</td>
-                    <td class="col-num">0</td>
-                    <td class="col-num">0</td>
-                    <td class="col-percent">0.00</td>
-                  `;
-                }
-                tbody.appendChild(row);
-              }
-
-              // Sous-total du sous-chapitre
-              const subTotalRow = document.createElement('tr');
-              subTotalRow.className = 'sous-total';
-              const subPercent = calculatePercent(
-                sousChapitre.totaux.total,
-                sousChapitre.totaux.prevision,
-              );
-              subTotalRow.innerHTML = `
-                <td>S/T ${sousChapitre.code}</td>
-                <td>SOUS TOTAL ${sousChapitre.code}</td>
-                <td class="col-num">${formatNumber(sousChapitre.totaux.prevision)}</td>
-                <td class="col-num">${formatNumber(sousChapitre.totaux.antecedent)}</td>
-                <td class="col-num">${formatNumber(sousChapitre.totaux.depenseMois)}</td>
-                <td class="col-num">${formatNumber(sousChapitre.totaux.total)}</td>
-                <td class="col-num">${formatNumber(sousChapitre.totaux.antecedent)}</td>
-                <td class="col-num">${formatNumber(sousChapitre.totaux.depenseMois)}</td>
-                <td class="col-num">${formatNumber(sousChapitre.totaux.total)}</td>
-                <td class="col-num">${formatNumber(sousChapitre.totaux.antecedent)}</td>
-                <td class="col-num">${formatNumber(sousChapitre.totaux.depenseMois)}</td>
-                <td class="col-num">${formatNumber(sousChapitre.totaux.total)}</td>
-                <td class="col-percent">${subPercent}</td>
-              `;
-              tbody.appendChild(subTotalRow);
-            }
-
-            // Sous-total du chapitre (600, 601, 610, etc.)
-            const chapTotalRow = document.createElement('tr');
-            chapTotalRow.className = 'sous-total';
-            const chapPercent = calculatePercent(chapitre.totaux.total, chapitre.totaux.prevision);
-            chapTotalRow.innerHTML = `
-              <td>S/T ${chapitre.code}</td>
-              <td>SOUS TOTAL CHAP. ${chapitre.code}</td>
-              <td class="col-num">${formatNumber(chapitre.totaux.prevision)}</td>
-              <td class="col-num">${formatNumber(chapitre.totaux.antecedent)}</td>
-              <td class="col-num">${formatNumber(chapitre.totaux.depenseMois)}</td>
-              <td class="col-num">${formatNumber(chapitre.totaux.total)}</td>
-              <td class="col-num">${formatNumber(chapitre.totaux.antecedent)}</td>
-              <td class="col-num">${formatNumber(chapitre.totaux.depenseMois)}</td>
-              <td class="col-num">${formatNumber(chapitre.totaux.total)}</td>
-              <td class="col-num">${formatNumber(chapitre.totaux.antecedent)}</td>
-              <td class="col-num">${formatNumber(chapitre.totaux.depenseMois)}</td>
-              <td class="col-num">${formatNumber(chapitre.totaux.total)}</td>
-              <td class="col-percent">${chapPercent}</td>
-            `;
-            tbody.appendChild(chapTotalRow);
-          }
-        }
-
-        // Total général
-        const totalRow = document.createElement('tr');
-        totalRow.className = 'total-section';
-        const totalPercent = calculatePercent(data.totaux.total, data.totaux.prevision);
-        totalRow.innerHTML = `
-          <td>TOTAL</td>
-          <td>TOTAL GÉNÉRAL DES DÉPENSES</td>
-          <td class="col-num">${formatNumber(data.totaux.prevision)}</td>
-          <td class="col-num">${formatNumber(data.totaux.antecedent)}</td>
-          <td class="col-num">${formatNumber(data.totaux.depenseMois)}</td>
-          <td class="col-num">${formatNumber(data.totaux.total)}</td>
-          <td class="col-num">${formatNumber(data.totaux.antecedent)}</td>
-          <td class="col-num">${formatNumber(data.totaux.depenseMois)}</td>
-          <td class="col-num">${formatNumber(data.totaux.total)}</td>
-          <td class="col-num">${formatNumber(data.totaux.antecedent)}</td>
-          <td class="col-num">${formatNumber(data.totaux.depenseMois)}</td>
-          <td class="col-num">${formatNumber(data.totaux.total)}</td>
-          <td class="col-percent">${totalPercent}</td>
-        `;
-        tbody.appendChild(totalRow);
       }
 
       // Libellés des sections
@@ -635,57 +368,346 @@
         return libelles[code] || code;
       }
 
-      // Variable pour éviter de traiter les données plusieurs fois
-      var dataProcessed = false;
+      // Global state
+      let currentData = null;
+      let generatedRows = [];
+      let currentPageStart = 1;
 
-      // Fonction pour traiter les données reçues
+      // Fonction principale appelée quand les données arrivent
       function processEtatData(messageData) {
-        if (dataProcessed) return;
         if (messageData && messageData.type === 'FILL_ETAT_FINANCIER_DATA') {
-          dataProcessed = true;
-          const data = messageData.data;
+          currentData = messageData.data;
 
-          // Helper pour mise à jour sécurisée
-          const setText = (id, value) => {
-            const el = document.getElementById(id);
-            if (el) el.textContent = value;
-          };
-
-          // Mettre à jour l'en-tête
-          setText('annee', data.annee);
-          setText('moisNom', data.moisNom.toUpperCase());
-          setText('numeroMois', String(data.mois).padStart(2, '0'));
-
-          // Informations de la mairie si disponibles
-          if (data.mairie) {
-            setText(
-              'departement',
-              'DÉPARTEMENT DE ' + (data.mairie.departement || '').toUpperCase(),
-            );
-            setText('commune', 'COMMUNE DE ' + (data.mairie.nom || '').toUpperCase());
-            setText('codeCommune', data.mairie.code || '---');
-            setText('lieuSignature', data.mairie.nom || '---');
+          // Initialiser le numéro de page par défaut à 1 si l'input est vide
+          const input = document.getElementById('inputNumero');
+          if (!input.value) {
+            input.value = '1';
           }
 
-          // Date de signature
-          const today = new Date();
-          const dateOptions = { day: 'numeric', month: 'long', year: 'numeric' };
-          setText('dateSignature', today.toLocaleDateString('fr-FR', dateOptions));
+          currentPageStart = parseInt(input.value, 10) || 1;
 
-          // Remplir le tableau
-          fillTable(data);
+          // Générer les lignes (une seule fois)
+          generatedRows = generateRowsFromData(currentData);
 
-          // Mettre à jour le pied de page
-          const montantLettres = NumberToLettres(data.totaux.total).toUpperCase();
-          setText(
-            'footerText',
-            `Arrêté le présent état à la somme de : ${montantLettres} FRANCS CFA.`,
-          );
+          // Rendre les pages
+          renderPages();
 
-          // Mettre à jour le titre de la page
-          document.title = `État Mensuel d'Exécution des Dépenses - ${data.moisNom} ${data.annee}`;
+          // Titre du document
+          document.title = `État Mensuel d'Exécution des Dépenses - ${currentData.moisNom} ${currentData.annee}`;
         }
       }
+
+      function rerenderWithPageNumber(val) {
+        currentPageStart = parseInt(val, 10) || 1;
+        if (currentData && generatedRows.length > 0) {
+          renderPages();
+        }
+      }
+
+      // 1. Générer toutes les lignes du tableau sous forme d'éléments DOM (ou objets)
+      function generateRowsFromData(data) {
+        const rows = []; // Array of TR elements
+
+        // Grouper les données (Logique existante)
+        const hierarchy = {};
+
+        for (const ligne of data.lignes) {
+          const sousChapitreCode = (ligne.sousChapitreCode || '').trim();
+          if (!sousChapitreCode || sousChapitreCode.length < 4) continue;
+
+          const codeNum = parseInt(sousChapitreCode, 10);
+          if (isNaN(codeNum)) continue;
+
+          const sectionCode = sousChapitreCode.substring(0, 2);
+          const chapitreCode = sousChapitreCode.substring(0, 3);
+
+          if (!hierarchy[sectionCode]) {
+            hierarchy[sectionCode] = {
+              code: sectionCode,
+              libelle: getSectionLibelle(sectionCode),
+              chapitres: {},
+              totaux: { prevision: 0, antecedent: 0, depenseMois: 0, total: 0 },
+            };
+          }
+
+          if (!hierarchy[sectionCode].chapitres[chapitreCode]) {
+            hierarchy[sectionCode].chapitres[chapitreCode] = {
+              code: chapitreCode,
+              libelle: getChapitreLibelle(chapitreCode),
+              sousChapitres: {},
+              totaux: { prevision: 0, antecedent: 0, depenseMois: 0, total: 0 },
+            };
+          }
+
+          if (!hierarchy[sectionCode].chapitres[chapitreCode].sousChapitres[sousChapitreCode]) {
+            hierarchy[sectionCode].chapitres[chapitreCode].sousChapitres[sousChapitreCode] = {
+              code: sousChapitreCode,
+              libelle: ligne.sousChapitreLibelle || sousChapitreCode,
+              lignes: {},
+              totaux: { prevision: 0, antecedent: 0, depenseMois: 0, total: 0 },
+            };
+          }
+
+          const sousChapitre =
+            hierarchy[sectionCode].chapitres[chapitreCode].sousChapitres[sousChapitreCode];
+          sousChapitre.lignes[ligne.chapitreCode] = ligne;
+
+          // Cumul totaux
+          const add = (target, source) => {
+            target.prevision += source.prevision || 0;
+            target.antecedent += source.antecedent || 0;
+            target.depenseMois += source.depenseMois || 0;
+            target.total += source.total || 0;
+          };
+
+          add(sousChapitre.totaux, ligne);
+          add(hierarchy[sectionCode].chapitres[chapitreCode].totaux, ligne);
+          add(hierarchy[sectionCode].totaux, ligne);
+        }
+
+        // Création des TR
+        const sortedSections = Object.keys(hierarchy).sort((a, b) => parseInt(a) - parseInt(b));
+
+        for (const sectionCode of sortedSections) {
+          const section = hierarchy[sectionCode];
+
+          // Entête de section
+          const sectionRow = document.createElement('tr');
+          sectionRow.className = 'section-header';
+          sectionRow.innerHTML = `<td>${section.code}</td><td colspan="12">SECTION ${section.code} - ${section.libelle}</td>`;
+          rows.push(sectionRow);
+
+          const sortedChapitres = Object.keys(section.chapitres).sort(
+            (a, b) => parseInt(a) - parseInt(b),
+          );
+
+          for (const chapCode of sortedChapitres) {
+            const chapitre = section.chapitres[chapCode];
+
+            const chapRow = document.createElement('tr');
+            chapRow.className = 'chap-header';
+            chapRow.innerHTML = `<td>${chapitre.code}</td><td colspan="12">CHAP. ${chapitre.libelle}</td>`;
+            rows.push(chapRow);
+
+            const sortedSousChapitres = Object.keys(chapitre.sousChapitres).sort((a, b) =>
+              a.localeCompare(b, undefined, { numeric: false }),
+            );
+
+            for (const scCode of sortedSousChapitres) {
+              const sousChapitre = chapitre.sousChapitres[scCode];
+
+              const scHeaderRow = document.createElement('tr');
+              scHeaderRow.className = 'sous-chapitre-header';
+              scHeaderRow.innerHTML = `<td>${sousChapitre.code}</td><td colspan="12"><strong>${sousChapitre.libelle}</strong></td>`;
+              rows.push(scHeaderRow);
+
+              for (let i = 1; i <= 8; i++) {
+                const chapCodeStr = String(i);
+                const ligne = sousChapitre.lignes[chapCodeStr];
+                const row = document.createElement('tr');
+
+                if (ligne) {
+                  const percent = calculatePercent(ligne.total, ligne.prevision);
+                  row.innerHTML = `
+                    <td class="col-code">${sousChapitre.code}/${chapCodeStr}</td>
+                    <td class="col-libelle">${chapitreLibelles[chapCodeStr]}</td>
+                    <td class="col-num">${formatNumber(ligne.prevision)}</td>
+                    <td class="col-num">${formatNumber(ligne.antecedent)}</td>
+                    <td class="col-num">${formatNumber(ligne.depenseMois)}</td>
+                    <td class="col-num">${formatNumber(ligne.total)}</td>
+                    <td class="col-num">${formatNumber(ligne.antecedent)}</td>
+                    <td class="col-num">${formatNumber(ligne.depenseMois)}</td>
+                    <td class="col-num">${formatNumber(ligne.total)}</td>
+                    <td class="col-num">${formatNumber(ligne.antecedent)}</td>
+                    <td class="col-num">${formatNumber(ligne.depenseMois)}</td>
+                    <td class="col-num">${formatNumber(ligne.total)}</td>
+                    <td class="col-percent">${percent}</td>
+                  `;
+                } else {
+                  row.innerHTML = `
+                    <td class="col-code">${sousChapitre.code}/${chapCodeStr}</td>
+                    <td class="col-libelle">${chapitreLibelles[chapCodeStr]}</td>
+                    <td class="col-num">0</td><td class="col-num">0</td><td class="col-num">0</td><td class="col-num">0</td>
+                    <td class="col-num">0</td><td class="col-num">0</td><td class="col-num">0</td>
+                    <td class="col-num">0</td><td class="col-num">0</td><td class="col-num">0</td>
+                    <td class="col-percent">0.00</td>
+                  `;
+                }
+                rows.push(row);
+              }
+
+              const subTotalRow = document.createElement('tr');
+              subTotalRow.className = 'sous-total';
+              const subPercent = calculatePercent(
+                sousChapitre.totaux.total,
+                sousChapitre.totaux.prevision,
+              );
+              subTotalRow.innerHTML = `
+                <td>S/T ${sousChapitre.code}</td>
+                <td>SOUS TOTAL ${sousChapitre.code}</td>
+                <td class="col-num">${formatNumber(sousChapitre.totaux.prevision)}</td>
+                <td class="col-num">${formatNumber(sousChapitre.totaux.antecedent)}</td>
+                <td class="col-num">${formatNumber(sousChapitre.totaux.depenseMois)}</td>
+                <td class="col-num">${formatNumber(sousChapitre.totaux.total)}</td>
+                <td class="col-num">${formatNumber(sousChapitre.totaux.antecedent)}</td>
+                <td class="col-num">${formatNumber(sousChapitre.totaux.depenseMois)}</td>
+                <td class="col-num">${formatNumber(sousChapitre.totaux.total)}</td>
+                <td class="col-num">${formatNumber(sousChapitre.totaux.antecedent)}</td>
+                <td class="col-num">${formatNumber(sousChapitre.totaux.depenseMois)}</td>
+                <td class="col-num">${formatNumber(sousChapitre.totaux.total)}</td>
+                <td class="col-percent">${subPercent}</td>
+              `;
+              rows.push(subTotalRow);
+            }
+
+            const chapTotalRow = document.createElement('tr');
+            chapTotalRow.className = 'sous-total';
+            const chapPercent = calculatePercent(chapitre.totaux.total, chapitre.totaux.prevision);
+            chapTotalRow.innerHTML = `
+              <td>S/T ${chapitre.code}</td>
+              <td>SOUS TOTAL CHAP. ${chapitre.code}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.prevision)}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.antecedent)}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.depenseMois)}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.total)}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.antecedent)}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.depenseMois)}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.total)}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.antecedent)}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.depenseMois)}</td>
+              <td class="col-num">${formatNumber(chapitre.totaux.total)}</td>
+              <td class="col-percent">${chapPercent}</td>
+            `;
+            rows.push(chapTotalRow);
+          }
+        }
+
+        // Total général
+        const totalRow = document.createElement('tr');
+        totalRow.className = 'total-section';
+        const totalPercent = calculatePercent(data.totaux.total, data.totaux.prevision);
+        totalRow.innerHTML = `
+          <td>TOTAL</td>
+          <td>TOTAL GÉNÉRAL DES DÉPENSES</td>
+          <td class="col-num">${formatNumber(data.totaux.prevision)}</td>
+          <td class="col-num">${formatNumber(data.totaux.antecedent)}</td>
+          <td class="col-num">${formatNumber(data.totaux.depenseMois)}</td>
+          <td class="col-num">${formatNumber(data.totaux.total)}</td>
+          <td class="col-num">${formatNumber(data.totaux.antecedent)}</td>
+          <td class="col-num">${formatNumber(data.totaux.depenseMois)}</td>
+          <td class="col-num">${formatNumber(data.totaux.total)}</td>
+          <td class="col-num">${formatNumber(data.totaux.antecedent)}</td>
+          <td class="col-num">${formatNumber(data.totaux.depenseMois)}</td>
+          <td class="col-num">${formatNumber(data.totaux.total)}</td>
+          <td class="col-percent">${totalPercent}</td>
+        `;
+        rows.push(totalRow);
+
+        return rows;
+      }
+
+      function renderPages() {
+        const content = document.getElementById('content');
+        content.innerHTML = '';
+
+        const ROWS_PER_PAGE = 30; // Ajuster selon besoin (A4 Landscape)
+        let currentRowIndex = 0;
+        let pageIndex = 0;
+
+        while (currentRowIndex < generatedRows.length) {
+          const pageNum = currentPageStart + pageIndex;
+          pageIndex++;
+
+          // Créer le conteneur de page
+          const pageDiv = document.createElement('div');
+          pageDiv.className = 'print-page';
+          pageDiv.style.position = 'relative';
+          pageDiv.style.pageBreakAfter = 'always';
+          // Min-height pour simuler la page à l'écran, mais en print c'est le page-break qui compte
+          pageDiv.style.minHeight = '180mm';
+
+          // --- Table avec header intégré ---
+          const table = document.createElement('table');
+          const tableHeaderTpl = document.getElementById('tableHeaderTemplate');
+          const theadClone = tableHeaderTpl.content.cloneNode(true);
+          fillHeader(theadClone, currentData, pageNum);
+          table.appendChild(theadClone);
+
+          const tbody = document.createElement('tbody');
+
+          // Ajouter les lignes pour cette page
+          // Note: On pourrait faire plus intelligent pour éviter de couper une section,
+          // mais un slice simple est un bon début.
+          const rowsForThisPage = generatedRows.slice(
+            currentRowIndex,
+            currentRowIndex + ROWS_PER_PAGE,
+          );
+
+          // Si c'est la dernière page, et qu'il reste peu de place, attention au footer
+          // Pour l'instant, logique simple
+
+          rowsForThisPage.forEach((row) => tbody.appendChild(row.cloneNode(true)));
+          table.appendChild(tbody);
+          pageDiv.appendChild(table);
+
+          currentRowIndex += ROWS_PER_PAGE;
+
+          // --- Footer seulement sur la dernière page ---
+          if (currentRowIndex >= generatedRows.length) {
+            const footerTpl = document.getElementById('footerTemplate');
+            const footerNode = footerTpl.content.cloneNode(true);
+            fillFooter(footerNode, currentData);
+            pageDiv.appendChild(footerNode);
+          }
+
+          content.appendChild(pageDiv);
+        }
+      }
+
+      function fillHeader(node, data, pageNum) {
+        const setText = (cls, val) => {
+          const el = node.querySelector('.' + cls);
+          if (el) el.textContent = val;
+        };
+
+        setText('tpl-annee', data.annee);
+        setText('tpl-moisNom', (data.moisNom || '').toUpperCase());
+        // Formater le numéro de page sur 2 chiffres ? Ou tel quel
+        setText('tpl-numeroPage', String(pageNum).padStart(2, '0'));
+
+        if (data.mairie) {
+          setText(
+            'tpl-departement',
+            'DÉPARTEMENT DE ' + (data.mairie.departement || '').toUpperCase(),
+          );
+          setText('tpl-commune', 'COMMUNE DE ' + (data.mairie.nom || '').toUpperCase());
+          setText('tpl-codeCommune', data.mairie.code || '---');
+        }
+      }
+
+      function fillFooter(node, data) {
+        const setText = (cls, val) => {
+          const el = node.querySelector('.' + cls);
+          if (el) el.textContent = val;
+        };
+
+        const montantLettres = NumberToLettres(data.totaux.total).toUpperCase();
+        setText(
+          'tpl-footerText',
+          `Arrêté le présent état à la somme de : ${montantLettres} FRANCS CFA.`,
+        );
+
+        if (data.mairie) {
+          setText('tpl-lieuSignature', data.mairie.nom || '---');
+        }
+
+        const today = new Date();
+        const dateOptions = { day: 'numeric', month: 'long', year: 'numeric' };
+        setText('tpl-dateSignature', today.toLocaleDateString('fr-FR', dateOptions));
+      }
+
+      // Variable pour éviter de traiter les données plusieurs fois
+      var dataProcessed = false;
 
       // Variable pour stocker les données reçues avant que le DOM soit prêt
       let pendingData = null;
@@ -699,29 +721,25 @@
         }
       });
 
-      // Fallback: Vérifier IndexedDB pour Electron (où postMessage ne fonctionne pas entre fenêtres file://)
+      // Fallback: Vérifier IndexedDB pour Electron
       window.addEventListener('DOMContentLoaded', async function () {
         console.log('[Depense] DOMContentLoaded fired');
 
-        // Traiter les données pendantes si elles existent
         if (pendingData && !dataProcessed) {
           console.log('[Depense] Processing pending data from postMessage');
           processEtatData(pendingData);
           return;
         }
 
-        // Attendre un peu pour laisser le temps à postMessage de fonctionner
         await new Promise((resolve) => setTimeout(resolve, 500));
 
         if (!dataProcessed) {
           try {
-            // Initialiser Dexie pour accéder à la table printData
             var db = new Dexie('TresorDatabase');
             db.version(24).stores({
               printData: '++id, type, createdAt',
             });
 
-            // Chercher les données d'impression les plus récentes pour ce type
             var printDataRecords = await db
               .table('printData')
               .where('type')
@@ -729,15 +747,12 @@
               .toArray();
 
             if (printDataRecords.length > 0) {
-              // Prendre le plus récent
               var latestRecord = printDataRecords.sort(function (a, b) {
                 return new Date(b.createdAt) - new Date(a.createdAt);
               })[0];
 
               console.log('[Depense] Data loaded from IndexedDB:', latestRecord);
               processEtatData(latestRecord.data);
-
-              // Supprimer les données après utilisation
               await db.table('printData').delete(latestRecord.id);
             }
           } catch (e) {
