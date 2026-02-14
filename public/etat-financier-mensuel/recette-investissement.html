@@ -3,13 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Etat Mensuel d'Exécution des Recettes d'Investissement</title>
+    <title>État Mensuel d'Exécution des Recettes d'Investissement</title>
     <!-- Charger Dexie pour accéder à IndexedDB -->
     <script src="../dexie.min.js"></script>
     <style>
       @page {
         size: A4 landscape;
-        margin: 5mm;
+        margin: 10mm;
       }
       body {
         font-family: Arial, Helvetica, sans-serif;
@@ -196,18 +196,18 @@
               <th colspan="12" class="doc-header-cell">
                 <div class="doc-header-grid">
                   <div class="doc-header-block doc-header-left">
-                    <span id="departement">DEPARTEMENT</span><br />
+                    <span id="departement">DÉPARTEMENT</span><br />
                     <span id="commune">COMMUNE</span><br />
                     CODE : <span id="codeCommune">---</span>
                   </div>
                   <div class="doc-header-block doc-header-center">
-                    <div class="main-title">ETAT MENSUEL D'EXECUTION DES RECETTES</div>
+                    <div class="main-title">ÉTAT MENSUEL D'EXÉCUTION DES RECETTES</div>
                     <div style="color: #1565c0; font-size: 11px">TITRE II - INVESTISSEMENT</div>
                     ARTICLE 4 DE LA LOI 81-1129 DU 30/12/1981<br />
                     MOIS DE : <strong id="moisNom">---</strong>
                   </div>
                   <div class="doc-header-block doc-header-right">
-                    ANNEE : <strong id="annee">----</strong><br />
+                    ANNÉE : <strong id="annee">----</strong><br />
                     N° &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <!-- <span id="numeroMois">--</span> -->
                   </div>
@@ -216,8 +216,8 @@
             </tr>
             <tr>
               <th rowspan="2" class="col-code">COMPTES</th>
-              <th rowspan="2" class="col-libelle">RUBRIQUES BUDGETAIRES</th>
-              <th rowspan="2" class="col-num">PREVISIONS</th>
+              <th rowspan="2" class="col-libelle">RUBRIQUES BUDGÉTAIRES</th>
+              <th rowspan="2" class="col-num">PRÉVISIONS</th>
               <th colspan="4">E M I S S I O N S</th>
               <th colspan="4">R E C O U V R E M E N T S</th>
               <th rowspan="2" class="col-percent">%<br />TR/P</th>
@@ -226,11 +226,11 @@
               <th class="col-num">ANT.</th>
               <th class="col-num">MOIS</th>
               <th class="col-num">TOTAL</th>
-              <th class="col-num">RESTE A<br />EMETTRE</th>
+              <th class="col-num">RESTE À<br />ÉMETTRE</th>
               <th class="col-num">ANT.</th>
               <th class="col-num">MOIS</th>
               <th class="col-num">TOTAL</th>
-              <th class="col-num">RESTE A<br />RECOUVRER</th>
+              <th class="col-num">RESTE À<br />RECOUVRER</th>
             </tr>
           </thead>
           <tbody id="tableBody">
@@ -273,8 +273,8 @@
       // Libellés des sections (recettes investissement - 02, 04, 06, etc.)
       function getSectionLibelle(code) {
         const libelles = {
-          '02': "PRELEVEMENT SUR FONDS D'INVESTISSEMENT",
-          '04': "AIDE DE L'ETAT - FONDS DE CONCOURS - AIDES EXTERIEURES",
+          '02': "PRÉLÈVEMENT SUR FONDS D'INVESTISSEMENT",
+          '04': "AIDE DE L'ÉTAT - FONDS DE CONCOURS - AIDES EXTÉRIEURES",
           '06': 'RECETTES DIVERSES AU TITRE II',
           '08': 'EMPRUNTS',
         };
@@ -284,10 +284,10 @@
       // Libellés des chapitres investissement
       function getChapitreLibelle(code) {
         const libelles = {
-          '020': "PRELEVEMENT SUR FONDS D'INVESTISSEMENT",
-          '040': "AIDE ET CONCOURS DE L'ETAT",
+          '020': "PRÉLÈVEMENT SUR FONDS D'INVESTISSEMENT",
+          '040': "AIDE ET CONCOURS DE L'ÉTAT",
           '041': 'FONDS DE CONCOURS',
-          '042': 'AIDES EXTERIEURES',
+          '042': 'AIDES EXTÉRIEURES',
           '060': 'RECETTES DIVERSES TITRE II',
           '066': 'AUTRES RECETTES DIVERSES AU TITRE II',
         };
@@ -505,7 +505,7 @@
         const totalResteARecouvrer = data.totaux.prevision - data.totaux.total;
         totalRow.innerHTML = `
           <td>TOTAL</td>
-          <td>TOTAL GENERAL DES RECETTES TITRE II</td>
+          <td>TOTAL GÉNÉRAL DES RECETTES TITRE II</td>
           <td class="col-num">${formatNumber(data.totaux.prevision)}</td>
           <td class="col-num">${formatNumber(data.totaux.emissionAnt || data.totaux.antecedent)}</td>
           <td class="col-num">${formatNumber(data.totaux.emissionMois || data.totaux.recetteMois)}</td>
@@ -545,7 +545,7 @@
           if (data.mairie) {
             setText(
               'departement',
-              'DEPARTEMENT DE ' + (data.mairie.departement || '').toUpperCase(),
+              'DÉPARTEMENT DE ' + (data.mairie.departement || '').toUpperCase(),
             );
             setText('commune', 'COMMUNE DE ' + (data.mairie.nom || '').toUpperCase());
             setText('codeCommune', data.mairie.code || '---');
@@ -568,7 +568,7 @@
           );
 
           // Mettre à jour le titre de la page
-          document.title = `Etat Mensuel des Recettes Investissement - ${data.moisNom} ${data.annee}`;
+          document.title = `État Mensuel des Recettes Investissement - ${data.moisNom} ${data.annee}`;
         }
       }
 

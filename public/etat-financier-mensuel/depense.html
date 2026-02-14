@@ -3,13 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Etat Mensuel d'Exécution des Dépenses</title>
+    <title>État Mensuel d'Exécution des Dépenses</title>
     <!-- Charger Dexie pour accéder à IndexedDB -->
     <script src="../dexie.min.js"></script>
     <style>
       @page {
         size: A4 landscape;
-        margin: 5mm;
+        margin: 10mm;
       }
       body {
         font-family: Arial, Helvetica, sans-serif;
@@ -188,6 +188,34 @@
         background-color: #1565c0;
       }
 
+      .options-bar {
+        position: fixed;
+        top: 20px;
+        right: 180px;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #fff;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 6px 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        font-size: 13px;
+      }
+      .options-bar label {
+        font-weight: bold;
+        white-space: nowrap;
+      }
+      .options-bar input {
+        width: 60px;
+        padding: 4px 6px;
+        border: 1px solid #aaa;
+        border-radius: 3px;
+        font-size: 13px;
+        text-align: center;
+      }
+
       @media print {
         body {
           padding: 0;
@@ -210,6 +238,15 @@
     </style>
   </head>
   <body>
+    <div class="options-bar no-print">
+      <label for="inputNumero">N° :</label>
+      <input
+        type="text"
+        id="inputNumero"
+        placeholder="Ex: 01"
+        oninput="document.getElementById('numeroMois').textContent = this.value"
+      />
+    </div>
     <button class="print-button no-print" onclick="window.print()">🖨️ Imprimer</button>
     <div class="container">
       <div id="content">
@@ -219,27 +256,26 @@
               <th colspan="13" class="doc-header-cell">
                 <div class="doc-header-grid">
                   <div class="doc-header-block doc-header-left">
-                    <span id="departement">DEPARTEMENT</span><br />
+                    <span id="departement">DÉPARTEMENT</span><br />
                     <span id="commune">COMMUNE</span><br />
                     CODE : <span id="codeCommune">---</span>
                   </div>
                   <div class="doc-header-block doc-header-center">
-                    <div class="main-title">ETAT MENSUEL D'EXECUTION DES DEPENSES</div>
+                    <div class="main-title">ÉTAT MENSUEL D'EXÉCUTION DES DÉPENSES</div>
                     ARTICLE 4 DE LA LOI 81-1129 DU 30/12/1981<br />
                     MOIS DE : <strong id="moisNom">---</strong>
                   </div>
                   <div class="doc-header-block doc-header-right">
-                    ANNEE : <strong id="annee">----</strong><br />
-                    N° &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <!-- <span id="numeroMois">--</span> -->
+                    ANNÉE : <strong id="annee">----</strong><br />
+                    N° <span id="numeroMois"></span>
                   </div>
                 </div>
               </th>
             </tr>
             <tr>
               <th rowspan="2" class="col-code">COMPTES</th>
-              <th rowspan="2" class="col-libelle">RUBRIQUES BUDGETAIRES</th>
-              <th rowspan="2" class="col-num">PREVISIONS</th>
+              <th rowspan="2" class="col-libelle">RUBRIQUES BUDGÉTAIRES</th>
+              <th rowspan="2" class="col-num">PRÉVISIONS</th>
               <th colspan="3">E N G A G E M E N T S</th>
               <th colspan="3">L I Q U I D A T I O N S</th>
               <th colspan="3">M A N D A T S</th>
@@ -424,9 +460,9 @@
             `;
             tbody.appendChild(chapRow);
 
-            // Trier les sous-chapitres
-            const sortedSousChapitres = Object.keys(chapitre.sousChapitres).sort(
-              (a, b) => parseInt(a) - parseInt(b),
+            // Trier les sous-chapitres (tri lexicographique pour respecter la hiérarchie : 6000, 6001, 60010, 60011, ..., 6002, 60020, ...)
+            const sortedSousChapitres = Object.keys(chapitre.sousChapitres).sort((a, b) =>
+              a.localeCompare(b, undefined, { numeric: false }),
             );
 
             for (const scCode of sortedSousChapitres) {
@@ -538,7 +574,7 @@
         const totalPercent = calculatePercent(data.totaux.total, data.totaux.prevision);
         totalRow.innerHTML = `
           <td>TOTAL</td>
-          <td>TOTAL GENERAL DES DEPENSES</td>
+          <td>TOTAL GÉNÉRAL DES DÉPENSES</td>
           <td class="col-num">${formatNumber(data.totaux.prevision)}</td>
           <td class="col-num">${formatNumber(data.totaux.antecedent)}</td>
           <td class="col-num">${formatNumber(data.totaux.depenseMois)}</td>
@@ -557,16 +593,16 @@
       // Libellés des sections
       function getSectionLibelle(code) {
         const libelles = {
-          60: 'DEPENSES DES SERVICES GENERAUX',
-          61: 'DEPENSES DE SECURITE ET PROTECTION CIVILE',
-          62: 'DEPENSES DES SERVICES SOCIAUX',
-          63: 'DEPENSES DES SERVICES ECONOMIQUES',
-          64: 'AUTRES DEPENSES',
-          65: 'DEPENSES DIVERSES',
+          60: 'DÉPENSES DES SERVICES GÉNÉRAUX',
+          61: 'DÉPENSES DE SÉCURITÉ ET PROTECTION CIVILE',
+          62: 'DÉPENSES DES SERVICES SOCIAUX',
+          63: 'DÉPENSES DES SERVICES ÉCONOMIQUES',
+          64: 'AUTRES DÉPENSES',
+          65: 'DÉPENSES DIVERSES',
           66: 'FRAIS FINANCIERS',
-          67: 'DEPENSES EXCEPTIONNELLES',
+          67: 'DÉPENSES EXCEPTIONNELLES',
           68: 'DOTATIONS AUX AMORTISSEMENTS',
-          69: 'IMPOTS SUR LES BENEFICES',
+          69: 'IMPÔTS SUR LES BÉNÉFICES',
         };
         return libelles[code] || `SECTION ${code}`;
       }
@@ -574,25 +610,25 @@
       // Libellés des chapitres
       function getChapitreLibelle(code) {
         const libelles = {
-          600: 'ADMINISTRATION GENERALE',
+          600: 'ADMINISTRATION GÉNÉRALE',
           601: 'SERVICES TECHNIQUES',
           602: 'SERVICES FINANCIERS',
-          603: 'ETAT CIVIL',
+          603: 'ÉTAT CIVIL',
           604: 'SERVICES SOCIAUX',
           605: 'URBANISME ET HABITAT',
           610: 'POLICE MUNICIPALE',
           611: 'PROTECTION CIVILE',
           620: 'ACTION SOCIALE',
-          621: 'SANTE',
-          622: 'EDUCATION',
+          621: 'SANTÉ',
+          622: 'ÉDUCATION',
           623: 'CULTURE ET JEUNESSE',
           624: 'SPORTS ET LOISIRS',
           630: 'AGRICULTURE',
           631: 'COMMERCE ET ARTISANAT',
-          640: 'DEPENSES DIVERSES',
-          645: 'DEPENSES ACCIDENTELLES',
+          640: 'DÉPENSES DIVERSES',
+          645: 'DÉPENSES ACCIDENTELLES',
           650: 'AUTRES CHARGES',
-          660: 'CHARGES FINANCIERES',
+          660: 'CHARGES FINANCIÈRES',
           670: 'CHARGES EXCEPTIONNELLES',
           680: 'AMORTISSEMENTS',
         };
@@ -624,7 +660,7 @@
           if (data.mairie) {
             setText(
               'departement',
-              'DEPARTEMENT DE ' + (data.mairie.departement || '').toUpperCase(),
+              'DÉPARTEMENT DE ' + (data.mairie.departement || '').toUpperCase(),
             );
             setText('commune', 'COMMUNE DE ' + (data.mairie.nom || '').toUpperCase());
             setText('codeCommune', data.mairie.code || '---');
@@ -647,7 +683,7 @@
           );
 
           // Mettre à jour le titre de la page
-          document.title = `Etat Mensuel d'Exécution des Dépenses - ${data.moisNom} ${data.annee}`;
+          document.title = `État Mensuel d'Exécution des Dépenses - ${data.moisNom} ${data.annee}`;
         }
       }
 

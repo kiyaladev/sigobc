@@ -310,10 +310,12 @@
               <div class="col-6">
                 <q-select
                   v-model="formData.statut"
-                  :options="['brouillon', 'emis', 'encaisse', 'rejete']"
+                  :options="statutOptions"
                   label="Statut *"
                   outlined
                   dense
+                  emit-value
+                  map-options
                 />
               </div>
             </div>
@@ -386,7 +388,7 @@ const formData = ref<Partial<MandatRecette>>({
   montant: 0,
   numeroFacture: '',
   modePaiement: 'virement',
-  statut: 'brouillon',
+  statut: 'paye',
   observations: '',
 });
 
@@ -468,11 +470,16 @@ watch(bordereauOptions, (newOptions) => {
   filteredBordereauOptions.value = newOptions;
 });
 
-const statutFilterOptions = [
+const statutOptions = [
+  { label: 'Mandaté', value: 'paye' },
+  { label: 'Annulé', value: 'annule' },
   { label: 'Brouillon', value: 'brouillon' },
-  { label: 'Émis', value: 'emis' },
-  { label: 'Encaissé', value: 'encaisse' },
-  { label: 'Rejeté', value: 'rejete' },
+];
+
+const statutFilterOptions = [
+  { label: 'Mandaté', value: 'paye' },
+  { label: 'Annulé', value: 'annule' },
+  { label: 'Brouillon', value: 'brouillon' },
 ];
 
 const filteredMandats = computed(() => {
@@ -584,9 +591,8 @@ function formatDate(dateValue: Date | undefined): string {
 function getStatutColor(statut: string): string {
   const colors: Record<string, string> = {
     brouillon: 'grey',
-    emis: 'warning',
-    encaisse: 'positive',
-    rejete: 'negative',
+    paye: 'positive',
+    annule: 'red',
   };
   return colors[statut] || 'grey';
 }
@@ -594,9 +600,8 @@ function getStatutColor(statut: string): string {
 function formatStatut(statut: string): string {
   const labels: Record<string, string> = {
     brouillon: 'Brouillon',
-    emis: 'Émis',
-    encaisse: 'Encaissé',
-    rejete: 'Rejeté',
+    paye: 'Mandaté',
+    annule: 'Annulé',
   };
   return labels[statut] || statut;
 }

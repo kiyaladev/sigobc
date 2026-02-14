@@ -222,7 +222,7 @@ export interface MandatRecette {
   numeroFacture?: string; // Numéro de facture
   dateFacture?: Date;
   modePaiement: 'virement' | 'cheque' | 'especes' | 'autre';
-  statut: 'brouillon' | 'emis' | 'encaisse' | 'annule';
+  statut: 'brouillon' | 'paye' | 'annule';
   observations?: string;
   personnelId: number;
   createdAt: Date;
