@@ -116,7 +116,7 @@
           icon="trending_up"
           icon-color="grey-7"
           border-color="#1A1A1A"
-          suffix="%"
+          format="percentage"
         />
       </div>
     </div>

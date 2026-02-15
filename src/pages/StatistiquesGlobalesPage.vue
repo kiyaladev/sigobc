@@ -132,7 +132,7 @@
           icon="check_circle"
           icon-color="grey-7"
           border-color="#00BCD4"
-          suffix="%"
+          format="percentage"
         />
       </div>
     </div>

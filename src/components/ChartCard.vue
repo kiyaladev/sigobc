@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
+import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
 import {
   Chart,
   type ChartConfiguration,
@@ -67,11 +67,25 @@ const props = withDefaults(defineProps<Props>(), {
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 let chartInstance: Chart | null = null;
 
+/**
+ * Clone les données du chart sans les fonctions (pour éviter que Chart.js ne mute les objets réactifs Vue)
+ */
+function cloneChartData(data: ChartConfiguration['data']): ChartConfiguration['data'] {
+  return JSON.parse(JSON.stringify(data));
+}
+
 const createChart = () => {
-  if (canvasRef.value) {
+  destroyChart();
+  if (canvasRef.value && props.chartConfig) {
     const ctx = canvasRef.value.getContext('2d');
-    if (ctx && props.chartConfig) {
-      chartInstance = new Chart(ctx, props.chartConfig);
+    if (ctx) {
+      // Clone les données pour éviter la mutation des objets réactifs par Chart.js
+      const config: ChartConfiguration = {
+        type: props.chartConfig.type,
+        data: cloneChartData(props.chartConfig.data),
+        options: props.chartConfig.options, // Les options contiennent des fonctions, on garde la référence
+      };
+      chartInstance = new Chart(ctx, config);
     }
   }
 };
@@ -83,36 +97,25 @@ const destroyChart = () => {
   }
 };
 
-const updateChart = () => {
-  if (chartInstance && props.chartConfig) {
-    // Mettre à jour les données du graphique
-    chartInstance.data = props.chartConfig.data;
-    chartInstance.update();
-  }
-};
-
 // Exposer les méthodes pour permettre la mise à jour depuis le parent
 defineExpose({
-  updateChart,
   destroyChart,
   getChartInstance: () => chartInstance,
 });
 
-// Surveiller les changements de configuration
+// Surveiller les changements de configuration - recréer le chart entier
 watch(
   () => props.chartConfig,
-  () => {
-    if (chartInstance) {
-      updateChart();
-    }
+  async () => {
+    await nextTick();
+    createChart();
   },
   { deep: true },
 );
 
 onMounted(() => {
-  setTimeout(() => {
-    createChart();
-  }, 100);
+  // Petit délai pour s'assurer que le canvas est rendu dans le DOM
+  setTimeout(createChart, 150);
 });
 
 onBeforeUnmount(() => {
