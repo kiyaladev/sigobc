@@ -30,6 +30,8 @@
               label="Période"
               outlined
               dense
+              emit-value
+              map-options
               @update:model-value="onPeriodChange"
             />
           </div>
