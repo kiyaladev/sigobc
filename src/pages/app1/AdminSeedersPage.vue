@@ -1,0 +1,407 @@
+<template>
+  <q-page class="q-pa-md">
+    <!-- Password Gate -->
+    <div v-if="!isUnlocked" class="flex flex-center" style="min-height: 60vh">
+      <q-card style="max-width: 420px; width: 100%" class="q-pa-lg">
+        <q-card-section class="text-center">
+          <q-icon name="lock" size="48px" color="warning" class="q-mb-md" />
+          <div class="text-h6 q-mb-sm">Accès protégé</div>
+          <div class="text-caption text-grey-7 q-mb-lg">
+            Veuillez entrer le mot de passe administrateur pour accéder à cette page.
+          </div>
+          <q-form @submit="checkPassword">
+            <q-input
+              v-model="adminPassword"
+              type="password"
+              label="Mot de passe administrateur"
+              outlined
+              dense
+              :error="passwordError"
+              error-message="Mot de passe incorrect"
+              @keyup.enter="checkPassword"
+              class="q-mb-md"
+            />
+            <q-btn
+              type="submit"
+              label="Déverrouiller"
+              color="primary"
+              unelevated
+              class="full-width"
+              icon="lock_open"
+            />
+          </q-form>
+        </q-card-section>
+      </q-card>
+    </div>
+
+    <!-- Actual content -->
+    <template v-if="isUnlocked">
+      <div class="text-h5 q-mb-md">⚙️ Gestion de la Base de Données</div>
+
+      <q-banner class="bg-warning text-white q-mb-md" rounded>
+        <template v-slot:avatar>
+          <q-icon name="warning" />
+        </template>
+        <strong>Attention :</strong> Les actions sur cette page peuvent supprimer définitivement les
+        données.
+      </q-banner>
+
+      <div class="row q-col-gutter-md">
+        <!-- Actions Principales -->
+        <div class="col-12 col-md-6">
+          <q-card>
+            <q-card-section>
+              <div class="text-h6">🚀 Actions Rapides</div>
+            </q-card-section>
+            <q-list separator>
+              <q-item>
+                <q-item-section>
+                  <q-item-label>Initialiser la base de données</q-item-label>
+                  <q-item-label caption
+                    >Vide la DB et la remplit avec les données par défaut (mairie, admin, taxes,
+                    etc.).</q-item-label
+                  >
+                </q-item-section>
+                <q-item-section side>
+                  <q-btn
+                    label="Initialiser"
+                    color="primary"
+                    icon="rocket_launch"
+                    @click="runSeedDefault"
+                    :loading="loading.default"
+                  />
+                </q-item-section>
+              </q-item>
+
+              <q-item>
+                <q-item-section>
+                  <q-item-label>Supprimer toutes les données</q-item-label>
+                  <q-item-label caption
+                    >Vide complètement la base de données. Action irréversible.</q-item-label
+                  >
+                </q-item-section>
+                <q-item-section side>
+                  <q-btn
+                    label="Supprimer"
+                    color="negative"
+                    icon="delete_forever"
+                    @click="runClear"
+                    :loading="loading.clear"
+                  />
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-card>
+        </div>
+
+        <!-- Seeder de Test -->
+        <div class="col-12 col-md-6" style="display: none">
+          <q-card>
+            <q-card-section>
+              <div class="text-h6">🧪 Générer des Données de Test</div>
+              <div class="text-caption">
+                Remplit la base avec un grand volume de données aléatoires pour les tests.
+              </div>
+            </q-card-section>
+
+            <q-card-section>
+              <q-expansion-item icon="settings" label="Personnaliser les quantités" class="q-mb-md">
+                <div class="q-gutter-md q-pt-md">
+                  <q-input
+                    v-model.number="testDataOptions.declarations"
+                    type="number"
+                    label="Déclarations"
+                    filled
+                    dense
+                  />
+                  <q-input
+                    v-model.number="testDataOptions.bordereaux"
+                    type="number"
+                    label="Bordereaux de Recette"
+                    filled
+                    dense
+                  />
+                  <q-input
+                    v-model.number="testDataOptions.mandats"
+                    type="number"
+                    label="Mandats"
+                    filled
+                    dense
+                  />
+                  <q-input
+                    v-model.number="testDataOptions.bordereauMandats"
+                    type="number"
+                    label="Bordereaux de Mandats"
+                    filled
+                    dense
+                  />
+                  <q-separator />
+                  <div class="text-subtitle2">App2 - Trésorerie</div>
+                  <q-input
+                    v-model.number="testDataOptions.approvisionnements"
+                    type="number"
+                    label="Approvisionnements"
+                    filled
+                    dense
+                  />
+                  <q-input
+                    v-model.number="testDataOptions.remises"
+                    type="number"
+                    label="Remises"
+                    filled
+                    dense
+                  />
+                  <q-input
+                    v-model.number="testDataOptions.versements"
+                    type="number"
+                    label="Versements"
+                    filled
+                    dense
+                  />
+                  <q-input
+                    v-model.number="testDataOptions.balancesEntree"
+                    type="number"
+                    label="Balances d'Entrée"
+                    filled
+                    dense
+                  />
+                  <q-input
+                    v-model.number="testDataOptions.quotites"
+                    type="number"
+                    label="Quotités"
+                    filled
+                    dense
+                  />
+                </div>
+              </q-expansion-item>
+            </q-card-section>
+
+            <q-card-actions align="right">
+              <q-btn
+                label="Générer Données de Test"
+                color="secondary"
+                icon="science"
+                @click="runSeedTest"
+                :loading="loading.test"
+              />
+            </q-card-actions>
+          </q-card>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="col-12">
+          <q-card>
+            <q-card-section>
+              <div class="text-h6">📊 Données Actuelles</div>
+            </q-card-section>
+            <q-card-section>
+              <div class="row q-col-gutter-md">
+                <div class="col-6 col-sm-4 col-md-2" v-for="stat in stats" :key="stat.label">
+                  <q-card flat bordered>
+                    <q-card-section class="text-center">
+                      <div class="text-h4 text-primary">{{ stat.count }}</div>
+                      <div class="text-caption text-grey-7">{{ stat.label }}</div>
+                    </q-card-section>
+                  </q-card>
+                </div>
+              </div>
+            </q-card-section>
+            <q-card-actions align="right">
+              <q-btn flat label="Actualiser" icon="refresh" color="primary" @click="loadStats" />
+            </q-card-actions>
+          </q-card>
+        </div>
+
+        <!-- Logs -->
+        <div class="col-12" v-if="logs.length > 0">
+          <q-card>
+            <q-card-section>
+              <div class="text-h6">📝 Logs d'exécution</div>
+            </q-card-section>
+            <q-card-section style="max-height: 300px; overflow-y: auto">
+              <div
+                v-for="(log, index) in logs"
+                :key="index"
+                class="text-caption q-mb-xs"
+                v-html="log"
+              ></div>
+            </q-card-section>
+            <q-card-actions align="right">
+              <q-btn flat label="Effacer" icon="clear" color="grey" @click="logs = []" />
+            </q-card-actions>
+          </q-card>
+        </div>
+      </div>
+    </template>
+  </q-page>
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted } from 'vue';
+import { useQuasar } from 'quasar';
+import { db } from 'src/database/db';
+import {
+  seedDefaultData,
+  seedTestData,
+  clearDatabase,
+  type SeedOptions,
+} from 'src/database/seeders';
+
+const $q = useQuasar();
+
+// Password protection
+const ADMIN_PAGE_PASSWORD = 'Sigobc@2026!';
+const isUnlocked = ref(false);
+const adminPassword = ref('');
+const passwordError = ref(false);
+
+function checkPassword() {
+  if (adminPassword.value === ADMIN_PAGE_PASSWORD) {
+    isUnlocked.value = true;
+    passwordError.value = false;
+    sessionStorage.setItem('seeders_unlocked', 'true');
+  } else {
+    passwordError.value = true;
+  }
+}
+
+// Check if already unlocked in this session
+if (sessionStorage.getItem('seeders_unlocked') === 'true') {
+  isUnlocked.value = true;
+}
+
+const loading = ref({
+  default: false,
+  test: false,
+  clear: false,
+});
+const logs = ref<string[]>([]);
+
+const testDataOptions = ref<SeedOptions>({
+  declarations: 100,
+  bordereaux: 12,
+  mandats: 50,
+  bordereauMandats: 6,
+  approvisionnements: 20,
+  remises: 50,
+  versements: 60,
+  balancesEntree: 2,
+  quotites: 10,
+  // Les autres options utiliseront les valeurs par défaut de seedTestData
+});
+
+const stats = ref([
+  { label: 'Utilisateurs', count: 0, table: 'utilisateurs' },
+  { label: 'Mairies', count: 0, table: 'mairies' },
+  { label: 'Taxes', count: 0, table: 'taxes' },
+  { label: 'Déclarations', count: 0, table: 'declarations' },
+  { label: 'Bordereaux Recette', count: 0, table: 'bordereauxRecette' },
+  { label: 'Chapitres', count: 0, table: 'chapitres' },
+  { label: 'Sous-chapitres', count: 0, table: 'sousChapitres' },
+  { label: 'Mandats', count: 0, table: 'mandats' },
+  { label: 'Bordereaux Mandats', count: 0, table: 'bordereauMandats' },
+  { label: 'Approvisionnements', count: 0, table: 'approvisionnements' },
+  { label: 'Remises', count: 0, table: 'remises' },
+  { label: 'Versements', count: 0, table: 'versements' },
+  { label: "Balances d'Entrée", count: 0, table: 'balancesEntree' },
+  { label: 'Quotités', count: 0, table: 'quotites' },
+]);
+
+function addLog(message: string) {
+  const timestamp = new Date().toLocaleTimeString();
+  const color =
+    message.includes('✅') || message.includes('✨')
+      ? 'green'
+      : message.includes('❌')
+        ? 'red'
+        : message.includes('🌱')
+          ? 'blue'
+          : message.includes('🗑️')
+            ? 'orange'
+            : 'white';
+  logs.value.push(`[${timestamp}] <span class="text-${color}">${message}</span>`);
+}
+
+async function loadStats() {
+  try {
+    const counts = await Promise.all(stats.value.map((stat) => db.table(stat.table).count()));
+    stats.value.forEach((stat, index) => {
+      stat.count = counts[index] ?? 0;
+    });
+  } catch (error) {
+    console.error('Erreur lors du chargement des statistiques:', error);
+    $q.notify({ type: 'negative', message: 'Impossible de charger les statistiques.' });
+  }
+}
+
+// Wrapper pour exécuter une fonction de seeder avec gestion de logs et d'état
+async function runSeederAction(
+  action: () => Promise<void>,
+  type: 'default' | 'test' | 'clear',
+  successMessage: string,
+) {
+  loading.value[type] = true;
+  logs.value = [];
+
+  const originalLog = console.log;
+  console.log = (...args) => {
+    addLog(args.join(' '));
+    originalLog(...args);
+  };
+
+  try {
+    await action();
+    $q.notify({ type: 'positive', message: successMessage, timeout: 3000 });
+    await loadStats();
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error(`Erreur lors de l'action '${type}':`, errorMessage);
+    $q.notify({ type: 'negative', message: `Erreur lors de l'action: ${errorMessage}` });
+  } finally {
+    console.log = originalLog;
+    loading.value[type] = false;
+  }
+}
+
+function runSeedDefault() {
+  $q.dialog({
+    title: 'Confirmation',
+    message:
+      'Voulez-vous vraiment initialiser la base de données ? Toutes les données actuelles seront supprimées.',
+    cancel: true,
+    persistent: true,
+  }).onOk(() => {
+    void runSeederAction(seedDefaultData, 'default', 'Base de données initialisée avec succès !');
+  });
+}
+
+function runSeedTest() {
+  $q.dialog({
+    title: 'Confirmation',
+    message:
+      "Voulez-vous vraiment générer les données de test ? Cela va d'abord initialiser la base de données.",
+    cancel: true,
+    persistent: true,
+  }).onOk(() => {
+    void runSeederAction(
+      () => seedTestData(testDataOptions.value),
+      'test',
+      'Données de test générées avec succès !',
+    );
+  });
+}
+
+function runClear() {
+  $q.dialog({
+    title: 'Confirmation',
+    message: 'Voulez-vous vraiment supprimer TOUTES les données ? Cette action est irréversible !',
+    cancel: true,
+    persistent: true,
+    color: 'negative',
+  }).onOk(() => {
+    void runSeederAction(clearDatabase, 'clear', 'Base de données entièrement vidée.');
+  });
+}
+
+onMounted(loadStats);
+</script>

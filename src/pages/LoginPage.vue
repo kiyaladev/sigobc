@@ -93,8 +93,6 @@
               </template>
             </q-btn>
           </div>
-
-
         </q-form>
       </q-card-section>
 
@@ -106,8 +104,6 @@
         </div>
       </q-card-section>
     </q-card>
-
-
   </q-page>
 </template>
 
@@ -302,8 +298,6 @@ function onForgotPassword() {
   font-weight: 600;
   letter-spacing: 0.5px;
 }
-
-
 
 // Footer
 .footer-info {

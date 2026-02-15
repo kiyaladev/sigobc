@@ -586,7 +586,7 @@ function onLogout() {
   .q-item-label {
     color: $primary;
   }
-}// Menu utilisateur
+} // Menu utilisateur
 .modern-menu {
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
