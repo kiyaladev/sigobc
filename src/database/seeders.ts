@@ -1622,9 +1622,28 @@ async function seedBordereauxRecettes(personnelIds: number[]) {
     });
   }
 
+  // Générer 6 bordereaux pour l'année courante (Janvier à Février)
+  for (let i = 9; i <= 14; i++) {
+    const mois = i <= 11 ? 0 : 1; // Janvier et Février
+    const jour = randomAmount(1, 28);
+    const dateEmission = new Date(CURRENT_YEAR, mois, jour);
+
+    bordereaux.push({
+      numero: i,
+      annee: CURRENT_YEAR,
+      mairieId: DEFAULT_MAIRIE_ID,
+      montantTotal: 0,
+      nombreDeclarations: 0,
+      statut: randomChoice(['ouvert', 'ferme']),
+      personnelId: randomChoice(personnelIds),
+      createdAt: dateEmission,
+      updatedAt: now,
+    });
+  }
+
   await db.bordereauxRecette.bulkAdd(bordereaux as BordereauRecette[]);
   console.log(
-    `✅ ${bordereaux.length} bordereaux de recettes créés (validés, Nov-Déc ${CURRENT_YEAR - 1})`,
+    `✅ ${bordereaux.length} bordereaux de recettes créés (${CURRENT_YEAR - 1} + ${CURRENT_YEAR})`,
   );
 
   return await db.bordereauxRecette.toArray();
@@ -1717,20 +1736,22 @@ async function seedDeclarations(personnelIds: number[], bordereaux: BordereauRec
   let numeroPiece = 1000;
   const bordereauMontants: Map<number, { total: number; count: number }> = new Map();
 
-  // Pour chaque taxe, créer 2 ou 3 déclarations validées
+  // Séparer bordereaux par année
+  const bordereauxPrevYear = bordereaux.filter((b) => b.annee === CURRENT_YEAR - 1);
+  const bordereauxCurrYear = bordereaux.filter((b) => b.annee === CURRENT_YEAR);
+
+  // Pour chaque taxe, créer 2 ou 3 déclarations validées pour l'année précédente
   for (const taxe of app6Taxes) {
     if (!taxe.id) continue;
 
     const nombreDecls = randomAmount(2, 3);
 
     for (let i = 0; i < nombreDecls; i++) {
-      // Assigner à un bordereau aléatoire
-      const bordereau = randomChoice(bordereaux);
+      const bordereau = bordereauxPrevYear.length > 0 ? randomChoice(bordereauxPrevYear) : randomChoice(bordereaux);
       if (!bordereau || !bordereau.id) continue;
 
       const montant = taxe.montant || randomAmount(5000, 500000);
 
-      // Alterner entre Novembre et Décembre de l'année précédente (pour avoir des données dans le passé)
       const mois = randomChoice([10, 11]);
       const jour = randomAmount(1, 28);
       const d = new Date(CURRENT_YEAR - 1, mois, jour);
@@ -1765,7 +1786,60 @@ async function seedDeclarations(personnelIds: number[], bordereaux: BordereauRec
         updatedAt: now,
       });
 
-      // Accumuler les montants par bordereau
+      const existing = bordereauMontants.get(bordereau.id) || { total: 0, count: 0 };
+      bordereauMontants.set(bordereau.id, {
+        total: existing.total + montant,
+        count: existing.count + 1,
+      });
+    }
+  }
+
+  // Pour chaque taxe, créer 1 ou 2 déclarations pour l'année courante (Janvier-Février)
+  for (const taxe of app6Taxes) {
+    if (!taxe.id) continue;
+
+    const nombreDecls = randomAmount(1, 2);
+
+    for (let i = 0; i < nombreDecls; i++) {
+      const bordereau = bordereauxCurrYear.length > 0 ? randomChoice(bordereauxCurrYear) : randomChoice(bordereaux);
+      if (!bordereau || !bordereau.id) continue;
+
+      const montant = taxe.montant || randomAmount(5000, 500000);
+
+      const mois = randomChoice([0, 1]); // Janvier, Février
+      const jour = randomAmount(1, 28);
+      const d = new Date(CURRENT_YEAR, mois, jour);
+
+      declarations.push({
+        exercice: CURRENT_YEAR,
+        numeroPiece: `P-${numeroPiece++}`,
+        dateDeclaration: d,
+        dateEncaissement: d,
+        bordereauId: bordereau.id,
+        taxeId: taxe.id,
+        mairieId: DEFAULT_MAIRIE_ID,
+        contribuable: randomChoice(contribuables),
+        nomPartieVersante: randomChoice([
+          'Le Gérant',
+          'Le Comptable',
+          'Le Directeur',
+          'Le Propriétaire',
+        ]),
+        adresse: randomChoice([
+          "Abidjan, Côte d'Ivoire",
+          'Bouaké, CI',
+          'Yamoussoukro, CI',
+          'Korhogo, CI',
+        ]),
+        montant: montant,
+        montantRecette: montant,
+        modePaiement: randomChoice(['especes', 'cheque', 'virement', 'autre']),
+        statut: randomChoice(['brouillon', 'validee', 'validee']),
+        personnelId: randomChoice(personnelIds),
+        createdAt: d,
+        updatedAt: now,
+      });
+
       const existing = bordereauMontants.get(bordereau.id) || { total: 0, count: 0 };
       bordereauMontants.set(bordereau.id, {
         total: existing.total + montant,
