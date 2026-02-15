@@ -33,7 +33,9 @@
       "Bash(a2ensite:*)",
       "Bash(apache2ctl configtest:*)",
       "Bash(systemctl reload:*)",
-      "Bash(certbot:*)"
+      "Bash(certbot:*)",
+      "Bash(bun run:*)",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": []
