@@ -34,7 +34,7 @@ const TRIAL_EXPIRED_KEY = 'tresor_app_trial_expired';
 
 export const useDemoStore = defineStore('demo', () => {
   // State
-  const isDemoMode = ref(true); // Toujours en mode démo
+  const isDemoMode = ref(false); // Mode démo désactivé (licence payée)
   const firstUseDate = ref<Date | null>(null);
   const isTrialExpired = ref(false);
   const demoWarningShown = ref(false);
@@ -90,8 +90,8 @@ export const useDemoStore = defineStore('demo', () => {
       console.log("⏰ Période d'essai expirée");
     }
 
-    isDemoMode.value = true;
-    console.log(`🎮 Mode démo initialisé - ${trialDaysRemaining.value} jours restants`);
+    isDemoMode.value = false;
+    console.log(`✅ Licence active - mode production`);
   }
 
   function checkTrialStatus(): { expired: boolean; daysRemaining: number } {

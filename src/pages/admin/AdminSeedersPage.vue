@@ -1,5 +1,41 @@
 <template>
   <q-page class="q-pa-md">
+    <!-- Password Gate -->
+    <div v-if="!isUnlocked" class="flex flex-center" style="min-height: 60vh">
+      <q-card style="max-width: 420px; width: 100%" class="q-pa-lg">
+        <q-card-section class="text-center">
+          <q-icon name="lock" size="48px" color="warning" class="q-mb-md" />
+          <div class="text-h6 q-mb-sm">Accès protégé</div>
+          <div class="text-caption text-grey-7 q-mb-lg">
+            Veuillez entrer le mot de passe administrateur pour accéder à cette page.
+          </div>
+          <q-form @submit="checkPassword">
+            <q-input
+              v-model="adminPassword"
+              type="password"
+              label="Mot de passe administrateur"
+              outlined
+              dense
+              :error="passwordError"
+              error-message="Mot de passe incorrect"
+              @keyup.enter="checkPassword"
+              class="q-mb-md"
+            />
+            <q-btn
+              type="submit"
+              label="Déverrouiller"
+              color="primary"
+              unelevated
+              class="full-width"
+              icon="lock_open"
+            />
+          </q-form>
+        </q-card-section>
+      </q-card>
+    </div>
+
+    <!-- Actual content -->
+    <template v-if="isUnlocked">
     <PageHeader
       title="Gestion de la Base de Données"
       subtitle="Initialisation et génération de données de test"
@@ -155,6 +191,7 @@
         </q-card>
       </div>
     </div>
+    </template>
   </q-page>
 </template>
 
@@ -171,6 +208,27 @@ import {
 } from 'src/database/seeders';
 
 const $q = useQuasar();
+
+// Password protection
+const ADMIN_PAGE_PASSWORD = 'Sigobc@2026!';
+const isUnlocked = ref(false);
+const adminPassword = ref('');
+const passwordError = ref(false);
+
+function checkPassword() {
+  if (adminPassword.value === ADMIN_PAGE_PASSWORD) {
+    isUnlocked.value = true;
+    passwordError.value = false;
+    sessionStorage.setItem('seeders_unlocked', 'true');
+  } else {
+    passwordError.value = true;
+  }
+}
+
+// Check if already unlocked in this session
+if (sessionStorage.getItem('seeders_unlocked') === 'true') {
+  isUnlocked.value = true;
+}
 
 const loading = ref({
   default: false,

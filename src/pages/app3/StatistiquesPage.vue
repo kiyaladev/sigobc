@@ -30,6 +30,8 @@
               label="Période"
               outlined
               dense
+              emit-value
+              map-options
               @update:model-value="onPeriodChange"
             />
           </div>
@@ -227,15 +229,15 @@
             <q-list separator>
               <q-item>
                 <q-item-section avatar>
-                  <q-avatar color="primary" text-color="white" icon="edit_note" />
+                  <q-avatar color="primary" text-color="white" icon="summarize" />
                 </q-item-section>
                 <q-item-section>
-                  <q-item-label class="text-weight-bold">Brouillons</q-item-label>
-                  <q-item-label caption>Mandats en préparation</q-item-label>
+                  <q-item-label class="text-weight-bold">Total</q-item-label>
+                  <q-item-label caption>Ensemble des mandats</q-item-label>
                 </q-item-section>
                 <q-item-section side>
-                  <q-item-label class="text-h6 text-grey-8">
-                    {{ stats.mandatsBrouillon }}
+                  <q-item-label class="text-h6" style="color: #e67e22">
+                    {{ stats.nombreMandats }}
                   </q-item-label>
                   <q-item-label caption>mandats</q-item-label>
                 </q-item-section>
@@ -247,7 +249,7 @@
                 </q-item-section>
                 <q-item-section>
                   <q-item-label class="text-weight-bold">Brouillon</q-item-label>
-                  <q-item-label caption>Mandats en brouillon</q-item-label>
+                  <q-item-label caption>Mandats en préparation</q-item-label>
                 </q-item-section>
                 <q-item-section side>
                   <q-item-label class="text-h6" style="color: #9e9e9e">
@@ -348,7 +350,7 @@ const $q = useQuasar();
 // État
 const loading = ref(false);
 const currentYear = new Date().getFullYear();
-const selectedExercice = ref(currentYear - 1); // Année précédente par défaut pour voir les données de test
+const selectedExercice = ref(currentYear); // Année en cours par défaut
 const periodFilter = ref('annee');
 const dateDebut = ref('');
 const dateFin = ref('');

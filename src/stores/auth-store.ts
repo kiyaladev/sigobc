@@ -33,7 +33,7 @@ export const useAuthStore = defineStore('auth', () => {
         console.log('🔧 Création du compte admin par défaut...');
         await db.utilisateurs.add({
           username: 'admin',
-          password: 'admin123',
+          password: 'Sigobc@2026!',
           nom: 'Administrateur',
           prenom: 'Système',
           email: 'admin@sigobc.gov',
@@ -43,15 +43,14 @@ export const useAuthStore = defineStore('auth', () => {
           updatedAt: new Date(),
         });
         console.log('✅ Compte admin créé avec succès');
-      } else if (!adminUser.actif || adminUser.password !== 'admin123') {
-        // S'assurer que le compte admin est actif et a le bon mot de passe par défaut
-        console.log('🔧 Réinitialisation du compte admin...');
+      } else if (!adminUser.actif) {
+        // S'assurer que le compte admin est actif
+        console.log('🔧 Réactivation du compte admin...');
         await db.utilisateurs.update(adminUser.id, {
-          password: 'admin123',
           actif: true,
           updatedAt: new Date(),
         });
-        console.log('✅ Compte admin réinitialisé avec succès');
+        console.log('✅ Compte admin réactivé avec succès');
       }
 
       // Créer le compte démo s'il n'existe pas

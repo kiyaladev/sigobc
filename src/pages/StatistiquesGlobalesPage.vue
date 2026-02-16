@@ -132,7 +132,7 @@
           icon="check_circle"
           icon-color="grey-7"
           border-color="#00BCD4"
-          suffix="%"
+          format="percentage"
         />
       </div>
     </div>
@@ -323,7 +323,7 @@ const $q = useQuasar();
 // État
 const loading = ref(false);
 const currentYear = new Date().getFullYear();
-const selectedExercice = ref(currentYear - 1); // Année précédente par défaut pour voir les données de test
+const selectedExercice = ref(currentYear); // Année en cours par défaut
 
 // Données brutes
 const previsions = ref<Prevision[]>([]);

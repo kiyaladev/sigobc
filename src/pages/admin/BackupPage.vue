@@ -1,233 +1,271 @@
 <template>
   <q-page class="q-pa-md">
-    <PageHeader
-      title="Sauvegarde & Restauration"
-      subtitle="Exportation et importation des données"
-      icon="backup"
-    />
-
-    <div class="row q-col-gutter-md">
-      <!-- Sauvegarde -->
-      <div class="col-12 col-md-6">
-        <q-card>
-          <q-card-section class="accent-left">
-            <div class="row items-center">
-              <q-icon name="save" size="md" class="q-mr-md" />
-              <div>
-                <div class="text-h6">Sauvegarder la base de données</div>
-                <div class="text-caption">Créer une copie de toutes vos données</div>
-              </div>
-            </div>
-          </q-card-section>
-
-          <q-card-section class="accent-left">
-            <div class="text-body2 q-mb-md">
-              La sauvegarde exportera toutes les données de l'application dans un fichier JSON que
-              vous pourrez télécharger.
-            </div>
-
-            <q-list bordered separator class="q-mb-md">
-              <q-item>
-                <q-item-section avatar>
-                  <q-icon name="check_circle" color="positive" />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label>Utilisateurs</q-item-label>
-                  <q-item-label caption>{{ stats.utilisateurs }} enregistrement(s)</q-item-label>
-                </q-item-section>
-              </q-item>
-
-              <q-item>
-                <q-item-section avatar>
-                  <q-icon name="check_circle" color="positive" />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label>Chapitres (Dépenses)</q-item-label>
-                  <q-item-label caption>{{ stats.chapitres }} enregistrement(s)</q-item-label>
-                </q-item-section>
-              </q-item>
-
-              <q-item>
-                <q-item-section avatar>
-                  <q-icon name="check_circle" color="positive" />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label>Sous-Chapitres (Dépenses)</q-item-label>
-                  <q-item-label caption>{{ stats.sousChapitres }} enregistrement(s)</q-item-label>
-                </q-item-section>
-              </q-item>
-
-              <q-item>
-                <q-item-section avatar>
-                  <q-icon name="check_circle" color="positive" />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label>Prévisions (Dépenses)</q-item-label>
-                  <q-item-label caption>{{ stats.previsions }} enregistrement(s)</q-item-label>
-                </q-item-section>
-              </q-item>
-
-              <q-item>
-                <q-item-section avatar>
-                  <q-icon name="check_circle" color="positive" />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label>Mandats (Dépenses)</q-item-label>
-                  <q-item-label caption>{{ stats.mandats }} enregistrement(s)</q-item-label>
-                </q-item-section>
-              </q-item>
-
-              <q-item>
-                <q-item-section avatar>
-                  <q-icon name="check_circle" color="positive" />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label>Bordereaux Mandats (Dépenses)</q-item-label>
-                  <q-item-label caption
-                    >{{ stats.bordereauMandats }} enregistrement(s)</q-item-label
-                  >
-                </q-item-section>
-              </q-item>
-
-              <q-item>
-                <q-item-section avatar>
-                  <q-icon name="check_circle" color="green" />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label>Taxes (Recettes)</q-item-label>
-                  <q-item-label caption>{{ stats.taxes }} enregistrement(s)</q-item-label>
-                </q-item-section>
-              </q-item>
-
-              <q-item>
-                <q-item-section avatar>
-                  <q-icon name="check_circle" color="green" />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label>Déclarations (Recettes)</q-item-label>
-                  <q-item-label caption>{{ stats.declarations }} enregistrement(s)</q-item-label>
-                </q-item-section>
-              </q-item>
-
-              <q-item>
-                <q-item-section avatar>
-                  <q-icon name="check_circle" color="green" />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label>Bordereaux Recette (Recettes)</q-item-label>
-                  <q-item-label caption
-                    >{{ stats.bordereauxRecette }} enregistrement(s)</q-item-label
-                  >
-                </q-item-section>
-              </q-item>
-            </q-list>
-          </q-card-section>
-
-          <q-card-actions align="right">
-            <q-btn
-              label="Télécharger la sauvegarde"
-              color="positive"
-              icon="download"
-              @click="exportDatabase"
-              :loading="exportLoading"
-              unelevated
+    <!-- Password Gate -->
+    <div v-if="!isUnlocked" class="flex flex-center" style="min-height: 60vh">
+      <q-card style="max-width: 420px; width: 100%" class="q-pa-lg">
+        <q-card-section class="text-center">
+          <q-icon name="lock" size="48px" color="warning" class="q-mb-md" />
+          <div class="text-h6 q-mb-sm">Accès protégé</div>
+          <div class="text-caption text-grey-7 q-mb-lg">
+            Veuillez entrer le mot de passe administrateur pour accéder à cette page.
+          </div>
+          <q-form @submit="checkPassword">
+            <q-input
+              v-model="adminPassword"
+              type="password"
+              label="Mot de passe administrateur"
+              outlined
+              dense
+              :error="passwordError"
+              error-message="Mot de passe incorrect"
+              @keyup.enter="checkPassword"
+              class="q-mb-md"
             />
-          </q-card-actions>
-        </q-card>
-      </div>
-
-      <!-- Restauration -->
-      <div class="col-12 col-md-6">
-        <q-card>
-          <q-card-section class="accent-left">
-            <div class="row items-center">
-              <q-icon name="upload" size="md" class="q-mr-md" />
-              <div>
-                <div class="text-h6">Restaurer la base de données</div>
-                <div class="text-caption">Importer une sauvegarde précédente</div>
-              </div>
-            </div>
-          </q-card-section>
-
-          <q-card-section>
-            <q-banner class="bg-warning text-white q-mb-md" rounded>
-              <template v-slot:avatar>
-                <q-icon name="warning" />
-              </template>
-              <strong>Attention :</strong> La restauration remplacera toutes vos données actuelles !
-            </q-banner>
-
-            <div class="text-body2 q-mb-md">
-              Importez un fichier de sauvegarde pour restaurer vos données. Assurez-vous que le
-              fichier provient d'une sauvegarde valide de cette application.
-            </div>
-
-            <div class="text-subtitle2 q-mb-sm">Instructions :</div>
-            <ol class="q-pl-md text-body2">
-              <li class="q-mb-xs">Cliquez sur "Choisir un fichier"</li>
-              <li class="q-mb-xs">Sélectionnez votre fichier de sauvegarde (.json)</li>
-              <li class="q-mb-xs">Confirmez la restauration</li>
-              <li>Attendez que l'importation se termine</li>
-            </ol>
-          </q-card-section>
-
-          <q-card-actions align="right">
             <q-btn
-              label="Choisir un fichier"
-              color="info"
-              icon="folder_open"
-              @click="importDatabase"
-              :loading="importLoading"
+              type="submit"
+              label="Déverrouiller"
+              color="primary"
               unelevated
+              class="full-width"
+              icon="lock_open"
             />
-          </q-card-actions>
-        </q-card>
-      </div>
-
-      <!-- Historique des sauvegardes -->
-      <div class="col-12">
-        <q-card>
-          <q-card-section>
-            <div class="text-h6">📋 Dernières opérations</div>
-          </q-card-section>
-
-          <q-card-section v-if="history.length === 0">
-            <div class="text-center text-grey-7 q-pa-md">
-              <q-icon name="info" size="lg" class="q-mb-sm" />
-              <div>Aucune opération enregistrée</div>
-            </div>
-          </q-card-section>
-
-          <q-card-section v-else>
-            <q-list separator>
-              <q-item v-for="(item, index) in history" :key="index">
-                <q-item-section avatar>
-                  <q-icon
-                    :name="item.type === 'export' ? 'download' : 'upload'"
-                    :color="item.type === 'export' ? 'positive' : 'info'"
-                  />
-                </q-item-section>
-
-                <q-item-section>
-                  <q-item-label>{{ item.action }}</q-item-label>
-                  <q-item-label caption>{{ item.date }}</q-item-label>
-                </q-item-section>
-
-                <q-item-section side>
-                  <q-chip
-                    :color="item.success ? 'positive' : 'negative'"
-                    text-color="white"
-                    size="sm"
-                  >
-                    {{ item.success ? 'Succès' : 'Échec' }}
-                  </q-chip>
-                </q-item-section>
-              </q-item>
-            </q-list>
-          </q-card-section>
-        </q-card>
-      </div>
+          </q-form>
+        </q-card-section>
+      </q-card>
     </div>
+
+    <!-- Actual content -->
+    <template v-if="isUnlocked">
+      <PageHeader
+        title="Sauvegarde & Restauration"
+        subtitle="Exportation et importation des données"
+        icon="backup"
+      />
+
+      <div class="row q-col-gutter-md">
+        <!-- Sauvegarde -->
+        <div class="col-12 col-md-6">
+          <q-card>
+            <q-card-section class="accent-left">
+              <div class="row items-center">
+                <q-icon name="save" size="md" class="q-mr-md" />
+                <div>
+                  <div class="text-h6">Sauvegarder la base de données</div>
+                  <div class="text-caption">Créer une copie de toutes vos données</div>
+                </div>
+              </div>
+            </q-card-section>
+
+            <q-card-section class="accent-left">
+              <div class="text-body2 q-mb-md">
+                La sauvegarde exportera toutes les données de l'application dans un fichier JSON que
+                vous pourrez télécharger.
+              </div>
+
+              <q-list bordered separator class="q-mb-md">
+                <q-item>
+                  <q-item-section avatar>
+                    <q-icon name="check_circle" color="positive" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label>Utilisateurs</q-item-label>
+                    <q-item-label caption>{{ stats.utilisateurs }} enregistrement(s)</q-item-label>
+                  </q-item-section>
+                </q-item>
+
+                <q-item>
+                  <q-item-section avatar>
+                    <q-icon name="check_circle" color="positive" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label>Chapitres (Dépenses)</q-item-label>
+                    <q-item-label caption>{{ stats.chapitres }} enregistrement(s)</q-item-label>
+                  </q-item-section>
+                </q-item>
+
+                <q-item>
+                  <q-item-section avatar>
+                    <q-icon name="check_circle" color="positive" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label>Sous-Chapitres (Dépenses)</q-item-label>
+                    <q-item-label caption>{{ stats.sousChapitres }} enregistrement(s)</q-item-label>
+                  </q-item-section>
+                </q-item>
+
+                <q-item>
+                  <q-item-section avatar>
+                    <q-icon name="check_circle" color="positive" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label>Prévisions (Dépenses)</q-item-label>
+                    <q-item-label caption>{{ stats.previsions }} enregistrement(s)</q-item-label>
+                  </q-item-section>
+                </q-item>
+
+                <q-item>
+                  <q-item-section avatar>
+                    <q-icon name="check_circle" color="positive" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label>Mandats (Dépenses)</q-item-label>
+                    <q-item-label caption>{{ stats.mandats }} enregistrement(s)</q-item-label>
+                  </q-item-section>
+                </q-item>
+
+                <q-item>
+                  <q-item-section avatar>
+                    <q-icon name="check_circle" color="positive" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label>Bordereaux Mandats (Dépenses)</q-item-label>
+                    <q-item-label caption
+                      >{{ stats.bordereauMandats }} enregistrement(s)</q-item-label
+                    >
+                  </q-item-section>
+                </q-item>
+
+                <q-item>
+                  <q-item-section avatar>
+                    <q-icon name="check_circle" color="green" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label>Taxes (Recettes)</q-item-label>
+                    <q-item-label caption>{{ stats.taxes }} enregistrement(s)</q-item-label>
+                  </q-item-section>
+                </q-item>
+
+                <q-item>
+                  <q-item-section avatar>
+                    <q-icon name="check_circle" color="green" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label>Déclarations (Recettes)</q-item-label>
+                    <q-item-label caption>{{ stats.declarations }} enregistrement(s)</q-item-label>
+                  </q-item-section>
+                </q-item>
+
+                <q-item>
+                  <q-item-section avatar>
+                    <q-icon name="check_circle" color="green" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label>Bordereaux Recette (Recettes)</q-item-label>
+                    <q-item-label caption
+                      >{{ stats.bordereauxRecette }} enregistrement(s)</q-item-label
+                    >
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-card-section>
+
+            <q-card-actions align="right">
+              <q-btn
+                label="Télécharger la sauvegarde"
+                color="positive"
+                icon="download"
+                @click="exportDatabase"
+                :loading="exportLoading"
+                unelevated
+              />
+            </q-card-actions>
+          </q-card>
+        </div>
+
+        <!-- Restauration -->
+        <div class="col-12 col-md-6">
+          <q-card>
+            <q-card-section class="accent-left">
+              <div class="row items-center">
+                <q-icon name="upload" size="md" class="q-mr-md" />
+                <div>
+                  <div class="text-h6">Restaurer la base de données</div>
+                  <div class="text-caption">Importer une sauvegarde précédente</div>
+                </div>
+              </div>
+            </q-card-section>
+
+            <q-card-section>
+              <q-banner class="bg-warning text-white q-mb-md" rounded>
+                <template v-slot:avatar>
+                  <q-icon name="warning" />
+                </template>
+                <strong>Attention :</strong> La restauration remplacera toutes vos données actuelles
+                !
+              </q-banner>
+
+              <div class="text-body2 q-mb-md">
+                Importez un fichier de sauvegarde pour restaurer vos données. Assurez-vous que le
+                fichier provient d'une sauvegarde valide de cette application.
+              </div>
+
+              <div class="text-subtitle2 q-mb-sm">Instructions :</div>
+              <ol class="q-pl-md text-body2">
+                <li class="q-mb-xs">Cliquez sur "Choisir un fichier"</li>
+                <li class="q-mb-xs">Sélectionnez votre fichier de sauvegarde (.json)</li>
+                <li class="q-mb-xs">Confirmez la restauration</li>
+                <li>Attendez que l'importation se termine</li>
+              </ol>
+            </q-card-section>
+
+            <q-card-actions align="right">
+              <q-btn
+                label="Choisir un fichier"
+                color="info"
+                icon="folder_open"
+                @click="importDatabase"
+                :loading="importLoading"
+                unelevated
+              />
+            </q-card-actions>
+          </q-card>
+        </div>
+
+        <!-- Historique des sauvegardes -->
+        <div class="col-12">
+          <q-card>
+            <q-card-section>
+              <div class="text-h6">📋 Dernières opérations</div>
+            </q-card-section>
+
+            <q-card-section v-if="history.length === 0">
+              <div class="text-center text-grey-7 q-pa-md">
+                <q-icon name="info" size="lg" class="q-mb-sm" />
+                <div>Aucune opération enregistrée</div>
+              </div>
+            </q-card-section>
+
+            <q-card-section v-else>
+              <q-list separator>
+                <q-item v-for="(item, index) in history" :key="index">
+                  <q-item-section avatar>
+                    <q-icon
+                      :name="item.type === 'export' ? 'download' : 'upload'"
+                      :color="item.type === 'export' ? 'positive' : 'info'"
+                    />
+                  </q-item-section>
+
+                  <q-item-section>
+                    <q-item-label>{{ item.action }}</q-item-label>
+                    <q-item-label caption>{{ item.date }}</q-item-label>
+                  </q-item-section>
+
+                  <q-item-section side>
+                    <q-chip
+                      :color="item.success ? 'positive' : 'negative'"
+                      text-color="white"
+                      size="sm"
+                    >
+                      {{ item.success ? 'Succès' : 'Échec' }}
+                    </q-chip>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-card-section>
+          </q-card>
+        </div>
+      </div>
+    </template>
   </q-page>
 </template>
 
@@ -238,6 +276,27 @@ import { db } from 'src/database/db';
 import PageHeader from 'src/components/PageHeader.vue';
 
 const $q = useQuasar();
+
+// Password protection
+const ADMIN_PAGE_PASSWORD = 'Sigobc@2026!';
+const isUnlocked = ref(false);
+const adminPassword = ref('');
+const passwordError = ref(false);
+
+function checkPassword() {
+  if (adminPassword.value === ADMIN_PAGE_PASSWORD) {
+    isUnlocked.value = true;
+    passwordError.value = false;
+    sessionStorage.setItem('backup_unlocked', 'true');
+  } else {
+    passwordError.value = true;
+  }
+}
+
+// Check if already unlocked in this session
+if (sessionStorage.getItem('backup_unlocked') === 'true') {
+  isUnlocked.value = true;
+}
 
 const exportLoading = ref(false);
 const importLoading = ref(false);

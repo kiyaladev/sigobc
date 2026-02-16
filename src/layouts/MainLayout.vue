@@ -369,21 +369,6 @@
           <q-item
             clickable
             v-ripple
-            to="/mairies"
-            class="nav-item q-mb-xs"
-            active-class="nav-item-active"
-          >
-            <q-item-section avatar>
-              <q-icon name="location_city" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>Mairies</q-item-label>
-            </q-item-section>
-          </q-item>
-
-          <q-item
-            clickable
-            v-ripple
             to="/statistiques"
             class="nav-item q-mb-xs"
             active-class="nav-item-active"
@@ -601,7 +586,7 @@ function onLogout() {
   .q-item-label {
     color: $primary;
   }
-}// Menu utilisateur
+} // Menu utilisateur
 .modern-menu {
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);

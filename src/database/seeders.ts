@@ -172,7 +172,7 @@ export async function seedDefaultData() {
     },
     {
       code: '5',
-      libelle: 'MATERIEL ET FOURNIT.',
+      libelle: 'MATÉRIEL ET FOURNIT.',
       mairieId: mairieId as number,
       actif: true,
       createdAt: now,
@@ -180,7 +180,7 @@ export async function seedDefaultData() {
     },
     {
       code: '6',
-      libelle: 'ABONN. EAU, ELEC, TELEPH.',
+      libelle: 'ABONN. EAU, ÉLEC, TÉLÉPH.',
       mairieId: mairieId as number,
       actif: true,
       createdAt: now,
@@ -209,14 +209,14 @@ export async function seedDefaultData() {
 
   const sousChapitresData = [
     // SECTION 60 - DÉPENSES DES SERVICES GÉNÉRAUX
-    { code: '60', libelle: 'SECTION 60- DEPENSES DES SERVICES GENERAUX', parent: null },
-    { code: '600', libelle: 'CHAP. ADMINISTRATION GENERALE', parent: '60' },
+    { code: '60', libelle: 'SECTION 60- DÉPENSES DES SERVICES GÉNÉRAUX', parent: null },
+    { code: '600', libelle: 'CHAP. ADMINISTRATION GÉNÉRALE', parent: '60' },
     { code: '6000', libelle: 'ADMINISTRATION', parent: '600' },
-    { code: '6001', libelle: 'AUTORITES MUNICIPALES', parent: '600' },
+    { code: '6001', libelle: 'AUTORITÉS MUNICIPALES', parent: '600' },
     { code: '60010', libelle: 'FONCTIONNEMENT CONSEILS ET COMMISSIONS', parent: '6001' },
-    { code: '60011', libelle: 'FONCTIONNEMENT DE LA MUNICIPALITE', parent: '6001' },
+    { code: '60011', libelle: 'FONCTIONNEMENT DE LA MUNICIPALITÉ', parent: '6001' },
     { code: '60012', libelle: 'FONCTIONNEMENT CABINET DU MAIRE', parent: '6001' },
-    { code: '60013', libelle: 'INDEMNITE DE FONCTION ET DE REPRESENTATION', parent: '6001' },
+    { code: '60013', libelle: 'INDEMNITÉ DE FONCTION ET DE REPRÉSENTATION', parent: '6001' },
     {
       code: '60015',
       libelle: 'FRAIS DE MISSIONS EN DEHORS DU TERRITOIRE NATIONAL (COMMUNE)',
@@ -224,37 +224,37 @@ export async function seedDefaultData() {
     },
     {
       code: '60016',
-      libelle: 'AUTRES DEPENSES AU TITRE DES AUTORITES MUNICIPALES',
+      libelle: 'AUTRES DÉPENSES AU TITRE DES AUTORITÉS MUNICIPALES',
       parent: '6001',
     },
-    { code: '6002', libelle: 'ETAT CIVIL ET POPULATION', parent: '600' },
-    { code: '6006', libelle: "AUTRES DEPENSES D'ADMINISTRATION GENERALE", parent: '600' },
+    { code: '6002', libelle: 'ÉTAT CIVIL ET POPULATION', parent: '600' },
+    { code: '6006', libelle: "AUTRES DÉPENSES D'ADMINISTRATION GÉNÉRALE", parent: '600' },
 
-    { code: '601', libelle: 'CHAP. 601- ADMINISTRATION FINANCIERE ET DOM.', parent: '60' },
+    { code: '601', libelle: 'CHAP. 601- ADMINISTRATION FINANCIÈRE ET DOM.', parent: '60' },
     { code: '6010', libelle: 'ADMINISTRATION', parent: '601' },
-    { code: '6016', libelle: 'AUTRES DEPENSES RELATIVES AU DOMAINE COMMUNAL', parent: '601' },
+    { code: '6016', libelle: 'AUTRES DÉPENSES RELATIVES AU DOMAINE COMMUNAL', parent: '601' },
 
     { code: '602', libelle: 'CHAP. 602-RECETTE MUNICIPALE', parent: '60' },
     { code: '6020', libelle: 'ADMINISTRATION', parent: '602' },
     { code: '6021', libelle: 'FRAIS DE RECOUVREMENT ET POURSUITES', parent: '602' },
 
-    { code: '603', libelle: 'CHAP.603-POLICE ET ORDRE PUBLIC-FOURRIERE', parent: '60' },
+    { code: '603', libelle: 'CHAP.603-POLICE ET ORDRE PUBLIC-FOURRIÈRE', parent: '60' },
     { code: '6031', libelle: 'GARDES MUNICIPAUX', parent: '603' },
-    { code: '6033', libelle: 'PROGRAMMES SPECIAUX ET OPERATIONS DIVERSES', parent: '603' },
+    { code: '6033', libelle: 'PROGRAMMES SPÉCIAUX ET OPÉRATIONS DIVERSES', parent: '603' },
 
     // SECTION 61 - DÉPENSES DES SERVICES DE COLLECTIVITÉ
-    { code: '61', libelle: 'SECTION 61- DEPENSES DES SERVICES DE COLLECTIVITE', parent: null },
-    { code: '610', libelle: 'CHAP. 610-VOIRIES ET RESEAUX', parent: '61' },
+    { code: '61', libelle: 'SECTION 61- DÉPENSES DES SERVICES DE COLLECTIVITÉ', parent: null },
+    { code: '610', libelle: 'CHAP. 610-VOIRIES ET RÉSEAUX', parent: '61' },
     { code: '6100', libelle: 'ADMINISTRATION', parent: '610' },
     { code: '6101', libelle: 'VOIRIES - ROUTES - CHEMINS', parent: '610' },
 
     {
       code: '613',
-      libelle: "CHAP. 613-HYGIENE ET SALUBRITE PUBLIQUES - HYDRAULIQUE - ADDUCTION D'EAU",
+      libelle: "CHAP. 613-HYGIÈNE ET SALUBRITÉ PUBLIQUES - HYDRAULIQUE - ADDUCTION D'EAU",
       parent: '61',
     },
-    { code: '6133', libelle: 'NETTOIEMENT VOIRIE-ENLEVEMENT ORDURES', parent: '613' },
-    { code: '6136', libelle: "Autres depenses d'hygiène et de salubrité", parent: '613' },
+    { code: '6133', libelle: 'NETTOIEMENT VOIRIE-ENLÈVEMENT ORDURES', parent: '613' },
+    { code: '6136', libelle: "Autres dépenses d'hygiène et de salubrité", parent: '613' },
 
     {
       code: '614',
@@ -264,51 +264,51 @@ export async function seedDefaultData() {
     { code: '6141', libelle: 'PROTECTION CIVILE', parent: '614' },
     { code: '6142', libelle: 'LUTTE CONTRE INCENDIE', parent: '614' },
 
-    { code: '615', libelle: 'CHAP. 615- CIMETIERES - SERVICES FUNERAIRES', parent: '61' },
-    { code: '6151', libelle: 'CIMETIERE-INHUMATIONS-EXHUMATIONS', parent: '615' },
+    { code: '615', libelle: 'CHAP. 615- CIMETIÈRES - SERVICES FUNÉRAIRES', parent: '61' },
+    { code: '6151', libelle: 'CIMETIÈRE-INHUMATIONS-EXHUMATIONS', parent: '615' },
     { code: '6152', libelle: 'CREUSEMENT DE FOSSES', parent: '615' },
 
     // SECTION 62 - DÉPENSES DES SERVICES SOCIAUX CULTURELS ET DE PROMOTION HUMAINE
     {
       code: '62',
-      libelle: 'SECTION 62- DEPENSES DES SERVICES SOCIAUX CULTURELS ET DE PROMOTION HUMAINE',
+      libelle: 'SECTION 62- DÉPENSES DES SERVICES SOCIAUX CULTURELS ET DE PROMOTION HUMAINE',
       parent: null,
     },
-    { code: '620', libelle: 'CHAP. 620- EDUCATION', parent: '62' },
+    { code: '620', libelle: 'CHAP. 620- ÉDUCATION', parent: '62' },
     { code: '6201', libelle: "Crèche, jardin d'enfants et ecoles primaire", parent: '620' },
-    { code: '6206', libelle: "AUTRES DEPENSES D'EDUCATION", parent: '620' },
+    { code: '6206', libelle: "AUTRES DÉPENSES D'ÉDUCATION", parent: '620' },
 
-    { code: '621', libelle: 'CHAP. 621 : SANTE PUBLIQUE', parent: '62' },
+    { code: '621', libelle: 'CHAP. 621 : SANTÉ PUBLIQUE', parent: '62' },
     { code: '6214', libelle: 'Evacuation sanitaire - service ambulance', parent: '621' },
 
     { code: '622', libelle: 'CHAP. 622- ASSISTANCE SOCIALE', parent: '62' },
-    { code: '6223', libelle: 'HANDICAPES', parent: '622' },
+    { code: '6223', libelle: 'HANDICAPÉS', parent: '622' },
     { code: '6224', libelle: 'AIDE FAMILIALE, SOCIALE ET PERSONNES A.', parent: '622' },
     { code: '6225', libelle: 'AIDES AUX INDIGENTS', parent: '622' },
-    { code: '6226', libelle: "AUTRES DEPENSES D'ASSISTANCE SOCIALE", parent: '622' },
+    { code: '6226', libelle: "AUTRES DÉPENSES D'ASSISTANCE SOCIALE", parent: '622' },
 
     { code: '624', libelle: 'CHAP. 624- SPORTS ET LOISIRS', parent: '62' },
     { code: '6242', libelle: 'MANIFESTATIONS SPORTIVES', parent: '624' },
 
-    { code: '625', libelle: 'CHAP.625- ACTIVITES CULTURELLES', parent: '62' },
+    { code: '625', libelle: 'CHAP.625- ACTIVITÉS CULTURELLES', parent: '62' },
     { code: '6250', libelle: 'ADMINISTRATION', parent: '625' },
-    { code: '6256', libelle: 'AUTRES DEPENSES DES ACTIVITES CULTURELLES', parent: '625' },
+    { code: '6256', libelle: 'AUTRES DÉPENSES DES ACTIVITÉS CULTURELLES', parent: '625' },
 
     {
       code: '626',
-      libelle: 'CHAP.626- AUTRES DEPENSES DES SERVICE SOCIAUX .CULTURELS ET DE PROMOTION HUMAINE',
+      libelle: 'CHAP.626- AUTRES DÉPENSES DES SERVICE SOCIAUX .CULTURELS ET DE PROMOTION HUMAINE',
       parent: '62',
     },
 
     // SECTION 63 - DÉPENSES DES SERVICES ÉCONOMIQUES
-    { code: '63', libelle: 'SECTION 63- DEPENSES DES SERVICES ECONOMIQUES', parent: null },
-    { code: '630', libelle: 'CHAP. 630- AGRICULTURE ET ELEVAGE', parent: '63' },
+    { code: '63', libelle: 'SECTION 63- DÉPENSES DES SERVICES ÉCONOMIQUES', parent: null },
+    { code: '630', libelle: 'CHAP. 630- AGRICULTURE ET ÉLEVAGE', parent: '63' },
     { code: '633', libelle: 'CHAP.633-TRANSPORT-COMMUNICATIONS', parent: '63' },
     { code: '634', libelle: 'CHAP. 634- INDUSTRIE ET COMMERCE', parent: '63' },
     { code: '6341', libelle: 'ABATTOIRS-CONSERVATION ET TRANSPORTS DE VIANDE', parent: '634' },
 
     // SECTION 64 - DÉPENSES DIVERSES
-    { code: '64', libelle: 'SECTION 64 - DEPENSES DIVERSES', parent: null },
+    { code: '64', libelle: 'SECTION 64 - DÉPENSES DIVERSES', parent: null },
     { code: '640', libelle: 'CHAP. 640- DETTES', parent: '64' },
     { code: '6406', libelle: 'AUTRES DETTES DE LA COMMUNE', parent: '640' },
 
@@ -319,34 +319,34 @@ export async function seedDefaultData() {
     },
     {
       code: '6415',
-      libelle: 'CONFERENCES INTERNATIONALES, ASSOCIATION DES VILLES ET COMMUNES',
+      libelle: 'CONFÉRENCES INTERNATIONALES, ASSOCIATION DES VILLES ET COMMUNES',
       parent: '641',
     },
 
     { code: '642', libelle: 'CHAP. 642- ASSURANCE DE LA COMMUNE', parent: '64' },
-    { code: '6420', libelle: 'RESPONSABILITE CIVILE', parent: '642' },
-    { code: '6422', libelle: 'ASSURANCE DES VEHICULES', parent: '642' },
-    { code: '6426', libelle: 'AUTRES ASSURANCES (ELUS)', parent: '642' },
+    { code: '6420', libelle: 'RESPONSABILITÉ CIVILE', parent: '642' },
+    { code: '6422', libelle: 'ASSURANCE DES VÉHICULES', parent: '642' },
+    { code: '6426', libelle: 'AUTRES ASSURANCES (ÉLUS)', parent: '642' },
 
     {
       code: '643',
-      libelle: 'CHAP.643- CEREMONIES PUBLIQUES - FETES ET RECEPTIONS OFFICIELLES',
+      libelle: 'CHAP.643- CÉRÉMONIES PUBLIQUES - FÊTES ET RÉCEPTIONS OFFICIELLES',
       parent: '64',
     },
-    { code: '6430', libelle: 'CEREMONIES PUBLIQUES', parent: '643' },
-    { code: '6431', libelle: 'FETES ET RECEPTIONS OFFICIELLES', parent: '643' },
+    { code: '6430', libelle: 'CÉRÉMONIES PUBLIQUES', parent: '643' },
+    { code: '6431', libelle: 'FÊTES ET RÉCEPTIONS OFFICIELLES', parent: '643' },
 
-    { code: '644', libelle: 'CHAP.644-VERSEMENT AUX FONDS DE RESERVE', parent: '64' },
-    { code: '6440', libelle: 'FONDS DE RESERVES ORDINAIRE', parent: '644' },
+    { code: '644', libelle: 'CHAP.644-VERSEMENT AUX FONDS DE RÉSERVE', parent: '64' },
+    { code: '6440', libelle: 'FONDS DE RÉSERVES ORDINAIRE', parent: '644' },
     { code: '6441', libelle: "FONDS D'INVESTISSEMENT", parent: '644' },
 
-    { code: '645', libelle: 'CHAP.645- DEPENSES ACCIDENTELLES', parent: '64' },
-    { code: '6451', libelle: 'INDEMNITES -FRAIS ET DOMMAGE ET INTERETS', parent: '645' },
+    { code: '645', libelle: 'CHAP.645- DÉPENSES ACCIDENTELLES', parent: '64' },
+    { code: '6451', libelle: 'INDEMNITÉS -FRAIS ET DOMMAGE ET INTÉRÊTS', parent: '645' },
 
     // SECTION 90 - EQUIPEMENT DES SERVICES GENERAUX
-    { code: '90', libelle: 'SECTION 90 - EQUIPEMENT DES SERVICES GENERAUX', parent: null },
-    { code: '900', libelle: 'CHAP.900-ADMINISTRATION GENERALE', parent: '90' },
-    { code: '903', libelle: 'CHAP.903-POLICE ET ORDRE PUBLIC FOURRIERE', parent: '90' },
+    { code: '90', libelle: 'SECTION 90 - ÉQUIPEMENT DES SERVICES GÉNÉRAUX', parent: null },
+    { code: '900', libelle: 'CHAP.900-ADMINISTRATION GÉNÉRALE', parent: '90' },
+    { code: '903', libelle: 'CHAP.903-POLICE ET ORDRE PUBLIC FOURRIÈRE', parent: '90' },
     {
       code: '9030',
       libelle: 'Police et ordre publique - fourrière SOUS TOTAL CHAP. 903',
@@ -354,14 +354,14 @@ export async function seedDefaultData() {
     },
 
     // SECTION 91 - EQUIPEMENT DES SERVICES DE COLLECTIVITE
-    { code: '91', libelle: 'SECTION 91-EQUIPEMENT DES SCES DE COLLECTIVITE', parent: null },
-    { code: '910', libelle: 'CHAP.910-VOIRIES ET RESEAUX', parent: '91' },
+    { code: '91', libelle: 'SECTION 91-ÉQUIPEMENT DES SCES DE COLLECTIVITÉ', parent: null },
+    { code: '910', libelle: 'CHAP.910-VOIRIES ET RÉSEAUX', parent: '91' },
     { code: '9101', libelle: 'VOIRIES', parent: '910' },
     { code: '9102', libelle: "Réseaux d'assainissement & Drainage", parent: '910' },
-    { code: '9103', libelle: 'Electricité - éclairage public', parent: '910' },
+    { code: '9103', libelle: 'Électricité - éclairage public', parent: '910' },
     {
       code: '913',
-      libelle: "CHAP. 913- HYGIENE & SALUBRITE PUBLIQ. HYDRAULIQUE- ADDUCTION D'EAU Articles",
+      libelle: "CHAP. 913- HYGIÈNE & SALUBRITÉ PUBLIQ. HYDRAULIQUE- ADDUCTION D'EAU Articles",
       parent: '91',
     },
     { code: '9134', libelle: 'Hydraulique - pompages puits lavoirs', parent: '913' },
@@ -370,14 +370,14 @@ export async function seedDefaultData() {
     // SECTION 92 - EQUIPEMENT DES SERVICES SOCIAUX, CULTURELS ET DE LA PROMOTION HUMAINE
     {
       code: '92',
-      libelle: 'SECTION 92-EQUIPEMENT DES SERVICES SOCIAUX, CULTURELS ET DE LA PROMOTION HUMAINE',
+      libelle: 'SECTION 92-ÉQUIPEMENT DES SERVICES SOCIAUX, CULTURELS ET DE LA PROMOTION HUMAINE',
       parent: null,
     },
-    { code: '921', libelle: 'CHAP. 921- SANTE PUBLIQUE Articles', parent: '92' },
+    { code: '921', libelle: 'CHAP. 921- SANTÉ PUBLIQUE Articles', parent: '92' },
     { code: '9212', libelle: 'Hôpitaux & Dispensaires', parent: '921' },
 
     // SECTION 93 - EQUIPEMENT DES SERVICES ECONOMIQUES
-    { code: '93', libelle: 'SECTION 93- EQUIPEMENT DES SERVICES ECONOMIQUES', parent: null },
+    { code: '93', libelle: 'SECTION 93- ÉQUIPEMENT DES SERVICES ÉCONOMIQUES', parent: null },
     { code: '934', libelle: 'CHAP. 934- INDUSTRIES & COMMERCES Articles', parent: '93' },
     { code: '9341', libelle: 'Abattoir- Conservation de viande & Transp.', parent: '934' },
     { code: '9344', libelle: 'Marchés', parent: '934' },
@@ -565,7 +565,7 @@ export async function seedDefaultData() {
     },
     {
       code: '700',
-      libelle: 'CHAP.700 - IMPOTS ATTRIBUES AUX COMMUNES',
+      libelle: 'CHAP.700 - IMPÔTS ATTRIBUÉS AUX COMMUNES',
       type: 'variable',
       mairieId: mairieId as number,
       actif: true,
@@ -610,7 +610,7 @@ export async function seedDefaultData() {
     },
     {
       code: '702',
-      libelle: 'CHAP.702 - TAXES COMMUNALES PAR VOIE DE ROLE',
+      libelle: 'CHAP.702 - TAXES COMMUNALES PAR VOIE DE RÔLE',
       type: 'variable',
       mairieId: mairieId as number,
       actif: true,
@@ -1078,7 +1078,7 @@ export async function seedDefaultData() {
     // ========== SECTION 73 - AIDE DE L'ETAT - FONDS DE CONCOURS ==========
     {
       code: '73',
-      libelle: "SECTION 73 - AIDE DE L'ETAT - FONDS DE CONCOURS",
+      libelle: "SECTION 73 - AIDE DE L'ÉTAT - FONDS DE CONCOURS",
       type: 'variable',
       mairieId: mairieId as number,
       actif: true,
@@ -1134,7 +1134,7 @@ export async function seedDefaultData() {
     },
     {
       code: '742',
-      libelle: 'CHAP.742 - PRELEVEMENT SUR FONDS DE RESERVE',
+      libelle: 'CHAP.742 - PRÉLÈVEMENT SUR FONDS DE RÉSERVE',
       type: 'variable',
       mairieId: mairieId as number,
       actif: true,
@@ -1172,7 +1172,7 @@ export async function seedDefaultData() {
     // ========== SECTION 02 - PRELEVEMENT SUR FONDS D'INVESTISSEMENT ==========
     {
       code: '02',
-      libelle: "SECTION 02 - PRELEVEMENT SUR FONDS D'INVESTISSEMENT",
+      libelle: "SECTION 02 - PRÉLÈVEMENT SUR FONDS D'INVESTISSEMENT",
       type: 'variable',
       mairieId: mairieId as number,
       actif: true,
@@ -1183,7 +1183,7 @@ export async function seedDefaultData() {
     // ========== SECTION 04 - AIDE DE L'ETAT - FONDS DE CONCOURS - AIDES EXTERIEURES ==========
     {
       code: '04',
-      libelle: "SECTION 04 - AIDE DE L'ETAT - FONDS DE CONCOURS",
+      libelle: "SECTION 04 - AIDE DE L'ÉTAT - FONDS DE CONCOURS",
       type: 'variable',
       mairieId: mairieId as number,
       actif: true,
@@ -1192,7 +1192,7 @@ export async function seedDefaultData() {
     },
     {
       code: '040',
-      libelle: "CHAP.040 - AIDE ET CONCOURS DE L'ETAT",
+      libelle: "CHAP.040 - AIDE ET CONCOURS DE L'ÉTAT",
       type: 'variable',
       mairieId: mairieId as number,
       actif: true,
@@ -1201,7 +1201,7 @@ export async function seedDefaultData() {
     },
     {
       code: '0401',
-      libelle: "Subvention d'équipement de l'Etat",
+      libelle: "Subvention d'équipement de l'État",
       type: 'variable',
       mairieId: mairieId as number,
       actif: true,
@@ -1406,7 +1406,7 @@ async function seedChapitresRecette() {
     },
     {
       code: '4',
-      libelle: "AIDE DE L'ETAT",
+      libelle: "AIDE DE L'ÉTAT",
       description: "Dotations et subventions de l'État",
       mairieId: DEFAULT_MAIRIE_ID,
       actif: true,
@@ -1622,9 +1622,28 @@ async function seedBordereauxRecettes(personnelIds: number[]) {
     });
   }
 
+  // Générer 6 bordereaux pour l'année courante (Janvier à Février)
+  for (let i = 9; i <= 14; i++) {
+    const mois = i <= 11 ? 0 : 1; // Janvier et Février
+    const jour = randomAmount(1, 28);
+    const dateEmission = new Date(CURRENT_YEAR, mois, jour);
+
+    bordereaux.push({
+      numero: i,
+      annee: CURRENT_YEAR,
+      mairieId: DEFAULT_MAIRIE_ID,
+      montantTotal: 0,
+      nombreDeclarations: 0,
+      statut: randomChoice(['ouvert', 'ferme']),
+      personnelId: randomChoice(personnelIds),
+      createdAt: dateEmission,
+      updatedAt: now,
+    });
+  }
+
   await db.bordereauxRecette.bulkAdd(bordereaux as BordereauRecette[]);
   console.log(
-    `✅ ${bordereaux.length} bordereaux de recettes créés (validés, Nov-Déc ${CURRENT_YEAR - 1})`,
+    `✅ ${bordereaux.length} bordereaux de recettes créés (${CURRENT_YEAR - 1} + ${CURRENT_YEAR})`,
   );
 
   return await db.bordereauxRecette.toArray();
@@ -1717,20 +1736,23 @@ async function seedDeclarations(personnelIds: number[], bordereaux: BordereauRec
   let numeroPiece = 1000;
   const bordereauMontants: Map<number, { total: number; count: number }> = new Map();
 
-  // Pour chaque taxe, créer 2 ou 3 déclarations validées
+  // Séparer bordereaux par année
+  const bordereauxPrevYear = bordereaux.filter((b) => b.annee === CURRENT_YEAR - 1);
+  const bordereauxCurrYear = bordereaux.filter((b) => b.annee === CURRENT_YEAR);
+
+  // Pour chaque taxe, créer 2 ou 3 déclarations validées pour l'année précédente
   for (const taxe of app6Taxes) {
     if (!taxe.id) continue;
 
     const nombreDecls = randomAmount(2, 3);
 
     for (let i = 0; i < nombreDecls; i++) {
-      // Assigner à un bordereau aléatoire
-      const bordereau = randomChoice(bordereaux);
+      const bordereau =
+        bordereauxPrevYear.length > 0 ? randomChoice(bordereauxPrevYear) : randomChoice(bordereaux);
       if (!bordereau || !bordereau.id) continue;
 
       const montant = taxe.montant || randomAmount(5000, 500000);
 
-      // Alterner entre Novembre et Décembre de l'année précédente (pour avoir des données dans le passé)
       const mois = randomChoice([10, 11]);
       const jour = randomAmount(1, 28);
       const d = new Date(CURRENT_YEAR - 1, mois, jour);
@@ -1765,7 +1787,61 @@ async function seedDeclarations(personnelIds: number[], bordereaux: BordereauRec
         updatedAt: now,
       });
 
-      // Accumuler les montants par bordereau
+      const existing = bordereauMontants.get(bordereau.id) || { total: 0, count: 0 };
+      bordereauMontants.set(bordereau.id, {
+        total: existing.total + montant,
+        count: existing.count + 1,
+      });
+    }
+  }
+
+  // Pour chaque taxe, créer 1 ou 2 déclarations pour l'année courante (Janvier-Février)
+  for (const taxe of app6Taxes) {
+    if (!taxe.id) continue;
+
+    const nombreDecls = randomAmount(1, 2);
+
+    for (let i = 0; i < nombreDecls; i++) {
+      const bordereau =
+        bordereauxCurrYear.length > 0 ? randomChoice(bordereauxCurrYear) : randomChoice(bordereaux);
+      if (!bordereau || !bordereau.id) continue;
+
+      const montant = taxe.montant || randomAmount(5000, 500000);
+
+      const mois = randomChoice([0, 1]); // Janvier, Février
+      const jour = randomAmount(1, 28);
+      const d = new Date(CURRENT_YEAR, mois, jour);
+
+      declarations.push({
+        exercice: CURRENT_YEAR,
+        numeroPiece: `P-${numeroPiece++}`,
+        dateDeclaration: d,
+        dateEncaissement: d,
+        bordereauId: bordereau.id,
+        taxeId: taxe.id,
+        mairieId: DEFAULT_MAIRIE_ID,
+        contribuable: randomChoice(contribuables),
+        nomPartieVersante: randomChoice([
+          'Le Gérant',
+          'Le Comptable',
+          'Le Directeur',
+          'Le Propriétaire',
+        ]),
+        adresse: randomChoice([
+          "Abidjan, Côte d'Ivoire",
+          'Bouaké, CI',
+          'Yamoussoukro, CI',
+          'Korhogo, CI',
+        ]),
+        montant: montant,
+        montantRecette: montant,
+        modePaiement: randomChoice(['especes', 'cheque', 'virement', 'autre']),
+        statut: randomChoice(['brouillon', 'validee', 'validee']),
+        personnelId: randomChoice(personnelIds),
+        createdAt: d,
+        updatedAt: now,
+      });
+
       const existing = bordereauMontants.get(bordereau.id) || { total: 0, count: 0 };
       bordereauMontants.set(bordereau.id, {
         total: existing.total + montant,
@@ -2146,11 +2222,8 @@ async function seedMandatsRecette(
           const numeroMandat = String(numeroOrdre);
           const montant = randomAmount(10000, 500000);
 
-          const statutsOptions: ('brouillon' | 'emis' | 'encaisse' | 'annule')[] = [
-            'emis',
-            'encaisse',
-          ];
-          const statut = bordereau.statut === 'ferme' ? 'encaisse' : randomChoice(statutsOptions);
+          const statutsOptions: ('brouillon' | 'paye' | 'annule')[] = ['paye', 'paye'];
+          const statut = bordereau.statut === 'ferme' ? 'paye' : randomChoice(statutsOptions);
 
           const mandat: Partial<MandatRecette> = {
             exercice,
