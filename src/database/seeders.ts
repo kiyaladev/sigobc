@@ -1747,7 +1747,8 @@ async function seedDeclarations(personnelIds: number[], bordereaux: BordereauRec
     const nombreDecls = randomAmount(2, 3);
 
     for (let i = 0; i < nombreDecls; i++) {
-      const bordereau = bordereauxPrevYear.length > 0 ? randomChoice(bordereauxPrevYear) : randomChoice(bordereaux);
+      const bordereau =
+        bordereauxPrevYear.length > 0 ? randomChoice(bordereauxPrevYear) : randomChoice(bordereaux);
       if (!bordereau || !bordereau.id) continue;
 
       const montant = taxe.montant || randomAmount(5000, 500000);
@@ -1801,7 +1802,8 @@ async function seedDeclarations(personnelIds: number[], bordereaux: BordereauRec
     const nombreDecls = randomAmount(1, 2);
 
     for (let i = 0; i < nombreDecls; i++) {
-      const bordereau = bordereauxCurrYear.length > 0 ? randomChoice(bordereauxCurrYear) : randomChoice(bordereaux);
+      const bordereau =
+        bordereauxCurrYear.length > 0 ? randomChoice(bordereauxCurrYear) : randomChoice(bordereaux);
       if (!bordereau || !bordereau.id) continue;
 
       const montant = taxe.montant || randomAmount(5000, 500000);
