@@ -9,7 +9,7 @@
     <q-card class="main-card">
       <q-card-section>
         <!-- Filtres -->
-        <div class="row q-col-gutter-md q-mb-md">
+        <div class="row q-col-gutter-sm q-mb-md">
           <div class="col-12 col-md-3">
             <q-select
               v-model="filterExercice"
