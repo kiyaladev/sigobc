@@ -699,13 +699,19 @@ async function loadStatistics() {
 
 // Configuration des graphiques
 const depensesChartConfig = computed<ChartConfiguration>(() => {
-  const data = previsions.value.map((p) => {
-    const chapitre = chapitres.value.find((c) => c.id === p.chapitreId);
-    return {
-      label: chapitre ? chapitre.code : 'N/A',
-      value: p.montantEngage,
-    };
-  });
+  // Top 5 chapitres par montant engagé
+  const data = previsions.value
+    .map((p) => {
+      const chapitre = chapitres.value.find((c) => c.id === p.chapitreId);
+      return {
+        label: chapitre ? `Ch.${chapitre.code}` : 'N/A',
+        fullLabel: chapitre ? `${chapitre.code} - ${chapitre.libelle}` : 'N/A',
+        value: p.montantEngage,
+      };
+    })
+    .filter((d) => d.value > 0)
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 5);
 
   return {
     type: 'doughnut',
@@ -715,16 +721,7 @@ const depensesChartConfig = computed<ChartConfiguration>(() => {
         {
           label: 'Dépenses',
           data: data.map((d) => d.value),
-          backgroundColor: [
-            '#E67E22', // Orange (Primary)
-            '#2E7D32', // Green (Secondary)
-            '#757575', // Grey
-            '#f57c00', // Dark Orange
-            '#388e3c', // Light Green
-            '#616161', // Dark Grey
-            '#ffb74d', // Light Orange
-            '#81c784', // Pale Green
-          ],
+          backgroundColor: ['#E67E22', '#2E7D32', '#757575', '#f57c00', '#388e3c'],
         },
       ],
     },
@@ -736,9 +733,10 @@ const depensesChartConfig = computed<ChartConfiguration>(() => {
         tooltip: {
           callbacks: {
             label: function (context: TooltipItem<keyof ChartTypeRegistry>) {
-              const label = context.label || '';
+              const idx = context.dataIndex;
+              const fullLabel = data[idx]?.fullLabel || context.label || '';
               const value = context.parsed || 0;
-              return `${label}: ${formatMontant(value)}`;
+              return `${fullLabel}: ${formatMontant(value)}`;
             },
           },
         },
@@ -748,15 +746,20 @@ const depensesChartConfig = computed<ChartConfiguration>(() => {
 });
 
 const executionChartConfig = computed<ChartConfiguration>(() => {
-  const data = previsions.value.map((p) => {
-    const chapitre = chapitres.value.find((c) => c.id === p.chapitreId);
-    return {
-      label: chapitre ? chapitre.code : 'N/A',
-      prevu: p.montantPrevu,
-      engage: p.montantEngage,
-      disponible: p.montantDisponible,
-    };
-  });
+  // Top 5 chapitres par budget prévu, barres horizontales empilées
+  const data = previsions.value
+    .map((p) => {
+      const chapitre = chapitres.value.find((c) => c.id === p.chapitreId);
+      return {
+        label: chapitre ? `Ch.${chapitre.code}` : 'N/A',
+        engage: p.montantEngage,
+        disponible: p.montantDisponible,
+        taux: p.montantPrevu > 0 ? Math.round((p.montantEngage / p.montantPrevu) * 100) : 0,
+      };
+    })
+    .filter((d) => d.engage > 0 || d.disponible > 0)
+    .sort((a, b) => b.engage + b.disponible - (a.engage + a.disponible))
+    .slice(0, 5);
 
   return {
     type: 'bar',
@@ -764,12 +767,7 @@ const executionChartConfig = computed<ChartConfiguration>(() => {
       labels: data.map((d) => d.label),
       datasets: [
         {
-          label: 'Budget Prévu',
-          data: data.map((d) => d.prevu),
-          backgroundColor: '#6B7280',
-        },
-        {
-          label: 'Montant Engagé',
+          label: 'Engagé',
           data: data.map((d) => d.engage),
           backgroundColor: '#E67E22',
         },
@@ -783,26 +781,33 @@ const executionChartConfig = computed<ChartConfiguration>(() => {
     options: {
       responsive: true,
       maintainAspectRatio: true,
+      indexAxis: 'y',
       plugins: {
         legend: { position: 'bottom' },
         tooltip: {
           callbacks: {
             label: function (context: TooltipItem<keyof ChartTypeRegistry>) {
               const label = context.dataset.label || '';
-              const value = context.parsed.y || 0;
-              return `${label}: ${formatMontant(value)}`;
+              const value = context.parsed.x || 0;
+              const idx = context.dataIndex;
+              const taux = data[idx]?.taux || 0;
+              return `${label}: ${formatMontant(value)} (${taux}%)`;
             },
           },
         },
       },
       scales: {
-        y: {
+        x: {
+          stacked: true,
           beginAtZero: true,
           ticks: {
             callback: function (tickValue: string | number) {
               return formatMontant(Number(tickValue));
             },
           },
+        },
+        y: {
+          stacked: true,
         },
       },
     },
