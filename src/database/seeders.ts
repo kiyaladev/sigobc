@@ -100,7 +100,7 @@ export async function seedDefaultData() {
   await db.utilisateurs.bulkAdd([
     {
       username: 'admin',
-      password: 'password',
+      password: 'Sigobc@2026!',
       nom: 'Administrateur',
       prenom: 'Complet',
       email: 'admin@sigobc.sn',
@@ -1286,6 +1286,10 @@ export async function seedTestData(options: SeedOptions = {}) {
       bordereauMandatsCreated,
     );
 
+    // Mettre à jour les prévisions avec les montants engagés réels
+    console.log('🌱 Mise à jour des montants engagés dans les prévisions...');
+    await updatePrevisionsFromMandats();
+
     // =================================================================
     // APP6 - RECETTES SEEDERS
     // =================================================================
@@ -1365,6 +1369,41 @@ export async function clearDatabase() {
     console.error('❌ Error clearing database:', error);
     throw error;
   }
+}
+
+// =================================================================
+//           MISE À JOUR DES PRÉVISIONS DEPUIS LES MANDATS
+// =================================================================
+
+/**
+ * Recalcule montantEngage et montantDisponible des prévisions
+ * à partir des mandats payés réellement enregistrés.
+ */
+async function updatePrevisionsFromMandats() {
+  const previsions = await db.previsions.toArray();
+  const mandats = await db.mandats.filter((m) => m.statut === 'paye').toArray();
+
+  // Calculer le montant engagé par couple (exercice, chapitreId, sousChapitreId)
+  const engageMap = new Map<string, number>();
+  for (const m of mandats) {
+    const key = `${m.exercice}-${m.chapitreId}-${m.sousChapitreId}`;
+    engageMap.set(key, (engageMap.get(key) || 0) + m.montant);
+  }
+
+  let updated = 0;
+  for (const prev of previsions) {
+    const key = `${prev.exercice}-${prev.chapitreId}-${prev.sousChapitreId || 0}`;
+    const engage = engageMap.get(key) || 0;
+    if (engage > 0) {
+      await db.previsions.update(prev.id, {
+        montantEngage: engage,
+        montantDisponible: Math.max(0, prev.montantPrevu - engage),
+      });
+      updated++;
+    }
+  }
+
+  console.log(`✅ ${updated} prévisions mises à jour avec les montants engagés réels`);
 }
 
 // =================================================================
@@ -1468,11 +1507,9 @@ async function seedEtatFinancierMensuelRecette(taxeIds: number[], chapitreRecett
 
   const taxes = await db.taxes.toArray();
   const chapitresRecette = await db.chapitresRecette.toArray();
-  const declarations = await db.declarations
-    .filter((d) => d.exercice === CURRENT_YEAR - 1)
-    .toArray();
+  const declarations = await db.declarations.filter((d) => d.exercice === CURRENT_YEAR).toArray();
   const mandatsRecette = await db.mandatsRecette
-    .filter((m) => m.exercice === CURRENT_YEAR - 1)
+    .filter((m) => m.exercice === CURRENT_YEAR)
     .toArray();
 
   // Filtrer les taxes App6 fonctionnelles (codes >= 7000)
@@ -1553,7 +1590,7 @@ async function seedEtatFinancierMensuelRecette(taxeIds: number[], chapitreRecett
     if (!chapitreRecette) continue;
 
     etats.push({
-      annee: CURRENT_YEAR - 1,
+      annee: CURRENT_YEAR,
       taxeId,
       chapitreRecetteId,
       taxeCode: taxe.code,
@@ -1590,7 +1627,7 @@ async function seedEtatFinancierMensuelRecette(taxeIds: number[], chapitreRecett
 
   await db.etatFinancierMensuelRecette.bulkAdd(etats as EtatFinancierMensuelRecette[]);
   console.log(
-    `✅ ${etats.length} états financiers mensuels recettes créés pour ${CURRENT_YEAR - 1} (calculés à partir des déclarations)`,
+    `✅ ${etats.length} états financiers mensuels recettes créés pour ${CURRENT_YEAR} (calculés à partir des déclarations)`,
   );
 }
 
@@ -2124,7 +2161,7 @@ async function seedMandats(
 
 async function seedBordereauMandatsRecette(personnelIds: number[], count: number = 10) {
   const bordereaux: Partial<BordereauMandatRecette>[] = [];
-  const exercices = [2024, 2025];
+  const exercices = [CURRENT_YEAR - 1, CURRENT_YEAR];
   let numeroGlobal = 1;
 
   for (let i = 0; i < count; i++) {
@@ -2133,7 +2170,7 @@ async function seedBordereauMandatsRecette(personnelIds: number[], count: number
     const dateEmission = new Date(exercice, mois, randomAmount(1, 28));
 
     const statuts: ('ouvert' | 'ferme')[] = ['ouvert', 'ferme'];
-    const statut = exercice < 2025 ? 'ferme' : randomChoice(statuts);
+    const statut = exercice < CURRENT_YEAR ? 'ferme' : randomChoice(statuts);
 
     bordereaux.push({
       numero: numeroGlobal++,
@@ -2191,16 +2228,16 @@ async function seedMandatsRecette(
 
   const MONTH_SPECS = [
     {
-      label: 'novembre',
+      label: 'janvier',
       exercice: CURRENT_YEAR,
-      start: new Date(CURRENT_YEAR, 10, 1),
-      end: new Date(CURRENT_YEAR, 10, 30),
+      start: new Date(CURRENT_YEAR, 0, 1),
+      end: new Date(CURRENT_YEAR, 0, 31),
     },
     {
-      label: 'décembre',
+      label: 'février',
       exercice: CURRENT_YEAR,
-      start: new Date(CURRENT_YEAR, 11, 1),
-      end: new Date(CURRENT_YEAR, 11, 31),
+      start: new Date(CURRENT_YEAR, 1, 1),
+      end: new Date(CURRENT_YEAR, 1, 28),
     },
   ];
 

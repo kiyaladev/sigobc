@@ -477,7 +477,7 @@ export async function initializeDatabase() {
     // Créer un utilisateur admin par défaut
     await db.utilisateurs.add({
       username: 'admin',
-      password: 'admin123', // À remplacer par un hash sécurisé en production
+      password: 'Sigobc@2026!', // À remplacer par un hash sécurisé en production
       nom: 'Administrateur',
       prenom: 'Système',
       email: 'admin@tresor.sn',

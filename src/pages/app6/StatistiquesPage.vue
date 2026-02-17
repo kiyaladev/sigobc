@@ -110,13 +110,57 @@
 
       <div class="col-12 col-sm-6 col-md-3">
         <StatisticsCard
-          :value="stats.tauxValidation"
-          title="Taux Validation"
-          subtitle="Déclarations validées"
-          icon="trending_up"
+          :value="stats.totalMandatsRecette"
+          title="Mandats Recette"
+          :subtitle="`${formatMontant(stats.montantMandatsRecette)}`"
+          icon="receipt"
           icon-color="grey-7"
           border-color="#1A1A1A"
-          format="percentage"
+        />
+      </div>
+    </div>
+
+    <!-- Cartes bordereaux -->
+    <div class="row q-col-gutter-md q-mb-md">
+      <div class="col-12 col-sm-6 col-md-3">
+        <StatisticsCard
+          :value="stats.totalBordereaux"
+          title="Total Bordereaux"
+          :subtitle="`${stats.bordereauxOuverts} ouverts`"
+          icon="folder_open"
+          icon-color="grey-7"
+          border-color="#E67E22"
+        />
+      </div>
+      <div class="col-12 col-sm-6 col-md-3">
+        <StatisticsCard
+          :value="stats.montantTotalBordereaux"
+          title="Montant Bordereaux"
+          subtitle="Total cumulé"
+          icon="account_balance_wallet"
+          icon-color="grey-7"
+          border-color="#2E7D32"
+          format="currency"
+        />
+      </div>
+      <div class="col-12 col-sm-6 col-md-3">
+        <StatisticsCard
+          :value="stats.bordereauxFermes"
+          title="Bordereaux Fermés"
+          subtitle="Clôturés"
+          icon="lock"
+          icon-color="grey-7"
+          border-color="#757575"
+        />
+      </div>
+      <div class="col-12 col-sm-6 col-md-3">
+        <StatisticsCard
+          :value="stats.nombreDeclBordereaux"
+          title="Décl./Bordereaux"
+          subtitle="Déclarations dans bordereaux"
+          icon="list_alt"
+          icon-color="grey-7"
+          border-color="#1A1A1A"
         />
       </div>
     </div>
@@ -136,13 +180,91 @@
         </div>
       </div>
 
-      <!-- Répartition par statut -->
+      <!-- Résumé des Bordereaux -->
       <div v-if="!loading && stats.totalDeclarations > 0" class="col-12 col-md-6">
-        <ChartCard
-          title="Répartition par Statut"
-          :chart-config="statutChartConfig"
-          header-class="text-grey-8"
-        />
+        <q-card class="activity-card">
+          <q-card-section class="bg-grey-1">
+            <div class="text-h6 text-grey-8">Résumé des Bordereaux</div>
+          </q-card-section>
+          <q-card-section>
+            <q-list separator>
+              <q-item>
+                <q-item-section avatar>
+                  <q-avatar color="orange-8" text-color="white" icon="folder_open" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label class="text-weight-bold">Total Bordereaux</q-item-label>
+                  <q-item-label caption>Sur l'exercice</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-item-label class="text-h6" style="color: #e67e22">{{
+                    formatNumber(stats.totalBordereaux)
+                  }}</q-item-label>
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section avatar>
+                  <q-avatar color="positive" text-color="white" icon="lock" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label class="text-weight-bold">Fermés</q-item-label>
+                  <q-item-label caption>Bordereaux clôturés</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-item-label class="text-h6" style="color: #2e7d32">{{
+                    formatNumber(stats.bordereauxFermes)
+                  }}</q-item-label>
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section avatar>
+                  <q-avatar color="warning" text-color="white" icon="lock_open" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label class="text-weight-bold">Ouverts</q-item-label>
+                  <q-item-label caption>Bordereaux en cours</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-item-label class="text-h6" style="color: #f57c00">{{
+                    formatNumber(stats.bordereauxOuverts)
+                  }}</q-item-label>
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section avatar>
+                  <q-avatar color="green-8" text-color="white" icon="payments" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label class="text-weight-bold">Montant Total</q-item-label>
+                  <q-item-label caption>Cumulé des bordereaux</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-item-label class="text-h6" style="color: #2e7d32">{{
+                    formatMontant(stats.montantTotalBordereaux)
+                  }}</q-item-label>
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section avatar>
+                  <q-avatar
+                    style="background-color: #1a1a1a"
+                    text-color="white"
+                    icon="description"
+                  />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label class="text-weight-bold">Déclarations Incluses</q-item-label>
+                  <q-item-label caption>Dans les bordereaux</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-item-label class="text-h6" style="color: #1a1a1a">{{
+                    formatNumber(stats.nombreDeclBordereaux)
+                  }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-card-section>
+        </q-card>
       </div>
 
       <!-- Répartition par taxe -->
@@ -328,7 +450,7 @@ import PageHeader from 'src/components/PageHeader.vue';
 import StatisticsCard from 'src/components/StatisticsCard.vue';
 import ChartCard from 'src/components/ChartCard.vue';
 import { db } from 'src/database/db';
-import type { Declaration, Taxe, BordereauRecette } from 'src/database/db';
+import type { Declaration, Taxe, BordereauRecette, MandatRecette } from 'src/database/db';
 
 const $q = useQuasar();
 
@@ -347,6 +469,7 @@ const exerciceOptions = ref<number[]>([currentYear - 2, currentYear - 1, current
 const declarations = ref<Declaration[]>([]);
 const taxes = ref<Taxe[]>([]);
 const bordereaux = ref<BordereauRecette[]>([]);
+const mandatsRecette = ref<MandatRecette[]>([]);
 
 // Options de période
 const periodOptions = [
@@ -358,9 +481,10 @@ const periodOptions = [
   { label: 'Personnalisé', value: 'custom' },
 ];
 
-// Déclarations filtrées par période
+// Déclarations filtrées par période (uniquement validées)
 const filteredDeclarations = computed(() => {
-  let filtered = declarations.value;
+  // Uniquement les déclarations validées
+  let filtered = declarations.value.filter((d) => d.statut === 'validee');
 
   if (dateDebut.value) {
     const debut = new Date(dateDebut.value);
@@ -381,24 +505,41 @@ const stats = computed(() => {
   const decl = filteredDeclarations.value;
 
   const totalDeclarations = decl.length;
-  const declarationsValidees = decl.filter((d) => d.statut === 'validee').length;
+  const declarationsValidees = decl.length; // Toutes sont validées désormais
   const montantTotal = decl.reduce((sum, d) => sum + (d.montantRecette || d.montant || 0), 0);
-  const montantMoyen = totalDeclarations > 0 ? montantTotal / totalDeclarations : 0;
-  const tauxValidation =
-    totalDeclarations > 0 ? Math.round((declarationsValidees / totalDeclarations) * 100) : 0;
+
+  // Inclure les mandats de recettes payés dans le montant total
+  const mandatsPayes = mandatsRecette.value.filter((m) => m.statut === 'paye');
+  const montantMandatsRecette = mandatsPayes.reduce((sum, m) => sum + m.montant, 0);
+  const montantGlobal = montantTotal + montantMandatsRecette;
+
+  const montantMoyen = totalDeclarations > 0 ? montantGlobal / totalDeclarations : 0;
+  const tauxValidation = 100; // Toutes validées
 
   const totalBordereaux = bordereaux.value.length;
   const bordereauxFermes = bordereaux.value.filter((b) => b.statut === 'ferme').length;
+  const bordereauxOuverts = bordereaux.value.filter((b) => b.statut === 'ouvert').length;
+  const montantTotalBordereaux = bordereaux.value.reduce((sum, b) => sum + b.montantTotal, 0);
+  const nombreDeclBordereaux = bordereaux.value.reduce((sum, b) => sum + b.nombreDeclarations, 0);
+
+  const totalMandatsRecette = mandatsPayes.length;
+  const mandatsRecettePayes = mandatsPayes.length;
 
   return {
     totalDeclarations,
     declarationsValidees,
-    montantTotal,
+    montantTotal: montantGlobal,
     montantMoyen,
     tauxValidation,
     totalBordereaux,
     bordereauxFermes,
+    bordereauxOuverts,
+    montantTotalBordereaux,
+    nombreDeclBordereaux,
     nombreTaxes: taxes.value.length,
+    totalMandatsRecette,
+    mandatsRecettePayes,
+    montantMandatsRecette,
   };
 });
 
@@ -573,7 +714,7 @@ async function loadStatistics() {
 
     const exercice = selectedExercice.value;
 
-    const [decl, taxesList, bordereauxList] = await Promise.all([
+    const [decl, taxesList, bordereauxList, mandatsRecetteList] = await Promise.all([
       db.declarations
         .where('mairieId')
         .equals(mairieId)
@@ -585,11 +726,17 @@ async function loadStatistics() {
         .equals(mairieId)
         .filter((b) => b.annee === exercice)
         .toArray(),
+      db.mandatsRecette
+        .where('mairieId')
+        .equals(mairieId)
+        .filter((m) => m.exercice === exercice)
+        .toArray(),
     ]);
 
     declarations.value = decl;
     taxes.value = taxesList;
     bordereaux.value = bordereauxList;
+    mandatsRecette.value = mandatsRecetteList;
   } catch (error) {
     console.error('Erreur:', error);
     $q.notify({
@@ -602,41 +749,6 @@ async function loadStatistics() {
 }
 
 // Configuration des graphiques
-const statutChartConfig = computed<ChartConfiguration>(() => {
-  const decl = filteredDeclarations.value;
-  const brouillon = decl.filter((d) => d.statut === 'brouillon').length;
-  const validee = decl.filter((d) => d.statut === 'validee').length;
-
-  return {
-    type: 'doughnut',
-    data: {
-      labels: ['Brouillon', 'Validée'],
-      datasets: [
-        {
-          label: 'Déclarations',
-          data: [brouillon, validee],
-          backgroundColor: ['#9E9E9E', '#2E7D32'],
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: true,
-      plugins: {
-        legend: { position: 'bottom' },
-        tooltip: {
-          callbacks: {
-            label: function (context: TooltipItem<keyof ChartTypeRegistry>) {
-              const label = context.label || '';
-              const value = context.parsed || 0;
-              return `${label}: ${formatNumber(value)} déclarations`;
-            },
-          },
-        },
-      },
-    },
-  };
-});
 
 const taxeChartConfig = computed<ChartConfiguration>(() => {
   const top5 = topTaxes.value;
@@ -726,7 +838,7 @@ const evolutionChartConfig = computed<ChartConfiguration>(() => {
     },
     options: {
       responsive: true,
-      maintainAspectRatio: true,
+      maintainAspectRatio: false,
       plugins: {
         legend: { position: 'bottom' },
         tooltip: {

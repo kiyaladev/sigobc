@@ -580,6 +580,27 @@
             `;
             rows.push(chapTotalRow);
           }
+
+          // Arrêté de compte de la section (total section 60, 61, 62, 63, 64)
+          const sectionTotalRow = document.createElement('tr');
+          sectionTotalRow.className = 'total-section';
+          const sectionPercent = calculatePercent(section.totaux.total, section.totaux.prevision);
+          sectionTotalRow.innerHTML = `
+            <td>S/${section.code}</td>
+            <td>ARRÊTÉ DE COMPTE SECTION ${section.code}</td>
+            <td class="col-num">${formatNumber(section.totaux.prevision)}</td>
+            <td class="col-num">${formatNumber(section.totaux.antecedent)}</td>
+            <td class="col-num">${formatNumber(section.totaux.depenseMois)}</td>
+            <td class="col-num">${formatNumber(section.totaux.total)}</td>
+            <td class="col-num">${formatNumber(section.totaux.antecedent)}</td>
+            <td class="col-num">${formatNumber(section.totaux.depenseMois)}</td>
+            <td class="col-num">${formatNumber(section.totaux.total)}</td>
+            <td class="col-num">${formatNumber(section.totaux.antecedent)}</td>
+            <td class="col-num">${formatNumber(section.totaux.depenseMois)}</td>
+            <td class="col-num">${formatNumber(section.totaux.total)}</td>
+            <td class="col-percent">${sectionPercent}</td>
+          `;
+          rows.push(sectionTotalRow);
         }
 
         // Total général
