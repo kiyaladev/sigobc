@@ -6,7 +6,7 @@
 import { onMounted } from 'vue';
 import { db, initializeDatabase } from 'src/database/db';
 import { useAuthStore } from 'src/stores/auth-store';
-import { seedTestData } from 'src/database/seeders';
+import { seedTestData, ensureCorrectMairieInfo } from 'src/database/seeders';
 
 // Initialiser la base de données au démarrage de l'application
 onMounted(async () => {
@@ -25,6 +25,9 @@ onMounted(async () => {
     } else {
       await initializeDatabase();
     }
+
+    // Migration: s'assurer que c'est bien la mairie de Vavoua
+    await ensureCorrectMairieInfo();
 
     // S'assurer que les comptes admin et démo existent
     const authStore = useAuthStore();

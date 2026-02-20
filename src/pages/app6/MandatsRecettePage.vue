@@ -13,7 +13,7 @@
     <q-card class="main-card">
       <q-card-section>
         <!-- Filtres -->
-        <div class="row q-col-gutter-md q-mb-md">
+        <div class="row q-col-gutter-sm q-mb-md">
           <div class="col-12 col-md-2">
             <q-select
               v-model="filterExercice"
@@ -148,6 +148,16 @@
             <div class="row q-col-gutter-md">
               <div class="col-4">
                 <q-input
+                  v-model.number="formData.exercice"
+                  label="Exercice *"
+                  outlined
+                  dense
+                  type="number"
+                  :rules="[(val) => !!val || 'Exercice requis']"
+                />
+              </div>
+              <div class="col-4">
+                <q-input
                   v-model="formData.numeroMandat"
                   label="Numéro Mandat *"
                   outlined
@@ -163,16 +173,6 @@
                   dense
                   type="date"
                   :rules="[(val) => !!val || 'Date requise']"
-                />
-              </div>
-              <div class="col-4">
-                <q-input
-                  v-model.number="formData.exercice"
-                  label="Exercice *"
-                  outlined
-                  dense
-                  type="number"
-                  :rules="[(val) => !!val || 'Exercice requis']"
                 />
               </div>
             </div>
@@ -399,6 +399,7 @@ const columns = [
     field: 'numeroMandat',
     align: 'left' as const,
     sortable: true,
+    sort: (a: string, b: string) => parseInt(a, 10) - parseInt(b, 10),
   },
   {
     name: 'dateMandat',
@@ -635,7 +636,21 @@ async function loadData() {
   }
 }
 
-function openDialog(mandat?: MandatRecette) {
+async function getNextMandatNumber(exercice: number): Promise<string> {
+  const mandatsForYear = await db.mandatsRecette.where('exercice').equals(exercice).toArray();
+
+  let maxNum = 0;
+  for (const m of mandatsForYear) {
+    const num = parseInt(m.numeroMandat, 10);
+    if (!isNaN(num) && num > maxNum) {
+      maxNum = num;
+    }
+  }
+
+  return String(maxNum + 1).padStart(4, '0');
+}
+
+async function openDialog(mandat?: MandatRecette) {
   if (mandat) {
     editingId.value = mandat.id!;
     formData.value = { ...mandat };
@@ -645,10 +660,10 @@ function openDialog(mandat?: MandatRecette) {
       : '';
   } else {
     editingId.value = null;
-    const nextNum = mandats.value.length + 1;
+    const nextNum = await getNextMandatNumber(currentYear);
     formData.value = {
       exercice: currentYear,
-      numeroMandat: String(nextNum).padStart(4, '0'),
+      numeroMandat: nextNum,
       dateMandat: new Date(),
       ...(chapitres.value[0]?.id !== undefined && { chapitreId: chapitres.value[0].id }),
       ...(taxes.value[0]?.id !== undefined && { taxeId: taxes.value[0].id }),
@@ -737,6 +752,15 @@ function printMandat(mandat: MandatRecette) {
 function downloadMandatPDF(mandat: MandatRecette) {
   openPrintWindow('mandat/ordre_de_recette.html', { mandatRecetteId: mandat.id!, print: 'true' });
 }
+
+watch(
+  () => formData.value.exercice,
+  async (newExercice) => {
+    if (newExercice && !editingId.value) {
+      formData.value.numeroMandat = await getNextMandatNumber(newExercice);
+    }
+  },
+);
 
 onMounted(() => {
   void loadData();

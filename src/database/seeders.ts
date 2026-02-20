@@ -1415,7 +1415,7 @@ async function updatePrevisionsFromMandats() {
  * Inclut un chapitre par défaut "Autres"
  */
 async function seedChapitresRecette() {
-  const chapitresRecette: Partial<ChapitreRecette>[] = [
+  const chapitresRecette: Omit<ChapitreRecette, 'id'>[] = [
     {
       code: '1',
       libelle: 'RECETTES FISCALES',
@@ -1490,7 +1490,7 @@ async function seedChapitresRecette() {
     },
   ];
 
-  await db.chapitresRecette.bulkAdd(chapitresRecette as ChapitreRecette[]);
+  await db.chapitresRecette.bulkAdd(chapitresRecette);
   console.log(`✅ ${chapitresRecette.length} chapitres recettes créés (dont "Autres" par défaut)`);
 }
 
@@ -1503,7 +1503,7 @@ async function seedChapitresRecette() {
  * Calcule les états à partir des déclarations existantes (comme les mandats impactent les états des dépenses)
  */
 async function seedEtatFinancierMensuelRecette(taxeIds: number[], chapitreRecetteIds: number[]) {
-  const etats: Partial<EtatFinancierMensuelRecette>[] = [];
+  const etats: Omit<EtatFinancierMensuelRecette, 'id'>[] = [];
 
   const taxes = await db.taxes.toArray();
   const chapitresRecette = await db.chapitresRecette.toArray();
@@ -1625,7 +1625,7 @@ async function seedEtatFinancierMensuelRecette(taxeIds: number[], chapitreRecett
     });
   }
 
-  await db.etatFinancierMensuelRecette.bulkAdd(etats as EtatFinancierMensuelRecette[]);
+  await db.etatFinancierMensuelRecette.bulkAdd(etats);
   console.log(
     `✅ ${etats.length} états financiers mensuels recettes créés pour ${CURRENT_YEAR} (calculés à partir des déclarations)`,
   );
@@ -1688,7 +1688,7 @@ async function seedBordereauxRecettes(personnelIds: number[]) {
 
 async function seedPrevisionsRecettes(personnelIds: number[]) {
   const taxes = await db.taxes.toArray();
-  const previsions: Partial<PrevisionRecette>[] = [];
+  const previsions: Omit<PrevisionRecette, 'id'>[] = [];
 
   // Prévisions pour l'année courante (2026)
   for (const taxe of taxes) {
@@ -1732,7 +1732,7 @@ async function seedPrevisionsRecettes(personnelIds: number[]) {
     });
   }
 
-  await db.previsionsRecettes.bulkAdd(previsions as PrevisionRecette[]);
+  await db.previsionsRecettes.bulkAdd(previsions);
   console.log(
     `✅ ${previsions.length} prévisions de recettes créées au total (${CURRENT_YEAR} + ${CURRENT_YEAR - 1})`,
   );
@@ -2160,7 +2160,7 @@ async function seedMandats(
 // =================================================================
 
 async function seedBordereauMandatsRecette(personnelIds: number[], count: number = 10) {
-  const bordereaux: Partial<BordereauMandatRecette>[] = [];
+  const bordereaux: Omit<BordereauMandatRecette, 'id'>[] = [];
   const exercices = [CURRENT_YEAR - 1, CURRENT_YEAR];
   let numeroGlobal = 1;
 
@@ -2186,7 +2186,7 @@ async function seedBordereauMandatsRecette(personnelIds: number[], count: number
     });
   }
 
-  await db.bordereauMandatsRecette.bulkAdd(bordereaux as BordereauMandatRecette[]);
+  await db.bordereauMandatsRecette.bulkAdd(bordereaux);
   console.log(`✅ ${count} bordereaux mandats recettes créés`);
   return await db.bordereauMandatsRecette.toArray();
 }
@@ -2197,7 +2197,7 @@ async function seedMandatsRecette(
   personnelIds: number[],
   bordereauxRecette: BordereauMandatRecette[],
 ) {
-  const mandatsRecette: Partial<MandatRecette>[] = [];
+  const mandatsRecette: Omit<MandatRecette, 'id'>[] = [];
 
   const partiesVersantes = [
     'ENTREPRISE ABC SARL',
@@ -2262,7 +2262,7 @@ async function seedMandatsRecette(
           const statutsOptions: ('brouillon' | 'paye' | 'annule')[] = ['paye', 'paye'];
           const statut = bordereau.statut === 'ferme' ? 'paye' : randomChoice(statutsOptions);
 
-          const mandat: Partial<MandatRecette> = {
+          const mandat: Omit<MandatRecette, 'id'> = {
             exercice,
             numeroMandat,
             dateMandat,
@@ -2297,7 +2297,7 @@ async function seedMandatsRecette(
     }
   }
 
-  await db.mandatsRecette.bulkAdd(mandatsRecette as MandatRecette[]);
+  await db.mandatsRecette.bulkAdd(mandatsRecette);
 
   for (const [id, stats] of bordereauUpdates.entries()) {
     await db.bordereauMandatsRecette.update(id, {
@@ -2310,4 +2310,37 @@ async function seedMandatsRecette(
   console.log(
     `✅ ${mandatsRecette.length} mandats de recettes créés (${MANDATS_PAR_COUPLE} par couple chapitre/taxe)`,
   );
+}
+// =================================================================
+//                      MIGRATION DE DONNÉES
+// =================================================================
+
+/**
+ * Vérifie et corrige les informations de la mairie si elles sont incorrectes (ex: Bodokro au lieu de Vavoua)
+ * Cette fonction est appelée au démarrage de l'application
+ */
+export async function ensureCorrectMairieInfo() {
+  const mairies = await db.mairies.toArray();
+
+  if (mairies.length > 0) {
+    const mairie = mairies[0];
+    if (!mairie) return;
+
+    // Si c'est Bodokro ou si le code n'est pas 433, on met à jour
+    if (mairie.nom.includes('Bodokro') || mairie.code !== '433') {
+      console.log('🔄 Correction des données de la mairie détectée (Bodokro -> Vavoua)...');
+
+      await db.mairies.update(mairie.id, {
+        nom: 'Mairie de Vavoua',
+        code: '433',
+        ville: 'Vavoua',
+        departement: 'Vavoua',
+        region: 'Haut-Sassandra',
+        email: 'contact@mairie-vavoua.ci',
+        updatedAt: new Date(),
+      });
+
+      console.log('✅ Données de la mairie corrigées avec succès');
+    }
+  }
 }

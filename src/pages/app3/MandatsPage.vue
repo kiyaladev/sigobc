@@ -5,7 +5,7 @@
     <q-card class="main-card">
       <q-card-section>
         <!-- Filtres -->
-        <div class="row q-col-gutter-md q-mb-md">
+        <div class="row q-col-gutter-sm q-mb-md">
           <div class="col-12 col-md-2">
             <q-select
               v-model="filterExercice"
@@ -149,6 +149,17 @@
             <div class="row q-col-gutter-sm">
               <div class="col-12 col-md-4">
                 <q-input
+                  v-model.number="formData.exercice"
+                  label="Exercice *"
+                  outlined
+                  dense
+                  type="number"
+                  :rules="[(val) => !!val || 'Exercice requis']"
+                />
+              </div>
+
+              <div class="col-12 col-md-4">
+                <q-input
                   v-model="formData.numeroMandat"
                   label="Numéro Mandat *"
                   outlined
@@ -156,6 +167,7 @@
                   :rules="[(val) => !!val || 'Numéro requis']"
                 />
               </div>
+
               <div class="col-12 col-md-4">
                 <q-input
                   v-model="formData.dateMandat"
@@ -164,16 +176,6 @@
                   dense
                   type="date"
                   :rules="[(val) => !!val || 'Date requise']"
-                />
-              </div>
-              <div class="col-12 col-md-4">
-                <q-input
-                  v-model.number="formData.exercice"
-                  label="Exercice *"
-                  outlined
-                  dense
-                  type="number"
-                  :rules="[(val) => !!val || 'Exercice requis']"
                 />
               </div>
             </div>
@@ -592,6 +594,7 @@ const columns = [
     align: 'left' as const,
     field: 'numeroMandat',
     sortable: true,
+    sort: (a: string, b: string) => parseInt(a, 10) - parseInt(b, 10),
   },
   {
     name: 'bordereauNumero',
@@ -814,12 +817,25 @@ function resetForm() {
   editingId.value = null;
 }
 
+async function getNextMandatNumber(exercice: number): Promise<string> {
+  const mandatsForYear = await db.mandats.where('exercice').equals(exercice).toArray();
+
+  let maxNum = 0;
+  for (const m of mandatsForYear) {
+    const num = parseInt(m.numeroMandat, 10);
+    if (!isNaN(num) && num > maxNum) {
+      maxNum = num;
+    }
+  }
+
+  return String(maxNum + 1);
+}
+
 async function openAddDialog() {
   resetForm();
-  // Générer automatiquement le numéro de mandat (nombre de mandats de l'année en cours + 1)
+  // Générer automatiquement le numéro de mandat (max des mandats de l'année + 1)
   const currentYear = new Date().getFullYear();
-  const countCurrentYear = await db.mandats.where('exercice').equals(currentYear).count();
-  formData.value.numeroMandat = String(countCurrentYear + 1);
+  formData.value.numeroMandat = await getNextMandatNumber(currentYear);
   showAddDialog.value = true;
 }
 
@@ -992,6 +1008,15 @@ function deleteMandat(row: Mandat) {
     })();
   });
 }
+
+watch(
+  () => formData.value.exercice,
+  async (newExercice) => {
+    if (newExercice && !editingId.value) {
+      formData.value.numeroMandat = await getNextMandatNumber(newExercice);
+    }
+  },
+);
 
 onMounted(() => {
   void loadData();
