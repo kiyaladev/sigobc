@@ -328,7 +328,14 @@ import PageHeader from 'src/components/PageHeader.vue';
 import StatisticsCard from 'src/components/StatisticsCard.vue';
 import ChartCard from 'src/components/ChartCard.vue';
 import { db } from 'src/database/db';
-import type { Declaration, Taxe, BordereauRecette } from 'src/database/db';
+import type {
+  Declaration,
+  Taxe,
+  BordereauRecette,
+  PrevisionRecette,
+  MandatRecette,
+  BordereauMandatRecette,
+} from 'src/database/db';
 
 const $q = useQuasar();
 
@@ -347,6 +354,9 @@ const exerciceOptions = ref<number[]>([currentYear - 2, currentYear - 1, current
 const declarations = ref<Declaration[]>([]);
 const taxes = ref<Taxe[]>([]);
 const bordereaux = ref<BordereauRecette[]>([]);
+const previsionsRecettes = ref<PrevisionRecette[]>([]);
+const mandatsRecette = ref<MandatRecette[]>([]);
+const bordereauxMandatsRecette = ref<BordereauMandatRecette[]>([]);
 
 // Options de période
 const periodOptions = [
@@ -376,29 +386,54 @@ const filteredDeclarations = computed(() => {
   return filtered;
 });
 
-// Données des statistiques
+// Données des statistiques - calculées dynamiquement depuis les données réelles
 const stats = computed(() => {
   const decl = filteredDeclarations.value;
 
   const totalDeclarations = decl.length;
   const declarationsValidees = decl.filter((d) => d.statut === 'validee').length;
-  const montantTotal = decl.reduce((sum, d) => sum + (d.montantRecette || d.montant || 0), 0);
-  const montantMoyen = totalDeclarations > 0 ? montantTotal / totalDeclarations : 0;
+  const montantDeclarations = decl.reduce(
+    (sum, d) => sum + (d.montantRecette || d.montant || 0),
+    0,
+  );
+
+  // Mandats de recettes (non annulés)
+  const mandatsNonAnnules = mandatsRecette.value.filter((m) => m.statut !== 'annule');
+  const montantMandatsRecette = mandatsNonAnnules.reduce((sum, m) => sum + m.montant, 0);
+  const nombreMandatsRecette = mandatsRecette.value.length;
+  const mandatsRecettePayes = mandatsRecette.value.filter((m) => m.statut === 'paye').length;
+
+  // Montant total = déclarations + mandats de recettes
+  const montantTotal = montantDeclarations + montantMandatsRecette;
+  const montantMoyen = totalDeclarations > 0 ? montantDeclarations / totalDeclarations : 0;
   const tauxValidation =
     totalDeclarations > 0 ? Math.round((declarationsValidees / totalDeclarations) * 100) : 0;
 
+  // Prévisions de recettes
+  const budgetPrevu = previsionsRecettes.value.reduce((sum, p) => sum + p.montantPrevu, 0);
+  const tauxRealisation = budgetPrevu > 0 ? Math.round((montantTotal / budgetPrevu) * 100) : 0;
+
+  // Bordereaux
   const totalBordereaux = bordereaux.value.length;
   const bordereauxFermes = bordereaux.value.filter((b) => b.statut === 'ferme').length;
+  const totalBordereauxMandats = bordereauxMandatsRecette.value.length;
 
   return {
     totalDeclarations,
     declarationsValidees,
     montantTotal,
+    montantDeclarations,
+    montantMandatsRecette,
     montantMoyen,
     tauxValidation,
     totalBordereaux,
     bordereauxFermes,
     nombreTaxes: taxes.value.length,
+    budgetPrevu,
+    tauxRealisation,
+    nombreMandatsRecette,
+    mandatsRecettePayes,
+    totalBordereauxMandats,
   };
 });
 
@@ -554,7 +589,7 @@ function onPeriodChange() {
 
 function resetFilters() {
   periodFilter.value = 'annee';
-  selectedExercice.value = currentYear - 1;
+  selectedExercice.value = currentYear;
   onPeriodChange();
 }
 
@@ -573,7 +608,14 @@ async function loadStatistics() {
 
     const exercice = selectedExercice.value;
 
-    const [decl, taxesList, bordereauxList] = await Promise.all([
+    const [
+      decl,
+      taxesList,
+      bordereauxList,
+      prevRecettesList,
+      mandatsRecetteList,
+      bordMandatsRecetteList,
+    ] = await Promise.all([
       db.declarations
         .where('mairieId')
         .equals(mairieId)
@@ -585,11 +627,29 @@ async function loadStatistics() {
         .equals(mairieId)
         .filter((b) => b.annee === exercice)
         .toArray(),
+      db.previsionsRecettes
+        .where('mairieId')
+        .equals(mairieId)
+        .filter((p) => p.exercice === exercice)
+        .toArray(),
+      db.mandatsRecette
+        .where('mairieId')
+        .equals(mairieId)
+        .filter((m) => m.exercice === exercice)
+        .toArray(),
+      db.bordereauMandatsRecette
+        .where('mairieId')
+        .equals(mairieId)
+        .filter((b) => b.exercice === exercice)
+        .toArray(),
     ]);
 
     declarations.value = decl;
     taxes.value = taxesList;
     bordereaux.value = bordereauxList;
+    previsionsRecettes.value = prevRecettesList;
+    mandatsRecette.value = mandatsRecetteList;
+    bordereauxMandatsRecette.value = bordMandatsRecetteList;
   } catch (error) {
     console.error('Erreur:', error);
     $q.notify({
@@ -697,14 +757,25 @@ const evolutionChartConfig = computed<ChartConfiguration>(() => {
     'Nov',
     'Déc',
   ];
-  const monthlyData = new Array(12).fill(0);
+  const monthlyDeclarations = new Array(12).fill(0);
+  const monthlyMandats = new Array(12).fill(0);
 
   filteredDeclarations.value.forEach((d) => {
     if (d.dateEncaissement) {
       const dateVal = new Date(d.dateEncaissement);
       const month = dateVal.getMonth();
       if (month >= 0 && month < 12) {
-        monthlyData[month] += d.montantRecette || d.montant || 0;
+        monthlyDeclarations[month] += d.montantRecette || d.montant || 0;
+      }
+    }
+  });
+
+  mandatsRecette.value.forEach((m) => {
+    if (m.statut !== 'annule') {
+      const dateVal = new Date(m.dateMandat);
+      const month = dateVal.getMonth();
+      if (month >= 0 && month < 12) {
+        monthlyMandats[month] += m.montant;
       }
     }
   });
@@ -715,10 +786,18 @@ const evolutionChartConfig = computed<ChartConfiguration>(() => {
       labels,
       datasets: [
         {
-          label: 'Montant des recettes',
-          data: monthlyData,
+          label: 'Déclarations',
+          data: monthlyDeclarations,
           borderColor: '#E67E22',
           backgroundColor: 'rgba(230, 126, 34, 0.1)',
+          tension: 0.4,
+          fill: true,
+        },
+        {
+          label: 'Mandats Recettes',
+          data: monthlyMandats,
+          borderColor: '#2E7D32',
+          backgroundColor: 'rgba(46, 125, 50, 0.1)',
           tension: 0.4,
           fill: true,
         },

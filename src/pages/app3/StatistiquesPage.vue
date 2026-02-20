@@ -372,14 +372,18 @@ const periodOptions = [
   { label: 'Personnalisé', value: 'custom' },
 ];
 
-// Statistiques calculées
+// Statistiques calculées dynamiquement à partir des mandats réels
 const stats = computed(() => {
   const budgetTotal = previsions.value.reduce((sum, p) => sum + p.montantPrevu, 0);
-  const montantEngage = previsions.value.reduce((sum, p) => sum + p.montantEngage, 0);
-  const montantDisponible = previsions.value.reduce((sum, p) => sum + p.montantDisponible, 0);
 
   // Filtrer les mandats par période
   const mandatsFiltered = filterMandatsByPeriod(mandats.value);
+
+  // Calculer le montant engagé à partir des mandats réels (non annulés)
+  const montantEngage = mandatsFiltered
+    .filter((m) => m.statut !== 'annule')
+    .reduce((sum, m) => sum + m.montant, 0);
+  const montantDisponible = Math.max(0, budgetTotal - montantEngage);
 
   const nombreMandats = mandatsFiltered.length;
   const mandatsBrouillon = mandatsFiltered.filter((m) => m.statut === 'brouillon').length;
@@ -400,18 +404,40 @@ const stats = computed(() => {
   };
 });
 
-// Détails par chapitre
+// Détails par chapitre - calculés dynamiquement depuis les mandats
 const previsionsStats = computed(() => {
-  return previsions.value.map((p) => {
-    const chapitre = chapitres.value.find((c) => c.id === p.chapitreId);
-    const taux = p.montantPrevu > 0 ? Math.round((p.montantEngage / p.montantPrevu) * 100) : 0;
+  // Agréger les prévisions par chapitre
+  const chapitreMap = new Map<number, { prevu: number; chapitreId: number }>();
+  for (const p of previsions.value) {
+    const existing = chapitreMap.get(p.chapitreId);
+    if (existing) {
+      existing.prevu += p.montantPrevu;
+    } else {
+      chapitreMap.set(p.chapitreId, { prevu: p.montantPrevu, chapitreId: p.chapitreId });
+    }
+  }
+
+  // Calculer les engagements réels depuis les mandats (non annulés)
+  const mandatsFiltered = filterMandatsByPeriod(mandats.value);
+  const engageParChapitre = new Map<number, number>();
+  for (const m of mandatsFiltered) {
+    if (m.statut !== 'annule') {
+      engageParChapitre.set(m.chapitreId, (engageParChapitre.get(m.chapitreId) || 0) + m.montant);
+    }
+  }
+
+  return Array.from(chapitreMap.entries()).map(([chapitreId, data]) => {
+    const chapitre = chapitres.value.find((c) => c.id === chapitreId);
+    const engage = engageParChapitre.get(chapitreId) || 0;
+    const disponible = Math.max(0, data.prevu - engage);
+    const taux = data.prevu > 0 ? Math.round((engage / data.prevu) * 100) : 0;
 
     return {
-      id: p.id!,
+      id: chapitreId,
       chapitre: chapitre ? `${chapitre.code} - ${chapitre.libelle}` : 'N/A',
-      prevu: formatMontant(p.montantPrevu),
-      engage: formatMontant(p.montantEngage),
-      disponible: formatMontant(p.montantDisponible),
+      prevu: formatMontant(data.prevu),
+      engage: formatMontant(engage),
+      disponible: formatMontant(disponible),
       taux,
     };
   });
@@ -550,7 +576,7 @@ function onPeriodChange() {
 
 function resetFilters() {
   periodFilter.value = 'annee';
-  selectedExercice.value = currentYear - 1;
+  selectedExercice.value = currentYear;
   onPeriodChange();
 }
 
@@ -603,13 +629,21 @@ async function loadStatistics() {
 
 // Configuration des graphiques
 const depensesChartConfig = computed<ChartConfiguration>(() => {
-  const data = previsions.value.map((p) => {
-    const chapitre = chapitres.value.find((c) => c.id === p.chapitreId);
+  // Calculer les dépenses par chapitre depuis les mandats réels
+  const mandatsFiltered = filterMandatsByPeriod(mandats.value);
+  const engageParChapitre = new Map<number, number>();
+  for (const m of mandatsFiltered) {
+    if (m.statut !== 'annule') {
+      engageParChapitre.set(m.chapitreId, (engageParChapitre.get(m.chapitreId) || 0) + m.montant);
+    }
+  }
+
+  const data = chapitres.value.map((c) => {
     return {
-      label: chapitre ? chapitre.code : 'N/A',
-      value: p.montantEngage,
+      label: c.code,
+      value: engageParChapitre.get(c.id!) || 0,
     };
-  });
+  }).filter((d) => d.value > 0);
 
   return {
     type: 'doughnut',
@@ -652,15 +686,31 @@ const depensesChartConfig = computed<ChartConfiguration>(() => {
 });
 
 const executionChartConfig = computed<ChartConfiguration>(() => {
-  const data = previsions.value.map((p) => {
-    const chapitre = chapitres.value.find((c) => c.id === p.chapitreId);
+  // Calculer l'exécution par chapitre depuis les mandats et prévisions
+  const mandatsFiltered = filterMandatsByPeriod(mandats.value);
+  const engageParChapitre = new Map<number, number>();
+  for (const m of mandatsFiltered) {
+    if (m.statut !== 'annule') {
+      engageParChapitre.set(m.chapitreId, (engageParChapitre.get(m.chapitreId) || 0) + m.montant);
+    }
+  }
+
+  // Agréger les prévisions par chapitre
+  const prevuParChapitre = new Map<number, number>();
+  for (const p of previsions.value) {
+    prevuParChapitre.set(p.chapitreId, (prevuParChapitre.get(p.chapitreId) || 0) + p.montantPrevu);
+  }
+
+  const data = chapitres.value.map((c) => {
+    const prevu = prevuParChapitre.get(c.id!) || 0;
+    const engage = engageParChapitre.get(c.id!) || 0;
     return {
-      label: chapitre ? chapitre.code : 'N/A',
-      prevu: p.montantPrevu,
-      engage: p.montantEngage,
-      disponible: p.montantDisponible,
+      label: c.code,
+      prevu,
+      engage,
+      disponible: Math.max(0, prevu - engage),
     };
-  });
+  }).filter((d) => d.prevu > 0 || d.engage > 0);
 
   return {
     type: 'bar',

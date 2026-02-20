@@ -1267,7 +1267,7 @@ export async function seedTestData(options: SeedOptions = {}) {
 
     // Seeding prévisions
     console.log(
-      `🌱 Seeding test previsions (1 per chapitre/sous-chapitre couple for ${CURRENT_YEAR} & ${CURRENT_YEAR - 1})...`,
+      `🌱 Seeding test previsions (1 per chapitre/sous-chapitre couple for ${CURRENT_YEAR})...`,
     );
     const previsionsCreated = await seedPrevisions(chapitreIds, utilisateurIds, sousChapitreIds);
     const previsionIds = previsionsCreated.map((p) => p.id!);
@@ -1468,11 +1468,9 @@ async function seedEtatFinancierMensuelRecette(taxeIds: number[], chapitreRecett
 
   const taxes = await db.taxes.toArray();
   const chapitresRecette = await db.chapitresRecette.toArray();
-  const declarations = await db.declarations
-    .filter((d) => d.exercice === CURRENT_YEAR - 1)
-    .toArray();
+  const declarations = await db.declarations.filter((d) => d.exercice === CURRENT_YEAR).toArray();
   const mandatsRecette = await db.mandatsRecette
-    .filter((m) => m.exercice === CURRENT_YEAR - 1)
+    .filter((m) => m.exercice === CURRENT_YEAR)
     .toArray();
 
   // Filtrer les taxes App6 fonctionnelles (codes >= 7000)
@@ -1553,7 +1551,7 @@ async function seedEtatFinancierMensuelRecette(taxeIds: number[], chapitreRecett
     if (!chapitreRecette) continue;
 
     etats.push({
-      annee: CURRENT_YEAR - 1,
+      annee: CURRENT_YEAR,
       taxeId,
       chapitreRecetteId,
       taxeCode: taxe.code,
@@ -1590,7 +1588,7 @@ async function seedEtatFinancierMensuelRecette(taxeIds: number[], chapitreRecett
 
   await db.etatFinancierMensuelRecette.bulkAdd(etats as EtatFinancierMensuelRecette[]);
   console.log(
-    `✅ ${etats.length} états financiers mensuels recettes créés pour ${CURRENT_YEAR - 1} (calculés à partir des déclarations)`,
+    `✅ ${etats.length} états financiers mensuels recettes créés pour ${CURRENT_YEAR} (calculés à partir des déclarations)`,
   );
 }
 
@@ -1601,30 +1599,9 @@ async function seedEtatFinancierMensuelRecette(taxeIds: number[], chapitreRecett
 async function seedBordereauxRecettes(personnelIds: number[]) {
   const bordereaux: Partial<BordereauRecette>[] = [];
 
-  // Générer 8 bordereaux validés pour les derniers mois de l'année précédente (pour avoir des données dans le passé)
-  for (let i = 1; i <= 8; i++) {
-    // Alterner entre Novembre et Décembre
-    const mois = i <= 4 ? 10 : 11; // 10 = Novembre, 11 = Décembre
-    const jour = randomAmount(1, 28);
-    const dateEmission = new Date(CURRENT_YEAR - 1, mois, jour);
-
-    bordereaux.push({
-      numero: i,
-      annee: CURRENT_YEAR - 1,
-      mairieId: DEFAULT_MAIRIE_ID,
-      montantTotal: 0, // Sera mis à jour après
-      nombreDeclarations: 0,
-      statut: 'ferme',
-      personnelId: randomChoice(personnelIds),
-      createdAt: dateEmission,
-      updatedAt: now,
-      dateTransmission: new Date(CURRENT_YEAR - 1, mois, jour + 5),
-    });
-  }
-
-  // Générer 6 bordereaux pour l'année courante (Janvier à Février)
-  for (let i = 9; i <= 14; i++) {
-    const mois = i <= 11 ? 0 : 1; // Janvier et Février
+  // Générer 14 bordereaux pour l'année 2026 (Janvier à Février)
+  for (let i = 1; i <= 14; i++) {
+    const mois = i <= 7 ? 0 : 1; // Janvier et Février
     const jour = randomAmount(1, 28);
     const dateEmission = new Date(CURRENT_YEAR, mois, jour);
 
@@ -1634,17 +1611,16 @@ async function seedBordereauxRecettes(personnelIds: number[]) {
       mairieId: DEFAULT_MAIRIE_ID,
       montantTotal: 0,
       nombreDeclarations: 0,
-      statut: randomChoice(['ouvert', 'ferme']),
+      statut: i <= 8 ? 'ferme' : randomChoice(['ouvert', 'ferme']),
       personnelId: randomChoice(personnelIds),
       createdAt: dateEmission,
       updatedAt: now,
+      ...(i <= 8 ? { dateTransmission: new Date(CURRENT_YEAR, mois, jour + 5) } : {}),
     });
   }
 
   await db.bordereauxRecette.bulkAdd(bordereaux as BordereauRecette[]);
-  console.log(
-    `✅ ${bordereaux.length} bordereaux de recettes créés (${CURRENT_YEAR - 1} + ${CURRENT_YEAR})`,
-  );
+  console.log(`✅ ${bordereaux.length} bordereaux de recettes créés (${CURRENT_YEAR})`);
 
   return await db.bordereauxRecette.toArray();
 }
@@ -1653,12 +1629,12 @@ async function seedPrevisionsRecettes(personnelIds: number[]) {
   const taxes = await db.taxes.toArray();
   const previsions: Partial<PrevisionRecette>[] = [];
 
-  // Prévisions pour l'année courante (2026)
+  // Prévisions pour l'année 2026
   for (const taxe of taxes) {
     if (!taxe.id) continue;
 
     const montantPrevu = randomAmount(100000, 5000000);
-    const montantRealise = 0; // Pas encore réalisé pour l'année courante
+    const montantRealise = 0;
 
     previsions.push({
       exercice: CURRENT_YEAR,
@@ -1668,37 +1644,13 @@ async function seedPrevisionsRecettes(personnelIds: number[]) {
       montantRealise,
       statut: 'validee',
       personnelId: randomChoice(personnelIds),
-      createdAt: new Date(CURRENT_YEAR - 1, 11, 15),
-      updatedAt: now,
-    });
-  }
-
-  console.log(`✅ ${previsions.length} prévisions de recettes créées pour ${CURRENT_YEAR}`);
-
-  // Prévisions pour l'année précédente (2025) - avec des données réalisées
-  for (const taxe of taxes) {
-    if (!taxe.id) continue;
-
-    const montantPrevu = randomAmount(100000, 5000000);
-    const montantRealise = Math.round(montantPrevu * (randomAmount(70, 120) / 100));
-
-    previsions.push({
-      exercice: CURRENT_YEAR - 1,
-      taxeId: taxe.id,
-      mairieId: DEFAULT_MAIRIE_ID,
-      montantPrevu,
-      montantRealise,
-      statut: 'validee',
-      personnelId: randomChoice(personnelIds),
-      createdAt: new Date(CURRENT_YEAR - 2, 11, 15),
+      createdAt: new Date(CURRENT_YEAR, 0, 1),
       updatedAt: now,
     });
   }
 
   await db.previsionsRecettes.bulkAdd(previsions as PrevisionRecette[]);
-  console.log(
-    `✅ ${previsions.length} prévisions de recettes créées au total (${CURRENT_YEAR} + ${CURRENT_YEAR - 1})`,
-  );
+  console.log(`✅ ${previsions.length} prévisions de recettes créées pour ${CURRENT_YEAR}`);
 }
 
 async function seedDeclarations(personnelIds: number[], bordereaux: BordereauRecette[]) {
@@ -1736,74 +1688,14 @@ async function seedDeclarations(personnelIds: number[], bordereaux: BordereauRec
   let numeroPiece = 1000;
   const bordereauMontants: Map<number, { total: number; count: number }> = new Map();
 
-  // Séparer bordereaux par année
-  const bordereauxPrevYear = bordereaux.filter((b) => b.annee === CURRENT_YEAR - 1);
-  const bordereauxCurrYear = bordereaux.filter((b) => b.annee === CURRENT_YEAR);
-
-  // Pour chaque taxe, créer 2 ou 3 déclarations validées pour l'année précédente
+  // Pour chaque taxe, créer 2 ou 3 déclarations pour 2026 (Janvier-Février)
   for (const taxe of app6Taxes) {
     if (!taxe.id) continue;
 
     const nombreDecls = randomAmount(2, 3);
 
     for (let i = 0; i < nombreDecls; i++) {
-      const bordereau =
-        bordereauxPrevYear.length > 0 ? randomChoice(bordereauxPrevYear) : randomChoice(bordereaux);
-      if (!bordereau || !bordereau.id) continue;
-
-      const montant = taxe.montant || randomAmount(5000, 500000);
-
-      const mois = randomChoice([10, 11]);
-      const jour = randomAmount(1, 28);
-      const d = new Date(CURRENT_YEAR - 1, mois, jour);
-
-      declarations.push({
-        exercice: CURRENT_YEAR - 1,
-        numeroPiece: `P-${numeroPiece++}`,
-        dateDeclaration: d,
-        dateEncaissement: d,
-        bordereauId: bordereau.id,
-        taxeId: taxe.id,
-        mairieId: DEFAULT_MAIRIE_ID,
-        contribuable: randomChoice(contribuables),
-        nomPartieVersante: randomChoice([
-          'Le Gérant',
-          'Le Comptable',
-          'Le Directeur',
-          'Le Propriétaire',
-        ]),
-        adresse: randomChoice([
-          "Abidjan, Côte d'Ivoire",
-          'Bouaké, CI',
-          'Yamoussoukro, CI',
-          'Korhogo, CI',
-        ]),
-        montant: montant,
-        montantRecette: montant,
-        modePaiement: randomChoice(['especes', 'cheque', 'virement', 'autre']),
-        statut: 'validee',
-        personnelId: randomChoice(personnelIds),
-        createdAt: d,
-        updatedAt: now,
-      });
-
-      const existing = bordereauMontants.get(bordereau.id) || { total: 0, count: 0 };
-      bordereauMontants.set(bordereau.id, {
-        total: existing.total + montant,
-        count: existing.count + 1,
-      });
-    }
-  }
-
-  // Pour chaque taxe, créer 1 ou 2 déclarations pour l'année courante (Janvier-Février)
-  for (const taxe of app6Taxes) {
-    if (!taxe.id) continue;
-
-    const nombreDecls = randomAmount(1, 2);
-
-    for (let i = 0; i < nombreDecls; i++) {
-      const bordereau =
-        bordereauxCurrYear.length > 0 ? randomChoice(bordereauxCurrYear) : randomChoice(bordereaux);
+      const bordereau = randomChoice(bordereaux);
       if (!bordereau || !bordereau.id) continue;
 
       const montant = taxe.montant || randomAmount(5000, 500000);
@@ -1859,7 +1751,9 @@ async function seedDeclarations(personnelIds: number[], bordereaux: BordereauRec
   }
 
   await db.declarations.bulkAdd(declarations as Declaration[]);
-  console.log(`✅ ${declarations.length} déclarations de recettes créées (2-3 par taxe, validées)`);
+  console.log(
+    `✅ ${declarations.length} déclarations de recettes créées pour ${CURRENT_YEAR} (2-3 par taxe)`,
+  );
 }
 
 async function seedPrevisions(
@@ -1869,7 +1763,7 @@ async function seedPrevisions(
 ) {
   const previsions: Partial<Prevision>[] = [];
 
-  // Année courante: créer une prévision pour CHAQUE combinaison sous-chapitre/chapitre
+  // Année 2026: créer une prévision pour CHAQUE combinaison sous-chapitre/chapitre
   console.log(
     `🌱 Creating previsions ${CURRENT_YEAR} for all sous-chapitres with all 8 chapitres...`,
   );
@@ -1890,56 +1784,17 @@ async function seedPrevisions(
         montantDisponible,
         statut: 'validee',
         personnelId: randomChoice(personnelIds),
-        createdAt: new Date(CURRENT_YEAR - 1, 11, 15),
+        createdAt: new Date(CURRENT_YEAR, 0, 1),
         updatedAt: now,
       };
 
       previsions.push(prevision);
     }
   }
-
-  const previsionsCurrentYearCount = previsions.length;
-  console.log(
-    `📊 ${previsionsCurrentYearCount} prévisions ${CURRENT_YEAR} créées (${sousChapitreIds.length} sous-chapitres x ${chapitreIds.length} chapitres)`,
-  );
-
-  // Créer UNE prévision pour CHAQUE couple chapitre/sous-chapitre pour l'année précédente (exactement 1 par couple)
-  console.log(
-    `🌱 Creating previsions ${CURRENT_YEAR - 1} for all sous-chapitres/chapitres (1 per couple)...`,
-  );
-
-  for (const sousChapitreId of sousChapitreIds) {
-    for (const chapitreId of chapitreIds) {
-      const montantPrevu = randomAmount(500000, 10000000);
-      const montantEngage = Math.round((montantPrevu * randomAmount(60, 95)) / 100);
-      const montantDisponible = montantPrevu - montantEngage;
-
-      const prevision: Partial<Prevision> = {
-        exercice: CURRENT_YEAR - 1,
-        chapitreId,
-        sousChapitreId,
-        mairieId: DEFAULT_MAIRIE_ID,
-        montantPrevu,
-        montantEngage,
-        montantDisponible,
-        statut: 'validee',
-        personnelId: randomChoice(personnelIds),
-        createdAt: new Date(CURRENT_YEAR - 2, 11, 15), // Créée en décembre de l'année précédente
-        updatedAt: now,
-      };
-
-      previsions.push(prevision);
-    }
-  }
-
-  const previsionsPreviousYearCount = previsions.length - previsionsCurrentYearCount;
-  console.log(
-    `📊 ${previsionsPreviousYearCount} prévisions ${CURRENT_YEAR - 1} créées (${sousChapitreIds.length} sous-chapitres x ${chapitreIds.length} chapitres)`,
-  );
 
   await db.previsions.bulkAdd(previsions as Prevision[]);
   console.log(
-    `✅ ${previsions.length} prévisions créées au total (${previsionsCurrentYearCount} pour ${CURRENT_YEAR} + ${previsionsPreviousYearCount} pour ${CURRENT_YEAR - 1})`,
+    `✅ ${previsions.length} prévisions créées pour ${CURRENT_YEAR} (${sousChapitreIds.length} sous-chapitres x ${chapitreIds.length} chapitres)`,
   );
 
   const created = await db.previsions.toArray();
@@ -1948,7 +1803,7 @@ async function seedPrevisions(
 
 async function seedBordereauMandats(personnelIds: number[], count: number = 20) {
   const bordereauMandats: Partial<BordereauMandat>[] = [];
-  const exercices = [CURRENT_YEAR - 2, CURRENT_YEAR - 1, CURRENT_YEAR];
+  const exercices = [CURRENT_YEAR];
   let numeroGlobal = 1;
 
   for (let i = 0; i < count; i++) {
@@ -1961,7 +1816,7 @@ async function seedBordereauMandats(personnelIds: number[], count: number = 20) 
     }
 
     const statuts: Array<'ouvert' | 'ferme'> = ['ouvert', 'ferme'];
-    const statut = exercice < CURRENT_YEAR ? 'ferme' : randomChoice(statuts);
+    const statut = randomChoice(statuts);
 
     bordereauMandats.push({
       numero: numeroGlobal++,
@@ -2124,7 +1979,7 @@ async function seedMandats(
 
 async function seedBordereauMandatsRecette(personnelIds: number[], count: number = 10) {
   const bordereaux: Partial<BordereauMandatRecette>[] = [];
-  const exercices = [2024, 2025];
+  const exercices = [CURRENT_YEAR];
   let numeroGlobal = 1;
 
   for (let i = 0; i < count; i++) {
@@ -2133,7 +1988,7 @@ async function seedBordereauMandatsRecette(personnelIds: number[], count: number
     const dateEmission = new Date(exercice, mois, randomAmount(1, 28));
 
     const statuts: ('ouvert' | 'ferme')[] = ['ouvert', 'ferme'];
-    const statut = exercice < 2025 ? 'ferme' : randomChoice(statuts);
+    const statut = randomChoice(statuts);
 
     bordereaux.push({
       numero: numeroGlobal++,
@@ -2191,16 +2046,16 @@ async function seedMandatsRecette(
 
   const MONTH_SPECS = [
     {
-      label: 'novembre',
+      label: 'janvier',
       exercice: CURRENT_YEAR,
-      start: new Date(CURRENT_YEAR, 10, 1),
-      end: new Date(CURRENT_YEAR, 10, 30),
+      start: new Date(CURRENT_YEAR, 0, 1),
+      end: new Date(CURRENT_YEAR, 0, 31),
     },
     {
-      label: 'décembre',
+      label: 'février',
       exercice: CURRENT_YEAR,
-      start: new Date(CURRENT_YEAR, 11, 1),
-      end: new Date(CURRENT_YEAR, 11, 31),
+      start: new Date(CURRENT_YEAR, 1, 1),
+      end: new Date(CURRENT_YEAR, 1, 28),
     },
   ];
 

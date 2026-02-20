@@ -316,7 +316,14 @@ import PageHeader from 'src/components/PageHeader.vue';
 import StatisticsCard from 'src/components/StatisticsCard.vue';
 import ChartCard from 'src/components/ChartCard.vue';
 import { db } from 'src/database/db';
-import type { Prevision, Mandat, Declaration, BordereauRecette } from 'src/database/db';
+import type {
+  Prevision,
+  Mandat,
+  Declaration,
+  BordereauRecette,
+  MandatRecette,
+  PrevisionRecette,
+} from 'src/database/db';
 
 const $q = useQuasar();
 
@@ -330,15 +337,21 @@ const previsions = ref<Prevision[]>([]);
 const mandats = ref<Mandat[]>([]);
 const declarations = ref<Declaration[]>([]);
 const bordereaux = ref<BordereauRecette[]>([]);
+const mandatsRecette = ref<MandatRecette[]>([]);
+const previsionsRecettes = ref<PrevisionRecette[]>([]);
 
 // Options
 const exerciceOptions = ref<number[]>([currentYear - 2, currentYear - 1, currentYear]);
 
-// Statistiques des dépenses
+// Statistiques des dépenses - calculées dynamiquement depuis les mandats
 const depensesStats = computed(() => {
   const budgetTotal = previsions.value.reduce((sum, p) => sum + p.montantPrevu, 0);
-  const montantEngage = previsions.value.reduce((sum, p) => sum + p.montantEngage, 0);
-  const montantDisponible = previsions.value.reduce((sum, p) => sum + p.montantDisponible, 0);
+
+  // Calculer le montant engagé depuis les mandats réels (non annulés)
+  const montantEngage = mandats.value
+    .filter((m) => m.statut !== 'annule')
+    .reduce((sum, m) => sum + m.montant, 0);
+  const montantDisponible = Math.max(0, budgetTotal - montantEngage);
 
   const nombreMandats = mandats.value.length;
   const mandatsBrouillon = mandats.value.filter((m) => m.statut === 'brouillon').length;
@@ -359,14 +372,25 @@ const depensesStats = computed(() => {
   };
 });
 
-// Statistiques des recettes
+// Statistiques des recettes - incluant déclarations et mandats recettes
 const recettesStats = computed(() => {
   const totalDeclarations = declarations.value.length;
   const declarationsValidees = declarations.value.filter((d) => d.statut === 'validee').length;
-  const montantTotal = declarations.value.reduce(
+  const montantDeclarations = declarations.value.reduce(
     (sum, d) => sum + (d.montantRecette || d.montant || 0),
     0,
   );
+
+  // Mandats de recettes (non annulés)
+  const montantMandatsRecette = mandatsRecette.value
+    .filter((m) => m.statut !== 'annule')
+    .reduce((sum, m) => sum + m.montant, 0);
+
+  // Montant total = déclarations + mandats recettes
+  const montantTotal = montantDeclarations + montantMandatsRecette;
+
+  // Prévisions recettes
+  const budgetPrevuRecettes = previsionsRecettes.value.reduce((sum, p) => sum + p.montantPrevu, 0);
 
   const totalBordereaux = bordereaux.value.length;
   const bordereauxFermes = bordereaux.value.filter((b) => b.statut === 'ferme').length;
@@ -378,6 +402,9 @@ const recettesStats = computed(() => {
     totalDeclarations,
     declarationsValidees,
     montantTotal,
+    montantDeclarations,
+    montantMandatsRecette,
+    budgetPrevuRecettes,
     totalBordereaux,
     bordereauxFermes,
     tauxValidation,
@@ -405,7 +432,14 @@ async function loadStatistics() {
     const mairieId = mairie?.id || 1;
     const exercice = selectedExercice.value;
 
-    const [previsionsList, mandatsList, declarationsList, bordereauxList] = await Promise.all([
+    const [
+      previsionsList,
+      mandatsList,
+      declarationsList,
+      bordereauxList,
+      mandatsRecetteList,
+      prevRecettesList,
+    ] = await Promise.all([
       db.previsions
         .where('mairieId')
         .equals(mairieId)
@@ -426,12 +460,24 @@ async function loadStatistics() {
         .equals(mairieId)
         .filter((b) => b.annee === exercice)
         .toArray(),
+      db.mandatsRecette
+        .where('mairieId')
+        .equals(mairieId)
+        .filter((m) => m.exercice === exercice)
+        .toArray(),
+      db.previsionsRecettes
+        .where('mairieId')
+        .equals(mairieId)
+        .filter((p) => p.exercice === exercice)
+        .toArray(),
     ]);
 
     previsions.value = previsionsList;
     mandats.value = mandatsList;
     declarations.value = declarationsList;
     bordereaux.value = bordereauxList;
+    mandatsRecette.value = mandatsRecetteList;
+    previsionsRecettes.value = prevRecettesList;
   } catch (error) {
     console.error('Erreur lors du chargement des statistiques:', error);
     $q.notify({
@@ -530,16 +576,20 @@ const evolutionChartConfig = computed<ChartConfiguration>(() => {
   const depensesData = new Array(12).fill(0);
   const recettesData = new Array(12).fill(0);
 
-  mandats.value.forEach((m) => {
-    const date = new Date(m.dateMandat);
-    if (date.getFullYear() === selectedExercice.value) {
-      const month = date.getMonth();
-      if (month >= 0 && month < 12) {
-        depensesData[month] += m.montant;
+  // Dépenses: mandats non annulés
+  mandats.value
+    .filter((m) => m.statut !== 'annule')
+    .forEach((m) => {
+      const date = new Date(m.dateMandat);
+      if (date.getFullYear() === selectedExercice.value) {
+        const month = date.getMonth();
+        if (month >= 0 && month < 12) {
+          depensesData[month] += m.montant;
+        }
       }
-    }
-  });
+    });
 
+  // Recettes: déclarations validées
   declarations.value.forEach((d) => {
     if (d.dateEncaissement) {
       const date = new Date(d.dateEncaissement);
@@ -551,6 +601,19 @@ const evolutionChartConfig = computed<ChartConfiguration>(() => {
       }
     }
   });
+
+  // Recettes: mandats de recettes non annulés
+  mandatsRecette.value
+    .filter((m) => m.statut !== 'annule')
+    .forEach((m) => {
+      const date = new Date(m.dateMandat);
+      if (date.getFullYear() === selectedExercice.value) {
+        const month = date.getMonth();
+        if (month >= 0 && month < 12) {
+          recettesData[month] += m.montant;
+        }
+      }
+    });
 
   return {
     type: 'line',
