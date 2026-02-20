@@ -666,15 +666,15 @@
             rows.push(chapTotalRow);
           }
 
-          // Sous-total de la section
+          // Arrêté de compte de la section
           const sectionTotalRow = document.createElement('tr');
-          sectionTotalRow.className = 'sous-total';
+          sectionTotalRow.className = 'total-section';
           const sectionPercent = calculatePercent(section.totaux.total, section.totaux.prevision);
           // RESTE A RECOUVRER = Prévision - Total Recouvré
           const sectionResteARecouvrer = section.totaux.prevision - section.totaux.total;
           sectionTotalRow.innerHTML = `
-            <td>S/T ${section.code}</td>
-            <td>SOUS TOTAL SECTION ${section.code}</td>
+            <td>S/${section.code}</td>
+            <td>ARRÊTÉ DE COMPTE SECTION ${section.code}</td>
             <td class="col-num">${formatNumber(section.totaux.prevision)}</td>
             <td class="col-num">${formatNumber(section.totaux.emissionAnt)}</td>
             <td class="col-num">${formatNumber(section.totaux.emissionMois)}</td>

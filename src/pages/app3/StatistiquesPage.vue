@@ -99,8 +99,8 @@
       <div class="col-12 col-sm-6 col-md-3">
         <StatisticsCard
           :value="stats.nombreMandats"
-          title="Mandats"
-          :subtitle="`${stats.mandatsBrouillon} brouillon / ${stats.mandatsPayes} payés`"
+          title="Mandats Payés"
+          :subtitle="`${stats.totalBordereaux} bordereaux`"
           icon="receipt"
           icon-color="grey-7"
           border-color="#E67E22"
@@ -116,6 +116,51 @@
           icon-color="grey-7"
           border-color="#2E7D32"
           format="currency"
+        />
+      </div>
+    </div>
+
+    <!-- Cartes bordereaux -->
+    <div class="row q-col-gutter-md q-mb-md">
+      <div class="col-12 col-sm-6 col-md-3">
+        <StatisticsCard
+          :value="stats.totalBordereaux"
+          title="Bordereaux"
+          :subtitle="`${stats.bordereauxFermes} fermés / ${stats.bordereauxOuverts} ouverts`"
+          icon="folder_open"
+          icon-color="grey-7"
+          border-color="#E67E22"
+        />
+      </div>
+      <div class="col-12 col-sm-6 col-md-3">
+        <StatisticsCard
+          :value="stats.montantTotalBordereaux"
+          title="Montant Bordereaux"
+          subtitle="Total des bordereaux"
+          icon="account_balance"
+          icon-color="grey-7"
+          border-color="#2E7D32"
+          format="currency"
+        />
+      </div>
+      <div class="col-12 col-sm-6 col-md-3">
+        <StatisticsCard
+          :value="stats.bordereauxFermes"
+          title="Bordereaux Fermés"
+          subtitle="Validés et transmis"
+          icon="lock"
+          icon-color="grey-7"
+          border-color="#1A1A1A"
+        />
+      </div>
+      <div class="col-12 col-sm-6 col-md-3">
+        <StatisticsCard
+          :value="stats.nombreMandatsBordereaux"
+          title="Mandats / Bordereaux"
+          subtitle="Mandats dans les bordereaux"
+          icon="assignment"
+          icon-color="grey-7"
+          border-color="#757575"
         />
       </div>
     </div>
@@ -219,79 +264,86 @@
         </q-card>
       </div>
 
-      <!-- Statistiques par statut -->
+      <!-- Résumé Bordereaux -->
       <div v-if="!loading && stats.budgetTotal > 0" class="col-12 col-md-6">
         <q-card class="activity-card">
           <q-card-section class="bg-grey-1">
-            <div class="text-h6 text-grey-8">Répartition par Statut</div>
+            <div class="text-h6 text-grey-8">Résumé des Bordereaux</div>
           </q-card-section>
           <q-card-section>
             <q-list separator>
               <q-item>
                 <q-item-section avatar>
-                  <q-avatar color="primary" text-color="white" icon="summarize" />
+                  <q-avatar color="primary" text-color="white" icon="folder_open" />
                 </q-item-section>
                 <q-item-section>
-                  <q-item-label class="text-weight-bold">Total</q-item-label>
-                  <q-item-label caption>Ensemble des mandats</q-item-label>
+                  <q-item-label class="text-weight-bold">Total Bordereaux</q-item-label>
+                  <q-item-label caption>Sur l'exercice {{ selectedExercice }}</q-item-label>
                 </q-item-section>
                 <q-item-section side>
                   <q-item-label class="text-h6" style="color: #e67e22">
-                    {{ stats.nombreMandats }}
+                    {{ stats.totalBordereaux }}
                   </q-item-label>
-                  <q-item-label caption>mandats</q-item-label>
                 </q-item-section>
               </q-item>
 
               <q-item>
                 <q-item-section avatar>
-                  <q-avatar color="grey" text-color="white" icon="edit" />
+                  <q-avatar style="background-color: #2e7d32" text-color="white" icon="lock" />
                 </q-item-section>
                 <q-item-section>
-                  <q-item-label class="text-weight-bold">Brouillon</q-item-label>
-                  <q-item-label caption>Mandats en préparation</q-item-label>
-                </q-item-section>
-                <q-item-section side>
-                  <q-item-label class="text-h6" style="color: #9e9e9e">
-                    {{ stats.mandatsBrouillon }}
-                  </q-item-label>
-                  <q-item-label caption>mandats</q-item-label>
-                </q-item-section>
-              </q-item>
-
-              <q-item>
-                <q-item-section avatar>
-                  <q-avatar
-                    style="background-color: #2e7d32"
-                    text-color="white"
-                    icon="check_circle"
-                  />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label class="text-weight-bold">Payés</q-item-label>
-                  <q-item-label caption>Mandats payés</q-item-label>
+                  <q-item-label class="text-weight-bold">Fermés</q-item-label>
+                  <q-item-label caption>Bordereaux validés et transmis</q-item-label>
                 </q-item-section>
                 <q-item-section side>
                   <q-item-label class="text-h6" style="color: #2e7d32">
-                    {{ stats.mandatsPayes }}
+                    {{ stats.bordereauxFermes }}
                   </q-item-label>
-                  <q-item-label caption>mandats</q-item-label>
                 </q-item-section>
               </q-item>
 
               <q-item>
                 <q-item-section avatar>
-                  <q-avatar color="negative" text-color="white" icon="cancel" />
+                  <q-avatar color="warning" text-color="white" icon="lock_open" />
                 </q-item-section>
                 <q-item-section>
-                  <q-item-label class="text-weight-bold">Annulés</q-item-label>
-                  <q-item-label caption>Mandats annulés</q-item-label>
+                  <q-item-label class="text-weight-bold">Ouverts</q-item-label>
+                  <q-item-label caption>Bordereaux en cours</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-item-label class="text-h6" style="color: #e67e22">
+                    {{ stats.bordereauxOuverts }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+
+              <q-item>
+                <q-item-section avatar>
+                  <q-avatar style="background-color: #1a1a1a" text-color="white" icon="payments" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label class="text-weight-bold">Montant Total</q-item-label>
+                  <q-item-label caption>Somme des bordereaux</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-item-label class="text-h6" style="color: #1a1a1a">
+                    {{ formatMontant(stats.montantTotalBordereaux) }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+
+              <q-item>
+                <q-item-section avatar>
+                  <q-avatar color="grey-7" text-color="white" icon="receipt" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label class="text-weight-bold">Mandats Payés</q-item-label>
+                  <q-item-label caption>Inclus dans les bordereaux</q-item-label>
                 </q-item-section>
                 <q-item-section side>
                   <q-item-label class="text-h6 text-grey-8">
-                    {{ stats.mandatsAnnules }}
+                    {{ stats.nombreMandats }}
                   </q-item-label>
-                  <q-item-label caption>mandats</q-item-label>
                 </q-item-section>
               </q-item>
             </q-list>
@@ -343,7 +395,7 @@ import PageHeader from 'src/components/PageHeader.vue';
 import StatisticsCard from 'src/components/StatisticsCard.vue';
 import ChartCard from 'src/components/ChartCard.vue';
 import { db } from 'src/database/db';
-import type { Prevision, Mandat, Chapitre } from 'src/database/db';
+import type { Prevision, Mandat, Chapitre, BordereauMandat } from 'src/database/db';
 
 const $q = useQuasar();
 
@@ -359,6 +411,7 @@ const dateFin = ref('');
 const previsions = ref<Prevision[]>([]);
 const mandats = ref<Mandat[]>([]);
 const chapitres = ref<Chapitre[]>([]);
+const bordereauMandats = ref<BordereauMandat[]>([]);
 
 // Options
 const exerciceOptions = ref<number[]>([currentYear - 2, currentYear - 1, currentYear]);
@@ -372,100 +425,111 @@ const periodOptions = [
   { label: 'Personnalisé', value: 'custom' },
 ];
 
-// Statistiques calculées dynamiquement à partir des mandats réels
+// Statistiques calculées (uniquement mandats payés)
 const stats = computed(() => {
   const budgetTotal = previsions.value.reduce((sum, p) => sum + p.montantPrevu, 0);
 
-  // Filtrer les mandats par période
+  // Filtrer les mandats par période - uniquement les payés
   const mandatsFiltered = filterMandatsByPeriod(mandats.value);
-
-  // Calculer le montant engagé à partir des mandats réels (non annulés)
-  const montantEngage = mandatsFiltered
-    .filter((m) => m.statut !== 'annule')
-    .reduce((sum, m) => sum + m.montant, 0);
+  const mandatsPayesList = mandatsFiltered.filter((m) => m.statut === 'paye');
+  const montantEngage = mandatsPayesList.reduce((sum, m) => sum + m.montant, 0);
   const montantDisponible = Math.max(0, budgetTotal - montantEngage);
 
-  const nombreMandats = mandatsFiltered.length;
-  const mandatsBrouillon = mandatsFiltered.filter((m) => m.statut === 'brouillon').length;
-  const mandatsPayes = mandatsFiltered.filter((m) => m.statut === 'paye').length;
-  const mandatsAnnules = mandatsFiltered.filter((m) => m.statut === 'annule').length;
+  const nombreMandats = mandatsPayesList.length;
+  const mandatsPayes = mandatsPayesList.length;
 
   const tauxExecution = budgetTotal > 0 ? Math.round((montantEngage / budgetTotal) * 100) : 0;
+
+  // Stats bordereaux
+  const totalBordereaux = bordereauMandats.value.length;
+  const bordereauxFermes = bordereauMandats.value.filter((b) => b.statut === 'ferme').length;
+  const bordereauxOuverts = bordereauMandats.value.filter((b) => b.statut === 'ouvert').length;
+  const montantTotalBordereaux = bordereauMandats.value.reduce((sum, b) => sum + b.montantTotal, 0);
+  const nombreMandatsBordereaux = bordereauMandats.value.reduce(
+    (sum, b) => sum + b.nombreMandats,
+    0,
+  );
 
   return {
     budgetTotal,
     montantEngage,
     montantDisponible,
     nombreMandats,
-    mandatsBrouillon,
     mandatsPayes,
-    mandatsAnnules,
     tauxExecution,
+    totalBordereaux,
+    bordereauxFermes,
+    bordereauxOuverts,
+    montantTotalBordereaux,
+    nombreMandatsBordereaux,
   };
 });
 
-// Détails par chapitre - calculés dynamiquement depuis les mandats
+// Détails par chapitre
 const previsionsStats = computed(() => {
-  // Agréger les prévisions par chapitre
-  const chapitreMap = new Map<number, { prevu: number; chapitreId: number }>();
-  for (const p of previsions.value) {
-    const existing = chapitreMap.get(p.chapitreId);
-    if (existing) {
-      existing.prevu += p.montantPrevu;
-    } else {
-      chapitreMap.set(p.chapitreId, { prevu: p.montantPrevu, chapitreId: p.chapitreId });
-    }
-  }
-
-  // Calculer les engagements réels depuis les mandats (non annulés)
-  const mandatsFiltered = filterMandatsByPeriod(mandats.value);
-  const engageParChapitre = new Map<number, number>();
-  for (const m of mandatsFiltered) {
-    if (m.statut !== 'annule') {
-      engageParChapitre.set(m.chapitreId, (engageParChapitre.get(m.chapitreId) || 0) + m.montant);
-    }
-  }
-
-  return Array.from(chapitreMap.entries()).map(([chapitreId, data]) => {
-    const chapitre = chapitres.value.find((c) => c.id === chapitreId);
-    const engage = engageParChapitre.get(chapitreId) || 0;
-    const disponible = Math.max(0, data.prevu - engage);
-    const taux = data.prevu > 0 ? Math.round((engage / data.prevu) * 100) : 0;
+  return previsions.value.map((p) => {
+    const chapitre = chapitres.value.find((c) => c.id === p.chapitreId);
+    const taux = p.montantPrevu > 0 ? Math.round((p.montantEngage / p.montantPrevu) * 100) : 0;
 
     return {
-      id: chapitreId,
+      id: p.id!,
       chapitre: chapitre ? `${chapitre.code} - ${chapitre.libelle}` : 'N/A',
-      prevu: formatMontant(data.prevu),
-      engage: formatMontant(engage),
-      disponible: formatMontant(disponible),
+      prevu: formatMontant(p.montantPrevu),
+      engage: formatMontant(p.montantEngage),
+      disponible: formatMontant(p.montantDisponible),
       taux,
     };
   });
 });
 
-// Alertes budgétaires
+// Alertes budgétaires (toujours 5)
 const alertes = computed(() => {
-  const alerts: Array<{ icon: string; color: string; titre: string; description: string }> = [];
+  const allAlerts: Array<{
+    icon: string;
+    color: string;
+    titre: string;
+    description: string;
+    taux: number;
+  }> = [];
 
   previsionsStats.value.forEach((stat) => {
     if (stat.taux >= 90) {
-      alerts.push({
+      allAlerts.push({
         icon: 'warning',
         color: 'negative',
         titre: `Budget critique - ${stat.chapitre}`,
         description: `${stat.taux}% du budget utilisé. Attention au dépassement.`,
+        taux: stat.taux,
       });
     } else if (stat.taux >= 75) {
-      alerts.push({
+      allAlerts.push({
         icon: 'info',
         color: 'warning',
         titre: `Budget élevé - ${stat.chapitre}`,
         description: `${stat.taux}% du budget utilisé. Surveiller l'évolution.`,
+        taux: stat.taux,
+      });
+    } else if (stat.taux >= 50) {
+      allAlerts.push({
+        icon: 'trending_up',
+        color: 'primary',
+        titre: `Budget modéré - ${stat.chapitre}`,
+        description: `${stat.taux}% du budget utilisé. Exécution en cours.`,
+        taux: stat.taux,
+      });
+    } else {
+      allAlerts.push({
+        icon: 'check_circle',
+        color: 'positive',
+        titre: `Budget normal - ${stat.chapitre}`,
+        description: `${stat.taux}% du budget utilisé. Situation saine.`,
+        taux: stat.taux,
       });
     }
   });
 
-  return alerts;
+  // Trier par taux décroissant et prendre les 5 premières
+  return allAlerts.sort((a, b) => b.taux - a.taux).slice(0, 5);
 });
 
 // Colonnes du tableau
@@ -576,7 +640,7 @@ function onPeriodChange() {
 
 function resetFilters() {
   periodFilter.value = 'annee';
-  selectedExercice.value = currentYear;
+  selectedExercice.value = currentYear - 1;
   onPeriodChange();
 }
 
@@ -595,7 +659,7 @@ async function loadStatistics() {
 
     const exercice = selectedExercice.value;
 
-    const [previsionsList, mandatsList, chapitresList] = await Promise.all([
+    const [previsionsList, mandatsList, chapitresList, bordereauMandatsList] = await Promise.all([
       db.previsions
         .where('mairieId')
         .equals(mairieId)
@@ -611,11 +675,17 @@ async function loadStatistics() {
         .equals(mairieId)
         .filter((c) => c.actif)
         .toArray(),
+      db.bordereauMandats
+        .where('mairieId')
+        .equals(mairieId)
+        .filter((b) => b.exercice === exercice)
+        .toArray(),
     ]);
 
     previsions.value = previsionsList;
     mandats.value = mandatsList;
     chapitres.value = chapitresList;
+    bordereauMandats.value = bordereauMandatsList;
   } catch (error) {
     console.error('Erreur lors du chargement des statistiques:', error);
     $q.notify({
@@ -629,21 +699,19 @@ async function loadStatistics() {
 
 // Configuration des graphiques
 const depensesChartConfig = computed<ChartConfiguration>(() => {
-  // Calculer les dépenses par chapitre depuis les mandats réels
-  const mandatsFiltered = filterMandatsByPeriod(mandats.value);
-  const engageParChapitre = new Map<number, number>();
-  for (const m of mandatsFiltered) {
-    if (m.statut !== 'annule') {
-      engageParChapitre.set(m.chapitreId, (engageParChapitre.get(m.chapitreId) || 0) + m.montant);
-    }
-  }
-
-  const data = chapitres.value.map((c) => {
-    return {
-      label: c.code,
-      value: engageParChapitre.get(c.id!) || 0,
-    };
-  }).filter((d) => d.value > 0);
+  // Top 5 chapitres par montant engagé
+  const data = previsions.value
+    .map((p) => {
+      const chapitre = chapitres.value.find((c) => c.id === p.chapitreId);
+      return {
+        label: chapitre ? `Ch.${chapitre.code}` : 'N/A',
+        fullLabel: chapitre ? `${chapitre.code} - ${chapitre.libelle}` : 'N/A',
+        value: p.montantEngage,
+      };
+    })
+    .filter((d) => d.value > 0)
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 5);
 
   return {
     type: 'doughnut',
@@ -653,16 +721,7 @@ const depensesChartConfig = computed<ChartConfiguration>(() => {
         {
           label: 'Dépenses',
           data: data.map((d) => d.value),
-          backgroundColor: [
-            '#E67E22', // Orange (Primary)
-            '#2E7D32', // Green (Secondary)
-            '#757575', // Grey
-            '#f57c00', // Dark Orange
-            '#388e3c', // Light Green
-            '#616161', // Dark Grey
-            '#ffb74d', // Light Orange
-            '#81c784', // Pale Green
-          ],
+          backgroundColor: ['#E67E22', '#2E7D32', '#757575', '#f57c00', '#388e3c'],
         },
       ],
     },
@@ -674,9 +733,10 @@ const depensesChartConfig = computed<ChartConfiguration>(() => {
         tooltip: {
           callbacks: {
             label: function (context: TooltipItem<keyof ChartTypeRegistry>) {
-              const label = context.label || '';
+              const idx = context.dataIndex;
+              const fullLabel = data[idx]?.fullLabel || context.label || '';
               const value = context.parsed || 0;
-              return `${label}: ${formatMontant(value)}`;
+              return `${fullLabel}: ${formatMontant(value)}`;
             },
           },
         },
@@ -686,31 +746,20 @@ const depensesChartConfig = computed<ChartConfiguration>(() => {
 });
 
 const executionChartConfig = computed<ChartConfiguration>(() => {
-  // Calculer l'exécution par chapitre depuis les mandats et prévisions
-  const mandatsFiltered = filterMandatsByPeriod(mandats.value);
-  const engageParChapitre = new Map<number, number>();
-  for (const m of mandatsFiltered) {
-    if (m.statut !== 'annule') {
-      engageParChapitre.set(m.chapitreId, (engageParChapitre.get(m.chapitreId) || 0) + m.montant);
-    }
-  }
-
-  // Agréger les prévisions par chapitre
-  const prevuParChapitre = new Map<number, number>();
-  for (const p of previsions.value) {
-    prevuParChapitre.set(p.chapitreId, (prevuParChapitre.get(p.chapitreId) || 0) + p.montantPrevu);
-  }
-
-  const data = chapitres.value.map((c) => {
-    const prevu = prevuParChapitre.get(c.id!) || 0;
-    const engage = engageParChapitre.get(c.id!) || 0;
-    return {
-      label: c.code,
-      prevu,
-      engage,
-      disponible: Math.max(0, prevu - engage),
-    };
-  }).filter((d) => d.prevu > 0 || d.engage > 0);
+  // Top 5 chapitres par budget prévu, barres horizontales empilées
+  const data = previsions.value
+    .map((p) => {
+      const chapitre = chapitres.value.find((c) => c.id === p.chapitreId);
+      return {
+        label: chapitre ? `Ch.${chapitre.code}` : 'N/A',
+        engage: p.montantEngage,
+        disponible: p.montantDisponible,
+        taux: p.montantPrevu > 0 ? Math.round((p.montantEngage / p.montantPrevu) * 100) : 0,
+      };
+    })
+    .filter((d) => d.engage > 0 || d.disponible > 0)
+    .sort((a, b) => b.engage + b.disponible - (a.engage + a.disponible))
+    .slice(0, 5);
 
   return {
     type: 'bar',
@@ -718,12 +767,7 @@ const executionChartConfig = computed<ChartConfiguration>(() => {
       labels: data.map((d) => d.label),
       datasets: [
         {
-          label: 'Budget Prévu',
-          data: data.map((d) => d.prevu),
-          backgroundColor: '#6B7280',
-        },
-        {
-          label: 'Montant Engagé',
+          label: 'Engagé',
           data: data.map((d) => d.engage),
           backgroundColor: '#E67E22',
         },
@@ -737,26 +781,33 @@ const executionChartConfig = computed<ChartConfiguration>(() => {
     options: {
       responsive: true,
       maintainAspectRatio: true,
+      indexAxis: 'y',
       plugins: {
         legend: { position: 'bottom' },
         tooltip: {
           callbacks: {
             label: function (context: TooltipItem<keyof ChartTypeRegistry>) {
               const label = context.dataset.label || '';
-              const value = context.parsed.y || 0;
-              return `${label}: ${formatMontant(value)}`;
+              const value = context.parsed.x || 0;
+              const idx = context.dataIndex;
+              const taux = data[idx]?.taux || 0;
+              return `${label}: ${formatMontant(value)} (${taux}%)`;
             },
           },
         },
       },
       scales: {
-        y: {
+        x: {
+          stacked: true,
           beginAtZero: true,
           ticks: {
             callback: function (tickValue: string | number) {
               return formatMontant(Number(tickValue));
             },
           },
+        },
+        y: {
+          stacked: true,
         },
       },
     },
@@ -778,24 +829,18 @@ const evolutionChartConfig = computed<ChartConfiguration>(() => {
     'Nov',
     'Déc',
   ];
-  const brouillonData = new Array(12).fill(0);
   const payeData = new Array(12).fill(0);
 
+  // Uniquement les mandats payés
   mandats.value.forEach((m) => {
+    if (m.statut !== 'paye') return;
     const date = new Date(m.dateMandat);
     if (date.getFullYear() === selectedExercice.value) {
       const month = date.getMonth();
       if (month >= 0 && month < 12) {
-        if (m.statut === 'brouillon') {
-          const val = brouillonData[month];
-          if (typeof val === 'number') {
-            brouillonData[month] = val + m.montant;
-          }
-        } else if (m.statut === 'paye') {
-          const val = payeData[month];
-          if (typeof val === 'number') {
-            payeData[month] = val + m.montant;
-          }
+        const val = payeData[month];
+        if (typeof val === 'number') {
+          payeData[month] = val + m.montant;
         }
       }
     }
@@ -807,24 +852,18 @@ const evolutionChartConfig = computed<ChartConfiguration>(() => {
       labels,
       datasets: [
         {
-          label: 'Brouillons',
-          data: brouillonData,
-          borderColor: '#6B7280',
-          backgroundColor: 'rgba(107, 114, 128, 0.1)',
-          tension: 0.4,
-        },
-        {
-          label: 'Payés',
+          label: 'Mandats Payés',
           data: payeData,
           borderColor: '#2E7D32',
           backgroundColor: 'rgba(46, 125, 50, 0.1)',
           tension: 0.4,
+          fill: true,
         },
       ],
     },
     options: {
       responsive: true,
-      maintainAspectRatio: true,
+      maintainAspectRatio: false,
       plugins: {
         legend: { position: 'bottom' },
         tooltip: {

@@ -100,7 +100,7 @@ export async function seedDefaultData() {
   await db.utilisateurs.bulkAdd([
     {
       username: 'admin',
-      password: 'password',
+      password: 'Sigobc@2026!',
       nom: 'Administrateur',
       prenom: 'Complet',
       email: 'admin@sigobc.sn',
@@ -1267,7 +1267,7 @@ export async function seedTestData(options: SeedOptions = {}) {
 
     // Seeding prévisions
     console.log(
-      `🌱 Seeding test previsions (1 per chapitre/sous-chapitre couple for ${CURRENT_YEAR})...`,
+      `🌱 Seeding test previsions (1 per chapitre/sous-chapitre couple for ${CURRENT_YEAR} & ${CURRENT_YEAR - 1})...`,
     );
     const previsionsCreated = await seedPrevisions(chapitreIds, utilisateurIds, sousChapitreIds);
     const previsionIds = previsionsCreated.map((p) => p.id!);
@@ -1285,6 +1285,10 @@ export async function seedTestData(options: SeedOptions = {}) {
       utilisateurIds,
       bordereauMandatsCreated,
     );
+
+    // Mettre à jour les prévisions avec les montants engagés réels
+    console.log('🌱 Mise à jour des montants engagés dans les prévisions...');
+    await updatePrevisionsFromMandats();
 
     // =================================================================
     // APP6 - RECETTES SEEDERS
@@ -1368,6 +1372,41 @@ export async function clearDatabase() {
 }
 
 // =================================================================
+//           MISE À JOUR DES PRÉVISIONS DEPUIS LES MANDATS
+// =================================================================
+
+/**
+ * Recalcule montantEngage et montantDisponible des prévisions
+ * à partir des mandats payés réellement enregistrés.
+ */
+async function updatePrevisionsFromMandats() {
+  const previsions = await db.previsions.toArray();
+  const mandats = await db.mandats.filter((m) => m.statut === 'paye').toArray();
+
+  // Calculer le montant engagé par couple (exercice, chapitreId, sousChapitreId)
+  const engageMap = new Map<string, number>();
+  for (const m of mandats) {
+    const key = `${m.exercice}-${m.chapitreId}-${m.sousChapitreId}`;
+    engageMap.set(key, (engageMap.get(key) || 0) + m.montant);
+  }
+
+  let updated = 0;
+  for (const prev of previsions) {
+    const key = `${prev.exercice}-${prev.chapitreId}-${prev.sousChapitreId || 0}`;
+    const engage = engageMap.get(key) || 0;
+    if (engage > 0) {
+      await db.previsions.update(prev.id, {
+        montantEngage: engage,
+        montantDisponible: Math.max(0, prev.montantPrevu - engage),
+      });
+      updated++;
+    }
+  }
+
+  console.log(`✅ ${updated} prévisions mises à jour avec les montants engagés réels`);
+}
+
+// =================================================================
 //           SEEDERS POUR CHAPITRES RECETTES (Nature des recettes)
 // =================================================================
 
@@ -1376,7 +1415,7 @@ export async function clearDatabase() {
  * Inclut un chapitre par défaut "Autres"
  */
 async function seedChapitresRecette() {
-  const chapitresRecette: Partial<ChapitreRecette>[] = [
+  const chapitresRecette: Omit<ChapitreRecette, 'id'>[] = [
     {
       code: '1',
       libelle: 'RECETTES FISCALES',
@@ -1451,7 +1490,7 @@ async function seedChapitresRecette() {
     },
   ];
 
-  await db.chapitresRecette.bulkAdd(chapitresRecette as ChapitreRecette[]);
+  await db.chapitresRecette.bulkAdd(chapitresRecette);
   console.log(`✅ ${chapitresRecette.length} chapitres recettes créés (dont "Autres" par défaut)`);
 }
 
@@ -1464,7 +1503,7 @@ async function seedChapitresRecette() {
  * Calcule les états à partir des déclarations existantes (comme les mandats impactent les états des dépenses)
  */
 async function seedEtatFinancierMensuelRecette(taxeIds: number[], chapitreRecetteIds: number[]) {
-  const etats: Partial<EtatFinancierMensuelRecette>[] = [];
+  const etats: Omit<EtatFinancierMensuelRecette, 'id'>[] = [];
 
   const taxes = await db.taxes.toArray();
   const chapitresRecette = await db.chapitresRecette.toArray();
@@ -1586,7 +1625,7 @@ async function seedEtatFinancierMensuelRecette(taxeIds: number[], chapitreRecett
     });
   }
 
-  await db.etatFinancierMensuelRecette.bulkAdd(etats as EtatFinancierMensuelRecette[]);
+  await db.etatFinancierMensuelRecette.bulkAdd(etats);
   console.log(
     `✅ ${etats.length} états financiers mensuels recettes créés pour ${CURRENT_YEAR} (calculés à partir des déclarations)`,
   );
@@ -1599,9 +1638,30 @@ async function seedEtatFinancierMensuelRecette(taxeIds: number[], chapitreRecett
 async function seedBordereauxRecettes(personnelIds: number[]) {
   const bordereaux: Partial<BordereauRecette>[] = [];
 
-  // Générer 14 bordereaux pour l'année 2026 (Janvier à Février)
-  for (let i = 1; i <= 14; i++) {
-    const mois = i <= 7 ? 0 : 1; // Janvier et Février
+  // Générer 8 bordereaux validés pour les derniers mois de l'année précédente (pour avoir des données dans le passé)
+  for (let i = 1; i <= 8; i++) {
+    // Alterner entre Novembre et Décembre
+    const mois = i <= 4 ? 10 : 11; // 10 = Novembre, 11 = Décembre
+    const jour = randomAmount(1, 28);
+    const dateEmission = new Date(CURRENT_YEAR - 1, mois, jour);
+
+    bordereaux.push({
+      numero: i,
+      annee: CURRENT_YEAR - 1,
+      mairieId: DEFAULT_MAIRIE_ID,
+      montantTotal: 0, // Sera mis à jour après
+      nombreDeclarations: 0,
+      statut: 'ferme',
+      personnelId: randomChoice(personnelIds),
+      createdAt: dateEmission,
+      updatedAt: now,
+      dateTransmission: new Date(CURRENT_YEAR - 1, mois, jour + 5),
+    });
+  }
+
+  // Générer 6 bordereaux pour l'année courante (Janvier à Février)
+  for (let i = 9; i <= 14; i++) {
+    const mois = i <= 11 ? 0 : 1; // Janvier et Février
     const jour = randomAmount(1, 28);
     const dateEmission = new Date(CURRENT_YEAR, mois, jour);
 
@@ -1611,30 +1671,31 @@ async function seedBordereauxRecettes(personnelIds: number[]) {
       mairieId: DEFAULT_MAIRIE_ID,
       montantTotal: 0,
       nombreDeclarations: 0,
-      statut: i <= 8 ? 'ferme' : randomChoice(['ouvert', 'ferme']),
+      statut: randomChoice(['ouvert', 'ferme']),
       personnelId: randomChoice(personnelIds),
       createdAt: dateEmission,
       updatedAt: now,
-      ...(i <= 8 ? { dateTransmission: new Date(CURRENT_YEAR, mois, jour + 5) } : {}),
     });
   }
 
   await db.bordereauxRecette.bulkAdd(bordereaux as BordereauRecette[]);
-  console.log(`✅ ${bordereaux.length} bordereaux de recettes créés (${CURRENT_YEAR})`);
+  console.log(
+    `✅ ${bordereaux.length} bordereaux de recettes créés (${CURRENT_YEAR - 1} + ${CURRENT_YEAR})`,
+  );
 
   return await db.bordereauxRecette.toArray();
 }
 
 async function seedPrevisionsRecettes(personnelIds: number[]) {
   const taxes = await db.taxes.toArray();
-  const previsions: Partial<PrevisionRecette>[] = [];
+  const previsions: Omit<PrevisionRecette, 'id'>[] = [];
 
-  // Prévisions pour l'année 2026
+  // Prévisions pour l'année courante (2026)
   for (const taxe of taxes) {
     if (!taxe.id) continue;
 
     const montantPrevu = randomAmount(100000, 5000000);
-    const montantRealise = 0;
+    const montantRealise = 0; // Pas encore réalisé pour l'année courante
 
     previsions.push({
       exercice: CURRENT_YEAR,
@@ -1644,13 +1705,37 @@ async function seedPrevisionsRecettes(personnelIds: number[]) {
       montantRealise,
       statut: 'validee',
       personnelId: randomChoice(personnelIds),
-      createdAt: new Date(CURRENT_YEAR, 0, 1),
+      createdAt: new Date(CURRENT_YEAR - 1, 11, 15),
       updatedAt: now,
     });
   }
 
-  await db.previsionsRecettes.bulkAdd(previsions as PrevisionRecette[]);
   console.log(`✅ ${previsions.length} prévisions de recettes créées pour ${CURRENT_YEAR}`);
+
+  // Prévisions pour l'année précédente (2025) - avec des données réalisées
+  for (const taxe of taxes) {
+    if (!taxe.id) continue;
+
+    const montantPrevu = randomAmount(100000, 5000000);
+    const montantRealise = Math.round(montantPrevu * (randomAmount(70, 120) / 100));
+
+    previsions.push({
+      exercice: CURRENT_YEAR - 1,
+      taxeId: taxe.id,
+      mairieId: DEFAULT_MAIRIE_ID,
+      montantPrevu,
+      montantRealise,
+      statut: 'validee',
+      personnelId: randomChoice(personnelIds),
+      createdAt: new Date(CURRENT_YEAR - 2, 11, 15),
+      updatedAt: now,
+    });
+  }
+
+  await db.previsionsRecettes.bulkAdd(previsions);
+  console.log(
+    `✅ ${previsions.length} prévisions de recettes créées au total (${CURRENT_YEAR} + ${CURRENT_YEAR - 1})`,
+  );
 }
 
 async function seedDeclarations(personnelIds: number[], bordereaux: BordereauRecette[]) {
@@ -1688,14 +1773,74 @@ async function seedDeclarations(personnelIds: number[], bordereaux: BordereauRec
   let numeroPiece = 1000;
   const bordereauMontants: Map<number, { total: number; count: number }> = new Map();
 
-  // Pour chaque taxe, créer 2 ou 3 déclarations pour 2026 (Janvier-Février)
+  // Séparer bordereaux par année
+  const bordereauxPrevYear = bordereaux.filter((b) => b.annee === CURRENT_YEAR - 1);
+  const bordereauxCurrYear = bordereaux.filter((b) => b.annee === CURRENT_YEAR);
+
+  // Pour chaque taxe, créer 2 ou 3 déclarations validées pour l'année précédente
   for (const taxe of app6Taxes) {
     if (!taxe.id) continue;
 
     const nombreDecls = randomAmount(2, 3);
 
     for (let i = 0; i < nombreDecls; i++) {
-      const bordereau = randomChoice(bordereaux);
+      const bordereau =
+        bordereauxPrevYear.length > 0 ? randomChoice(bordereauxPrevYear) : randomChoice(bordereaux);
+      if (!bordereau || !bordereau.id) continue;
+
+      const montant = taxe.montant || randomAmount(5000, 500000);
+
+      const mois = randomChoice([10, 11]);
+      const jour = randomAmount(1, 28);
+      const d = new Date(CURRENT_YEAR - 1, mois, jour);
+
+      declarations.push({
+        exercice: CURRENT_YEAR - 1,
+        numeroPiece: `P-${numeroPiece++}`,
+        dateDeclaration: d,
+        dateEncaissement: d,
+        bordereauId: bordereau.id,
+        taxeId: taxe.id,
+        mairieId: DEFAULT_MAIRIE_ID,
+        contribuable: randomChoice(contribuables),
+        nomPartieVersante: randomChoice([
+          'Le Gérant',
+          'Le Comptable',
+          'Le Directeur',
+          'Le Propriétaire',
+        ]),
+        adresse: randomChoice([
+          "Abidjan, Côte d'Ivoire",
+          'Bouaké, CI',
+          'Yamoussoukro, CI',
+          'Korhogo, CI',
+        ]),
+        montant: montant,
+        montantRecette: montant,
+        modePaiement: randomChoice(['especes', 'cheque', 'virement', 'autre']),
+        statut: 'validee',
+        personnelId: randomChoice(personnelIds),
+        createdAt: d,
+        updatedAt: now,
+      });
+
+      const existing = bordereauMontants.get(bordereau.id) || { total: 0, count: 0 };
+      bordereauMontants.set(bordereau.id, {
+        total: existing.total + montant,
+        count: existing.count + 1,
+      });
+    }
+  }
+
+  // Pour chaque taxe, créer 1 ou 2 déclarations pour l'année courante (Janvier-Février)
+  for (const taxe of app6Taxes) {
+    if (!taxe.id) continue;
+
+    const nombreDecls = randomAmount(1, 2);
+
+    for (let i = 0; i < nombreDecls; i++) {
+      const bordereau =
+        bordereauxCurrYear.length > 0 ? randomChoice(bordereauxCurrYear) : randomChoice(bordereaux);
       if (!bordereau || !bordereau.id) continue;
 
       const montant = taxe.montant || randomAmount(5000, 500000);
@@ -1751,9 +1896,7 @@ async function seedDeclarations(personnelIds: number[], bordereaux: BordereauRec
   }
 
   await db.declarations.bulkAdd(declarations as Declaration[]);
-  console.log(
-    `✅ ${declarations.length} déclarations de recettes créées pour ${CURRENT_YEAR} (2-3 par taxe)`,
-  );
+  console.log(`✅ ${declarations.length} déclarations de recettes créées (2-3 par taxe, validées)`);
 }
 
 async function seedPrevisions(
@@ -1763,7 +1906,7 @@ async function seedPrevisions(
 ) {
   const previsions: Partial<Prevision>[] = [];
 
-  // Année 2026: créer une prévision pour CHAQUE combinaison sous-chapitre/chapitre
+  // Année courante: créer une prévision pour CHAQUE combinaison sous-chapitre/chapitre
   console.log(
     `🌱 Creating previsions ${CURRENT_YEAR} for all sous-chapitres with all 8 chapitres...`,
   );
@@ -1784,7 +1927,7 @@ async function seedPrevisions(
         montantDisponible,
         statut: 'validee',
         personnelId: randomChoice(personnelIds),
-        createdAt: new Date(CURRENT_YEAR, 0, 1),
+        createdAt: new Date(CURRENT_YEAR - 1, 11, 15),
         updatedAt: now,
       };
 
@@ -1792,9 +1935,48 @@ async function seedPrevisions(
     }
   }
 
+  const previsionsCurrentYearCount = previsions.length;
+  console.log(
+    `📊 ${previsionsCurrentYearCount} prévisions ${CURRENT_YEAR} créées (${sousChapitreIds.length} sous-chapitres x ${chapitreIds.length} chapitres)`,
+  );
+
+  // Créer UNE prévision pour CHAQUE couple chapitre/sous-chapitre pour l'année précédente (exactement 1 par couple)
+  console.log(
+    `🌱 Creating previsions ${CURRENT_YEAR - 1} for all sous-chapitres/chapitres (1 per couple)...`,
+  );
+
+  for (const sousChapitreId of sousChapitreIds) {
+    for (const chapitreId of chapitreIds) {
+      const montantPrevu = randomAmount(500000, 10000000);
+      const montantEngage = Math.round((montantPrevu * randomAmount(60, 95)) / 100);
+      const montantDisponible = montantPrevu - montantEngage;
+
+      const prevision: Partial<Prevision> = {
+        exercice: CURRENT_YEAR - 1,
+        chapitreId,
+        sousChapitreId,
+        mairieId: DEFAULT_MAIRIE_ID,
+        montantPrevu,
+        montantEngage,
+        montantDisponible,
+        statut: 'validee',
+        personnelId: randomChoice(personnelIds),
+        createdAt: new Date(CURRENT_YEAR - 2, 11, 15), // Créée en décembre de l'année précédente
+        updatedAt: now,
+      };
+
+      previsions.push(prevision);
+    }
+  }
+
+  const previsionsPreviousYearCount = previsions.length - previsionsCurrentYearCount;
+  console.log(
+    `📊 ${previsionsPreviousYearCount} prévisions ${CURRENT_YEAR - 1} créées (${sousChapitreIds.length} sous-chapitres x ${chapitreIds.length} chapitres)`,
+  );
+
   await db.previsions.bulkAdd(previsions as Prevision[]);
   console.log(
-    `✅ ${previsions.length} prévisions créées pour ${CURRENT_YEAR} (${sousChapitreIds.length} sous-chapitres x ${chapitreIds.length} chapitres)`,
+    `✅ ${previsions.length} prévisions créées au total (${previsionsCurrentYearCount} pour ${CURRENT_YEAR} + ${previsionsPreviousYearCount} pour ${CURRENT_YEAR - 1})`,
   );
 
   const created = await db.previsions.toArray();
@@ -1803,7 +1985,7 @@ async function seedPrevisions(
 
 async function seedBordereauMandats(personnelIds: number[], count: number = 20) {
   const bordereauMandats: Partial<BordereauMandat>[] = [];
-  const exercices = [CURRENT_YEAR];
+  const exercices = [CURRENT_YEAR - 2, CURRENT_YEAR - 1, CURRENT_YEAR];
   let numeroGlobal = 1;
 
   for (let i = 0; i < count; i++) {
@@ -1816,7 +1998,7 @@ async function seedBordereauMandats(personnelIds: number[], count: number = 20) 
     }
 
     const statuts: Array<'ouvert' | 'ferme'> = ['ouvert', 'ferme'];
-    const statut = randomChoice(statuts);
+    const statut = exercice < CURRENT_YEAR ? 'ferme' : randomChoice(statuts);
 
     bordereauMandats.push({
       numero: numeroGlobal++,
@@ -1978,8 +2160,8 @@ async function seedMandats(
 // =================================================================
 
 async function seedBordereauMandatsRecette(personnelIds: number[], count: number = 10) {
-  const bordereaux: Partial<BordereauMandatRecette>[] = [];
-  const exercices = [CURRENT_YEAR];
+  const bordereaux: Omit<BordereauMandatRecette, 'id'>[] = [];
+  const exercices = [CURRENT_YEAR - 1, CURRENT_YEAR];
   let numeroGlobal = 1;
 
   for (let i = 0; i < count; i++) {
@@ -1988,7 +2170,7 @@ async function seedBordereauMandatsRecette(personnelIds: number[], count: number
     const dateEmission = new Date(exercice, mois, randomAmount(1, 28));
 
     const statuts: ('ouvert' | 'ferme')[] = ['ouvert', 'ferme'];
-    const statut = randomChoice(statuts);
+    const statut = exercice < CURRENT_YEAR ? 'ferme' : randomChoice(statuts);
 
     bordereaux.push({
       numero: numeroGlobal++,
@@ -2004,7 +2186,7 @@ async function seedBordereauMandatsRecette(personnelIds: number[], count: number
     });
   }
 
-  await db.bordereauMandatsRecette.bulkAdd(bordereaux as BordereauMandatRecette[]);
+  await db.bordereauMandatsRecette.bulkAdd(bordereaux);
   console.log(`✅ ${count} bordereaux mandats recettes créés`);
   return await db.bordereauMandatsRecette.toArray();
 }
@@ -2015,7 +2197,7 @@ async function seedMandatsRecette(
   personnelIds: number[],
   bordereauxRecette: BordereauMandatRecette[],
 ) {
-  const mandatsRecette: Partial<MandatRecette>[] = [];
+  const mandatsRecette: Omit<MandatRecette, 'id'>[] = [];
 
   const partiesVersantes = [
     'ENTREPRISE ABC SARL',
@@ -2080,7 +2262,7 @@ async function seedMandatsRecette(
           const statutsOptions: ('brouillon' | 'paye' | 'annule')[] = ['paye', 'paye'];
           const statut = bordereau.statut === 'ferme' ? 'paye' : randomChoice(statutsOptions);
 
-          const mandat: Partial<MandatRecette> = {
+          const mandat: Omit<MandatRecette, 'id'> = {
             exercice,
             numeroMandat,
             dateMandat,
@@ -2115,7 +2297,7 @@ async function seedMandatsRecette(
     }
   }
 
-  await db.mandatsRecette.bulkAdd(mandatsRecette as MandatRecette[]);
+  await db.mandatsRecette.bulkAdd(mandatsRecette);
 
   for (const [id, stats] of bordereauUpdates.entries()) {
     await db.bordereauMandatsRecette.update(id, {
@@ -2128,4 +2310,37 @@ async function seedMandatsRecette(
   console.log(
     `✅ ${mandatsRecette.length} mandats de recettes créés (${MANDATS_PAR_COUPLE} par couple chapitre/taxe)`,
   );
+}
+// =================================================================
+//                      MIGRATION DE DONNÉES
+// =================================================================
+
+/**
+ * Vérifie et corrige les informations de la mairie si elles sont incorrectes (ex: Bodokro au lieu de Vavoua)
+ * Cette fonction est appelée au démarrage de l'application
+ */
+export async function ensureCorrectMairieInfo() {
+  const mairies = await db.mairies.toArray();
+
+  if (mairies.length > 0) {
+    const mairie = mairies[0];
+    if (!mairie) return;
+
+    // Si c'est Bodokro ou si le code n'est pas 433, on met à jour
+    if (mairie.nom.includes('Bodokro') || mairie.code !== '433') {
+      console.log('🔄 Correction des données de la mairie détectée (Bodokro -> Vavoua)...');
+
+      await db.mairies.update(mairie.id, {
+        nom: 'Mairie de Vavoua',
+        code: '433',
+        ville: 'Vavoua',
+        departement: 'Vavoua',
+        region: 'Haut-Sassandra',
+        email: 'contact@mairie-vavoua.ci',
+        updatedAt: new Date(),
+      });
+
+      console.log('✅ Données de la mairie corrigées avec succès');
+    }
+  }
 }
