@@ -7,6 +7,13 @@
     >
       <template #actions>
         <q-btn color="primary" icon="add" label="Nouveau Bordereau" @click="openDialog()" />
+        <q-btn
+          v-if="isDev"
+          color="orange"
+          icon="science"
+          label="Fake Bordereau"
+          @click="createFakeBordereau"
+        />
       </template>
     </PageHeader>
 
@@ -599,6 +606,33 @@ async function downloadBordereauPDF(bordereau: BordereauRecette) {
       type: 'negative',
       message: 'Erreur lors du téléchargement du bordereau',
     });
+  }
+}
+
+const isDev = import.meta.env.VITE_ENV === 'development';
+
+async function createFakeBordereau() {
+  try {
+    const currentYear = new Date().getFullYear();
+    const bordereauxThisYear = bordereaux.value.filter((b) => b.annee === currentYear);
+    const nextNum =
+      bordereauxThisYear.length > 0 ? Math.max(...bordereauxThisYear.map((b) => b.numero)) + 1 : 1;
+    const now = new Date();
+    await db.bordereauxRecette.add({
+      numero: nextNum,
+      annee: currentYear,
+      mairieId: DEFAULT_MAIRIE_ID,
+      montantTotal: 0,
+      nombreDeclarations: 0,
+      statut: 'ouvert',
+      createdAt: now,
+      updatedAt: now,
+    } as BordereauRecette);
+    $q.notify({ type: 'positive', message: `Bordereau recette fake #${nextNum} créé` });
+    await loadData();
+  } catch (error) {
+    console.error('Erreur:', error);
+    $q.notify({ type: 'negative', message: 'Erreur création fake' });
   }
 }
 

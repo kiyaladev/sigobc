@@ -363,7 +363,7 @@
 
         for (const ligne of data.lignes) {
           const sousChapitreCode = (ligne.sousChapitreCode || '').trim();
-          if (!sousChapitreCode || sousChapitreCode.length < 4) continue;
+          if (!sousChapitreCode || sousChapitreCode.length < 3) continue;
 
           const codeNum = parseInt(sousChapitreCode, 10);
           if (isNaN(codeNum)) continue;
@@ -479,42 +479,33 @@
               for (let i = 1; i <= 8; i++) {
                 const chapCodeStr = String(i);
                 const ligne = sousChapitre.lignes[chapCodeStr];
-                const row = document.createElement('tr');
 
-                if (ligne) {
-                  const percent = calculatePercent(ligne.total, ligne.prevision);
-                  row.innerHTML = `
-                    <td class="col-code">${sousChapitre.code}/${chapCodeStr}</td>
-                    <td class="col-libelle">${chapitreLibelles[chapCodeStr]}</td>
-                    <td class="col-num">${formatNumber(ligne.prevision)}</td>
-                    <td class="col-num">${formatNumber(ligne.antecedent)}</td>
-                    <td class="col-num">${formatNumber(ligne.depenseMois)}</td>
-                    <td class="col-num">${formatNumber(ligne.total)}</td>
-                    <td class="col-num">${formatNumber(ligne.antecedent)}</td>
-                    <td class="col-num">${formatNumber(ligne.depenseMois)}</td>
-                    <td class="col-num">${formatNumber(ligne.total)}</td>
-                    <td class="col-num">${formatNumber(ligne.antecedent)}</td>
-                    <td class="col-num">${formatNumber(ligne.depenseMois)}</td>
-                    <td class="col-num">${formatNumber(ligne.total)}</td>
-                    <td class="col-percent">${percent}</td>
-                  `;
-                } else {
-                  row.innerHTML = `
-                    <td class="col-code">${sousChapitre.code}/${chapCodeStr}</td>
-                    <td class="col-libelle">${chapitreLibelles[chapCodeStr]}</td>
-                    <td class="col-num">0</td>
-                    <td class="col-num">0</td>
-                    <td class="col-num">0</td>
-                    <td class="col-num">0</td>
-                    <td class="col-num">0</td>
-                    <td class="col-num">0</td>
-                    <td class="col-num">0</td>
-                    <td class="col-num">0</td>
-                    <td class="col-num">0</td>
-                    <td class="col-num">0</td>
-                    <td class="col-percent">0.00</td>
-                  `;
-                }
+                // Masquer la ligne si tout est à zéro
+                if (!ligne) continue;
+                const hasValues =
+                  (ligne.prevision || 0) !== 0 ||
+                  (ligne.antecedent || 0) !== 0 ||
+                  (ligne.depenseMois || 0) !== 0 ||
+                  (ligne.total || 0) !== 0;
+                if (!hasValues) continue;
+
+                const row = document.createElement('tr');
+                const percent = calculatePercent(ligne.total, ligne.prevision);
+                row.innerHTML = `
+                  <td class="col-code">${sousChapitre.code}/${chapCodeStr}</td>
+                  <td class="col-libelle">${chapitreLibelles[chapCodeStr]}</td>
+                  <td class="col-num">${formatNumber(ligne.prevision)}</td>
+                  <td class="col-num">${formatNumber(ligne.antecedent)}</td>
+                  <td class="col-num">${formatNumber(ligne.depenseMois)}</td>
+                  <td class="col-num">${formatNumber(ligne.total)}</td>
+                  <td class="col-num">${formatNumber(ligne.antecedent)}</td>
+                  <td class="col-num">${formatNumber(ligne.depenseMois)}</td>
+                  <td class="col-num">${formatNumber(ligne.total)}</td>
+                  <td class="col-num">${formatNumber(ligne.antecedent)}</td>
+                  <td class="col-num">${formatNumber(ligne.depenseMois)}</td>
+                  <td class="col-num">${formatNumber(ligne.total)}</td>
+                  <td class="col-percent">${percent}</td>
+                `;
                 rows.push(row);
               }
 
@@ -740,7 +731,10 @@
             'tpl-departement',
             'DÉPARTEMENT DE ' + (data.mairie.departement || '').toUpperCase(),
           );
-          setText('tpl-commune', 'COMMUNE DE ' + (data.mairie.nom || '').toUpperCase());
+          setText(
+            'tpl-commune',
+            'COMMUNE DE ' + (data.mairie.nom || '').replace(/^mairie de /i, '').toUpperCase(),
+          );
           setText('tpl-codeCommune', data.mairie.code || '---');
         }
       }

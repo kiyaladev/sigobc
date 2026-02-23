@@ -7,6 +7,13 @@
     >
       <template #actions>
         <q-btn color="primary" icon="add" label="Nouveau Bordereau" @click="openDialog()" />
+        <q-btn
+          v-if="isDev"
+          color="orange"
+          icon="science"
+          label="Fake Bordereau"
+          @click="createFakeBordereau"
+        />
       </template>
     </PageHeader>
 
@@ -579,6 +586,34 @@ function printBordereau(bordereau: BordereauMandatRecette) {
 
 function downloadBordereauPDF(bordereau: BordereauMandatRecette) {
   openPrintWindow('bordereau_mandat_recette.html', { bordereauId: bordereau.id!, print: 'true' });
+}
+
+const isDev = import.meta.env.VITE_ENV === 'development';
+
+async function createFakeBordereau() {
+  try {
+    const currentYear = new Date().getFullYear();
+    const bordereauxThisYear = bordereaux.value.filter((b) => b.exercice === currentYear);
+    const nextNum =
+      bordereauxThisYear.length > 0 ? Math.max(...bordereauxThisYear.map((b) => b.numero)) + 1 : 1;
+    const now = new Date();
+    await db.bordereauMandatsRecette.add({
+      numero: nextNum,
+      exercice: currentYear,
+      mairieId: DEFAULT_MAIRIE_ID,
+      montantTotal: 0,
+      nombreMandats: 0,
+      statut: 'ouvert',
+      personnelId: 1,
+      createdAt: now,
+      updatedAt: now,
+    });
+    $q.notify({ type: 'positive', message: `Bordereau mandat recette fake #${nextNum} créé` });
+    await loadData();
+  } catch (error) {
+    console.error('Erreur:', error);
+    $q.notify({ type: 'negative', message: 'Erreur création fake' });
+  }
 }
 
 onMounted(() => {

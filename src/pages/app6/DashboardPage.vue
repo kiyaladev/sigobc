@@ -55,11 +55,7 @@
             </div>
 
             <div class="row q-col-gutter-md">
-              <div
-                class="col-6 col-sm-4 col-md-3"
-                v-for="(action, index) in quickActions"
-                :key="index"
-              >
+              <div class="col-6 col-sm" v-for="(action, index) in quickActions" :key="index">
                 <q-btn
                   unelevated
                   :color="action.color"
@@ -131,7 +127,7 @@
                     label="Nouvelle déclaration"
                     icon="add"
                     size="sm"
-                    @click="$router.push('/recettes/declarations')"
+                    @click="$router.push('/app6/declarations')"
                   />
                 </q-item-section>
               </q-item>
@@ -143,21 +139,21 @@
               color="primary"
               label="Voir tout"
               icon-right="arrow_forward"
-              @click="$router.push('/recettes/declarations')"
+              @click="$router.push('/app6/declarations')"
               class="view-all-btn"
             />
           </q-card-actions>
         </q-card>
       </div>
 
-      <!-- Bordereaux ouverts -->
+      <!-- Bordereaux récents -->
       <div class="col-12 col-md-6 fade-in" style="animation-delay: 0.6s">
         <q-card class="activity-card">
           <q-card-section>
             <div class="section-header q-mb-md">
               <div class="flex items-center">
                 <q-icon name="folder_open" color="warning" size="24px" class="q-mr-sm" />
-                <span class="text-h6 text-weight-bold">Bordereaux Ouverts</span>
+                <span class="text-h6 text-weight-bold">Bordereaux Récents</span>
               </div>
               <div class="section-decoration"></div>
             </div>
@@ -193,7 +189,7 @@
               <q-item v-if="openBordereaux.length === 0" class="empty-state">
                 <q-item-section class="text-center">
                   <q-icon name="inbox" size="48px" color="grey-4" class="q-mb-sm" />
-                  <div class="text-grey-5 q-mb-sm">Aucun bordereau ouvert</div>
+                  <div class="text-grey-5 q-mb-sm">Aucun bordereau récent</div>
                   <q-btn
                     flat
                     dense
@@ -201,7 +197,7 @@
                     label="Nouveau bordereau"
                     icon="add"
                     size="sm"
-                    @click="$router.push('/recettes/bordereaux')"
+                    @click="$router.push('/app6/bordereaux')"
                   />
                 </q-item-section>
               </q-item>
@@ -213,7 +209,150 @@
               color="primary"
               label="Voir tout"
               icon-right="arrow_forward"
-              @click="$router.push('/recettes/bordereaux')"
+              @click="$router.push('/app6/bordereaux')"
+              class="view-all-btn"
+            />
+          </q-card-actions>
+        </q-card>
+      </div>
+
+      <!-- Mandats récents -->
+      <div class="col-12 col-md-6 fade-in" style="animation-delay: 0.7s">
+        <q-card class="activity-card">
+          <q-card-section>
+            <div class="section-header q-mb-md">
+              <div class="flex items-center">
+                <q-icon name="request_quote" color="secondary" size="24px" class="q-mr-sm" />
+                <span class="text-h6 text-weight-bold">Mandats Récents</span>
+              </div>
+              <div class="section-decoration"></div>
+            </div>
+
+            <q-list separator class="activity-list">
+              <q-item
+                v-for="(mandat, index) in recentMandats"
+                :key="mandat.id || 0"
+                class="activity-item"
+                :style="{ animationDelay: `${index * 0.1}s` }"
+              >
+                <q-item-section avatar>
+                  <q-avatar color="secondary" text-color="white" class="pulse-soft">
+                    <q-icon name="request_quote" />
+                  </q-avatar>
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label class="text-weight-medium">{{ mandat.numeroMandat }}</q-item-label>
+                  <q-item-label caption class="text-grey-6">
+                    <q-icon name="event" size="14px" class="q-mr-xs" />
+                    {{ formatDate(mandat.dateMandat) }} — {{ mandat.partieVersante }}
+                  </q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <div class="amount-badge">
+                    {{ formatMontant(mandat.montant) }}
+                  </div>
+                </q-item-section>
+              </q-item>
+
+              <q-item v-if="recentMandats.length === 0" class="empty-state">
+                <q-item-section class="text-center">
+                  <q-icon name="inbox" size="48px" color="grey-4" class="q-mb-sm" />
+                  <div class="text-grey-5 q-mb-sm">Aucun mandat récent</div>
+                  <q-btn
+                    flat
+                    dense
+                    color="primary"
+                    label="Nouveau mandat"
+                    icon="add"
+                    size="sm"
+                    @click="$router.push('/app6/mandats-recette')"
+                  />
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-card-section>
+          <q-card-actions align="right" class="q-px-md q-pb-md">
+            <q-btn
+              flat
+              color="primary"
+              label="Voir tout"
+              icon-right="arrow_forward"
+              @click="$router.push('/app6/mandats-recette')"
+              class="view-all-btn"
+            />
+          </q-card-actions>
+        </q-card>
+      </div>
+
+      <!-- Prévisions récentes -->
+      <div class="col-12 col-md-6 fade-in" style="animation-delay: 0.8s">
+        <q-card class="activity-card">
+          <q-card-section>
+            <div class="section-header q-mb-md">
+              <div class="flex items-center">
+                <q-icon name="trending_up" color="primary" size="24px" class="q-mr-sm" />
+                <span class="text-h6 text-weight-bold">Prévisions Récentes</span>
+              </div>
+              <div class="section-decoration"></div>
+            </div>
+
+            <q-list separator class="activity-list">
+              <q-item
+                v-for="(prev, index) in recentPrevisions"
+                :key="prev.id || 0"
+                class="activity-item"
+                :style="{ animationDelay: `${index * 0.1}s` }"
+              >
+                <q-item-section avatar>
+                  <q-avatar color="primary" text-color="white" class="pulse-soft">
+                    <q-icon name="trending_up" />
+                  </q-avatar>
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label class="text-weight-medium"
+                    >Exercice {{ prev.exercice }}</q-item-label
+                  >
+                  <q-item-label caption class="text-grey-6">
+                    <q-icon name="payments" size="14px" class="q-mr-xs" />
+                    Prévu: {{ formatMontant(prev.montantPrevu) }} CFA
+                  </q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-chip
+                    :color="prev.statut === 'validee' ? 'primary' : 'grey'"
+                    text-color="white"
+                    size="sm"
+                    class="status-chip"
+                  >
+                    {{ prev.statut }}
+                  </q-chip>
+                </q-item-section>
+              </q-item>
+
+              <q-item v-if="recentPrevisions.length === 0" class="empty-state">
+                <q-item-section class="text-center">
+                  <q-icon name="inbox" size="48px" color="grey-4" class="q-mb-sm" />
+                  <div class="text-grey-5 q-mb-sm">Aucune prévision récente</div>
+                  <q-btn
+                    flat
+                    dense
+                    color="primary"
+                    label="Nouvelle prévision"
+                    icon="add"
+                    size="sm"
+                    @click="$router.push('/app6/previsions')"
+                  />
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-card-section>
+          <q-card-actions align="right" class="q-px-md q-pb-md">
+            <q-btn
+              flat
+              color="primary"
+              label="Voir tout"
+              icon-right="arrow_forward"
+              @click="$router.push('/app6/previsions')"
               class="view-all-btn"
             />
           </q-card-actions>
@@ -225,7 +364,13 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
-import { db, type Declaration, type BordereauRecette } from 'src/database/db';
+import {
+  db,
+  type Declaration,
+  type BordereauRecette,
+  type PrevisionRecette,
+  type MandatRecette,
+} from 'src/database/db';
 import { date } from 'quasar';
 import PageHeader from 'src/components/PageHeader.vue';
 
@@ -238,6 +383,8 @@ const stats = ref({
 
 const recentDeclarations = ref<Declaration[]>([]);
 const openBordereaux = ref<BordereauRecette[]>([]);
+const recentPrevisions = ref<PrevisionRecette[]>([]);
+const recentMandats = ref<MandatRecette[]>([]);
 
 // Cartes de statistiques avec animations
 const statsCards = computed(() => [
@@ -334,14 +481,29 @@ async function loadStats() {
     });
     recentDeclarations.value = allDeclarations.slice(0, 5);
 
-    openBordereaux.value = await db.bordereauxRecette
-      .where('statut')
-      .equals('ouvert')
-      .limit(5)
-      .toArray();
+    const allBordereaux = await db.bordereauxRecette.toArray();
+    allBordereaux.sort((a, b) => {
+      const dateA = a.id || 0;
+      const dateB = b.id || 0;
+      return dateB - dateA;
+    });
+    openBordereaux.value = allBordereaux.slice(0, 5);
 
-    console.log('Déclarations récentes:', recentDeclarations.value.length);
-    console.log('Bordereaux ouverts:', openBordereaux.value.length);
+    const allPrevisions = await db.previsionsRecettes.toArray();
+    allPrevisions.sort((a, b) => {
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return dateB - dateA;
+    });
+    recentPrevisions.value = allPrevisions.slice(0, 5);
+
+    const allMandats = await db.mandatsRecette.toArray();
+    allMandats.sort((a, b) => {
+      const dateA = a.dateMandat ? new Date(a.dateMandat).getTime() : 0;
+      const dateB = b.dateMandat ? new Date(b.dateMandat).getTime() : 0;
+      return dateB - dateA;
+    });
+    recentMandats.value = allMandats.slice(0, 5);
   } catch (error) {
     console.error('Erreur lors du chargement des statistiques:', error);
   }

@@ -37,13 +37,16 @@
           <div class="col-12 col-md-3">
             <q-select
               v-model="filterSousChapitreId"
-              :options="sousChapitreOptions"
+              :options="filteredSousChapitreOptions"
               label="Sous-chapitre"
               outlined
               dense
               emit-value
               map-options
               clearable
+              use-input
+              input-debounce="0"
+              @filter="filterSousChapitre"
             />
           </div>
           <div class="col-12 col-md-3">
@@ -100,6 +103,14 @@
               label="Nouvelle Prévision"
               unelevated
               @click="showAddDialog = true"
+            />
+            <q-btn
+              v-if="isDev"
+              color="orange"
+              icon="science"
+              label="Fake Prévision"
+              unelevated
+              @click="createFakePrevision"
             />
           </div>
         </div>
@@ -159,13 +170,16 @@
 
             <q-select
               v-model="formData.sousChapitreId"
-              :options="sousChapitreOptions"
+              :options="filteredSousChapitreOptions"
               label="Sous-chapitre (Compte)"
               outlined
               dense
               emit-value
               map-options
               clearable
+              use-input
+              input-debounce="0"
+              @filter="filterSousChapitre"
             />
 
             <q-input
@@ -174,7 +188,7 @@
               outlined
               dense
               type="number"
-              prefix="XOF"
+              prefix="CFA"
               :rules="[(val) => !!val || 'Montant requis']"
             />
 
@@ -229,13 +243,16 @@
 
             <q-select
               v-model="ct02Filters.sousChapitreId"
-              :options="sousChapitreOptions"
+              :options="filteredSousChapitreOptions"
               label="Sous-chapitre (Compte)"
               outlined
               dense
               emit-value
               map-options
               clearable
+              use-input
+              input-debounce="0"
+              @filter="filterSousChapitre"
             />
 
             <div class="row justify-end q-gutter-sm q-mt-md">
@@ -316,7 +333,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import { db, type Prevision, type Chapitre, type SousChapitre, type Mandat } from 'src/database/db';
 import PageHeader from 'src/components/PageHeader.vue';
@@ -348,7 +365,7 @@ const formData = ref({
   chapitreId: null as number | null,
   sousChapitreId: null as number | null,
   montantPrevu: 0,
-  statut: 'validee' as 'brouillon' | 'validee' | 'cloturee',
+  statut: 'validee' as 'brouillon' | 'validee',
   observations: '',
 });
 
@@ -384,7 +401,6 @@ const moisOptions = [
 const statutOptions = [
   { label: 'Brouillon', value: 'brouillon' },
   { label: 'Validée', value: 'validee' },
-  { label: 'Clôturée', value: 'cloturee' },
 ];
 
 const chapitreOptions = computed(() =>
@@ -394,6 +410,31 @@ const chapitreOptions = computed(() =>
 const sousChapitreOptions = computed(() =>
   sousChapitres.value.map((s) => ({ label: `${s.code} - ${s.libelle}`, value: s.id })),
 );
+
+const filteredSousChapitreOptions = ref([] as { label: string; value: number | undefined }[]);
+
+watch(
+  sousChapitreOptions,
+  (newOptions) => {
+    filteredSousChapitreOptions.value = newOptions;
+  },
+  { immediate: true },
+);
+
+function filterSousChapitre(val: string, update: (callback: () => void) => void) {
+  if (val === '') {
+    update(() => {
+      filteredSousChapitreOptions.value = sousChapitreOptions.value;
+    });
+    return;
+  }
+  update(() => {
+    const needle = val.toLowerCase();
+    filteredSousChapitreOptions.value = sousChapitreOptions.value.filter(
+      (v) => v.label.toLowerCase().indexOf(needle) > -1,
+    );
+  });
+}
 
 const exerciceOptions = computed(() => {
   const currentYear = new Date().getFullYear();
@@ -524,7 +565,6 @@ function getStatutColor(statut: string): string {
   const colors: Record<string, string> = {
     brouillon: 'grey-6',
     validee: 'primary',
-    cloturee: 'secondary',
   };
   return colors[statut] || 'grey';
 }
@@ -533,7 +573,6 @@ function getStatutLabel(statut: string): string {
   const labels: Record<string, string> = {
     brouillon: 'Brouillon',
     validee: 'Validée',
-    cloturee: 'Clôturée',
   };
   return labels[statut] || statut;
 }
@@ -543,7 +582,9 @@ async function loadData() {
   try {
     previsions.value = await db.previsions.toArray();
     chapitres.value = await db.chapitres.filter((c) => c.actif).toArray();
-    sousChapitres.value = await db.sousChapitres.filter((s) => s.actif).toArray();
+    sousChapitres.value = await db.sousChapitres
+      .filter((s) => s.actif && !s.code.startsWith('7'))
+      .toArray();
     mandats.value = await db.mandats.toArray();
   } catch (error) {
     console.error('Erreur lors du chargement:', error);
@@ -703,8 +744,13 @@ async function generateEtatFinancierMensuel() {
     // Récupérer la mairie
     const mairie = await db.mairies.toCollection().first();
 
-    // Récupérer tous les mandats de l'année sélectionnée
-    const mandatsAnnee = await db.mandats.where('exercice').equals(annee).toArray();
+    // Récupérer uniquement les mandats payés de l'année sélectionnée
+    // (brouillon et annulé ne doivent pas impacter l'état d'exécution)
+    const mandatsAnnee = await db.mandats
+      .where('exercice')
+      .equals(annee)
+      .filter((m) => m.statut === 'paye')
+      .toArray();
 
     // Récupérer les chapitres et sous-chapitres
     const chapitresData = await db.chapitres.toArray();
@@ -717,7 +763,7 @@ async function generateEtatFinancierMensuel() {
 
     const isEligibleSousChapitreCode = (code: string) => {
       const trimmed = (code || '').trim();
-      if (trimmed.length < 4) return false;
+      if (trimmed.length < 3) return false;
       const firstChar = trimmed.charAt(0);
       // Fonctionnel: codes commençant par 6
       // Investissement: codes commençant par 9
@@ -1038,6 +1084,41 @@ function deletePrevision(row: Prevision) {
       }
     })();
   });
+}
+
+const isDev = import.meta.env.VITE_ENV === 'development';
+
+async function createFakePrevision() {
+  try {
+    const currentYear = new Date().getFullYear();
+    const chapitre = chapitres.value[Math.floor(Math.random() * chapitres.value.length)];
+    const sousChapitre =
+      sousChapitres.value[Math.floor(Math.random() * sousChapitres.value.length)];
+    if (!chapitre || !sousChapitre) {
+      $q.notify({ type: 'warning', message: 'Aucun chapitre/sous-chapitre disponible' });
+      return;
+    }
+    const now = new Date();
+    const montantPrevu = Math.floor(Math.random() * 10000000) + 500000;
+    await db.previsions.add({
+      exercice: currentYear,
+      chapitreId: chapitre.id!,
+      sousChapitreId: sousChapitre.id!,
+      montantPrevu,
+      montantEngage: 0,
+      montantDisponible: montantPrevu,
+      statut: 'validee',
+      mairieId: 1,
+      personnelId: 1,
+      createdAt: now,
+      updatedAt: now,
+    });
+    $q.notify({ type: 'positive', message: 'Prévision fake créée' });
+    await loadData();
+  } catch (error) {
+    console.error('Erreur:', error);
+    $q.notify({ type: 'negative', message: 'Erreur création fake' });
+  }
 }
 
 onMounted(() => {

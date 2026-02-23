@@ -33,13 +33,16 @@
           <div class="col-12 col-md-2">
             <q-select
               v-model="filterSousChapitreId"
-              :options="sousChapitreOptions"
+              :options="filteredSousChapitreOptions"
               label="Sous-chapitre"
               outlined
               dense
               emit-value
               map-options
               clearable
+              use-input
+              input-debounce="0"
+              @filter="filterSousChapitre"
             />
           </div>
           <div class="col-12 col-md-2">
@@ -96,6 +99,14 @@
               unelevated
               @click="openAddDialog"
             />
+            <q-btn
+              v-if="isDev"
+              color="orange"
+              icon="science"
+              label="Fake Mandat"
+              unelevated
+              @click="createFakeMandat"
+            />
           </div>
         </div>
 
@@ -119,6 +130,12 @@
           <template v-slot:body-cell-bordereauNumero="props">
             <q-td :props="props">
               {{ getBordereauNumero(props.row.bordereauMandatId) }}
+            </q-td>
+          </template>
+
+          <template v-slot:body-cell-compte="props">
+            <q-td :props="props">
+              {{ getCompte(props.row) }}
             </q-td>
           </template>
 
@@ -296,7 +313,7 @@
                   outlined
                   dense
                   type="number"
-                  suffix="XOF"
+                  suffix="CFA"
                   :rules="[(val) => !!val || 'Montant requis']"
                 />
               </div>
@@ -342,7 +359,7 @@
                   outlined
                   dense
                   type="number"
-                  suffix="XOF"
+                  suffix="CFA"
                 />
               </div>
             </div>
@@ -444,6 +461,7 @@ import {
   type SousChapitre,
   type BordereauMandat,
   type Mairie,
+  type Exercice,
 } from 'src/database/db';
 import PageHeader from 'src/components/PageHeader.vue';
 import DataTable from 'src/components/DataTable.vue';
@@ -467,6 +485,15 @@ const chapitres = ref<Chapitre[]>([]);
 const sousChapitres = ref<SousChapitre[]>([]);
 const bordereauMandats = ref<BordereauMandat[]>([]);
 const mairies = ref<Mairie[]>([]);
+const exercices = ref<Exercice[]>([]);
+
+const lockedYears = computed(() =>
+  exercices.value.filter((e) => e.statut === 'verrouille').map((e) => e.annee),
+);
+
+function isYearLocked(annee: number): boolean {
+  return lockedYears.value.includes(annee);
+}
 
 const formData = ref({
   numeroMandat: '',
@@ -612,12 +639,11 @@ const columns = [
     sortable: true,
   },
   {
-    name: 'etatMensuelId',
-    label: 'État mensuel',
+    name: 'compte',
+    label: 'Compte',
     align: 'left' as const,
-    field: 'etatMensuelId',
-    format: (val?: string) => val || '-',
-    sortable: true,
+    field: 'id',
+    sortable: false,
   },
   {
     name: 'beneficiaire',
@@ -659,6 +685,11 @@ const columns = [
 const filteredMandats = computed(() => {
   let result = mandats.value;
 
+  // Masquer les mandats des exercices verrouillés
+  if (lockedYears.value.length > 0) {
+    result = result.filter((m) => !lockedYears.value.includes(m.exercice));
+  }
+
   // Filtre par exercice
   if (filterExercice.value) {
     result = result.filter((m) => m.exercice === filterExercice.value);
@@ -694,8 +725,7 @@ const filteredMandats = computed(() => {
       (m) =>
         m.numeroMandat.toLowerCase().includes(searchTerm) ||
         m.beneficiaire.toLowerCase().includes(searchTerm) ||
-        m.objet.toLowerCase().includes(searchTerm) ||
-        (m.etatMensuelId || '').toLowerCase().includes(searchTerm),
+        m.objet.toLowerCase().includes(searchTerm),
     );
   }
 
@@ -724,6 +754,14 @@ function getBordereauNumero(bordereauMandatId?: number): string {
   const bordereau = bordereauMandats.value.find((b) => b.id === bordereauMandatId);
   if (!bordereau) return '-';
   return `${bordereau.numero}-${bordereau.exercice}`;
+}
+
+function getCompte(row: Mandat): string {
+  const sc = sousChapitres.value.find((s) => s.id === row.sousChapitreId);
+  const ch = chapitres.value.find((c) => c.id === row.chapitreId);
+  const scCode = sc?.code || '?';
+  const chCode = ch?.code || '?';
+  return `${scCode}/${chCode}`;
 }
 
 function getStatutColor(statut: string): string {
@@ -769,14 +807,21 @@ function printMandat(mandat: Mandat) {
 async function loadData() {
   loading.value = true;
   try {
-    [mandats.value, chapitres.value, sousChapitres.value, bordereauMandats.value, mairies.value] =
-      await Promise.all([
-        db.mandats.toArray(),
-        db.chapitres.filter((c) => c.actif).toArray(),
-        db.sousChapitres.filter((s) => s.actif && !s.code.startsWith('7')).toArray(),
-        db.bordereauMandats.toArray(),
-        db.mairies.toArray(),
-      ]);
+    [
+      mandats.value,
+      chapitres.value,
+      sousChapitres.value,
+      bordereauMandats.value,
+      mairies.value,
+      exercices.value,
+    ] = await Promise.all([
+      db.mandats.toArray(),
+      db.chapitres.filter((c) => c.actif).toArray(),
+      db.sousChapitres.filter((s) => s.actif && !s.code.startsWith('7')).toArray(),
+      db.bordereauMandats.toArray(),
+      db.mairies.toArray(),
+      db.exercices.toArray(),
+    ]);
   } catch (error) {
     console.error('Erreur lors du chargement:', error);
     $q.notify({
@@ -832,6 +877,13 @@ async function getNextMandatNumber(exercice: number): Promise<string> {
 }
 
 async function openAddDialog() {
+  if (isYearLocked(new Date().getFullYear())) {
+    $q.notify({
+      type: 'warning',
+      message: "L'exercice en cours est verrouillé. Impossible d'ajouter un mandat.",
+    });
+    return;
+  }
   resetForm();
   // Générer automatiquement le numéro de mandat (max des mandats de l'année + 1)
   const currentYear = new Date().getFullYear();
@@ -846,8 +898,8 @@ async function openAddDialog() {
 async function recalculateBordereauStats(bordereauId: number): Promise<void> {
   const allMandats = await db.mandats.where('bordereauMandatId').equals(bordereauId).toArray();
 
-  // Exclure les mandats annulés du calcul
-  const mandatsDuBordereau = allMandats.filter((m) => m.statut !== 'annule');
+  // Seuls les mandats payés impactent le bordereau (brouillon et annulé exclus)
+  const mandatsDuBordereau = allMandats.filter((m) => m.statut === 'paye');
 
   const nombreMandats = mandatsDuBordereau.length;
   const montantTotal = mandatsDuBordereau.reduce((sum, m) => sum + (m.montant || 0), 0);
@@ -861,6 +913,13 @@ async function recalculateBordereauStats(bordereauId: number): Promise<void> {
 
 async function saveMandat() {
   try {
+    if (isYearLocked(formData.value.exercice)) {
+      $q.notify({
+        type: 'warning',
+        message: 'Cet exercice est verrouillé. Modification impossible.',
+      });
+      return;
+    }
     const now = new Date();
     const mairieId = 1;
     const personnelId = 1;
@@ -945,6 +1004,13 @@ async function saveMandat() {
 }
 
 function editMandat(row: Mandat) {
+  if (isYearLocked(row.exercice)) {
+    $q.notify({
+      type: 'warning',
+      message: 'Cet exercice est verrouillé. Modification impossible.',
+    });
+    return;
+  }
   editingId.value = row.id!;
   formData.value = {
     numeroMandat: row.numeroMandat,
@@ -977,6 +1043,10 @@ function editMandat(row: Mandat) {
 }
 
 function deleteMandat(row: Mandat) {
+  if (isYearLocked(row.exercice)) {
+    $q.notify({ type: 'warning', message: 'Cet exercice est verrouillé. Suppression impossible.' });
+    return;
+  }
   $q.dialog({
     title: 'Confirmation',
     message: `Voulez-vous vraiment supprimer le mandat "${row.numeroMandat}" ?`,
@@ -1017,6 +1087,49 @@ watch(
     }
   },
 );
+
+const isDev = import.meta.env.VITE_ENV === 'development';
+
+async function createFakeMandat() {
+  try {
+    const currentYear = new Date().getFullYear();
+    if (isYearLocked(currentYear)) {
+      $q.notify({ type: 'warning', message: 'Exercice verrouillé' });
+      return;
+    }
+    const nextNum = await getNextMandatNumber(currentYear);
+    const chapitre = chapitres.value[Math.floor(Math.random() * chapitres.value.length)];
+    const sousChapitre =
+      sousChapitres.value[Math.floor(Math.random() * sousChapitres.value.length)];
+    if (!chapitre || !sousChapitre) {
+      $q.notify({ type: 'warning', message: 'Aucun chapitre/sous-chapitre disponible' });
+      return;
+    }
+    const now = new Date();
+    const montant = Math.floor(Math.random() * 5000000) + 100000;
+    await db.mandats.add({
+      numeroMandat: nextNum,
+      dateMandat: now,
+      exercice: currentYear,
+      chapitreId: chapitre.id!,
+      sousChapitreId: sousChapitre.id!,
+      beneficiaire: `Fournisseur Test ${nextNum}`,
+      objet: `Objet test mandat ${nextNum}`,
+      montant,
+      modePaiement: 'virement',
+      statut: 'paye',
+      mairieId: 1,
+      personnelId: 1,
+      createdAt: now,
+      updatedAt: now,
+    } as Omit<Mandat, 'id'> & Record<string, unknown>);
+    $q.notify({ type: 'positive', message: `Mandat fake #${nextNum} créé` });
+    await loadData();
+  } catch (error) {
+    console.error('Erreur:', error);
+    $q.notify({ type: 'negative', message: 'Erreur création fake' });
+  }
+}
 
 onMounted(() => {
   void loadData();

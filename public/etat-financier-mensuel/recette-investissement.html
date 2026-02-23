@@ -654,7 +654,10 @@
             'tpl-departement',
             'DÉPARTEMENT DE ' + (data.mairie.departement || '').toUpperCase(),
           );
-          setText('tpl-commune', 'COMMUNE DE ' + (data.mairie.nom || '').toUpperCase());
+          setText(
+            'tpl-commune',
+            'COMMUNE DE ' + (data.mairie.nom || '').replace(/^mairie de /i, '').toUpperCase(),
+          );
           setText('tpl-codeCommune', data.mairie.code || '---');
         }
       }
