@@ -7,6 +7,13 @@
     >
       <template #actions>
         <q-btn color="primary" icon="add" label="Nouveau Bordereau" @click="openDialog()" />
+        <q-btn
+          v-if="isDev"
+          color="orange"
+          icon="science"
+          label="Fake Bordereau"
+          @click="createFakeBordereau"
+        />
       </template>
     </PageHeader>
 
@@ -538,6 +545,38 @@ function printBordereau(bordereau: BordereauMandat) {
 
 function downloadBordereauPDF(bordereau: BordereauMandat) {
   openPrintWindow('bordereau_mandat.html', { bordereauId: bordereau.id!, print: 'true' });
+}
+
+const isDev = import.meta.env.VITE_ENV === 'development';
+
+async function createFakeBordereau() {
+  try {
+    const currentYear = new Date().getFullYear();
+    const bordereauxThisYear = await db.bordereauMandats
+      .where('exercice')
+      .equals(currentYear)
+      .toArray();
+    const nextNum =
+      bordereauxThisYear.length > 0 ? Math.max(...bordereauxThisYear.map((b) => b.numero)) + 1 : 1;
+    const now = new Date();
+    await db.bordereauMandats.add({
+      numero: nextNum,
+      exercice: currentYear,
+      dateEmission: now,
+      mairieId: 1,
+      montantTotal: 0,
+      nombreMandats: 0,
+      statut: 'ouvert',
+      personnelId: authStore.currentUser?.id ?? 1,
+      createdAt: now,
+      updatedAt: now,
+    });
+    $q.notify({ type: 'positive', message: `Bordereau fake #${nextNum} créé` });
+    await loadData();
+  } catch (error) {
+    console.error('Erreur:', error);
+    $q.notify({ type: 'negative', message: 'Erreur création fake' });
+  }
 }
 
 onMounted(() => {

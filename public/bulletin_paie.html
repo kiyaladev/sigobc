@@ -1,0 +1,640 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bulletin de Paie</title>
+    <style>
+      @page {
+        size: A4 portrait;
+        margin: 10mm;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background-color: #f0f0f0;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 11px;
+        padding: 20px;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .page-container {
+        background: white;
+        width: 190mm;
+        margin: 0 auto;
+        padding: 8mm;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Bouton impression */
+      .print-btn {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: #1976d2;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 13px;
+        z-index: 999;
+      }
+      @media print {
+        body {
+          background: none;
+          padding: 0;
+        }
+        .page-container {
+          box-shadow: none;
+          width: 100%;
+          padding: 0;
+        }
+        .print-btn {
+          display: none !important;
+        }
+      }
+
+      /* ===== EN-TÊTE ===== */
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        border-bottom: 2px solid #000;
+        padding-bottom: 6px;
+        margin-bottom: 8px;
+      }
+      .header-left {
+        font-size: 10px;
+        line-height: 1.6;
+      }
+      .header-left .republique {
+        font-weight: bold;
+        font-size: 11px;
+        text-transform: uppercase;
+      }
+      .header-left .devise {
+        font-style: italic;
+        font-size: 9px;
+        color: #555;
+      }
+      .header-left .mairie-nom {
+        font-weight: bold;
+        font-size: 13px;
+        margin-top: 4px;
+        text-transform: uppercase;
+      }
+      .header-center {
+        text-align: center;
+        flex: 1;
+        padding: 0 10px;
+      }
+      .header-center .titre {
+        font-size: 16px;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        border: 2px solid #000;
+        padding: 6px 12px;
+      }
+      .header-center .periode {
+        font-size: 12px;
+        font-weight: bold;
+        margin-top: 5px;
+      }
+      .header-right {
+        font-size: 10px;
+        text-align: right;
+        line-height: 1.6;
+      }
+      .header-right .ref {
+        font-weight: bold;
+      }
+
+      /* ===== SECTION INFOS ===== */
+      .info-section {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 8px;
+      }
+      .info-box {
+        flex: 1;
+        border: 1px solid #000;
+        padding: 5px 8px;
+      }
+      .info-box .box-title {
+        font-weight: bold;
+        font-size: 10px;
+        text-transform: uppercase;
+        background: #eee;
+        margin: -5px -8px 5px;
+        padding: 3px 8px;
+        border-bottom: 1px solid #ccc;
+      }
+      .info-row {
+        display: flex;
+        font-size: 10px;
+        padding: 2px 0;
+        border-bottom: 1px dashed #ddd;
+      }
+      .info-row:last-child {
+        border-bottom: none;
+      }
+      .info-label {
+        font-weight: bold;
+        width: 120px;
+        flex-shrink: 0;
+        color: #444;
+      }
+      .info-value {
+        flex: 1;
+      }
+
+      /* ===== TABLES DE RÉMUNÉRATION ===== */
+      .section-title {
+        font-weight: bold;
+        font-size: 11px;
+        text-transform: uppercase;
+        background: #333;
+        color: white;
+        padding: 3px 8px;
+        margin-bottom: 0;
+        letter-spacing: 1px;
+      }
+      table.remun {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 11px;
+        margin-bottom: 6px;
+      }
+      table.remun th {
+        background: #f0f0f0;
+        border: 1px solid #999;
+        padding: 4px 8px;
+        text-align: left;
+        font-size: 10px;
+      }
+      table.remun th.right,
+      table.remun td.right {
+        text-align: right;
+      }
+      table.remun td {
+        border: 1px solid #ccc;
+        padding: 4px 8px;
+      }
+      table.remun tr.subtotal td {
+        background: #f7f7f7;
+        font-weight: bold;
+      }
+      table.remun tr.total-brut td {
+        background: #dbeafe;
+        font-weight: bold;
+        font-size: 12px;
+      }
+      table.remun tr.total-net td {
+        background: #dcfce7;
+        font-weight: bold;
+        font-size: 13px;
+      }
+      table.remun tr.retenue td {
+        color: #c00;
+      }
+
+      /* ===== RÉSUMÉ FINAL ===== */
+      .resume-box {
+        border: 2px solid #000;
+        padding: 8px 12px;
+        margin: 8px 0;
+        text-align: center;
+        background: #f0fdf4;
+      }
+      .resume-box .label {
+        font-size: 12px;
+        font-weight: bold;
+        text-transform: uppercase;
+      }
+      .resume-box .montant {
+        font-size: 22px;
+        font-weight: 900;
+        margin-top: 3px;
+        letter-spacing: 1px;
+      }
+      .resume-box .en-lettres {
+        font-size: 10px;
+        font-style: italic;
+        margin-top: 3px;
+        color: #555;
+      }
+
+      /* ===== SIGNATURES ===== */
+      .signatures {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 16px;
+        font-size: 11px;
+      }
+      .sig-block {
+        text-align: center;
+        width: 30%;
+      }
+      .sig-block .sig-title {
+        font-weight: bold;
+        border-bottom: 1px solid #000;
+        padding-bottom: 3px;
+        margin-bottom: 25px;
+      }
+      .sig-line {
+        border-top: 1px solid #000;
+        margin-top: 20px;
+        padding-top: 3px;
+        font-size: 10px;
+        color: #555;
+      }
+
+      /* Statut badge */
+      .statut-badge {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 10px;
+        font-size: 10px;
+        font-weight: bold;
+        text-transform: uppercase;
+        margin-left: 8px;
+        vertical-align: middle;
+      }
+      .statut-paye {
+        background: #dcfce7;
+        color: #166534;
+        border: 1px solid #86efac;
+      }
+      .statut-valide {
+        background: #dbeafe;
+        color: #1e40af;
+        border: 1px solid #93c5fd;
+      }
+      .statut-brouillon {
+        background: #f3f4f6;
+        color: #374151;
+        border: 1px solid #d1d5db;
+      }
+    </style>
+  </head>
+  <body>
+    <button class="print-btn" onclick="window.print()">🖨️ Imprimer</button>
+
+    <div class="page-container" id="content">
+      <!-- L'en-tête et le contenu seront générés par JS -->
+      <div style="text-align: center; padding: 40px; color: #888">Chargement en cours...</div>
+    </div>
+
+    <script src="dexie.min.js"></script>
+    <script>
+      const MOIS_LABELS = [
+        'Janvier',
+        'Février',
+        'Mars',
+        'Avril',
+        'Mai',
+        'Juin',
+        'Juillet',
+        'Août',
+        'Septembre',
+        'Octobre',
+        'Novembre',
+        'Décembre',
+      ];
+
+      function fmt(n) {
+        return Number(n || 0).toLocaleString('fr-FR');
+      }
+
+      function statutBadge(s) {
+        const cls = s === 'paye' ? 'paye' : s === 'valide' ? 'valide' : 'brouillon';
+        const lbl = s === 'paye' ? 'Payé' : s === 'valide' ? 'Validé' : 'Brouillon';
+        return `<span class="statut-badge statut-${cls}">${lbl}</span>`;
+      }
+
+      // Conversion nombre en lettres (français)
+      function numberToWords(num) {
+        if (num === 0) return 'zéro';
+        const units = [
+          '',
+          'un',
+          'deux',
+          'trois',
+          'quatre',
+          'cinq',
+          'six',
+          'sept',
+          'huit',
+          'neuf',
+          'dix',
+          'onze',
+          'douze',
+          'treize',
+          'quatorze',
+          'quinze',
+          'seize',
+          'dix-sept',
+          'dix-huit',
+          'dix-neuf',
+        ];
+        const tens = [
+          '',
+          '',
+          'vingt',
+          'trente',
+          'quarante',
+          'cinquante',
+          'soixante',
+          'soixante',
+          'quatre-vingt',
+          'quatre-vingt',
+        ];
+
+        function convertLessThan1000(n) {
+          if (n < 20) return units[n];
+          if (n < 100) {
+            const t = Math.floor(n / 10);
+            const u = n % 10;
+            if (t === 7) return 'soixante-' + units[10 + u];
+            if (t === 9) return 'quatre-vingt-' + (u === 0 ? 's' : units[u]);
+            return (
+              tens[t] +
+              (u === 1 && t !== 8 ? '-et-un' : u > 0 ? '-' + units[u] : t === 8 ? 's' : '')
+            );
+          }
+          const h = Math.floor(n / 100);
+          const r = n % 100;
+          const hText = (h === 1 ? 'cent' : units[h] + '-cent') + (r === 0 && h > 1 ? 's' : '');
+          return hText + (r > 0 ? '-' + convertLessThan1000(r) : '');
+        }
+
+        function convert(n) {
+          if (n === 0) return '';
+          if (n >= 1000000) {
+            const m = Math.floor(n / 1000000);
+            const r = n % 1000000;
+            return (
+              (m === 1 ? 'un million' : convertLessThan1000(m) + ' millions') +
+              (r > 0 ? ' ' + convert(r) : '')
+            );
+          }
+          if (n >= 1000) {
+            const k = Math.floor(n / 1000);
+            const r = n % 1000;
+            return (
+              (k === 1 ? 'mille' : convertLessThan1000(k) + ' mille') +
+              (r > 0 ? ' ' + convertLessThan1000(r) : '')
+            );
+          }
+          return convertLessThan1000(n);
+        }
+        return convert(num);
+      }
+
+      const db = new Dexie('TresorDatabase');
+      db.version(25).stores({
+        mairies: '++id, nom, code, ville',
+        employes: '++id, matricule, nom, prenom, service, mairieId, actif',
+        fichesPaie:
+          '++id, employeId, mois, annee, exercice, mairieId, statut, [annee+mois+employeId]',
+      });
+
+      document.addEventListener('DOMContentLoaded', async () => {
+        const params = new URLSearchParams(window.location.search);
+        const fichePaieId = parseInt(params.get('fichePaieId'), 10);
+        const shouldPrint = params.get('print') === 'true';
+        const content = document.getElementById('content');
+
+        if (!fichePaieId) {
+          content.innerHTML =
+            '<p style="color:red;padding:20px">ID du bulletin manquant (fichePaieId).</p>';
+          return;
+        }
+
+        try {
+          const fiche = await db.fichesPaie.get(fichePaieId);
+          if (!fiche) {
+            content.innerHTML = `<p style="color:red;padding:20px">Bulletin introuvable (ID: ${fichePaieId}).</p>`;
+            return;
+          }
+
+          const emp = await db.employes.get(fiche.employeId);
+          const mairie = await db.mairies.toCollection().first();
+
+          const moisLabel = MOIS_LABELS[(fiche.mois || 1) - 1] || '';
+          const totalRetenues =
+            (fiche.cotisationCNPS || 0) +
+            (fiche.impotSurSalaire || 0) +
+            (fiche.autresRetenues || 0);
+          const totalIndemnites =
+            (fiche.indemniteLogement || 0) +
+            (fiche.indemniteTransport || 0) +
+            (fiche.autresIndemnites || 0);
+          const mairieVille = mairie ? mairie.ville.toUpperCase() : 'VAVOUA';
+          const mairieCode = mairie ? mairie.code : '';
+          const dateAujourdhui = new Date().toLocaleDateString('fr-FR', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+          });
+
+          content.innerHTML = `
+            <!-- EN-TÊTE -->
+            <div class="header">
+              <div class="header-left">
+                <div class="republique">REPUBLIQUE DE CÔTE D'IVOIRE</div>
+                <div class="devise">Union – Discipline – Travail</div>
+                <div class="mairie-nom">COMMUNE DE ${mairieVille}</div>
+                ${mairieCode ? `<div style="font-size:10px;margin-top:2px">Code : <strong>${mairieCode}</strong></div>` : ''}
+              </div>
+              <div class="header-center">
+                <div class="titre">BULLETIN DE PAIE</div>
+                <div class="periode">${moisLabel} ${fiche.annee} ${statutBadge(fiche.statut)}</div>
+              </div>
+              <div class="header-right">
+                <div class="ref">Réf. BP-${fiche.annee}-${String(fiche.mois).padStart(2, '0')}</div>
+                <div>Exercice ${fiche.exercice || fiche.annee}</div>
+              </div>
+            </div>
+
+            <!-- INFOS EMPLOYEUR / AGENT -->
+            <div class="info-section">
+              <div class="info-box">
+                <div class="box-title">Employeur</div>
+                <div class="info-row">
+                  <span class="info-label">Entité</span>
+                  <span class="info-value">MAIRIE DE ${mairieVille}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Code mairie</span>
+                  <span class="info-value">${mairieCode || '-'}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Localité</span>
+                  <span class="info-value">${mairie ? mairie.ville : 'VAVOUA'}</span>
+                </div>
+              </div>
+              <div class="info-box">
+                <div class="box-title">Informations Agent</div>
+                <div class="info-row">
+                  <span class="info-label">Matricule</span>
+                  <span class="info-value"><strong>${emp ? emp.matricule : '-'}</strong></span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Nom & Prénom</span>
+                  <span class="info-value"><strong>${emp ? `${emp.nom} ${emp.prenom}` : '-'}</strong></span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Poste</span>
+                  <span class="info-value">${emp ? emp.poste || '-' : '-'}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Grade</span>
+                  <span class="info-value">${emp ? emp.grade || '-' : '-'}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Catégorie</span>
+                  <span class="info-value">${emp ? emp.categorie || '-' : '-'}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Service</span>
+                  <span class="info-value">${emp ? emp.service || '-' : '-'}</span>
+                </div>
+                ${emp && emp.numeroCNPS ? `<div class="info-row"><span class="info-label">N° CNPS</span><span class="info-value">${emp.numeroCNPS}</span></div>` : ''}
+                ${emp && emp.rib ? `<div class="info-row"><span class="info-label">RIB / Compte</span><span class="info-value">${emp.rib}</span></div>` : ''}
+              </div>
+            </div>
+
+            <!-- GAINS -->
+            <div class="section-title">GAINS</div>
+            <table class="remun">
+              <thead>
+                <tr>
+                  <th style="width:60%">Désignation</th>
+                  <th class="right" style="width:20%">Base</th>
+                  <th class="right" style="width:20%">Montant (CFA)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Salaire de base</td>
+                  <td class="right">—</td>
+                  <td class="right">${fmt(fiche.salaireBase)}</td>
+                </tr>
+                <tr>
+                  <td>Indemnité de logement</td>
+                  <td class="right">—</td>
+                  <td class="right">${fmt(fiche.indemniteLogement)}</td>
+                </tr>
+                <tr>
+                  <td>Indemnité de transport</td>
+                  <td class="right">—</td>
+                  <td class="right">${fmt(fiche.indemniteTransport)}</td>
+                </tr>
+                ${
+                  (fiche.autresIndemnites || 0) > 0
+                    ? `
+                <tr>
+                  <td>Autres indemnités</td>
+                  <td class="right">—</td>
+                  <td class="right">${fmt(fiche.autresIndemnites)}</td>
+                </tr>`
+                    : ''
+                }
+                <tr class="total-brut">
+                  <td><strong>MONTANT BRUT</strong></td>
+                  <td class="right"></td>
+                  <td class="right"><strong>${fmt(fiche.montantBrut)}</strong></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- RETENUES -->
+            <div class="section-title">RETENUES</div>
+            <table class="remun">
+              <thead>
+                <tr>
+                  <th style="width:60%">Désignation</th>
+                  <th class="right" style="width:20%">Taux / Base</th>
+                  <th class="right" style="width:20%">Montant (CFA)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="retenue">
+                  <td>(-) Cotisation CNPS</td>
+                  <td class="right">—</td>
+                  <td class="right">${fmt(fiche.cotisationCNPS)}</td>
+                </tr>
+                <tr class="retenue">
+                  <td>(-) Impôt sur salaire (ITS)</td>
+                  <td class="right">—</td>
+                  <td class="right">${fmt(fiche.impotSurSalaire)}</td>
+                </tr>
+                ${
+                  (fiche.autresRetenues || 0) > 0
+                    ? `
+                <tr class="retenue">
+                  <td>(-) Autres retenues</td>
+                  <td class="right">—</td>
+                  <td class="right">${fmt(fiche.autresRetenues)}</td>
+                </tr>`
+                    : ''
+                }
+                <tr class="subtotal">
+                  <td><strong>TOTAL RETENUES</strong></td>
+                  <td class="right"></td>
+                  <td class="right"><strong>${fmt(totalRetenues)}</strong></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- NET À PAYER -->
+            <div class="resume-box">
+              <div class="label">NET À PAYER</div>
+              <div class="montant">${fmt(fiche.montantNet)} <span style="font-size:14px">FCFA</span></div>
+              <div class="en-lettres">${numberToWords(fiche.montantNet || 0)} francs CFA</div>
+            </div>
+
+            ${fiche.observations ? `<div style="font-size:10px;font-style:italic;margin-bottom:8px;padding:4px 8px;background:#fffde7;border-left:3px solid #f59e0b">Observations : ${fiche.observations}</div>` : ''}
+
+            <!-- SIGNATURES -->
+            <div class="signatures">
+              <div class="sig-block">
+                <div class="sig-title">L'Agent</div>
+                <div class="sig-line">Signature</div>
+              </div>
+              <div class="sig-block">
+                <div class="sig-title">Le Comptable Municipal</div>
+                <div class="sig-line">Signature & Cachet</div>
+              </div>
+              <div class="sig-block">
+                <div class="sig-title">Le Maire</div>
+                <div class="sig-line">Signature & Cachet</div>
+              </div>
+            </div>
+
+            <div style="text-align:right;font-size:9px;color:#999;margin-top:10px;border-top:1px dashed #ccc;padding-top:5px">
+              Édité le ${dateAujourdhui} — SIGOBC Mairie de ${mairie ? mairie.ville : 'Vavoua'}
+            </div>
+          `;
+
+          if (shouldPrint) {
+            setTimeout(() => window.print(), 600);
+          }
+        } catch (err) {
+          document.getElementById('content').innerHTML =
+            `<p style="color:red;padding:20px">Erreur: ${err.message}</p>`;
+        }
+      });
+    </script>
+  </body>
+</html>

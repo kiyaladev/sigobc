@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>État des Décomptes Part Patronale - Vavoua</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../dexie.min.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: #e5e7eb;
+        font-family: 'Times New Roman', Times, serif;
+        color: #000;
+      }
+
+      .page-container {
+        width: 100%;
+        max-width: 297mm; /* A4 Paysage Largeur */
+        min-height: 210mm; /* A4 Paysage Hauteur */
+        background-color: white;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        margin: 2rem auto;
+        padding: 1.5rem 2rem;
+        position: relative;
+      }
+
+      .signature-font {
+        font-family: 'Dancing Script', cursive;
+      }
+
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      th,
+      td {
+        border: 1px solid #000 !important;
+        vertical-align: middle;
+      }
+
+      th {
+        font-size: 11px;
+        line-height: 1.2;
+        padding: 6px 4px;
+      }
+
+      td {
+        font-size: 11px;
+        padding: 6px 8px;
+      }
+
+      @media print {
+        @page {
+          size: A4 landscape;
+          margin: 0.8cm;
+        }
+        body {
+          background-color: white;
+        }
+        .page-container {
+          margin: 0;
+          box-shadow: none;
+          max-width: 100%;
+          min-height: auto;
+          padding: 0;
+        }
+      }
+    </style>
+  </head>
+  <body class="antialiased">
+    <div class="page-container">
+      <!-- En-tête -->
+      <header class="flex justify-between items-start mb-4 text-xs font-bold">
+        <div class="text-center leading-tight">
+          <p>DÉPARTEMENT DE VAVOUA</p>
+          <div class="w-8 h-[1px] bg-black mx-auto my-1"></div>
+          <p>COMMUNE DE VAVOUA</p>
+          <p>Code: 433</p>
+        </div>
+
+        <div class="text-center leading-tight">
+          <p>RÉPUBLIQUE DE COTE D'IVOIRE</p>
+          <p class="font-normal italic mt-0.5">Union - Discipline - Travail</p>
+          <div class="w-12 h-[1px] bg-black mx-auto mt-0.5"></div>
+        </div>
+      </header>
+
+      <!-- Titre Central -->
+      <h1 class="text-center font-bold text-lg underline underline-offset-2 mb-2 tracking-wide">
+        ÉTAT DES DÉCOMPTES DE LA PART PATRONALE
+      </h1>
+
+      <!-- Informations Document -->
+      <div class="text-center mb-6 font-bold text-xs">
+        <p class="mb-1">BUDGET COMMUNAL</p>
+        <p>
+          EXERCICE: <span id="exercice-text">...</span> &nbsp;&nbsp;&nbsp;&nbsp; CHAPITRE: 600
+          &nbsp;&nbsp;&nbsp;&nbsp; ARTICLE: 6002 &nbsp;&nbsp;&nbsp;&nbsp; PARAGRAPHE: 6002/2
+        </p>
+        <p class="mt-2 font-normal">
+          État nominatif pour servir au paiement de la somme acquise par :
+        </p>
+        <p id="periode-text">Les Agents de l'État Civil et population du ...</p>
+      </div>
+
+      <!-- Tableau -->
+      <div class="mb-4">
+        <table>
+          <thead>
+            <tr class="text-center bg-gray-50">
+              <th rowspan="2" class="w-8">N°</th>
+              <th rowspan="2" class="w-56">NOM ET PRÉNOMS</th>
+              <th rowspan="2">Salaires Brut<br />soumis à<br />cotisation</th>
+              <th colspan="3">DIFFÉRENTS TAUX DE PRÉLÈVEMENT</th>
+              <th rowspan="2" class="w-32">Total cotisation<br />à reverser<br />15,45%</th>
+            </tr>
+            <tr class="text-center bg-gray-50">
+              <th>
+                Prestation familiale<br />5,75%
+                <hr class="border-black border-t-[1.5px] my-1.5" />
+                <span class="font-normal text-[9px]">Plafond imposable<br />70 000 F CFA</span>
+              </th>
+              <th>
+                Accident de travail<br />2%
+                <hr class="border-black border-t-[1.5px] my-1.5" />
+                <span class="font-normal text-[9px]">Plafond imposable<br />70 000 F CFA</span>
+              </th>
+              <th>
+                Régime général de<br />retraite 7,7%
+                <hr class="border-black border-t-[1.5px] my-1.5" />
+                <span class="font-normal text-[9px]">Salaire brut<br />imposable</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody id="tbody-data">
+            <tr>
+              <td colspan="7" class="text-center py-4">Chargement...</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr class="font-bold bg-gray-100">
+              <td class="text-center" colspan="6">TOTAL</td>
+              <td id="tot-patron" class="text-right bg-gray-200">0</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- Mentions légales / Arrêt de la somme -->
+      <div class="mb-4 mt-6 text-xs">
+        <p>
+          Arrêté le présent état à la somme de : <br />
+          <span class="font-bold" id="arrete-montant">...</span>
+        </p>
+
+        <div class="grid grid-cols-3 gap-4 mt-6">
+          <!-- Colonne de gauche -->
+          <div class="flex flex-col">
+            <p>Payé et enregistré sous le n°07/2026</p>
+            <p class="mt-1">Pour acquis global</p>
+            <p class="mt-10 font-bold underline underline-offset-2">Certifié le service fait</p>
+          </div>
+
+          <!-- Colonne du milieu -->
+          <div class="text-center flex flex-col justify-end">
+            <p class="font-bold underline underline-offset-2">Vu, vérifié et liquidé</p>
+          </div>
+
+          <!-- Colonne de droite -->
+          <div class="text-center flex flex-col items-center mr-4">
+            <p id="date-sig">À Vavoua, le ...</p>
+            <p class="font-bold mt-1">P/Le Maire & P.D</p>
+
+            <div class="mt-16 border-t border-black w-40 text-center pt-1">Signature</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="absolute bottom-3 left-4 text-[9px] text-gray-500 italic">
+        Scanné avec CamScanner
+      </div>
+    </div>
+
+    <script>
+      const MOIS_LABELS = [
+        'Janvier',
+        'Février',
+        'Mars',
+        'Avril',
+        'Mai',
+        'Juin',
+        'Juillet',
+        'Août',
+        'Septembre',
+        'Octobre',
+        'Novembre',
+        'Décembre',
+      ];
+      function fmt(n) {
+        return Number(n || 0).toLocaleString('fr-FR');
+      }
+      function numberToWords(num) {
+        if (num === 0) return 'ZÉRO';
+        const u = [
+          '',
+          'un',
+          'deux',
+          'trois',
+          'quatre',
+          'cinq',
+          'six',
+          'sept',
+          'huit',
+          'neuf',
+          'dix',
+          'onze',
+          'douze',
+          'treize',
+          'quatorze',
+          'quinze',
+          'seize',
+          'dix-sept',
+          'dix-huit',
+          'dix-neuf',
+        ];
+        const t = [
+          '',
+          '',
+          'vingt',
+          'trente',
+          'quarante',
+          'cinquante',
+          'soixante',
+          'soixante',
+          'quatre-vingt',
+          'quatre-vingt',
+        ];
+        function lt1000(n) {
+          if (n < 20) return u[n];
+          if (n < 100) {
+            const a = Math.floor(n / 10),
+              b = n % 10;
+            if (a === 7) return 'soixante-' + u[10 + b];
+            if (a === 9) return 'quatre-vingt-' + (b === 0 ? 's' : u[b]);
+            return t[a] + (b === 1 && a !== 8 ? '-et-un' : b > 0 ? '-' + u[b] : a === 8 ? 's' : '');
+          }
+          const h = Math.floor(n / 100),
+            r = n % 100;
+          return (
+            (h === 1 ? 'cent' : u[h] + '-cent') +
+            (r === 0 && h > 1 ? 's' : '') +
+            (r > 0 ? '-' + lt1000(r) : '')
+          );
+        }
+        function conv(n) {
+          if (!n) return '';
+          if (n >= 1000000) {
+            const m = Math.floor(n / 1e6),
+              r = n % 1e6;
+            return (
+              (m === 1 ? 'un million' : lt1000(m) + ' millions') + (r > 0 ? ' ' + conv(r) : '')
+            );
+          }
+          if (n >= 1000) {
+            const k = Math.floor(n / 1000),
+              r = n % 1000;
+            return (k === 1 ? 'mille' : lt1000(k) + ' mille') + (r > 0 ? ' ' + lt1000(r) : '');
+          }
+          return lt1000(n);
+        }
+        return conv(num).toUpperCase() + ' FRANCS CFA';
+      }
+      const db = new Dexie('TresorDatabase');
+      db.version(25).stores({
+        mairies: '++id',
+        employes: '++id,matricule,nom,prenom,service,mairieId,actif',
+        fichesPaie: '++id,employeId,mois,annee,exercice,mairieId,statut,[annee+mois+employeId]',
+      });
+      document.addEventListener('DOMContentLoaded', async () => {
+        const p = new URLSearchParams(window.location.search);
+        const mois = parseInt(p.get('mois') || String(new Date().getMonth() + 1), 10);
+        const annee = parseInt(p.get('annee') || String(new Date().getFullYear()), 10);
+        const premierJour = `1er/${String(mois).padStart(2, '0')}/${annee}`;
+        const dernierJour = `${new Date(annee, mois, 0).getDate()}/${String(mois).padStart(2, '0')}/${annee}`;
+        document.getElementById('exercice-text').textContent = String(annee);
+        document.getElementById('periode-text').textContent =
+          `Les Agents de l'État Civil et population du ${premierJour} au ${dernierJour}`;
+        document.getElementById('date-sig').textContent =
+          `À Vavoua, le ${new Date().toLocaleDateString('fr-FR')}`;
+        const fiches = await db.fichesPaie
+          .filter((f) => f.mois === mois && f.annee === annee)
+          .toArray();
+        const tbody = document.getElementById('tbody-data');
+        if (!fiches.length) {
+          tbody.innerHTML =
+            '<tr><td colspan="7" class="text-center py-4 text-gray-500">Aucun bulletin pour cette période</td></tr>';
+          document.getElementById('arrete-montant').textContent = 'ZÉRO FRANC CFA';
+          return;
+        }
+        // Taux patronaux CNPS Côte d'Ivoire
+        const PLAFOND_PF_AT = 70000; // plafond PF et AT
+        const TAUX_PF = 0.0575,
+          TAUX_AT = 0.02,
+          TAUX_RG = 0.077;
+        let totPatron = 0;
+        const rows = await Promise.all(
+          fiches.map(async (f, i) => {
+            const emp = await db.employes.get(f.employeId);
+            const nom = emp ? `${emp.nom} ${emp.prenom}` : `Agent #${f.employeId}`;
+            const brut = f.montantBrut || 0;
+            const basePfAt = Math.min(brut, PLAFOND_PF_AT);
+            const pf = Math.round(basePfAt * TAUX_PF);
+            const at = Math.round(basePfAt * TAUX_AT);
+            const rg = Math.round(brut * TAUX_RG);
+            const total = pf + at + rg;
+            totPatron += total;
+            return `<tr><td class="text-center">${String(i + 1).padStart(2, '0')}</td><td class="font-semibold pl-2">${nom}</td><td class="text-right">${fmt(brut)}</td><td class="text-right">${fmt(pf)}</td><td class="text-right">${fmt(at)}</td><td class="text-right">${fmt(rg)}</td><td class="text-right font-bold bg-gray-50">${fmt(total)}</td></tr>`;
+          }),
+        );
+        tbody.innerHTML = rows.join('');
+        document.getElementById('tot-patron').textContent = fmt(totPatron);
+        document.getElementById('arrete-montant').textContent = numberToWords(totPatron);
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>État de Solde - Vavoua</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../dexie.min.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: #e5e7eb;
+        font-family: 'Times New Roman', Times, serif;
+        color: #000;
+      }
+
+      .page-container {
+        width: 100%;
+        max-width: 297mm; /* A4 Paysage Largeur */
+        min-height: 210mm; /* A4 Paysage Hauteur */
+        background-color: white;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        margin: 2rem auto;
+        padding: 1.5rem 2rem;
+        position: relative;
+      }
+
+      .signature-font {
+        font-family: 'Dancing Script', cursive;
+      }
+
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      th,
+      td {
+        border: 1px solid #000 !important;
+        vertical-align: middle;
+      }
+
+      /* En-têtes du tableau plus serrés pour faire tenir les 13 colonnes */
+      th {
+        font-size: 11px;
+        line-height: 1.1;
+        padding: 4px 2px;
+      }
+
+      td {
+        font-size: 11px;
+        padding: 4px 6px;
+      }
+
+      @media print {
+        @page {
+          size: A4 landscape;
+          margin: 0.8cm;
+        }
+        body {
+          background-color: white;
+        }
+        .page-container {
+          margin: 0;
+          box-shadow: none;
+          max-width: 100%;
+          min-height: auto;
+          padding: 0;
+        }
+      }
+    </style>
+  </head>
+  <body class="antialiased">
+    <div class="page-container">
+      <!-- En-tête -->
+      <header class="flex justify-between items-start mb-4 text-xs font-bold">
+        <div class="text-center leading-tight">
+          <p>DEPARTEMENT DE VAVOUA</p>
+          <p>COMMUNE DE VAVOUA</p>
+          <p>CODE: 433</p>
+        </div>
+
+        <div class="text-center leading-tight">
+          <p>REPUBLIQUE DE COTE D'IVOIRE</p>
+          <p class="font-normal italic mt-0.5">Union- Discipline-Travail</p>
+          <div class="w-12 h-[1px] bg-black mx-auto mt-0.5"></div>
+        </div>
+      </header>
+
+      <!-- Titre Central -->
+      <h1 class="text-center font-bold text-lg underline underline-offset-2 mb-4 tracking-wide">
+        ETAT DE SOLDE
+      </h1>
+
+      <!-- Informations Document -->
+      <div class="flex justify-between items-end mb-4 font-bold text-xs">
+        <div>
+          <p id="periode-text">PERIODE: ...</p>
+        </div>
+        <div class="text-right">
+          <p id="exercice-text">EXERCICE: ...</p>
+          <p>CHAPITRE: 601</p>
+          <p>ARTICLE: 6010/1</p>
+        </div>
+      </div>
+
+      <!-- Tableau -->
+      <div class="mb-4">
+        <table>
+          <thead>
+            <tr class="text-center bg-gray-50">
+              <th class="w-8">N°<br />D'ORD.</th>
+              <th class="w-48">NOM & PRENOM (S)</th>
+              <th>Salaire<br />Brut</th>
+              <th>Idem<br />Résid<br />15%</th>
+              <th>SALAIRE<br />BRUT</th>
+              <th>CNPS<br />6,30%</th>
+              <th>Salaire<br />Net</th>
+              <th>I.T.S<br />1,60%</th>
+              <th>RETENUES<br />I.G.R</th>
+              <th>F.N.S<br />1%</th>
+              <th>TOTAL<br />IMPÔTS</th>
+              <th>Primes de<br />Transp.<br />Indem.Fct</th>
+              <th class="font-extrabold bg-gray-100">NET<br />A PAYER</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-data">
+            <tr>
+              <td colspan="13" class="text-center py-4">Chargement...</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr id="tfoot-totals" class="font-bold bg-gray-100">
+              <td class="text-center" colspan="2">TOTAUX</td>
+              <td id="tot-base" class="text-right">0</td>
+              <td id="tot-logement" class="text-right">0</td>
+              <td id="tot-brut" class="text-right">0</td>
+              <td id="tot-cnps" class="text-right">0</td>
+              <td id="tot-net-imp" class="text-right">0</td>
+              <td id="tot-its" class="text-right">0</td>
+              <td></td>
+              <td></td>
+              <td id="tot-imp" class="text-right">0</td>
+              <td id="tot-primes" class="text-right">0</td>
+              <td id="tot-net" class="text-right bg-gray-200">0</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- Mentions légales / Arrêt de la somme -->
+      <div class="mb-4 text-xs">
+        <p>
+          Arrêté le présent état à la somme de : <br />
+          <span class="font-bold" id="arrete-montant">...</span>
+        </p>
+      </div>
+
+      <!-- Section Signatures et Date -->
+      <div class="flex justify-end items-start relative text-xs">
+        <div class="text-center flex flex-col items-center mr-16">
+          <p id="date-sig">VAVOUA, le ...</p>
+          <p class="font-bold mt-1">P/LE MAIRE & P.D.</p>
+
+          <div class="mt-16 border-t border-black w-40 text-center pt-1">Signature</div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const MOIS_LABELS = [
+        'Janvier',
+        'Février',
+        'Mars',
+        'Avril',
+        'Mai',
+        'Juin',
+        'Juillet',
+        'Août',
+        'Septembre',
+        'Octobre',
+        'Novembre',
+        'Décembre',
+      ];
+
+      function fmt(n) {
+        return Number(n || 0).toLocaleString('fr-FR');
+      }
+
+      function numberToWords(num) {
+        if (num === 0) return 'ZÉRO';
+        const units = [
+          '',
+          'un',
+          'deux',
+          'trois',
+          'quatre',
+          'cinq',
+          'six',
+          'sept',
+          'huit',
+          'neuf',
+          'dix',
+          'onze',
+          'douze',
+          'treize',
+          'quatorze',
+          'quinze',
+          'seize',
+          'dix-sept',
+          'dix-huit',
+          'dix-neuf',
+        ];
+        const tens = [
+          '',
+          '',
+          'vingt',
+          'trente',
+          'quarante',
+          'cinquante',
+          'soixante',
+          'soixante',
+          'quatre-vingt',
+          'quatre-vingt',
+        ];
+        function lt1000(n) {
+          if (n < 20) return units[n];
+          if (n < 100) {
+            const t = Math.floor(n / 10),
+              u = n % 10;
+            if (t === 7) return 'soixante-' + units[10 + u];
+            if (t === 9) return 'quatre-vingt-' + (u === 0 ? 's' : units[u]);
+            return (
+              tens[t] +
+              (u === 1 && t !== 8 ? '-et-un' : u > 0 ? '-' + units[u] : t === 8 ? 's' : '')
+            );
+          }
+          const h = Math.floor(n / 100),
+            r = n % 100;
+          return (
+            (h === 1 ? 'cent' : units[h] + '-cent') +
+            (r === 0 && h > 1 ? 's' : '') +
+            (r > 0 ? '-' + lt1000(r) : '')
+          );
+        }
+        function conv(n) {
+          if (!n) return '';
+          if (n >= 1000000) {
+            const m = Math.floor(n / 1e6),
+              r = n % 1e6;
+            return (
+              (m === 1 ? 'un million' : lt1000(m) + ' millions') + (r > 0 ? ' ' + conv(r) : '')
+            );
+          }
+          if (n >= 1000) {
+            const k = Math.floor(n / 1000),
+              r = n % 1000;
+            return (k === 1 ? 'mille' : lt1000(k) + ' mille') + (r > 0 ? ' ' + lt1000(r) : '');
+          }
+          return lt1000(n);
+        }
+        return conv(num).toUpperCase() + ' FRANCS CFA';
+      }
+
+      const db = new Dexie('TresorDatabase');
+      db.version(25).stores({
+        mairies: '++id, nom, code, ville',
+        employes: '++id, matricule, nom, prenom, service, mairieId, actif',
+        fichesPaie:
+          '++id, employeId, mois, annee, exercice, mairieId, statut, [annee+mois+employeId]',
+      });
+
+      document.addEventListener('DOMContentLoaded', async () => {
+        const params = new URLSearchParams(window.location.search);
+        const mois = parseInt(params.get('mois') || String(new Date().getMonth() + 1), 10);
+        const annee = parseInt(params.get('annee') || String(new Date().getFullYear()), 10);
+
+        const moisLabel = MOIS_LABELS[mois - 1] || '';
+        const premierJour = `01/${String(mois).padStart(2, '0')}/${annee}`;
+        const dernierJour = `${new Date(annee, mois, 0).getDate()}/${String(mois).padStart(2, '0')}/${annee}`;
+
+        document.getElementById('periode-text').textContent =
+          `PERIODE: DU ${premierJour} AU ${dernierJour}`;
+        document.getElementById('exercice-text').textContent = `EXERCICE: ${annee}`;
+        document.getElementById('date-sig').textContent =
+          `VAVOUA, le ${new Date().toLocaleDateString('fr-FR')}`;
+
+        const fiches = await db.fichesPaie
+          .where('[annee+mois+employeId]')
+          .between([annee, mois, -Infinity], [annee, mois, Infinity])
+          .toArray()
+          .catch(() => db.fichesPaie.filter((f) => f.mois === mois && f.annee === annee).toArray());
+
+        const tbody = document.getElementById('tbody-data');
+        if (!fiches.length) {
+          tbody.innerHTML =
+            '<tr><td colspan="13" class="text-center py-4 text-gray-500">Aucun bulletin pour cette période</td></tr>';
+          return;
+        }
+
+        let totBase = 0,
+          totLogement = 0,
+          totBrut = 0,
+          totCnps = 0,
+          totNetImp = 0,
+          totIts = 0,
+          totImp = 0,
+          totPrimes = 0,
+          totNet = 0;
+        const rows = await Promise.all(
+          fiches.map(async (f, i) => {
+            const emp = await db.employes.get(f.employeId);
+            const nom = emp ? `${emp.nom} ${emp.prenom}` : `Agent #${f.employeId}`;
+            const base = f.salaireBase || 0,
+              log = f.indemniteLogement || 0;
+            const brut = f.montantBrut || 0,
+              cnps = f.cotisationCNPS || 0;
+            const netImp = brut - cnps,
+              its = f.impotSurSalaire || 0;
+            const totalImp = its,
+              primes = (f.indemniteTransport || 0) + (f.autresIndemnites || 0),
+              net = f.montantNet || 0;
+            totBase += base;
+            totLogement += log;
+            totBrut += brut;
+            totCnps += cnps;
+            totNetImp += netImp;
+            totIts += its;
+            totImp += totalImp;
+            totPrimes += primes;
+            totNet += net;
+            return `<tr>
+            <td class="text-center">${i + 1}</td>
+            <td class="font-semibold">${nom}</td>
+            <td class="text-right">${fmt(base)}</td>
+            <td class="text-right">${fmt(log)}</td>
+            <td class="text-right">${fmt(brut)}</td>
+            <td class="text-right">${fmt(cnps)}</td>
+            <td class="text-right">${fmt(netImp)}</td>
+            <td class="text-right">${fmt(its)}</td>
+            <td></td>
+            <td></td>
+            <td class="text-right">${fmt(totalImp)}</td>
+            <td class="text-right">${fmt(primes)}</td>
+            <td class="text-right font-bold bg-gray-50">${fmt(net)}</td>
+          </tr>`;
+          }),
+        );
+        tbody.innerHTML = rows.join('');
+
+        document.getElementById('tot-base').textContent = fmt(totBase);
+        document.getElementById('tot-logement').textContent = fmt(totLogement);
+        document.getElementById('tot-brut').textContent = fmt(totBrut);
+        document.getElementById('tot-cnps').textContent = fmt(totCnps);
+        document.getElementById('tot-net-imp').textContent = fmt(totNetImp);
+        document.getElementById('tot-its').textContent = fmt(totIts);
+        document.getElementById('tot-imp').textContent = fmt(totImp);
+        document.getElementById('tot-primes').textContent = fmt(totPrimes);
+        document.getElementById('tot-net').textContent = fmt(totNet);
+        document.getElementById('arrete-montant').textContent = numberToWords(totNet);
+      });
+    </script>
+  </body>
+</html>

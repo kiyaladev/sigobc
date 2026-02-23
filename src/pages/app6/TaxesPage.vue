@@ -146,7 +146,7 @@
               outlined
               dense
               type="number"
-              prefix="XOF"
+              prefix="CFA"
             />
 
             <q-input

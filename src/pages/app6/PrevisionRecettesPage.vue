@@ -94,6 +94,14 @@
               unelevated
               @click="showAddDialog = true"
             />
+            <q-btn
+              v-if="isDev"
+              color="orange"
+              icon="science"
+              label="Fake Prévision"
+              unelevated
+              @click="createFakePrevision"
+            />
           </div>
         </div>
 
@@ -217,7 +225,7 @@
               outlined
               dense
               type="number"
-              prefix="XOF"
+              prefix="CFA"
               :rules="[(val) => !!val || 'Montant requis']"
             />
 
@@ -227,12 +235,12 @@
               outlined
               dense
               type="number"
-              prefix="XOF"
+              prefix="CFA"
             />
 
             <q-select
               v-model="formData.statut"
-              :options="['brouillon', 'validee', 'cloturee']"
+              :options="['brouillon', 'validee']"
               label="Statut *"
               outlined
               dense
@@ -347,7 +355,7 @@ const formData = ref({
   taxeId: null as number | null,
   montantPrevu: 0,
   montantRealise: 0,
-  statut: 'brouillon' as 'brouillon' | 'validee' | 'cloturee',
+  statut: 'validee' as 'brouillon' | 'validee',
   observations: '',
 });
 
@@ -377,7 +385,6 @@ const moisOptions = [
 const statutOptions = [
   { label: 'Brouillon', value: 'brouillon' },
   { label: 'Validée', value: 'validee' },
-  { label: 'Clôturée', value: 'cloturee' },
 ];
 
 const taxeOptions = computed(() =>
@@ -524,7 +531,6 @@ function getStatutColor(statut: string): string {
   const colors: Record<string, string> = {
     brouillon: 'grey',
     validee: 'blue',
-    cloturee: 'green',
   };
   return colors[statut] || 'grey';
 }
@@ -817,6 +823,36 @@ function resetForm() {
     statut: 'brouillon',
     observations: '',
   };
+}
+
+const isDev = import.meta.env.VITE_ENV === 'development';
+
+async function createFakePrevision() {
+  try {
+    const currentYear = new Date().getFullYear();
+    const taxe = taxes.value[Math.floor(Math.random() * taxes.value.length)];
+    if (!taxe) {
+      $q.notify({ type: 'warning', message: 'Aucune taxe disponible' });
+      return;
+    }
+    const now = new Date();
+    const montantPrevu = Math.floor(Math.random() * 8000000) + 200000;
+    await db.previsionsRecettes.add({
+      exercice: currentYear,
+      taxeId: taxe.id!,
+      mairieId: DEFAULT_MAIRIE_ID,
+      montantPrevu,
+      montantRealise: 0,
+      statut: 'validee',
+      createdAt: now,
+      updatedAt: now,
+    });
+    $q.notify({ type: 'positive', message: 'Prévision recette fake créée' });
+    await loadData();
+  } catch (error) {
+    console.error('Erreur:', error);
+    $q.notify({ type: 'negative', message: 'Erreur création fake' });
+  }
 }
 
 onMounted(() => {

@@ -11,6 +11,8 @@ import type {
   BordereauMandatRecette,
   ChapitreRecette,
   EtatFinancierMensuelRecette,
+  Employe,
+  FichePaie,
 } from './db';
 
 const now = new Date();
@@ -79,6 +81,9 @@ export async function seedDefaultData() {
   const mairieCount = await db.mairies.count();
   if (mairieCount > 0) return;
 
+  // L'utilisateur initialise volontairement, retirer le flag de suppression
+  localStorage.removeItem('sigobc_db_cleared');
+
   console.log('🚀 Seeding default data...');
 
   // 1. Mairie
@@ -87,11 +92,12 @@ export async function seedDefaultData() {
     code: '433',
     adresse: 'Avenue Principale',
     ville: 'Vavoua',
-    departement: 'Agboville',
-    region: 'Agnéby-Tiassa',
+    departement: 'Vavoua',
+    region: 'Haut-Sassandra',
     codePostal: '00225',
     telephone: '+225 23 54 00 00',
     email: 'contact@mairie-vavoua.ci',
+    maire: 'KALOU BONAVENTURE',
     createdAt: now,
     updatedAt: now,
   });
@@ -1251,6 +1257,8 @@ export async function seedTestData(options: SeedOptions = {}) {
   try {
     // D'abord, vider et réinitialiser la base
     await clearDatabase();
+    // Retirer le flag après le clear car on va remplir la base
+    localStorage.removeItem('sigobc_db_cleared');
     await seedDefaultData();
     console.log('Default data seeded before adding test data.');
 
@@ -1326,11 +1334,306 @@ export async function seedTestData(options: SeedOptions = {}) {
     const chapitreRecetteIds = chapitresRecetteList.map((c) => c.id!);
     await seedEtatFinancierMensuelRecette(taxeIds, chapitreRecetteIds);
 
+    // =================================================================
+    // APP7 - GESTION DES EMPLOYÉS SEEDERS
+    // =================================================================
+    console.log('🌱 Seeding employés, fiches de paie et congés...');
+    const employesCreated = await seedEmployes();
+    const employeIds = employesCreated.map((e) => e.id);
+    await seedFichesPaie(employeIds);
+    await seedCongesApp7(employeIds);
+    await seedOrdresMissionApp7(employeIds);
+
     console.log('\n✨ All test data seeders have been executed successfully!');
   } catch (error) {
     console.error('❌ Error during test data seeding:', error);
     throw error;
   }
+}
+
+// =================================================================
+//                  APP7 - SEEDER FUNCTIONS
+// =================================================================
+
+async function seedEmployes(): Promise<(Employe & { id: number })[]> {
+  const mairieId = DEFAULT_MAIRIE_ID as number;
+  const employes: Omit<Employe, 'id'>[] = [
+    {
+      matricule: 'EMP001',
+      nom: 'KONSEIGA',
+      prenom: 'Georges Ulrich',
+      sexe: 'M',
+      poste: 'Secrétaire Général',
+      grade: 'A1',
+      service: 'Direction Générale',
+      dateEmbauche: new Date('2015-01-15'),
+      salaireBase: 105345,
+      indemniteLogement: 15802,
+      indemniteTransport: 22000,
+      autresIndemnites: 0,
+      numeroCNPS: 'CNPS001235',
+      mairieId,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      matricule: 'EMP002',
+      nom: 'TOURE',
+      prenom: 'Mory',
+      sexe: 'M',
+      poste: 'Comptable',
+      grade: 'B2',
+      service: 'Finance',
+      dateEmbauche: new Date('2017-06-01'),
+      salaireBase: 105345,
+      indemniteLogement: 15802,
+      indemniteTransport: 22000,
+      autresIndemnites: 0,
+      numeroCNPS: 'CNPS001236',
+      mairieId,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      matricule: 'EMP003',
+      nom: 'SIDIBE',
+      prenom: 'Dramane',
+      sexe: 'M',
+      poste: 'Agent Administratif',
+      grade: 'C1',
+      service: 'Administration',
+      dateEmbauche: new Date('2019-03-01'),
+      salaireBase: 83520,
+      indemniteLogement: 12528,
+      indemniteTransport: 22000,
+      autresIndemnites: 0,
+      numeroCNPS: 'CNPS001237',
+      mairieId,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      matricule: 'EMP004',
+      nom: 'KONE',
+      prenom: 'Korotoum',
+      sexe: 'F',
+      poste: 'Technicienne',
+      grade: 'B1',
+      service: 'Technique',
+      dateEmbauche: new Date('2018-09-01'),
+      salaireBase: 89009,
+      indemniteLogement: 13351,
+      indemniteTransport: 22000,
+      autresIndemnites: 0,
+      numeroCNPS: 'CNPS001238',
+      mairieId,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      matricule: 'EMP005',
+      nom: 'TOH TAPE',
+      prenom: 'Edmond',
+      sexe: 'M',
+      poste: 'Chauffeur',
+      grade: 'D1',
+      service: 'Logistique',
+      dateEmbauche: new Date('2016-04-01'),
+      salaireBase: 105345,
+      indemniteLogement: 15802,
+      indemniteTransport: 22000,
+      autresIndemnites: 0,
+      numeroCNPS: 'CNPS001239',
+      mairieId,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      matricule: 'EMP006',
+      nom: 'SILUE',
+      prenom: 'Guébessôngui Léon',
+      sexe: 'M',
+      poste: 'Agent de Sécurité',
+      grade: 'D2',
+      service: 'Sécurité',
+      dateEmbauche: new Date('2020-01-15'),
+      salaireBase: 81649,
+      indemniteLogement: 12247,
+      indemniteTransport: 22000,
+      autresIndemnites: 0,
+      numeroCNPS: 'CNPS001240',
+      mairieId,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      matricule: 'EMP007',
+      nom: 'FOFANA',
+      prenom: 'Abou',
+      sexe: 'M',
+      poste: 'Technicien',
+      grade: 'C2',
+      service: 'Technique',
+      dateEmbauche: new Date('2021-05-01'),
+      salaireBase: 79779,
+      indemniteLogement: 11967,
+      indemniteTransport: 22000,
+      autresIndemnites: 0,
+      numeroCNPS: 'CNPS001241',
+      mairieId,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      matricule: 'EMP008',
+      nom: 'GBAHA',
+      prenom: 'Hermann Bertrand',
+      sexe: 'M',
+      poste: "Agent d'accueil",
+      grade: 'D1',
+      service: 'Accueil',
+      dateEmbauche: new Date('2022-02-01'),
+      salaireBase: 76038,
+      indemniteLogement: 11406,
+      indemniteTransport: 22000,
+      autresIndemnites: 0,
+      numeroCNPS: 'CNPS001242',
+      mairieId,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+  ];
+
+  await db.employes.bulkAdd(employes);
+  const created = await db.employes.toArray();
+  console.log(`✅ ${created.length} employés seedés.`);
+  return created as (Employe & { id: number })[];
+}
+
+async function seedFichesPaie(employeIds: number[]) {
+  const mairieId = DEFAULT_MAIRIE_ID as number;
+  const fiches: Omit<FichePaie, 'id'>[] = [];
+
+  // Générer des fiches pour les 4 derniers mois
+  const today = new Date();
+  for (let m = 0; m < 4; m++) {
+    const d = new Date(today.getFullYear(), today.getMonth() - m, 1);
+    const mois = d.getMonth() + 1;
+    const annee = d.getFullYear();
+
+    for (const empId of employeIds) {
+      const emp = await db.employes.get(empId);
+      if (!emp) continue;
+
+      const salaireBase = emp.salaireBase;
+      const indemniteLogement = emp.indemniteLogement ?? 0;
+      const indemniteTransport = emp.indemniteTransport ?? 0;
+      const autresIndemnites = emp.autresIndemnites ?? 0;
+      const montantBrut = salaireBase + indemniteLogement;
+      const cotisationCNPS = Math.round(montantBrut * 0.063);
+      const impotSurSalaire = Math.round(montantBrut * 0.016);
+      const autresRetenues = 0;
+      const montantNet =
+        montantBrut - cotisationCNPS - impotSurSalaire + indemniteTransport + autresIndemnites;
+
+      fiches.push({
+        employeId: empId,
+        mois,
+        annee,
+        exercice: annee,
+        mairieId,
+        salaireBase,
+        indemniteLogement,
+        indemniteTransport,
+        autresIndemnites,
+        montantBrut,
+        cotisationCNPS,
+        impotSurSalaire,
+        autresRetenues,
+        montantNet,
+        statut: m === 0 ? 'brouillon' : 'paye',
+        personnelId: 1,
+        createdAt: now,
+        updatedAt: now,
+      });
+    }
+  }
+
+  await db.fichesPaie.bulkAdd(fiches);
+  console.log(`✅ ${fiches.length} fiches de paie seedées.`);
+}
+
+async function seedCongesApp7(employeIds: number[]) {
+  const mairieId = DEFAULT_MAIRIE_ID as number;
+  const types: Array<'annuel' | 'maladie' | 'maternite' | 'circonstance' | 'autre'> = [
+    'annuel',
+    'maladie',
+    'annuel',
+    'circonstance',
+    'annuel',
+  ];
+  const statuts: Array<'demande' | 'approuve' | 'refuse' | 'annule'> = [
+    'approuve',
+    'approuve',
+    'demande',
+    'refuse',
+    'annule',
+  ];
+  const conges = employeIds.slice(0, 5).map((empId, i) => ({
+    employeId: empId,
+    mairieId,
+    type: types[i]!,
+    dateDebut: new Date(CURRENT_YEAR, i, 5),
+    dateFin: new Date(CURRENT_YEAR, i, 12 + i),
+    nombreJours: 7 + i,
+    motif: 'Congé de routine',
+    statut: statuts[i]!,
+    personnelId: 1,
+    createdAt: now,
+    updatedAt: now,
+  }));
+  await db.conges.bulkAdd(conges);
+  console.log(`✅ ${conges.length} congés seedés.`);
+}
+
+async function seedOrdresMissionApp7(employeIds: number[]) {
+  const mairieId = DEFAULT_MAIRIE_ID as number;
+  const destinations = ['Abidjan', 'Bouaké', 'Yamoussoukro', 'Daloa', 'San Pédro'];
+  const objets = [
+    'Réunion mensuelle DGDDL',
+    'Formation sur les finances locales',
+    'Conférence des maires',
+    'Atelier budgétaire',
+    'Séminaire de gestion',
+  ];
+  const missions = employeIds.slice(0, 5).map((empId, i) => ({
+    numero: `OM/${CURRENT_YEAR}/${String(i + 1).padStart(3, '0')}`,
+    employeId: empId,
+    mairieId,
+    exercice: CURRENT_YEAR,
+    objet: objets[i]!,
+    destination: destinations[i]!,
+    dateDebut: new Date(CURRENT_YEAR, i, 10),
+    dateFin: new Date(CURRENT_YEAR, i, 12 + i),
+    nombreJours: 2 + i,
+    indemniteJournaliere: 25000,
+    fraisTransport: 15000,
+    montantTotal: (2 + i) * 25000 + 15000,
+    statut: i < 2 ? ('paye' as const) : i < 4 ? ('valide' as const) : ('brouillon' as const),
+    personnelId: 1,
+    createdAt: now,
+    updatedAt: now,
+  }));
+  await db.ordresMission.bulkAdd(missions);
+  console.log(`✅ ${missions.length} ordres de mission seedés.`);
 }
 
 // =================================================================
@@ -1361,8 +1664,24 @@ export async function clearDatabase() {
     await db.chapitresRecette.clear();
     await db.etatFinancierMensuelRecette.clear();
 
+    // Tables supplémentaires
+    await db.exercices.clear();
+    await db
+      .table('printData')
+      .clear()
+      .catch(() => {});
+
     await db.utilisateurs.clear();
     await db.mairies.clear();
+
+    // Tables app7 - Gestion des Employés
+    await db.employes.clear();
+    await db.fichesPaie.clear();
+    await db.conges.clear();
+    await db.ordresMission.clear();
+
+    // Empecher le auto-seed au prochain chargement
+    localStorage.setItem('sigobc_db_cleared', 'true');
 
     console.log('✅ All tables cleared successfully.');
   } catch (error) {
@@ -2319,6 +2638,78 @@ async function seedMandatsRecette(
  * Vérifie et corrige les informations de la mairie si elles sont incorrectes (ex: Bodokro au lieu de Vavoua)
  * Cette fonction est appelée au démarrage de l'application
  */
+export async function ensureSousChapitres9xxExist() {
+  const existing = await db.sousChapitres.filter((s) => s.code.startsWith('9')).toArray();
+  if (existing.length > 0) return; // Already have 9xx sous-chapitres
+
+  const mairie = await db.mairies.toCollection().first();
+  if (!mairie) return;
+  const mairieId = mairie.id as number;
+  const now = new Date();
+
+  console.log('🔄 Migration: ajout des sous-chapitres 9xx (investissement)...');
+
+  const items9xx = [
+    { code: '90', libelle: 'SECTION 90 - ÉQUIPEMENT DES SERVICES GÉNÉRAUX', parent: null },
+    { code: '900', libelle: 'CHAP.900-ADMINISTRATION GÉNÉRALE', parent: '90' },
+    { code: '903', libelle: 'CHAP.903-POLICE ET ORDRE PUBLIC FOURRIÈRE', parent: '90' },
+    {
+      code: '9030',
+      libelle: 'Police et ordre publique - fourrière SOUS TOTAL CHAP. 903',
+      parent: '903',
+    },
+    { code: '91', libelle: 'SECTION 91-ÉQUIPEMENT DES SCES DE COLLECTIVITÉ', parent: null },
+    { code: '910', libelle: 'CHAP.910-VOIRIES ET RÉSEAUX', parent: '91' },
+    { code: '9101', libelle: 'VOIRIES', parent: '910' },
+    { code: '9102', libelle: "Réseaux d'assainissement & Drainage", parent: '910' },
+    { code: '9103', libelle: 'Électricité - éclairage public', parent: '910' },
+    {
+      code: '913',
+      libelle: "CHAP. 913- HYGIÈNE & SALUBRITÉ PUBLIQ. HYDRAULIQUE- ADDUCTION D'EAU Articles",
+      parent: '91',
+    },
+    { code: '9134', libelle: 'Hydraulique - pompages puits lavoirs', parent: '913' },
+    { code: '9136', libelle: "Autres dépenses d'équipement au tritre", parent: '913' },
+    {
+      code: '92',
+      libelle: 'SECTION 92-ÉQUIPEMENT DES SERVICES SOCIAUX, CULTURELS ET DE LA PROMOTION HUMAINE',
+      parent: null,
+    },
+    { code: '921', libelle: 'CHAP. 921- SANTÉ PUBLIQUE Articles', parent: '92' },
+    { code: '9212', libelle: 'Hôpitaux & Dispensaires', parent: '921' },
+    { code: '93', libelle: 'SECTION 93- ÉQUIPEMENT DES SERVICES ÉCONOMIQUES', parent: null },
+    { code: '934', libelle: 'CHAP. 934- INDUSTRIES & COMMERCES Articles', parent: '93' },
+    { code: '9341', libelle: 'Abattoir- Conservation de viande & Transp.', parent: '934' },
+    { code: '9344', libelle: 'Marchés', parent: '934' },
+  ];
+
+  const codeToIdMap = new Map<string, number>();
+
+  for (const item of items9xx) {
+    let parentId: number | undefined;
+    if (item.parent) {
+      parentId = codeToIdMap.get(item.parent);
+    }
+
+    const newItem: Omit<SousChapitre, 'id'> = {
+      code: item.code,
+      libelle: item.libelle,
+      mairieId,
+      actif: true,
+      createdAt: now,
+      updatedAt: now,
+    };
+    if (parentId !== undefined) {
+      newItem.parentId = parentId;
+    }
+
+    const id = await db.sousChapitres.add(newItem);
+    codeToIdMap.set(item.code, id as number);
+  }
+
+  console.log(`✅ ${items9xx.length} sous-chapitres 9xx ajoutés avec succès`);
+}
+
 export async function ensureCorrectMairieInfo() {
   const mairies = await db.mairies.toArray();
 

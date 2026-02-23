@@ -15,6 +15,7 @@ export interface Mairie {
   codePostal: string;
   telephone?: string;
   email?: string;
+  maire?: string;
   logo?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -89,7 +90,7 @@ export interface Prevision {
   montantEngage: number; // Montant déjà engagé (mandats)
   montantDisponible: number; // Reste à mandater
   observations?: string;
-  statut: 'brouillon' | 'validee' | 'cloturee';
+  statut: 'brouillon' | 'validee';
   personnelId: number;
   createdAt: Date;
   updatedAt: Date;
@@ -196,7 +197,7 @@ export interface PrevisionRecette {
   mairieId: number;
   montantPrevu: number;
   montantRealise: number;
-  statut: 'brouillon' | 'validee' | 'cloturee';
+  statut: 'brouillon' | 'validee';
   observations?: string;
   personnelId?: number;
   createdAt: Date;
@@ -375,6 +376,95 @@ export interface EtatFinancierMensuelRecette {
   updatedAt: Date;
 }
 
+// ========== Interfaces pour App7 - Gestion des Employés ==========
+
+export interface Employe {
+  id?: number;
+  matricule: string;
+  nom: string;
+  prenom: string;
+  dateNaissance?: Date;
+  sexe?: 'M' | 'F';
+  poste: string;
+  grade?: string;
+  categorie?: string;
+  service: string;
+  dateEmbauche?: Date;
+  salaireBase: number;
+  indemniteLogement?: number;
+  indemniteTransport?: number;
+  autresIndemnites?: number;
+  numeroCNPS?: string;
+  rib?: string;
+  mairieId: number;
+  actif: boolean;
+  observations?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface FichePaie {
+  id?: number;
+  employeId: number;
+  mois: number; // 1-12
+  annee: number;
+  exercice: number;
+  mairieId: number;
+  salaireBase: number;
+  indemniteLogement: number;
+  indemniteTransport: number;
+  autresIndemnites: number;
+  montantBrut: number;
+  cotisationCNPS: number;
+  impotSurSalaire: number;
+  autresRetenues: number;
+  montantNet: number;
+  statut: 'brouillon' | 'valide' | 'paye';
+  mandatId?: number;
+  observations?: string;
+  personnelId: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Conge {
+  id?: number;
+  employeId: number;
+  mairieId: number;
+  type: 'annuel' | 'maladie' | 'maternite' | 'circonstance' | 'autre';
+  dateDebut: Date;
+  dateFin: Date;
+  nombreJours: number;
+  motif?: string;
+  statut: 'demande' | 'approuve' | 'refuse' | 'annule';
+  observations?: string;
+  personnelId: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface OrdreMission {
+  id?: number;
+  numero: string;
+  employeId: number;
+  mairieId: number;
+  exercice: number;
+  objet: string;
+  destination: string;
+  dateDebut: Date;
+  dateFin: Date;
+  nombreJours: number;
+  indemniteJournaliere: number;
+  fraisTransport?: number;
+  montantTotal: number;
+  mandatId?: number;
+  statut: 'brouillon' | 'valide' | 'paye';
+  observations?: string;
+  personnelId: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // Interface pour stocker temporairement les données d'impression
 // Utilisé pour passer les données aux pages d'impression en mode Electron
 export interface PrintData {
@@ -382,6 +472,21 @@ export interface PrintData {
   type: string; // Type de document (FILL_ETAT_FINANCIER_DATA, FILL_CT02_DATA, etc.)
   data: unknown; // Données à imprimer (sérialisées en JSON)
   createdAt: Date;
+}
+
+// ========== Interface pour la gestion des exercices budgétaires ==========
+
+export interface Exercice {
+  id?: number;
+  annee: number; // Année de l'exercice (ex: 2025, 2026)
+  libelle?: string; // Libellé optionnel
+  statut: 'ouvert' | 'verrouille'; // ouvert = modifiable, verrouille = lecture seule
+  mairieId: number;
+  dateOuverture?: Date;
+  dateVerrouillage?: Date;
+  observations?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 // Classe Dexie pour la base de données
@@ -409,6 +514,15 @@ class TresorDatabase extends Dexie {
 
   // Table temporaire pour les données d'impression
   printData!: EntityTable<PrintData, 'id'>;
+
+  // Gestion des exercices budgétaires
+  exercices!: EntityTable<Exercice, 'id'>;
+
+  // App7 - Gestion des Employés
+  employes!: EntityTable<Employe, 'id'>;
+  fichesPaie!: EntityTable<FichePaie, 'id'>;
+  conges!: EntityTable<Conge, 'id'>;
+  ordresMission!: EntityTable<OrdreMission, 'id'>;
 
   constructor() {
     super('TresorDatabase');
@@ -446,6 +560,50 @@ class TresorDatabase extends Dexie {
 
       // Table temporaire pour les données d'impression (utilisée en mode Electron)
       printData: '++id, type, createdAt',
+
+      // Gestion des exercices budgétaires
+      exercices: '++id, annee, statut, mairieId',
+    });
+
+    this.version(25).stores({
+      mairies: '++id, nom, code, ville',
+      utilisateurs: '++id, username, email, role, mairieId, actif',
+
+      // App3
+      chapitres: '++id, code, libelle, mairieId, actif',
+      sousChapitres: '++id, code, libelle, parentId, mairieId, actif',
+      previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
+      mandats:
+        '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
+      bordereauMandats: '++id, numero, exercice, mairieId, statut, personnelId',
+      etatFinancierMensuel:
+        '++id, annee, sousChapitreId, chapitreId, mairieId, [annee+sousChapitreId+chapitreId]',
+
+      // App6 - Recettes
+      taxes: '++id, code, libelle, mairieId, type, actif',
+      declarations:
+        '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
+      bordereauxRecette: '++id, numero, annee, mairieId, statut, personnelId',
+      previsionsRecettes: '++id, exercice, taxeId, mairieId, statut, personnelId',
+      mandatsRecette:
+        '++id, numeroMandat, dateMandat, exercice, chapitreId, taxeId, previsionRecetteId, bordereauMandatRecetteId, mairieId, statut, personnelId',
+      bordereauMandatsRecette: '++id, numero, exercice, mairieId, statut, personnelId',
+      chapitresRecette: '++id, code, libelle, mairieId, actif',
+      etatFinancierMensuelRecette:
+        '++id, annee, taxeId, chapitreRecetteId, mairieId, [annee+taxeId+chapitreRecetteId]',
+
+      // Table temporaire pour les données d'impression
+      printData: '++id, type, createdAt',
+
+      // Gestion des exercices budgétaires
+      exercices: '++id, annee, statut, mairieId',
+
+      // App7 - Gestion des Employés
+      employes: '++id, matricule, nom, prenom, service, mairieId, actif',
+      fichesPaie:
+        '++id, employeId, mois, annee, exercice, mairieId, statut, [annee+mois+employeId]',
+      conges: '++id, employeId, type, dateDebut, dateFin, statut, mairieId',
+      ordresMission: '++id, numero, employeId, exercice, dateDebut, statut, mairieId',
     });
   }
 }

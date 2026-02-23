@@ -7,6 +7,13 @@
     >
       <template #actions>
         <q-btn color="primary" icon="add" label="Nouveau Mandat" @click="openDialog()" />
+        <q-btn
+          v-if="isDev"
+          color="orange"
+          icon="science"
+          label="Fake Mandat"
+          @click="createFakeMandat"
+        />
       </template>
     </PageHeader>
 
@@ -108,6 +115,12 @@
           <template v-slot:body-cell-bordereauNumero="props">
             <q-td :props="props">
               {{ getBordereauNumero(props.row.bordereauMandatRecetteId) }}
+            </q-td>
+          </template>
+
+          <template v-slot:body-cell-compte="props">
+            <q-td :props="props">
+              {{ getCompte(props.row) }}
             </q-td>
           </template>
 
@@ -279,7 +292,7 @@
                   outlined
                   dense
                   type="number"
-                  prefix="XOF"
+                  prefix="CFA"
                   :rules="[(val) => val > 0 || 'Montant requis']"
                 />
               </div>
@@ -349,6 +362,7 @@ import {
   type Chapitre,
   type Taxe,
   type BordereauMandatRecette,
+  type Exercice,
   DEFAULT_MAIRIE_ID,
 } from 'src/database/db';
 import DataTable from 'src/components/DataTable.vue';
@@ -361,7 +375,16 @@ const mandats = ref<MandatRecette[]>([]);
 const chapitres = ref<Chapitre[]>([]);
 const taxes = ref<Taxe[]>([]);
 const bordereaux = ref<BordereauMandatRecette[]>([]);
+const exercices = ref<Exercice[]>([]);
 const loading = ref(false);
+
+const lockedYears = computed(() =>
+  exercices.value.filter((e) => e.statut === 'verrouille').map((e) => e.annee),
+);
+
+function isYearLocked(annee: number): boolean {
+  return lockedYears.value.includes(annee);
+}
 
 const filter = ref('');
 const filterExercice = ref<number | null>(null);
@@ -420,6 +443,13 @@ const columns = [
     label: 'Bordereau',
     field: 'bordereauMandatRecetteId',
     align: 'center' as const,
+  },
+  {
+    name: 'compte',
+    label: 'Compte',
+    field: 'id',
+    align: 'left' as const,
+    sortable: false,
   },
   {
     name: 'partieVersante',
@@ -485,6 +515,11 @@ const statutFilterOptions = [
 
 const filteredMandats = computed(() => {
   let result = mandats.value;
+
+  // Masquer les mandats des exercices verrouillés
+  if (lockedYears.value.length > 0) {
+    result = result.filter((m) => !lockedYears.value.includes(m.exercice));
+  }
 
   if (filterExercice.value) {
     result = result.filter((m) => m.exercice === filterExercice.value);
@@ -614,15 +649,25 @@ function getBordereauNumero(bordereauId?: number): string {
   return `${bordereau.numero}-${bordereau.exercice % 100}`;
 }
 
+function getCompte(row: MandatRecette): string {
+  const taxe = taxes.value.find((t) => t.id === row.taxeId);
+  const ch = chapitres.value.find((c) => c.id === row.chapitreId);
+  const taxeCode = taxe?.code || '?';
+  const chCode = ch?.code || '?';
+  return `${taxeCode}/${chCode}`;
+}
+
 async function loadData() {
   loading.value = true;
   try {
-    [mandats.value, chapitres.value, taxes.value, bordereaux.value] = await Promise.all([
-      db.mandatsRecette.toArray(),
-      db.chapitres.toArray(),
-      db.taxes.toArray(),
-      db.bordereauMandatsRecette.toArray(),
-    ]);
+    [mandats.value, chapitres.value, taxes.value, bordereaux.value, exercices.value] =
+      await Promise.all([
+        db.mandatsRecette.toArray(),
+        db.chapitres.toArray(),
+        db.taxes.toArray(),
+        db.bordereauMandatsRecette.toArray(),
+        db.exercices.toArray(),
+      ]);
 
     // Trier par date décroissante
     mandats.value.sort((a, b) => {
@@ -652,6 +697,13 @@ async function getNextMandatNumber(exercice: number): Promise<string> {
 
 async function openDialog(mandat?: MandatRecette) {
   if (mandat) {
+    if (isYearLocked(mandat.exercice)) {
+      $q.notify({
+        type: 'warning',
+        message: 'Cet exercice est verrouillé. Modification impossible.',
+      });
+      return;
+    }
     editingId.value = mandat.id!;
     formData.value = { ...mandat };
     formDataDateStr.value = date.formatDate(mandat.dateMandat, 'YYYY-MM-DD');
@@ -659,6 +711,13 @@ async function openDialog(mandat?: MandatRecette) {
       ? date.formatDate(mandat.dateFacture, 'YYYY-MM-DD')
       : '';
   } else {
+    if (isYearLocked(currentYear)) {
+      $q.notify({
+        type: 'warning',
+        message: "L'exercice en cours est verrouillé. Impossible d'ajouter un mandat.",
+      });
+      return;
+    }
     editingId.value = null;
     const nextNum = await getNextMandatNumber(currentYear);
     formData.value = {
@@ -674,7 +733,7 @@ async function openDialog(mandat?: MandatRecette) {
       montant: 0,
       numeroFacture: '',
       modePaiement: 'virement',
-      statut: 'brouillon',
+      statut: 'paye',
       observations: '',
     };
     formDataDateStr.value = date.formatDate(new Date(), 'YYYY-MM-DD');
@@ -684,6 +743,13 @@ async function openDialog(mandat?: MandatRecette) {
 }
 
 async function saveMandat() {
+  if (formData.value.exercice && isYearLocked(formData.value.exercice)) {
+    $q.notify({
+      type: 'warning',
+      message: 'Cet exercice est verrouillé. Modification impossible.',
+    });
+    return;
+  }
   if (
     !formData.value.numeroMandat ||
     !formData.value.partieVersante ||
@@ -726,6 +792,10 @@ async function saveMandat() {
 }
 
 function confirmDelete(mandat: MandatRecette) {
+  if (isYearLocked(mandat.exercice)) {
+    $q.notify({ type: 'warning', message: 'Cet exercice est verrouillé. Suppression impossible.' });
+    return;
+  }
   $q.dialog({
     title: 'Confirmation',
     message: `Supprimer le mandat "${mandat.numeroMandat}" ?`,
@@ -761,6 +831,48 @@ watch(
     }
   },
 );
+
+const isDev = import.meta.env.VITE_ENV === 'development';
+
+async function createFakeMandat() {
+  try {
+    const yr = new Date().getFullYear();
+    if (isYearLocked(yr)) {
+      $q.notify({ type: 'warning', message: 'Exercice verrouillé' });
+      return;
+    }
+    const nextNum = await getNextMandatNumber(yr);
+    const chapitre = chapitres.value[Math.floor(Math.random() * chapitres.value.length)];
+    const taxe = taxes.value[Math.floor(Math.random() * taxes.value.length)];
+    if (!chapitre || !taxe) {
+      $q.notify({ type: 'warning', message: 'Aucun chapitre/taxe disponible' });
+      return;
+    }
+    const now = new Date();
+    const montant = Math.floor(Math.random() * 3000000) + 50000;
+    await db.mandatsRecette.add({
+      exercice: yr,
+      numeroMandat: nextNum,
+      dateMandat: now,
+      chapitreId: chapitre.id!,
+      taxeId: taxe.id!,
+      partieVersante: `Contribuable Test ${nextNum}`,
+      objet: `Recette test ${nextNum}`,
+      montant,
+      modePaiement: 'virement',
+      statut: 'paye',
+      mairieId: DEFAULT_MAIRIE_ID,
+      personnelId: 1,
+      createdAt: now,
+      updatedAt: now,
+    } as MandatRecette);
+    $q.notify({ type: 'positive', message: `Mandat recette fake #${nextNum} créé` });
+    await loadData();
+  } catch (error) {
+    console.error('Erreur:', error);
+    $q.notify({ type: 'negative', message: 'Erreur création fake' });
+  }
+}
 
 onMounted(() => {
   void loadData();

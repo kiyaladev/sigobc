@@ -199,6 +199,7 @@ import {
   type Mairie,
   type Taxe,
   type BordereauRecette,
+  type Exercice,
   DEFAULT_MAIRIE_ID,
 } from 'src/database/db';
 import FilterBar from 'src/components/FilterBar.vue';
@@ -212,8 +213,17 @@ const declarations = ref<Declaration[]>([]);
 const mairies = ref<Mairie[]>([]);
 const taxes = ref<Taxe[]>([]);
 const bordereaux = ref<BordereauRecette[]>([]);
+const exercicesData = ref<Exercice[]>([]);
 const loading = ref(false);
 const saving = ref(false);
+
+const lockedYears = computed(() =>
+  exercicesData.value.filter((e) => e.statut === 'verrouille').map((e) => e.annee),
+);
+
+function isYearLocked(annee: number): boolean {
+  return lockedYears.value.includes(annee);
+}
 const dialogVisible = ref(false);
 const isEditing = ref(false);
 const currentDeclaration = ref<Declaration | null>(null);
@@ -315,6 +325,11 @@ const bordereauSelectOptions = computed(() => {
 const filteredDeclarations = computed(() => {
   let result = declarations.value;
 
+  // Masquer les déclarations des exercices verrouillés
+  if (lockedYears.value.length > 0) {
+    result = result.filter((d) => !lockedYears.value.includes(d.exercice));
+  }
+
   if (filterStatut.value) {
     result = result.filter((d) => d.statut === filterStatut.value);
   }
@@ -402,12 +417,14 @@ function getBordereauNumero(bordereauId?: number): string {
 async function loadData() {
   loading.value = true;
   try {
-    [declarations.value, mairies.value, taxes.value, bordereaux.value] = await Promise.all([
-      db.declarations.toArray(),
-      db.mairies.toArray(),
-      db.taxes.toArray(),
-      db.bordereauxRecette.toArray(),
-    ]);
+    [declarations.value, mairies.value, taxes.value, bordereaux.value, exercicesData.value] =
+      await Promise.all([
+        db.declarations.toArray(),
+        db.mairies.toArray(),
+        db.taxes.toArray(),
+        db.bordereauxRecette.toArray(),
+        db.exercices.toArray(),
+      ]);
 
     // Trier les déclarations par date d'encaissement décroissante
     declarations.value.sort((a, b) => {
@@ -428,11 +445,26 @@ function openDialog(declaration?: Declaration) {
   currentDeclaration.value = declaration || null;
 
   if (declaration) {
+    if (isYearLocked(declaration.exercice)) {
+      $q.notify({
+        type: 'warning',
+        message: 'Cet exercice est verrouillé. Modification impossible.',
+      });
+      return;
+    }
     form.value = { ...declaration };
     formDateStr.value = declaration.dateEncaissement
       ? date.formatDate(declaration.dateEncaissement, 'YYYY-MM-DD')
       : '';
   } else {
+    // Vérifier si l'exercice en cours est verrouillé
+    if (isYearLocked(currentYear)) {
+      $q.notify({
+        type: 'warning',
+        message: "L'exercice en cours est verrouillé. Impossible d'ajouter une déclaration.",
+      });
+      return;
+    }
     // Calculer le prochain numéro de pièce
     const declarationsThisYear = declarations.value.filter((d) => d.exercice === currentYear);
     const nextNum = declarationsThisYear.length + 1;
@@ -468,6 +500,14 @@ async function onSubmit() {
 
   saving.value = true;
   try {
+    if (form.value.exercice && isYearLocked(form.value.exercice)) {
+      $q.notify({
+        type: 'warning',
+        message: 'Cet exercice est verrouillé. Modification impossible.',
+      });
+      saving.value = false;
+      return;
+    }
     const now = new Date();
     const data: Partial<Declaration> = {
       ...form.value,
@@ -501,6 +541,10 @@ async function onSubmit() {
 }
 
 function confirmDelete(declaration: Declaration) {
+  if (isYearLocked(declaration.exercice)) {
+    $q.notify({ type: 'warning', message: 'Cet exercice est verrouillé. Suppression impossible.' });
+    return;
+  }
   $q.dialog({
     title: 'Confirmation',
     message: `Supprimer la déclaration "${declaration.numeroPiece}" ?`,

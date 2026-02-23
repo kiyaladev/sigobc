@@ -43,6 +43,12 @@ const routes: RouteRecordRaw[] = [
         meta: { allowAfterExpiration: true }, // Accessible même après expiration
       },
       {
+        path: 'admin/parametrage',
+        component: () => import('pages/admin/ParametragePage.vue'),
+        name: 'admin-parametrage',
+        meta: { requiresAdmin: true },
+      },
+      {
         path: 'statistiques',
         component: () => import('pages/StatistiquesGlobalesPage.vue'),
         name: 'statistiques-globales',
@@ -122,6 +128,37 @@ const routes: RouteRecordRaw[] = [
         path: 'app6/statistiques',
         component: () => import('pages/app6/StatistiquesPage.vue'),
         name: 'app6-statistiques',
+      },
+      // Routes App7 - Gestion des Employés
+      {
+        path: 'app7/dashboard',
+        component: () => import('pages/app7/DashboardPage.vue'),
+        name: 'app7-dashboard',
+      },
+      {
+        path: 'app7/employes',
+        component: () => import('pages/app7/EmployesPage.vue'),
+        name: 'app7-employes',
+      },
+      {
+        path: 'app7/salaires',
+        component: () => import('pages/app7/SalairesPage.vue'),
+        name: 'app7-salaires',
+      },
+      {
+        path: 'app7/conges',
+        component: () => import('pages/app7/CongesPage.vue'),
+        name: 'app7-conges',
+      },
+      {
+        path: 'app7/missions',
+        component: () => import('pages/app7/OrdresMissionPage.vue'),
+        name: 'app7-missions',
+      },
+      {
+        path: 'app7/statistiques',
+        component: () => import('pages/app7/StatistiquesPage.vue'),
+        name: 'app7-statistiques',
       },
     ],
   },
