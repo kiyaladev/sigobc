@@ -148,6 +148,17 @@
                 />
               </div>
             </div>
+            <div class="row q-col-gutter-sm q-mt-sm">
+              <div class="col-12 col-md-4">
+                <q-toggle v-model="form.hebergementAssure" label="Hébergement assuré" />
+              </div>
+              <div class="col-12 col-md-4">
+                <q-toggle v-model="form.nourritureAssuree" label="Nourriture assurée" />
+              </div>
+              <div class="col-12 col-md-4">
+                <q-input v-model="form.moyenTransport" label="Moyen de transport" outlined dense />
+              </div>
+            </div>
             <q-separator class="q-my-sm" />
             <div class="text-subtitle2 text-grey-8">Frais</div>
             <div class="row q-col-gutter-sm">
@@ -245,6 +256,9 @@ const defaultForm = () => ({
   montantTotal: 0,
   statut: 'brouillon' as OrdreMission['statut'],
   observations: '',
+  hebergementAssure: false,
+  nourritureAssuree: false,
+  moyenTransport: '',
 });
 
 const form = ref(defaultForm());
@@ -379,6 +393,9 @@ function editMission(row: OrdreMission) {
     montantTotal: row.montantTotal,
     statut: row.statut,
     observations: row.observations || '',
+    hebergementAssure: row.hebergementAssure || false,
+    nourritureAssuree: row.nourritureAssuree || false,
+    moyenTransport: row.moyenTransport || '',
   };
   showDialog.value = true;
 }
@@ -400,6 +417,9 @@ async function saveMission() {
     montantTotal: form.value.montantTotal,
     statut: form.value.statut,
     observations: form.value.observations || undefined,
+    hebergementAssure: form.value.hebergementAssure,
+    nourritureAssuree: form.value.nourritureAssuree,
+    moyenTransport: form.value.moyenTransport,
     mairieId: 1,
     personnelId: 1,
     updatedAt: now,
@@ -435,49 +455,50 @@ function deleteMission(row: OrdreMission) {
   });
 }
 
-function printMission(row: OrdreMission) {
-  const emp = employes.value.find((e) => e.id === row.employeId);
-  const html = `
-    <html><head><title>Ordre de Mission N° ${row.numero}</title>
-    <style>
-      body{font-family:Arial,sans-serif;margin:40px;}
-      h2{text-align:center;}
-      table{width:100%;border-collapse:collapse;margin-top:16px;}
-      td,th{padding:8px 12px;border:1px solid #ddd;}
-      th{background:#f5f5f5;}
-      .signature{display:flex;justify-content:space-between;margin-top:60px;}
-      .sig-box{text-align:center;width:200px;border-top:1px solid #333;padding-top:8px;}
-    </style></head>
-    <body>
-      <h2>ORDRE DE MISSION N° ${row.numero}</h2>
-      <table>
-        <tr><th colspan="2">Agent</th></tr>
-        <tr><td>Matricule</td><td>${emp?.matricule || '-'}</td></tr>
-        <tr><td>Nom & Prénom</td><td>${emp ? `${emp.nom} ${emp.prenom}` : '-'}</td></tr>
-        <tr><td>Poste</td><td>${emp?.poste || '-'}</td></tr>
-        <tr><td>Service</td><td>${emp?.service || '-'}</td></tr>
-        <tr><th colspan="2">Mission</th></tr>
-        <tr><td>Objet</td><td>${row.objet}</td></tr>
-        <tr><td>Destination</td><td>${row.destination}</td></tr>
-        <tr><td>Date de départ</td><td>${date.formatDate(row.dateDebut, 'DD/MM/YYYY')}</td></tr>
-        <tr><td>Date de retour</td><td>${date.formatDate(row.dateFin, 'DD/MM/YYYY')}</td></tr>
-        <tr><td>Nombre de jours</td><td>${row.nombreJours}</td></tr>
-        <tr><th colspan="2">Frais</th></tr>
-        <tr><td>Indemnité journalière</td><td>${row.indemniteJournaliere.toLocaleString('fr-FR')} CFA × ${row.nombreJours} j</td></tr>
-        <tr><td>Frais de transport</td><td>${(row.fraisTransport || 0).toLocaleString('fr-FR')} CFA</td></tr>
-        <tr><td><strong>MONTANT TOTAL</strong></td><td><strong>${row.montantTotal.toLocaleString('fr-FR')} CFA</strong></td></tr>
-      </table>
-      <div class="signature">
-        <div class="sig-box">L'Agent</div>
-        <div class="sig-box">Le Chef de Service</div>
-        <div class="sig-box">Le Maire</div>
-      </div>
-    </body></html>`;
-  const win = window.open('', '_blank');
-  if (win) {
-    win.document.write(html);
-    win.document.close();
-    win.print();
+async function printMission(row: OrdreMission) {
+  loading.value = true;
+  try {
+    const emp = employes.value.find((e) => e.id === row.employeId);
+
+    // Preparer les données complètes pour l'impression finale
+    const missionData = {
+      ...row,
+      agentNom: emp?.nom || '',
+      agentPrenom: emp?.prenom || '',
+      agentSexe: emp?.sexe || 'M',
+      agentMatricule: emp?.matricule || '-',
+      agentPoste: emp?.poste || '-',
+      agentService: emp?.service || '-',
+    };
+
+    // Sauvegarder dans PrintData pour l'accès de l'autre page
+
+    const printId = await db.printData.add({
+      type: 'PRINT_ORDRE_MISSION',
+      data: JSON.stringify(missionData),
+      createdAt: new Date(),
+    } as any);
+
+    // Ouvrir la fenêtre d'impression avec le printId
+    const url = `/employe/ordre-mission.html?printId=${printId}&print=true`;
+
+    // Si on est dans Electron, informer le main process (le cas échéant)
+    // Sinon on ouvre une nouvelle fenêtre (cas du web browser)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((window as any).electronAPI) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (window as any).electronAPI.printDocument({
+        url: url,
+        title: `Ordre de Mission N° ${row.numero}`,
+      });
+    } else {
+      window.open(url, '_blank');
+    }
+  } catch (error) {
+    console.error("Erreur lors de l'impression :", error);
+    $q.notify({ type: 'negative', message: "Erreur lors de la préparation de l'impression" });
+  } finally {
+    loading.value = false;
   }
 }
 

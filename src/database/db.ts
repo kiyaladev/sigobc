@@ -460,6 +460,9 @@ export interface OrdreMission {
   mandatId?: number;
   statut: 'brouillon' | 'valide' | 'paye';
   observations?: string;
+  hebergementAssure?: boolean;
+  nourritureAssuree?: boolean;
+  moyenTransport?: string;
   personnelId: number;
   createdAt: Date;
   updatedAt: Date;

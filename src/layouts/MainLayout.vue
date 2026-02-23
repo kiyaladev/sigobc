@@ -409,7 +409,6 @@
             </q-item-section>
           </q-item>
 
-          <!-- Congés masqué temporairement
           <q-item
             clickable
             v-ripple
@@ -424,9 +423,7 @@
               <q-item-label>Congés & Absences</q-item-label>
             </q-item-section>
           </q-item>
-          -->
 
-          <!-- Ordres de Mission masqué temporairement
           <q-item
             clickable
             v-ripple
@@ -441,7 +438,6 @@
               <q-item-label>Ordres de Mission</q-item-label>
             </q-item-section>
           </q-item>
-          -->
 
           <q-item
             clickable

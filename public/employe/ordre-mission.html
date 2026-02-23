@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ordre de Mission - Imprimable</title>
+    <!-- Vue 3 -->
+    <script src="../vue.global.js"></script>
+    <!-- Dexie JS -->
+    <script src="../dexie.min.js"></script>
+    <!-- Quasar CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/quasar@2.14.0/dist/quasar.prod.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <!-- Format date JS -->
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/locale/fr.js"></script>
+    <style>
+      body {
+        font-family: 'Times New Roman', Times, serif;
+        margin: 40px 60px;
+        font-size: 14px;
+        line-height: 1.3;
+        color: #000;
+      }
+      .header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+      }
+      .header-left {
+        text-align: center;
+        font-size: 13px;
+        font-weight: bold;
+        width: 45%;
+      }
+      .header-right {
+        text-align: center;
+        font-size: 13px;
+        font-weight: bold;
+        width: 45%;
+      }
+      .header-right-subtitle {
+        font-style: italic;
+        font-weight: normal;
+        font-size: 12px;
+      }
+
+      .logo-container {
+        margin: 10px 0;
+      }
+      .logo-container img {
+        max-width: 80px;
+        height: auto;
+      }
+
+      .separator-line {
+        border-top: 1px dashed #000;
+        width: 60%;
+        margin: 8px auto;
+      }
+
+      h2 {
+        text-align: center;
+        text-decoration: underline;
+        margin-top: 30px;
+        margin-bottom: 30px;
+        font-size: 16px;
+        font-weight: bold;
+      }
+
+      .content {
+        margin-left: 0;
+      }
+      .maire-title {
+        font-weight: bold;
+        margin-bottom: 25px;
+      }
+
+      .row-info {
+        display: flex;
+        margin-bottom: 12px;
+        align-items: flex-start;
+      }
+      .label {
+        width: 220px;
+        font-weight: bold;
+        text-transform: uppercase;
+      }
+      .colon {
+        font-weight: bold;
+        margin-right: 10px;
+      }
+      .value {
+        flex: 1;
+        text-align: justify;
+      }
+
+      .destination-centered {
+        text-align: center;
+        position: relative;
+        font-weight: bold;
+        text-decoration: underline;
+        margin-top: 5px;
+        margin-bottom: 20px;
+      }
+
+      .signature-section {
+        margin-top: 50px;
+        display: flex;
+        justify-content: flex-end;
+      }
+      .signature-box {
+        text-align: center;
+        width: 300px;
+        font-weight: bold;
+      }
+      .signature-name {
+        margin-top: 60px;
+        text-decoration: underline;
+      }
+
+      /* Styles pour la deuxième page (Frais) */
+      .frais-title {
+        text-align: center;
+        margin-top: 40px;
+        margin-bottom: 20px;
+        text-decoration: underline;
+        font-size: 16px;
+        font-weight: bold;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 16px;
+        font-size: 14px;
+      }
+      td,
+      th {
+        padding: 8px 12px;
+        border: 1px solid #000;
+        text-align: left;
+      }
+      th {
+        background: #f5f5f5;
+      }
+      .signatures-frais {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 60px;
+      }
+      .sig-frais-box {
+        text-align: center;
+        width: 200px;
+        border-top: 1px solid #000;
+        padding-top: 8px;
+        font-weight: bold;
+      }
+
+      .print-controls {
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      @media print {
+        .page-break {
+          page-break-before: always;
+        }
+        .print-controls {
+          display: none;
+        }
+        body {
+          margin: 0;
+          padding: 20mm;
+        }
+      }
+
+      [v-cloak] {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app" v-cloak>
+      <div class="print-controls">
+        <button
+          onclick="window.print()"
+          style="
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+          "
+        >
+          Imprimer l'Ordre de Mission
+        </button>
+        <div v-if="loading" style="margin-top: 10px; color: #666">Chargement des données...</div>
+        <div v-if="error" style="margin-top: 10px; color: red">{{ error }}</div>
+      </div>
+
+      <template v-if="data">
+        <!-- PAGE 1: ORDRE DE MISSION -->
+        <div class="header">
+          <div class="header-left">
+            <div>DISTRICT AUTONOME DU<br />SASSANDRA-MARAHOUE</div>
+            <br />
+            <div>REGION DU HAUT SASSANDRA</div>
+            <br />
+            <div>COMMUNE DE VAVOUA</div>
+
+            <div class="logo-container">
+              <img
+                src="../logo-mairie-vavoua.png"
+                alt="Logo Mairie"
+                onerror="this.style.display='none'"
+              />
+            </div>
+
+            <div>SECRETARIAT GENERAL</div>
+            <div class="separator-line"></div>
+            <div>SERVICES ADMINISTRATIFS</div>
+            <br />
+            <div>N°{{ data.exercice }}-{{ data.numero }}/CV/SG/SA</div>
+          </div>
+
+          <div class="header-right">
+            <div>REPUBLIQUE DE COTE D'IVOIRE</div>
+            <div class="header-right-subtitle">Union - Discipline - Travail</div>
+          </div>
+        </div>
+
+        <h2>ORDRE DE MISSION</h2>
+
+        <div class="content">
+          <div class="maire-title">LE MAIRE DE LA COMMUNE DE VAVOUA</div>
+
+          <div class="row-info">
+            <div class="label">DONNE ORDRE A</div>
+            <div class="colon">:</div>
+            <div class="value">{{ agentNom }}.</div>
+          </div>
+          <div class="row-info">
+            <div class="label">FONCTION</div>
+            <div class="colon">:</div>
+            <div class="value">{{ data.agentPoste || '-' }}.</div>
+          </div>
+          <div class="row-info">
+            <div class="label">MATRICULE</div>
+            <div class="colon">:</div>
+            <div class="value">{{ data.agentMatricule || '-' }}.</div>
+          </div>
+          <div class="row-info">
+            <div class="label">DE SE RENDRE A</div>
+            <div class="colon">:</div>
+            <div class="value">{{ data.destination }}.</div>
+          </div>
+
+          <br />
+
+          <div class="row-info">
+            <div class="label">OBJET DE LA MISSION</div>
+            <div class="colon">:</div>
+            <div class="value">{{ data.objet }}.</div>
+          </div>
+
+          <div class="destination-centered">{{ (data.destination || '').toUpperCase() }}</div>
+
+          <div class="row-info">
+            <div class="label">DATE DE DEPART</div>
+            <div class="colon">:</div>
+            <div class="value">{{ formatDate(data.dateDebut) }}.</div>
+          </div>
+          <div class="row-info">
+            <div class="label">DATE DE RETOUR</div>
+            <div class="colon">:</div>
+            <div class="value">{{ formatDate(data.dateFin) }}.</div>
+          </div>
+
+          <br />
+
+          <div class="row-info">
+            <div class="label">HEBERGEMENT ASSURE</div>
+            <div class="colon">:</div>
+            <div class="value">{{ data.hebergementAssure ? 'Oui.' : 'Non.' }}</div>
+          </div>
+          <div class="row-info">
+            <div class="label">NOURRITURE</div>
+            <div class="colon">:</div>
+            <div class="value">{{ data.nourritureAssuree ? 'Oui.' : 'Non.' }}</div>
+          </div>
+          <div class="row-info">
+            <div class="label">MOYEN DE TRANSPORT</div>
+            <div class="colon">:</div>
+            <div class="value">
+              {{ data.moyenTransport || 'Transport en commun de voyageurs.' }}
+            </div>
+          </div>
+        </div>
+
+        <div class="signature-section">
+          <div class="signature-box">
+            <div style="font-weight: normal">Vavoua, le {{ todayStr }}</div>
+            <div>P/Le Maire & P.D</div>
+            <div class="signature-name">COULIBALY LANCINA</div>
+          </div>
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- PAGE 2: FRAIS DE MISSION -->
+        <div class="frais-title">DÉTAIL DES FRAIS DE MISSION</div>
+        <table>
+          <tr>
+            <th colspan="2">Agent</th>
+          </tr>
+          <tr>
+            <td>Matricule</td>
+            <td>{{ data.agentMatricule || '-' }}</td>
+          </tr>
+          <tr>
+            <td>Nom & Prénom</td>
+            <td>{{ agentNom }}</td>
+          </tr>
+          <tr>
+            <td>Poste</td>
+            <td>{{ data.agentPoste || '-' }}</td>
+          </tr>
+          <tr>
+            <td>Service</td>
+            <td>{{ data.agentService || '-' }}</td>
+          </tr>
+          <tr>
+            <th colspan="2">Mission</th>
+          </tr>
+          <tr>
+            <td>Objet</td>
+            <td>{{ data.objet }}</td>
+          </tr>
+          <tr>
+            <td>Destination</td>
+            <td>{{ data.destination }}</td>
+          </tr>
+          <tr>
+            <td>Date de départ</td>
+            <td>{{ formatDate(data.dateDebut) }}</td>
+          </tr>
+          <tr>
+            <td>Date de retour</td>
+            <td>{{ formatDate(data.dateFin) }}</td>
+          </tr>
+          <tr>
+            <td>Nombre de jours</td>
+            <td>{{ data.nombreJours }}</td>
+          </tr>
+          <tr>
+            <th colspan="2">Frais</th>
+          </tr>
+          <tr>
+            <td>Indemnité journalière</td>
+            <td>{{ formatAmount(data.indemniteJournaliere) }} × {{ data.nombreJours }} j</td>
+          </tr>
+          <tr>
+            <td>Frais de transport</td>
+            <td>{{ formatAmount(data.fraisTransport || 0) }}</td>
+          </tr>
+          <tr>
+            <td><strong>MONTANT TOTAL</strong></td>
+            <td><strong>{{ formatAmount(data.montantTotal) }}</strong></td>
+          </tr>
+        </table>
+
+        <div class="signatures-frais">
+          <div class="sig-frais-box">L'Agent</div>
+          <div class="sig-frais-box">Le Chef de Service</div>
+          <div class="sig-frais-box">Le Maire</div>
+        </div>
+      </template>
+    </div>
+
+    <script>
+      dayjs.locale('fr');
+      const { createApp, ref, computed, onMounted } = Vue;
+
+      createApp({
+        setup() {
+          const data = ref(null);
+          const loading = ref(true);
+          const error = ref(null);
+
+          const agentNom = computed(() => {
+            if (!data.value) return '';
+            const titre = data.value.agentSexe === 'F' ? 'Madame' : 'Monsieur';
+            return `${titre} ${data.value.agentNom} ${data.value.agentPrenom}`;
+          });
+
+          const todayStr = computed(() => {
+            return dayjs().format('DD MMMM YYYY');
+          });
+
+          function formatDate(date) {
+            if (!date) return '';
+            return dayjs(date).format('DD/MM/YYYY');
+          }
+
+          function formatAmount(amount) {
+            if (amount == null) return '0 CFA';
+            return new Intl.NumberFormat('fr-FR').format(amount) + ' CFA';
+          }
+
+          async function loadData() {
+            loading.value = true;
+            error.value = null;
+            try {
+              const urlParams = new URLSearchParams(window.location.search);
+              const id = urlParams.get('id');
+
+              // En environnement Electron, on peut aussi lire depuis printData
+              const printId = urlParams.get('printId');
+
+              const db = new Dexie('TresorDatabase');
+
+              db.version(25).stores({
+                ordresMission: '++id, numero, employeId, exercice, dateDebut, statut, mairieId',
+                employes: '++id, matricule, nom, prenom, service, mairieId, actif',
+                printData: '++id, type, createdAt',
+              });
+
+              let missionData = null;
+
+              if (printId) {
+                // Lecture via la table temporaire pour Electron
+                const pd = await db.printData.get(parseInt(printId));
+                if (pd && pd.data) {
+                  missionData = JSON.parse(pd.data);
+                } else {
+                  throw new Error("Données d'impression introuvables.");
+                }
+              } else if (id) {
+                // Lecture directe en DB web (mode dev/web)
+                const mission = await db.ordresMission.get(parseInt(id));
+                if (!mission) throw new Error('Ordre de mission introuvable.');
+
+                const employe = await db.employes.get(mission.employeId);
+                if (!employe) throw new Error('Employé introuvable.');
+
+                missionData = {
+                  ...mission,
+                  agentNom: employe.nom,
+                  agentPrenom: employe.prenom,
+                  agentSexe: employe.sexe,
+                  agentMatricule: employe.matricule,
+                  agentPoste: employe.poste,
+                  agentService: employe.service,
+                };
+              } else {
+                // Mode test : on prend le dernier ordre de mission
+                const missions = await db.ordresMission.toArray();
+                if (missions.length === 0) {
+                  throw new Error('Aucun ordre de mission dans la base (Test).');
+                }
+                const mission = missions[missions.length - 1];
+                const employe = await db.employes.get(mission.employeId);
+
+                missionData = {
+                  ...mission,
+                  agentNom: employe?.nom || 'Test',
+                  agentPrenom: employe?.prenom || 'Agent',
+                  agentSexe: employe?.sexe || 'M',
+                  agentMatricule: employe?.matricule || '123456',
+                  agentPoste: employe?.poste || 'Employé',
+                  agentService: employe?.service || 'Service',
+                };
+              }
+
+              data.value = missionData;
+
+              // Lancer l'impression auto si demandé (+ timeout pour Vue render)
+              if (urlParams.get('print') === 'true' || printId) {
+                setTimeout(() => {
+                  window.print();
+                  // Optionnel : if (printId) window.close();
+                }, 500);
+              }
+            } catch (e) {
+              console.error(e);
+              error.value = e.message;
+            } finally {
+              loading.value = false;
+            }
+          }
+
+          onMounted(() => {
+            loadData();
+          });
+
+          return { data, loading, error, agentNom, todayStr, formatDate, formatAmount };
+        },
+      }).mount('#app');
+    </script>
+  </body>
+</html>
