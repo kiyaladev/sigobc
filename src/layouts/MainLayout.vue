@@ -105,6 +105,7 @@
       <q-list padding class="q-px-sm">
         <!-- ===== 4. GESTION DES DÉPENSES ===== -->
         <q-expansion-item
+          group="sidebar"
           icon="receipt"
           label="Gestion des Dépenses"
           :default-opened="isApp3Active"
@@ -222,6 +223,7 @@
 
         <!-- ===== 5. GESTION DES RECETTES ===== -->
         <q-expansion-item
+          group="sidebar"
           icon="payments"
           label="Gestion des Recettes"
           :default-opened="isApp6Active"
@@ -354,6 +356,7 @@
 
         <!-- ===== 6. GESTION DES EMPLOYÉS ===== -->
         <q-expansion-item
+          group="sidebar"
           icon="people"
           label="Gestion des Employés"
           :default-opened="isApp7Active"
@@ -461,6 +464,7 @@
         <!-- ===== ADMINISTRATION ===== -->
         <template v-if="authStore.isAdmin">
           <q-expansion-item
+            group="sidebar"
             icon="admin_panel_settings"
             label="Administration"
             :default-opened="isAdminActive"

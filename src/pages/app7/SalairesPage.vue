@@ -37,6 +37,7 @@
           </div>
           <div class="col-12 col-md-auto q-gutter-sm row">
             <q-btn
+              v-if="false"
               icon="add"
               label="Générer bulletins"
               color="primary"
@@ -45,6 +46,7 @@
             />
             <q-btn icon="add" label="Nouveau bulletin" color="teal" unelevated @click="openAdd" />
             <q-btn
+              v-if="false"
               icon="print"
               label="Imprimer"
               color="deep-purple"

@@ -35,10 +35,10 @@
   <body class="bg-gray-100 text-gray-900 antialiased py-8 print:py-0">
     <!-- Conteneur A4 Paysage géré avec Tailwind -->
     <div
-      class="w-full max-w-[297mm] min-h-[210mm] bg-white shadow-xl mx-auto px-14 py-10 relative print:shadow-none print:m-0 print:p-0 print:max-w-full print:min-h-auto"
+      class="w-full max-w-[297mm] min-h-[210mm] bg-white shadow-xl mx-auto px-5 py-5 relative print:shadow-none print:m-0 print:p-0 print:max-w-full print:min-h-auto"
     >
       <!-- En-tête -->
-      <header class="flex justify-between items-start mb-6 text-[15px] font-bold">
+      <header class="flex justify-between items-start mb-6 text-[13px] font-bold">
         <!-- Côté Gauche -->
         <div class="text-center leading-snug">
           <p>DEPARTEMENT DE VAVOUA</p>
@@ -55,7 +55,7 @@
       </header>
 
       <!-- Période et Imputation -->
-      <div class="flex justify-between items-end mb-6 font-bold text-[15px]">
+      <div class="flex justify-between items-end mb-6 font-bold text-[13px]">
         <div>
           <p id="periode-text">PERIODE: ...</p>
         </div>
@@ -72,16 +72,16 @@
       <!-- Tableau des Paiements (Bordures Tailwind) -->
       <div class="overflow-x-auto mb-6">
         <table
-          class="w-full text-[15px] border-collapse border border-black [&_th]:border [&_th]:border-black [&_td]:border [&_td]:border-black"
+          class="w-full text-[13px] border-collapse border border-black [&_th]:border [&_th]:border-black [&_td]:border [&_td]:border-black"
         >
           <thead>
             <tr class="text-center font-bold bg-gray-50 print:bg-transparent">
-              <th class="p-2 w-1/4">NOM ET PRENOMS</th>
-              <th class="p-2">NBRE DE<br />MOIS</th>
-              <th class="p-2">SALAIRE DE<br />BASE</th>
-              <th class="p-2">INDEMNITE<br />DE RESIDENSE</th>
-              <th class="p-2">IMPOSABLE<br />SALAIRE BRUT</th>
-              <th class="p-2">1,60%<br />ITS</th>
+              <th class="p-1 w-1/4">NOM ET PRENOMS</th>
+              <th class="p-1">NBRE DE<br />MOIS</th>
+              <th class="p-1">SALAIRE DE<br />BASE</th>
+              <th class="p-1">INDEMNITE<br />DE RESIDENSE</th>
+              <th class="p-1">IMPOSABLE<br />SALAIRE BRUT</th>
+              <th class="p-1">1,60%<br />ITS</th>
             </tr>
           </thead>
           <tbody id="tbody-data">
@@ -91,26 +91,27 @@
           </tbody>
           <tfoot>
             <tr class="font-bold bg-gray-50 print:bg-transparent">
-              <td class="p-2 text-center" colspan="5">TOTAL</td>
-              <td id="tot-its" class="p-2 text-right pr-3">0</td>
+              <td class="p-1 text-center" colspan="5">TOTAL</td>
+              <td id="tot-its" class="p-1 text-right pr-3">0</td>
             </tr>
           </tfoot>
         </table>
       </div>
 
       <!-- Mentions légales / Arrêt de la somme -->
-      <div class="mb-10 mt-6">
-        <p class="text-justify text-[15px]">
+      <div class="mb-3 mt-6">
+        <p class="text-justify text-[13px]">
           Arrêté le présent état à la somme de:
           <span class="font-bold" id="arrete-montant">...</span>
         </p>
       </div>
 
       <!-- Section Signatures et Date -->
-      <div class="flex justify-end items-start relative text-[15px]">
+      <div class="flex justify-end items-start relative text-[13px]">
         <div class="text-center flex flex-col items-center mr-8">
           <p id="date-sig">VAVOUA, le ...</p>
           <p class="font-bold mt-2">P/Le Maire & P.D</p>
+          <br />
           <div class="mt-16 border-t border-black w-40 text-center pt-1">Signature</div>
         </div>
       </div>
@@ -241,7 +242,7 @@
               brut = f.montantBrut || 0,
               its = f.impotSurSalaire || 0;
             totIts += its;
-            return `<tr><td class="p-2 pl-3">${nom}</td><td class="p-2 text-center">1</td><td class="p-2 text-right pr-3">${fmt(base)}</td><td class="p-2 text-right pr-3">${fmt(log)}</td><td class="p-2 text-right pr-3">${fmt(brut)}</td><td class="p-2 text-right pr-3">${fmt(its)}</td></tr>`;
+            return `<tr><td class="p-1 pl-3">${nom}</td><td class="p-1 text-center">1</td><td class="p-1 text-right pr-3">${fmt(base)}</td><td class="p-1 text-right pr-3">${fmt(log)}</td><td class="p-1 text-right pr-3">${fmt(brut)}</td><td class="p-1 text-right pr-3">${fmt(its)}</td></tr>`;
           }),
         );
         tbody.innerHTML = rows.join('');
