@@ -175,9 +175,9 @@
             <q-separator class="q-my-sm" />
 
             <!-- Poste -->
-            <div class="text-subtitle2 text-grey-8 q-mb-xs">Poste & Service</div>
+            <div class="text-subtitle2 text-grey-8 q-mb-xs">Poste, Type & Service</div>
             <div class="row q-col-gutter-sm">
-              <div class="col-12 col-md-4">
+              <div class="col-12 col-md-3">
                 <q-input
                   v-model="form.poste"
                   label="Poste / Fonction *"
@@ -186,10 +186,20 @@
                   :rules="[(v) => !!v || 'Obligatoire']"
                 />
               </div>
-              <div class="col-12 col-md-4">
+              <div class="col-12 col-md-3">
+                <q-select
+                  v-model="form.typeEmploye"
+                  :options="typeEmployeOptions"
+                  label="Type d'agent *"
+                  outlined
+                  dense
+                  :rules="[(v) => !!v || 'Obligatoire']"
+                />
+              </div>
+              <div class="col-12 col-md-3">
                 <q-input v-model="form.grade" label="Grade / Catégorie" outlined dense />
               </div>
-              <div class="col-12 col-md-4">
+              <div class="col-12 col-md-3">
                 <q-select
                   v-model="form.service"
                   :options="servicesOptions"
@@ -200,6 +210,20 @@
                   input-debounce="0"
                   new-value-mode="add-unique"
                   :rules="[(v) => !!v || 'Obligatoire']"
+                />
+              </div>
+            </div>
+            <div class="row q-col-gutter-sm q-mt-xs">
+              <div class="col-12 col-md-4">
+                <q-select
+                  v-model="form.departement"
+                  :options="departementsOptions"
+                  label="Département"
+                  outlined
+                  dense
+                  use-input
+                  input-debounce="0"
+                  new-value-mode="add-unique"
                 />
               </div>
             </div>
@@ -334,16 +358,20 @@ const statsCards = computed(() => {
   ];
 });
 
-const servicesOptions = [
-  'Administration Générale',
-  'Direction Financière',
-  'Service Technique',
-  'État Civil',
-  'Urbanisme',
-  'Hygiène et Assainissement',
-  'Service Social',
-  'Sécurité',
-  'Cabinet du Maire',
+const servicesOptions = ref<string[]>([]);
+const departementsOptions = ref<string[]>([
+  'Direction Générale',
+  'Administration Financière',
+  'Services Techniques',
+  'Services Socio-Culturels',
+  'Ressources Humaines',
+]);
+
+const typeEmployeOptions = [
+  'Salariés (6000/2)',
+  'Contractuels (60012/2)',
+  "Agents de l'État (6002/2)",
+  'Maire et Adjoints (6010/2)',
 ];
 
 const defaultForm = () => ({
@@ -351,12 +379,14 @@ const defaultForm = () => ({
   nom: '',
   prenom: '',
   sexe: '' as 'M' | 'F' | '',
+  typeEmploye: '' as Employe['typeEmploye'] | '',
   dateNaissance: '',
   dateEmbauche: date.formatDate(new Date(), 'YYYY-MM-DD'),
   poste: '',
   grade: '',
   categorie: '',
   service: '',
+  departement: '',
   salaireBase: 0,
   indemniteLogement: 0,
   indemniteTransport: 0,
@@ -384,8 +414,22 @@ const columns = [
     align: 'left' as const,
     sortable: true,
   },
+  {
+    name: 'typeEmploye',
+    label: 'Type',
+    field: 'typeEmploye',
+    align: 'left' as const,
+    sortable: true,
+  },
   { name: 'poste', label: 'Poste', field: 'poste', align: 'left' as const, sortable: true },
   { name: 'service', label: 'Service', field: 'service', align: 'left' as const, sortable: true },
+  {
+    name: 'departement',
+    label: 'Département',
+    field: 'departement',
+    align: 'left' as const,
+    sortable: true,
+  },
   {
     name: 'salaireBase',
     label: 'Salaire de base',
@@ -416,7 +460,8 @@ const filteredEmployes = computed(() => {
         e.nom.toLowerCase().includes(s) ||
         e.prenom.toLowerCase().includes(s) ||
         e.poste.toLowerCase().includes(s) ||
-        e.service.toLowerCase().includes(s),
+        e.service.toLowerCase().includes(s) ||
+        (e.departement && e.departement.toLowerCase().includes(s)),
     );
   }
   return result;
@@ -434,6 +479,10 @@ async function loadData() {
   loading.value = true;
   try {
     employes.value = await db.employes.toArray();
+
+    // Load available services from DB instead of hardcoded
+    const svcs = await db.servicesApp7.toArray();
+    servicesOptions.value = svcs.map((s) => s.nom);
   } finally {
     loading.value = false;
   }
@@ -452,12 +501,14 @@ function editEmploye(row: Employe) {
     nom: row.nom,
     prenom: row.prenom,
     sexe: row.sexe || '',
+    typeEmploye: row.typeEmploye,
     dateNaissance: row.dateNaissance ? date.formatDate(row.dateNaissance, 'YYYY-MM-DD') : '',
     dateEmbauche: row.dateEmbauche ? date.formatDate(row.dateEmbauche, 'YYYY-MM-DD') : '',
     poste: row.poste,
     grade: row.grade || '',
     categorie: row.categorie || '',
     service: row.service,
+    departement: row.departement || '',
     salaireBase: row.salaireBase,
     indemniteLogement: row.indemniteLogement || 0,
     indemniteTransport: row.indemniteTransport || 0,
@@ -478,12 +529,14 @@ async function saveEmploye() {
     nom: form.value.nom,
     prenom: form.value.prenom,
     ...(form.value.sexe ? { sexe: form.value.sexe } : {}),
+    typeEmploye: form.value.typeEmploye,
     ...(form.value.dateNaissance ? { dateNaissance: new Date(form.value.dateNaissance) } : {}),
     ...(form.value.dateEmbauche ? { dateEmbauche: new Date(form.value.dateEmbauche) } : {}),
     poste: form.value.poste,
     grade: form.value.grade || undefined,
     categorie: form.value.categorie || undefined,
     service: form.value.service,
+    departement: form.value.departement || undefined,
     salaireBase: form.value.salaireBase,
     indemniteLogement: form.value.indemniteLogement,
     indemniteTransport: form.value.indemniteTransport,

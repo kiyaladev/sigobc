@@ -385,10 +385,16 @@ export interface Employe {
   prenom: string;
   dateNaissance?: Date;
   sexe?: 'M' | 'F';
+  typeEmploye:
+    | 'Salariés (6000/2)'
+    | 'Contractuels (60012/2)'
+    | "Agents de l'État (6002/2)"
+    | 'Maire et Adjoints (6010/2)';
   poste: string;
   grade?: string;
   categorie?: string;
   service: string;
+  departement?: string;
   dateEmbauche?: Date;
   salaireBase: number;
   indemniteLogement?: number;
@@ -481,6 +487,16 @@ export interface ParametresPaie {
   updatedAt: Date;
 }
 
+export interface ServiceApp7 {
+  id?: number;
+  nom: string;
+  compte?: string;
+  mairieId: number;
+  actif: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // Interface pour stocker temporairement les données d'impression
 // Utilisé pour passer les données aux pages d'impression en mode Electron
 export interface PrintData {
@@ -540,6 +556,7 @@ class TresorDatabase extends Dexie {
   conges!: EntityTable<Conge, 'id'>;
   ordresMission!: EntityTable<OrdreMission, 'id'>;
   parametresPaie!: EntityTable<ParametresPaie, 'id'>;
+  servicesApp7!: EntityTable<ServiceApp7, 'id'>;
 
   constructor() {
     super('TresorDatabase');
@@ -616,7 +633,7 @@ class TresorDatabase extends Dexie {
       exercices: '++id, annee, statut, mairieId',
 
       // App7 - Gestion des Employés
-      employes: '++id, matricule, nom, prenom, service, mairieId, actif',
+      employes: '++id, matricule, nom, prenom, typeEmploye, service, mairieId, actif',
       fichesPaie:
         '++id, employeId, mois, annee, exercice, mairieId, statut, [annee+mois+employeId]',
       conges: '++id, employeId, type, dateDebut, dateFin, statut, mairieId',
@@ -647,12 +664,77 @@ class TresorDatabase extends Dexie {
         '++id, annee, taxeId, chapitreRecetteId, mairieId, [annee+taxeId+chapitreRecetteId]',
       printData: '++id, type, createdAt',
       exercices: '++id, annee, statut, mairieId',
-      employes: '++id, matricule, nom, prenom, service, mairieId, actif',
+      employes: '++id, matricule, nom, prenom, typeEmploye, service, mairieId, actif',
       fichesPaie:
         '++id, employeId, mois, annee, exercice, mairieId, statut, [annee+mois+employeId]',
       conges: '++id, employeId, type, dateDebut, dateFin, statut, mairieId',
       ordresMission: '++id, numero, employeId, exercice, dateDebut, statut, mairieId',
       parametresPaie: '++id, mairieId',
+    });
+
+    this.version(27).stores({
+      mairies: '++id, nom, code, ville',
+      utilisateurs: '++id, username, email, role, mairieId, actif',
+      chapitres: '++id, code, libelle, mairieId, actif',
+      sousChapitres: '++id, code, libelle, parentId, mairieId, actif',
+      previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
+      mandats:
+        '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
+      bordereauMandats: '++id, numero, exercice, mairieId, statut, personnelId',
+      etatFinancierMensuel:
+        '++id, annee, sousChapitreId, chapitreId, mairieId, [annee+sousChapitreId+chapitreId]',
+      taxes: '++id, code, libelle, mairieId, type, actif',
+      declarations:
+        '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
+      bordereauxRecette: '++id, numero, annee, mairieId, statut, personnelId',
+      previsionsRecettes: '++id, exercice, taxeId, mairieId, statut, personnelId',
+      mandatsRecette:
+        '++id, numeroMandat, dateMandat, exercice, chapitreId, taxeId, previsionRecetteId, bordereauMandatRecetteId, mairieId, statut, personnelId',
+      bordereauMandatsRecette: '++id, numero, exercice, mairieId, statut, personnelId',
+      chapitresRecette: '++id, code, libelle, mairieId, actif',
+      etatFinancierMensuelRecette:
+        '++id, annee, taxeId, chapitreRecetteId, mairieId, [annee+taxeId+chapitreRecetteId]',
+      printData: '++id, type, createdAt',
+      exercices: '++id, annee, statut, mairieId',
+      employes: '++id, matricule, nom, prenom, typeEmploye, service, mairieId, actif',
+      fichesPaie:
+        '++id, employeId, mois, annee, exercice, mairieId, statut, [annee+mois+employeId]',
+      conges: '++id, employeId, type, dateDebut, dateFin, statut, mairieId',
+      ordresMission: '++id, numero, employeId, exercice, dateDebut, statut, mairieId',
+      parametresPaie: '++id, mairieId',
+    });
+
+    this.version(28).stores({
+      mairies: '++id, nom, code, ville',
+      utilisateurs: '++id, username, email, role, mairieId, actif',
+      chapitres: '++id, code, libelle, mairieId, actif',
+      sousChapitres: '++id, code, libelle, parentId, mairieId, actif',
+      previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
+      mandats:
+        '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
+      bordereauMandats: '++id, numero, exercice, mairieId, statut, personnelId',
+      etatFinancierMensuel:
+        '++id, annee, sousChapitreId, chapitreId, mairieId, [annee+sousChapitreId+chapitreId]',
+      taxes: '++id, code, libelle, mairieId, type, actif',
+      declarations:
+        '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
+      bordereauxRecette: '++id, numero, annee, mairieId, statut, personnelId',
+      previsionsRecettes: '++id, exercice, taxeId, mairieId, statut, personnelId',
+      mandatsRecette:
+        '++id, numeroMandat, dateMandat, exercice, chapitreId, taxeId, previsionRecetteId, bordereauMandatRecetteId, mairieId, statut, personnelId',
+      bordereauMandatsRecette: '++id, numero, exercice, mairieId, statut, personnelId',
+      chapitresRecette: '++id, code, libelle, mairieId, actif',
+      etatFinancierMensuelRecette:
+        '++id, annee, taxeId, chapitreRecetteId, mairieId, [annee+taxeId+chapitreRecetteId]',
+      printData: '++id, type, createdAt',
+      exercices: '++id, annee, statut, mairieId',
+      employes: '++id, matricule, nom, prenom, typeEmploye, service, departement, mairieId, actif',
+      fichesPaie:
+        '++id, employeId, mois, annee, exercice, mairieId, statut, [annee+mois+employeId]',
+      conges: '++id, employeId, type, dateDebut, dateFin, statut, mairieId',
+      ordresMission: '++id, numero, employeId, exercice, dateDebut, statut, mairieId',
+      parametresPaie: '++id, mairieId',
+      servicesApp7: '++id, nom, compte, mairieId, actif',
     });
   }
 }

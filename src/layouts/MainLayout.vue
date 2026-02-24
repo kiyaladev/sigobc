@@ -382,6 +382,21 @@
           <q-item
             clickable
             v-ripple
+            to="/app7/services"
+            class="nav-item q-mb-xs"
+            active-class="nav-item-active"
+          >
+            <q-item-section avatar>
+              <q-icon name="business" color="deep-purple" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Services</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item
+            clickable
+            v-ripple
             to="/app7/employes"
             class="nav-item q-mb-xs"
             active-class="nav-item-active"

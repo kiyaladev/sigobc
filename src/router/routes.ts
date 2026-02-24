@@ -136,6 +136,11 @@ const routes: RouteRecordRaw[] = [
         name: 'app7-dashboard',
       },
       {
+        path: 'app7/services',
+        component: () => import('pages/app7/ServicesPage.vue'),
+        name: 'app7-services',
+      },
+      {
         path: 'app7/employes',
         component: () => import('pages/app7/EmployesPage.vue'),
         name: 'app7-employes',

@@ -1,5 +1,5 @@
 <template>
-  <q-card>
+  <q-card flat class="q-pa-sm">
     <q-card-section v-if="showExportCsv" class="q-pb-none">
       <div class="row justify-end">
         <q-btn
@@ -18,6 +18,7 @@
       :row-key="rowKey"
       :loading="loading"
       :pagination="pagination"
+      flat
       v-bind="$attrs"
     >
       <!-- Forward all custom column slots -->

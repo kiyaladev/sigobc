@@ -357,12 +357,14 @@
       }
 
       const db = new Dexie('TresorDatabase');
-      db.version(26).stores({
+      db.version(28).stores({
         mairies: '++id, nom, code, ville',
-        employes: '++id, matricule, nom, prenom, service, mairieId, actif',
+        employes:
+          '++id, matricule, nom, prenom, typeEmploye, service, departement, mairieId, actif',
         fichesPaie:
           '++id, employeId, mois, annee, exercice, mairieId, statut, [annee+mois+employeId]',
         parametresPaie: '++id, mairieId',
+        servicesApp7: '++id, nom, compte, mairieId, actif',
       });
 
       document.addEventListener('DOMContentLoaded', async () => {
@@ -395,7 +397,7 @@
         const elFns = document.getElementById('th-fns');
         if (elFns) elFns.innerHTML = `F.N.S<br />${tFns.toLocaleString('fr-FR')}%`;
 
-        const fiches = await db.fichesPaie
+        let fiches = await db.fichesPaie
           .where('[annee+mois+employeId]')
           .between([annee, mois, -Infinity], [annee, mois, Infinity])
           .filter((f) => f.statut !== 'brouillon')
@@ -405,6 +407,22 @@
               .filter((f) => f.mois === mois && f.annee === annee && f.statut !== 'brouillon')
               .toArray(),
           );
+
+        const serviceFiltre = params.get('service');
+        const typeEmployeFiltre = params.get('typeEmploye');
+
+        if (serviceFiltre || typeEmployeFiltre) {
+          const filtered = [];
+          for (const f of fiches) {
+            const emp = await db.employes.get(f.employeId);
+            if (emp) {
+              if (serviceFiltre && emp.service !== serviceFiltre) continue;
+              if (typeEmployeFiltre && emp.typeEmploye !== typeEmployeFiltre) continue;
+              filtered.push(f);
+            }
+          }
+          fiches = filtered;
+        }
 
         const tbody = document.getElementById('tbody-data');
         if (!fiches.length) {

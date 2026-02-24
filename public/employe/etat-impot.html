@@ -209,11 +209,12 @@
         return conv(num).toUpperCase() + ' FRANCS CFA';
       }
       const db = new Dexie('TresorDatabase');
-      db.version(26).stores({
+      db.version(28).stores({
         mairies: '++id',
-        employes: '++id,matricule,nom,prenom,service,mairieId,actif',
+        employes: '++id,matricule,nom,prenom,typeEmploye,service,departement,mairieId,actif',
         fichesPaie: '++id,employeId,mois,annee,exercice,mairieId,statut,[annee+mois+employeId]',
         parametresPaie: '++id, mairieId',
+        servicesApp7: '++id, nom, compte, mairieId, actif',
       });
       document.addEventListener('DOMContentLoaded', async () => {
         const p = new URLSearchParams(window.location.search);
@@ -228,9 +229,26 @@
         const tIts = paramsDb ? paramsDb.tauxIts : 1.6;
         const elIts = document.getElementById('th-its');
         if (elIts) elIts.innerHTML = `${tIts.toLocaleString('fr-FR')}%<br />ITS`;
-        const fiches = await db.fichesPaie
+        let fiches = await db.fichesPaie
           .filter((f) => f.mois === mois && f.annee === annee && f.statut !== 'brouillon')
           .toArray();
+
+        const serviceFiltre = p.get('service');
+        const typeEmployeFiltre = p.get('typeEmploye');
+
+        if (serviceFiltre || typeEmployeFiltre) {
+          const filtered = [];
+          for (const f of fiches) {
+            const emp = await db.employes.get(f.employeId);
+            if (emp) {
+              if (serviceFiltre && emp.service !== serviceFiltre) continue;
+              if (typeEmployeFiltre && emp.typeEmploye !== typeEmployeFiltre) continue;
+              filtered.push(f);
+            }
+          }
+          fiches = filtered;
+        }
+
         const tbody = document.getElementById('tbody-data');
         if (!fiches.length) {
           tbody.innerHTML =

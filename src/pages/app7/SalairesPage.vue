@@ -167,6 +167,28 @@
               <q-input v-model.number="printAnnee" label="Année" outlined dense type="number" />
             </div>
           </div>
+          <div class="row q-col-gutter-sm q-mt-xs">
+            <div class="col-12 col-sm-6">
+              <q-select
+                v-model="printService"
+                :options="servicesOptions"
+                label="Service (Optionnel)"
+                outlined
+                dense
+                clearable
+              />
+            </div>
+            <div class="col-12 col-sm-6">
+              <q-select
+                v-model="printTypeEmploye"
+                :options="typeEmployeOptions"
+                label="Type d'employé (Optionnel)"
+                outlined
+                dense
+                clearable
+              />
+            </div>
+          </div>
           <div class="text-subtitle2 text-grey-8 q-mt-sm">Document officiel</div>
           <q-list bordered separator class="rounded-borders">
             <q-item
@@ -445,6 +467,16 @@ const genMois = ref(now.getMonth() + 1);
 const genAnnee = ref(now.getFullYear());
 const printMois = ref(now.getMonth() + 1);
 const printAnnee = ref(now.getFullYear());
+const printService = ref<string | null>(null);
+const printTypeEmploye = ref<string | null>(null);
+
+const servicesOptions = ref<string[]>([]);
+const typeEmployeOptions = [
+  'Salariés (6000/2)',
+  'Contractuels (60012/2)',
+  "Agents de l'État (6002/2)",
+  'Maire et Adjoints (6010/2)',
+];
 
 const officialDocs = [
   {
@@ -474,7 +506,12 @@ const officialDocs = [
 ];
 
 function launchOfficialDoc(file: string) {
-  openPrintWindow(file, { mois: printMois.value, annee: printAnnee.value });
+  openPrintWindow(file, {
+    mois: printMois.value,
+    annee: printAnnee.value,
+    service: printService.value || '',
+    typeEmploye: printTypeEmploye.value || '',
+  });
   showPrintDialog.value = false;
 }
 
@@ -670,15 +707,17 @@ const columns = [
 async function loadData() {
   loading.value = true;
   try {
-    const [loadedFiches, loadedEmployes, loadedParams] = await Promise.all([
+    const [loadedFiches, loadedEmployes, loadedParams, svcs] = await Promise.all([
       db.fichesPaie.toArray(),
       db.employes.toArray(),
       db.parametresPaie.toCollection().first(),
+      db.servicesApp7.toArray(),
     ]);
     fiches.value = loadedFiches;
     employes.value = loadedEmployes;
     parametresPaie.value = loadedParams ?? null;
     filteredEmployeOptions.value = employeOptions.value;
+    servicesOptions.value = svcs.map((s) => s.nom);
   } finally {
     loading.value = false;
   }
