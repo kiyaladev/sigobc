@@ -3,54 +3,116 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>État des Décomptes Part Patronale - Vavoua</title>
+    <title>État des Décomptes - Mairie de Vavoua</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="../dexie.min.js"></script>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap"
-      rel="stylesheet"
-    />
     <style>
+      @import url('https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap');
+
       body {
-        background-color: #e5e7eb;
-        font-family: 'Times New Roman', Times, serif;
-        color: #000;
+        background-color: #f3f4f6;
+        padding: 1rem;
+        display: flex;
+        justify-content: center;
       }
 
-      .page-container {
-        width: 100%;
-        max-width: 297mm; /* A4 Paysage Largeur */
-        min-height: 210mm; /* A4 Paysage Hauteur */
+      .a4-landscape {
+        width: 297mm;
+        min-height: 210mm;
         background-color: white;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        margin: 2rem auto;
-        padding: 1.5rem 2rem;
+        box-shadow:
+          0 10px 15px -3px rgba(0, 0, 0, 0.1),
+          0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        padding: 1cm 1.5cm;
+        font-family: 'Times New Roman', Times, serif;
         position: relative;
-      }
-
-      .signature-font {
-        font-family: 'Dancing Script', cursive;
+        color: #111;
       }
 
       table {
         border-collapse: collapse;
         width: 100%;
+        font-size: 11px;
+        margin-top: 1.5rem;
       }
+
       th,
       td {
-        border: 1px solid #000 !important;
-        vertical-align: middle;
+        border: 1px solid black;
+        padding: 4px 6px;
+        text-align: center;
       }
 
       th {
-        font-size: 11px;
-        line-height: 1.2;
-        padding: 6px 4px;
+        font-weight: bold;
+        background-color: transparent;
+        vertical-align: middle;
       }
 
-      td {
-        font-size: 11px;
-        padding: 6px 8px;
+      .text-left-col {
+        text-align: left !important;
+      }
+      .text-right-col {
+        text-align: right !important;
+      }
+
+      .cursive-signature {
+        font-family: 'Brush Script MT', 'Lucida Handwriting', cursive;
+        font-size: 4rem;
+        color: #1e3a8a;
+        position: absolute;
+        transform: rotate(-5deg);
+        top: -2rem;
+        left: 1rem;
+        white-space: nowrap;
+        z-index: 20;
+        opacity: 0.9;
+      }
+
+      .stamp-round {
+        position: absolute;
+        top: -2rem;
+        left: 2rem;
+        width: 130px;
+        height: 130px;
+        border: 3px solid #1e3a8a;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform: rotate(-15deg);
+        opacity: 0.7;
+        z-index: 10;
+      }
+
+      .stamp-round-inner {
+        border: 1px solid #1e3a8a;
+        width: 90%;
+        height: 90%;
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.55rem;
+        font-weight: bold;
+        color: #1e3a8a;
+        text-align: center;
+        line-height: 1.1;
+      }
+
+      .stamp-rect {
+        border: 2px solid #1e3a8a;
+        color: #1e3a8a;
+        padding: 8px 16px;
+        text-align: center;
+        font-family: Arial, sans-serif;
+        font-weight: bold;
+        font-size: 14px;
+        transform: rotate(2deg);
+        opacity: 0.85;
+        display: inline-block;
+        background-color: transparent;
       }
 
       @media print {
@@ -60,8 +122,10 @@
         }
         body {
           background-color: white;
+          padding: 0;
+          display: block;
         }
-        .page-container {
+        .a4-landscape {
           margin: 0;
           box-shadow: none;
           max-width: 100%;
@@ -71,118 +135,128 @@
       }
     </style>
   </head>
-  <body class="antialiased">
-    <div class="page-container">
-      <!-- En-tête -->
-      <header class="flex justify-between items-start mb-4 text-xs font-bold">
-        <div class="text-center leading-tight">
+  <body>
+    <div class="a4-landscape">
+      <!-- Headers -->
+      <div class="flex justify-between items-start text-sm">
+        <!-- Left Header -->
+        <div class="leading-tight font-bold text-center">
           <p>DÉPARTEMENT DE VAVOUA</p>
-          <div class="w-8 h-[1px] bg-black mx-auto my-1"></div>
+          <div class="w-10 h-[1px] bg-black mx-auto my-1"></div>
           <p>COMMUNE DE VAVOUA</p>
           <p>Code: 433</p>
         </div>
 
-        <div class="text-center leading-tight">
+        <!-- Right Header -->
+        <div class="text-center leading-tight font-bold">
           <p>RÉPUBLIQUE DE COTE D'IVOIRE</p>
-          <p class="font-normal italic mt-0.5">Union - Discipline - Travail</p>
-          <div class="w-12 h-[1px] bg-black mx-auto mt-0.5"></div>
+          <p class="italic font-normal">Union - Discipline - Travail</p>
         </div>
-      </header>
+      </div>
 
-      <!-- Titre Central -->
-      <h1 class="text-center font-bold text-lg underline underline-offset-2 mb-2 tracking-wide">
-        ÉTAT DES DÉCOMPTES DE LA PART PATRONALE
-      </h1>
+      <!-- Center Titles -->
+      <div class="text-center mt-4">
+        <h1 class="font-bold text-lg tracking-wide">ÉTAT DES DÉCOMPTES DE LA PART PATRONALE</h1>
+        <h2 class="font-bold text-md">BUDGET COMMUNAL</h2>
 
-      <!-- Informations Document -->
-      <div class="text-center mb-6 font-bold text-xs">
-        <p class="mb-1">BUDGET COMMUNAL</p>
-        <p>
+        <p class="font-bold text-sm">
           EXERCICE: <span id="exercice-text">...</span> &nbsp;&nbsp;&nbsp;&nbsp; CHAPITRE: 600
           &nbsp;&nbsp;&nbsp;&nbsp; ARTICLE: 6002 &nbsp;&nbsp;&nbsp;&nbsp; PARAGRAPHE: 6002/2
         </p>
-        <p class="mt-2 font-normal">
-          État nominatif pour servir au paiement de la somme acquise par :
+
+        <p class="text-sm">État nominatif pour servir au paiement de la somme acquise par :</p>
+        <p class="text-sm font-bold" id="periode-text">
+          Les Agents de l'État Civil et population du ... au ...
         </p>
-        <p id="periode-text">Les Agents de l'État Civil et population du ...</p>
       </div>
 
-      <!-- Tableau -->
-      <div class="mb-4">
-        <table>
-          <thead>
-            <tr class="text-center bg-gray-50">
-              <th rowspan="2" class="w-8">N°</th>
-              <th rowspan="2" class="w-56">NOM ET PRÉNOMS</th>
-              <th rowspan="2">Salaires Brut<br />soumis à<br />cotisation</th>
-              <th colspan="3">DIFFÉRENTS TAUX DE PRÉLÈVEMENT</th>
-              <th rowspan="2" class="w-32">Total cotisation<br />à reverser<br />15,45%</th>
-            </tr>
-            <tr class="text-center bg-gray-50">
-              <th>
-                Prestation familiale<br />5,75%
-                <hr class="border-black border-t-[1.5px] my-1.5" />
-                <span class="font-normal text-[9px]">Plafond imposable<br />70 000 F CFA</span>
-              </th>
-              <th>
-                Accident de travail<br />2%
-                <hr class="border-black border-t-[1.5px] my-1.5" />
-                <span class="font-normal text-[9px]">Plafond imposable<br />70 000 F CFA</span>
-              </th>
-              <th>
-                Régime général de<br />retraite 7,7%
-                <hr class="border-black border-t-[1.5px] my-1.5" />
-                <span class="font-normal text-[9px]">Salaire brut<br />imposable</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody id="tbody-data">
-            <tr>
-              <td colspan="7" class="text-center py-4">Chargement...</td>
-            </tr>
-          </tbody>
-          <tfoot>
-            <tr class="font-bold bg-gray-100">
-              <td class="text-center" colspan="6">TOTAL</td>
-              <td id="tot-patron" class="text-right bg-gray-200">0</td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
+      <!-- Table -->
+      <table>
+        <thead>
+          <tr>
+            <th rowspan="2" class="w-12">N°</th>
+            <th rowspan="2" class="w-64">NOM ET PRÉNOMS</th>
+            <th rowspan="2" class="w-32">Salaires Brut<br />soumis à<br />cotisation</th>
+            <th colspan="3">DIFFÉRENTS TAUX DE PRÉLÈVEMENT</th>
+            <th rowspan="2" class="w-32 font-bold" id="th-total-cotisation">
+              Total cotisation<br />à reverser<br />...%
+            </th>
+          </tr>
+          <tr>
+            <th class="w-40 font-normal" style="padding: 0" id="th-pf">
+              <div class="font-bold border-b border-black h-full">
+                Prestation familiale<br />...%
+              </div>
+              <div class="h-full">Plafond imposable<br />70 000 F CFA</div>
+            </th>
+            <th class="w-40 font-normal" style="padding: 0" id="th-at">
+              <div class="font-bold border-b border-black h-full">
+                Accident de travail<br />...%
+              </div>
+              <div class="h-full">Plafond imposable<br />70 000 F CFA</div>
+            </th>
+            <th class="w-40 font-normal" style="padding: 0" id="th-rg">
+              <div class="font-bold border-b border-black h-full">
+                Régime général de<br />retraite ...%
+              </div>
+              <div class="h-full">Salaire brut<br />imposable</div>
+            </th>
+          </tr>
+        </thead>
+        <tbody id="tbody-data">
+          <tr>
+            <td colspan="7" class="text-center py-4">Chargement...</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="font-bold text-sm">
+            <td colspan="6" class="text-left">TOTAL</td>
+            <td class="text-right-col" id="tot-patron">0</td>
+          </tr>
+        </tfoot>
+      </table>
 
-      <!-- Mentions légales / Arrêt de la somme -->
-      <div class="mb-4 mt-6 text-xs">
-        <p>
-          Arrêté le présent état à la somme de : <br />
-          <span class="font-bold" id="arrete-montant">...</span>
-        </p>
-
-        <div class="grid grid-cols-3 gap-4 mt-6">
-          <!-- Colonne de gauche -->
-          <div class="flex flex-col">
-            <p>Payé et enregistré sous le n°07/2026</p>
-            <p class="mt-1">Pour acquis global</p>
-            <p class="mt-10 font-bold underline underline-offset-2">Certifié le service fait</p>
+      <div class="flex justify-between items-start text-sm">
+        <!-- Left Header -->
+        <div class="mt-6 text-sm flex flex-col gap-2" style="width: 75%">
+          <div class="flex">
+            <p>Arrêté le présent état à la somme de :</p>
+            <p class="font-bold underline ml-2 uppercase" id="arrete-montant">...</p>
           </div>
+          <p>Payé et enregistré sous le n°07/2026</p>
+          <p>Pour acquis global</p>
+        </div>
 
-          <!-- Colonne du milieu -->
-          <div class="text-center flex flex-col justify-end">
-            <p class="font-bold underline underline-offset-2">Vu, vérifié et liquidé</p>
-          </div>
+        <!-- Right Header -->
+        <div class="mt-8 text-sm relative h-40 text-center" style="width: 25%">
+          <p class="font-bold underline">Certifié le service fait</p>
 
-          <!-- Colonne de droite -->
-          <div class="text-center flex flex-col items-center mr-4">
-            <p id="date-sig">À Vavoua, le ...</p>
-            <p class="font-bold mt-1">P/Le Maire & P.D</p>
+          <p class="font-bold underline text-center">Vu, vérifié et liquidé</p>
 
-            <div class="mt-16 border-t border-black w-40 text-center pt-1">Signature</div>
-          </div>
+          <p id="date-sig">À Vavoua, le ...</p>
+          <p class="font-bold mt-2">P/Le Maire & P.D.</p>
         </div>
       </div>
 
-      <div class="absolute bottom-3 left-4 text-[9px] text-gray-500 italic">
-        Scanné avec CamScanner
-      </div>
+      <!-- Footer Text Section
+      <div class="mt-6 text-sm flex flex-col gap-2" style="width: 75%">
+        <div class="flex">
+          <p>Arrêté le présent état à la somme de :</p>
+          <p class="font-bold underline ml-2 uppercase" id="arrete-montant">...</p>
+        </div>
+        <p>Payé et enregistré sous le n°07/2026</p>
+        <p>Pour acquis global</p>
+      </div> -->
+
+      <!-- Signatures Grid -->
+      <!-- <div class="mt-8 text-sm relative h-40 text-center" style="width: 25%">
+        <p class="font-bold underline">Certifié le service fait</p>
+
+        <p class="font-bold underline text-center">Vu, vérifié et liquidé</p>
+
+        <p id="date-sig">À Vavoua, le ...</p>
+        <p class="font-bold mt-2">P/Le Maire & P.D.</p>
+      </div> -->
     </div>
 
     <script>
@@ -205,7 +279,7 @@
       }
       function numberToWords(num) {
         if (num === 0) return 'ZÉRO';
-        const u = [
+        const units = [
           '',
           'un',
           'deux',
@@ -227,7 +301,7 @@
           'dix-huit',
           'dix-neuf',
         ];
-        const t = [
+        const tens = [
           '',
           '',
           'vingt',
@@ -240,18 +314,21 @@
           'quatre-vingt',
         ];
         function lt1000(n) {
-          if (n < 20) return u[n];
+          if (n < 20) return units[n];
           if (n < 100) {
-            const a = Math.floor(n / 10),
-              b = n % 10;
-            if (a === 7) return 'soixante-' + u[10 + b];
-            if (a === 9) return 'quatre-vingt-' + (b === 0 ? 's' : u[b]);
-            return t[a] + (b === 1 && a !== 8 ? '-et-un' : b > 0 ? '-' + u[b] : a === 8 ? 's' : '');
+            const t = Math.floor(n / 10),
+              u = n % 10;
+            if (t === 7) return 'soixante-' + units[10 + u];
+            if (t === 9) return 'quatre-vingt-' + (u === 0 ? 's' : units[u]);
+            return (
+              tens[t] +
+              (u === 1 && t !== 8 ? '-et-un' : u > 0 ? '-' + units[u] : t === 8 ? 's' : '')
+            );
           }
           const h = Math.floor(n / 100),
             r = n % 100;
           return (
-            (h === 1 ? 'cent' : u[h] + '-cent') +
+            (h === 1 ? 'cent' : units[h] + '-cent') +
             (r === 0 && h > 1 ? 's' : '') +
             (r > 0 ? '-' + lt1000(r) : '')
           );
@@ -274,56 +351,112 @@
         }
         return conv(num).toUpperCase() + ' FRANCS CFA';
       }
+
       const db = new Dexie('TresorDatabase');
-      db.version(25).stores({
+      db.version(26).stores({
         mairies: '++id',
         employes: '++id,matricule,nom,prenom,service,mairieId,actif',
         fichesPaie: '++id,employeId,mois,annee,exercice,mairieId,statut,[annee+mois+employeId]',
+        parametresPaie: '++id, mairieId',
       });
+
       document.addEventListener('DOMContentLoaded', async () => {
         const p = new URLSearchParams(window.location.search);
         const mois = parseInt(p.get('mois') || String(new Date().getMonth() + 1), 10);
         const annee = parseInt(p.get('annee') || String(new Date().getFullYear()), 10);
-        const premierJour = `1er/${String(mois).padStart(2, '0')}/${annee}`;
+        const premierJour = `01/${String(mois).padStart(2, '0')}/${annee}`;
         const dernierJour = `${new Date(annee, mois, 0).getDate()}/${String(mois).padStart(2, '0')}/${annee}`;
+
         document.getElementById('exercice-text').textContent = String(annee);
         document.getElementById('periode-text').textContent =
           `Les Agents de l'État Civil et population du ${premierJour} au ${dernierJour}`;
         document.getElementById('date-sig').textContent =
           `À Vavoua, le ${new Date().toLocaleDateString('fr-FR')}`;
-        const fiches = await db.fichesPaie
-          .filter((f) => f.mois === mois && f.annee === annee)
-          .toArray();
+
         const tbody = document.getElementById('tbody-data');
+
+        // Fetch des données
+        const fiches = await db.fichesPaie
+          .where('[annee+mois+employeId]')
+          .between([annee, mois, -Infinity], [annee, mois, Infinity])
+          .filter((f) => f.statut !== 'brouillon')
+          .toArray()
+          .catch(() =>
+            db.fichesPaie
+              .filter((f) => f.mois === mois && f.annee === annee && f.statut !== 'brouillon')
+              .toArray(),
+          );
+
         if (!fiches.length) {
           tbody.innerHTML =
             '<tr><td colspan="7" class="text-center py-4 text-gray-500">Aucun bulletin pour cette période</td></tr>';
           document.getElementById('arrete-montant').textContent = 'ZÉRO FRANC CFA';
           return;
         }
+
         // Taux patronaux CNPS Côte d'Ivoire
-        const PLAFOND_PF_AT = 70000; // plafond PF et AT
-        const TAUX_PF = 0.0575,
-          TAUX_AT = 0.02,
-          TAUX_RG = 0.077;
+        const paramsDb = await db.parametresPaie.toCollection().first();
+        const TAUX_PF = paramsDb ? paramsDb.tauxCnpsPatronalPrestationFamiliale / 100 : 0.0575;
+        const TAUX_AT = paramsDb ? paramsDb.tauxCnpsPatronalAccidentTravail / 100 : 0.02;
+        const TAUX_RG = paramsDb ? paramsDb.tauxCnpsPatronalRetraite / 100 : 0.077;
+        const TAUX_TOTAL = (TAUX_PF + TAUX_AT + TAUX_RG) * 100;
+
+        const elTotal = document.getElementById('th-total-cotisation');
+        if (elTotal)
+          elTotal.innerHTML = `Total cotisation<br />à reverser<br />${TAUX_TOTAL.toLocaleString('fr-FR')}%`;
+
+        const elPf = document.getElementById('th-pf');
+        if (elPf)
+          elPf.innerHTML = `<div class="font-bold border-b border-black h-full">Prestation familiale<br />${(TAUX_PF * 100).toLocaleString('fr-FR')}%</div><div class="h-full">Plafond imposable<br />70 000 F CFA</div>`;
+
+        const elAt = document.getElementById('th-at');
+        if (elAt)
+          elAt.innerHTML = `<div class="font-bold border-b border-black h-full">Accident de travail<br />${(TAUX_AT * 100).toLocaleString('fr-FR')}%</div><div class="h-full">Plafond imposable<br />70 000 F CFA</div>`;
+
+        const elRg = document.getElementById('th-rg');
+        if (elRg)
+          elRg.innerHTML = `<div class="font-bold border-b border-black h-full">Régime général de<br />retraite ${(TAUX_RG * 100).toLocaleString('fr-FR')}%</div><div class="h-full">Salaire brut<br />imposable</div>`;
+
+        const PLAFOND_PF_AT = 70000;
         let totPatron = 0;
+
         const rows = await Promise.all(
           fiches.map(async (f, i) => {
             const emp = await db.employes.get(f.employeId);
             const nom = emp ? `${emp.nom} ${emp.prenom}` : `Agent #${f.employeId}`;
             const brut = f.montantBrut || 0;
             const basePfAt = Math.min(brut, PLAFOND_PF_AT);
+
             const pf = Math.round(basePfAt * TAUX_PF);
             const at = Math.round(basePfAt * TAUX_AT);
             const rg = Math.round(brut * TAUX_RG);
             const total = pf + at + rg;
             totPatron += total;
-            return `<tr><td class="text-center">${String(i + 1).padStart(2, '0')}</td><td class="font-semibold pl-2">${nom}</td><td class="text-right">${fmt(brut)}</td><td class="text-right">${fmt(pf)}</td><td class="text-right">${fmt(at)}</td><td class="text-right">${fmt(rg)}</td><td class="text-right font-bold bg-gray-50">${fmt(total)}</td></tr>`;
+
+            return `<tr>
+              <td>${String(i + 1).padStart(2, '0')}</td>
+              <td class="text-left-col font-semibold">${nom}</td>
+              <td class="text-right-col">${fmt(brut)}</td>
+              <td class="text-right-col">${fmt(pf)}</td>
+              <td class="text-right-col">${fmt(at)}</td>
+              <td class="text-right-col">${fmt(rg)}</td>
+              <td class="text-right-col font-bold">${fmt(total)}</td>
+            </tr>`;
           }),
         );
+
         tbody.innerHTML = rows.join('');
-        document.getElementById('tot-patron').textContent = fmt(totPatron);
-        document.getElementById('arrete-montant').textContent = numberToWords(totPatron);
+        const totPatronEl = document.getElementById('tot-patron');
+        if (totPatronEl) totPatronEl.textContent = fmt(totPatron);
+
+        const arreteEl = document.getElementById('arrete-montant');
+        if (arreteEl) arreteEl.textContent = numberToWords(totPatron);
+
+        setTimeout(() => {
+          if (p.get('print') === 'true') {
+            window.print();
+          }
+        }, 500);
       });
     </script>
   </body>

@@ -221,6 +221,108 @@
       </q-card-section>
     </q-card>
 
+    <!-- Paramètres de Paie -->
+    <q-card class="main-card q-mt-md">
+      <q-card-section>
+        <div class="row items-center justify-between q-mb-md">
+          <div class="text-h6">
+            <q-icon name="payments" class="q-mr-sm" />
+            Paramètres de Paie (Taux & Cotisations)
+          </div>
+          <q-btn
+            color="primary"
+            icon="save"
+            label="Enregistrer les paramètres"
+            @click="saveParametresPaie"
+            :loading="savingPaie"
+          />
+        </div>
+
+        <div v-if="parametresPaie" class="row q-col-gutter-md">
+          <div class="col-12 col-md-4">
+            <q-input
+              v-model.number="parametresPaie.tauxIndemniteResidence"
+              label="Taux Indemnité Résidence"
+              type="number"
+              step="0.01"
+              outlined
+              dense
+              suffix="%"
+            />
+          </div>
+          <div class="col-12 col-md-4">
+            <q-input
+              v-model.number="parametresPaie.tauxIts"
+              label="Taux ITS"
+              type="number"
+              step="0.01"
+              outlined
+              dense
+              suffix="%"
+            />
+          </div>
+          <div class="col-12 col-md-4">
+            <q-input
+              v-model.number="parametresPaie.tauxFns"
+              label="Taux FNS"
+              type="number"
+              step="0.01"
+              outlined
+              dense
+              suffix="%"
+            />
+          </div>
+          <div class="col-12 col-md-3">
+            <q-input
+              v-model.number="parametresPaie.tauxCnpsEmploye"
+              label="Part Salariale CNPS"
+              type="number"
+              step="0.01"
+              outlined
+              dense
+              suffix="%"
+            />
+          </div>
+          <div class="col-12 col-md-3">
+            <q-input
+              v-model.number="parametresPaie.tauxCnpsPatronalPrestationFamiliale"
+              label="Patronal - Prest. Familiale"
+              type="number"
+              step="0.01"
+              outlined
+              dense
+              suffix="%"
+            />
+          </div>
+          <div class="col-12 col-md-3">
+            <q-input
+              v-model.number="parametresPaie.tauxCnpsPatronalAccidentTravail"
+              label="Patronal - Accident Travail"
+              type="number"
+              step="0.01"
+              outlined
+              dense
+              suffix="%"
+            />
+          </div>
+          <div class="col-12 col-md-3">
+            <q-input
+              v-model.number="parametresPaie.tauxCnpsPatronalRetraite"
+              label="Patronal - Retraite"
+              type="number"
+              step="0.01"
+              outlined
+              dense
+              suffix="%"
+            />
+          </div>
+        </div>
+        <div v-else class="text-center text-grey-5 q-pa-lg">
+          <q-spinner color="primary" size="2em" />
+        </div>
+      </q-card-section>
+    </q-card>
+
     <!-- Dialog création exercice -->
     <q-dialog v-model="showExerciceDialog" persistent>
       <q-card style="min-width: 400px">
@@ -276,14 +378,22 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useQuasar, date } from 'quasar';
-import { db, type Exercice, type Mairie, DEFAULT_MAIRIE_ID } from 'src/database/db';
+import {
+  db,
+  type Exercice,
+  type Mairie,
+  type ParametresPaie,
+  DEFAULT_MAIRIE_ID,
+} from 'src/database/db';
 import PageHeader from 'src/components/PageHeader.vue';
 
 const $q = useQuasar();
 
 const exercices = ref<Exercice[]>([]);
 const mairie = ref<Mairie | null>(null);
+const parametresPaie = ref<ParametresPaie | null>(null);
 const loading = ref(false);
+const savingPaie = ref(false);
 
 const showExerciceDialog = ref(false);
 
@@ -359,6 +469,9 @@ async function loadData() {
       m = await db.mairies.get(mId);
     }
     mairie.value = m || null;
+
+    const params = await db.parametresPaie.toCollection().first();
+    parametresPaie.value = params || null;
   } catch (error) {
     console.error('Erreur:', error);
     $q.notify({ type: 'negative', message: 'Erreur lors du chargement' });
@@ -479,6 +592,22 @@ function confirmDeleteExercice(exercice: Exercice) {
       }
     })();
   });
+}
+
+async function saveParametresPaie() {
+  if (!parametresPaie.value || !parametresPaie.value.id) return;
+  savingPaie.value = true;
+  try {
+    parametresPaie.value.updatedAt = new Date();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await db.parametresPaie.update(parametresPaie.value.id, parametresPaie.value as any);
+    $q.notify({ type: 'positive', message: 'Paramètres de paie enregistrés avec succès' });
+  } catch (error) {
+    console.error('Erreur:', error);
+    $q.notify({ type: 'negative', message: 'Erreur lors de la sauvegarde' });
+  } finally {
+    savingPaie.value = false;
+  }
 }
 
 onMounted(() => {

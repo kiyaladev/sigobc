@@ -1,5 +1,5 @@
 <template>
-  <q-page class="q-pa-md">
+  <q-page class="dashboard-page q-pa-md">
     <PageHeader
       title="Gestion des Salaires"
       subtitle="Bulletins de paie mensuels"
@@ -46,7 +46,6 @@
             />
             <q-btn icon="add" label="Nouveau bulletin" color="teal" unelevated @click="openAdd" />
             <q-btn
-              v-if="false"
               icon="print"
               label="Imprimer"
               color="deep-purple"
@@ -57,24 +56,38 @@
         </div>
 
         <!-- Résumé du mois -->
-        <div class="row q-col-gutter-sm q-mb-md">
-          <div class="col-12 col-sm-4">
-            <q-banner class="bg-teal-1 rounded-borders">
-              <div class="text-caption text-grey">Total bulletins</div>
-              <div class="text-h6 text-teal">{{ filteredFiches.length }}</div>
-            </q-banner>
-          </div>
-          <div class="col-12 col-sm-4">
-            <q-banner class="bg-blue-1 rounded-borders">
-              <div class="text-caption text-grey">Total brut</div>
-              <div class="text-h6 text-blue">{{ formatMontant(totalBrut) }}</div>
-            </q-banner>
-          </div>
-          <div class="col-12 col-sm-4">
-            <q-banner class="bg-green-1 rounded-borders">
-              <div class="text-caption text-grey">Total net à payer</div>
-              <div class="text-h6 text-positive">{{ formatMontant(totalNet) }}</div>
-            </q-banner>
+        <div class="row q-col-gutter-md q-mb-md">
+          <div class="col-12 col-sm-6 col-md-3" v-for="(stat, index) in statsCards" :key="index">
+            <q-card
+              class="stat-card hover-lift"
+              :class="`stat-card-${index}`"
+              :style="{
+                animationDelay: `${index * 0.1}s`,
+                borderLeft: `4px solid var(--q-${stat.color})`,
+              }"
+            >
+              <q-card-section class="stat-card-content">
+                <div class="row items-center no-wrap">
+                  <div class="col">
+                    <div class="stat-value text-grey-8">{{ stat.value }}</div>
+                    <div class="stat-label text-grey-6">{{ stat.label }}</div>
+                  </div>
+                  <div class="col-auto">
+                    <div class="stat-icon-wrapper" :class="`bg-${stat.color}-1`">
+                      <q-icon :name="stat.icon" class="stat-icon" :color="stat.color" />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Indicateur de progression -->
+                <q-linear-progress
+                  :value="stat.progress || 1"
+                  :color="stat.color"
+                  class="stat-progress q-mt-md"
+                  :class="{ 'pulse-animation': stat.progress < 1 }"
+                />
+              </q-card-section>
+            </q-card>
           </div>
         </div>
 
@@ -82,12 +95,9 @@
           :rows="filteredFiches"
           :columns="columns"
           :loading="loading"
-          show-print
+          :show-actions="false"
           show-export-csv
           export-filename="fiches-paie"
-          @print="printBulletin"
-          @edit="editFiche"
-          @delete="deleteFiche"
         >
           <template v-slot:body-cell-employe="props">
             <q-td :props="props">{{ getEmployeNom(props.row.employeId) }}</q-td>
@@ -97,6 +107,34 @@
               <q-chip :color="getStatutColor(props.row.statut)" text-color="white" size="sm" dense>
                 {{ getStatutLabel(props.row.statut) }}
               </q-chip>
+            </q-td>
+          </template>
+          <template v-slot:body-cell-actions="props">
+            <q-td :props="props" class="text-center">
+              <q-btn
+                v-if="props.row.statut !== 'brouillon'"
+                flat
+                round
+                dense
+                icon="print"
+                color="grey-7"
+                @click="printBulletin(props.row)"
+              >
+                <q-tooltip>Imprimer bulletin</q-tooltip>
+              </q-btn>
+              <q-btn flat round dense icon="edit" color="grey-7" @click="editFiche(props.row)">
+                <q-tooltip>Modifier</q-tooltip>
+              </q-btn>
+              <q-btn
+                flat
+                round
+                dense
+                icon="delete"
+                color="negative"
+                @click="deleteFiche(props.row)"
+              >
+                <q-tooltip>Supprimer</q-tooltip>
+              </q-btn>
             </q-td>
           </template>
         </DataTable>
@@ -384,7 +422,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import { useQuasar } from 'quasar';
-import { db, type FichePaie, type Employe } from 'src/database/db';
+import { db, type FichePaie, type Employe, type ParametresPaie } from 'src/database/db';
 import PageHeader from 'src/components/PageHeader.vue';
 import DataTable from 'src/components/DataTable.vue';
 import { openPrintWindow } from 'src/utils/printUrl';
@@ -397,6 +435,7 @@ const showPrintDialog = ref(false);
 const editingId = ref<number | null>(null);
 const fiches = ref<FichePaie[]>([]);
 const employes = ref<Employe[]>([]);
+const parametresPaie = ref<ParametresPaie | null>(null);
 
 const now = new Date();
 const filterMois = ref(now.getMonth() + 1);
@@ -516,6 +555,14 @@ function recalculate() {
     (form.value.indemniteTransport || 0) +
     (form.value.autresIndemnites || 0);
   form.value.montantBrut = brut;
+
+  if (parametresPaie.value) {
+    const cnps = Math.round(brut * (parametresPaie.value.tauxCnpsEmploye / 100));
+    const its = Math.round(brut * (parametresPaie.value.tauxIts / 100));
+    form.value.cotisationCNPS = cnps;
+    form.value.impotSurSalaire = its;
+  }
+
   form.value.montantNet =
     brut -
     (form.value.cotisationCNPS || 0) -
@@ -531,6 +578,45 @@ const filteredFiches = computed(() => {
 
 const totalBrut = computed(() => filteredFiches.value.reduce((s, f) => s + f.montantBrut, 0));
 const totalNet = computed(() => filteredFiches.value.reduce((s, f) => s + f.montantNet, 0));
+
+// Cartes de statistiques avec animations
+const statsCards = computed(() => {
+  const total = filteredFiches.value.length;
+  const valides = filteredFiches.value.filter(
+    (f) => f.statut === 'valide' || f.statut === 'paye',
+  ).length;
+
+  return [
+    {
+      value: total,
+      label: 'Total bulletins',
+      icon: 'receipt_long',
+      color: 'primary',
+      progress: total > 0 ? 1 : 0,
+    },
+    {
+      value: valides,
+      label: 'Bulletins Validés',
+      icon: 'check_circle',
+      color: 'positive',
+      progress: total > 0 ? valides / total : 0,
+    },
+    {
+      value: formatMontant(totalBrut.value),
+      label: 'Total Brut',
+      icon: 'account_balance',
+      color: 'blue',
+      progress: 0.8,
+    },
+    {
+      value: formatMontant(totalNet.value),
+      label: 'Total Net à payer',
+      icon: 'payments',
+      color: 'teal',
+      progress: 0.9,
+    },
+  ];
+});
 
 function getEmployeNom(id: number): string {
   const e = employes.value.find((x) => x.id === id);
@@ -584,10 +670,14 @@ const columns = [
 async function loadData() {
   loading.value = true;
   try {
-    [fiches.value, employes.value] = await Promise.all([
+    const [loadedFiches, loadedEmployes, loadedParams] = await Promise.all([
       db.fichesPaie.toArray(),
       db.employes.toArray(),
+      db.parametresPaie.toCollection().first(),
     ]);
+    fiches.value = loadedFiches;
+    employes.value = loadedEmployes;
+    parametresPaie.value = loadedParams ?? null;
     filteredEmployeOptions.value = employeOptions.value;
   } finally {
     loading.value = false;
@@ -619,6 +709,14 @@ async function generateBulletins() {
         (e.indemniteLogement || 0) +
         (e.indemniteTransport || 0) +
         (e.autresIndemnites || 0);
+
+      let calcCnps = 0;
+      let calcIts = 0;
+      if (parametresPaie.value) {
+        calcCnps = Math.round(brut * (parametresPaie.value.tauxCnpsEmploye / 100));
+        calcIts = Math.round(brut * (parametresPaie.value.tauxIts / 100));
+      }
+
       return {
         employeId: e.id!,
         mois: genMois.value,
@@ -630,10 +728,10 @@ async function generateBulletins() {
         indemniteTransport: e.indemniteTransport || 0,
         autresIndemnites: e.autresIndemnites || 0,
         montantBrut: brut,
-        cotisationCNPS: 0,
-        impotSurSalaire: 0,
+        cotisationCNPS: calcCnps,
+        impotSurSalaire: calcIts,
         autresRetenues: 0,
-        montantNet: brut,
+        montantNet: brut - calcCnps - calcIts,
         statut: 'valide' as const,
         personnelId: 1,
         createdAt: new Date(),
@@ -754,8 +852,101 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+// Page principale
+.dashboard-page {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
 .main-card {
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  animation: fadeIn 0.6s ease-out both;
+  animation-delay: 0.4s;
+}
+
+// Cartes de statistiques
+.stat-card {
+  height: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  animation: slideInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+
+  &:hover {
+    .stat-icon {
+      transform: scale(1.1) rotate(5deg);
+    }
+  }
+}
+
+.stat-card-content {
+  position: relative;
+  overflow: hidden;
+  background: white;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  opacity: 0.95;
+  margin-top: 4px;
+}
+
+.stat-icon-wrapper {
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.stat-icon {
+  font-size: 48px;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.stat-progress {
+  border-radius: 4px;
+  height: 4px;
+}
+
+.pulse-animation {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+// Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
 }
 </style>

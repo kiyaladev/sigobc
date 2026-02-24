@@ -68,7 +68,7 @@
       <!-- En-tête -->
       <header class="flex justify-between items-start mb-8 text-sm font-bold">
         <!-- Côté Gauche -->
-        <div class="text-center leading-snug">
+        <div class="text-left leading-snug">
           <p>DEPARTEMENT DE VAVOUA</p>
           <p>COMMUNE DE VAVOUA</p>
           <p>CODE: 433</p>
@@ -82,8 +82,13 @@
         </div>
       </header>
 
+      <!-- Titre -->
+      <h1 class="text-center font-bold text-lg mb-5">
+        ETAT DE PAIEMENT DE LA CNPS (PART EMPLOYES)
+      </h1>
+
       <!-- Période et Imputation -->
-      <div class="flex justify-between items-end mb-6 font-bold text-sm">
+      <div class="items-end mb-6 font-bold text-sm">
         <div>
           <p id="periode-text">PERIODE: ...</p>
         </div>
@@ -92,22 +97,17 @@
         </div>
       </div>
 
-      <!-- Titre -->
-      <h1 class="text-center font-bold text-lg underline underline-offset-4 mb-8">
-        ETAT DE PAIEMENT DE LA CNPS (PART EMPLOYES)
-      </h1>
-
       <!-- Tableau des Paiements -->
       <div class="overflow-x-auto mb-6">
         <table class="w-full text-sm">
           <thead>
-            <tr class="text-center font-bold bg-gray-50">
-              <th class="p-2 w-1/4">NOM ET PRENOMS</th>
-              <th class="p-2">NBRE DE<br />MOIS</th>
-              <th class="p-2">SALAIRE DE<br />BASE</th>
-              <th class="p-2">INDEMNITE<br />DE RESIDENSE</th>
-              <th class="p-2">IMPOSABLE<br />SALAIRE BRUT</th>
-              <th class="p-2">CNPS/PART<br />EMPLOYES -6,30%</th>
+            <tr class="text-center font-bold">
+              <th class="p-1 w-1/4">NOM ET PRENOMS</th>
+              <th class="p-1">NBRE DE<br />MOIS</th>
+              <th class="p-1">SALAIRE DE<br />BASE</th>
+              <th class="p-1">INDEMNITE<br />DE RESIDENSE</th>
+              <th class="p-1">IMPOSABLE<br />SALAIRE BRUT</th>
+              <th class="p-1" id="th-cnps-employe">CNPS/PART<br />EMPLOYES -...</th>
             </tr>
           </thead>
           <tbody id="tbody-data">
@@ -116,9 +116,9 @@
             </tr>
           </tbody>
           <tfoot>
-            <tr class="font-bold bg-gray-50">
-              <td class="p-2 text-center" colspan="5">TOTAL</td>
-              <td id="tot-cnps" class="p-2 text-right pr-3">0</td>
+            <tr class="font-bold">
+              <td class="p-1 text-center" colspan="5">TOTAL</td>
+              <td id="tot-cnps" class="p-1 text-right pr-3">0</td>
             </tr>
           </tfoot>
         </table>
@@ -127,7 +127,7 @@
       <!-- Mentions légales / Arrêt de la somme -->
       <div class="mb-10 mt-6">
         <p class="text-justify text-sm">
-          Arrêté le présent état à la somme de
+          Arrêté le présent état à la somme de:
           <span class="font-bold" id="arrete-montant">...</span>
         </p>
       </div>
@@ -137,7 +137,6 @@
         <div class="text-center flex flex-col items-center mr-8">
           <p id="date-sig">VAVOUA, le ...</p>
           <p class="font-bold mt-2">P/LE MAIRE & P.D</p>
-          <div class="mt-16 border-t border-black w-40 text-center pt-1">Signature</div>
         </div>
       </div>
     </div>
@@ -232,10 +231,11 @@
         return conv(num).toUpperCase() + ' FRANCS CFA';
       }
       const db = new Dexie('TresorDatabase');
-      db.version(25).stores({
+      db.version(26).stores({
         mairies: '++id',
         employes: '++id,matricule,nom,prenom,service,mairieId,actif',
         fichesPaie: '++id,employeId,mois,annee,exercice,mairieId,statut,[annee+mois+employeId]',
+        parametresPaie: '++id, mairieId',
       });
       document.addEventListener('DOMContentLoaded', async () => {
         const p = new URLSearchParams(window.location.search);
@@ -245,8 +245,15 @@
           `PERIODE: ${MOIS_LABELS[mois - 1] || ''} ${annee}`;
         document.getElementById('date-sig').textContent =
           `VAVOUA, le ${new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase()}`;
+
+        const paramsDb = await db.parametresPaie.toCollection().first();
+        const tauxCnpsEmploye = paramsDb ? paramsDb.tauxCnpsEmploye : 6.3;
+        const thCnps = document.getElementById('th-cnps-employe');
+        if (thCnps) {
+          thCnps.innerHTML = `CNPS/PART<br />EMPLOYES -${tauxCnpsEmploye.toLocaleString('fr-FR')}%`;
+        }
         const fiches = await db.fichesPaie
-          .filter((f) => f.mois === mois && f.annee === annee)
+          .filter((f) => f.mois === mois && f.annee === annee && f.statut !== 'brouillon')
           .toArray();
         const tbody = document.getElementById('tbody-data');
         if (!fiches.length) {
@@ -265,7 +272,7 @@
               brut = f.montantBrut || 0,
               cnps = f.cotisationCNPS || 0;
             totCnps += cnps;
-            return `<tr><td class="p-2 pl-3">${nom}</td><td class="p-2 text-center">1</td><td class="p-2 text-right pr-3">${fmt(base)}</td><td class="p-2 text-right pr-3">${fmt(log)}</td><td class="p-2 text-right pr-3">${fmt(brut)}</td><td class="p-2 text-right pr-3">${fmt(cnps)}</td></tr>`;
+            return `<tr><td class="p-1 pl-3">${nom}</td><td class="p-1 text-center">1</td><td class="p-1 text-right pr-3">${fmt(base)}</td><td class="p-1 text-right pr-3">${fmt(log)}</td><td class="p-1 text-right pr-3">${fmt(brut)}</td><td class="p-1 text-right pr-3">${fmt(cnps)}</td></tr>`;
           }),
         );
         tbody.innerHTML = rows.join('');

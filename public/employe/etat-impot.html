@@ -40,7 +40,7 @@
       <!-- En-tête -->
       <header class="flex justify-between items-start mb-6 text-[13px] font-bold">
         <!-- Côté Gauche -->
-        <div class="text-center leading-snug">
+        <div class="text-left leading-snug">
           <p>DEPARTEMENT DE VAVOUA</p>
           <p>COMMUNE DE VAVOUA</p>
           <p>CODE: 433</p>
@@ -54,8 +54,13 @@
         </div>
       </header>
 
+      <!-- Titre -->
+      <h1 class="text-center font-bold text-xl mb-6">
+        ETAT DE PAIEMENT DE L'IMPOT SUR SALAIRE (ITS)
+      </h1>
+
       <!-- Période et Imputation -->
-      <div class="flex justify-between items-end mb-6 font-bold text-[13px]">
+      <div class="mb-6 font-bold text-[13px]">
         <div>
           <p id="periode-text">PERIODE: ...</p>
         </div>
@@ -64,24 +69,19 @@
         </div>
       </div>
 
-      <!-- Titre -->
-      <h1 class="text-center font-bold text-xl underline underline-offset-4 mb-6">
-        ETAT DE PAIEMENT DE L'IMPOT SUR SALAIRE (ITS)
-      </h1>
-
       <!-- Tableau des Paiements (Bordures Tailwind) -->
       <div class="overflow-x-auto mb-6">
         <table
           class="w-full text-[13px] border-collapse border border-black [&_th]:border [&_th]:border-black [&_td]:border [&_td]:border-black"
         >
           <thead>
-            <tr class="text-center font-bold bg-gray-50 print:bg-transparent">
+            <tr class="text-center font-bold print:bg-transparent">
               <th class="p-1 w-1/4">NOM ET PRENOMS</th>
               <th class="p-1">NBRE DE<br />MOIS</th>
               <th class="p-1">SALAIRE DE<br />BASE</th>
               <th class="p-1">INDEMNITE<br />DE RESIDENSE</th>
               <th class="p-1">IMPOSABLE<br />SALAIRE BRUT</th>
-              <th class="p-1">1,60%<br />ITS</th>
+              <th class="p-1" id="th-its">...%<br />ITS</th>
             </tr>
           </thead>
           <tbody id="tbody-data">
@@ -90,7 +90,7 @@
             </tr>
           </tbody>
           <tfoot>
-            <tr class="font-bold bg-gray-50 print:bg-transparent">
+            <tr class="font-bold print:bg-transparent">
               <td class="p-1 text-center" colspan="5">TOTAL</td>
               <td id="tot-its" class="p-1 text-right pr-3">0</td>
             </tr>
@@ -112,7 +112,7 @@
           <p id="date-sig">VAVOUA, le ...</p>
           <p class="font-bold mt-2">P/Le Maire & P.D</p>
           <br />
-          <div class="mt-16 border-t border-black w-40 text-center pt-1">Signature</div>
+          <!-- <div class="mt-16 border-t border-black w-40 text-center pt-1">Signature</div> -->
         </div>
       </div>
 
@@ -209,10 +209,11 @@
         return conv(num).toUpperCase() + ' FRANCS CFA';
       }
       const db = new Dexie('TresorDatabase');
-      db.version(25).stores({
+      db.version(26).stores({
         mairies: '++id',
         employes: '++id,matricule,nom,prenom,service,mairieId,actif',
         fichesPaie: '++id,employeId,mois,annee,exercice,mairieId,statut,[annee+mois+employeId]',
+        parametresPaie: '++id, mairieId',
       });
       document.addEventListener('DOMContentLoaded', async () => {
         const p = new URLSearchParams(window.location.search);
@@ -222,8 +223,13 @@
           `PERIODE: ${MOIS_LABELS[mois - 1] || ''} ${annee}`;
         document.getElementById('date-sig').textContent =
           `VAVOUA, le ${new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase()}`;
+
+        const paramsDb = await db.parametresPaie.toCollection().first();
+        const tIts = paramsDb ? paramsDb.tauxIts : 1.6;
+        const elIts = document.getElementById('th-its');
+        if (elIts) elIts.innerHTML = `${tIts.toLocaleString('fr-FR')}%<br />ITS`;
         const fiches = await db.fichesPaie
-          .filter((f) => f.mois === mois && f.annee === annee)
+          .filter((f) => f.mois === mois && f.annee === annee && f.statut !== 'brouillon')
           .toArray();
         const tbody = document.getElementById('tbody-data');
         if (!fiches.length) {

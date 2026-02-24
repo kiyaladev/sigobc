@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>État de Solde - Commune de Vavoua</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600;700;800&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap');
+
+      body {
+        font-family: 'Libre Baskerville', 'Georgia', serif;
+        background: #d6d2cc;
+      }
+
+      .garamond {
+        font-family: 'EB Garamond', serif;
+      }
+
+      .page {
+        width: 297mm;
+        min-height: 210mm;
+        background: #fff;
+        box-shadow:
+          0 6px 32px rgba(0, 0, 0, 0.14),
+          0 1px 6px rgba(0, 0, 0, 0.08);
+        position: relative;
+      }
+
+      table {
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        border: 1.5px solid #222;
+        padding: 4px 7px;
+        text-align: center;
+        font-size: 12.5px;
+      }
+
+      th {
+        background: #f5f3ef;
+        font-weight: 700;
+        font-size: 11.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+      }
+
+      td {
+        font-variant-numeric: tabular-nums;
+      }
+
+      td.name-cell {
+        text-align: left;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      tr.totals-row td {
+        font-weight: 800;
+        border-top: 3px double #222;
+        background: #f9f8f5;
+      }
+
+      .seal {
+        width: 85px;
+        height: 85px;
+        border: 3px solid #1a3a7a;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        opacity: 0.8;
+      }
+
+      .seal::before {
+        content: '';
+        width: 75px;
+        height: 75px;
+        border: 1.5px solid #1a3a7a;
+        border-radius: 50%;
+        position: absolute;
+      }
+
+      .seal-text-top {
+        position: absolute;
+        top: 5px;
+        font-size: 6.5px;
+        font-weight: 700;
+        letter-spacing: 1.2px;
+        color: #1a3a7a;
+        text-transform: uppercase;
+      }
+
+      .seal-text-bottom {
+        position: absolute;
+        bottom: 5px;
+        font-size: 6.5px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        color: #1a3a7a;
+        text-transform: uppercase;
+      }
+
+      .seal-star {
+        color: #1a3a7a;
+        font-size: 12px;
+      }
+
+      .stamp-box {
+        border: 2.5px solid #1a3a7a;
+        padding: 3px 14px;
+        display: inline-block;
+      }
+
+      .stamp-box span {
+        color: #1a3a7a;
+        font-weight: 700;
+      }
+
+      .title-main {
+        font-family: 'EB Garamond', serif;
+        font-size: 30px;
+        font-weight: 800;
+        letter-spacing: 6px;
+        text-transform: uppercase;
+        text-decoration: underline;
+        text-underline-offset: 4px;
+      }
+
+      @media print {
+        body {
+          background: white;
+        }
+        .page {
+          box-shadow: none;
+          margin: 0;
+        }
+      }
+    </style>
+  </head>
+  <body class="flex items-start justify-center min-h-screen py-8">
+    <div class="page px-12 py-8">
+      <!-- En-tête -->
+      <div class="flex justify-between items-start mb-6">
+        <div class="text-[13px] leading-snug">
+          <p class="font-bold uppercase">Département de Vavoua</p>
+          <p class="font-bold uppercase">Commune de Vavoua</p>
+          <p class="font-bold uppercase">Code : 433</p>
+        </div>
+        <div class="text-right text-[13px] leading-snug">
+          <p class="font-bold uppercase tracking-wide">République de Côte d'Ivoire</p>
+          <p class="italic">Union – Discipline – Travail</p>
+        </div>
+      </div>
+
+      <!-- Titre -->
+      <div class="text-center mb-4">
+        <h1 class="title-main garamond">État de Solde</h1>
+      </div>
+
+      <!-- Période -->
+      <div class="text-center mb-4">
+        <p class="text-[14px] font-bold uppercase tracking-wide underline underline-offset-2">
+          Période : du 01/01/2026 au 31/01/2026
+        </p>
+      </div>
+
+      <!-- Exercice / Chapitre / Article -->
+      <div class="flex justify-between items-center mb-4 px-4">
+        <p class="text-[14px] font-bold uppercase underline underline-offset-2">Exercice : 2026</p>
+        <p class="text-[14px] font-bold uppercase underline underline-offset-2">Chapitre : 601</p>
+        <p class="text-[14px] font-bold uppercase underline underline-offset-2">Article : 6010/1</p>
+      </div>
+
+      <!-- Tableau principal -->
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr>
+              <th rowspan="2" class="w-[40px]">N°<br />D'ORD.</th>
+              <th rowspan="2" class="text-left min-w-[180px]">Nom & Prenom (S)</th>
+              <th rowspan="2">Salaire<br />Brut</th>
+              <th rowspan="2">Idem<br />Résid<br />15%</th>
+              <th rowspan="2">Salaire<br />Brut</th>
+              <th rowspan="2">CNPS<br />6,30%</th>
+              <th rowspan="2">Salaire<br />Net</th>
+              <th colspan="3">Retenues</th>
+              <th rowspan="2">Total<br />Impôts</th>
+              <th rowspan="2">Primes de<br />Transp.<br />Indem.Fct</th>
+              <th rowspan="2">Net<br />A<br />Payer</th>
+            </tr>
+            <tr>
+              <th>I.T.S<br />1,60%</th>
+              <th>I.G.R</th>
+              <th>F.N.S<br />1%</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td class="name-cell">KONSEIGA GEORGES U.</td>
+              <td>105 345</td>
+              <td>15 802</td>
+              <td>121 147</td>
+              <td>7 632</td>
+              <td>113 515</td>
+              <td>1 938</td>
+              <td></td>
+              <td>1 938</td>
+              <td>22 000</td>
+              <td>133 577</td>
+              <td class="font-bold">133 577</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td class="name-cell">TOURE MORY</td>
+              <td>105 345</td>
+              <td>15 802</td>
+              <td>121 147</td>
+              <td>7 632</td>
+              <td>113 515</td>
+              <td>19 38</td>
+              <td></td>
+              <td>19 38</td>
+              <td>22 000</td>
+              <td>133 577</td>
+              <td class="font-bold">133 577</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td class="name-cell">SIDIBE DRAMANE</td>
+              <td>83 520</td>
+              <td>12 528</td>
+              <td>96 048</td>
+              <td>6 051</td>
+              <td>89 997</td>
+              <td>1 537</td>
+              <td></td>
+              <td>1 537</td>
+              <td>22 000</td>
+              <td>110 460</td>
+              <td class="font-bold">110 460</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td class="name-cell">VANIE BI NATTI MAURICE</td>
+              <td>105 345</td>
+              <td>15 802</td>
+              <td>121 147</td>
+              <td>7 632</td>
+              <td>113 515</td>
+              <td>1 938</td>
+              <td></td>
+              <td>1 938</td>
+              <td>22 000</td>
+              <td>133 577</td>
+              <td class="font-bold">133 577</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td class="name-cell">TOH TAPE EDMOND</td>
+              <td>105 345</td>
+              <td>15 802</td>
+              <td>121 147</td>
+              <td>7 632</td>
+              <td>113 515</td>
+              <td>1 938</td>
+              <td></td>
+              <td>1 938</td>
+              <td>22 000</td>
+              <td>133 577</td>
+              <td class="font-bold">133 577</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td class="name-cell">SILUE GUEBESSONGUI L.</td>
+              <td>81 649</td>
+              <td>12 247</td>
+              <td>93 896</td>
+              <td>5 915</td>
+              <td>87 981</td>
+              <td>1 502</td>
+              <td></td>
+              <td>1 502</td>
+              <td>22 000</td>
+              <td>108 478</td>
+              <td class="font-bold">108 478</td>
+            </tr>
+            <tr>
+              <td>7</td>
+              <td class="name-cell">KORE TAPE VICTOR</td>
+              <td>85 973</td>
+              <td>12 896</td>
+              <td>98 869</td>
+              <td>6 229</td>
+              <td>92 640</td>
+              <td>1 582</td>
+              <td></td>
+              <td>1 582</td>
+              <td>22 000</td>
+              <td>113 058</td>
+              <td class="font-bold">113 058</td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td class="name-cell">FOFANA ABOU</td>
+              <td>79 779</td>
+              <td>11 967</td>
+              <td>91 746</td>
+              <td>5 780</td>
+              <td>85 966</td>
+              <td>1 468</td>
+              <td></td>
+              <td>1 468</td>
+              <td>22 000</td>
+              <td>106 498</td>
+              <td class="font-bold">106 498</td>
+            </tr>
+            <tr>
+              <td>9</td>
+              <td class="name-cell">GBAHA HERMANN BERTRAND</td>
+              <td>76 038</td>
+              <td>11 406</td>
+              <td>87 444</td>
+              <td>5 509</td>
+              <td>81 935</td>
+              <td>1 399</td>
+              <td></td>
+              <td>1 399</td>
+              <td>22 000</td>
+              <td>102 536</td>
+              <td class="font-bold">102 536</td>
+            </tr>
+            <tr>
+              <td>10</td>
+              <td class="name-cell">SALI BI FEAN PATRICE</td>
+              <td>95 075</td>
+              <td>14 262</td>
+              <td>109 337</td>
+              <td>6 888</td>
+              <td>102 453</td>
+              <td>1 749</td>
+              <td></td>
+              <td>1 749</td>
+              <td>22 000</td>
+              <td>123 704</td>
+              <td class="font-bold">123 704</td>
+            </tr>
+
+            <!-- TOTAUX -->
+            <tr class="totals-row">
+              <td
+                colspan="2"
+                class="text-left font-extrabold tracking-wide"
+                style="text-align: left; padding-left: 12px"
+              >
+                TOTAUX ...................
+              </td>
+              <td>923 414</td>
+              <td>138 514</td>
+              <td>1 061 928</td>
+              <td>66 900</td>
+              <td>995 032</td>
+              <td>16 989</td>
+              <td></td>
+              <td>16 989</td>
+              <td>220 000</td>
+              <td>1 199 042</td>
+              <td class="font-extrabold">1 199 042</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Arrêté -->
+      <div class="mt-5 text-[13px]">
+        <p>
+          <span>Arrêté le présent état à la somme de :</span>
+          <span class="font-bold uppercase ml-2"
+            >Un Million Cent Quatre-Vingt Dix-Neuf Mille Quarante Deux Francs CFA</span
+          >
+        </p>
+      </div>
+
+      <!-- Signature -->
+      <div class="mt-6 flex justify-end">
+        <div class="text-center">
+          <p class="text-[13px] font-bold">VAVOUA, le 13 / 01 / 2026</p>
+          <p class="text-[13px] font-bold mt-0.5">P/ LE MAIRE & P.D.;</p>
+
+          <div class="flex items-center gap-4 mt-4">
+            <!-- Cachet -->
+            <div class="seal">
+              <span class="seal-text-top">Côte d'Ivoire</span>
+              <span class="seal-text-bottom">★ Mairie de</span>
+              <span class="seal-star">🏛</span>
+            </div>
+
+            <!-- Nom signataire -->
+            <div class="stamp-box text-center">
+              <span class="text-[13px] block">OUATTARA KADJATOU</span>
+              <span class="text-[11px] block">Epse OUATTARA</span>
+              <span class="text-[12px] block">4<sup>ème</sup> Adjoint</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pied de page -->
+      <div class="absolute bottom-3 right-6 text-[8px] text-gray-400 italic">
+        Scanné avec CamScanner
+      </div>
+    </div>
+  </body>
+</html>

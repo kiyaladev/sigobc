@@ -468,6 +468,19 @@ export interface OrdreMission {
   updatedAt: Date;
 }
 
+export interface ParametresPaie {
+  id?: number;
+  mairieId: number;
+  tauxCnpsEmploye: number;
+  tauxIts: number;
+  tauxFns: number;
+  tauxIndemniteResidence: number;
+  tauxCnpsPatronalPrestationFamiliale: number;
+  tauxCnpsPatronalAccidentTravail: number;
+  tauxCnpsPatronalRetraite: number;
+  updatedAt: Date;
+}
+
 // Interface pour stocker temporairement les données d'impression
 // Utilisé pour passer les données aux pages d'impression en mode Electron
 export interface PrintData {
@@ -526,6 +539,7 @@ class TresorDatabase extends Dexie {
   fichesPaie!: EntityTable<FichePaie, 'id'>;
   conges!: EntityTable<Conge, 'id'>;
   ordresMission!: EntityTable<OrdreMission, 'id'>;
+  parametresPaie!: EntityTable<ParametresPaie, 'id'>;
 
   constructor() {
     super('TresorDatabase');
@@ -607,6 +621,38 @@ class TresorDatabase extends Dexie {
         '++id, employeId, mois, annee, exercice, mairieId, statut, [annee+mois+employeId]',
       conges: '++id, employeId, type, dateDebut, dateFin, statut, mairieId',
       ordresMission: '++id, numero, employeId, exercice, dateDebut, statut, mairieId',
+    });
+
+    this.version(26).stores({
+      mairies: '++id, nom, code, ville',
+      utilisateurs: '++id, username, email, role, mairieId, actif',
+      chapitres: '++id, code, libelle, mairieId, actif',
+      sousChapitres: '++id, code, libelle, parentId, mairieId, actif',
+      previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
+      mandats:
+        '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
+      bordereauMandats: '++id, numero, exercice, mairieId, statut, personnelId',
+      etatFinancierMensuel:
+        '++id, annee, sousChapitreId, chapitreId, mairieId, [annee+sousChapitreId+chapitreId]',
+      taxes: '++id, code, libelle, mairieId, type, actif',
+      declarations:
+        '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
+      bordereauxRecette: '++id, numero, annee, mairieId, statut, personnelId',
+      previsionsRecettes: '++id, exercice, taxeId, mairieId, statut, personnelId',
+      mandatsRecette:
+        '++id, numeroMandat, dateMandat, exercice, chapitreId, taxeId, previsionRecetteId, bordereauMandatRecetteId, mairieId, statut, personnelId',
+      bordereauMandatsRecette: '++id, numero, exercice, mairieId, statut, personnelId',
+      chapitresRecette: '++id, code, libelle, mairieId, actif',
+      etatFinancierMensuelRecette:
+        '++id, annee, taxeId, chapitreRecetteId, mairieId, [annee+taxeId+chapitreRecetteId]',
+      printData: '++id, type, createdAt',
+      exercices: '++id, annee, statut, mairieId',
+      employes: '++id, matricule, nom, prenom, service, mairieId, actif',
+      fichesPaie:
+        '++id, employeId, mois, annee, exercice, mairieId, statut, [annee+mois+employeId]',
+      conges: '++id, employeId, type, dateDebut, dateFin, statut, mairieId',
+      ordresMission: '++id, numero, employeId, exercice, dateDebut, statut, mairieId',
+      parametresPaie: '++id, mairieId',
     });
   }
 }
@@ -1752,5 +1798,25 @@ export async function initializeDatabase() {
     ]);
 
     console.log('Base de données initialisée avec succès avec des données de démonstration');
+  }
+
+  // Vérifier et initialiser les paramètres de paie si inexistants
+  const paramsCount = await db.parametresPaie.count();
+  if (paramsCount === 0) {
+    const defaultMairie = await db.mairies.toCollection().first();
+    const mId = defaultMairie?.id || DEFAULT_MAIRIE_ID;
+
+    await db.parametresPaie.add({
+      mairieId: mId,
+      tauxCnpsEmploye: 6.3,
+      tauxIts: 1.6,
+      tauxFns: 1.0,
+      tauxIndemniteResidence: 15.0,
+      tauxCnpsPatronalPrestationFamiliale: 5.75,
+      tauxCnpsPatronalAccidentTravail: 2.0,
+      tauxCnpsPatronalRetraite: 7.7,
+      updatedAt: new Date(),
+    });
+    console.log('Paramètres de paie par défaut initialisés.');
   }
 }

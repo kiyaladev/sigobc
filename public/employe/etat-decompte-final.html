@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>État des Décomptes - Mairie de Vavoua</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap');
+
+      body {
+        background-color: #f3f4f6;
+        padding: 2rem;
+        display: flex;
+        justify-content: center;
+      }
+
+      .a4-landscape {
+        width: 297mm;
+        min-height: 210mm;
+        background-color: white;
+        box-shadow:
+          0 10px 15px -3px rgba(0, 0, 0, 0.1),
+          0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        padding: 1.5cm 2cm;
+        font-family: 'Times New Roman', Times, serif;
+        position: relative;
+        color: #111;
+      }
+
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 12px;
+        margin-top: 1.5rem;
+      }
+
+      th,
+      td {
+        border: 1px solid black;
+        padding: 6px 8px;
+        text-align: center;
+      }
+
+      th {
+        font-weight: bold;
+        background-color: transparent;
+        vertical-align: middle;
+      }
+
+      .text-left-col {
+        text-align: left !important;
+      }
+      .text-right-col {
+        text-align: right !important;
+      }
+
+      .cursive-signature {
+        font-family: 'Brush Script MT', 'Lucida Handwriting', cursive;
+        font-size: 4rem;
+        color: #1e3a8a;
+        position: absolute;
+        transform: rotate(-5deg);
+        top: -2rem;
+        left: 1rem;
+        white-space: nowrap;
+        z-index: 20;
+        opacity: 0.9;
+      }
+
+      .stamp-round {
+        position: absolute;
+        top: -2rem;
+        left: 2rem;
+        width: 130px;
+        height: 130px;
+        border: 3px solid #1e3a8a;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform: rotate(-15deg);
+        opacity: 0.7;
+        z-index: 10;
+      }
+
+      .stamp-round-inner {
+        border: 1px solid #1e3a8a;
+        width: 90%;
+        height: 90%;
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.55rem;
+        font-weight: bold;
+        color: #1e3a8a;
+        text-align: center;
+        line-height: 1.1;
+      }
+
+      .stamp-rect {
+        border: 2px solid #1e3a8a;
+        color: #1e3a8a;
+        padding: 8px 16px;
+        text-align: center;
+        font-family: Arial, sans-serif;
+        font-weight: bold;
+        font-size: 14px;
+        transform: rotate(2deg);
+        opacity: 0.85;
+        display: inline-block;
+        background-color: transparent;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="a4-landscape">
+      <!-- Headers -->
+      <div class="flex justify-between items-start text-sm">
+        <!-- Left Header -->
+        <div class="leading-tight font-bold text-center">
+          <p>DÉPARTEMENT DE VAVOUA</p>
+          <div class="w-10 h-[1px] bg-black mx-auto my-1"></div>
+          <p>COMMUNE DE VAVOUA</p>
+          <p>Code: 433</p>
+        </div>
+
+        <!-- Right Header -->
+        <div class="text-center leading-tight font-bold">
+          <p>RÉPUBLIQUE DE COTE D'IVOIRE</p>
+          <p class="italic font-normal">Union - Discipline - Travail</p>
+        </div>
+      </div>
+
+      <!-- Center Titles -->
+      <div class="text-center mt-6">
+        <h1 class="font-bold text-xl underline underline-offset-4 tracking-wide mb-2">
+          ÉTAT DES DÉCOMPTES DE LA PART PATRONALE
+        </h1>
+        <h2 class="font-bold text-lg underline underline-offset-2 mb-4">BUDGET COMMUNAL</h2>
+
+        <p class="font-bold text-sm mb-2">
+          EXERCICE: 2026 &nbsp;&nbsp;&nbsp;&nbsp; CHAPITRE: 600 &nbsp;&nbsp;&nbsp;&nbsp; ARTICLE:
+          6002 &nbsp;&nbsp;&nbsp;&nbsp; PARAGRAPHE: 6002/2
+        </p>
+
+        <p class="text-sm">État nominatif pour servir au paiement de la somme acquise par :</p>
+        <p class="text-sm font-bold">
+          Les Agents de l'État Civil et population du 1er/01/2026 au 31/01/2026
+        </p>
+      </div>
+
+      <!-- Table -->
+      <table>
+        <thead>
+          <tr>
+            <th rowspan="2" class="w-12">N°</th>
+            <th rowspan="2" class="w-64">NOM ET PRÉNOMS</th>
+            <th rowspan="2" class="w-32">Salaires Brut<br />soumis à<br />cotisation</th>
+            <th colspan="3" class="py-2">DIFFÉRENTS TAUX DE PRÉLÈVEMENT</th>
+            <th rowspan="2" class="w-32 font-bold">Total cotisation<br />à reverser<br />15,45%</th>
+          </tr>
+          <tr>
+            <th class="w-40 font-normal" style="padding: 0">
+              <div class="font-bold border-b border-black py-2 h-full">
+                Prestation familiale<br />5,75%
+              </div>
+              <div class="py-2 h-full">Plafond imposable<br />70 000 F CFA</div>
+            </th>
+            <th class="w-40 font-normal" style="padding: 0">
+              <div class="font-bold border-b border-black py-2 h-full">
+                Accident de travail<br />2%
+              </div>
+              <div class="py-2 h-full">Plafond imposable<br />70 000 F CFA</div>
+            </th>
+            <th class="w-40 font-normal" style="padding: 0">
+              <div class="font-bold border-b border-black py-2 h-full">
+                Régime général de<br />retraite 7,7%
+              </div>
+              <div class="py-2 h-full">Salaire brut<br />imposable</div>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>01</td>
+            <td class="text-left-col font-semibold">DANIEL TRABI</td>
+            <td class="text-right-col">121 147</td>
+            <td class="text-right-col">4 025</td>
+            <td class="text-right-col">1 400</td>
+            <td class="text-right-col">9 328</td>
+            <td class="text-right-col font-bold">14 753</td>
+          </tr>
+          <tr>
+            <td>02</td>
+            <td class="text-left-col font-semibold">KOUASSI N'GUESSAN FRANÇOISE</td>
+            <td class="text-right-col">124 369</td>
+            <td class="text-right-col">4 025</td>
+            <td class="text-right-col">1 400</td>
+            <td class="text-right-col">9 576</td>
+            <td class="text-right-col font-bold">15 101</td>
+          </tr>
+          <tr>
+            <td>03</td>
+            <td class="text-left-col font-semibold">MONTOKAGBAHO BERNADETTE</td>
+            <td class="text-right-col">121 147</td>
+            <td class="text-right-col">4 025</td>
+            <td class="text-right-col">1 400</td>
+            <td class="text-right-col">9 328</td>
+            <td class="text-right-col font-bold">14 753</td>
+          </tr>
+          <tr>
+            <td>04</td>
+            <td class="text-left-col font-semibold">NOGOBALA BAKAYOKO</td>
+            <td class="text-right-col">121 147</td>
+            <td class="text-right-col">4 025</td>
+            <td class="text-right-col">1 400</td>
+            <td class="text-right-col">9 328</td>
+            <td class="text-right-col font-bold">14 753</td>
+          </tr>
+          <tr>
+            <td>05</td>
+            <td class="text-left-col font-semibold">YAO KOFFI GERMAIN</td>
+            <td class="text-right-col">121 147</td>
+            <td class="text-right-col">4 025</td>
+            <td class="text-right-col">1 400</td>
+            <td class="text-right-col">9 328</td>
+            <td class="text-right-col font-bold">14 753</td>
+          </tr>
+          <tr>
+            <td>06</td>
+            <td class="text-left-col font-semibold">KONE KOROTOUM</td>
+            <td class="text-right-col">102 360</td>
+            <td class="text-right-col">4 025</td>
+            <td class="text-right-col">1 400</td>
+            <td class="text-right-col">7 882</td>
+            <td class="text-right-col font-bold">13 307</td>
+          </tr>
+          <tr>
+            <td>07</td>
+            <td class="text-left-col font-semibold">KALOU DIAGONE</td>
+            <td class="text-right-col">90 209</td>
+            <td class="text-right-col">4 025</td>
+            <td class="text-right-col">1 400</td>
+            <td class="text-right-col">6 946</td>
+            <td class="text-right-col font-bold">12 371</td>
+          </tr>
+          <tr class="font-bold bg-gray-50 text-sm">
+            <td colspan="6" class="text-center py-3">TOTAL</td>
+            <td class="text-right-col py-3">99 791</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Footer Text Section -->
+      <div class="mt-6 text-sm flex flex-col gap-2">
+        <div class="flex">
+          <p>Arrêté le présent état à la somme de :</p>
+          <p class="font-bold underline ml-2">
+            QUATRE-VINGT-DIX-NEUF MILLE SEPT CENT QUATRE-VINGT ONZE FRANCS CFA
+          </p>
+        </div>
+        <p>Payé et enregistré sous le n°07/2026</p>
+        <p>Pour acquis global</p>
+      </div>
+
+      <!-- Signatures Grid -->
+      <div class="mt-8 grid grid-cols-3 gap-4 text-sm relative h-40">
+        <!-- Left / Center Stamp Zone -->
+        <div class="relative">
+          <p class="font-bold underline">Certifié le service fait</p>
+          <div class="stamp-round">
+            <div class="stamp-round-inner">
+              <span class="mt-2">REPUBLIQUE DE<br />CÔTE D'IVOIRE</span>
+              <span class="text-3xl my-1 opacity-80">🐘</span>
+              <span class="mb-2">* MAIRIE DE VAVOUA *</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Middle Zone -->
+        <div>
+          <p class="font-bold underline text-center">Vu, vérifié et liquidé</p>
+        </div>
+
+        <!-- Right Zone -->
+        <div class="text-center relative">
+          <p>À Vavoua, le 13/01/2026</p>
+          <p class="font-bold mt-2">P/Le Maire & P.D.</p>
+
+          <div class="mt-6 relative inline-block">
+            <!-- Rectangular Blue Stamp -->
+            <div class="stamp-rect">
+              OUATTARA KADIDJATOU<br />
+              Epse OUATTARA<br />
+              4<sup>ème</sup> Adjoint
+            </div>
+
+            <!-- Overlapping Signature -->
+            <div class="cursive-signature">Kady</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CamScanner Watermark -->
+      <div class="absolute bottom-4 right-8 text-gray-400 font-sans text-xs">
+        Scanné avec CamScanner
+      </div>
+    </div>
+  </body>
+</html>

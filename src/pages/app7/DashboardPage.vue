@@ -1,5 +1,5 @@
 <template>
-  <q-page class="q-pa-md">
+  <q-page class="dashboard-page q-pa-md">
     <PageHeader
       title="Gestion des Employés"
       subtitle="Tableau de bord du personnel"
@@ -8,65 +8,35 @@
 
     <!-- Statistiques principales -->
     <div class="row q-col-gutter-md q-mb-md">
-      <div class="col-12 col-sm-6 col-md-3">
-        <q-card class="stat-card bg-primary text-white">
-          <q-card-section class="q-pa-md">
+      <div class="col-12 col-sm-6 col-md-3" v-for="(stat, index) in statsCards" :key="index">
+        <q-card
+          class="stat-card hover-lift"
+          :class="`stat-card-${index}`"
+          :style="{
+            animationDelay: `${index * 0.1}s`,
+            borderLeft: `4px solid var(--q-${stat.color})`,
+          }"
+        >
+          <q-card-section class="stat-card-content">
             <div class="row items-center no-wrap">
               <div class="col">
-                <div class="text-h4 text-weight-bold">{{ stats.totalEmployes }}</div>
-                <div class="text-body2 q-mt-xs opacity-80">Agents actifs</div>
+                <div class="stat-value text-grey-8">{{ stat.value }}</div>
+                <div class="stat-label text-grey-6">{{ stat.label }}</div>
               </div>
               <div class="col-auto">
-                <q-icon name="people" size="48px" class="opacity-60" />
-              </div>
-            </div>
-          </q-card-section>
-        </q-card>
-      </div>
-      <div class="col-12 col-sm-6 col-md-3">
-        <q-card class="stat-card bg-teal text-white">
-          <q-card-section class="q-pa-md">
-            <div class="row items-center no-wrap">
-              <div class="col">
-                <div class="text-h4 text-weight-bold">
-                  {{ formatMontant(stats.masseSalariale) }}
+                <div class="stat-icon-wrapper" :class="`bg-${stat.color}-1`">
+                  <q-icon :name="stat.icon" class="stat-icon" :color="stat.color" />
                 </div>
-                <div class="text-body2 q-mt-xs opacity-80">Masse salariale mensuelle</div>
-              </div>
-              <div class="col-auto">
-                <q-icon name="payments" size="48px" class="opacity-60" />
               </div>
             </div>
-          </q-card-section>
-        </q-card>
-      </div>
-      <div class="col-12 col-sm-6 col-md-3">
-        <q-card class="stat-card bg-orange text-white">
-          <q-card-section class="q-pa-md">
-            <div class="row items-center no-wrap">
-              <div class="col">
-                <div class="text-h4 text-weight-bold">{{ stats.congesEnAttente }}</div>
-                <div class="text-body2 q-mt-xs opacity-80">Congés en attente</div>
-              </div>
-              <div class="col-auto">
-                <q-icon name="beach_access" size="48px" class="opacity-60" />
-              </div>
-            </div>
-          </q-card-section>
-        </q-card>
-      </div>
-      <div class="col-12 col-sm-6 col-md-3">
-        <q-card class="stat-card bg-indigo text-white">
-          <q-card-section class="q-pa-md">
-            <div class="row items-center no-wrap">
-              <div class="col">
-                <div class="text-h4 text-weight-bold">{{ stats.missionsMois }}</div>
-                <div class="text-body2 q-mt-xs opacity-80">Missions ce mois</div>
-              </div>
-              <div class="col-auto">
-                <q-icon name="flight_takeoff" size="48px" class="opacity-60" />
-              </div>
-            </div>
+
+            <!-- Indicateur de progression -->
+            <q-linear-progress
+              :value="stat.progress || 1"
+              :color="stat.color"
+              class="stat-progress q-mt-md"
+              :class="{ 'pulse-animation': stat.progress < 1 }"
+            />
           </q-card-section>
         </q-card>
       </div>
@@ -197,6 +167,38 @@ const stats = ref({
   paie: { nbFiches: 0, nbPayes: 0, totalNet: 0 },
 });
 
+// Cartes de statistiques avec animations
+const statsCards = computed(() => [
+  {
+    value: stats.value.totalEmployes,
+    label: 'Agents actifs',
+    icon: 'people',
+    color: 'primary',
+    progress: 1,
+  },
+  {
+    value: formatMontant(stats.value.masseSalariale),
+    label: 'Masse salariale',
+    icon: 'payments',
+    color: 'teal',
+    progress: 0.9,
+  },
+  {
+    value: stats.value.congesEnAttente,
+    label: 'Congés en attente',
+    icon: 'beach_access',
+    color: 'orange',
+    progress: stats.value.congesEnAttente > 0 ? 0.5 : 1,
+  },
+  {
+    value: stats.value.missionsMois,
+    label: 'Missions ce mois',
+    icon: 'flight_takeoff',
+    color: 'indigo',
+    progress: 0.8,
+  },
+]);
+
 const quickLinks = [
   { to: '/app7/employes', icon: 'people', label: 'Agents', color: 'primary' },
   { to: '/app7/salaires', icon: 'payments', label: 'Salaires', color: 'teal' },
@@ -267,11 +269,101 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.stat-card {
-  border-radius: 12px;
+// Page principale
+.dashboard-page {
+  max-width: 1400px;
+  margin: 0 auto;
 }
+
 .main-card {
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  animation: fadeIn 0.6s ease-out both;
+  animation-delay: 0.4s;
+}
+
+// Cartes de statistiques
+.stat-card {
+  height: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  animation: slideInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+
+  &:hover {
+    .stat-icon {
+      transform: scale(1.1) rotate(5deg);
+    }
+  }
+}
+
+.stat-card-content {
+  position: relative;
+  overflow: hidden;
+  background: white;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  opacity: 0.95;
+  margin-top: 4px;
+}
+
+.stat-icon-wrapper {
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.stat-icon {
+  font-size: 48px;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.stat-progress {
+  border-radius: 4px;
+  height: 4px;
+}
+
+.pulse-animation {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+// Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
 }
 </style>
