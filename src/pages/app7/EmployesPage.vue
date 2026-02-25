@@ -213,21 +213,6 @@
                 />
               </div>
             </div>
-            <div class="row q-col-gutter-sm q-mt-xs">
-              <div class="col-12 col-md-4">
-                <q-select
-                  v-model="form.departement"
-                  :options="departementsOptions"
-                  label="Département"
-                  outlined
-                  dense
-                  use-input
-                  input-debounce="0"
-                  new-value-mode="add-unique"
-                />
-              </div>
-            </div>
-
             <q-separator class="q-my-sm" />
 
             <!-- Salaire -->
@@ -359,20 +344,7 @@ const statsCards = computed(() => {
 });
 
 const servicesOptions = ref<string[]>([]);
-const departementsOptions = ref<string[]>([
-  'Direction Générale',
-  'Administration Financière',
-  'Services Techniques',
-  'Services Socio-Culturels',
-  'Ressources Humaines',
-]);
-
-const typeEmployeOptions = [
-  'Salariés (6000/2)',
-  'Contractuels (60012/2)',
-  "Agents de l'État (6002/2)",
-  'Maire et Adjoints (6010/2)',
-];
+const typeEmployeOptions = ['Salariés', 'Contractuels', "Agents de l'État", 'Maire et Adjoints'];
 
 const defaultForm = () => ({
   matricule: '',
@@ -386,7 +358,6 @@ const defaultForm = () => ({
   grade: '',
   categorie: '',
   service: '',
-  departement: '',
   salaireBase: 0,
   indemniteLogement: 0,
   indemniteTransport: 0,
@@ -424,13 +395,6 @@ const columns = [
   { name: 'poste', label: 'Poste', field: 'poste', align: 'left' as const, sortable: true },
   { name: 'service', label: 'Service', field: 'service', align: 'left' as const, sortable: true },
   {
-    name: 'departement',
-    label: 'Département',
-    field: 'departement',
-    align: 'left' as const,
-    sortable: true,
-  },
-  {
     name: 'salaireBase',
     label: 'Salaire de base',
     field: 'salaireBase',
@@ -460,8 +424,7 @@ const filteredEmployes = computed(() => {
         e.nom.toLowerCase().includes(s) ||
         e.prenom.toLowerCase().includes(s) ||
         e.poste.toLowerCase().includes(s) ||
-        e.service.toLowerCase().includes(s) ||
-        (e.departement && e.departement.toLowerCase().includes(s)),
+        e.service.toLowerCase().includes(s),
     );
   }
   return result;
@@ -508,7 +471,6 @@ function editEmploye(row: Employe) {
     grade: row.grade || '',
     categorie: row.categorie || '',
     service: row.service,
-    departement: row.departement || '',
     salaireBase: row.salaireBase,
     indemniteLogement: row.indemniteLogement || 0,
     indemniteTransport: row.indemniteTransport || 0,
@@ -536,7 +498,6 @@ async function saveEmploye() {
     grade: form.value.grade || undefined,
     categorie: form.value.categorie || undefined,
     service: form.value.service,
-    departement: form.value.departement || undefined,
     salaireBase: form.value.salaireBase,
     indemniteLogement: form.value.indemniteLogement,
     indemniteTransport: form.value.indemniteTransport,

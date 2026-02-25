@@ -1,377 +1,421 @@
 <template>
   <q-page class="parametrage-page q-pa-md">
-    <PageHeader
-      title="Paramétrage"
-      subtitle="Configuration générale de l'application"
-      icon="settings"
-    />
-
-    <!-- Gestion des Exercices Budgétaires -->
-    <q-card class="main-card q-mt-md">
-      <q-card-section>
-        <div class="row items-center justify-between q-mb-md">
-          <div class="text-h6">
-            <q-icon name="calendar_today" class="q-mr-sm" />
-            Gestion des Exercices Budgétaires
+    <!-- Password Gate -->
+    <div v-if="!isUnlocked" class="flex flex-center" style="min-height: 60vh">
+      <q-card style="max-width: 420px; width: 100%" class="q-pa-lg">
+        <q-card-section class="text-center">
+          <q-icon name="lock" size="48px" color="warning" class="q-mb-md" />
+          <div class="text-h6 q-mb-sm">Accès protégé</div>
+          <div class="text-caption text-grey-7 q-mb-lg">
+            Veuillez entrer le mot de passe administrateur pour accéder à cette page.
           </div>
-          <q-btn color="primary" icon="add" label="Nouvel Exercice" @click="openExerciceDialog()" />
-        </div>
-
-        <q-table
-          :rows="exercices"
-          :columns="exerciceColumns"
-          row-key="id"
-          :loading="loading"
-          flat
-          bordered
-          :pagination="{ rowsPerPage: 10 }"
-        >
-          <template v-slot:body-cell-annee="props">
-            <q-td :props="props">
-              <strong>{{ props.row.annee }}</strong>
-            </q-td>
-          </template>
-
-          <template v-slot:body-cell-statut="props">
-            <q-td :props="props">
-              <q-chip
-                :color="props.row.statut === 'ouvert' ? 'positive' : 'orange'"
-                text-color="white"
-                size="sm"
-                :icon="props.row.statut === 'ouvert' ? 'lock_open' : 'lock'"
-              >
-                {{ props.row.statut === 'ouvert' ? 'Ouvert' : 'Verrouillé' }}
-              </q-chip>
-            </q-td>
-          </template>
-
-          <template v-slot:body-cell-dateVerrouillage="props">
-            <q-td :props="props">
-              {{ props.row.dateVerrouillage ? formatDate(props.row.dateVerrouillage) : '-' }}
-            </q-td>
-          </template>
-
-          <template v-slot:body-cell-actions="props">
-            <q-td :props="props" class="q-gutter-xs">
-              <q-btn
-                v-if="props.row.statut === 'ouvert'"
-                flat
-                round
-                dense
-                color="orange"
-                icon="lock"
-                @click="confirmVerrouiller(props.row)"
-              >
-                <q-tooltip>Verrouiller cet exercice</q-tooltip>
-              </q-btn>
-              <q-btn
-                v-else
-                flat
-                round
-                dense
-                color="positive"
-                icon="lock_open"
-                @click="confirmOuvrir(props.row)"
-              >
-                <q-tooltip>Rouvrir cet exercice</q-tooltip>
-              </q-btn>
-              <q-btn
-                flat
-                round
-                dense
-                color="negative"
-                icon="delete"
-                @click="confirmDeleteExercice(props.row)"
-              >
-                <q-tooltip>Supprimer</q-tooltip>
-              </q-btn>
-            </q-td>
-          </template>
-        </q-table>
-      </q-card-section>
-    </q-card>
-
-    <!-- Informations Mairie -->
-    <q-card class="main-card q-mt-md">
-      <q-card-section>
-        <div class="row items-center justify-between q-mb-md">
-          <div class="text-h6">
-            <q-icon name="business" class="q-mr-sm" />
-            Informations de la Mairie
-          </div>
-        </div>
-
-        <div v-if="mairie" class="row q-col-gutter-md">
-          <div class="col-12 col-md-6">
-            <q-item>
-              <q-item-section avatar>
-                <q-icon name="business" color="primary" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label caption>Nom</q-item-label>
-                <q-item-label class="text-weight-bold text-body1">{{ mairie.nom }}</q-item-label>
-              </q-item-section>
-            </q-item>
-          </div>
-          <div class="col-12 col-md-3">
-            <q-item>
-              <q-item-section avatar>
-                <q-icon name="tag" color="secondary" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label caption>Code</q-item-label>
-                <q-item-label class="text-weight-bold text-body1">{{ mairie.code }}</q-item-label>
-              </q-item-section>
-            </q-item>
-          </div>
-          <div class="col-12 col-md-3">
-            <q-item>
-              <q-item-section avatar>
-                <q-icon name="location_city" color="orange" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label caption>Ville</q-item-label>
-                <q-item-label class="text-weight-bold text-body1">{{ mairie.ville }}</q-item-label>
-              </q-item-section>
-            </q-item>
-          </div>
-          <div class="col-12 col-md-4">
-            <q-item>
-              <q-item-section avatar>
-                <q-icon name="map" color="teal" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label caption>Département</q-item-label>
-                <q-item-label class="text-weight-bold text-body1">{{
-                  mairie.departement || '-'
-                }}</q-item-label>
-              </q-item-section>
-            </q-item>
-          </div>
-          <div class="col-12 col-md-4">
-            <q-item>
-              <q-item-section avatar>
-                <q-icon name="public" color="deep-purple" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label caption>Région</q-item-label>
-                <q-item-label class="text-weight-bold text-body1">{{
-                  mairie.region || '-'
-                }}</q-item-label>
-              </q-item-section>
-            </q-item>
-          </div>
-          <div class="col-12 col-md-4">
-            <q-item>
-              <q-item-section avatar>
-                <q-icon name="person" color="primary" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label caption>Maire</q-item-label>
-                <q-item-label class="text-weight-bold text-body1">{{
-                  mairie.maire || '-'
-                }}</q-item-label>
-              </q-item-section>
-            </q-item>
-          </div>
-          <div class="col-12 col-md-4">
-            <q-item>
-              <q-item-section avatar>
-                <q-icon name="phone" color="green" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label caption>Téléphone</q-item-label>
-                <q-item-label class="text-weight-bold text-body1">{{
-                  mairie.telephone || '-'
-                }}</q-item-label>
-              </q-item-section>
-            </q-item>
-          </div>
-          <div class="col-12 col-md-4">
-            <q-item>
-              <q-item-section avatar>
-                <q-icon name="email" color="blue" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label caption>Email</q-item-label>
-                <q-item-label class="text-weight-bold text-body1">{{
-                  mairie.email || '-'
-                }}</q-item-label>
-              </q-item-section>
-            </q-item>
-          </div>
-          <div class="col-12 col-md-4">
-            <q-item>
-              <q-item-section avatar>
-                <q-icon name="home" color="brown" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label caption>Adresse</q-item-label>
-                <q-item-label class="text-weight-bold text-body1">{{
-                  mairie.adresse || '-'
-                }}</q-item-label>
-              </q-item-section>
-            </q-item>
-          </div>
-        </div>
-        <div v-else class="text-center text-grey-5 q-pa-lg">
-          <q-icon name="info" size="32px" class="q-mb-sm" />
-          <div>Aucune mairie configurée. Veuillez initialiser la base de données.</div>
-        </div>
-      </q-card-section>
-    </q-card>
-
-    <!-- Paramètres de Paie -->
-    <q-card class="main-card q-mt-md">
-      <q-card-section>
-        <div class="row items-center justify-between q-mb-md">
-          <div class="text-h6">
-            <q-icon name="payments" class="q-mr-sm" />
-            Paramètres de Paie (Taux & Cotisations)
-          </div>
-          <q-btn
-            color="primary"
-            icon="save"
-            label="Enregistrer les paramètres"
-            @click="saveParametresPaie"
-            :loading="savingPaie"
-          />
-        </div>
-
-        <div v-if="parametresPaie" class="row q-col-gutter-md">
-          <div class="col-12 col-md-4">
+          <q-form @submit="checkPassword">
             <q-input
-              v-model.number="parametresPaie.tauxIndemniteResidence"
-              label="Taux Indemnité Résidence"
-              type="number"
-              step="0.01"
+              v-model="adminPassword"
+              type="password"
+              label="Mot de passe administrateur"
               outlined
               dense
-              suffix="%"
+              :error="passwordError"
+              error-message="Mot de passe incorrect"
+              @keyup.enter="checkPassword"
+              class="q-mb-md"
             />
-          </div>
-          <div class="col-12 col-md-4">
-            <q-input
-              v-model.number="parametresPaie.tauxIts"
-              label="Taux ITS"
-              type="number"
-              step="0.01"
-              outlined
-              dense
-              suffix="%"
+            <q-btn
+              type="submit"
+              label="Déverrouiller"
+              color="primary"
+              unelevated
+              class="full-width"
+              icon="lock_open"
             />
-          </div>
-          <div class="col-12 col-md-4">
-            <q-input
-              v-model.number="parametresPaie.tauxFns"
-              label="Taux FNS"
-              type="number"
-              step="0.01"
-              outlined
-              dense
-              suffix="%"
-            />
-          </div>
-          <div class="col-12 col-md-3">
-            <q-input
-              v-model.number="parametresPaie.tauxCnpsEmploye"
-              label="Part Salariale CNPS"
-              type="number"
-              step="0.01"
-              outlined
-              dense
-              suffix="%"
-            />
-          </div>
-          <div class="col-12 col-md-3">
-            <q-input
-              v-model.number="parametresPaie.tauxCnpsPatronalPrestationFamiliale"
-              label="Patronal - Prest. Familiale"
-              type="number"
-              step="0.01"
-              outlined
-              dense
-              suffix="%"
-            />
-          </div>
-          <div class="col-12 col-md-3">
-            <q-input
-              v-model.number="parametresPaie.tauxCnpsPatronalAccidentTravail"
-              label="Patronal - Accident Travail"
-              type="number"
-              step="0.01"
-              outlined
-              dense
-              suffix="%"
-            />
-          </div>
-          <div class="col-12 col-md-3">
-            <q-input
-              v-model.number="parametresPaie.tauxCnpsPatronalRetraite"
-              label="Patronal - Retraite"
-              type="number"
-              step="0.01"
-              outlined
-              dense
-              suffix="%"
-            />
-          </div>
-        </div>
-        <div v-else class="text-center text-grey-5 q-pa-lg">
-          <q-spinner color="primary" size="2em" />
-        </div>
-      </q-card-section>
-    </q-card>
-
-    <!-- Dialog création exercice -->
-    <q-dialog v-model="showExerciceDialog" persistent>
-      <q-card style="min-width: 400px">
-        <q-card-section class="row items-center q-pb-none">
-          <div class="text-h6">Nouvel Exercice Budgétaire</div>
-          <q-space />
-          <q-btn icon="close" flat round dense v-close-popup />
-        </q-card-section>
-
-        <q-card-section>
-          <q-form @submit="saveExercice" class="q-gutter-md">
-            <q-input
-              v-model.number="exerciceForm.annee"
-              label="Année *"
-              outlined
-              dense
-              type="number"
-              :rules="[
-                (val) => !!val || 'Année requise',
-                (val) => (val >= 2020 && val <= 2050) || 'Année entre 2020 et 2050',
-                (val) => !exerciceExists(val) || 'Cet exercice existe déjà',
-              ]"
-            />
-
-            <q-input
-              v-model="exerciceForm.libelle"
-              label="Libellé (optionnel)"
-              outlined
-              dense
-              :placeholder="`Exercice budgétaire ${exerciceForm.annee}`"
-            />
-
-            <q-input
-              v-model="exerciceForm.observations"
-              label="Observations"
-              outlined
-              dense
-              type="textarea"
-              rows="2"
-            />
-
-            <div class="row justify-end q-gutter-sm q-mt-md">
-              <q-btn label="Annuler" flat color="grey-7" v-close-popup />
-              <q-btn label="Créer" type="submit" color="primary" unelevated />
-            </div>
           </q-form>
         </q-card-section>
       </q-card>
-    </q-dialog>
+    </div>
+
+    <!-- Actual content -->
+    <template v-if="isUnlocked">
+      <PageHeader
+        title="Paramétrage"
+        subtitle="Configuration générale de l'application"
+        icon="settings"
+      />
+
+      <!-- Gestion des Exercices Budgétaires -->
+      <q-card class="main-card q-mt-md">
+        <q-card-section>
+          <div class="row items-center justify-between q-mb-md">
+            <div class="text-h6">
+              <q-icon name="calendar_today" class="q-mr-sm" />
+              Gestion des Exercices Budgétaires
+            </div>
+            <q-btn
+              color="primary"
+              icon="add"
+              label="Nouvel Exercice"
+              @click="openExerciceDialog()"
+            />
+          </div>
+
+          <q-table
+            :rows="exercices"
+            :columns="exerciceColumns"
+            row-key="id"
+            :loading="loading"
+            flat
+            bordered
+            :pagination="{ rowsPerPage: 10 }"
+          >
+            <template v-slot:body-cell-annee="props">
+              <q-td :props="props">
+                <strong>{{ props.row.annee }}</strong>
+              </q-td>
+            </template>
+
+            <template v-slot:body-cell-statut="props">
+              <q-td :props="props">
+                <q-chip
+                  :color="props.row.statut === 'ouvert' ? 'positive' : 'orange'"
+                  text-color="white"
+                  size="sm"
+                  :icon="props.row.statut === 'ouvert' ? 'lock_open' : 'lock'"
+                >
+                  {{ props.row.statut === 'ouvert' ? 'Ouvert' : 'Verrouillé' }}
+                </q-chip>
+              </q-td>
+            </template>
+
+            <template v-slot:body-cell-dateVerrouillage="props">
+              <q-td :props="props">
+                {{ props.row.dateVerrouillage ? formatDate(props.row.dateVerrouillage) : '-' }}
+              </q-td>
+            </template>
+
+            <template v-slot:body-cell-actions="props">
+              <q-td :props="props" class="q-gutter-xs">
+                <q-btn
+                  v-if="props.row.statut === 'ouvert'"
+                  flat
+                  round
+                  dense
+                  color="orange"
+                  icon="lock"
+                  @click="confirmVerrouiller(props.row)"
+                >
+                  <q-tooltip>Verrouiller cet exercice</q-tooltip>
+                </q-btn>
+                <q-btn
+                  v-else
+                  flat
+                  round
+                  dense
+                  color="positive"
+                  icon="lock_open"
+                  @click="confirmOuvrir(props.row)"
+                >
+                  <q-tooltip>Rouvrir cet exercice</q-tooltip>
+                </q-btn>
+                <q-btn
+                  flat
+                  round
+                  dense
+                  color="negative"
+                  icon="delete"
+                  @click="confirmDeleteExercice(props.row)"
+                >
+                  <q-tooltip>Supprimer</q-tooltip>
+                </q-btn>
+              </q-td>
+            </template>
+          </q-table>
+        </q-card-section>
+      </q-card>
+
+      <!-- Informations Mairie -->
+      <q-card class="main-card q-mt-md">
+        <q-card-section>
+          <div class="row items-center justify-between q-mb-md">
+            <div class="text-h6">
+              <q-icon name="business" class="q-mr-sm" />
+              Informations de la Mairie
+            </div>
+          </div>
+
+          <div v-if="mairie" class="row q-col-gutter-md">
+            <div class="col-12 col-md-6">
+              <q-item>
+                <q-item-section avatar>
+                  <q-icon name="business" color="primary" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label caption>Nom</q-item-label>
+                  <q-item-label class="text-weight-bold text-body1">{{ mairie.nom }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </div>
+            <div class="col-12 col-md-3">
+              <q-item>
+                <q-item-section avatar>
+                  <q-icon name="tag" color="secondary" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label caption>Code</q-item-label>
+                  <q-item-label class="text-weight-bold text-body1">{{ mairie.code }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </div>
+            <div class="col-12 col-md-3">
+              <q-item>
+                <q-item-section avatar>
+                  <q-icon name="location_city" color="orange" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label caption>Ville</q-item-label>
+                  <q-item-label class="text-weight-bold text-body1">{{
+                    mairie.ville
+                  }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </div>
+            <div class="col-12 col-md-4">
+              <q-item>
+                <q-item-section avatar>
+                  <q-icon name="map" color="teal" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label caption>Département</q-item-label>
+                  <q-item-label class="text-weight-bold text-body1">{{
+                    mairie.departement || '-'
+                  }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </div>
+            <div class="col-12 col-md-4">
+              <q-item>
+                <q-item-section avatar>
+                  <q-icon name="public" color="deep-purple" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label caption>Région</q-item-label>
+                  <q-item-label class="text-weight-bold text-body1">{{
+                    mairie.region || '-'
+                  }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </div>
+            <div class="col-12 col-md-4">
+              <q-item>
+                <q-item-section avatar>
+                  <q-icon name="person" color="primary" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label caption>Maire</q-item-label>
+                  <q-item-label class="text-weight-bold text-body1">{{
+                    mairie.maire || '-'
+                  }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </div>
+            <div class="col-12 col-md-4">
+              <q-item>
+                <q-item-section avatar>
+                  <q-icon name="phone" color="green" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label caption>Téléphone</q-item-label>
+                  <q-item-label class="text-weight-bold text-body1">{{
+                    mairie.telephone || '-'
+                  }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </div>
+            <div class="col-12 col-md-4">
+              <q-item>
+                <q-item-section avatar>
+                  <q-icon name="email" color="blue" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label caption>Email</q-item-label>
+                  <q-item-label class="text-weight-bold text-body1">{{
+                    mairie.email || '-'
+                  }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </div>
+            <div class="col-12 col-md-4">
+              <q-item>
+                <q-item-section avatar>
+                  <q-icon name="home" color="brown" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label caption>Adresse</q-item-label>
+                  <q-item-label class="text-weight-bold text-body1">{{
+                    mairie.adresse || '-'
+                  }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </div>
+          </div>
+          <div v-else class="text-center text-grey-5 q-pa-lg">
+            <q-icon name="info" size="32px" class="q-mb-sm" />
+            <div>Aucune mairie configurée. Veuillez initialiser la base de données.</div>
+          </div>
+        </q-card-section>
+      </q-card>
+
+      <!-- Paramètres de Paie -->
+      <q-card class="main-card q-mt-md">
+        <q-card-section>
+          <div class="row items-center justify-between q-mb-md">
+            <div class="text-h6">
+              <q-icon name="payments" class="q-mr-sm" />
+              Paramètres de Paie (Taux & Cotisations)
+            </div>
+            <q-btn
+              color="primary"
+              icon="save"
+              label="Enregistrer les paramètres"
+              @click="saveParametresPaie"
+              :loading="savingPaie"
+            />
+          </div>
+
+          <div v-if="parametresPaie" class="row q-col-gutter-md">
+            <div class="col-12 col-md-4">
+              <q-input
+                v-model.number="parametresPaie.tauxIndemniteResidence"
+                label="Taux Indemnité Résidence"
+                type="number"
+                step="0.01"
+                outlined
+                dense
+                suffix="%"
+              />
+            </div>
+            <div class="col-12 col-md-4">
+              <q-input
+                v-model.number="parametresPaie.tauxIts"
+                label="Taux ITS"
+                type="number"
+                step="0.01"
+                outlined
+                dense
+                suffix="%"
+              />
+            </div>
+            <div class="col-12 col-md-4">
+              <q-input
+                v-model.number="parametresPaie.tauxFns"
+                label="Taux FNS"
+                type="number"
+                step="0.01"
+                outlined
+                dense
+                suffix="%"
+              />
+            </div>
+            <div class="col-12 col-md-3">
+              <q-input
+                v-model.number="parametresPaie.tauxCnpsEmploye"
+                label="Part Salariale CNPS"
+                type="number"
+                step="0.01"
+                outlined
+                dense
+                suffix="%"
+              />
+            </div>
+            <div class="col-12 col-md-3">
+              <q-input
+                v-model.number="parametresPaie.tauxCnpsPatronalPrestationFamiliale"
+                label="Patronal - Prest. Familiale"
+                type="number"
+                step="0.01"
+                outlined
+                dense
+                suffix="%"
+              />
+            </div>
+            <div class="col-12 col-md-3">
+              <q-input
+                v-model.number="parametresPaie.tauxCnpsPatronalAccidentTravail"
+                label="Patronal - Accident Travail"
+                type="number"
+                step="0.01"
+                outlined
+                dense
+                suffix="%"
+              />
+            </div>
+            <div class="col-12 col-md-3">
+              <q-input
+                v-model.number="parametresPaie.tauxCnpsPatronalRetraite"
+                label="Patronal - Retraite"
+                type="number"
+                step="0.01"
+                outlined
+                dense
+                suffix="%"
+              />
+            </div>
+          </div>
+          <div v-else class="text-center text-grey-5 q-pa-lg">
+            <q-spinner color="primary" size="2em" />
+          </div>
+        </q-card-section>
+      </q-card>
+
+      <!-- Dialog création exercice -->
+      <q-dialog v-model="showExerciceDialog" persistent>
+        <q-card style="min-width: 400px">
+          <q-card-section class="row items-center q-pb-none">
+            <div class="text-h6">Nouvel Exercice Budgétaire</div>
+            <q-space />
+            <q-btn icon="close" flat round dense v-close-popup />
+          </q-card-section>
+
+          <q-card-section>
+            <q-form @submit="saveExercice" class="q-gutter-md">
+              <q-input
+                v-model.number="exerciceForm.annee"
+                label="Année *"
+                outlined
+                dense
+                type="number"
+                :rules="[
+                  (val) => !!val || 'Année requise',
+                  (val) => (val >= 2020 && val <= 2050) || 'Année entre 2020 et 2050',
+                  (val) => !exerciceExists(val) || 'Cet exercice existe déjà',
+                ]"
+              />
+
+              <q-input
+                v-model="exerciceForm.libelle"
+                label="Libellé (optionnel)"
+                outlined
+                dense
+                :placeholder="`Exercice budgétaire ${exerciceForm.annee}`"
+              />
+
+              <q-input
+                v-model="exerciceForm.observations"
+                label="Observations"
+                outlined
+                dense
+                type="textarea"
+                rows="2"
+              />
+
+              <div class="row justify-end q-gutter-sm q-mt-md">
+                <q-btn label="Annuler" flat color="grey-7" v-close-popup />
+                <q-btn label="Créer" type="submit" color="primary" unelevated />
+              </div>
+            </q-form>
+          </q-card-section>
+        </q-card>
+      </q-dialog>
+    </template>
   </q-page>
 </template>
 
@@ -388,6 +432,27 @@ import {
 import PageHeader from 'src/components/PageHeader.vue';
 
 const $q = useQuasar();
+
+// Password protection
+const ADMIN_PAGE_PASSWORD = 'Sigobc@2026!';
+const isUnlocked = ref(false);
+const adminPassword = ref('');
+const passwordError = ref(false);
+
+function checkPassword() {
+  if (adminPassword.value === ADMIN_PAGE_PASSWORD) {
+    isUnlocked.value = true;
+    passwordError.value = false;
+    sessionStorage.setItem('parametrage_unlocked', 'true');
+  } else {
+    passwordError.value = true;
+  }
+}
+
+// Check if already unlocked in this session
+if (sessionStorage.getItem('parametrage_unlocked') === 'true') {
+  isUnlocked.value = true;
+}
 
 const exercices = ref<Exercice[]>([]);
 const mairie = ref<Mairie | null>(null);

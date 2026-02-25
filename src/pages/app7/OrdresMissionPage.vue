@@ -44,13 +44,13 @@
 
     <q-card class="main-card">
       <q-card-section>
-        <div class="row items-center justify-between q-mb-md">
-          <div class="col-12 col-md-4">
+        <div class="row q-col-gutter-sm items-center q-mb-md">
+          <div class="col-12 col-md-3">
             <q-input v-model="filter" placeholder="Rechercher..." outlined dense clearable>
               <template v-slot:prepend><q-icon name="search" /></template>
             </q-input>
           </div>
-          <div class="col-12 col-md-auto q-mt-sm q-mt-md-none q-gutter-x-sm">
+          <div class="col-12 col-md-auto q-gutter-x-sm">
             <q-select
               v-model="filterStatut"
               :options="statutOptions"
@@ -62,6 +62,8 @@
               clearable
               style="min-width: 160px"
             />
+          </div>
+          <div class="col-12 col-md-auto q-gutter-x-sm">
             <q-btn color="primary" icon="add" label="Nouvel ordre" unelevated @click="openAdd" />
           </div>
         </div>

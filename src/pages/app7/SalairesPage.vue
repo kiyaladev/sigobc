@@ -9,7 +9,7 @@
     <q-card class="main-card q-mb-md">
       <q-card-section>
         <div class="row q-col-gutter-sm items-center q-mb-md">
-          <div class="col-12 col-md-2">
+          <div class="col-12 col-md-1">
             <q-select
               v-model="filterMois"
               :options="moisOptions"
@@ -18,12 +18,13 @@
               dense
               emit-value
               map-options
+              clearable
             />
           </div>
-          <div class="col-12 col-md-2">
+          <div class="col-12 col-md-1">
             <q-input v-model.number="filterAnnee" label="Année" outlined dense type="number" />
           </div>
-          <div class="col-12 col-md-3">
+          <div class="col-12 col-md-1">
             <q-select
               v-model="filterStatut"
               :options="statutOptions"
@@ -35,10 +36,9 @@
               clearable
             />
           </div>
-          <div class="col-12 col-md-auto q-gutter-sm row">
+          <div class="col-12 col-md-6 q-gutter-sm row">
             <q-btn
-              v-if="false"
-              icon="add"
+              icon="bolt"
               label="Générer bulletins"
               color="primary"
               unelevated
@@ -404,16 +404,17 @@
 
     <!-- Dialog génération en masse -->
     <q-dialog v-model="showGenerateDialog" persistent>
-      <q-card style="min-width: 450px">
+      <q-card style="min-width: 500px">
         <q-card-section class="row items-center q-pb-none">
+          <q-icon name="bolt" color="primary" size="sm" class="q-mr-sm" />
           <div class="text-h6">Générer les bulletins du mois</div>
           <q-space />
           <q-btn icon="close" flat round dense v-close-popup />
         </q-card-section>
         <q-card-section>
           <p class="text-body2 text-grey-7">
-            Cette action génère un bulletin de paie pour chaque agent actif, en reprenant les
-            éléments de rémunération de leur fiche.
+            Génère un bulletin de paie pour chaque agent actif correspondant aux critères
+            ci-dessous, en reprenant les éléments de rémunération de leur fiche.
           </p>
           <div class="row q-col-gutter-sm">
             <div class="col-6">
@@ -431,10 +432,53 @@
               <q-input v-model.number="genAnnee" label="Année" outlined dense type="number" />
             </div>
           </div>
+          <div class="text-subtitle2 text-grey-8 q-mt-md q-mb-xs">
+            Filtrer les agents (optionnel)
+          </div>
+          <div class="row q-col-gutter-sm">
+            <div class="col-12 col-sm-6">
+              <q-select
+                v-model="genService"
+                :options="[
+                  { label: 'Tous les services', value: null },
+                  ...servicesOptions.map((s) => ({ label: s, value: s })),
+                ]"
+                label="Service"
+                outlined
+                dense
+                emit-value
+                map-options
+              />
+            </div>
+            <div class="col-12 col-sm-6">
+              <q-select
+                v-model="genTypeEmploye"
+                :options="[
+                  { label: 'Tous les types', value: null },
+                  ...typeEmployeOptions.map((t) => ({ label: t, value: t })),
+                ]"
+                label="Type de salarié"
+                outlined
+                dense
+                emit-value
+                map-options
+              />
+            </div>
+          </div>
+          <div class="q-mt-sm text-caption text-grey-6">
+            <q-icon name="info" size="xs" class="q-mr-xs" />
+            {{ genCountLabel }}
+          </div>
         </q-card-section>
         <q-card-actions align="right">
           <q-btn label="Annuler" flat color="grey-7" v-close-popup />
-          <q-btn label="Générer" color="primary" unelevated @click="generateBulletins" />
+          <q-btn
+            label="Générer"
+            color="primary"
+            unelevated
+            icon="bolt"
+            @click="generateBulletins"
+          />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -460,23 +504,20 @@ const employes = ref<Employe[]>([]);
 const parametresPaie = ref<ParametresPaie | null>(null);
 
 const now = new Date();
-const filterMois = ref(now.getMonth() + 1);
+const filterMois = ref<number | null>(null);
 const filterAnnee = ref(now.getFullYear());
 const filterStatut = ref<string | null>(null);
 const genMois = ref(now.getMonth() + 1);
 const genAnnee = ref(now.getFullYear());
+const genService = ref<string | null>(null);
+const genTypeEmploye = ref<string | null>(null);
 const printMois = ref(now.getMonth() + 1);
 const printAnnee = ref(now.getFullYear());
 const printService = ref<string | null>(null);
 const printTypeEmploye = ref<string | null>(null);
 
 const servicesOptions = ref<string[]>([]);
-const typeEmployeOptions = [
-  'Salariés (6000/2)',
-  'Contractuels (60012/2)',
-  "Agents de l'État (6002/2)",
-  'Maire et Adjoints (6010/2)',
-];
+const typeEmployeOptions = ['Salariés', 'Contractuels', "Agents de l'État", 'Maire et Adjoints'];
 
 const officialDocs = [
   {
@@ -608,7 +649,11 @@ function recalculate() {
 }
 
 const filteredFiches = computed(() => {
-  let r = fiches.value.filter((f) => f.mois === filterMois.value && f.annee === filterAnnee.value);
+  let r = fiches.value.filter((f) => {
+    if (filterMois.value && f.mois !== filterMois.value) return false;
+    if (f.annee !== filterAnnee.value) return false;
+    return true;
+  });
   if (filterStatut.value) r = r.filter((f) => f.statut === filterStatut.value);
   return r;
 });
@@ -729,18 +774,34 @@ function openAdd() {
   showDialog.value = true;
 }
 
+const genCandidates = computed(() => {
+  let list = employes.value.filter((e) => e.actif);
+  if (genService.value) list = list.filter((e) => e.service === genService.value);
+  if (genTypeEmploye.value) list = list.filter((e) => e.typeEmploye === genTypeEmploye.value);
+  return list;
+});
+
+const genCountLabel = computed(() => {
+  const n = genCandidates.value.length;
+  return n === 0
+    ? 'Aucun agent ne correspond aux critères sélectionnés.'
+    : `${n} agent${n > 1 ? 's' : ''} seront traité${n > 1 ? 's' : ''}.`;
+});
+
 function openGenerateDialog() {
+  genService.value = null;
+  genTypeEmploye.value = null;
   showGenerateDialog.value = true;
 }
 
 async function generateBulletins() {
-  const activeEmployes = employes.value.filter((e) => e.actif);
+  const candidates = genCandidates.value;
   const existingFiches = await db.fichesPaie
     .filter((f) => f.mois === genMois.value && f.annee === genAnnee.value)
     .toArray();
   const existingIds = new Set(existingFiches.map((f) => f.employeId));
 
-  const newFiches = activeEmployes
+  const newFiches = candidates
     .filter((e) => !existingIds.has(e.id!))
     .map((e) => {
       const brut =

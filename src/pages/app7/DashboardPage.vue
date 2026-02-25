@@ -114,7 +114,7 @@
           <q-card-section>
             <div class="text-h6 q-mb-md">Accès rapides</div>
             <div class="row q-col-gutter-sm">
-              <div class="col-6 col-sm-4 col-md-2" v-for="link in quickLinks" :key="link.to">
+              <div class="col-6 col-sm-4 col-md" v-for="link in quickLinks" :key="link.to">
                 <q-btn
                   :to="link.to"
                   :icon="link.icon"
