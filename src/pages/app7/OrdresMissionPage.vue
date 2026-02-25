@@ -50,7 +50,7 @@
               <template v-slot:prepend><q-icon name="search" /></template>
             </q-input>
           </div>
-          <div class="col-12 col-md-auto q-gutter-x-sm">
+          <div class="col-12 col-md-auto">
             <q-select
               v-model="filterStatut"
               :options="statutOptions"
@@ -63,7 +63,7 @@
               style="min-width: 160px"
             />
           </div>
-          <div class="col-12 col-md-auto q-gutter-x-sm">
+          <div class="col-12 col-md-auto">
             <q-btn color="primary" icon="add" label="Nouvel ordre" unelevated @click="openAdd" />
           </div>
         </div>
