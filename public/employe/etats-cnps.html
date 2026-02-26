@@ -11,7 +11,6 @@
       rel="stylesheet"
     />
     <style>
-      /* Configuration de la police de style document officiel */
       body {
         background-color: #f3f4f6;
         font-family: 'Times New Roman', Times, serif;
@@ -20,8 +19,8 @@
 
       .page-container {
         width: 100%;
-        max-width: 297mm; /* Largeur d'une page A4 en paysage */
-        min-height: 210mm; /* Hauteur d'une page A4 en paysage */
+        max-width: 297mm;
+        min-height: 210mm;
         background-color: white;
         box-shadow:
           0 10px 15px -3px rgba(0, 0, 0, 0.1),
@@ -35,16 +34,52 @@
         font-family: 'Dancing Script', cursive;
       }
 
-      /* Amélioration des bordures du tableau pour l'impression */
-      table {
+      .print-btn {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: #1976d2;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        z-index: 999;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      }
+      .print-btn:hover {
+        background: #1565c0;
+      }
+
+      /* Data table borders */
+      table.data-table {
         border-collapse: collapse;
       }
-      th,
-      td {
+      table.data-table th,
+      table.data-table td {
         border: 1px solid #000 !important;
       }
 
-      /* Cacher les ombres et marges à l'impression */
+      /* Wrapper table for repeating header on each printed page */
+      table.print-wrapper {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      table.print-wrapper > thead > tr > td,
+      table.print-wrapper > tbody > tr > td,
+      table.print-wrapper > tfoot > tr > td {
+        border: none !important;
+        padding: 0 !important;
+        vertical-align: top;
+      }
+      table.print-wrapper > thead {
+        display: table-header-group;
+      }
+      table.print-wrapper > tfoot {
+        display: table-footer-group;
+      }
+
       @media print {
         @page {
           size: A4 landscape;
@@ -60,107 +95,121 @@
           min-height: auto;
           padding: 0;
         }
+        .print-btn {
+          display: none !important;
+        }
+        tr {
+          break-inside: avoid;
+        }
       }
     </style>
   </head>
   <body class="antialiased">
+    <button class="print-btn" onclick="window.print()">Imprimer</button>
+
     <div class="page-container">
-      <!-- En-tête -->
-      <header class="flex justify-between items-start mb-8 text-sm font-bold">
-        <!-- Côté Gauche -->
-        <div class="text-left leading-snug">
-          <p>DEPARTEMENT DE VAVOUA</p>
-          <p>COMMUNE DE VAVOUA</p>
-          <p>CODE: 433</p>
-        </div>
+      <table class="print-wrapper">
+        <thead>
+          <tr>
+            <td>
+              <!-- En-tete repete sur chaque page -->
+              <header class="flex justify-between items-start mb-8 text-sm font-bold">
+                <div class="text-left leading-snug">
+                  <p>DEPARTEMENT DE VAVOUA</p>
+                  <p>COMMUNE DE VAVOUA</p>
+                  <p>CODE: 433</p>
+                </div>
+                <div class="text-center leading-snug">
+                  <p>REPUBLIQUE DE COTE D'IVOIRE</p>
+                  <p class="font-normal italic text-xs mt-1">Union - Discipline - Travail</p>
+                  <div class="w-12 h-[1px] bg-black mx-auto mt-1"></div>
+                </div>
+              </header>
+              <h1 class="text-center font-bold text-lg mb-5">
+                ETAT DE PAIEMENT DE LA CNPS (PART EMPLOYES)
+              </h1>
+              <div class="items-end mb-6 font-bold text-sm">
+                <div>
+                  <p id="periode-text">PERIODE: ...</p>
+                </div>
+                <div>
+                  <p>IMPUTATION BUDGETAIRE: 6002/1</p>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <!-- Tableau des Paiements -->
+              <div class="overflow-x-auto mb-6">
+                <table class="data-table w-full text-sm">
+                  <thead>
+                    <tr class="text-center font-bold">
+                      <th class="p-1 w-1/4">NOM ET PRENOMS</th>
+                      <th class="p-1">NBRE DE<br />MOIS</th>
+                      <th class="p-1">SALAIRE DE<br />BASE</th>
+                      <th class="p-1">INDEMNITE<br />DE RESIDENSE</th>
+                      <th class="p-1">IMPOSABLE<br />SALAIRE BRUT</th>
+                      <th class="p-1" id="th-cnps-employe">CNPS/PART<br />EMPLOYES -...</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody-data">
+                    <tr>
+                      <td colspan="6" class="p-4 text-center">Chargement...</td>
+                    </tr>
+                  </tbody>
+                  <tfoot>
+                    <tr class="font-bold">
+                      <td class="p-1 text-center" colspan="5">TOTAL</td>
+                      <td id="tot-cnps" class="p-1 text-right pr-3">0</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
 
-        <!-- Côté Droit -->
-        <div class="text-center leading-snug">
-          <p>REPUBLIQUE DE COTE D'IVOIRE</p>
-          <p class="font-normal italic text-xs mt-1">Union - Discipline - Travail</p>
-          <div class="w-12 h-[1px] bg-black mx-auto mt-1"></div>
-        </div>
-      </header>
+              <!-- Mentions legales -->
+              <div class="mb-10 mt-6">
+                <p class="text-justify text-sm">
+                  Arrete le present etat a la somme de:
+                  <span class="font-bold" id="arrete-montant">...</span>
+                </p>
+              </div>
 
-      <!-- Titre -->
-      <h1 class="text-center font-bold text-lg mb-5">
-        ETAT DE PAIEMENT DE LA CNPS (PART EMPLOYES)
-      </h1>
-
-      <!-- Période et Imputation -->
-      <div class="items-end mb-6 font-bold text-sm">
-        <div>
-          <p id="periode-text">PERIODE: ...</p>
-        </div>
-        <div>
-          <p>IMPUTATION BUDGETAIRE: 6002/1</p>
-        </div>
-      </div>
-
-      <!-- Tableau des Paiements -->
-      <div class="overflow-x-auto mb-6">
-        <table class="w-full text-sm">
-          <thead>
-            <tr class="text-center font-bold">
-              <th class="p-1 w-1/4">NOM ET PRENOMS</th>
-              <th class="p-1">NBRE DE<br />MOIS</th>
-              <th class="p-1">SALAIRE DE<br />BASE</th>
-              <th class="p-1">INDEMNITE<br />DE RESIDENSE</th>
-              <th class="p-1">IMPOSABLE<br />SALAIRE BRUT</th>
-              <th class="p-1" id="th-cnps-employe">CNPS/PART<br />EMPLOYES -...</th>
-            </tr>
-          </thead>
-          <tbody id="tbody-data">
-            <tr>
-              <td colspan="6" class="p-4 text-center">Chargement...</td>
-            </tr>
-          </tbody>
-          <tfoot>
-            <tr class="font-bold">
-              <td class="p-1 text-center" colspan="5">TOTAL</td>
-              <td id="tot-cnps" class="p-1 text-right pr-3">0</td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-
-      <!-- Mentions légales / Arrêt de la somme -->
-      <div class="mb-10 mt-6">
-        <p class="text-justify text-sm">
-          Arrêté le présent état à la somme de:
-          <span class="font-bold" id="arrete-montant">...</span>
-        </p>
-      </div>
-
-      <!-- Section Signatures et Date -->
-      <div class="flex justify-end items-start relative text-sm">
-        <div class="text-center flex flex-col items-center mr-8">
-          <p id="date-sig">VAVOUA, le ...</p>
-          <p class="font-bold mt-2">P/LE MAIRE & P.D</p>
-        </div>
-      </div>
+              <!-- Section Signatures et Date -->
+              <div class="flex justify-end items-start relative text-sm">
+                <div class="text-center flex flex-col items-center mr-8">
+                  <p id="date-sig">VAVOUA, le ...</p>
+                  <p class="font-bold mt-2">P/LE MAIRE & P.D</p>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
     <script>
       const MOIS_LABELS = [
         'Janvier',
-        'Février',
+        'Fevrier',
         'Mars',
         'Avril',
         'Mai',
         'Juin',
         'Juillet',
-        'Août',
+        'Aout',
         'Septembre',
         'Octobre',
         'Novembre',
-        'Décembre',
+        'Decembre',
       ];
       function fmt(n) {
         return Number(n || 0).toLocaleString('fr-FR');
       }
       function numberToWords(num) {
-        if (num === 0) return 'ZÉRO';
+        if (num === 0) return 'ZERO';
         const u = [
           '',
           'un',
@@ -276,8 +325,8 @@
         const tbody = document.getElementById('tbody-data');
         if (!fiches.length) {
           tbody.innerHTML =
-            '<tr><td colspan="6" class="p-4 text-center text-gray-500">Aucun bulletin pour cette période</td></tr>';
-          document.getElementById('arrete-montant').textContent = 'ZÉRO FRANC CFA';
+            '<tr><td colspan="6" class="p-4 text-center text-gray-500">Aucun bulletin pour cette periode</td></tr>';
+          document.getElementById('arrete-montant').textContent = 'ZERO FRANC CFA';
           return;
         }
         let totCnps = 0;

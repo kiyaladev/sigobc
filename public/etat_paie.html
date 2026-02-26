@@ -6,7 +6,7 @@
     <title>État de Paie Mensuel</title>
     <style>
       @page {
-        size: A3 landscape;
+        size: A4 landscape;
         margin: 8mm;
       }
 
@@ -27,7 +27,7 @@
 
       .page-container {
         background: white;
-        width: 410mm;
+        width: 297mm;
         margin: 0 auto;
         padding: 8mm;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -40,11 +40,15 @@
         background: #7c3aed;
         color: white;
         border: none;
-        padding: 8px 16px;
+        padding: 10px 20px;
         border-radius: 4px;
         cursor: pointer;
-        font-size: 13px;
+        font-size: 14px;
         z-index: 999;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      }
+      .print-btn:hover {
+        background: #6d28d9;
       }
 
       @media print {
@@ -63,9 +67,12 @@
         .no-print {
           display: none !important;
         }
+        tr {
+          break-inside: avoid;
+        }
       }
 
-      /* EN-TÊTE */
+      /* EN-TETE */
       .header {
         display: flex;
         align-items: flex-start;
@@ -100,7 +107,7 @@
         padding: 0 15px;
       }
       .header-center .titre {
-        font-size: 18px;
+        font-size: 16px;
         font-weight: 900;
         text-transform: uppercase;
         letter-spacing: 2px;
@@ -109,7 +116,7 @@
         display: inline-block;
       }
       .header-center .sous-titre {
-        font-size: 13px;
+        font-size: 12px;
         font-weight: bold;
         margin-top: 5px;
         color: #333;
@@ -120,10 +127,66 @@
         line-height: 1.7;
       }
       .header-right .periode {
-        font-size: 20px;
+        font-size: 18px;
         font-weight: 900;
         letter-spacing: 3px;
         display: block;
+      }
+
+      /* RESUME */
+      .resume-section {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+      .resume-card {
+        flex: 1;
+        border: 1px solid #000;
+        padding: 6px 10px;
+        text-align: center;
+      }
+      .resume-card .card-label {
+        font-size: 9px;
+        text-transform: uppercase;
+        font-weight: bold;
+        color: #555;
+      }
+      .resume-card .card-value {
+        font-size: 14px;
+        font-weight: 900;
+        margin-top: 2px;
+        font-family: 'Courier New', monospace;
+      }
+      .resume-card.brut .card-value {
+        color: #1d4ed8;
+      }
+      .resume-card.retenues .card-value {
+        color: #c00;
+      }
+      .resume-card.net .card-value {
+        color: #15803d;
+      }
+      .resume-card.agents .card-value {
+        color: #7c3aed;
+      }
+
+      /* Wrapper table for repeating header on each printed page */
+      table.print-wrapper {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      table.print-wrapper > thead > tr > td,
+      table.print-wrapper > tbody > tr > td,
+      table.print-wrapper > tfoot > tr > td {
+        border: none;
+        padding: 0;
+        vertical-align: top;
+      }
+      table.print-wrapper > thead {
+        display: table-header-group;
+      }
+      table.print-wrapper > tfoot {
+        display: table-footer-group;
       }
 
       /* TABLEAU PRINCIPAL */
@@ -162,9 +225,6 @@
       table.main-table tr:nth-child(even) td {
         background: #f9fafb;
       }
-      table.main-table tr:hover td {
-        background: #eff6ff;
-      }
       table.main-table tfoot td {
         background: #1e3a5f;
         color: white;
@@ -183,43 +243,6 @@
         padding: 20px;
         color: #888;
         font-style: italic;
-      }
-
-      /* RÉSUMÉ GÉNÉRAL */
-      .resume-section {
-        display: flex;
-        gap: 8px;
-        margin-bottom: 10px;
-      }
-      .resume-card {
-        flex: 1;
-        border: 1px solid #000;
-        padding: 6px 10px;
-        text-align: center;
-      }
-      .resume-card .card-label {
-        font-size: 9px;
-        text-transform: uppercase;
-        font-weight: bold;
-        color: #555;
-      }
-      .resume-card .card-value {
-        font-size: 14px;
-        font-weight: 900;
-        margin-top: 2px;
-        font-family: 'Courier New', monospace;
-      }
-      .resume-card.brut .card-value {
-        color: #1d4ed8;
-      }
-      .resume-card.retenues .card-value {
-        color: #c00;
-      }
-      .resume-card.net .card-value {
-        color: #15803d;
-      }
-      .resume-card.agents .card-value {
-        color: #7c3aed;
       }
 
       /* SIGNATURES */
@@ -262,7 +285,7 @@
     </style>
   </head>
   <body>
-    <button class="print-btn" onclick="window.print()">🖨️ Imprimer</button>
+    <button class="print-btn" onclick="window.print()">Imprimer</button>
 
     <div class="page-container" id="content">
       <div style="text-align: center; padding: 40px; color: #888">Chargement...</div>
@@ -272,17 +295,17 @@
     <script>
       const MOIS_LABELS = [
         'Janvier',
-        'Février',
+        'Fevrier',
         'Mars',
         'Avril',
         'Mai',
         'Juin',
         'Juillet',
-        'Août',
+        'Aout',
         'Septembre',
         'Octobre',
         'Novembre',
-        'Décembre',
+        'Decembre',
       ];
 
       function fmt(n) {
@@ -363,113 +386,122 @@
                   <td class="right" style="font-weight:bold;color:#1d4ed8">${fmt(f.montantBrut)}</td>
                   <td class="right" style="color:#c00">${fmt(retenues)}</td>
                   <td class="right" style="font-weight:bold;color:#15803d">${fmt(f.montantNet)}</td>
-                  <td class="center" style="${statutCls};font-size:9px">${f.statut === 'paye' ? 'Payé' : f.statut === 'valide' ? 'Validé' : 'Brouillon'}</td>
+                  <td class="center" style="${statutCls};font-size:9px">${f.statut === 'paye' ? 'Paye' : f.statut === 'valide' ? 'Valide' : 'Brouillon'}</td>
                 </tr>`;
                   })
                   .join('');
 
           content.innerHTML = `
-            <div class="header">
-              <div class="header-left">
-                <div class="republique">REPUBLIQUE DE CÔTE D'IVOIRE</div>
-                <div class="devise">Union – Discipline – Travail</div>
-                <div class="mairie">COMMUNE DE ${maisVille}</div>
-                ${maisCode ? `<div style="font-size:9px;margin-top:2px">Code : <strong>${maisCode}</strong></div>` : ''}
-              </div>
-              <div class="header-center">
-                <div class="titre">ÉTAT DE PAIE</div>
-                <div class="sous-titre">Récapitulatif des rémunérations — ${moisLabel} ${annee}</div>
-              </div>
-              <div class="header-right">
-                <span class="periode">${moisLabel.toUpperCase()}<br>${annee}</span>
-              </div>
-            </div>
-
-            <div class="resume-section">
-              <div class="resume-card agents">
-                <div class="card-label">Agents payés</div>
-                <div class="card-value">${fiches.length}</div>
-              </div>
-              <div class="resume-card brut">
-                <div class="card-label">Total brut</div>
-                <div class="card-value">${fmt(totalBrut)}</div>
-              </div>
-              <div class="resume-card retenues">
-                <div class="card-label">Total retenues</div>
-                <div class="card-value">${fmt(totalRetenues)}</div>
-              </div>
-              <div class="resume-card net">
-                <div class="card-label">Total net à payer</div>
-                <div class="card-value">${fmt(totalNet)}</div>
-              </div>
-            </div>
-
-            <table class="main-table">
-              <colgroup>
-                <col style="width:3%"/>   <!-- N° -->
-                <col style="width:7%"/>   <!-- Matricule -->
-                <col style="width:18%"/>  <!-- Nom & Prénom -->
-                <col style="width:11%"/>  <!-- Poste -->
-                <col style="width:8%"/>   <!-- Grade -->
-                <col style="width:9%"/>   <!-- Service -->
-                <col style="width:9%"/>   <!-- Salaire base -->
-                <col style="width:8%"/>   <!-- Indemnités -->
-                <col style="width:9%"/>   <!-- Brut -->
-                <col style="width:8%"/>   <!-- Retenues -->
-                <col style="width:9%"/>   <!-- Net -->
-                <col style="width:6%"/>   <!-- Statut -->
-              </colgroup>
+            <table class="print-wrapper">
               <thead>
-                <tr>
-                  <th>N°</th>
-                  <th class="left">Matricule</th>
-                  <th class="left">Nom & Prénom</th>
-                  <th class="left">Poste</th>
-                  <th class="left">Grade</th>
-                  <th class="left">Service</th>
-                  <th>Salaire Base</th>
-                  <th>Indemnités</th>
-                  <th>Montant Brut</th>
-                  <th>Retenues</th>
-                  <th>Net à Payer</th>
-                  <th>Statut</th>
-                </tr>
+                <tr><td>
+                  <div class="header">
+                    <div class="header-left">
+                      <div class="republique">REPUBLIQUE DE COTE D'IVOIRE</div>
+                      <div class="devise">Union - Discipline - Travail</div>
+                      <div class="mairie">COMMUNE DE ${maisVille}</div>
+                      ${maisCode ? `<div style="font-size:9px;margin-top:2px">Code : <strong>${maisCode}</strong></div>` : ''}
+                    </div>
+                    <div class="header-center">
+                      <div class="titre">ETAT DE PAIE</div>
+                      <div class="sous-titre">Recapitulatif des remunerations - ${moisLabel} ${annee}</div>
+                    </div>
+                    <div class="header-right">
+                      <span class="periode">${moisLabel.toUpperCase()}<br>${annee}</span>
+                    </div>
+                  </div>
+
+                  <div class="resume-section">
+                    <div class="resume-card agents">
+                      <div class="card-label">Agents payes</div>
+                      <div class="card-value">${fiches.length}</div>
+                    </div>
+                    <div class="resume-card brut">
+                      <div class="card-label">Total brut</div>
+                      <div class="card-value">${fmt(totalBrut)}</div>
+                    </div>
+                    <div class="resume-card retenues">
+                      <div class="card-label">Total retenues</div>
+                      <div class="card-value">${fmt(totalRetenues)}</div>
+                    </div>
+                    <div class="resume-card net">
+                      <div class="card-label">Total net a payer</div>
+                      <div class="card-value">${fmt(totalNet)}</div>
+                    </div>
+                  </div>
+                </td></tr>
               </thead>
-              <tbody>${rows}</tbody>
-              ${
-                fiches.length > 0
-                  ? `
-              <tfoot>
-                <tr>
-                  <td colspan="8" style="text-align:right">TOTAUX (${fiches.length} agents)</td>
-                  <td class="right">${fmt(totalBrut)}</td>
-                  <td class="right">${fmt(totalRetenues)}</td>
-                  <td class="right">${fmt(totalNet)}</td>
-                  <td></td>
-                </tr>
-              </tfoot>`
-                  : ''
-              }
+              <tbody>
+                <tr><td>
+                  <table class="main-table">
+                    <colgroup>
+                      <col style="width:3%"/>
+                      <col style="width:7%"/>
+                      <col style="width:18%"/>
+                      <col style="width:11%"/>
+                      <col style="width:8%"/>
+                      <col style="width:9%"/>
+                      <col style="width:9%"/>
+                      <col style="width:8%"/>
+                      <col style="width:9%"/>
+                      <col style="width:8%"/>
+                      <col style="width:9%"/>
+                      <col style="width:6%"/>
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th>N&deg;</th>
+                        <th class="left">Matricule</th>
+                        <th class="left">Nom & Prenom</th>
+                        <th class="left">Poste</th>
+                        <th class="left">Grade</th>
+                        <th class="left">Service</th>
+                        <th>Salaire Base</th>
+                        <th>Indemnites</th>
+                        <th>Montant Brut</th>
+                        <th>Retenues</th>
+                        <th>Net a Payer</th>
+                        <th>Statut</th>
+                      </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                    ${
+                      fiches.length > 0
+                        ? `
+                    <tfoot>
+                      <tr>
+                        <td colspan="8" style="text-align:right">TOTAUX (${fiches.length} agents)</td>
+                        <td class="right">${fmt(totalBrut)}</td>
+                        <td class="right">${fmt(totalRetenues)}</td>
+                        <td class="right">${fmt(totalNet)}</td>
+                        <td></td>
+                      </tr>
+                    </tfoot>`
+                        : ''
+                    }
+                  </table>
+
+                  <div class="signatures">
+                    <div class="sig-block">
+                      <div class="sig-title">L'Ordonnateur</div>
+                      <div class="sig-line">Nom, Signature & Date</div>
+                    </div>
+                    <div class="sig-block">
+                      <div class="sig-title">Le Comptable Municipal</div>
+                      <div class="sig-line">Nom, Signature & Cachet</div>
+                    </div>
+                    <div class="sig-block">
+                      <div class="sig-title">Le Maire</div>
+                      <div class="sig-line">Nom, Signature & Cachet officiel</div>
+                    </div>
+                  </div>
+
+                  <div class="footer-doc">
+                    Edite le ${dateAujourdhui} - SIGOBC Mairie de ${mairie ? mairie.ville : 'Vavoua'} - Document officiel
+                  </div>
+                </td></tr>
+              </tbody>
             </table>
-
-            <div class="signatures">
-              <div class="sig-block">
-                <div class="sig-title">L'Ordonnateur</div>
-                <div class="sig-line">Nom, Signature & Date</div>
-              </div>
-              <div class="sig-block">
-                <div class="sig-title">Le Comptable Municipal</div>
-                <div class="sig-line">Nom, Signature & Cachet</div>
-              </div>
-              <div class="sig-block">
-                <div class="sig-title">Le Maire</div>
-                <div class="sig-line">Nom, Signature & Cachet officiel</div>
-              </div>
-            </div>
-
-            <div class="footer-doc">
-              Édité le ${dateAujourdhui} — SIGOBC Mairie de ${mairie ? mairie.ville : 'Vavoua'} — Document officiel
-            </div>
           `;
 
           if (shouldPrint) {

@@ -28,19 +28,20 @@
         position: relative;
       }
 
-      table {
+      /* Data table styles */
+      table.data-table {
         border-collapse: collapse;
       }
 
-      th,
-      td {
+      table.data-table th,
+      table.data-table td {
         border: 1.5px solid #222;
         padding: 4px 7px;
         text-align: center;
         font-size: 12.5px;
       }
 
-      th {
+      table.data-table th {
         background: #f5f3ef;
         font-weight: 700;
         font-size: 11.5px;
@@ -48,19 +49,19 @@
         letter-spacing: 0.3px;
       }
 
-      td {
+      table.data-table td {
         font-variant-numeric: tabular-nums;
         font-family: 'Arial', sans-serif;
       }
 
-      td.name-cell {
+      table.data-table td.name-cell {
         text-align: left;
         font-weight: 600;
         white-space: nowrap;
         font-family: 'Libre Baskerville', serif;
       }
 
-      tr.totals-row td {
+      table.data-table tr.totals-row td {
         font-weight: 800;
         border-top: 3px double #222;
         background: #f9f8f5;
@@ -133,148 +134,204 @@
         text-underline-offset: 4px;
       }
 
+      .print-btn {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: #1976d2;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        z-index: 999;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      }
+      .print-btn:hover {
+        background: #1565c0;
+      }
+
+      /* Wrapper table for repeating header on each printed page */
+      table.print-wrapper {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      table.print-wrapper > thead > tr > td,
+      table.print-wrapper > tbody > tr > td,
+      table.print-wrapper > tfoot > tr > td {
+        border: none !important;
+        padding: 0 !important;
+        vertical-align: top;
+      }
+      table.print-wrapper > thead {
+        display: table-header-group;
+      }
+      table.print-wrapper > tfoot {
+        display: table-footer-group;
+      }
+
       @media print {
+        @page {
+          size: A4 landscape;
+          margin: 1cm;
+        }
         body {
           background: white;
         }
         .page {
           box-shadow: none;
           margin: 0;
+          width: 100%;
+          padding: 0;
         }
-
-        /* Cacher la zone imprimante s'il y en a une, bien que non présente ici */
+        .print-btn {
+          display: none !important;
+        }
+        tr {
+          break-inside: avoid;
+        }
       }
     </style>
   </head>
   <body class="flex items-start justify-center min-h-screen py-8">
+    <button class="print-btn" onclick="window.print()">Imprimer</button>
+
     <div class="page px-12 py-8">
-      <!-- En-tête -->
-      <div class="flex justify-between items-start mb-6">
-        <div class="text-[13px] leading-snug">
-          <p class="font-bold uppercase">Département de Vavoua</p>
-          <p class="font-bold uppercase">Commune de Vavoua</p>
-          <p class="font-bold uppercase">Code : 433</p>
-        </div>
-        <div class="text-right text-[13px] leading-snug">
-          <p class="font-bold uppercase tracking-wide">République de Côte d'Ivoire</p>
-          <p class="italic">Union – Discipline – Travail</p>
-        </div>
-      </div>
+      <table class="print-wrapper">
+        <thead>
+          <tr>
+            <td>
+              <!-- En-tete repete sur chaque page -->
+              <div class="flex justify-between items-start mb-6">
+                <div class="text-[13px] leading-snug">
+                  <p class="font-bold uppercase">Departement de Vavoua</p>
+                  <p class="font-bold uppercase">Commune de Vavoua</p>
+                  <p class="font-bold uppercase">Code : 433</p>
+                </div>
+                <div class="text-right text-[13px] leading-snug">
+                  <p class="font-bold uppercase tracking-wide">Republique de Cote d'Ivoire</p>
+                  <p class="italic">Union - Discipline - Travail</p>
+                </div>
+              </div>
 
-      <!-- Titre -->
-      <div class="text-center mb-4">
-        <h1 class="title-main garamond">État de Solde</h1>
-      </div>
+              <!-- Titre -->
+              <div class="text-center mb-4">
+                <h1 class="title-main garamond">Etat de Solde</h1>
+              </div>
 
-      <!-- Période -->
-      <div class="text-center mb-4">
-        <p
-          id="periode-text"
-          class="text-[14px] font-bold uppercase tracking-wide underline underline-offset-2"
-        >
-          Période : du ... au ...
-        </p>
-      </div>
+              <!-- Periode -->
+              <div class="text-center mb-4">
+                <p
+                  id="periode-text"
+                  class="text-[14px] font-bold uppercase tracking-wide underline underline-offset-2"
+                >
+                  Periode : du ... au ...
+                </p>
+              </div>
 
-      <!-- Exercice / Chapitre / Article -->
-      <div class="flex justify-between items-center mb-4 px-4">
-        <p id="exercice-text" class="text-[14px] font-bold uppercase underline underline-offset-2">
-          Exercice : ...
-        </p>
-        <p class="text-[14px] font-bold uppercase underline underline-offset-2">Chapitre : 601</p>
-        <p class="text-[14px] font-bold uppercase underline underline-offset-2">Article : 6010/1</p>
-      </div>
+              <!-- Exercice / Chapitre / Article -->
+              <div class="flex justify-between items-center mb-4 px-4">
+                <p id="exercice-text" class="text-[14px] font-bold uppercase underline underline-offset-2">
+                  Exercice : ...
+                </p>
+                <p class="text-[14px] font-bold uppercase underline underline-offset-2">Chapitre : 601</p>
+                <p class="text-[14px] font-bold uppercase underline underline-offset-2">Article : 6010/1</p>
+              </div>
+            </td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <!-- Tableau principal -->
+              <div class="overflow-x-auto">
+                <table class="data-table w-full">
+                  <thead>
+                    <tr>
+                      <th rowspan="2" class="w-[40px]">N&deg;<br />D'ORD.</th>
+                      <th rowspan="2" class="text-left min-w-[180px]">Nom & Prenom (S)</th>
+                      <th rowspan="2">Salaire<br />Brut</th>
+                      <th rowspan="2" id="th-resid">Idem<br />Resid<br />...%</th>
+                      <th rowspan="2">Salaire<br />Brut</th>
+                      <th rowspan="2" id="th-cnps">CNPS<br />...%</th>
+                      <th rowspan="2">Salaire<br />Net</th>
+                      <th colspan="3">Retenues</th>
+                      <th rowspan="2">Total<br />Impots</th>
+                      <th rowspan="2">Primes de<br />Transp.<br />Indem.Fct</th>
+                      <th rowspan="2">Net<br />A<br />Payer</th>
+                    </tr>
+                    <tr>
+                      <th id="th-its">I.T.S<br />...%</th>
+                      <th>I.G.R</th>
+                      <th id="th-fns">F.N.S<br />...%</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody-data">
+                    <tr>
+                      <td colspan="13" class="text-center py-4 text-gray-500">Chargement des donnees...</td>
+                    </tr>
+                  </tbody>
+                  <tfoot>
+                    <tr class="totals-row">
+                      <td
+                        colspan="2"
+                        class="text-left font-extrabold tracking-wide"
+                        style="text-align: left; padding-left: 12px"
+                      >
+                        TOTAUX ...................
+                      </td>
+                      <td id="tot-base">0</td>
+                      <td id="tot-logement">0</td>
+                      <td id="tot-brut">0</td>
+                      <td id="tot-cnps">0</td>
+                      <td id="tot-net-imp">0</td>
+                      <td id="tot-its">0</td>
+                      <td></td>
+                      <td></td>
+                      <td id="tot-imp">0</td>
+                      <td id="tot-primes">0</td>
+                      <td id="tot-net" class="font-extrabold">0</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
 
-      <!-- Tableau principal -->
-      <div class="overflow-x-auto">
-        <table class="w-full">
-          <thead>
-            <tr>
-              <th rowspan="2" class="w-[40px]">N°<br />D'ORD.</th>
-              <th rowspan="2" class="text-left min-w-[180px]">Nom & Prenom (S)</th>
-              <th rowspan="2">Salaire<br />Brut</th>
-              <th rowspan="2" id="th-resid">Idem<br />Résid<br />...%</th>
-              <th rowspan="2">Salaire<br />Brut</th>
-              <th rowspan="2" id="th-cnps">CNPS<br />...%</th>
-              <th rowspan="2">Salaire<br />Net</th>
-              <th colspan="3">Retenues</th>
-              <th rowspan="2">Total<br />Impôts</th>
-              <th rowspan="2">Primes de<br />Transp.<br />Indem.Fct</th>
-              <th rowspan="2">Net<br />A<br />Payer</th>
-            </tr>
-            <tr>
-              <th id="th-its">I.T.S<br />...%</th>
-              <th>I.G.R</th>
-              <th id="th-fns">F.N.S<br />...%</th>
-            </tr>
-          </thead>
-          <tbody id="tbody-data">
-            <tr>
-              <td colspan="13" class="text-center py-4 text-gray-500">Chargement des données...</td>
-            </tr>
-          </tbody>
-          <tfoot>
-            <!-- TOTAUX -->
-            <tr class="totals-row">
-              <td
-                colspan="2"
-                class="text-left font-extrabold tracking-wide"
-                style="text-align: left; padding-left: 12px"
-              >
-                TOTAUX ...................
-              </td>
-              <td id="tot-base">0</td>
-              <td id="tot-logement">0</td>
-              <td id="tot-brut">0</td>
-              <td id="tot-cnps">0</td>
-              <td id="tot-net-imp">0</td>
-              <td id="tot-its">0</td>
-              <td></td>
-              <td></td>
-              <td id="tot-imp">0</td>
-              <td id="tot-primes">0</td>
-              <td id="tot-net" class="font-extrabold">0</td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
+              <!-- Arrete -->
+              <div class="mt-5 text-[13px]">
+                <p>
+                  <span>Arrete le present etat a la somme de :</span>
+                  <span id="arrete-montant" class="font-bold uppercase ml-2">...</span>
+                </p>
+              </div>
 
-      <!-- Arrêté -->
-      <div class="mt-5 text-[13px]">
-        <p>
-          <span>Arrêté le présent état à la somme de :</span>
-          <span id="arrete-montant" class="font-bold uppercase ml-2">...</span>
-        </p>
-      </div>
-
-      <!-- Signature -->
-      <div class="mt-6 flex justify-end">
-        <div class="text-center">
-          <p id="date-sig" class="text-[13px] font-bold">VAVOUA, le ...</p>
-          <p class="text-[13px] font-bold mt-0.5">P/ LE MAIRE & P.D.;</p>
-        </div>
-      </div>
-
-      <!-- Pied de page -->
-      <div class="absolute bottom-3 right-6 text-[8px] text-gray-400 italic">
-        Scanné avec CamScanner
-      </div>
+              <!-- Signature -->
+              <div class="mt-6 flex justify-end">
+                <div class="text-center">
+                  <p id="date-sig" class="text-[13px] font-bold">VAVOUA, le ...</p>
+                  <p class="text-[13px] font-bold mt-0.5">P/ LE MAIRE & P.D.;</p>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
     <script>
       const MOIS_LABELS = [
         'Janvier',
-        'Février',
+        'Fevrier',
         'Mars',
         'Avril',
         'Mai',
         'Juin',
         'Juillet',
-        'Août',
+        'Aout',
         'Septembre',
         'Octobre',
         'Novembre',
-        'Décembre',
+        'Decembre',
       ];
 
       function fmt(n) {
@@ -282,7 +339,7 @@
       }
 
       function numberToWords(num) {
-        if (num === 0) return 'ZÉRO';
+        if (num === 0) return 'ZERO';
         const units = [
           '',
           'un',
@@ -377,7 +434,7 @@
         const dernierJour = `${new Date(annee, mois, 0).getDate()}/${String(mois).padStart(2, '0')}/${annee}`;
 
         document.getElementById('periode-text').textContent =
-          `Période : du ${premierJour} au ${dernierJour}`;
+          `Periode : du ${premierJour} au ${dernierJour}`;
         document.getElementById('exercice-text').textContent = `Exercice : ${annee}`;
         document.getElementById('date-sig').textContent =
           `VAVOUA, le ${new Date().toLocaleDateString('fr-FR')}`;
@@ -389,7 +446,7 @@
         const tFns = paramsDb ? paramsDb.tauxFns : 1;
 
         const elResid = document.getElementById('th-resid');
-        if (elResid) elResid.innerHTML = `Idem<br />Résid<br />${tResid.toLocaleString('fr-FR')}%`;
+        if (elResid) elResid.innerHTML = `Idem<br />Resid<br />${tResid.toLocaleString('fr-FR')}%`;
         const elCnps = document.getElementById('th-cnps');
         if (elCnps) elCnps.innerHTML = `CNPS<br />${tCnps.toLocaleString('fr-FR')}%`;
         const elIts = document.getElementById('th-its');
@@ -427,7 +484,7 @@
         const tbody = document.getElementById('tbody-data');
         if (!fiches.length) {
           tbody.innerHTML =
-            '<tr><td colspan="13" class="text-center py-4 text-gray-500">Aucun bulletin pour cette période</td></tr>';
+            '<tr><td colspan="13" class="text-center py-4 text-gray-500">Aucun bulletin pour cette periode</td></tr>';
 
           setTimeout(() => {
             if (params.get('print') === 'true') {

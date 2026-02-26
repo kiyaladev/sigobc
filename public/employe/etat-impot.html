@@ -4,141 +4,187 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>État de Paiement ITS - Vavoua</title>
-    <!-- Chargement de Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="../dexie.min.js"></script>
-    <!-- Police pour la fausse signature -->
     <link
       href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap"
       rel="stylesheet"
     />
 
     <style>
-      /* CSS minimaliste pour l'impression A4 Paysage et la police globale */
       body {
         font-family: 'Times New Roman', Times, serif;
       }
       .signature-font {
         font-family: 'Dancing Script', cursive;
       }
+
+      .print-btn {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: #1976d2;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        z-index: 999;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      }
+      .print-btn:hover {
+        background: #1565c0;
+      }
+
+      /* Wrapper table for repeating header on each printed page */
+      table.print-wrapper {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      table.print-wrapper > thead > tr > td,
+      table.print-wrapper > tbody > tr > td,
+      table.print-wrapper > tfoot > tr > td {
+        border: none !important;
+        padding: 0 !important;
+        vertical-align: top;
+      }
+      table.print-wrapper > thead {
+        display: table-header-group;
+      }
+      table.print-wrapper > tfoot {
+        display: table-footer-group;
+      }
+
       @media print {
         @page {
-          size: A4 landscape; /* Force l'impression en format paysage */
+          size: A4 landscape;
           margin: 1cm;
         }
         body {
           background-color: white !important;
         }
+        .print-btn {
+          display: none !important;
+        }
+        /* Prevent row splitting across pages */
+        tr {
+          break-inside: avoid;
+        }
       }
     </style>
   </head>
   <body class="bg-gray-100 text-gray-900 antialiased py-8 print:py-0">
-    <!-- Conteneur A4 Paysage géré avec Tailwind -->
+    <button class="print-btn" onclick="window.print()">Imprimer</button>
+
     <div
       class="w-full max-w-[297mm] min-h-[210mm] bg-white shadow-xl mx-auto px-5 py-5 relative print:shadow-none print:m-0 print:p-0 print:max-w-full print:min-h-auto"
     >
-      <!-- En-tête -->
-      <header class="flex justify-between items-start mb-6 text-[13px] font-bold">
-        <!-- Côté Gauche -->
-        <div class="text-left leading-snug">
-          <p>DEPARTEMENT DE VAVOUA</p>
-          <p>COMMUNE DE VAVOUA</p>
-          <p>CODE: 433</p>
-        </div>
+      <table class="print-wrapper">
+        <thead>
+          <tr>
+            <td>
+              <!-- En-tete repete sur chaque page -->
+              <header class="flex justify-between items-start mb-6 text-[13px] font-bold">
+                <div class="text-left leading-snug">
+                  <p>DEPARTEMENT DE VAVOUA</p>
+                  <p>COMMUNE DE VAVOUA</p>
+                  <p>CODE: 433</p>
+                </div>
+                <div class="text-center leading-snug">
+                  <p>REPUBLIQUE DE COTE D'IVOIRE</p>
+                  <p class="font-normal italic text-sm mt-1">Union - Discipline - Travail</p>
+                  <div class="w-16 h-[1.5px] bg-black mx-auto mt-1"></div>
+                </div>
+              </header>
+              <h1 class="text-center font-bold text-xl mb-6">
+                ETAT DE PAIEMENT DE L'IMPOT SUR SALAIRE (ITS)
+              </h1>
+              <div class="mb-6 font-bold text-[13px]">
+                <div>
+                  <p id="periode-text">PERIODE: ...</p>
+                </div>
+                <div>
+                  <p>IMPUTATION BUDGETAIRE: 6002/1</p>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <!-- Tableau des Paiements -->
+              <div class="overflow-x-auto mb-6">
+                <table
+                  class="w-full text-[13px] border-collapse border border-black [&_th]:border [&_th]:border-black [&_td]:border [&_td]:border-black"
+                >
+                  <thead>
+                    <tr class="text-center font-bold print:bg-transparent">
+                      <th class="p-1 w-1/4">NOM ET PRENOMS</th>
+                      <th class="p-1">NBRE DE<br />MOIS</th>
+                      <th class="p-1">SALAIRE DE<br />BASE</th>
+                      <th class="p-1">INDEMNITE<br />DE RESIDENSE</th>
+                      <th class="p-1">IMPOSABLE<br />SALAIRE BRUT</th>
+                      <th class="p-1" id="th-its">...%<br />ITS</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody-data">
+                    <tr>
+                      <td colspan="6" class="p-4 text-center">Chargement...</td>
+                    </tr>
+                  </tbody>
+                  <tfoot>
+                    <tr class="font-bold print:bg-transparent">
+                      <td class="p-1 text-center" colspan="5">TOTAL</td>
+                      <td id="tot-its" class="p-1 text-right pr-3">0</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
 
-        <!-- Côté Droit -->
-        <div class="text-center leading-snug">
-          <p>REPUBLIQUE DE COTE D'IVOIRE</p>
-          <p class="font-normal italic text-sm mt-1">Union - Discipline - Travail</p>
-          <div class="w-16 h-[1.5px] bg-black mx-auto mt-1"></div>
-        </div>
-      </header>
+              <!-- Mentions legales -->
+              <div class="mb-3 mt-6">
+                <p class="text-justify text-[13px]">
+                  Arrete le present etat a la somme de:
+                  <span class="font-bold" id="arrete-montant">...</span>
+                </p>
+              </div>
 
-      <!-- Titre -->
-      <h1 class="text-center font-bold text-xl mb-6">
-        ETAT DE PAIEMENT DE L'IMPOT SUR SALAIRE (ITS)
-      </h1>
-
-      <!-- Période et Imputation -->
-      <div class="mb-6 font-bold text-[13px]">
-        <div>
-          <p id="periode-text">PERIODE: ...</p>
-        </div>
-        <div>
-          <p>IMPUTATION BUDGETAIRE: 6002/1</p>
-        </div>
-      </div>
-
-      <!-- Tableau des Paiements (Bordures Tailwind) -->
-      <div class="overflow-x-auto mb-6">
-        <table
-          class="w-full text-[13px] border-collapse border border-black [&_th]:border [&_th]:border-black [&_td]:border [&_td]:border-black"
-        >
-          <thead>
-            <tr class="text-center font-bold print:bg-transparent">
-              <th class="p-1 w-1/4">NOM ET PRENOMS</th>
-              <th class="p-1">NBRE DE<br />MOIS</th>
-              <th class="p-1">SALAIRE DE<br />BASE</th>
-              <th class="p-1">INDEMNITE<br />DE RESIDENSE</th>
-              <th class="p-1">IMPOSABLE<br />SALAIRE BRUT</th>
-              <th class="p-1" id="th-its">...%<br />ITS</th>
-            </tr>
-          </thead>
-          <tbody id="tbody-data">
-            <tr>
-              <td colspan="6" class="p-4 text-center">Chargement...</td>
-            </tr>
-          </tbody>
-          <tfoot>
-            <tr class="font-bold print:bg-transparent">
-              <td class="p-1 text-center" colspan="5">TOTAL</td>
-              <td id="tot-its" class="p-1 text-right pr-3">0</td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-
-      <!-- Mentions légales / Arrêt de la somme -->
-      <div class="mb-3 mt-6">
-        <p class="text-justify text-[13px]">
-          Arrêté le présent état à la somme de:
-          <span class="font-bold" id="arrete-montant">...</span>
-        </p>
-      </div>
-
-      <!-- Section Signatures et Date -->
-      <div class="flex justify-end items-start relative text-[13px]">
-        <div class="text-center flex flex-col items-center mr-8">
-          <p id="date-sig">VAVOUA, le ...</p>
-          <p class="font-bold mt-2">P/Le Maire & P.D</p>
-          <br />
-          <!-- <div class="mt-16 border-t border-black w-40 text-center pt-1">Signature</div> -->
-        </div>
-      </div>
-
-      <!-- Footer CamScanner -->
+              <!-- Section Signatures et Date -->
+              <div class="flex justify-end items-start relative text-[13px]">
+                <div class="text-center flex flex-col items-center mr-8">
+                  <p id="date-sig">VAVOUA, le ...</p>
+                  <p class="font-bold mt-2">P/Le Maire & P.D</p>
+                  <br />
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
     <script>
       const MOIS_LABELS = [
         'Janvier',
-        'Février',
+        'Fevrier',
         'Mars',
         'Avril',
         'Mai',
         'Juin',
         'Juillet',
-        'Août',
+        'Aout',
         'Septembre',
         'Octobre',
         'Novembre',
-        'Décembre',
+        'Decembre',
       ];
       function fmt(n) {
         return Number(n || 0).toLocaleString('fr-FR');
       }
       function numberToWords(num) {
-        if (num === 0) return 'ZÉRO';
+        if (num === 0) return 'ZERO';
         const u = [
           '',
           'un',
@@ -252,8 +298,8 @@
         const tbody = document.getElementById('tbody-data');
         if (!fiches.length) {
           tbody.innerHTML =
-            '<tr><td colspan="6" class="p-4 text-center text-gray-500">Aucun bulletin pour cette période</td></tr>';
-          document.getElementById('arrete-montant').textContent = 'ZÉRO FRANC CFA';
+            '<tr><td colspan="6" class="p-4 text-center text-gray-500">Aucun bulletin pour cette periode</td></tr>';
+          document.getElementById('arrete-montant').textContent = 'ZERO FRANC CFA';
           return;
         }
         let totIts = 0;

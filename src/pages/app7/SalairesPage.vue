@@ -832,7 +832,7 @@ async function generateBulletins() {
         impotSurSalaire: calcIts,
         autresRetenues: 0,
         montantNet: brut - calcCnps - calcIts,
-        statut: 'valide' as const,
+        statut: 'paye' as const,
         personnelId: 1,
         createdAt: new Date(),
         updatedAt: new Date(),
