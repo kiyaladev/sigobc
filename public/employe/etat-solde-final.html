@@ -130,7 +130,13 @@
         text-underline-offset: 4px;
       }
 
+      /* Editable date */
+      .editable-date { cursor: pointer; border-bottom: 1px dashed #999; padding: 0 2px; min-width: 80px; display: inline-block; }
+      .editable-date:hover { background: #e8f0fe; }
+      .editable-date:focus { outline: 2px solid #1976d2; background: #fff; border-bottom: none; }
+
       @media print {
+        .editable-date { border-bottom: none; }
         body {
           background: white;
         }
@@ -388,7 +394,7 @@
       <!-- Signature -->
       <div class="mt-6 flex justify-end">
         <div class="text-center">
-          <p class="text-[13px] font-bold">VAVOUA, le 13 / 01 / 2026</p>
+          <p class="text-[13px] font-bold">VAVOUA, le <span class="editable-date" contenteditable="true">13 / 01 / 2026</span></p>
           <p class="text-[13px] font-bold mt-0.5">P/ LE MAIRE & P.D.;</p>
 
           <div class="flex items-center gap-4 mt-4">

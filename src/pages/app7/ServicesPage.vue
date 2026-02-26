@@ -8,7 +8,7 @@
           <div class="col-12 col-md-4">
             <q-input
               v-model="filter"
-              placeholder="Rechercher par nom ou compte..."
+              placeholder="Rechercher par nom, compte ou chapitre..."
               outlined
               dense
               clearable
@@ -68,7 +68,9 @@
               :rules="[(v) => !!v || 'Obligatoire']"
             />
 
-            <q-input v-model="form.compte" label="Compte associé" outlined dense />
+            <q-input v-model="form.compte" label="Compte associé" outlined dense type="number" />
+
+            <q-input v-model="form.chapitre" label="Chapitre" outlined dense type="number" />
 
             <q-toggle v-model="form.actif" label="Service actif" />
 
@@ -101,6 +103,7 @@ const servicesList = ref<ServiceApp7[]>([]);
 const defaultForm = () => ({
   nom: '',
   compte: '',
+  chapitre: '',
   actif: true,
 });
 
@@ -121,6 +124,13 @@ const columns = [
     align: 'left' as const,
     sortable: true,
   },
+  {
+    name: 'chapitre',
+    label: 'Chapitre',
+    field: 'chapitre',
+    align: 'left' as const,
+    sortable: true,
+  },
   { name: 'actif', label: 'Statut', field: 'actif', align: 'center' as const },
   { name: 'actions', label: 'Actions', field: 'id', align: 'center' as const },
 ];
@@ -132,7 +142,9 @@ const filteredServices = computed(() => {
     const term = filter.value.toLowerCase();
     result = result.filter(
       (s) =>
-        s.nom.toLowerCase().includes(term) || (s.compte && s.compte.toLowerCase().includes(term)),
+        s.nom.toLowerCase().includes(term) ||
+        (s.compte && s.compte.toLowerCase().includes(term)) ||
+        (s.chapitre && s.chapitre.toLowerCase().includes(term)),
     );
   }
   return result;
@@ -158,6 +170,7 @@ function editService(row: ServiceApp7) {
   form.value = {
     nom: row.nom,
     compte: row.compte || '',
+    chapitre: row.chapitre || '',
     actif: row.actif,
   };
   showDialog.value = true;
@@ -168,6 +181,7 @@ async function saveService() {
   const data = {
     nom: form.value.nom,
     compte: form.value.compte || undefined,
+    chapitre: form.value.chapitre || undefined,
     actif: form.value.actif,
     mairieId: 1, // Mairie par défaut
     createdAt: now,

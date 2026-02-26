@@ -35,7 +35,11 @@
       "Bash(systemctl reload:*)",
       "Bash(certbot:*)",
       "Bash(bun run:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(xargs grep:*)",
+      "Bash(python3:*)",
+      "Bash(pip install:*)",
+      "Bash(file:*)"
     ],
     "deny": [],
     "ask": []

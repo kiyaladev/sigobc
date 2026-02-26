@@ -208,8 +208,14 @@
         background-color: #1565c0;
       }
 
+      /* Editable date */
+      .editable-date { cursor: pointer; border-bottom: 1px dashed #999; padding: 0 2px; min-width: 80px; display: inline-block; }
+      .editable-date:hover { background: #e8f0fe; }
+      .editable-date:focus { outline: 2px solid #1976d2; background: #fff; border-bottom: none; }
+
       /* Styles spécifiques pour l'impression */
       @media print {
+        .editable-date { border-bottom: none; }
         .no-print {
           display: none !important;
         }
@@ -293,7 +299,7 @@
               >T31T N° 63</span
             >
             <span class="field-label" style="margin-left: 20px">du :</span>
-            <span class="field-value filled right-align" data-field="dateEncaissement"
+            <span class="field-value filled right-align editable-date" contenteditable="true" data-field="dateEncaissement"
               >31/10/2025</span
             >
           </div>
@@ -327,13 +333,13 @@
             <div class="footer-col">
               <div class="field-row">
                 <span class="field-label">CT du :</span>
-                <span class="field-value filled right-align" data-field="dateEncaissement"
+                <span class="field-value filled right-align editable-date" contenteditable="true" data-field="dateEncaissement"
                   >31/10/2025</span
                 >
               </div>
               <div class="field-row">
                 <span class="field-label">A <span data-field="ville">Vavoua</span> , le</span>
-                <span class="field-value filled right-align" data-field="dateEncaissement"
+                <span class="field-value filled right-align editable-date" contenteditable="true" data-field="dateEncaissement"
                   >31/10/2025</span
                 >
               </div>
@@ -408,7 +414,7 @@
               >T31T N° 63</span
             >
             <span class="field-label" style="margin-left: 20px">du :</span>
-            <span class="field-value filled right-align" data-field="dateEncaissement"
+            <span class="field-value filled right-align editable-date" contenteditable="true" data-field="dateEncaissement"
               >31/10/2025</span
             >
           </div>
@@ -442,13 +448,13 @@
             <div class="footer-col">
               <div class="field-row">
                 <span class="field-label">CT du :</span>
-                <span class="field-value filled right-align" data-field="dateEncaissement"
+                <span class="field-value filled right-align editable-date" contenteditable="true" data-field="dateEncaissement"
                   >31/10/2025</span
                 >
               </div>
               <div class="field-row">
                 <span class="field-label">A <span data-field="ville">Vavoua</span> , le</span>
-                <span class="field-value filled right-align" data-field="dateEncaissement"
+                <span class="field-value filled right-align editable-date" contenteditable="true" data-field="dateEncaissement"
                   >31/10/2025</span
                 >
               </div>
@@ -523,7 +529,7 @@
                 <span class="field-label">Date d'encaissement :</span>
                 <span class="field-value filled" style="flex: 0 0 150px;" data-field="numeroLivre">T31T N° 63</span>
                 <span class="field-label" style="margin-left: 20px;">du :</span>
-                <span class="field-value filled right-align" data-field="dateEncaissement">31/10/2025</span>
+                <span class="field-value filled right-align editable-date" contenteditable="true" data-field="dateEncaissement">31/10/2025</span>
             </div>
 
             <div class="body-row">
@@ -550,11 +556,11 @@
                 <div class="footer-col">
                     <div class="field-row">
                         <span class="field-label">CT du :</span>
-                        <span class="field-value filled right-align" data-field="dateEncaissement">31/10/2025</span>
+                        <span class="field-value filled right-align editable-date" contenteditable="true" data-field="dateEncaissement">31/10/2025</span>
                     </div>
                     <div class="field-row">
                         <span class="field-label">A <span data-field="ville">Vavoua</span> , le</span>
-                        <span class="field-value filled right-align" data-field="dateEncaissement">31/10/2025</span>
+                        <span class="field-value filled right-align editable-date" contenteditable="true" data-field="dateEncaissement">31/10/2025</span>
                     </div>
                     <div class="signature-box" style="margin-top: 5px;">
                         Le Receveur.

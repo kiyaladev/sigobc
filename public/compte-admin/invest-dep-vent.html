@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Compte Administratif - Depenses Investissement Ventilees</title>
+    <script src="../dexie.min.js"></script>
+    <style>
+      @page {
+        size: A4 landscape;
+        margin: 10mm;
+      }
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 10px;
+        margin: 0;
+        padding: 10px;
+      }
+      .container { width: 100%; }
+      .main-title {
+        text-decoration: underline;
+        font-size: 14px;
+        margin: 5px 0;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 0;
+      }
+      th, td {
+        border: 1px solid #000;
+        padding: 3px 4px;
+      }
+      th {
+        background-color: #f0f0f0;
+        text-align: center;
+        vertical-align: middle;
+        font-size: 9px;
+      }
+      .col-code { width: 5%; text-align: center; }
+      .col-libelle { width: 15%; text-align: left; }
+      .col-num { text-align: right; white-space: nowrap; }
+      .col-prev { width: 8%; }
+      .col-chap { width: 7%; }
+      .col-total { width: 8%; }
+      .section-header { background-color: #e0e0e0; font-weight: bold; }
+      .total-section { background-color: #d0d0d0; font-weight: bold; border-top: 2px solid #000; }
+      .grand-total { background-color: #bbb; font-weight: bold; border-top: 3px double #000; }
+      .doc-header-cell { padding: 0 !important; background: #fff !important; }
+      .doc-header-grid { width: 100%; display: grid; grid-template-columns: 1fr 2fr 1fr; }
+      .doc-header-block { padding: 4px 6px; min-height: 70px; }
+      .doc-header-block + .doc-header-block { border-left: 1px solid #000; }
+      .doc-header-left { text-align: left; font-weight: bold; }
+      .doc-header-center { text-align: center; font-weight: bold; }
+      .doc-header-right { text-align: right; font-weight: bold; }
+      .doc-header-center .main-title { margin: 0 0 4px 0; }
+      .print-button {
+        position: fixed; top: 20px; right: 20px; padding: 10px 20px;
+        background: #009688; color: white; border: none; border-radius: 5px;
+        cursor: pointer; font-size: 14px; z-index: 1000;
+      }
+      .print-button:hover { background: #00796B; }
+      .loading { text-align: center; padding: 50px; font-size: 16px; color: #666; }
+      @media print {
+        .no-print { display: none !important; }
+        body { padding: 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <button class="print-button no-print" onclick="window.print()">Imprimer</button>
+    <div class="container">
+      <div id="content">
+        <div class="loading" id="loading">Chargement des donnees...</div>
+      </div>
+    </div>
+
+    <script>
+      function fmt(v) { return v ? new Intl.NumberFormat('fr-FR').format(v) : '0'; }
+
+      const SECTIONS = {
+        '90': 'Immobilisations incorporelles',
+        '91': 'Immobilisations corporelles',
+        '92': 'Immobilisations en cours',
+        '93': 'Immobilisations financieres',
+        '94': 'Remboursement emprunts',
+        '95': 'Autres depenses investissement'
+      };
+
+      const CHAPITRE_LABELS = {
+        1: 'Salaires',
+        2: 'Materiel',
+        3: 'Charges',
+        4: 'Subvent.',
+        5: 'Interv.',
+        6: 'Autres',
+        7: 'Reserve',
+        8: 'Divers'
+      };
+
+      async function loadData() {
+        const db = new Dexie('TresorDatabase');
+        db.version(28).stores({
+          mandats: '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
+          previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
+          sousChapitres: '++id, code, libelle, parentId, mairieId, actif',
+          chapitres: '++id, code, libelle, mairieId, actif',
+          taxes: '++id, code, libelle, mairieId, type, actif',
+          declarations: '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
+          previsionsRecettes: '++id, exercice, taxeId, mairieId, statut, personnelId',
+          mairies: '++id, nom, code, ville',
+          printData: '++id, type, createdAt'
+        });
+
+        const exercice = new Date().getFullYear();
+
+        const [sousChapitres, chapitres, previsions, mandats, mairie] = await Promise.all([
+          db.sousChapitres.toArray(),
+          db.chapitres.toArray(),
+          db.previsions.where('exercice').equals(exercice).toArray(),
+          db.mandats.where('exercice').equals(exercice).toArray(),
+          db.mairies.toCollection().first()
+        ]);
+
+        // Filter sous-chapitres with code starting with '9'
+        const investSC = sousChapitres.filter(sc => sc.code && sc.code.startsWith('9'));
+
+        // Build chapitre map (id -> code)
+        const chapMap = {};
+        chapitres.forEach(c => { chapMap[c.id] = c.code; });
+
+        // Build prevision map by sousChapitreId
+        const prevMap = {};
+        previsions.forEach(p => {
+          if (p.sousChapitreId) {
+            if (!prevMap[p.sousChapitreId]) prevMap[p.sousChapitreId] = 0;
+            prevMap[p.sousChapitreId] += (p.montantPrevu || 0);
+          }
+        });
+
+        // Build ventilation map: sousChapitreId -> { chapCode: montant }
+        const ventMap = {};
+        mandats.forEach(m => {
+          if (m.statut === 'annule') return;
+          const scId = m.sousChapitreId;
+          const chapCode = chapMap[m.chapitreId] || String(m.chapitreId);
+          // Normalize chapitre code to single digit (1-8)
+          const chapNum = parseInt(chapCode, 10);
+          if (isNaN(chapNum) || chapNum < 1 || chapNum > 8) return;
+
+          if (!ventMap[scId]) ventMap[scId] = {};
+          if (!ventMap[scId][chapNum]) ventMap[scId][chapNum] = 0;
+          ventMap[scId][chapNum] += (m.montant || 0);
+        });
+
+        return { investSC, prevMap, ventMap, exercice, mairie };
+      }
+
+      function render(data) {
+        const { investSC, prevMap, ventMap, exercice, mairie } = data;
+        const mairieNom = mairie ? mairie.nom || 'Mairie de Vavoua' : 'Mairie de Vavoua';
+
+        // Group sous-chapitres by section (first 2 chars of code)
+        const grouped = {};
+        investSC.forEach(sc => {
+          const sec = sc.code.substring(0, 2);
+          if (!grouped[sec]) grouped[sec] = [];
+          grouped[sec].push(sc);
+        });
+
+        let grandPrev = 0;
+        const grandChap = {};
+        let grandTotal = 0;
+
+        let rows = '';
+        const sectionCodes = Object.keys(SECTIONS).sort();
+
+        sectionCodes.forEach(secCode => {
+          const secLabel = SECTIONS[secCode];
+          const items = (grouped[secCode] || []).sort((a, b) => a.code.localeCompare(b.code));
+
+          let secPrev = 0;
+          const secChap = {};
+          let secTotal = 0;
+
+          rows += '<tr class="section-header"><td>' + secCode + '</td><td colspan="11">SECTION ' + secCode + ' - ' + secLabel + '</td></tr>';
+
+          items.forEach(sc => {
+            const prev = prevMap[sc.id] || 0;
+            const vent = ventMap[sc.id] || {};
+            let rowTotal = 0;
+
+            let chapCells = '';
+            for (let i = 1; i <= 8; i++) {
+              const val = vent[i] || 0;
+              rowTotal += val;
+              if (!secChap[i]) secChap[i] = 0;
+              secChap[i] += val;
+              chapCells += '<td class="col-num col-chap">' + fmt(val) + '</td>';
+            }
+
+            secPrev += prev;
+            secTotal += rowTotal;
+
+            rows += '<tr>'
+              + '<td class="col-code">' + sc.code + '</td>'
+              + '<td class="col-libelle">' + (sc.libelle || '') + '</td>'
+              + '<td class="col-num col-prev">' + fmt(prev) + '</td>'
+              + chapCells
+              + '<td class="col-num col-total">' + fmt(rowTotal) + '</td>'
+              + '</tr>';
+          });
+
+          // Section total
+          let secChapCells = '';
+          for (let i = 1; i <= 8; i++) {
+            const val = secChap[i] || 0;
+            if (!grandChap[i]) grandChap[i] = 0;
+            grandChap[i] += val;
+            secChapCells += '<td class="col-num col-chap">' + fmt(val) + '</td>';
+          }
+
+          rows += '<tr class="total-section">'
+            + '<td></td>'
+            + '<td>TOTAL SECTION ' + secCode + '</td>'
+            + '<td class="col-num col-prev">' + fmt(secPrev) + '</td>'
+            + secChapCells
+            + '<td class="col-num col-total">' + fmt(secTotal) + '</td>'
+            + '</tr>';
+
+          grandPrev += secPrev;
+          grandTotal += secTotal;
+        });
+
+        // Grand total
+        let grandChapCells = '';
+        for (let i = 1; i <= 8; i++) {
+          grandChapCells += '<td class="col-num col-chap">' + fmt(grandChap[i] || 0) + '</td>';
+        }
+
+        rows += '<tr class="grand-total">'
+          + '<td></td>'
+          + '<td>TOTAL GENERAL</td>'
+          + '<td class="col-num col-prev">' + fmt(grandPrev) + '</td>'
+          + grandChapCells
+          + '<td class="col-num col-total">' + fmt(grandTotal) + '</td>'
+          + '</tr>';
+
+        // Build header columns
+        let chapHeaders = '';
+        for (let i = 1; i <= 8; i++) {
+          chapHeaders += '<th class="col-chap">' + i + '-' + CHAPITRE_LABELS[i] + '</th>';
+        }
+
+        document.getElementById('content').innerHTML = '<table>'
+          + '<thead>'
+          + '<tr><td colspan="12" class="doc-header-cell">'
+          + '<div class="doc-header-grid">'
+          + '<div class="doc-header-block doc-header-left">REPUBLIQUE DE COTE D\'IVOIRE<br>' + mairieNom + '</div>'
+          + '<div class="doc-header-block doc-header-center"><div class="main-title">COMPTE ADMINISTRATIF - DEPENSES INVESTISSEMENT VENTILEES</div><div>Exercice ' + exercice + '</div></div>'
+          + '<div class="doc-header-block doc-header-right">Page <span class="page-num">1</span></div>'
+          + '</div></td></tr>'
+          + '<tr>'
+          + '<th class="col-code">Code</th>'
+          + '<th class="col-libelle">Libelle</th>'
+          + '<th class="col-prev">Prevu</th>'
+          + chapHeaders
+          + '<th class="col-total">Total</th>'
+          + '</tr>'
+          + '</thead>'
+          + '<tbody>' + rows + '</tbody>'
+          + '</table>';
+      }
+
+      function processMessage(msgData) {
+        if (msgData && msgData.type === 'FILL_COMPTE_ADMIN_DATA') {
+          if (msgData.data) {
+            render(msgData.data);
+          }
+        }
+      }
+
+      let pendingData = null;
+      let dataProcessed = false;
+
+      window.addEventListener('message', function(event) {
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+          processMessage(event.data);
+          dataProcessed = true;
+        } else {
+          pendingData = event.data;
+        }
+      });
+
+      window.addEventListener('DOMContentLoaded', async function() {
+        if (pendingData && !dataProcessed) {
+          processMessage(pendingData);
+          dataProcessed = true;
+          return;
+        }
+
+        await new Promise(r => setTimeout(r, 500));
+
+        if (!dataProcessed) {
+          try {
+            const result = await loadData();
+            render(result);
+            dataProcessed = true;
+          } catch(e) {
+            console.warn('Erreur chargement IndexedDB:', e);
+          }
+        }
+
+        if (!dataProcessed) {
+          try {
+            const db = new Dexie('TresorDatabase');
+            db.version(28).stores({ printData: '++id, type, createdAt' });
+            const records = await db.table('printData').where('type').equals('FILL_COMPTE_ADMIN_DATA').toArray();
+            if (records.length > 0) {
+              const latest = records.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+              processMessage(latest.data);
+              await db.table('printData').delete(latest.id);
+            }
+          } catch(e) {
+            console.warn('Erreur printData:', e);
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

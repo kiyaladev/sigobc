@@ -13,7 +13,7 @@
       }
       body {
         font-family: Arial, Helvetica, sans-serif;
-        font-size: 10px;
+        font-size: 12px;
         margin: 0;
         padding: 10px;
       }
@@ -197,7 +197,27 @@
         text-align: center;
       }
 
+      /* Editable date */
+      .editable-date {
+        cursor: pointer;
+        border-bottom: 1px dashed #999;
+        padding: 0 2px;
+        min-width: 80px;
+        display: inline-block;
+      }
+      .editable-date:hover {
+        background: #e8f0fe;
+      }
+      .editable-date:focus {
+        outline: 2px solid #1976d2;
+        background: #fff;
+        border-bottom: none;
+      }
+
       @media print {
+        .editable-date {
+          border-bottom: none;
+        }
         body {
           padding: 0;
         }
@@ -288,7 +308,9 @@
 
         <div class="signatures">
           <div class="signature-box">
-            <span class="tpl-lieuSignature">---</span>, le <span class="tpl-dateSignature">---</span
+            <span class="tpl-lieuSignature">---</span>, le
+            <span class="editable-date" contenteditable="true"
+              ><span class="tpl-dateSignature">---</span></span
             ><br />
             <strong>Le Trésorier Principal</strong>
           </div>

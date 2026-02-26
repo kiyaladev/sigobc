@@ -176,6 +176,8 @@
                 outlined
                 dense
                 clearable
+                emit-value
+                map-options
               />
             </div>
             <div class="col-12 col-sm-6">
@@ -441,7 +443,7 @@
                 v-model="genService"
                 :options="[
                   { label: 'Tous les services', value: null },
-                  ...servicesOptions.map((s) => ({ label: s, value: s })),
+                  ...servicesOptions,
                 ]"
                 label="Service"
                 outlined
@@ -488,7 +490,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import { useQuasar } from 'quasar';
-import { db, type FichePaie, type Employe, type ParametresPaie } from 'src/database/db';
+import { db, type FichePaie, type Employe, type ParametresPaie, type ServiceApp7 } from 'src/database/db';
 import PageHeader from 'src/components/PageHeader.vue';
 import DataTable from 'src/components/DataTable.vue';
 import { openPrintWindow } from 'src/utils/printUrl';
@@ -516,7 +518,8 @@ const printAnnee = ref(now.getFullYear());
 const printService = ref<string | null>(null);
 const printTypeEmploye = ref<string | null>(null);
 
-const servicesOptions = ref<string[]>([]);
+const servicesList = ref<ServiceApp7[]>([]);
+const servicesOptions = ref<{ label: string; value: string }[]>([]);
 const typeEmployeOptions = ['Salariés', 'Contractuels', "Agents de l'État", 'Maire et Adjoints'];
 
 const officialDocs = [
@@ -547,11 +550,16 @@ const officialDocs = [
 ];
 
 function launchOfficialDoc(file: string) {
+  const svc = printService.value
+    ? servicesList.value.find((s) => s.nom === printService.value)
+    : null;
   openPrintWindow(file, {
     mois: printMois.value,
     annee: printAnnee.value,
     service: printService.value || '',
     typeEmploye: printTypeEmploye.value || '',
+    compte: svc?.compte || '',
+    chapitre: svc?.chapitre || '',
   });
   showPrintDialog.value = false;
 }
@@ -762,7 +770,11 @@ async function loadData() {
     employes.value = loadedEmployes;
     parametresPaie.value = loadedParams ?? null;
     filteredEmployeOptions.value = employeOptions.value;
-    servicesOptions.value = svcs.map((s) => s.nom);
+    servicesList.value = svcs;
+    servicesOptions.value = svcs.map((s) => ({
+      label: s.compte ? `(${s.compte}) ${s.nom}` : s.nom,
+      value: s.nom,
+    }));
   } finally {
     loading.value = false;
   }

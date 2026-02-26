@@ -8,436 +8,85 @@
     <script src="../dexie.min.js"></script>
     <style>
       @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600;700;800&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap');
-
-      body {
-        font-family: 'Libre Baskerville', 'Georgia', serif;
-        background: #d6d2cc;
-      }
-
-      .garamond {
-        font-family: 'EB Garamond', serif;
-      }
-
-      .page {
-        width: 297mm;
-        min-height: 210mm;
-        background: #fff;
-        box-shadow:
-          0 6px 32px rgba(0, 0, 0, 0.14),
-          0 1px 6px rgba(0, 0, 0, 0.08);
-        position: relative;
-      }
-
-      /* Data table styles */
-      table.data-table {
-        border-collapse: collapse;
-      }
-
-      table.data-table th,
-      table.data-table td {
-        border: 1.5px solid #222;
-        padding: 4px 7px;
-        text-align: center;
-        font-size: 12.5px;
-      }
-
-      table.data-table th {
-        background: #f5f3ef;
-        font-weight: 700;
-        font-size: 11.5px;
-        text-transform: uppercase;
-        letter-spacing: 0.3px;
-      }
-
-      table.data-table td {
-        font-variant-numeric: tabular-nums;
-        font-family: 'Arial', sans-serif;
-      }
-
-      table.data-table td.name-cell {
-        text-align: left;
-        font-weight: 600;
-        white-space: nowrap;
-        font-family: 'Libre Baskerville', serif;
-      }
-
-      table.data-table tr.totals-row td {
-        font-weight: 800;
-        border-top: 3px double #222;
-        background: #f9f8f5;
-      }
-
-      .seal {
-        width: 85px;
-        height: 85px;
-        border: 3px solid #1a3a7a;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-        opacity: 0.8;
-      }
-
-      .seal::before {
-        content: '';
-        width: 75px;
-        height: 75px;
-        border: 1.5px solid #1a3a7a;
-        border-radius: 50%;
-        position: absolute;
-      }
-
-      .seal-text-top {
-        position: absolute;
-        top: 5px;
-        font-size: 6.5px;
-        font-weight: 700;
-        letter-spacing: 1.2px;
-        color: #1a3a7a;
-        text-transform: uppercase;
-      }
-
-      .seal-text-bottom {
-        position: absolute;
-        bottom: 5px;
-        font-size: 6.5px;
-        font-weight: 700;
-        letter-spacing: 1px;
-        color: #1a3a7a;
-        text-transform: uppercase;
-      }
-
-      .seal-star {
-        color: #1a3a7a;
-        font-size: 12px;
-      }
-
-      .stamp-box {
-        border: 2.5px solid #1a3a7a;
-        padding: 3px 14px;
-        display: inline-block;
-      }
-
-      .stamp-box span {
-        color: #1a3a7a;
-        font-weight: 700;
-      }
-
-      .title-main {
-        font-family: 'EB Garamond', serif;
-        font-size: 30px;
-        font-weight: 800;
-        letter-spacing: 6px;
-        text-transform: uppercase;
-        text-decoration: underline;
-        text-underline-offset: 4px;
-      }
-
+      body { font-family: 'Libre Baskerville', 'Georgia', serif; background: #d6d2cc; }
+      .garamond { font-family: 'EB Garamond', serif; }
       .print-btn {
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        background: #1976d2;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 14px;
-        z-index: 999;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        position: fixed; top: 10px; right: 10px; background: #1976d2; color: white;
+        border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;
+        font-size: 14px; z-index: 999; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
       }
-      .print-btn:hover {
-        background: #1565c0;
+      .print-btn:hover { background: #1565c0; }
+      .print-page {
+        width: 297mm; min-height: 210mm; background: #fff;
+        box-shadow: 0 6px 32px rgba(0,0,0,0.14), 0 1px 6px rgba(0,0,0,0.08);
+        margin: 20px auto; padding: 8mm 10mm; position: relative; page-break-after: always;
       }
-
-      /* Wrapper table for repeating header on each printed page */
-      table.print-wrapper {
-        width: 100%;
-        border-collapse: collapse;
-      }
-      table.print-wrapper > thead > tr > td,
-      table.print-wrapper > tbody > tr > td,
-      table.print-wrapper > tfoot > tr > td {
-        border: none !important;
-        padding: 0 !important;
-        vertical-align: top;
-      }
-      table.print-wrapper > thead {
-        display: table-header-group;
-      }
-      table.print-wrapper > tfoot {
-        display: table-footer-group;
-      }
-
+      .print-page:last-child { page-break-after: auto; }
+      .page-number { position: absolute; bottom: 5mm; right: 10mm; font-size: 9px; color: #999; }
+      table.data-table { border-collapse: collapse; width: 100%; }
+      table.data-table th, table.data-table td { border: 1.5px solid #222; padding: 3px 4px; text-align: center; font-size: 10.5px; }
+      table.data-table th { background: #f5f3ef; font-weight: 700; font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.3px; }
+      table.data-table td { font-variant-numeric: tabular-nums; font-family: 'Arial', sans-serif; }
+      table.data-table td.name-cell { text-align: left; font-weight: 600; white-space: nowrap; font-family: 'Libre Baskerville', serif; }
+      tr.totals-row td { font-weight: 800; border-top: 3px double #222; background: #f9f8f5; }
+      tr.report-row td { background: #fef3c7 !important; font-weight: bold; font-style: italic; }
+      tr.total-row td { background: #dbeafe !important; font-weight: bold; }
+      .title-main { font-family: 'EB Garamond', serif; font-size: 24px; font-weight: 800; letter-spacing: 5px; text-transform: uppercase; text-decoration: underline; text-underline-offset: 4px; }
+      .editable-date { cursor: pointer; border-bottom: 1px dashed #999; padding: 0 2px; min-width: 80px; display: inline-block; }
+      .editable-date:hover { background: #e8f0fe; }
+      .editable-date:focus { outline: 2px solid #1976d2; background: #fff; border-bottom: none; }
       @media print {
-        @page {
-          size: A4 landscape;
-          margin: 1cm;
-        }
-        body {
-          background: white;
-        }
-        .page {
-          box-shadow: none;
-          margin: 0;
-          width: 100%;
-          padding: 0;
-        }
-        .print-btn {
-          display: none !important;
-        }
-        tr {
-          break-inside: avoid;
-        }
+        @page { size: A4 landscape; margin: 0; }
+        body { background: white; padding: 0; margin: 0; }
+        .print-btn { display: none !important; }
+        .editable-date { border-bottom: none; }
+        .print-page { box-shadow: none; margin: 0; width: 100%; min-height: 100vh; padding: 5mm 7mm; }
       }
     </style>
   </head>
-  <body class="flex items-start justify-center min-h-screen py-8">
+  <body class="py-8">
     <button class="print-btn" onclick="window.print()">Imprimer</button>
-
-    <div class="page px-12 py-8">
-      <table class="print-wrapper">
-        <thead>
-          <tr>
-            <td>
-              <!-- En-tete repete sur chaque page -->
-              <div class="flex justify-between items-start mb-6">
-                <div class="text-[13px] leading-snug">
-                  <p class="font-bold uppercase">Departement de Vavoua</p>
-                  <p class="font-bold uppercase">Commune de Vavoua</p>
-                  <p class="font-bold uppercase">Code : 433</p>
-                </div>
-                <div class="text-right text-[13px] leading-snug">
-                  <p class="font-bold uppercase tracking-wide">Republique de Cote d'Ivoire</p>
-                  <p class="italic">Union - Discipline - Travail</p>
-                </div>
-              </div>
-
-              <!-- Titre -->
-              <div class="text-center mb-4">
-                <h1 class="title-main garamond">Etat de Solde</h1>
-              </div>
-
-              <!-- Periode -->
-              <div class="text-center mb-4">
-                <p
-                  id="periode-text"
-                  class="text-[14px] font-bold uppercase tracking-wide underline underline-offset-2"
-                >
-                  Periode : du ... au ...
-                </p>
-              </div>
-
-              <!-- Exercice / Chapitre / Article -->
-              <div class="flex justify-between items-center mb-4 px-4">
-                <p id="exercice-text" class="text-[14px] font-bold uppercase underline underline-offset-2">
-                  Exercice : ...
-                </p>
-                <p class="text-[14px] font-bold uppercase underline underline-offset-2">Chapitre : 601</p>
-                <p class="text-[14px] font-bold uppercase underline underline-offset-2">Article : 6010/1</p>
-              </div>
-            </td>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <!-- Tableau principal -->
-              <div class="overflow-x-auto">
-                <table class="data-table w-full">
-                  <thead>
-                    <tr>
-                      <th rowspan="2" class="w-[40px]">N&deg;<br />D'ORD.</th>
-                      <th rowspan="2" class="text-left min-w-[180px]">Nom & Prenom (S)</th>
-                      <th rowspan="2">Salaire<br />Brut</th>
-                      <th rowspan="2" id="th-resid">Idem<br />Resid<br />...%</th>
-                      <th rowspan="2">Salaire<br />Brut</th>
-                      <th rowspan="2" id="th-cnps">CNPS<br />...%</th>
-                      <th rowspan="2">Salaire<br />Net</th>
-                      <th colspan="3">Retenues</th>
-                      <th rowspan="2">Total<br />Impots</th>
-                      <th rowspan="2">Primes de<br />Transp.<br />Indem.Fct</th>
-                      <th rowspan="2">Net<br />A<br />Payer</th>
-                    </tr>
-                    <tr>
-                      <th id="th-its">I.T.S<br />...%</th>
-                      <th>I.G.R</th>
-                      <th id="th-fns">F.N.S<br />...%</th>
-                    </tr>
-                  </thead>
-                  <tbody id="tbody-data">
-                    <tr>
-                      <td colspan="13" class="text-center py-4 text-gray-500">Chargement des donnees...</td>
-                    </tr>
-                  </tbody>
-                  <tfoot>
-                    <tr class="totals-row">
-                      <td
-                        colspan="2"
-                        class="text-left font-extrabold tracking-wide"
-                        style="text-align: left; padding-left: 12px"
-                      >
-                        TOTAUX ...................
-                      </td>
-                      <td id="tot-base">0</td>
-                      <td id="tot-logement">0</td>
-                      <td id="tot-brut">0</td>
-                      <td id="tot-cnps">0</td>
-                      <td id="tot-net-imp">0</td>
-                      <td id="tot-its">0</td>
-                      <td></td>
-                      <td></td>
-                      <td id="tot-imp">0</td>
-                      <td id="tot-primes">0</td>
-                      <td id="tot-net" class="font-extrabold">0</td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-
-              <!-- Arrete -->
-              <div class="mt-5 text-[13px]">
-                <p>
-                  <span>Arrete le present etat a la somme de :</span>
-                  <span id="arrete-montant" class="font-bold uppercase ml-2">...</span>
-                </p>
-              </div>
-
-              <!-- Signature -->
-              <div class="mt-6 flex justify-end">
-                <div class="text-center">
-                  <p id="date-sig" class="text-[13px] font-bold">VAVOUA, le ...</p>
-                  <p class="text-[13px] font-bold mt-0.5">P/ LE MAIRE & P.D.;</p>
-                </div>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div id="content">
+      <div class="print-page" style="display:flex;align-items:center;justify-content:center;color:#888">Chargement des données...</div>
     </div>
-
     <script>
-      const MOIS_LABELS = [
-        'Janvier',
-        'Fevrier',
-        'Mars',
-        'Avril',
-        'Mai',
-        'Juin',
-        'Juillet',
-        'Aout',
-        'Septembre',
-        'Octobre',
-        'Novembre',
-        'Decembre',
-      ];
-
-      function fmt(n) {
-        return Number(n || 0).toLocaleString('fr-FR');
-      }
-
+      const MOIS_LABELS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+      const ROWS_PER_PAGE = 10;
+      function fmt(n) { return Number(n||0).toLocaleString('fr-FR'); }
       function numberToWords(num) {
-        if (num === 0) return 'ZERO';
-        const units = [
-          '',
-          'un',
-          'deux',
-          'trois',
-          'quatre',
-          'cinq',
-          'six',
-          'sept',
-          'huit',
-          'neuf',
-          'dix',
-          'onze',
-          'douze',
-          'treize',
-          'quatorze',
-          'quinze',
-          'seize',
-          'dix-sept',
-          'dix-huit',
-          'dix-neuf',
-        ];
-        const tens = [
-          '',
-          '',
-          'vingt',
-          'trente',
-          'quarante',
-          'cinquante',
-          'soixante',
-          'soixante',
-          'quatre-vingt',
-          'quatre-vingt',
-        ];
-        function lt1000(n) {
-          if (n < 20) return units[n];
-          if (n < 100) {
-            const t = Math.floor(n / 10),
-              u = n % 10;
-            if (t === 7) return 'soixante-' + units[10 + u];
-            if (t === 9) return 'quatre-vingt-' + (u === 0 ? 's' : units[u]);
-            return (
-              tens[t] +
-              (u === 1 && t !== 8 ? '-et-un' : u > 0 ? '-' + units[u] : t === 8 ? 's' : '')
-            );
-          }
-          const h = Math.floor(n / 100),
-            r = n % 100;
-          return (
-            (h === 1 ? 'cent' : units[h] + '-cent') +
-            (r === 0 && h > 1 ? 's' : '') +
-            (r > 0 ? '-' + lt1000(r) : '')
-          );
-        }
-        function conv(n) {
-          if (!n) return '';
-          if (n >= 1000000) {
-            const m = Math.floor(n / 1e6),
-              r = n % 1e6;
-            return (
-              (m === 1 ? 'un million' : lt1000(m) + ' millions') + (r > 0 ? ' ' + conv(r) : '')
-            );
-          }
-          if (n >= 1000) {
-            const k = Math.floor(n / 1000),
-              r = n % 1000;
-            return (k === 1 ? 'mille' : lt1000(k) + ' mille') + (r > 0 ? ' ' + lt1000(r) : '');
-          }
-          return lt1000(n);
-        }
-        return conv(num).toUpperCase() + ' FRANCS CFA';
+        if(num===0)return'ZÉRO';const units=['','un','deux','trois','quatre','cinq','six','sept','huit','neuf','dix','onze','douze','treize','quatorze','quinze','seize','dix-sept','dix-huit','dix-neuf'];const tens=['','','vingt','trente','quarante','cinquante','soixante','soixante','quatre-vingt','quatre-vingt'];
+        function lt1000(n){if(n<20)return units[n];if(n<100){const t=Math.floor(n/10),u=n%10;if(t===7)return'soixante-'+units[10+u];if(t===9)return'quatre-vingt-'+(u===0?'s':units[u]);return tens[t]+(u===1&&t!==8?'-et-un':u>0?'-'+units[u]:t===8?'s':'');}const h=Math.floor(n/100),r=n%100;return(h===1?'cent':units[h]+'-cent')+(r===0&&h>1?'s':'')+(r>0?'-'+lt1000(r):'');}
+        function conv(n){if(!n)return'';if(n>=1e6){const m=Math.floor(n/1e6),r=n%1e6;return(m===1?'un million':lt1000(m)+' millions')+(r>0?' '+conv(r):'');}if(n>=1000){const k=Math.floor(n/1000),r=n%1000;return(k===1?'mille':lt1000(k)+' mille')+(r>0?' '+lt1000(r):'');}return lt1000(n);}
+        return conv(num).toUpperCase()+' FRANCS CFA';
       }
-
       const db = new Dexie('TresorDatabase');
-      db.version(28).stores({
-        mairies: '++id, nom, code, ville',
-        employes:
-          '++id, matricule, nom, prenom, typeEmploye, service, departement, mairieId, actif',
-        fichesPaie:
-          '++id, employeId, mois, annee, exercice, mairieId, statut, [annee+mois+employeId]',
-        parametresPaie: '++id, mairieId',
-        servicesApp7: '++id, nom, compte, mairieId, actif',
-      });
+      db.version(28).stores({ mairies:'++id, nom, code, ville', employes:'++id, matricule, nom, prenom, typeEmploye, service, departement, mairieId, actif', fichesPaie:'++id, employeId, mois, annee, exercice, mairieId, statut, [annee+mois+employeId]', parametresPaie:'++id, mairieId', servicesApp7:'++id, nom, compte, mairieId, actif' });
+
+      function buildHeader(premierJour, dernierJour, annee, chapitre, compte) {
+        return `<div class="flex justify-between items-start mb-2">
+            <div style="font-size:11px" class="leading-snug"><p class="font-bold uppercase">Département de Vavoua</p><p class="font-bold uppercase">Commune de Vavoua</p><p class="font-bold uppercase">Code : 433</p></div>
+            <div class="text-right" style="font-size:11px"><p class="font-bold uppercase tracking-wide">République de Côte d'Ivoire</p><p class="italic">Union – Discipline – Travail</p></div>
+          </div>
+          <div class="text-center mb-2"><h1 class="title-main garamond">État de Solde</h1></div>
+          <div class="text-center mb-1"><p style="font-size:11px" class="font-bold uppercase tracking-wide underline underline-offset-2">Période : du ${premierJour} au ${dernierJour}</p></div>
+          <div class="flex justify-between items-center mb-2 px-2" style="font-size:11px"><p class="font-bold uppercase underline underline-offset-2">Exercice : ${annee}</p>${chapitre ? `<p class="font-bold uppercase underline underline-offset-2">Chapitre : ${chapitre}</p>` : ''}<p class="font-bold uppercase underline underline-offset-2">Article : ${compte || '6010'}/1</p></div>`;
+      }
+      function buildTableHead(tResid, tCnps, tIts, tFns) {
+        return `<thead>
+          <tr><th rowspan="2" style="width:3.5%">N°<br/>D'ORD.</th><th rowspan="2" class="text-left" style="width:14%">Nom & Prénom(S)</th><th rowspan="2" style="width:7.5%">Salaire<br/>Brut</th><th rowspan="2" style="width:7%">Idem<br/>Résid<br/>${tResid.toLocaleString('fr-FR')}%</th><th rowspan="2" style="width:7.5%">Salaire<br/>Brut</th><th rowspan="2" style="width:6.5%">CNPS<br/>${tCnps.toLocaleString('fr-FR')}%</th><th rowspan="2" style="width:7.5%">Salaire<br/>Net</th><th colspan="3">Retenues</th><th rowspan="2" style="width:7%">Total<br/>Impôts</th><th rowspan="2" style="width:7.5%">Primes de<br/>Transp.<br/>Indem.Fct</th><th rowspan="2" style="width:8%">Net<br/>A<br/>Payer</th></tr>
+          <tr><th style="width:6.5%">I.T.S<br/>${tIts.toLocaleString('fr-FR')}%</th><th style="width:5%">I.G.R</th><th style="width:5%">F.N.S<br/>${tFns.toLocaleString('fr-FR')}%</th></tr>
+        </thead>`;
+      }
 
       document.addEventListener('DOMContentLoaded', async () => {
         const params = new URLSearchParams(window.location.search);
-        const mois = parseInt(params.get('mois') || String(new Date().getMonth() + 1), 10);
-        const annee = parseInt(params.get('annee') || String(new Date().getFullYear()), 10);
-
-        const moisLabel = MOIS_LABELS[mois - 1] || '';
-        const premierJour = `01/${String(mois).padStart(2, '0')}/${annee}`;
-        const dernierJour = `${new Date(annee, mois, 0).getDate()}/${String(mois).padStart(2, '0')}/${annee}`;
-
-        document.getElementById('periode-text').textContent =
-          `Periode : du ${premierJour} au ${dernierJour}`;
-        document.getElementById('exercice-text').textContent = `Exercice : ${annee}`;
-        document.getElementById('date-sig').textContent =
-          `VAVOUA, le ${new Date().toLocaleDateString('fr-FR')}`;
+        const mois = parseInt(params.get('mois')||String(new Date().getMonth()+1),10);
+        const annee = parseInt(params.get('annee')||String(new Date().getFullYear()),10);
+        const premierJour = `01/${String(mois).padStart(2,'0')}/${annee}`;
+        const dernierJour = `${new Date(annee,mois,0).getDate()}/${String(mois).padStart(2,'0')}/${annee}`;
+        const dateSig = `VAVOUA, le ${new Date().toLocaleDateString('fr-FR')}`;
+        const compteParam = params.get('compte') || '';
+        const chapitreParam = params.get('chapitre') || '';
 
         const paramsDb = await db.parametresPaie.toCollection().first();
         const tResid = paramsDb ? paramsDb.tauxIndemniteResidence : 15;
@@ -445,124 +94,63 @@
         const tIts = paramsDb ? paramsDb.tauxIts : 1.6;
         const tFns = paramsDb ? paramsDb.tauxFns : 1;
 
-        const elResid = document.getElementById('th-resid');
-        if (elResid) elResid.innerHTML = `Idem<br />Resid<br />${tResid.toLocaleString('fr-FR')}%`;
-        const elCnps = document.getElementById('th-cnps');
-        if (elCnps) elCnps.innerHTML = `CNPS<br />${tCnps.toLocaleString('fr-FR')}%`;
-        const elIts = document.getElementById('th-its');
-        if (elIts) elIts.innerHTML = `I.T.S<br />${tIts.toLocaleString('fr-FR')}%`;
-        const elFns = document.getElementById('th-fns');
-        if (elFns) elFns.innerHTML = `F.N.S<br />${tFns.toLocaleString('fr-FR')}%`;
+        let fiches = await db.fichesPaie.where('[annee+mois+employeId]').between([annee,mois,-Infinity],[annee,mois,Infinity]).filter(f=>f.statut!=='brouillon').toArray().catch(()=>db.fichesPaie.filter(f=>f.mois===mois&&f.annee===annee&&f.statut!=='brouillon').toArray());
+        const sf=params.get('service'),tf=params.get('typeEmploye');
+        if(sf||tf){const fl=[];for(const f of fiches){const e=await db.employes.get(f.employeId);if(e){if(sf&&e.service!==sf)continue;if(tf&&e.typeEmploye!==tf)continue;fl.push(f);}}fiches=fl;}
 
-        let fiches = await db.fichesPaie
-          .where('[annee+mois+employeId]')
-          .between([annee, mois, -Infinity], [annee, mois, Infinity])
-          .filter((f) => f.statut !== 'brouillon')
-          .toArray()
-          .catch(() =>
-            db.fichesPaie
-              .filter((f) => f.mois === mois && f.annee === annee && f.statut !== 'brouillon')
-              .toArray(),
-          );
+        if(!fiches.length){ document.getElementById('content').innerHTML=`<div class="print-page"><p style="padding:40px;text-align:center;color:#888">Aucun bulletin pour cette période</p></div>`; if(params.get('print')==='true')setTimeout(()=>window.print(),500); return; }
 
-        const serviceFiltre = params.get('service');
-        const typeEmployeFiltre = params.get('typeEmploye');
+        // Build all data rows with values
+        const allData = await Promise.all(fiches.map(async (f,i) => {
+          const emp = await db.employes.get(f.employeId);
+          const nom = emp ? `${emp.nom} ${emp.prenom}` : `Agent #${f.employeId}`;
+          const base=f.salaireBase||0, log=f.indemniteLogement||0, brut=f.montantBrut||0, cnps=f.cotisationCNPS||0;
+          const netImp=brut-cnps, its=f.impotSurSalaire||0, totalImp=its;
+          const primes=(f.indemniteTransport||0)+(f.autresIndemnites||0), net=f.montantNet||0;
+          return { idx:i+1, nom, base, log, brut, cnps, netImp, its, totalImp, primes, net };
+        }));
 
-        if (serviceFiltre || typeEmployeFiltre) {
-          const filtered = [];
-          for (const f of fiches) {
-            const emp = await db.employes.get(f.employeId);
-            if (emp) {
-              if (serviceFiltre && emp.service !== serviceFiltre) continue;
-              if (typeEmployeFiltre && emp.typeEmploye !== typeEmployeFiltre) continue;
-              filtered.push(f);
-            }
-          }
-          fiches = filtered;
-        }
+        const pages = [];
+        for(let i=0;i<allData.length;i+=ROWS_PER_PAGE) pages.push(allData.slice(i,i+ROWS_PER_PAGE));
+        const totalPages = pages.length;
 
-        const tbody = document.getElementById('tbody-data');
-        if (!fiches.length) {
-          tbody.innerHTML =
-            '<tr><td colspan="13" class="text-center py-4 text-gray-500">Aucun bulletin pour cette periode</td></tr>';
+        // Cumulative totals
+        let cBase=0,cLog=0,cBrut=0,cCnps=0,cNetImp=0,cIts=0,cImp=0,cPrimes=0,cNet=0;
+        let html = '';
 
-          setTimeout(() => {
-            if (params.get('print') === 'true') {
-              window.print();
-            }
-          }, 500);
-          return;
-        }
+        pages.forEach((pageData, idx) => {
+          const isLast = idx===totalPages-1;
+          const rBase=cBase,rLog=cLog,rBrut=cBrut,rCnps=cCnps,rNetImp=cNetImp,rIts=cIts,rImp=cImp,rPrimes=cPrimes,rNet=cNet;
 
-        let totBase = 0,
-          totLogement = 0,
-          totBrut = 0,
-          totCnps = 0,
-          totNetImp = 0,
-          totIts = 0,
-          totImp = 0,
-          totPrimes = 0,
-          totNet = 0;
+          pageData.forEach(d => { cBase+=d.base; cLog+=d.log; cBrut+=d.brut; cCnps+=d.cnps; cNetImp+=d.netImp; cIts+=d.its; cImp+=d.totalImp; cPrimes+=d.primes; cNet+=d.net; });
 
-        const rows = await Promise.all(
-          fiches.map(async (f, i) => {
-            const emp = await db.employes.get(f.employeId);
-            const nom = emp ? `${emp.nom} ${emp.prenom}` : `Agent #${f.employeId}`;
-            const base = f.salaireBase || 0,
-              log = f.indemniteLogement || 0;
-            const brut = f.montantBrut || 0,
-              cnps = f.cotisationCNPS || 0;
-            const netImp = brut - cnps,
-              its = f.impotSurSalaire || 0;
-            const totalImp = its,
-              primes = (f.indemniteTransport || 0) + (f.autresIndemnites || 0),
-              net = f.montantNet || 0;
+          const reportRow = idx>0 ? `<tr class="report-row">
+            <td colspan="2" style="text-align:left;padding-left:8px">REPORT</td>
+            <td>${fmt(rBase)}</td><td>${fmt(rLog)}</td><td>${fmt(rBrut)}</td><td>${fmt(rCnps)}</td><td>${fmt(rNetImp)}</td>
+            <td>${fmt(rIts)}</td><td></td><td></td><td>${fmt(rImp)}</td><td>${fmt(rPrimes)}</td><td>${fmt(rNet)}</td>
+          </tr>` : '';
 
-            totBase += base;
-            totLogement += log;
-            totBrut += brut;
-            totCnps += cnps;
-            totNetImp += netImp;
-            totIts += its;
-            totImp += totalImp;
-            totPrimes += primes;
-            totNet += net;
+          const dataRows = pageData.map(d => `<tr>
+            <td>${d.idx}</td><td class="name-cell">${d.nom}</td><td>${fmt(d.base)}</td><td>${fmt(d.log)}</td><td>${fmt(d.brut)}</td><td>${fmt(d.cnps)}</td><td>${fmt(d.netImp)}</td><td>${fmt(d.its)}</td><td></td><td></td><td>${fmt(d.totalImp)}</td><td>${fmt(d.primes)}</td><td class="font-bold">${fmt(d.net)}</td>
+          </tr>`).join('');
 
-            return `<tr>
-            <td>${i + 1}</td>
-            <td class="name-cell">${nom}</td>
-            <td>${fmt(base)}</td>
-            <td>${fmt(log)}</td>
-            <td>${fmt(brut)}</td>
-            <td>${fmt(cnps)}</td>
-            <td>${fmt(netImp)}</td>
-            <td>${fmt(its)}</td>
-            <td></td>
-            <td></td>
-            <td>${fmt(totalImp)}</td>
-            <td>${fmt(primes)}</td>
-            <td class="font-bold">${fmt(net)}</td>
+          const totalRow = `<tr class="total-row">
+            <td colspan="2" style="text-align:left;padding-left:8px"><strong>${isLast?'TOTAUX GÉNÉRAUX':'TOTAL'} ...................</strong></td>
+            <td><strong>${fmt(cBase)}</strong></td><td><strong>${fmt(cLog)}</strong></td><td><strong>${fmt(cBrut)}</strong></td><td><strong>${fmt(cCnps)}</strong></td><td><strong>${fmt(cNetImp)}</strong></td>
+            <td><strong>${fmt(cIts)}</strong></td><td></td><td></td><td><strong>${fmt(cImp)}</strong></td><td><strong>${fmt(cPrimes)}</strong></td><td><strong>${fmt(cNet)}</strong></td>
           </tr>`;
-          }),
-        );
-        tbody.innerHTML = rows.join('');
 
-        document.getElementById('tot-base').textContent = fmt(totBase);
-        document.getElementById('tot-logement').textContent = fmt(totLogement);
-        document.getElementById('tot-brut').textContent = fmt(totBrut);
-        document.getElementById('tot-cnps').textContent = fmt(totCnps);
-        document.getElementById('tot-net-imp').textContent = fmt(totNetImp);
-        document.getElementById('tot-its').textContent = fmt(totIts);
-        document.getElementById('tot-imp').textContent = fmt(totImp);
-        document.getElementById('tot-primes').textContent = fmt(totPrimes);
-        document.getElementById('tot-net').textContent = fmt(totNet);
-        document.getElementById('arrete-montant').textContent = numberToWords(totNet);
+          html += `<div class="print-page">
+            ${buildHeader(premierJour, dernierJour, annee, chapitreParam, compteParam)}
+            <table class="data-table">${buildTableHead(tResid, tCnps, tIts, tFns)}<tbody>${reportRow}${dataRows}${totalRow}</tbody></table>
+            ${isLast ? `<div class="mt-3" style="font-size:11px"><p><span>Arrêté le présent état à la somme de :</span> <span class="font-bold uppercase ml-2">${numberToWords(cNet)}</span></p></div>
+              <div class="mt-3 flex justify-end"><div class="text-center"><p style="font-size:11px" class="font-bold">VAVOUA, le <span class="editable-date" contenteditable="true">${new Date().toLocaleDateString('fr-FR')}</span></p><p style="font-size:11px" class="font-bold mt-0.5">P/ LE MAIRE & P.D.;</p></div></div>` : ''}
+            <div class="page-number">Page ${idx+1}/${totalPages}</div>
+          </div>`;
+        });
 
-        setTimeout(() => {
-          if (params.get('print') === 'true') {
-            window.print();
-          }
-        }, 500);
+        document.getElementById('content').innerHTML = html;
+        if(params.get('print')==='true') setTimeout(()=>window.print(),500);
       });
     </script>
   </body>

@@ -472,6 +472,34 @@
 
         <q-separator class="q-my-xs" />
 
+        <!-- ===== COMPTE ADMINISTRATIF ===== -->
+        <q-expansion-item
+          group="sidebar"
+          icon="assignment"
+          label="Compte Administratif"
+          :default-opened="isCompteAdminActive"
+          header-class="text-grey-7 text-weight-medium accordion-header"
+          expand-icon-class="text-grey-7"
+          class="accordion-section q-mb-xs"
+        >
+          <q-item
+            clickable
+            v-ripple
+            to="/compte-admin"
+            class="nav-item q-mb-xs"
+            active-class="nav-item-active"
+          >
+            <q-item-section avatar>
+              <q-icon name="summarize" color="teal" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Compte Administratif</q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-expansion-item>
+
+        <q-separator class="q-my-xs" />
+
         <!-- ===== ADMINISTRATION ===== -->
         <template v-if="authStore.isAdmin">
           <q-expansion-item
@@ -596,6 +624,7 @@ const leftDrawerOpen = ref(false);
 const isApp3Active = computed(() => route.path.startsWith('/app3'));
 const isApp6Active = computed(() => route.path.startsWith('/app6'));
 const isApp7Active = computed(() => route.path.startsWith('/app7'));
+const isCompteAdminActive = computed(() => route.path.startsWith('/compte-admin'));
 const isAdminActive = computed(
   () =>
     route.path.startsWith('/admin') ||

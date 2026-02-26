@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Compte Administratif - Recettes Investissement</title>
+    <script src="../dexie.min.js"></script>
+    <style>
+      @page {
+        size: A4 landscape;
+        margin: 10mm;
+      }
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 10px;
+        margin: 0;
+        padding: 10px;
+      }
+      .container { width: 100%; }
+      .main-title {
+        text-decoration: underline;
+        font-size: 14px;
+        margin: 5px 0;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 0;
+      }
+      th, td {
+        border: 1px solid #000;
+        padding: 3px 4px;
+      }
+      th {
+        background-color: #f0f0f0;
+        text-align: center;
+        vertical-align: middle;
+        font-size: 9px;
+      }
+      .col-code { width: 8%; text-align: center; }
+      .col-libelle { width: 30%; text-align: left; }
+      .col-num { width: 14%; text-align: right; white-space: nowrap; }
+      .col-percent { width: 8%; text-align: center; }
+      .section-header { background-color: #e0e0e0; font-weight: bold; }
+      .total-section { background-color: #d0d0d0; font-weight: bold; border-top: 2px solid #000; }
+      .grand-total { background-color: #bbb; font-weight: bold; border-top: 3px double #000; }
+      .doc-header-cell { padding: 0 !important; background: #fff !important; }
+      .doc-header-grid { width: 100%; display: grid; grid-template-columns: 1fr 2fr 1fr; }
+      .doc-header-block { padding: 4px 6px; min-height: 70px; }
+      .doc-header-block + .doc-header-block { border-left: 1px solid #000; }
+      .doc-header-left { text-align: left; font-weight: bold; }
+      .doc-header-center { text-align: center; font-weight: bold; }
+      .doc-header-right { text-align: right; font-weight: bold; }
+      .doc-header-center .main-title { margin: 0 0 4px 0; }
+      .print-button {
+        position: fixed; top: 20px; right: 20px; padding: 10px 20px;
+        background: #009688; color: white; border: none; border-radius: 5px;
+        cursor: pointer; font-size: 14px; z-index: 1000;
+      }
+      .print-button:hover { background: #00796B; }
+      .loading { text-align: center; padding: 50px; font-size: 16px; color: #666; }
+      @media print {
+        .no-print { display: none !important; }
+        body { padding: 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <button class="print-button no-print" onclick="window.print()">Imprimer</button>
+    <div class="container">
+      <div id="content">
+        <div class="loading" id="loading">Chargement des donnees...</div>
+      </div>
+    </div>
+
+    <script>
+      function fmt(v) { return v ? new Intl.NumberFormat('fr-FR').format(v) : '0'; }
+      function pct(a, b) { return b ? ((a / b) * 100).toFixed(2) : '0.00'; }
+
+      const SECTIONS = {
+        '01': 'Dotations de l\'Etat',
+        '02': 'Emprunts',
+        '03': 'Cessions immobilieres',
+        '04': 'Subventions investissement',
+        '05': 'Fonds propres',
+        '06': 'Autres recettes investissement'
+      };
+
+      async function loadData() {
+        const db = new Dexie('TresorDatabase');
+        db.version(28).stores({
+          mandats: '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
+          previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
+          sousChapitres: '++id, code, libelle, parentId, mairieId, actif',
+          chapitres: '++id, code, libelle, mairieId, actif',
+          taxes: '++id, code, libelle, mairieId, type, actif',
+          declarations: '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
+          previsionsRecettes: '++id, exercice, taxeId, mairieId, statut, personnelId',
+          mairies: '++id, nom, code, ville',
+          printData: '++id, type, createdAt'
+        });
+
+        const exercice = new Date().getFullYear();
+
+        const [taxes, previsionsRecettes, declarations, mairie] = await Promise.all([
+          db.taxes.toArray(),
+          db.previsionsRecettes.where('exercice').equals(exercice).toArray(),
+          db.declarations.where('exercice').equals(exercice).toArray(),
+          db.mairies.toCollection().first()
+        ]);
+
+        // Filter taxes with code starting with '0' (investissement recettes)
+        const investTaxes = taxes.filter(t => t.code && t.code.startsWith('0'));
+
+        // Build prevision map by taxeId
+        const prevMap = {};
+        previsionsRecettes.forEach(p => {
+          if (!prevMap[p.taxeId]) prevMap[p.taxeId] = 0;
+          prevMap[p.taxeId] += (p.montantPrevu || 0);
+        });
+
+        // Build emissions and recouvrements maps by taxeId
+        const emissionMap = {};
+        const recouvrementMap = {};
+        declarations.forEach(d => {
+          if (d.statut === 'annulee') return;
+          const tid = d.taxeId;
+          if (!emissionMap[tid]) emissionMap[tid] = 0;
+          if (!recouvrementMap[tid]) recouvrementMap[tid] = 0;
+          emissionMap[tid] += (d.montant || d.montantRecette || 0);
+          if (d.dateEncaissement) {
+            recouvrementMap[tid] += (d.montantRecette || d.montant || 0);
+          }
+        });
+
+        return { investTaxes, prevMap, emissionMap, recouvrementMap, exercice, mairie };
+      }
+
+      function render(data) {
+        const { investTaxes, prevMap, emissionMap, recouvrementMap, exercice, mairie } = data;
+        const mairieNom = mairie ? mairie.nom || 'Mairie de Vavoua' : 'Mairie de Vavoua';
+
+        // Group taxes by section (first 2 chars of code)
+        const grouped = {};
+        investTaxes.forEach(t => {
+          const sec = t.code.substring(0, 2);
+          if (!grouped[sec]) grouped[sec] = [];
+          grouped[sec].push(t);
+        });
+
+        let grandPrev = 0, grandEmis = 0, grandRec = 0;
+
+        let rows = '';
+        const sectionCodes = Object.keys(SECTIONS).sort();
+
+        sectionCodes.forEach(secCode => {
+          const secLabel = SECTIONS[secCode];
+          const taxesInSection = (grouped[secCode] || []).sort((a, b) => a.code.localeCompare(b.code));
+
+          let secPrev = 0, secEmis = 0, secRec = 0;
+
+          rows += '<tr class="section-header"><td>' + secCode + '</td><td colspan="5">SECTION ' + secCode + ' - ' + secLabel + '</td></tr>';
+
+          taxesInSection.forEach(t => {
+            const prev = prevMap[t.id] || 0;
+            const emis = emissionMap[t.id] || 0;
+            const rec = recouvrementMap[t.id] || 0;
+            const tauxRec = pct(rec, emis);
+
+            secPrev += prev;
+            secEmis += emis;
+            secRec += rec;
+
+            rows += '<tr>'
+              + '<td class="col-code">' + t.code + '</td>'
+              + '<td class="col-libelle">' + (t.libelle || '') + '</td>'
+              + '<td class="col-num">' + fmt(prev) + '</td>'
+              + '<td class="col-num">' + fmt(emis) + '</td>'
+              + '<td class="col-num">' + fmt(rec) + '</td>'
+              + '<td class="col-percent">' + tauxRec + '</td>'
+              + '</tr>';
+          });
+
+          // Section total
+          rows += '<tr class="total-section">'
+            + '<td></td>'
+            + '<td>TOTAL SECTION ' + secCode + '</td>'
+            + '<td class="col-num">' + fmt(secPrev) + '</td>'
+            + '<td class="col-num">' + fmt(secEmis) + '</td>'
+            + '<td class="col-num">' + fmt(secRec) + '</td>'
+            + '<td class="col-percent">' + pct(secRec, secEmis) + '</td>'
+            + '</tr>';
+
+          grandPrev += secPrev;
+          grandEmis += secEmis;
+          grandRec += secRec;
+        });
+
+        // Grand total
+        rows += '<tr class="grand-total">'
+          + '<td></td>'
+          + '<td>TOTAL GENERAL RECETTES INVESTISSEMENT</td>'
+          + '<td class="col-num">' + fmt(grandPrev) + '</td>'
+          + '<td class="col-num">' + fmt(grandEmis) + '</td>'
+          + '<td class="col-num">' + fmt(grandRec) + '</td>'
+          + '<td class="col-percent">' + pct(grandRec, grandEmis) + '</td>'
+          + '</tr>';
+
+        document.getElementById('content').innerHTML = '<table>'
+          + '<thead>'
+          + '<tr><td colspan="6" class="doc-header-cell">'
+          + '<div class="doc-header-grid">'
+          + '<div class="doc-header-block doc-header-left">REPUBLIQUE DE COTE D\'IVOIRE<br>' + mairieNom + '</div>'
+          + '<div class="doc-header-block doc-header-center"><div class="main-title">COMPTE ADMINISTRATIF - RECETTES INVESTISSEMENT</div><div>Exercice ' + exercice + '</div></div>'
+          + '<div class="doc-header-block doc-header-right">Page <span class="page-num">1</span></div>'
+          + '</div></td></tr>'
+          + '<tr>'
+          + '<th class="col-code">Code</th>'
+          + '<th class="col-libelle">Libelle</th>'
+          + '<th class="col-num">Previsions</th>'
+          + '<th class="col-num">Emissions</th>'
+          + '<th class="col-num">Recouvrements</th>'
+          + '<th class="col-percent">Taux Rec.(%)</th>'
+          + '</tr>'
+          + '</thead>'
+          + '<tbody>' + rows + '</tbody>'
+          + '</table>';
+      }
+
+      function processMessage(msgData) {
+        if (msgData && msgData.type === 'FILL_COMPTE_ADMIN_DATA') {
+          if (msgData.data) {
+            render(msgData.data);
+          }
+        }
+      }
+
+      let pendingData = null;
+      let dataProcessed = false;
+
+      window.addEventListener('message', function(event) {
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+          processMessage(event.data);
+          dataProcessed = true;
+        } else {
+          pendingData = event.data;
+        }
+      });
+
+      window.addEventListener('DOMContentLoaded', async function() {
+        if (pendingData && !dataProcessed) {
+          processMessage(pendingData);
+          dataProcessed = true;
+          return;
+        }
+
+        await new Promise(r => setTimeout(r, 500));
+
+        if (!dataProcessed) {
+          try {
+            const result = await loadData();
+            render(result);
+            dataProcessed = true;
+          } catch(e) {
+            console.warn('Erreur chargement IndexedDB:', e);
+          }
+        }
+
+        // Also try printData table
+        if (!dataProcessed) {
+          try {
+            const db = new Dexie('TresorDatabase');
+            db.version(28).stores({ printData: '++id, type, createdAt' });
+            const records = await db.table('printData').where('type').equals('FILL_COMPTE_ADMIN_DATA').toArray();
+            if (records.length > 0) {
+              const latest = records.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+              processMessage(latest.data);
+              await db.table('printData').delete(latest.id);
+            }
+          } catch(e) {
+            console.warn('Erreur printData:', e);
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

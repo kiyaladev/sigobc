@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Compte Administratif - Modifications du Patrimoine</title>
+    <script src="../dexie.min.js"></script>
+    <style>
+      @page {
+        size: A4 landscape;
+        margin: 10mm;
+      }
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 10px;
+        margin: 0;
+        padding: 10px;
+      }
+      .container { width: 100%; }
+      .main-title {
+        text-decoration: underline;
+        font-size: 14px;
+        margin: 5px 0;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 0;
+        margin-bottom: 15px;
+      }
+      th, td {
+        border: 1px solid #000;
+        padding: 3px 4px;
+      }
+      th {
+        background-color: #f0f0f0;
+        text-align: center;
+        vertical-align: middle;
+        font-size: 9px;
+      }
+      .col-rubrique { width: 30%; text-align: left; }
+      .col-num { text-align: right; white-space: nowrap; }
+      .section-header { background-color: #e0e0e0; font-weight: bold; }
+      .total-section { background-color: #d0d0d0; font-weight: bold; border-top: 2px solid #000; }
+      .grand-total { background-color: #bbb; font-weight: bold; border-top: 3px double #000; }
+      .positive { color: #2e7d32; }
+      .negative { color: #c62828; }
+      .section-title {
+        font-size: 12px;
+        font-weight: bold;
+        margin: 15px 0 5px 0;
+        padding: 4px 8px;
+        background: #e8e8e8;
+        border: 1px solid #000;
+      }
+      .doc-header-cell { padding: 0 !important; background: #fff !important; }
+      .doc-header-grid { width: 100%; display: grid; grid-template-columns: 1fr 2fr 1fr; }
+      .doc-header-block { padding: 4px 6px; min-height: 70px; }
+      .doc-header-block + .doc-header-block { border-left: 1px solid #000; }
+      .doc-header-left { text-align: left; font-weight: bold; }
+      .doc-header-center { text-align: center; font-weight: bold; }
+      .doc-header-right { text-align: right; font-weight: bold; }
+      .doc-header-center .main-title { margin: 0 0 4px 0; }
+      .print-button {
+        position: fixed; top: 20px; right: 20px; padding: 10px 20px;
+        background: #009688; color: white; border: none; border-radius: 5px;
+        cursor: pointer; font-size: 14px; z-index: 1000;
+      }
+      .print-button:hover { background: #00796B; }
+      .loading { text-align: center; padding: 50px; font-size: 16px; color: #666; }
+      @media print {
+        .no-print { display: none !important; }
+        body { padding: 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <button class="print-button no-print" onclick="window.print()">Imprimer</button>
+    <div class="container">
+      <div id="content">
+        <div class="loading" id="loading">Chargement des donnees...</div>
+      </div>
+    </div>
+
+    <script>
+      function fmt(v) { return v ? new Intl.NumberFormat('fr-FR').format(v) : '0'; }
+      function resClass(v) { return v >= 0 ? 'positive' : 'negative'; }
+
+      // Mapping between invest dep sections (9x) and invest rec sections (0x)
+      const PATRIMOINE_SECTIONS = [
+        { depSec: '90', recSec: '01', label: 'Immobilisations incorporelles / Dotations de l\'Etat' },
+        { depSec: '91', recSec: '02', label: 'Immobilisations corporelles / Emprunts' },
+        { depSec: '92', recSec: '03', label: 'Immobilisations en cours / Cessions immobilieres' },
+        { depSec: '93', recSec: '04', label: 'Immobilisations financieres / Subventions investissement' },
+        { depSec: '94', recSec: '05', label: 'Remboursement emprunts / Fonds propres' },
+        { depSec: '95', recSec: '06', label: 'Autres depenses invest. / Autres recettes invest.' }
+      ];
+
+      async function loadData() {
+        const db = new Dexie('TresorDatabase');
+        db.version(28).stores({
+          mandats: '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
+          previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
+          sousChapitres: '++id, code, libelle, parentId, mairieId, actif',
+          chapitres: '++id, code, libelle, mairieId, actif',
+          taxes: '++id, code, libelle, mairieId, type, actif',
+          declarations: '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
+          previsionsRecettes: '++id, exercice, taxeId, mairieId, statut, personnelId',
+          mairies: '++id, nom, code, ville',
+          printData: '++id, type, createdAt'
+        });
+
+        const exercice = new Date().getFullYear();
+
+        const [sousChapitres, taxes, mandats, declarations, previsions, previsionsRecettes, mairie] = await Promise.all([
+          db.sousChapitres.toArray(),
+          db.taxes.toArray(),
+          db.mandats.where('exercice').equals(exercice).toArray(),
+          db.declarations.where('exercice').equals(exercice).toArray(),
+          db.previsions.where('exercice').equals(exercice).toArray(),
+          db.previsionsRecettes.where('exercice').equals(exercice).toArray(),
+          db.mairies.toCollection().first()
+        ]);
+
+        // Build maps
+        const scMap = {};
+        sousChapitres.forEach(sc => { scMap[sc.id] = sc.code; });
+        const taxeMap = {};
+        taxes.forEach(t => { taxeMap[t.id] = t.code; });
+
+        // Depenses by sous-chapitre section prefix
+        const depBySection = {};
+        mandats.forEach(m => {
+          if (m.statut === 'annule') return;
+          const scCode = scMap[m.sousChapitreId] || '';
+          const sec = scCode.substring(0, 2);
+          if (!depBySection[sec]) depBySection[sec] = 0;
+          depBySection[sec] += (m.montant || 0);
+        });
+
+        // Recettes by taxe section prefix
+        const recBySection = {};
+        declarations.forEach(d => {
+          if (d.statut === 'annulee') return;
+          const taxeCode = taxeMap[d.taxeId] || '';
+          const sec = taxeCode.substring(0, 2);
+          if (!recBySection[sec]) recBySection[sec] = 0;
+          recBySection[sec] += (d.montantRecette || d.montant || 0);
+        });
+
+        // Previsions depenses by sous-chapitre section
+        const prevDepBySection = {};
+        previsions.forEach(p => {
+          if (p.sousChapitreId) {
+            const scCode = scMap[p.sousChapitreId] || '';
+            const sec = scCode.substring(0, 2);
+            if (!prevDepBySection[sec]) prevDepBySection[sec] = 0;
+            prevDepBySection[sec] += (p.montantPrevu || 0);
+          }
+        });
+
+        // Previsions recettes by taxe section
+        const prevRecBySection = {};
+        previsionsRecettes.forEach(p => {
+          const taxeCode = taxeMap[p.taxeId] || '';
+          const sec = taxeCode.substring(0, 2);
+          if (!prevRecBySection[sec]) prevRecBySection[sec] = 0;
+          prevRecBySection[sec] += (p.montantPrevu || 0);
+        });
+
+        return { depBySection, recBySection, prevDepBySection, prevRecBySection, exercice, mairie, scMap, taxeMap };
+      }
+
+      function render(data) {
+        const { depBySection, recBySection, prevDepBySection, prevRecBySection, exercice, mairie } = data;
+        const mairieNom = mairie ? mairie.nom || 'Mairie de Vavoua' : 'Mairie de Vavoua';
+
+        let content = '';
+
+        // Document header
+        content += '<table><thead><tr><td colspan="4" class="doc-header-cell">'
+          + '<div class="doc-header-grid">'
+          + '<div class="doc-header-block doc-header-left">REPUBLIQUE DE COTE D\'IVOIRE<br>' + mairieNom + '</div>'
+          + '<div class="doc-header-block doc-header-center"><div class="main-title">COMPTE ADMINISTRATIF - MODIFICATIONS DU PATRIMOINE</div><div>Exercice ' + exercice + '</div></div>'
+          + '<div class="doc-header-block doc-header-right">Page <span class="page-num">1</span></div>'
+          + '</div></td></tr></thead></table>';
+
+        // ============ TABLE 1: MODIFICATIONS DU PATRIMOINE ============
+        content += '<div class="section-title">1. MODIFICATIONS DU PATRIMOINE</div>';
+        content += '<table>';
+        content += '<thead><tr>'
+          + '<th class="col-rubrique">Rubrique</th>'
+          + '<th class="col-num">Acquisitions (Depenses)</th>'
+          + '<th class="col-num">Cessions (Recettes)</th>'
+          + '<th class="col-num">Variation nette</th>'
+          + '</tr></thead>';
+        content += '<tbody>';
+
+        let totalAcq = 0, totalCes = 0;
+
+        PATRIMOINE_SECTIONS.forEach(sec => {
+          const acq = depBySection[sec.depSec] || 0;
+          const ces = recBySection[sec.recSec] || 0;
+          const variation = acq - ces;
+
+          totalAcq += acq;
+          totalCes += ces;
+
+          content += '<tr>'
+            + '<td class="col-rubrique">' + sec.label + '</td>'
+            + '<td class="col-num">' + fmt(acq) + '</td>'
+            + '<td class="col-num">' + fmt(ces) + '</td>'
+            + '<td class="col-num ' + resClass(variation) + '">' + fmt(variation) + '</td>'
+            + '</tr>';
+        });
+
+        const totalVariation = totalAcq - totalCes;
+        content += '<tr class="grand-total">'
+          + '<td class="col-rubrique">TOTAL PATRIMOINE</td>'
+          + '<td class="col-num">' + fmt(totalAcq) + '</td>'
+          + '<td class="col-num">' + fmt(totalCes) + '</td>'
+          + '<td class="col-num ' + resClass(totalVariation) + '">' + fmt(totalVariation) + '</td>'
+          + '</tr>';
+
+        content += '</tbody></table>';
+
+        // ============ TABLE 2: SYNTHESE ============
+        content += '<div class="section-title">2. SYNTHESE</div>';
+        content += '<table>';
+        content += '<thead><tr>'
+          + '<th class="col-rubrique">Section</th>'
+          + '<th class="col-num">Prev.Dep</th>'
+          + '<th class="col-num">Real.Dep</th>'
+          + '<th class="col-num">Prev.Rec</th>'
+          + '<th class="col-num">Real.Rec</th>'
+          + '<th class="col-num">Resultat</th>'
+          + '</tr></thead>';
+        content += '<tbody>';
+
+        // Fonctionnement: dep sections 6x, rec sections 7x
+        let foncPrevDep = 0, foncRealDep = 0, foncPrevRec = 0, foncRealRec = 0;
+        for (let i = 60; i <= 69; i++) {
+          const sec = String(i);
+          foncPrevDep += (prevDepBySection[sec] || 0);
+          foncRealDep += (depBySection[sec] || 0);
+        }
+        for (let i = 70; i <= 79; i++) {
+          const sec = String(i);
+          foncPrevRec += (prevRecBySection[sec] || 0);
+          foncRealRec += (recBySection[sec] || 0);
+        }
+        const foncResultat = foncRealRec - foncRealDep;
+
+        content += '<tr>'
+          + '<td class="col-rubrique">Fonctionnement</td>'
+          + '<td class="col-num">' + fmt(foncPrevDep) + '</td>'
+          + '<td class="col-num">' + fmt(foncRealDep) + '</td>'
+          + '<td class="col-num">' + fmt(foncPrevRec) + '</td>'
+          + '<td class="col-num">' + fmt(foncRealRec) + '</td>'
+          + '<td class="col-num ' + resClass(foncResultat) + '">' + fmt(foncResultat) + '</td>'
+          + '</tr>';
+
+        // Investissement: dep sections 9x, rec sections 0x
+        let invPrevDep = 0, invRealDep = 0, invPrevRec = 0, invRealRec = 0;
+        for (let i = 90; i <= 95; i++) {
+          const sec = String(i);
+          invPrevDep += (prevDepBySection[sec] || 0);
+          invRealDep += (depBySection[sec] || 0);
+        }
+        for (let i = 1; i <= 6; i++) {
+          const sec = '0' + i;
+          invPrevRec += (prevRecBySection[sec] || 0);
+          invRealRec += (recBySection[sec] || 0);
+        }
+        const invResultat = invRealRec - invRealDep;
+
+        content += '<tr>'
+          + '<td class="col-rubrique">Investissement</td>'
+          + '<td class="col-num">' + fmt(invPrevDep) + '</td>'
+          + '<td class="col-num">' + fmt(invRealDep) + '</td>'
+          + '<td class="col-num">' + fmt(invPrevRec) + '</td>'
+          + '<td class="col-num">' + fmt(invRealRec) + '</td>'
+          + '<td class="col-num ' + resClass(invResultat) + '">' + fmt(invResultat) + '</td>'
+          + '</tr>';
+
+        // Total General
+        const totPrevDep = foncPrevDep + invPrevDep;
+        const totRealDep = foncRealDep + invRealDep;
+        const totPrevRec = foncPrevRec + invPrevRec;
+        const totRealRec = foncRealRec + invRealRec;
+        const totResultat = totRealRec - totRealDep;
+
+        content += '<tr class="grand-total">'
+          + '<td class="col-rubrique">TOTAL GENERAL</td>'
+          + '<td class="col-num">' + fmt(totPrevDep) + '</td>'
+          + '<td class="col-num">' + fmt(totRealDep) + '</td>'
+          + '<td class="col-num">' + fmt(totPrevRec) + '</td>'
+          + '<td class="col-num">' + fmt(totRealRec) + '</td>'
+          + '<td class="col-num ' + resClass(totResultat) + '">' + fmt(totResultat) + '</td>'
+          + '</tr>';
+
+        content += '</tbody></table>';
+
+        document.getElementById('content').innerHTML = content;
+      }
+
+      function processMessage(msgData) {
+        if (msgData && msgData.type === 'FILL_COMPTE_ADMIN_DATA') {
+          if (msgData.data) {
+            render(msgData.data);
+          }
+        }
+      }
+
+      let pendingData = null;
+      let dataProcessed = false;
+
+      window.addEventListener('message', function(event) {
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+          processMessage(event.data);
+          dataProcessed = true;
+        } else {
+          pendingData = event.data;
+        }
+      });
+
+      window.addEventListener('DOMContentLoaded', async function() {
+        if (pendingData && !dataProcessed) {
+          processMessage(pendingData);
+          dataProcessed = true;
+          return;
+        }
+
+        await new Promise(r => setTimeout(r, 500));
+
+        if (!dataProcessed) {
+          try {
+            const result = await loadData();
+            render(result);
+            dataProcessed = true;
+          } catch(e) {
+            console.warn('Erreur chargement IndexedDB:', e);
+          }
+        }
+
+        if (!dataProcessed) {
+          try {
+            const db = new Dexie('TresorDatabase');
+            db.version(28).stores({ printData: '++id, type, createdAt' });
+            const records = await db.table('printData').where('type').equals('FILL_COMPTE_ADMIN_DATA').toArray();
+            if (records.length > 0) {
+              const latest = records.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+              processMessage(latest.data);
+              await db.table('printData').delete(latest.id);
+            }
+          } catch(e) {
+            console.warn('Erreur printData:', e);
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

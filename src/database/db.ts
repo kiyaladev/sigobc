@@ -491,6 +491,7 @@ export interface ServiceApp7 {
   id?: number;
   nom: string;
   compte?: string;
+  chapitre?: string;
   mairieId: number;
   actif: boolean;
   createdAt: Date;

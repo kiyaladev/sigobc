@@ -38,14 +38,8 @@
       .page {
           background-color: white;
           width: 210mm;
-<<<<<<< HEAD
-          height: 287mm; /* Hauteur fixe pour une page A4 moins les marges */
-          max-height: 287mm;
-          padding: 2mm 4mm; /* Marges intérieures réduites */
-=======
           min-height: 287mm;
           padding: 3mm 5mm; /* Marges intérieures */
->>>>>>> f29b7f37d570686df35893ff2600d786da57a2aa
           box-shadow: 0 0 15px rgba(0,0,0,0.1);
           display: flex;
           flex-direction: column;
@@ -231,8 +225,14 @@
           font-weight: bold;
       }
 
+      /* Editable date */
+      .editable-date { cursor: pointer; border-bottom: 1px dashed #999; padding: 0 2px; min-width: 80px; display: inline-block; }
+      .editable-date:hover { background: #e8f0fe; }
+      .editable-date:focus { outline: 2px solid #1976d2; background: #fff; border-bottom: none; }
+
       /* Print styles */
       @media print {
+        .editable-date { border-bottom: none; }
           html, body {
             width: 210mm;
             height: 297mm;
@@ -242,40 +242,21 @@
               background: none;
               padding: 0;
               -webkit-print-color-adjust: exact;
-            font-size: 10.5pt;
-            line-height: 1.18;
+            font-size: 12pt;
+            line-height: 1.22;
           }
           .page {
               width: 100%;
-<<<<<<< HEAD
-              height: 100vh;
-              max-height: 100vh;
-              box-shadow: none;
-              margin: 0;
-              padding: 2mm;
-              page-break-after: avoid;
-              page-break-inside: avoid;
-=======
             height: 297mm;
             min-height: 0;
               box-shadow: none;
               margin: 0;
             padding: 2mm 3mm; /* Ajustement marge imprimante */
             overflow: hidden;
->>>>>>> f29b7f37d570686df35893ff2600d786da57a2aa
           }
           .no-print {
               display: none !important;
           }
-<<<<<<< HEAD
-          .main-grid {
-              flex-grow: 1;
-          }
-          .signature-section {
-              padding-bottom: 40px;
-              min-height: 60px;
-          }
-=======
           .creditor-section {
             padding-bottom: 34px;
           }
@@ -300,7 +281,6 @@
             .footer-note {
               margin-top: 3px;
             }
->>>>>>> f29b7f37d570686df35893ff2600d786da57a2aa
       }
 
       .print-button {
@@ -419,6 +399,7 @@
 
           <div class="payment-mode-section">
             <p class="mb-2">A Régler au compte indiqué ci-dessus par :</p>
+            <br />
             <ul style="list-style: none; padding-left: 15px">
               <li>- Virement postal</li>
               <li>- Virement bancaire</li>
@@ -427,6 +408,7 @@
           </div>
 
           <div class="justification-section">
+            <br />
             <div>
               <p>Pièces justificatives de la dépense :</p>
               <p class="bold italic ml-2">Voir état de solde ci-joint</p>
@@ -434,7 +416,7 @@
             <br />
 
             <div class="mt-1"><span class="dotted-line"></span></div>
-
+            <br />
             <div class="mt-1">
               <p>
                 Référence du Marché : <span class="bold small" data-field="referenceMarche"></span>
@@ -451,7 +433,11 @@
             <div class="mt-1">
               <p>
                 Délibération N° <span class="bold small" data-field="numeroDeliberation"></span> du
-                <span class="bold small" data-field="dateDeliberation"></span>
+                <span
+                  class="bold small editable-date"
+                  contenteditable="true"
+                  data-field="dateDeliberation"
+                ></span>
               </p>
 
               <p class="mt-4">Montants à précompter ( en lettre )</p>
@@ -493,7 +479,9 @@
           <div class="signature-section">
             <p class="uppercase mt-2">
               A <span data-field="mairieCommune"></span> , le
-              <span data-field="dateEmission">15/09/2019</span>
+              <span class="editable-date" contenteditable="true"
+                ><span data-field="dateEmission">15/09/2019</span></span
+              >
             </p>
             <p class="text-sm italic mt-1">Signature et cachet de l'Ordonnateur</p>
             <p class="bold mt-2">P/ LE MAIRE & P.D.</p>

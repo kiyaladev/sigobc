@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Compte Administratif - Recettes Fonctionnement</title>
+    <script src="../dexie.min.js"></script>
+    <style>
+      @page {
+        size: A4 landscape;
+        margin: 10mm;
+      }
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 10px;
+        margin: 0;
+        padding: 10px;
+      }
+      .container {
+        width: 100%;
+      }
+      .doc-header {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 2fr 1fr;
+        border: 1px solid #000;
+        margin-bottom: 10px;
+      }
+      .doc-header-block {
+        padding: 6px 8px;
+        min-height: 60px;
+      }
+      .doc-header-block + .doc-header-block {
+        border-left: 1px solid #000;
+      }
+      .doc-header-left {
+        text-align: left;
+        font-weight: bold;
+      }
+      .doc-header-center {
+        text-align: center;
+        font-weight: bold;
+      }
+      .doc-header-right {
+        text-align: right;
+        font-weight: bold;
+      }
+      .main-title {
+        text-decoration: underline;
+        font-size: 14px;
+        margin: 4px 0;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 5px;
+      }
+      th, td {
+        border: 1px solid #000;
+        padding: 3px 5px;
+      }
+      th {
+        background-color: #f0f0f0;
+        text-align: center;
+        vertical-align: middle;
+        font-size: 9px;
+      }
+      .col-code {
+        width: 8%;
+        text-align: center;
+      }
+      .col-libelle {
+        width: 28%;
+        text-align: left;
+      }
+      .col-num {
+        text-align: right;
+        white-space: nowrap;
+        width: 13%;
+      }
+      .col-percent {
+        text-align: center;
+        width: 8%;
+      }
+      .section-header {
+        background-color: #d4edda;
+        font-weight: bold;
+      }
+      .sous-total {
+        background-color: #e8f5e9;
+        font-weight: bold;
+        font-style: italic;
+      }
+      .total-row {
+        background-color: #c8e6c9;
+        font-weight: bold;
+        border-top: 2px solid #000;
+      }
+      .signatures {
+        margin-top: 30px;
+        display: flex;
+        justify-content: space-between;
+        padding: 0 50px;
+      }
+      .signature-box {
+        text-align: center;
+        width: 200px;
+      }
+      .print-button {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 24px;
+        background-color: #1976d2;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+      }
+      .print-button:hover {
+        background-color: #1565c0;
+      }
+      .loading {
+        text-align: center;
+        padding: 50px;
+        font-size: 16px;
+        color: #666;
+      }
+      .print-footer {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      @media print {
+        body { padding: 0; }
+        .no-print { display: none; }
+        .print-footer {
+          break-inside: avoid;
+          page-break-inside: avoid;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <button class="print-button no-print" onclick="window.print()">Imprimer</button>
+    <div class="container">
+      <div id="content">
+        <div class="loading">Chargement des données...</div>
+      </div>
+    </div>
+
+    <script>
+      function fmt(v) { return v ? new Intl.NumberFormat('fr-FR').format(Math.round(v)) : '0'; }
+      function pct(real, prev) {
+        if (!prev || prev === 0) return '0,00';
+        return ((real / prev) * 100).toFixed(2).replace('.', ',');
+      }
+
+      const sectionLabels = {
+        '70': 'SECTION 70 - RECETTES FISCALES',
+        '71': 'SECTION 71 - PRESTATIONS ET SERVICES',
+        '72': 'SECTION 72 - REVENUS DU PATRIMOINE',
+        '73': 'SECTION 73 - SUBVENTIONS ET CONTRIBUTIONS',
+        '74': 'SECTION 74 - RECETTES DIVERSES',
+      };
+
+      var dataProcessed = false;
+      let pendingData = null;
+
+      function processData(messageData) {
+        if (dataProcessed) return;
+        if (messageData && messageData.type === 'FILL_COMPTE_ADMIN_DATA') {
+          dataProcessed = true;
+          renderPage(messageData.data);
+        }
+      }
+
+      function renderPage(data) {
+        const exercice = data.exercice || new Date().getFullYear();
+        const mairie = data.mairie || {};
+        const lignes = data.lignesRecettes || [];
+
+        const content = document.getElementById('content');
+        content.innerHTML = '';
+
+        // Header
+        const header = document.createElement('div');
+        header.className = 'doc-header';
+        header.innerHTML = `
+          <div class="doc-header-block doc-header-left">
+            DÉPARTEMENT DE ${(mairie.departement || '').toUpperCase()}<br/>
+            COMMUNE DE ${(mairie.nom || '').replace(/^mairie de /i, '').toUpperCase()}<br/>
+            CODE : ${mairie.code || '---'}
+          </div>
+          <div class="doc-header-block doc-header-center">
+            <div class="main-title">COMPTE ADMINISTRATIF</div>
+            RECETTES DE FONCTIONNEMENT (DÉTAIL)<br/>
+            EXERCICE : <strong>${exercice}</strong>
+          </div>
+          <div class="doc-header-block doc-header-right">
+            ANNÉE : <strong>${exercice}</strong>
+          </div>
+        `;
+        content.appendChild(header);
+
+        // Table
+        const table = document.createElement('table');
+        table.innerHTML = `
+          <thead>
+            <tr>
+              <th class="col-code">Code</th>
+              <th class="col-libelle">Libellé</th>
+              <th class="col-num">Prévisions</th>
+              <th class="col-num">Émissions</th>
+              <th class="col-num">Recouvrements</th>
+              <th class="col-percent">Taux Rec.(%)</th>
+            </tr>
+          </thead>
+        `;
+        const tbody = document.createElement('tbody');
+
+        // Group lines by section (first 2 digits of code)
+        const sections = {};
+        const sectionOrder = ['70','71','72','73','74'];
+        sectionOrder.forEach(function(s) { sections[s] = []; });
+
+        lignes.forEach(function(l) {
+          var prefix = (l.code || '').substring(0, 2);
+          if (sections[prefix]) {
+            sections[prefix].push(l);
+          }
+        });
+
+        let grandPrev = 0, grandEmis = 0, grandRec = 0;
+
+        sectionOrder.forEach(function(secCode) {
+          var items = sections[secCode];
+          // Sort by code
+          items.sort(function(a, b) {
+            return (a.code || '').localeCompare(b.code || '', undefined, { numeric: true });
+          });
+
+          // Section header
+          var secRow = document.createElement('tr');
+          secRow.className = 'section-header';
+          secRow.innerHTML = '<td></td><td colspan="5">' + (sectionLabels[secCode] || 'SECTION ' + secCode) + '</td>';
+          tbody.appendChild(secRow);
+
+          var secPrev = 0, secEmis = 0, secRec = 0;
+
+          items.forEach(function(l) {
+            var prev = l.previsions || 0;
+            var emis = l.emissions || 0;
+            var rec = l.recouvrements || 0;
+            secPrev += prev;
+            secEmis += emis;
+            secRec += rec;
+
+            var tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td class="col-code">${l.code || ''}</td>
+              <td class="col-libelle">${l.libelle || ''}</td>
+              <td class="col-num">${fmt(prev)}</td>
+              <td class="col-num">${fmt(emis)}</td>
+              <td class="col-num">${fmt(rec)}</td>
+              <td class="col-percent">${pct(rec, prev)}</td>
+            `;
+            tbody.appendChild(tr);
+          });
+
+          // Section subtotal
+          var stRow = document.createElement('tr');
+          stRow.className = 'sous-total';
+          stRow.innerHTML = `
+            <td>S/${secCode}</td>
+            <td>SOUS TOTAL SECTION ${secCode}</td>
+            <td class="col-num">${fmt(secPrev)}</td>
+            <td class="col-num">${fmt(secEmis)}</td>
+            <td class="col-num">${fmt(secRec)}</td>
+            <td class="col-percent">${pct(secRec, secPrev)}</td>
+          `;
+          tbody.appendChild(stRow);
+
+          grandPrev += secPrev;
+          grandEmis += secEmis;
+          grandRec += secRec;
+        });
+
+        // Grand total
+        var totalRow = document.createElement('tr');
+        totalRow.className = 'total-row';
+        totalRow.innerHTML = `
+          <td>TOTAL</td>
+          <td>TOTAL GÉNÉRAL RECETTES FONCTIONNEMENT</td>
+          <td class="col-num">${fmt(grandPrev)}</td>
+          <td class="col-num">${fmt(grandEmis)}</td>
+          <td class="col-num">${fmt(grandRec)}</td>
+          <td class="col-percent">${pct(grandRec, grandPrev)}</td>
+        `;
+        tbody.appendChild(totalRow);
+
+        table.appendChild(tbody);
+        content.appendChild(table);
+
+        // Signatures
+        var sigs = document.createElement('div');
+        sigs.className = 'signatures print-footer';
+        var today = new Date();
+        var dateStr = today.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+        sigs.innerHTML = `
+          <div class="signature-box">
+            ${mairie.nom || '---'}, le ${dateStr}<br/>
+            <strong>Le Trésorier Principal</strong>
+          </div>
+          <div class="signature-box">
+            <br/>
+            <strong>Le Maire</strong>
+          </div>
+        `;
+        content.appendChild(sigs);
+
+        document.title = 'Compte Administratif - Recettes Fonctionnement - ' + exercice;
+      }
+
+      // Listen for postMessage
+      window.addEventListener('message', function(event) {
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+          processData(event.data);
+        } else {
+          pendingData = event.data;
+        }
+      });
+
+      // Fallback: IndexedDB
+      window.addEventListener('DOMContentLoaded', async function() {
+        console.log('[RecFonct] DOMContentLoaded fired');
+
+        if (pendingData && !dataProcessed) {
+          processData(pendingData);
+          return;
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        if (!dataProcessed) {
+          try {
+            var db = new Dexie('TresorDatabase');
+            db.version(28).stores({
+              mandats: '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
+              previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
+              sousChapitres: '++id, code, libelle, parentId, mairieId, actif',
+              chapitres: '++id, code, libelle, mairieId, actif',
+              taxes: '++id, code, libelle, mairieId, type, actif',
+              declarations: '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
+              previsionsRecettes: '++id, exercice, taxeId, mairieId, statut, personnelId',
+              mairies: '++id, nom, code, ville',
+              printData: '++id, type, createdAt',
+            });
+
+            // Check printData first
+            var printDataRecords = await db.table('printData')
+              .where('type').equals('FILL_COMPTE_ADMIN_DATA')
+              .toArray();
+
+            if (printDataRecords.length > 0) {
+              var latestRecord = printDataRecords.sort(function(a, b) {
+                return new Date(b.createdAt) - new Date(a.createdAt);
+              })[0];
+              processData(latestRecord.data);
+              await db.table('printData').delete(latestRecord.id);
+              return;
+            }
+
+            // Fallback: aggregate from DB
+            var params = new URLSearchParams(window.location.search);
+            var exercice = parseInt(params.get('exercice')) || new Date().getFullYear();
+            var mairieId = parseInt(params.get('mairieId')) || 1;
+
+            var mairie = await db.table('mairies').get(mairieId);
+            var allTaxes = await db.table('taxes').where('mairieId').equals(mairieId).toArray();
+            var allPrevisionsRecettes = await db.table('previsionsRecettes')
+              .where('exercice').equals(exercice).toArray();
+            var allDeclarations = await db.table('declarations')
+              .where('exercice').equals(exercice).toArray();
+
+            var taxMap = {};
+            allTaxes.forEach(function(t) { taxMap[t.id] = t; });
+
+            // Build per-tax aggregation for codes starting with 7
+            var taxAggregation = {};
+            allTaxes.forEach(function(t) {
+              if (!(t.code || '').startsWith('7')) return;
+              taxAggregation[t.id] = {
+                code: t.code,
+                libelle: t.libelle,
+                previsions: 0,
+                emissions: 0,
+                recouvrements: 0,
+              };
+            });
+
+            allPrevisionsRecettes.forEach(function(pr) {
+              if (taxAggregation[pr.taxeId]) {
+                taxAggregation[pr.taxeId].previsions += pr.montantPrevu || 0;
+              }
+            });
+
+            allDeclarations.forEach(function(d) {
+              if (d.statut !== 'validee') return;
+              if (!taxAggregation[d.taxeId]) return;
+              var montant = d.montant || d.montantRecette || 0;
+              taxAggregation[d.taxeId].emissions += montant;
+              if (d.dateEncaissement) {
+                taxAggregation[d.taxeId].recouvrements += montant;
+              }
+            });
+
+            var lignesRecettes = Object.values(taxAggregation);
+
+            processData({
+              type: 'FILL_COMPTE_ADMIN_DATA',
+              data: {
+                exercice: exercice,
+                mairie: mairie || {},
+                lignesRecettes: lignesRecettes,
+              }
+            });
+          } catch(e) {
+            console.warn('Erreur lors de la lecture de IndexedDB:', e);
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

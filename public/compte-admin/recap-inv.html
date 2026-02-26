@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Compte Administratif - Récapitulatif Investissement</title>
+    <script src="../dexie.min.js"></script>
+    <style>
+      @page {
+        size: A4 landscape;
+        margin: 10mm;
+      }
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 11px;
+        margin: 0;
+        padding: 10px;
+      }
+      .container {
+        width: 100%;
+      }
+      .doc-header {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 2fr 1fr;
+        border: 1px solid #000;
+        margin-bottom: 10px;
+      }
+      .doc-header-block {
+        padding: 6px 8px;
+        min-height: 60px;
+      }
+      .doc-header-block + .doc-header-block {
+        border-left: 1px solid #000;
+      }
+      .doc-header-left {
+        text-align: left;
+        font-weight: bold;
+      }
+      .doc-header-center {
+        text-align: center;
+        font-weight: bold;
+      }
+      .doc-header-right {
+        text-align: right;
+        font-weight: bold;
+      }
+      .main-title {
+        text-decoration: underline;
+        font-size: 14px;
+        margin: 4px 0;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
+      th, td {
+        border: 1px solid #000;
+        padding: 4px 6px;
+      }
+      th {
+        background-color: #f0f0f0;
+        text-align: center;
+        vertical-align: middle;
+        font-size: 10px;
+      }
+      .col-libelle {
+        text-align: left;
+        width: 40%;
+      }
+      .col-num {
+        text-align: right;
+        white-space: nowrap;
+        width: 18%;
+      }
+      .col-percent {
+        text-align: center;
+        width: 10%;
+      }
+      .section-header {
+        background-color: #e0e0e0;
+        font-weight: bold;
+      }
+      .total-row {
+        background-color: #d0d0d0;
+        font-weight: bold;
+        border-top: 2px solid #000;
+      }
+      .resultat-row {
+        background-color: #c0e0c0;
+        font-weight: bold;
+        font-size: 12px;
+        border-top: 3px double #000;
+      }
+      .resultat-negatif {
+        background-color: #e0c0c0;
+      }
+      .table-title {
+        font-size: 13px;
+        font-weight: bold;
+        margin: 15px 0 5px 0;
+        text-decoration: underline;
+      }
+      .signatures {
+        margin-top: 30px;
+        display: flex;
+        justify-content: space-between;
+        padding: 0 50px;
+      }
+      .signature-box {
+        text-align: center;
+        width: 200px;
+      }
+      .print-button {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 24px;
+        background-color: #1976d2;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+      }
+      .print-button:hover {
+        background-color: #1565c0;
+      }
+      .loading {
+        text-align: center;
+        padding: 50px;
+        font-size: 16px;
+        color: #666;
+      }
+      @media print {
+        body { padding: 0; }
+        .no-print { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <button class="print-button no-print" onclick="window.print()">Imprimer</button>
+    <div class="container">
+      <div id="content">
+        <div class="loading">Chargement des données...</div>
+      </div>
+    </div>
+
+    <script>
+      function fmt(v) { return v ? new Intl.NumberFormat('fr-FR').format(Math.round(v)) : '0'; }
+      function pct(real, prev) {
+        if (!prev || prev === 0) return '0,00';
+        return ((real / prev) * 100).toFixed(2).replace('.', ',');
+      }
+
+      const sectionsRecettesInv = {
+        '01': 'Section 01 - Dotations de l\'État',
+        '02': 'Section 02 - Emprunts',
+        '03': 'Section 03 - Cessions immobilières',
+        '04': 'Section 04 - Subventions investissement',
+        '05': 'Section 05 - Fonds propres',
+        '06': 'Section 06 - Autres recettes investissement',
+      };
+
+      const sectionsDepensesInv = {
+        '90': 'Section 90 - Immobilisations incorporelles',
+        '91': 'Section 91 - Immobilisations corporelles',
+        '92': 'Section 92 - Immobilisations en cours',
+        '93': 'Section 93 - Immobilisations financières',
+        '94': 'Section 94 - Remboursement emprunts',
+        '95': 'Section 95 - Autres dépenses investissement',
+      };
+
+      var dataProcessed = false;
+      let pendingData = null;
+
+      function processData(messageData) {
+        if (dataProcessed) return;
+        if (messageData && messageData.type === 'FILL_COMPTE_ADMIN_DATA') {
+          dataProcessed = true;
+          renderPage(messageData.data);
+        }
+      }
+
+      function renderPage(data) {
+        const exercice = data.exercice || new Date().getFullYear();
+        const mairie = data.mairie || {};
+
+        const content = document.getElementById('content');
+        content.innerHTML = '';
+
+        // Header
+        const header = document.createElement('div');
+        header.className = 'doc-header';
+        header.innerHTML = `
+          <div class="doc-header-block doc-header-left">
+            DÉPARTEMENT DE ${(mairie.departement || '').toUpperCase()}<br/>
+            COMMUNE DE ${(mairie.nom || '').replace(/^mairie de /i, '').toUpperCase()}<br/>
+            CODE : ${mairie.code || '---'}
+          </div>
+          <div class="doc-header-block doc-header-center">
+            <div class="main-title">COMPTE ADMINISTRATIF</div>
+            RÉCAPITULATIF INVESTISSEMENT<br/>
+            EXERCICE : <strong>${exercice}</strong>
+          </div>
+          <div class="doc-header-block doc-header-right">
+            ANNÉE : <strong>${exercice}</strong>
+          </div>
+        `;
+        content.appendChild(header);
+
+        // RECETTES INVESTISSEMENT TABLE
+        const recTitle = document.createElement('div');
+        recTitle.className = 'table-title';
+        recTitle.textContent = 'I - RECETTES D\'INVESTISSEMENT';
+        content.appendChild(recTitle);
+
+        const recTable = document.createElement('table');
+        recTable.innerHTML = `
+          <thead>
+            <tr>
+              <th class="col-libelle">Section</th>
+              <th class="col-num">Prévisions</th>
+              <th class="col-num">Réalisations</th>
+              <th class="col-percent">Taux (%)</th>
+            </tr>
+          </thead>
+        `;
+        const recTbody = document.createElement('tbody');
+        let totalRecPrev = 0, totalRecReal = 0;
+
+        const recettesInvData = data.recettesInv || {};
+        for (const code of Object.keys(sectionsRecettesInv)) {
+          const sec = recettesInvData[code] || { previsions: 0, realisations: 0 };
+          totalRecPrev += sec.previsions || 0;
+          totalRecReal += sec.realisations || 0;
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="col-libelle">${sectionsRecettesInv[code]}</td>
+            <td class="col-num">${fmt(sec.previsions)}</td>
+            <td class="col-num">${fmt(sec.realisations)}</td>
+            <td class="col-percent">${pct(sec.realisations, sec.previsions)}</td>
+          `;
+          recTbody.appendChild(tr);
+        }
+        const recTotalRow = document.createElement('tr');
+        recTotalRow.className = 'total-row';
+        recTotalRow.innerHTML = `
+          <td class="col-libelle">TOTAL RECETTES INVESTISSEMENT</td>
+          <td class="col-num">${fmt(totalRecPrev)}</td>
+          <td class="col-num">${fmt(totalRecReal)}</td>
+          <td class="col-percent">${pct(totalRecReal, totalRecPrev)}</td>
+        `;
+        recTbody.appendChild(recTotalRow);
+        recTable.appendChild(recTbody);
+        content.appendChild(recTable);
+
+        // DEPENSES INVESTISSEMENT TABLE
+        const depTitle = document.createElement('div');
+        depTitle.className = 'table-title';
+        depTitle.textContent = 'II - DÉPENSES D\'INVESTISSEMENT';
+        content.appendChild(depTitle);
+
+        const depTable = document.createElement('table');
+        depTable.innerHTML = `
+          <thead>
+            <tr>
+              <th class="col-libelle">Section</th>
+              <th class="col-num">Prévisions</th>
+              <th class="col-num">Réalisations</th>
+              <th class="col-percent">Taux (%)</th>
+            </tr>
+          </thead>
+        `;
+        const depTbody = document.createElement('tbody');
+        let totalDepPrev = 0, totalDepReal = 0;
+
+        const depensesInvData = data.depensesInv || {};
+        for (const code of Object.keys(sectionsDepensesInv)) {
+          const sec = depensesInvData[code] || { previsions: 0, realisations: 0 };
+          totalDepPrev += sec.previsions || 0;
+          totalDepReal += sec.realisations || 0;
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="col-libelle">${sectionsDepensesInv[code]}</td>
+            <td class="col-num">${fmt(sec.previsions)}</td>
+            <td class="col-num">${fmt(sec.realisations)}</td>
+            <td class="col-percent">${pct(sec.realisations, sec.previsions)}</td>
+          `;
+          depTbody.appendChild(tr);
+        }
+        const depTotalRow = document.createElement('tr');
+        depTotalRow.className = 'total-row';
+        depTotalRow.innerHTML = `
+          <td class="col-libelle">TOTAL DÉPENSES INVESTISSEMENT</td>
+          <td class="col-num">${fmt(totalDepPrev)}</td>
+          <td class="col-num">${fmt(totalDepReal)}</td>
+          <td class="col-percent">${pct(totalDepReal, totalDepPrev)}</td>
+        `;
+        depTbody.appendChild(depTotalRow);
+        depTable.appendChild(depTbody);
+        content.appendChild(depTable);
+
+        // RESULTAT INVESTISSEMENT
+        const resultat = totalRecReal - totalDepReal;
+        const resTable = document.createElement('table');
+        resTable.style.marginTop = '15px';
+        const resTr = document.createElement('tr');
+        resTr.className = resultat >= 0 ? 'resultat-row' : 'resultat-row resultat-negatif';
+        resTr.innerHTML = `
+          <td class="col-libelle">RÉSULTAT INVESTISSEMENT (Recettes - Dépenses)</td>
+          <td class="col-num" colspan="3">${fmt(resultat)}</td>
+        `;
+        resTable.appendChild(resTr);
+        content.appendChild(resTable);
+
+        // Signatures
+        const sigs = document.createElement('div');
+        sigs.className = 'signatures';
+        const today = new Date();
+        const dateStr = today.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+        sigs.innerHTML = `
+          <div class="signature-box">
+            ${mairie.nom || '---'}, le ${dateStr}<br/>
+            <strong>Le Trésorier Principal</strong>
+          </div>
+          <div class="signature-box">
+            <br/>
+            <strong>Le Maire</strong>
+          </div>
+        `;
+        content.appendChild(sigs);
+
+        document.title = 'Compte Administratif - Récapitulatif Investissement - ' + exercice;
+      }
+
+      // Listen for postMessage
+      window.addEventListener('message', function(event) {
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+          processData(event.data);
+        } else {
+          pendingData = event.data;
+        }
+      });
+
+      // Fallback: IndexedDB
+      window.addEventListener('DOMContentLoaded', async function() {
+        console.log('[RecapInv] DOMContentLoaded fired');
+
+        if (pendingData && !dataProcessed) {
+          processData(pendingData);
+          return;
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        if (!dataProcessed) {
+          try {
+            var db = new Dexie('TresorDatabase');
+            db.version(28).stores({
+              mandats: '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
+              previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
+              sousChapitres: '++id, code, libelle, parentId, mairieId, actif',
+              chapitres: '++id, code, libelle, mairieId, actif',
+              taxes: '++id, code, libelle, mairieId, type, actif',
+              declarations: '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
+              previsionsRecettes: '++id, exercice, taxeId, mairieId, statut, personnelId',
+              mairies: '++id, nom, code, ville',
+              printData: '++id, type, createdAt',
+            });
+
+            // Check printData first
+            var printDataRecords = await db.table('printData')
+              .where('type').equals('FILL_COMPTE_ADMIN_DATA')
+              .toArray();
+
+            if (printDataRecords.length > 0) {
+              var latestRecord = printDataRecords.sort(function(a, b) {
+                return new Date(b.createdAt) - new Date(a.createdAt);
+              })[0];
+              processData(latestRecord.data);
+              await db.table('printData').delete(latestRecord.id);
+              return;
+            }
+
+            // Fallback: aggregate from DB
+            var params = new URLSearchParams(window.location.search);
+            var exercice = parseInt(params.get('exercice')) || new Date().getFullYear();
+            var mairieId = parseInt(params.get('mairieId')) || 1;
+
+            var mairie = await db.table('mairies').get(mairieId);
+            var allTaxes = await db.table('taxes').where('mairieId').equals(mairieId).toArray();
+            var allPrevisionsRecettes = await db.table('previsionsRecettes')
+              .where('exercice').equals(exercice).toArray();
+            var allDeclarations = await db.table('declarations')
+              .where('exercice').equals(exercice).toArray();
+            var allSousChapitres = await db.table('sousChapitres')
+              .where('mairieId').equals(mairieId).toArray();
+            var allPrevisions = await db.table('previsions')
+              .where('exercice').equals(exercice).toArray();
+            var allMandats = await db.table('mandats')
+              .where('exercice').equals(exercice).toArray();
+
+            var taxMap = {};
+            allTaxes.forEach(function(t) { taxMap[t.id] = t; });
+
+            var scMap = {};
+            allSousChapitres.forEach(function(sc) { scMap[sc.id] = sc; });
+
+            // Recettes investissement: group taxes by code prefix 01-06
+            var recettesInv = {};
+            ['01','02','03','04','05','06'].forEach(function(c) { recettesInv[c] = { previsions: 0, realisations: 0 }; });
+
+            allPrevisionsRecettes.forEach(function(pr) {
+              var tax = taxMap[pr.taxeId];
+              if (!tax) return;
+              var prefix = (tax.code || '').substring(0, 2);
+              if (recettesInv[prefix]) {
+                recettesInv[prefix].previsions += pr.montantPrevu || 0;
+              }
+            });
+
+            allDeclarations.forEach(function(d) {
+              if (d.statut !== 'validee') return;
+              var tax = taxMap[d.taxeId];
+              if (!tax) return;
+              var prefix = (tax.code || '').substring(0, 2);
+              if (recettesInv[prefix]) {
+                recettesInv[prefix].realisations += d.montant || d.montantRecette || 0;
+              }
+            });
+
+            // Depenses investissement: group sous-chapitres by code prefix 90-95
+            var depensesInv = {};
+            ['90','91','92','93','94','95'].forEach(function(c) { depensesInv[c] = { previsions: 0, realisations: 0 }; });
+
+            allPrevisions.forEach(function(p) {
+              var sc = scMap[p.sousChapitreId];
+              if (!sc) return;
+              var prefix = (sc.code || '').substring(0, 2);
+              if (depensesInv[prefix]) {
+                depensesInv[prefix].previsions += p.montantPrevu || 0;
+              }
+            });
+
+            allMandats.forEach(function(m) {
+              if (m.statut !== 'paye') return;
+              var sc = scMap[m.sousChapitreId];
+              if (!sc) return;
+              var prefix = (sc.code || '').substring(0, 2);
+              if (depensesInv[prefix]) {
+                depensesInv[prefix].realisations += m.montant || 0;
+              }
+            });
+
+            processData({
+              type: 'FILL_COMPTE_ADMIN_DATA',
+              data: {
+                exercice: exercice,
+                mairie: mairie || {},
+                recettesInv: recettesInv,
+                depensesInv: depensesInv,
+              }
+            });
+          } catch(e) {
+            console.warn('Erreur lors de la lecture de IndexedDB:', e);
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

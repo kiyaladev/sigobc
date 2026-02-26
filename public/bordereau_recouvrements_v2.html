@@ -193,7 +193,13 @@
         font-weight: bold;
       }
 
+      /* Editable date */
+      .editable-date { cursor: pointer; border-bottom: 1px dashed #999; padding: 0 2px; min-width: 80px; display: inline-block; }
+      .editable-date:hover { background: #e8f0fe; }
+      .editable-date:focus { outline: 2px solid #1976d2; background: #fff; border-bottom: none; }
+
       @media print {
+        .editable-date { border-bottom: none; }
         body {
           background: none;
           padding: 0;
@@ -281,7 +287,7 @@
           <div class="signature-line">
             <br />
             <span data-field="ville">Vavoua</span>, le
-            <span data-field="dateBordereau">__/__/____</span>
+            <span class="editable-date" contenteditable="true" data-field="dateBordereau">__/__/____</span>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <br /><br />
             <div style="text-align: center; font-weight: bold">Le Receveur</div>
@@ -368,7 +374,7 @@
           <div style="font-weight: bold">DATE DE VISA DU MAIRE</div>
           <br />
           <div>
-            <span data-field="dateBordereau">__/__/____</span>
+            <span class="editable-date" contenteditable="true" data-field="dateBordereau">__/__/____</span>
           </div>
           <br />
           <div style="font-weight: bold">SIGNATURE ET CACHET DU MAIRE</div>
