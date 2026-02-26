@@ -16,61 +16,117 @@
         margin: 0;
         padding: 10px;
       }
-      .container { width: 100%; }
-      .main-title {
-        text-decoration: underline;
-        font-size: 14px;
-        margin: 5px 0;
+      .container {
+        width: 100%;
       }
       table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 0;
-        margin-bottom: 15px;
+        margin-top: 5px;
+        margin-bottom: 25px;
       }
-      th, td {
+      th,
+      td {
         border: 1px solid #000;
-        padding: 3px 4px;
+        padding: 4px 5px;
+        color: #000;
       }
       th {
-        background-color: #f0f0f0;
+        font-weight: bold;
         text-align: center;
         vertical-align: middle;
+      }
+      .col-num {
+        text-align: right;
+        white-space: nowrap;
         font-size: 9px;
       }
-      .col-rubrique { width: 40%; text-align: left; }
-      .col-num { width: 20%; text-align: right; white-space: nowrap; }
-      .section-header { background-color: #e0e0e0; font-weight: bold; }
-      .total-section { background-color: #d0d0d0; font-weight: bold; border-top: 2px solid #000; }
-      .grand-total { background-color: #bbb; font-weight: bold; border-top: 3px double #000; }
-      .positive { color: #2e7d32; }
-      .negative { color: #c62828; }
-      .section-title {
-        font-size: 12px;
+      .col-center {
+        text-align: center;
+        white-space: nowrap;
+        font-size: 9px;
+      }
+      .bold {
         font-weight: bold;
-        margin: 15px 0 5px 0;
-        padding: 4px 8px;
-        background: #e8e8e8;
-        border: 1px solid #000;
       }
-      .doc-header-cell { padding: 0 !important; background: #fff !important; }
-      .doc-header-grid { width: 100%; display: grid; grid-template-columns: 1fr 2fr 1fr; }
-      .doc-header-block { padding: 4px 6px; min-height: 70px; }
-      .doc-header-block + .doc-header-block { border-left: 1px solid #000; }
-      .doc-header-left { text-align: left; font-weight: bold; }
-      .doc-header-center { text-align: center; font-weight: bold; }
-      .doc-header-right { text-align: right; font-weight: bold; }
-      .doc-header-center .main-title { margin: 0 0 4px 0; }
+      .underline {
+        text-decoration: underline;
+      }
+      .align-center {
+        text-align: center;
+      }
+      .align-right {
+        text-align: right;
+      }
+      .align-left {
+        text-align: left;
+      }
+      .uppercase {
+        text-transform: uppercase;
+      }
+      .padding-left-md {
+        padding-left: 20px;
+      }
+      .padding-left-sm {
+        padding-left: 10px;
+      }
+      .total-row {
+        font-weight: bold;
+      }
+      .signatures {
+        margin-top: 10px;
+        display: flex;
+        justify-content: space-between;
+        padding: 0 50px;
+        font-size: 10px;
+      }
+      .signature-box {
+        text-align: center;
+        width: 250px;
+      }
+      .arrete-text {
+        font-size: 9px;
+        margin-top: 5px;
+        margin-bottom: 15px;
+      }
       .print-button {
-        position: fixed; top: 20px; right: 20px; padding: 10px 20px;
-        background: #009688; color: white; border: none; border-radius: 5px;
-        cursor: pointer; font-size: 14px; z-index: 1000;
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 10px 20px;
+        background: #1976d2;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: bold;
+        z-index: 1000;
       }
-      .print-button:hover { background: #00796B; }
-      .loading { text-align: center; padding: 50px; font-size: 16px; color: #666; }
+      .print-button:hover {
+        background: #1565c0;
+      }
+      .loading {
+        text-align: center;
+        padding: 50px;
+        font-size: 16px;
+        color: #666;
+      }
+      .print-footer {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
       @media print {
-        .no-print { display: none !important; }
-        body { padding: 0; }
+        .no-print {
+          display: none !important;
+        }
+        body {
+          padding: 0;
+        }
+        .print-footer {
+          break-inside: avoid;
+          page-break-inside: avoid;
+        }
       }
     </style>
   </head>
@@ -83,43 +139,63 @@
     </div>
 
     <script>
-      function fmt(v) { return v ? new Intl.NumberFormat('fr-FR').format(v) : '0'; }
-      function resClass(v) { return v >= 0 ? 'positive' : 'negative'; }
+      function fmt(v) {
+        return v ? new Intl.NumberFormat('fr-FR').format(v) : '0';
+      }
+      function resClass(v) {
+        return v >= 0 ? 'positive' : 'negative';
+      }
 
       async function loadData() {
         const db = new Dexie('TresorDatabase');
         db.version(28).stores({
-          mandats: '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
+          mandats:
+            '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
           previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
           sousChapitres: '++id, code, libelle, parentId, mairieId, actif',
           chapitres: '++id, code, libelle, mairieId, actif',
           taxes: '++id, code, libelle, mairieId, type, actif',
-          declarations: '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
+          declarations:
+            '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
           previsionsRecettes: '++id, exercice, taxeId, mairieId, statut, personnelId',
           mairies: '++id, nom, code, ville',
-          printData: '++id, type, createdAt'
+          printData: '++id, type, createdAt',
         });
 
         const exercice = new Date().getFullYear();
         const exercicePrev = exercice - 1;
 
-        const [sousChapitres, taxes, mandatsN, mandatsN1, declarationsN, declarationsN1, mairie] = await Promise.all([
+        const [
+          sousChapitres,
+          taxes,
+          mandatsN,
+          mandatsN1,
+          declarationsN,
+          declarationsN1,
+          previsionsN,
+          mairie,
+        ] = await Promise.all([
           db.sousChapitres.toArray(),
           db.taxes.toArray(),
           db.mandats.where('exercice').equals(exercice).toArray(),
           db.mandats.where('exercice').equals(exercicePrev).toArray(),
           db.declarations.where('exercice').equals(exercice).toArray(),
           db.declarations.where('exercice').equals(exercicePrev).toArray(),
-          db.mairies.toCollection().first()
+          db.previsions.where('exercice').equals(exercice).toArray(),
+          db.mairies.toCollection().first(),
         ]);
 
         // Build sous-chapitre map (id -> code)
         const scMap = {};
-        sousChapitres.forEach(sc => { scMap[sc.id] = sc.code; });
+        sousChapitres.forEach((sc) => {
+          scMap[sc.id] = sc.code;
+        });
 
         // Build taxe map (id -> code)
         const taxeMap = {};
-        taxes.forEach(t => { taxeMap[t.id] = t.code; });
+        taxes.forEach((t) => {
+          taxeMap[t.id] = t.code;
+        });
 
         function computeResults(mandats, declarations) {
           // Depenses fonctionnement: sousChapitres starting with '6'
@@ -127,13 +203,13 @@
           // Depenses investissement: sousChapitres starting with '9'
           let depInv = 0;
 
-          mandats.forEach(m => {
+          mandats.forEach((m) => {
             if (m.statut === 'annule') return;
             const scCode = scMap[m.sousChapitreId] || '';
             if (scCode.startsWith('6')) {
-              depFonc += (m.montant || 0);
+              depFonc += m.montant || 0;
             } else if (scCode.startsWith('9')) {
-              depInv += (m.montant || 0);
+              depInv += m.montant || 0;
             }
           });
 
@@ -142,7 +218,7 @@
           // Recettes investissement: taxes starting with '0'
           let recInv = 0;
 
-          declarations.forEach(d => {
+          declarations.forEach((d) => {
             if (d.statut === 'annulee') return;
             const taxeCode = taxeMap[d.taxeId] || '';
             const montant = d.montantRecette || d.montant || 0;
@@ -159,114 +235,260 @@
         const resultsN = computeResults(mandatsN, declarationsN);
         const resultsN1 = computeResults(mandatsN1, declarationsN1);
 
+        let prevFonc = 0;
+        let prevInv = 0;
+        previsionsN.forEach((p) => {
+          const scCode = scMap[p.sousChapitreId] || '';
+          if (scCode.startsWith('6')) {
+            prevFonc += p.montantPrevu || 0;
+          } else if (scCode.startsWith('9')) {
+            prevInv += p.montantPrevu || 0;
+          }
+        });
+        resultsN.prevFonc = prevFonc;
+        resultsN.prevInv = prevInv;
+
         return { resultsN, resultsN1, exercice, exercicePrev, mairie };
-      }
-
-      function buildResultTable(title, results, colspan) {
-        const { depFonc, depInv, recFonc, recInv } = results;
-        const resFonc = recFonc - depFonc;
-        const resInv = recInv - depInv;
-        const totalRec = recFonc + recInv;
-        const totalDep = depFonc + depInv;
-        const totalRes = totalRec - totalDep;
-
-        let html = '<div class="section-title">' + title + '</div>';
-        html += '<table>';
-        html += '<thead><tr>'
-          + '<th class="col-rubrique">Rubrique</th>'
-          + '<th class="col-num">Recettes</th>'
-          + '<th class="col-num">Depenses</th>'
-          + '<th class="col-num">Resultat</th>'
-          + '</tr></thead>';
-        html += '<tbody>';
-
-        // Fonctionnement
-        html += '<tr>'
-          + '<td class="col-rubrique">Section Fonctionnement</td>'
-          + '<td class="col-num">' + fmt(recFonc) + '</td>'
-          + '<td class="col-num">' + fmt(depFonc) + '</td>'
-          + '<td class="col-num ' + resClass(resFonc) + '">' + fmt(resFonc) + '</td>'
-          + '</tr>';
-
-        // Investissement
-        html += '<tr>'
-          + '<td class="col-rubrique">Section Investissement</td>'
-          + '<td class="col-num">' + fmt(recInv) + '</td>'
-          + '<td class="col-num">' + fmt(depInv) + '</td>'
-          + '<td class="col-num ' + resClass(resInv) + '">' + fmt(resInv) + '</td>'
-          + '</tr>';
-
-        // Total
-        html += '<tr class="grand-total">'
-          + '<td class="col-rubrique">TOTAL</td>'
-          + '<td class="col-num">' + fmt(totalRec) + '</td>'
-          + '<td class="col-num">' + fmt(totalDep) + '</td>'
-          + '<td class="col-num ' + resClass(totalRes) + '">' + fmt(totalRes) + '</td>'
-          + '</tr>';
-
-        html += '</tbody></table>';
-        return { html, totalRec, totalDep, totalRes };
       }
 
       function render(data) {
         const { resultsN, resultsN1, exercice, exercicePrev, mairie } = data;
         const mairieNom = mairie ? mairie.nom || 'Mairie de Vavoua' : 'Mairie de Vavoua';
 
+        const resFoncN = resultsN.recFonc - resultsN.depFonc;
+        const resInvN = resultsN.recInv - resultsN.depInv;
+        const totalRecN = resultsN.recFonc + resultsN.recInv;
+        const totalDepN = resultsN.depFonc + resultsN.depInv;
+        const totalResN = totalRecN - totalDepN;
+        const totalPrev = resultsN.prevFonc + resultsN.prevInv;
+
+        const resFoncN1 = resultsN1.recFonc - resultsN1.depFonc;
+        const resInvN1 = resultsN1.recInv - resultsN1.depInv;
+        const totalRecN1 = resultsN1.recFonc + resultsN1.recInv;
+        const totalDepN1 = resultsN1.depFonc + resultsN1.depInv;
+        const totalResN1 = totalRecN1 - totalDepN1;
+
+        const cumulFonc = resFoncN + resFoncN1;
+        const cumulInv = resInvN + resInvN1;
+        const cumulRes = totalResN + totalResN1;
+
         let content = '';
 
-        // Document header
-        content += '<table><thead><tr><td colspan="4" class="doc-header-cell">'
-          + '<div class="doc-header-grid">'
-          + '<div class="doc-header-block doc-header-left">REPUBLIQUE DE COTE D\'IVOIRE<br>' + mairieNom + '</div>'
-          + '<div class="doc-header-block doc-header-center"><div class="main-title">COMPTE ADMINISTRATIF - RESULTAT</div><div>Exercice ' + exercice + '</div></div>'
-          + '<div class="doc-header-block doc-header-right">Page <span class="page-num">1</span></div>'
-          + '</div></td></tr></thead></table>';
-
-        // A. RESULTAT DE L'EXERCICE N
-        const sectionA = buildResultTable('A. RESULTAT DE L\'EXERCICE ' + exercice, resultsN);
-        content += sectionA.html;
-
-        // B. RESULTAT EXERCICE PRECEDENT (N-1)
-        const sectionB = buildResultTable('B. RESULTAT EXERCICE PRECEDENT ' + exercicePrev, resultsN1);
-        content += sectionB.html;
-
-        // C. RESULTAT CUMULE (N + N-1)
-        const cumulRec = sectionA.totalRec + sectionB.totalRec;
-        const cumulDep = sectionA.totalDep + sectionB.totalDep;
-        const cumulRes = cumulRec - cumulDep;
-
-        content += '<div class="section-title">C. RESULTAT CUMULE (N + N-1)</div>';
+        // FIRST TABLE: RESULTAT AVANT CORRECTION
         content += '<table>';
-        content += '<thead><tr>'
-          + '<th class="col-rubrique">Rubrique</th>'
-          + '<th class="col-num">Recettes</th>'
-          + '<th class="col-num">Depenses</th>'
-          + '<th class="col-num">Resultat</th>'
-          + '</tr></thead>';
+        content += '<thead>';
+        content += '<tr>';
+        content +=
+          '<th rowspan="2" class="align-center bold uppercase" style="font-size: 11px; width: 20%;">COMPTE ADMINISTRATIF</th>';
+        content +=
+          '<th rowspan="2" colspan="7" class="align-center bold uppercase" style="font-size: 11px;">RESULTAT AVANT CORRECTION</th>';
+        content +=
+          '<th class="align-center bold uppercase" style="font-size: 10px; width: 60px;">ANNEE</th>';
+        content +=
+          '<th class="align-center bold uppercase" style="font-size: 10px; width: 40px;">N°</th>';
+        content += '</tr>';
+        content += '<tr>';
+        content += '<th class="align-center" style="font-size: 10px;">' + exercice + '</th>';
+        content += '<th class="align-center" style="font-size: 10px;">34</th>';
+        content += '</tr>';
+        content += '<tr>';
+        content +=
+          '<th rowspan="2" class="align-center bold uppercase" style="font-size: 8px;">BUDGET</th>';
+        content +=
+          '<th rowspan="2" class="align-center uppercase" style="font-size: 6px;">PREVISIONS<br>BUDGETAIRES</th>';
+        content +=
+          '<th rowspan="2" class="align-center uppercase" style="font-size: 6px;">RECETTES RECOUVREES</th>';
+        content +=
+          '<th rowspan="2" class="align-center uppercase" style="font-size: 6px;">DEPENSES<br>ORDONNANCEES</th>';
+        content +=
+          '<th colspan="6" class="align-center bold uppercase" style="font-size: 9px; letter-spacing: 2px;">R E S U L T A T</th>';
+        content += '</tr>';
+        content += '<tr>';
+        content +=
+          '<th colspan="2" class="align-center bold uppercase" style="font-size: 7px;">EXERCICE EN COURS</th>';
+        content +=
+          '<th colspan="2" class="align-center bold uppercase" style="font-size: 7px;">EXERCICE PRECEDENT</th>';
+        content +=
+          '<th colspan="2" class="align-center bold uppercase" style="font-size: 7px;">RESULTAT CUMULE</th>';
+        content += '</tr>';
+        content += '<tr>';
+        content += '<th></th><th></th><th></th><th></th>';
+        content += '<th class="align-center bold uppercase" style="font-size: 7px;">EXCEDENT</th>';
+        content += '<th class="align-center bold uppercase" style="font-size: 7px;">DEFICIT</th>';
+        content += '<th class="align-center bold uppercase" style="font-size: 7px;">EXCEDENT</th>';
+        content += '<th class="align-center bold uppercase" style="font-size: 7px;">DEFICIT</th>';
+        content += '<th class="align-center bold uppercase" style="font-size: 7px;">EXCEDENT</th>';
+        content += '<th class="align-center bold uppercase" style="font-size: 7px;">DEFICIT</th>';
+        content += '</tr>';
+        content += '</thead>';
         content += '<tbody>';
 
-        content += '<tr>'
-          + '<td class="col-rubrique">Resultat Exercice ' + exercice + '</td>'
-          + '<td class="col-num">' + fmt(sectionA.totalRec) + '</td>'
-          + '<td class="col-num">' + fmt(sectionA.totalDep) + '</td>'
-          + '<td class="col-num ' + resClass(sectionA.totalRes) + '">' + fmt(sectionA.totalRes) + '</td>'
-          + '</tr>';
+        // FONCTIONNEMENT
+        content += '<tr>';
+        content +=
+          '<td class="align-center bold uppercase" style="font-size: 8px;">FONCTIONNEMENT</td>';
+        content += '<td class="col-center">' + fmt(resultsN.prevFonc) + '</td>';
+        content += '<td class="col-center">' + fmt(resultsN.recFonc) + '</td>';
+        content += '<td class="col-center">' + fmt(resultsN.depFonc) + '</td>';
+        content += '<td class="col-center">' + (resFoncN >= 0 ? fmt(resFoncN) : '-') + '</td>';
+        content += '<td class="col-center">' + (resFoncN < 0 ? fmt(-resFoncN) : '-') + '</td>';
+        content += '<td class="col-center">' + (resFoncN1 >= 0 ? fmt(resFoncN1) : '-') + '</td>';
+        content += '<td class="col-center">' + (resFoncN1 < 0 ? fmt(-resFoncN1) : '-') + '</td>';
+        content += '<td class="col-center">' + (cumulFonc >= 0 ? fmt(cumulFonc) : '-') + '</td>';
+        content += '<td class="col-center">' + (cumulFonc < 0 ? fmt(-cumulFonc) : '-') + '</td>';
+        content += '</tr>';
 
-        content += '<tr>'
-          + '<td class="col-rubrique">Resultat Exercice ' + exercicePrev + '</td>'
-          + '<td class="col-num">' + fmt(sectionB.totalRec) + '</td>'
-          + '<td class="col-num">' + fmt(sectionB.totalDep) + '</td>'
-          + '<td class="col-num ' + resClass(sectionB.totalRes) + '">' + fmt(sectionB.totalRes) + '</td>'
-          + '</tr>';
+        // INVESTISSEMENT
+        content += '<tr>';
+        content +=
+          '<td class="align-center bold uppercase" style="font-size: 8px;">INVESTISSEMENT</td>';
+        content += '<td class="col-center">' + fmt(resultsN.prevInv) + '</td>';
+        content += '<td class="col-center">' + fmt(resultsN.recInv) + '</td>';
+        content += '<td class="col-center">' + fmt(resultsN.depInv) + '</td>';
+        content += '<td class="col-center">' + (resInvN >= 0 ? fmt(resInvN) : '-') + '</td>';
+        content += '<td class="col-center">' + (resInvN < 0 ? fmt(-resInvN) : '-') + '</td>';
+        content += '<td class="col-center">' + (resInvN1 >= 0 ? fmt(resInvN1) : '-') + '</td>';
+        content += '<td class="col-center">' + (resInvN1 < 0 ? fmt(-resInvN1) : '-') + '</td>';
+        content += '<td class="col-center">' + (cumulInv >= 0 ? fmt(cumulInv) : '-') + '</td>';
+        content += '<td class="col-center">' + (cumulInv < 0 ? fmt(-cumulInv) : '-') + '</td>';
+        content += '</tr>';
 
-        content += '<tr class="grand-total">'
-          + '<td class="col-rubrique">RESULTAT CUMULE</td>'
-          + '<td class="col-num">' + fmt(cumulRec) + '</td>'
-          + '<td class="col-num">' + fmt(cumulDep) + '</td>'
-          + '<td class="col-num ' + resClass(cumulRes) + '">' + fmt(cumulRes) + '</td>'
-          + '</tr>';
+        // TOTAL
+        content += '<tr>';
+        content += '<td class="align-center bold uppercase" style="font-size: 8px;">TOTAL</td>';
+        content += '<td class="col-center">' + fmt(totalPrev) + '</td>';
+        content += '<td class="col-center">' + fmt(totalRecN) + '</td>';
+        content += '<td class="col-center">' + fmt(totalDepN) + '</td>';
+        content += '<td class="col-center">' + (totalResN >= 0 ? fmt(totalResN) : '-') + '</td>';
+        content += '<td class="col-center">' + (totalResN < 0 ? fmt(-totalResN) : '-') + '</td>';
+        content += '<td class="col-center">' + (totalResN1 >= 0 ? fmt(totalResN1) : '-') + '</td>';
+        content += '<td class="col-center">' + (totalResN1 < 0 ? fmt(-totalResN1) : '-') + '</td>';
+        content +=
+          '<td class="col-center bold" style="font-size: 10px;">' +
+          (cumulRes >= 0 ? fmt(cumulRes) : '-') +
+          '</td>';
+        content +=
+          '<td class="col-center bold" style="font-size: 10px;">' +
+          (cumulRes < 0 ? fmt(-cumulRes) : '-') +
+          '</td>';
+        content += '</tr>';
 
         content += '</tbody></table>';
+
+        const today = new Date();
+        const dateStr = today.toLocaleDateString('fr-FR', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+        });
+
+        content +=
+          '<div class="arrete-text">Arrêté le résultat avant correction du présent compte administratif à la somme de: <strong>( ' +
+          fmt(Math.abs(cumulRes)) +
+          ' ) francs CFA</strong></div>';
+
+        content += '<div class="signatures">';
+        content +=
+          '<div class="signature-box"><br><strong>LE TRESORIER PRINCIPAL</strong><br><br><br><br><br><br><strong>MOBIE BOKA WILFREED</strong></div>';
+        content +=
+          '<div class="signature-box">Fait à ' +
+          (mairie.ville || 'VAVOUA').toUpperCase() +
+          ' le, ' +
+          dateStr +
+          '<br><strong>LE MAIRE</strong><br><br><br><br><br><br><strong>KALOU BONAVENTURE</strong></div>';
+        content += '</div>';
+
+        // SECOND TABLE: RESULTAT APRES CORRECTION
+        content += '<table style="margin-top: 50px; page-break-before: always;">'; // Start on a new page or push down
+        content += '<thead>';
+        content += '<tr>';
+        content +=
+          '<th rowspan="2" class="align-center bold uppercase" style="font-size: 11px; width: 25%;">COMPTE ADMINISTRATIF</th>';
+        content +=
+          '<th rowspan="2" colspan="4" class="align-center bold uppercase" style="font-size: 11px;">RESULTAT APRES CORRECTION<br><br>n° 47</th>';
+        content +=
+          '<th class="align-center bold uppercase" style="font-size: 10px; width: 60px;">ANNEE</th>';
+        content +=
+          '<th class="align-center bold uppercase" style="font-size: 10px; width: 40px;">N°</th>';
+        content += '</tr>';
+        content += '<tr>';
+        content += '<th class="align-center" style="font-size: 10px;">' + exercice + '</th>';
+        content += '<th class="align-center" style="font-size: 10px;">35</th>';
+        content += '</tr>';
+        content += '<tr>';
+        content +=
+          '<th rowspan="2" class="align-center bold uppercase" style="font-size: 8px;">BUDGET</th>';
+        content +=
+          '<th colspan="2" class="align-center bold uppercase" style="font-size: 7px;">RESULTAT AVANT CORRECTION</th>';
+        content +=
+          '<th rowspan="2" class="align-center bold uppercase" style="font-size: 7px;">RESTE A RECOUVRER</th>';
+        content +=
+          '<th rowspan="2" class="align-center bold uppercase" style="font-size: 7px;">ENGAGEMENTS NON<br>MANDATES</th>';
+        content +=
+          '<th colspan="2" class="align-center bold uppercase" style="font-size: 7px;">RESULTAT APRES CORRECTION</th>';
+        content += '</tr>';
+        content += '<tr>';
+        content += '<th class="align-center bold uppercase" style="font-size: 7px;">EXCEDENT</th>';
+        content += '<th class="align-center bold uppercase" style="font-size: 7px;">DEFICIT</th>';
+        content += '<th class="align-center bold uppercase" style="font-size: 7px;">EXCEDENT</th>';
+        content += '<th class="align-center bold uppercase" style="font-size: 7px;">DEFICIT</th>';
+        content += '</tr>';
+        content += '</thead>';
+        content += '<tbody>';
+
+        // TITRE I FONCTIONNEMENT
+        content += '<tr>';
+        content +=
+          '<td class="align-center bold uppercase" style="font-size: 9px; padding: 15px 5px;">TITRE I FONCTIONNEMENT</td>';
+        content += '<td class="col-center">' + (cumulFonc >= 0 ? fmt(cumulFonc) : '') + '</td>';
+        content += '<td class="col-center">' + (cumulFonc < 0 ? fmt(-cumulFonc) : '') + '</td>';
+        content += '<td class="col-center"></td>';
+        content += '<td class="col-center"></td>';
+        content += '<td class="col-center">' + (cumulFonc >= 0 ? fmt(cumulFonc) : '') + '</td>';
+        content += '<td class="col-center">' + (cumulFonc < 0 ? fmt(-cumulFonc) : '') + '</td>';
+        content += '</tr>';
+
+        // TITRE II INVESTISSEMENT
+        content += '<tr>';
+        content +=
+          '<td class="align-center bold uppercase" style="font-size: 9px; padding: 15px 5px;">TITRE II INVESTISSEMENT</td>';
+        content += '<td class="col-center">' + (cumulInv >= 0 ? fmt(cumulInv) : '') + '</td>';
+        content += '<td class="col-center">' + (cumulInv < 0 ? fmt(-cumulInv) : '') + '</td>';
+        content += '<td class="col-center"></td>';
+        content += '<td class="col-center"></td>';
+        content += '<td class="col-center">' + (cumulInv >= 0 ? fmt(cumulInv) : '') + '</td>';
+        content += '<td class="col-center">' + (cumulInv < 0 ? fmt(-cumulInv) : '') + '</td>';
+        content += '</tr>';
+
+        // TOTAL
+        content += '<tr>';
+        content +=
+          '<td class="align-center bold uppercase" style="font-size: 9px; padding: 15px 5px;">TOTAL</td>';
+        content += '<td class="col-center">' + (cumulRes >= 0 ? fmt(cumulRes) : '') + '</td>';
+        content += '<td class="col-center">' + (cumulRes < 0 ? fmt(-cumulRes) : '') + '</td>';
+        content += '<td class="col-center"></td>';
+        content += '<td class="col-center"></td>';
+        content += '<td class="col-center">' + (cumulRes >= 0 ? fmt(cumulRes) : '') + '</td>';
+        content += '<td class="col-center">' + (cumulRes < 0 ? fmt(-cumulRes) : '') + '</td>';
+        content += '</tr>';
+
+        content += '</tbody></table>';
+
+        content +=
+          '<div class="arrete-text">Arrêté le résultat apres correction du présent compte administratif à la somme de: <strong>( ' +
+          fmt(Math.abs(cumulRes)) +
+          ' ) francs CFA</strong></div>';
+
+        content += '<div class="signatures">';
+        content +=
+          '<div class="signature-box"><br><strong>LE TRESORIER PRINCIPAL</strong><br><br><br><br><br><br><strong>MOBIE BOKA WILFREED</strong></div>';
+        content +=
+          '<div class="signature-box">Fait à ' +
+          (mairie.ville || 'VAVOUA').toUpperCase() +
+          ' le, ' +
+          dateStr +
+          '<br><strong>LE MAIRE</strong><br><br><br><br><br><br><strong>KALOU BONAVENTURE</strong></div>';
+        content += '</div>';
 
         document.getElementById('content').innerHTML = content;
       }
@@ -282,7 +504,7 @@
       let pendingData = null;
       let dataProcessed = false;
 
-      window.addEventListener('message', function(event) {
+      window.addEventListener('message', function (event) {
         if (document.readyState === 'complete' || document.readyState === 'interactive') {
           processMessage(event.data);
           dataProcessed = true;
@@ -291,21 +513,21 @@
         }
       });
 
-      window.addEventListener('DOMContentLoaded', async function() {
+      window.addEventListener('DOMContentLoaded', async function () {
         if (pendingData && !dataProcessed) {
           processMessage(pendingData);
           dataProcessed = true;
           return;
         }
 
-        await new Promise(r => setTimeout(r, 500));
+        await new Promise((r) => setTimeout(r, 500));
 
         if (!dataProcessed) {
           try {
             const result = await loadData();
             render(result);
             dataProcessed = true;
-          } catch(e) {
+          } catch (e) {
             console.warn('Erreur chargement IndexedDB:', e);
           }
         }
@@ -314,13 +536,19 @@
           try {
             const db = new Dexie('TresorDatabase');
             db.version(28).stores({ printData: '++id, type, createdAt' });
-            const records = await db.table('printData').where('type').equals('FILL_COMPTE_ADMIN_DATA').toArray();
+            const records = await db
+              .table('printData')
+              .where('type')
+              .equals('FILL_COMPTE_ADMIN_DATA')
+              .toArray();
             if (records.length > 0) {
-              const latest = records.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+              const latest = records.sort(
+                (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+              )[0];
               processMessage(latest.data);
               await db.table('printData').delete(latest.id);
             }
-          } catch(e) {
+          } catch (e) {
             console.warn('Erreur printData:', e);
           }
         }

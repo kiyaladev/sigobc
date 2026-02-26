@@ -19,82 +19,58 @@
       .container {
         width: 100%;
       }
-      .doc-header {
-        width: 100%;
-        display: grid;
-        grid-template-columns: 1fr 2fr 1fr;
-        border: 1px solid #000;
-        margin-bottom: 10px;
-      }
-      .doc-header-block {
-        padding: 6px 8px;
-        min-height: 60px;
-      }
-      .doc-header-block + .doc-header-block {
-        border-left: 1px solid #000;
-      }
-      .doc-header-left {
-        text-align: left;
-        font-weight: bold;
-      }
-      .doc-header-center {
-        text-align: center;
-        font-weight: bold;
-      }
-      .doc-header-right {
-        text-align: right;
-        font-weight: bold;
-      }
-      .main-title {
-        text-decoration: underline;
-        font-size: 14px;
-        margin: 4px 0;
-      }
       table {
         width: 100%;
         border-collapse: collapse;
         margin-top: 5px;
       }
-      th, td {
+      th,
+      td {
         border: 1px solid #000;
         padding: 3px 5px;
+        color: #000;
       }
       th {
-        background-color: #f0f0f0;
+        font-weight: bold;
         text-align: center;
         vertical-align: middle;
-        font-size: 9px;
-      }
-      .col-code {
-        width: 8%;
-        text-align: center;
-      }
-      .col-libelle {
-        width: 26%;
-        text-align: left;
       }
       .col-num {
         text-align: right;
         white-space: nowrap;
-        width: 13%;
+        font-size: 9px;
       }
-      .col-percent {
+      .col-center {
         text-align: center;
-        width: 8%;
+        white-space: nowrap;
+        font-size: 9px;
       }
-      .section-header {
-        background-color: #e0e0e0;
+      .bold {
         font-weight: bold;
       }
-      .sous-total {
-        background-color: #f5f5f5;
-        font-weight: bold;
-        font-style: italic;
+      .underline {
+        text-decoration: underline;
+      }
+      .align-center {
+        text-align: center;
+      }
+      .align-right {
+        text-align: right;
+      }
+      .align-left {
+        text-align: left;
+      }
+      .uppercase {
+        text-transform: uppercase;
+      }
+      .padding-left-md {
+        padding-left: 20px;
+      }
+      .padding-left-sm {
+        padding-left: 10px;
       }
       .total-row {
-        background-color: #d0d0d0;
         font-weight: bold;
-        border-top: 2px solid #000;
       }
       .signatures {
         margin-top: 30px;
@@ -135,8 +111,12 @@
         page-break-inside: avoid;
       }
       @media print {
-        body { padding: 0; }
-        .no-print { display: none; }
+        body {
+          padding: 0;
+        }
+        .no-print {
+          display: none;
+        }
         .print-footer {
           break-inside: avoid;
           page-break-inside: avoid;
@@ -153,18 +133,20 @@
     </div>
 
     <script>
-      function fmt(v) { return v ? new Intl.NumberFormat('fr-FR').format(Math.round(v)) : '0'; }
+      function fmt(v) {
+        return v ? new Intl.NumberFormat('fr-FR').format(Math.round(v)) : '0';
+      }
       function pct(real, prev) {
         if (!prev || prev === 0) return '0,00';
         return ((real / prev) * 100).toFixed(2).replace('.', ',');
       }
 
       const sectionLabels = {
-        '60': 'SECTION 60 - SALAIRES ET ACCESSOIRES',
-        '61': 'SECTION 61 - MATÉRIEL ET FONCTIONNEMENT',
-        '62': 'SECTION 62 - CHARGES SOCIALES DE L\'ÉTAT',
-        '63': 'SECTION 63 - SUBVENTIONS ET TRANSFERTS',
-        '64': 'SECTION 64 - INTERVENTIONS ET CHARGES DIVERSES',
+        60: 'SECTION 60 - SALAIRES ET ACCESSOIRES',
+        61: 'SECTION 61 - MATÉRIEL ET FONCTIONNEMENT',
+        62: "SECTION 62 - CHARGES SOCIALES DE L'ÉTAT",
+        63: 'SECTION 63 - SUBVENTIONS ET TRANSFERTS',
+        64: 'SECTION 64 - INTERVENTIONS ET CHARGES DIVERSES',
       };
 
       var dataProcessed = false;
@@ -186,100 +168,117 @@
         const content = document.getElementById('content');
         content.innerHTML = '';
 
-        // Header
-        const header = document.createElement('div');
-        header.className = 'doc-header';
-        header.innerHTML = `
-          <div class="doc-header-block doc-header-left">
-            DÉPARTEMENT DE ${(mairie.departement || '').toUpperCase()}<br/>
-            COMMUNE DE ${(mairie.nom || '').replace(/^mairie de /i, '').toUpperCase()}<br/>
-            CODE : ${mairie.code || '---'}
-          </div>
-          <div class="doc-header-block doc-header-center">
-            <div class="main-title">COMPTE ADMINISTRATIF</div>
-            DÉPENSES ENGAGÉES (DÉTAIL)<br/>
-            EXERCICE : <strong>${exercice}</strong>
-          </div>
-          <div class="doc-header-block doc-header-right">
-            ANNÉE : <strong>${exercice}</strong>
-          </div>
-        `;
-        content.appendChild(header);
-
         // Table
         const table = document.createElement('table');
         table.innerHTML = `
           <thead>
             <tr>
-              <th class="col-code">Code</th>
-              <th class="col-libelle">Libellé</th>
-              <th class="col-num">Prévisions</th>
-              <th class="col-num">Engagements</th>
-              <th class="col-percent">Taux Exec.(%)</th>
-              <th class="col-num">Disponible</th>
+              <th rowspan="2" class="align-center bold uppercase" style="font-size: 11px;">COMMUNE DE <span id="mairie-nom-header"></span></th>
+              <th rowspan="2" colspan="6" class="align-center bold uppercase" style="font-size: 11px;">COMPTE ADMINISTRATIF - DEPENSES DE FONCTIONNEMENT</th>
+              <th class="align-center bold uppercase" style="font-size: 10px; width: 60px;">ANNEE</th>
+              <th class="align-center bold uppercase" style="font-size: 10px; width: 40px;">N°</th>
+            </tr>
+            <tr>
+              <th class="align-center" style="font-size: 10px;">${exercice}</th>
+              <th class="align-center" style="font-size: 10px;">1</th>
+            </tr>
+            <tr>
+              <th rowspan="2" class="align-center bold" style="font-size: 10px; width: 35%;">RUBRIQUES BUDGETAIRES</th>
+              <th rowspan="2" class="align-center" style="font-size: 7px; width: 8.5%;">PREVISIONS</th>
+              <th rowspan="2" class="align-center" style="font-size: 7px; width: 9%;">DEPENSES ENGAGEES</th>
+              <th rowspan="2" class="align-center" style="font-size: 7px; width: 5%;">% E/P</th>
+              <th rowspan="2" class="align-center" style="font-size: 7px; width: 8.5%;">MANDATS</th>
+              <th colspan="3" class="align-center bold" style="font-size: 9px;">ENGAGEMENTS NON MANDATES</th>
+              <th rowspan="2" class="align-center" style="font-size: 8px; width: 7%;">T O T A L</th>
+            </tr>
+            <tr>
+              <th class="align-center" style="font-size: 6px; width: 7.5%;">COMMANDES NON<br>LIVREES</th>
+              <th class="align-center" style="font-size: 6px; width: 7.5%;">COMMANDES<br>LIVREES NON<br>FACTUREES</th>
+              <th class="align-center" style="font-size: 6px; width: 7.5%;">COMMANDES FACTUREES</th>
             </tr>
           </thead>
+          <tbody></tbody>
         `;
-        const tbody = document.createElement('tbody');
+        const tbody = table.querySelector('tbody');
+
+        // Update mairie info
+        const nomMairie = (mairie.nom || '').replace(/^mairie de /i, '');
+        table.querySelector('#mairie-nom-header').textContent = nomMairie.toUpperCase();
 
         // Group lines by section
         const sections = {};
-        const sectionOrder = ['60','61','62','63','64'];
-        sectionOrder.forEach(function(s) { sections[s] = []; });
+        const sectionOrder = ['60', '61', '62', '63', '64'];
+        sectionOrder.forEach(function (s) {
+          sections[s] = [];
+        });
 
-        lignes.forEach(function(l) {
+        lignes.forEach(function (l) {
           var prefix = (l.code || '').substring(0, 2);
           if (sections[prefix]) {
             sections[prefix].push(l);
           }
         });
 
-        let grandPrev = 0, grandEng = 0;
+        let grandPrev = 0,
+          grandEng = 0;
 
-        sectionOrder.forEach(function(secCode) {
+        sectionOrder.forEach(function (secCode) {
           var items = sections[secCode];
-          items.sort(function(a, b) {
+          if (items.length === 0) return;
+
+          items.sort(function (a, b) {
             return (a.code || '').localeCompare(b.code || '', undefined, { numeric: true });
           });
 
           // Section header
           var secRow = document.createElement('tr');
-          secRow.className = 'section-header';
-          secRow.innerHTML = '<td></td><td colspan="5">' + (sectionLabels[secCode] || 'SECTION ' + secCode) + '</td>';
+          secRow.innerHTML = `
+            <td class="bold underline padding-left-md uppercase" style="font-size: 9px;">${sectionLabels[secCode] || 'SECTION ' + secCode}</td>
+            <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+          `;
           tbody.appendChild(secRow);
 
-          var secPrev = 0, secEng = 0;
+          var secPrev = 0,
+            secEng = 0;
 
-          items.forEach(function(l) {
+          items.forEach(function (l) {
             var prev = l.previsions || 0;
             var eng = l.engagements || 0;
-            var dispo = prev - eng;
             secPrev += prev;
             secEng += eng;
 
+            var codeStr = l.code || '';
+            var libStr = l.libelle || '';
+            var td1 = codeStr + (codeStr && libStr ? ' ' : '') + libStr;
+
             var tr = document.createElement('tr');
             tr.innerHTML = `
-              <td class="col-code">${l.code || ''}</td>
-              <td class="col-libelle">${l.libelle || ''}</td>
+              <td class="padding-left-sm align-left" style="font-size: 9px;">${td1}</td>
               <td class="col-num">${fmt(prev)}</td>
               <td class="col-num">${fmt(eng)}</td>
-              <td class="col-percent">${pct(eng, prev)}</td>
-              <td class="col-num">${fmt(dispo)}</td>
+              <td class="col-center">${pct(eng, prev)}</td>
+              <td class="col-num">${fmt(eng)}</td>
+              <td class="col-center">-</td>
+              <td class="col-center">-</td>
+              <td class="col-center">-</td>
+              <td class="col-center">-</td>
             `;
             tbody.appendChild(tr);
           });
 
           // Section subtotal
-          var secDispo = secPrev - secEng;
           var stRow = document.createElement('tr');
-          stRow.className = 'sous-total';
+          stRow.className = 'total-row';
           stRow.innerHTML = `
-            <td>S/${secCode}</td>
-            <td>SOUS TOTAL SECTION ${secCode}</td>
+            <td class="bold align-right uppercase" style="font-size: 8px;">SOUS TOTAL SECTION ${secCode}</td>
             <td class="col-num">${fmt(secPrev)}</td>
             <td class="col-num">${fmt(secEng)}</td>
-            <td class="col-percent">${pct(secEng, secPrev)}</td>
-            <td class="col-num">${fmt(secDispo)}</td>
+            <td class="col-center">${pct(secEng, secPrev)}</td>
+            <td class="col-num">${fmt(secEng)}</td>
+            <td class="col-center">-</td>
+            <td class="col-center">-</td>
+            <td class="col-center">-</td>
+            <td class="col-center">-</td>
           `;
           tbody.appendChild(stRow);
 
@@ -288,27 +287,32 @@
         });
 
         // Grand total
-        var grandDispo = grandPrev - grandEng;
         var totalRow = document.createElement('tr');
         totalRow.className = 'total-row';
         totalRow.innerHTML = `
-          <td>TOTAL</td>
-          <td>TOTAL GÉNÉRAL DÉPENSES ENGAGÉES</td>
+          <td class="bold align-right uppercase">TOTAL GENERAL DEPENSES ENGAGEES</td>
           <td class="col-num">${fmt(grandPrev)}</td>
           <td class="col-num">${fmt(grandEng)}</td>
-          <td class="col-percent">${pct(grandEng, grandPrev)}</td>
-          <td class="col-num">${fmt(grandDispo)}</td>
+          <td class="col-center">${pct(grandEng, grandPrev)}</td>
+          <td class="col-num">${fmt(grandEng)}</td>
+          <td class="col-center">-</td>
+          <td class="col-center">-</td>
+          <td class="col-center">-</td>
+          <td class="col-center">-</td>
         `;
         tbody.appendChild(totalRow);
 
-        table.appendChild(tbody);
         content.appendChild(table);
 
         // Signatures
         var sigs = document.createElement('div');
         sigs.className = 'signatures print-footer';
         var today = new Date();
-        var dateStr = today.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+        var dateStr = today.toLocaleDateString('fr-FR', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+        });
         sigs.innerHTML = `
           <div class="signature-box">
             ${mairie.nom || '---'}, le ${dateStr}<br/>
@@ -325,7 +329,7 @@
       }
 
       // Listen for postMessage
-      window.addEventListener('message', function(event) {
+      window.addEventListener('message', function (event) {
         if (document.readyState === 'complete' || document.readyState === 'interactive') {
           processData(event.data);
         } else {
@@ -334,7 +338,7 @@
       });
 
       // Fallback: IndexedDB
-      window.addEventListener('DOMContentLoaded', async function() {
+      window.addEventListener('DOMContentLoaded', async function () {
         console.log('[DepEng] DOMContentLoaded fired');
 
         if (pendingData && !dataProcessed) {
@@ -342,30 +346,34 @@
           return;
         }
 
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
         if (!dataProcessed) {
           try {
             var db = new Dexie('TresorDatabase');
             db.version(28).stores({
-              mandats: '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
+              mandats:
+                '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
               previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
               sousChapitres: '++id, code, libelle, parentId, mairieId, actif',
               chapitres: '++id, code, libelle, mairieId, actif',
               taxes: '++id, code, libelle, mairieId, type, actif',
-              declarations: '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
+              declarations:
+                '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
               previsionsRecettes: '++id, exercice, taxeId, mairieId, statut, personnelId',
               mairies: '++id, nom, code, ville',
               printData: '++id, type, createdAt',
             });
 
             // Check printData first
-            var printDataRecords = await db.table('printData')
-              .where('type').equals('FILL_COMPTE_ADMIN_DATA')
+            var printDataRecords = await db
+              .table('printData')
+              .where('type')
+              .equals('FILL_COMPTE_ADMIN_DATA')
               .toArray();
 
             if (printDataRecords.length > 0) {
-              var latestRecord = printDataRecords.sort(function(a, b) {
+              var latestRecord = printDataRecords.sort(function (a, b) {
                 return new Date(b.createdAt) - new Date(a.createdAt);
               })[0];
               processData(latestRecord.data);
@@ -379,19 +387,26 @@
             var mairieId = parseInt(params.get('mairieId')) || 1;
 
             var mairie = await db.table('mairies').get(mairieId);
-            var allSousChapitres = await db.table('sousChapitres')
-              .where('mairieId').equals(mairieId).toArray();
-            var allPrevisions = await db.table('previsions')
-              .where('exercice').equals(exercice).toArray();
-            var allMandats = await db.table('mandats')
-              .where('exercice').equals(exercice).toArray();
+            var allSousChapitres = await db
+              .table('sousChapitres')
+              .where('mairieId')
+              .equals(mairieId)
+              .toArray();
+            var allPrevisions = await db
+              .table('previsions')
+              .where('exercice')
+              .equals(exercice)
+              .toArray();
+            var allMandats = await db.table('mandats').where('exercice').equals(exercice).toArray();
 
             var scMap = {};
-            allSousChapitres.forEach(function(sc) { scMap[sc.id] = sc; });
+            allSousChapitres.forEach(function (sc) {
+              scMap[sc.id] = sc;
+            });
 
             // Build per-sous-chapitre aggregation for codes starting with 6
             var scAggregation = {};
-            allSousChapitres.forEach(function(sc) {
+            allSousChapitres.forEach(function (sc) {
               if (!(sc.code || '').startsWith('6')) return;
               scAggregation[sc.id] = {
                 code: sc.code,
@@ -401,13 +416,13 @@
               };
             });
 
-            allPrevisions.forEach(function(p) {
+            allPrevisions.forEach(function (p) {
               if (scAggregation[p.sousChapitreId]) {
                 scAggregation[p.sousChapitreId].previsions += p.montantPrevu || 0;
               }
             });
 
-            allMandats.forEach(function(m) {
+            allMandats.forEach(function (m) {
               if (m.statut !== 'paye') return;
               if (scAggregation[m.sousChapitreId]) {
                 scAggregation[m.sousChapitreId].engagements += m.montant || 0;
@@ -422,9 +437,9 @@
                 exercice: exercice,
                 mairie: mairie || {},
                 lignesDepenses: lignesDepenses,
-              }
+              },
             });
-          } catch(e) {
+          } catch (e) {
             console.warn('Erreur lors de la lecture de IndexedDB:', e);
           }
         }

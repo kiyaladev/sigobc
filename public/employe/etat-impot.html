@@ -7,56 +7,218 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="../dexie.min.js"></script>
     <style>
-      body { font-family: 'Times New Roman', Times, serif; }
+      body {
+        font-family: 'Times New Roman', Times, serif;
+      }
       .print-btn {
-        position: fixed; top: 10px; right: 10px; background: #1976d2; color: white;
-        border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;
-        font-size: 14px; z-index: 999; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: #1976d2;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        z-index: 999;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
       }
-      .print-btn:hover { background: #1565c0; }
+      .print-btn:hover {
+        background: #1565c0;
+      }
       .print-page {
-        width: 297mm; min-height: 210mm; background: #fff;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.12); margin: 20px auto;
-        padding: 1cm 1.2cm; position: relative; page-break-after: always;
+        width: 297mm;
+        min-height: 210mm;
+        background: #fff;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        margin: 20px auto;
+        padding: 1cm 1.2cm;
+        position: relative;
+        page-break-after: always;
       }
-      .print-page:last-child { page-break-after: auto; }
-      .page-number { position: absolute; bottom: 8mm; right: 10mm; font-size: 9px; color: #999; }
-      table.data-table { border-collapse: collapse; width: 100%; }
-      table.data-table th, table.data-table td { border: 1px solid #000; padding: 5px 8px; font-size: 13px; }
-      table.data-table th { text-align: center; font-weight: bold; }
-      tr.report-row td { background: #fef3c7 !important; font-weight: bold; font-style: italic; }
-      tr.total-row td { background: #dbeafe !important; font-weight: bold; }
-      .editable-date { cursor: pointer; border-bottom: 1px dashed #999; padding: 0 2px; min-width: 80px; display: inline-block; }
-      .editable-date:hover { background: #e8f0fe; }
-      .editable-date:focus { outline: 2px solid #1976d2; background: #fff; border-bottom: none; }
+      .print-page:last-child {
+        page-break-after: auto;
+      }
+      .page-number {
+        position: absolute;
+        bottom: 8mm;
+        right: 10mm;
+        font-size: 9px;
+        color: #999;
+      }
+      table.data-table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      table.data-table th,
+      table.data-table td {
+        border: 1px solid #000;
+        padding: 5px 8px;
+        font-size: 13px;
+      }
+      table.data-table th {
+        text-align: center;
+        font-weight: bold;
+      }
+      tr.report-row td {
+        background: #fef3c7 !important;
+        font-weight: bold;
+        font-style: italic;
+      }
+      tr.total-row td {
+        background: #dbeafe !important;
+        font-weight: bold;
+      }
+      .editable-date {
+        cursor: pointer;
+        border-bottom: 1px dashed #999;
+        padding: 0 2px;
+        min-width: 80px;
+        display: inline-block;
+      }
+      .editable-date:hover {
+        background: #e8f0fe;
+      }
+      .editable-date:focus {
+        outline: 2px solid #1976d2;
+        background: #fff;
+        border-bottom: none;
+      }
       @media print {
-        @page { size: A4 landscape; margin: 0; }
-        body { background: white; padding: 0; margin: 0; }
-        .print-btn { display: none !important; }
-        .editable-date { border-bottom: none; }
-        .print-page { box-shadow: none; margin: 0; width: 100%; min-height: 100vh; padding: 8mm 10mm; }
+        @page {
+          size: A4 landscape;
+          margin: 0;
+        }
+        body {
+          background: white;
+          padding: 0;
+          margin: 0;
+        }
+        .print-btn {
+          display: none !important;
+        }
+        .editable-date {
+          border-bottom: none;
+        }
+        .print-page {
+          box-shadow: none;
+          margin: 0;
+          width: 100%;
+          min-height: 100vh;
+          padding: 8mm 10mm;
+        }
       }
     </style>
   </head>
   <body class="bg-gray-200">
     <button class="print-btn" onclick="window.print()">Imprimer</button>
     <div id="content">
-      <div class="print-page" style="display:flex;align-items:center;justify-content:center;color:#888">Chargement...</div>
+      <div
+        class="print-page"
+        style="display: flex; align-items: center; justify-content: center; color: #888"
+      >
+        Chargement...
+      </div>
     </div>
     <script>
-      const MOIS_LABELS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+      const MOIS_LABELS = [
+        'Janvier',
+        'Février',
+        'Mars',
+        'Avril',
+        'Mai',
+        'Juin',
+        'Juillet',
+        'Août',
+        'Septembre',
+        'Octobre',
+        'Novembre',
+        'Décembre',
+      ];
       const ROWS_PER_PAGE = 10;
-      function fmt(n) { return Number(n||0).toLocaleString('fr-FR'); }
+      function fmt(n) {
+        return Number(n || 0).toLocaleString('fr-FR');
+      }
       function numberToWords(num) {
-        if (num===0) return 'ZÉRO';
-        const u=['','un','deux','trois','quatre','cinq','six','sept','huit','neuf','dix','onze','douze','treize','quatorze','quinze','seize','dix-sept','dix-huit','dix-neuf'];
-        const t=['','','vingt','trente','quarante','cinquante','soixante','soixante','quatre-vingt','quatre-vingt'];
-        function lt1000(n){if(n<20)return u[n];if(n<100){const a=Math.floor(n/10),b=n%10;if(a===7)return'soixante-'+u[10+b];if(a===9)return'quatre-vingt-'+(b===0?'s':u[b]);return t[a]+(b===1&&a!==8?'-et-un':b>0?'-'+u[b]:a===8?'s':'');}const h=Math.floor(n/100),r=n%100;return(h===1?'cent':u[h]+'-cent')+(r===0&&h>1?'s':'')+(r>0?'-'+lt1000(r):'');}
-        function conv(n){if(!n)return'';if(n>=1e6){const m=Math.floor(n/1e6),r=n%1e6;return(m===1?'un million':lt1000(m)+' millions')+(r>0?' '+conv(r):'');}if(n>=1000){const k=Math.floor(n/1000),r=n%1000;return(k===1?'mille':lt1000(k)+' mille')+(r>0?' '+lt1000(r):'');}return lt1000(n);}
-        return conv(num).toUpperCase()+' FRANCS CFA';
+        if (num === 0) return 'ZÉRO';
+        const u = [
+          '',
+          'un',
+          'deux',
+          'trois',
+          'quatre',
+          'cinq',
+          'six',
+          'sept',
+          'huit',
+          'neuf',
+          'dix',
+          'onze',
+          'douze',
+          'treize',
+          'quatorze',
+          'quinze',
+          'seize',
+          'dix-sept',
+          'dix-huit',
+          'dix-neuf',
+        ];
+        const t = [
+          '',
+          '',
+          'vingt',
+          'trente',
+          'quarante',
+          'cinquante',
+          'soixante',
+          'soixante',
+          'quatre-vingt',
+          'quatre-vingt',
+        ];
+        function lt1000(n) {
+          if (n < 20) return u[n];
+          if (n < 100) {
+            const a = Math.floor(n / 10),
+              b = n % 10;
+            if (a === 7) return 'soixante-' + u[10 + b];
+            if (a === 9) return 'quatre-vingt-' + (b === 0 ? 's' : u[b]);
+            return t[a] + (b === 1 && a !== 8 ? '-et-un' : b > 0 ? '-' + u[b] : a === 8 ? 's' : '');
+          }
+          const h = Math.floor(n / 100),
+            r = n % 100;
+          return (
+            (h === 1 ? 'cent' : u[h] + '-cent') +
+            (r === 0 && h > 1 ? 's' : '') +
+            (r > 0 ? '-' + lt1000(r) : '')
+          );
+        }
+        function conv(n) {
+          if (!n) return '';
+          if (n >= 1e6) {
+            const m = Math.floor(n / 1e6),
+              r = n % 1e6;
+            return (
+              (m === 1 ? 'un million' : lt1000(m) + ' millions') + (r > 0 ? ' ' + conv(r) : '')
+            );
+          }
+          if (n >= 1000) {
+            const k = Math.floor(n / 1000),
+              r = n % 1000;
+            return (k === 1 ? 'mille' : lt1000(k) + ' mille') + (r > 0 ? ' ' + lt1000(r) : '');
+          }
+          return lt1000(n);
+        }
+        return conv(num).toUpperCase() + ' FRANCS CFA';
       }
       const db = new Dexie('TresorDatabase');
-      db.version(28).stores({ mairies:'++id', employes:'++id,matricule,nom,prenom,typeEmploye,service,departement,mairieId,actif', fichesPaie:'++id,employeId,mois,annee,exercice,mairieId,statut,[annee+mois+employeId]', parametresPaie:'++id, mairieId', servicesApp7:'++id, nom, compte, mairieId, actif' });
+      db.version(28).stores({
+        mairies: '++id',
+        employes: '++id,matricule,nom,prenom,typeEmploye,service,departement,mairieId,actif',
+        fichesPaie: '++id,employeId,mois,annee,exercice,mairieId,statut,[annee+mois+employeId]',
+        parametresPaie: '++id, mairieId',
+        servicesApp7: '++id, nom, compte, mairieId, actif',
+      });
 
       function buildHeader(moisLabel, annee, chapitre, compte) {
         return `<div class="flex justify-between items-start mb-4 text-[13px] font-bold">
@@ -76,45 +238,89 @@
 
       document.addEventListener('DOMContentLoaded', async () => {
         const p = new URLSearchParams(window.location.search);
-        const mois = parseInt(p.get('mois')||String(new Date().getMonth()+1),10);
-        const annee = parseInt(p.get('annee')||String(new Date().getFullYear()),10);
-        const moisLabel = MOIS_LABELS[mois-1]||'';
-        const dateSig = new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}).toUpperCase();
+        const mois = parseInt(p.get('mois') || String(new Date().getMonth() + 1), 10);
+        const annee = parseInt(p.get('annee') || String(new Date().getFullYear()), 10);
+        const moisLabel = MOIS_LABELS[mois - 1] || '';
+        const dateSig = new Date()
+          .toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+          .toUpperCase();
         const compteParam = p.get('compte') || '';
         const chapitreParam = p.get('chapitre') || '';
         const paramsDb = await db.parametresPaie.toCollection().first();
         const tIts = paramsDb ? paramsDb.tauxIts : 1.6;
 
-        let fiches = await db.fichesPaie.filter(f=>f.mois===mois&&f.annee===annee&&f.statut!=='brouillon').toArray();
-        const sf=p.get('service'), tf=p.get('typeEmploye');
-        if(sf||tf){const fl=[];for(const f of fiches){const e=await db.employes.get(f.employeId);if(e){if(sf&&e.service!==sf)continue;if(tf&&e.typeEmploye!==tf)continue;fl.push(f);}}fiches=fl;}
+        let fiches = await db.fichesPaie
+          .filter((f) => f.mois === mois && f.annee === annee && f.statut !== 'brouillon')
+          .toArray();
+        const sf = p.get('service'),
+          tf = p.get('typeEmploye');
+        if (sf || tf) {
+          const fl = [];
+          for (const f of fiches) {
+            const e = await db.employes.get(f.employeId);
+            if (e) {
+              if (sf && e.service !== sf) continue;
+              if (tf && e.typeEmploye !== tf) continue;
+              fl.push(f);
+            }
+          }
+          fiches = fl;
+        }
 
-        if(!fiches.length){ document.getElementById('content').innerHTML=`<div class="print-page"><p style="padding:40px;text-align:center;color:#888">Aucun bulletin pour ${moisLabel} ${annee}</p></div>`; return; }
+        if (!fiches.length) {
+          document.getElementById('content').innerHTML =
+            `<div class="print-page"><p style="padding:40px;text-align:center;color:#888">Aucun bulletin pour ${moisLabel} ${annee}</p></div>`;
+          return;
+        }
 
         // Build data with running totals
-        const data = await Promise.all(fiches.map(async (f,i) => {
-          const emp = await db.employes.get(f.employeId);
-          return { idx:i+1, nom:emp?`${emp.nom} ${emp.prenom}`:`Agent #${f.employeId}`, base:f.salaireBase||0, log:f.indemniteLogement||0, brut:f.montantBrut||0, its:f.impotSurSalaire||0 };
-        }));
+        const data = await Promise.all(
+          fiches.map(async (f, i) => {
+            const emp = await db.employes.get(f.employeId);
+            // Le transport est exonéré : la base imposable exclut l'indemnité de transport
+            const brutTotal = f.montantBrut || 0,
+              transport = f.indemniteTransport || 0;
+            const brutImposable = brutTotal - transport;
+            return {
+              idx: i + 1,
+              nom: emp ? `${emp.nom} ${emp.prenom}` : `Agent #${f.employeId}`,
+              base: f.salaireBase || 0,
+              log: f.indemniteLogement || 0,
+              brut: brutImposable,
+              its: f.impotSurSalaire || 0,
+            };
+          }),
+        );
 
         const pages = [];
-        for(let i=0;i<data.length;i+=ROWS_PER_PAGE) pages.push(data.slice(i,i+ROWS_PER_PAGE));
+        for (let i = 0; i < data.length; i += ROWS_PER_PAGE)
+          pages.push(data.slice(i, i + ROWS_PER_PAGE));
 
         const totalPages = pages.length;
         let cumulIts = 0;
         let html = '';
 
         pages.forEach((pageData, idx) => {
-          const isLast = idx === totalPages-1;
+          const isLast = idx === totalPages - 1;
           const reportIts = cumulIts; // report from previous pages
 
           let pageIts = 0;
-          pageData.forEach(d => { pageIts += d.its; });
+          pageData.forEach((d) => {
+            pageIts += d.its;
+          });
           cumulIts += pageIts;
 
-          const reportRow = idx > 0 ? `<tr class="report-row"><td class="p-1 text-center" colspan="6">REPORT</td><td class="p-1 text-right pr-3">${fmt(reportIts)}</td></tr>` : '';
-          const dataRows = pageData.map(d => `<tr><td class="p-1 text-center">${d.idx}</td><td class="p-1 pl-3">${d.nom}</td><td class="p-1 text-center">1</td><td class="p-1 text-right pr-3">${fmt(d.base)}</td><td class="p-1 text-right pr-3">${fmt(d.log)}</td><td class="p-1 text-right pr-3">${fmt(d.brut)}</td><td class="p-1 text-right pr-3">${fmt(d.its)}</td></tr>`).join('');
-          const totalRow = `<tr class="total-row"><td class="p-1 text-center" colspan="6"><strong>${isLast?'TOTAL GÉNÉRAL':'TOTAL'}</strong></td><td class="p-1 text-right pr-3"><strong>${fmt(cumulIts)}</strong></td></tr>`;
+          const reportRow =
+            idx > 0
+              ? `<tr class="report-row"><td class="p-1 text-center" colspan="6">REPORT</td><td class="p-1 text-right pr-3">${fmt(reportIts)}</td></tr>`
+              : '';
+          const dataRows = pageData
+            .map(
+              (d) =>
+                `<tr><td class="p-1 text-center">${d.idx}</td><td class="p-1 pl-3">${d.nom}</td><td class="p-1 text-center">1</td><td class="p-1 text-right pr-3">${fmt(d.base)}</td><td class="p-1 text-right pr-3">${fmt(d.log)}</td><td class="p-1 text-right pr-3">${fmt(d.brut)}</td><td class="p-1 text-right pr-3">${fmt(d.its)}</td></tr>`,
+            )
+            .join('');
+          const totalRow = `<tr class="total-row"><td class="p-1 text-center" colspan="6"><strong>${isLast ? 'TOTAL GÉNÉRAL' : 'TOTAL'}</strong></td><td class="p-1 text-right pr-3"><strong>${fmt(cumulIts)}</strong></td></tr>`;
 
           html += `<div class="print-page">
             ${buildHeader(moisLabel, annee, chapitreParam, compteParam)}
@@ -122,9 +328,13 @@
               ${buildTableHead(tIts)}
               <tbody>${reportRow}${dataRows}${totalRow}</tbody>
             </table>
-            ${isLast ? `<div class="mt-6 text-[13px]"><p>Arrêté le présent état à la somme de: <span class="font-bold">${numberToWords(cumulIts)}</span></p></div>
-              <div class="flex justify-end mt-8 text-[13px]"><div class="text-center mr-8"><p>VAVOUA, le <span class="editable-date" contenteditable="true">${new Date().toLocaleDateString('fr-FR')}</span></p><p class="font-bold mt-2">P/Le Maire & P.D</p></div></div>` : ''}
-            <div class="page-number">Page ${idx+1}/${totalPages}</div>
+            ${
+              isLast
+                ? `<div class="mt-6 text-[13px]"><p>Arrêté le présent état à la somme de: <span class="font-bold">${numberToWords(cumulIts)}</span></p></div>
+              <div class="flex justify-end mt-8 text-[13px]"><div class="text-center mr-8"><p>VAVOUA, le <span class="editable-date" contenteditable="true">${new Date().toLocaleDateString('fr-FR')}</span></p><p class="font-bold mt-2">P/Le Maire & P.D</p></div></div>`
+                : ''
+            }
+            <div class="page-number">Page ${idx + 1}/${totalPages}</div>
           </div>`;
         });
 

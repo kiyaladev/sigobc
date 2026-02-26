@@ -12,58 +12,116 @@
       }
       body {
         font-family: Arial, Helvetica, sans-serif;
-        font-size: 10px;
+        font-size: 9px;
         margin: 0;
         padding: 10px;
       }
-      .container { width: 100%; }
+      .container {
+        width: 100%;
+      }
       .main-title {
-        text-decoration: underline;
-        font-size: 14px;
-        margin: 5px 0;
+        font-size: 12px;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 10px;
       }
       table {
         width: 100%;
         border-collapse: collapse;
         margin-top: 0;
       }
-      th, td {
+      th,
+      td {
         border: 1px solid #000;
-        padding: 3px 4px;
+        padding: 2px 4px;
       }
       th {
-        background-color: #f0f0f0;
+        background-color: #fff;
         text-align: center;
         vertical-align: middle;
-        font-size: 9px;
+        font-size: 8px;
+        font-weight: bold;
       }
-      .col-code { width: 5%; text-align: center; }
-      .col-libelle { width: 15%; text-align: left; }
-      .col-num { text-align: right; white-space: nowrap; }
-      .col-prev { width: 8%; }
-      .col-chap { width: 7%; }
-      .col-total { width: 8%; }
-      .section-header { background-color: #e0e0e0; font-weight: bold; }
-      .total-section { background-color: #d0d0d0; font-weight: bold; border-top: 2px solid #000; }
-      .grand-total { background-color: #bbb; font-weight: bold; border-top: 3px double #000; }
-      .doc-header-cell { padding: 0 !important; background: #fff !important; }
-      .doc-header-grid { width: 100%; display: grid; grid-template-columns: 1fr 2fr 1fr; }
-      .doc-header-block { padding: 4px 6px; min-height: 70px; }
-      .doc-header-block + .doc-header-block { border-left: 1px solid #000; }
-      .doc-header-left { text-align: left; font-weight: bold; }
-      .doc-header-center { text-align: center; font-weight: bold; }
-      .doc-header-right { text-align: right; font-weight: bold; }
-      .doc-header-center .main-title { margin: 0 0 4px 0; }
+      .col-rubrique {
+        width: 25%;
+        text-align: left;
+      }
+      .col-num {
+        text-align: right;
+        white-space: nowrap;
+        width: 7%;
+      }
+      .section-header {
+        font-weight: bold;
+        text-transform: uppercase;
+      }
+      .chapitre-header {
+        font-weight: bold;
+        text-decoration: underline;
+        padding-left: 10px;
+      }
+      .article-header {
+        font-weight: bold;
+        padding-left: 20px;
+      }
+      .sous-total {
+        font-weight: bold;
+        text-align: center;
+      }
+      .total-section {
+        font-weight: bold;
+        text-align: center;
+      }
+      .grand-total {
+        font-weight: bold;
+        text-align: center;
+      }
+      .category-title {
+        text-decoration: underline;
+        text-align: center;
+        margin: 2px 0;
+      }
+      .detail-row td:first-child {
+        padding-left: 30px;
+      }
+      .header-table {
+        width: 100%;
+        border: none;
+        margin-bottom: 5px;
+      }
+      .header-table td {
+        border: none;
+        padding: 0;
+      }
       .print-button {
-        position: fixed; top: 20px; right: 20px; padding: 10px 20px;
-        background: #009688; color: white; border: none; border-radius: 5px;
-        cursor: pointer; font-size: 14px; z-index: 1000;
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 10px 20px;
+        background: #009688;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        z-index: 1000;
       }
-      .print-button:hover { background: #00796B; }
-      .loading { text-align: center; padding: 50px; font-size: 16px; color: #666; }
+      .print-button:hover {
+        background: #00796b;
+      }
+      .loading {
+        text-align: center;
+        padding: 50px;
+        font-size: 16px;
+        color: #666;
+      }
       @media print {
-        .no-print { display: none !important; }
-        body { padding: 0; }
+        .no-print {
+          display: none !important;
+        }
+        body {
+          padding: 0;
+        }
       }
     </style>
   </head>
@@ -76,40 +134,33 @@
     </div>
 
     <script>
-      function fmt(v) { return v ? new Intl.NumberFormat('fr-FR').format(v) : '0'; }
+      function fmt(v) {
+        return v ? new Intl.NumberFormat('fr-FR').format(v) : '-';
+      }
 
       const SECTIONS = {
-        '90': 'Immobilisations incorporelles',
-        '91': 'Immobilisations corporelles',
-        '92': 'Immobilisations en cours',
-        '93': 'Immobilisations financieres',
-        '94': 'Remboursement emprunts',
-        '95': 'Autres depenses investissement'
-      };
-
-      const CHAPITRE_LABELS = {
-        1: 'Salaires',
-        2: 'Materiel',
-        3: 'Charges',
-        4: 'Subvent.',
-        5: 'Interv.',
-        6: 'Autres',
-        7: 'Reserve',
-        8: 'Divers'
+        90: 'EQUIPEMENT DES SERVICES GENERAUX',
+        91: 'EQUIPEMENT DES SERVICES DE COLLECTIVITE',
+        92: 'EQUIPEMENT DES SERVICES SOCIAUX',
+        93: 'EQUIPEMENT DES SERVICES ECONOMIQUES',
+        94: 'REMBOURSEMENT EMPRUNTS',
+        95: 'AUTRES DEPENSES INVESTISSEMENT',
       };
 
       async function loadData() {
         const db = new Dexie('TresorDatabase');
         db.version(28).stores({
-          mandats: '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
+          mandats:
+            '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
           previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
           sousChapitres: '++id, code, libelle, parentId, mairieId, actif',
           chapitres: '++id, code, libelle, mairieId, actif',
           taxes: '++id, code, libelle, mairieId, type, actif',
-          declarations: '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
+          declarations:
+            '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
           previsionsRecettes: '++id, exercice, taxeId, mairieId, statut, personnelId',
           mairies: '++id, nom, code, ville',
-          printData: '++id, type, createdAt'
+          printData: '++id, type, createdAt',
         });
 
         const exercice = new Date().getFullYear();
@@ -119,157 +170,410 @@
           db.chapitres.toArray(),
           db.previsions.where('exercice').equals(exercice).toArray(),
           db.mandats.where('exercice').equals(exercice).toArray(),
-          db.mairies.toCollection().first()
+          db.mairies.toCollection().first(),
         ]);
 
         // Filter sous-chapitres with code starting with '9'
-        const investSC = sousChapitres.filter(sc => sc.code && sc.code.startsWith('9'));
-
-        // Build chapitre map (id -> code)
-        const chapMap = {};
-        chapitres.forEach(c => { chapMap[c.id] = c.code; });
+        const investSC = sousChapitres.filter((sc) => sc.code && sc.code.startsWith('9'));
 
         // Build prevision map by sousChapitreId
         const prevMap = {};
-        previsions.forEach(p => {
+        previsions.forEach((p) => {
           if (p.sousChapitreId) {
             if (!prevMap[p.sousChapitreId]) prevMap[p.sousChapitreId] = 0;
-            prevMap[p.sousChapitreId] += (p.montantPrevu || 0);
+            prevMap[p.sousChapitreId] += p.montantPrevu || 0;
           }
         });
 
-        // Build ventilation map: sousChapitreId -> { chapCode: montant }
-        const ventMap = {};
-        mandats.forEach(m => {
+        // Build engagements map by sousChapitreId
+        const engMap = {};
+        mandats.forEach((m) => {
           if (m.statut === 'annule') return;
           const scId = m.sousChapitreId;
-          const chapCode = chapMap[m.chapitreId] || String(m.chapitreId);
-          // Normalize chapitre code to single digit (1-8)
-          const chapNum = parseInt(chapCode, 10);
-          if (isNaN(chapNum) || chapNum < 1 || chapNum > 8) return;
-
-          if (!ventMap[scId]) ventMap[scId] = {};
-          if (!ventMap[scId][chapNum]) ventMap[scId][chapNum] = 0;
-          ventMap[scId][chapNum] += (m.montant || 0);
+          if (!engMap[scId]) engMap[scId] = 0;
+          engMap[scId] += m.montant || 0;
         });
 
-        return { investSC, prevMap, ventMap, exercice, mairie };
+        return { investSC, chapitres, prevMap, engMap, exercice, mairie };
       }
 
       function render(data) {
-        const { investSC, prevMap, ventMap, exercice, mairie } = data;
-        const mairieNom = mairie ? mairie.nom || 'Mairie de Vavoua' : 'Mairie de Vavoua';
+        const { investSC, chapitres, prevMap, engMap, exercice, mairie } = data;
 
-        // Group sous-chapitres by section (first 2 chars of code)
-        const grouped = {};
-        investSC.forEach(sc => {
-          const sec = sc.code.substring(0, 2);
-          if (!grouped[sec]) grouped[sec] = [];
-          grouped[sec].push(sc);
-        });
+        // Group by Section (2 digits), Chapitre (3 digits), Article (4 digits)
+        const hierarchy = {};
 
-        let grandPrev = 0;
-        const grandChap = {};
-        let grandTotal = 0;
+        investSC.forEach((sc) => {
+          const code = sc.code;
+          if (!code || code.length < 2) return;
 
-        let rows = '';
-        const sectionCodes = Object.keys(SECTIONS).sort();
+          const secCode = code.substring(0, 2);
+          const chapCode = code.length >= 3 ? code.substring(0, 3) : code;
 
-        sectionCodes.forEach(secCode => {
-          const secLabel = SECTIONS[secCode];
-          const items = (grouped[secCode] || []).sort((a, b) => a.code.localeCompare(b.code));
-
-          let secPrev = 0;
-          const secChap = {};
-          let secTotal = 0;
-
-          rows += '<tr class="section-header"><td>' + secCode + '</td><td colspan="11">SECTION ' + secCode + ' - ' + secLabel + '</td></tr>';
-
-          items.forEach(sc => {
-            const prev = prevMap[sc.id] || 0;
-            const vent = ventMap[sc.id] || {};
-            let rowTotal = 0;
-
-            let chapCells = '';
-            for (let i = 1; i <= 8; i++) {
-              const val = vent[i] || 0;
-              rowTotal += val;
-              if (!secChap[i]) secChap[i] = 0;
-              secChap[i] += val;
-              chapCells += '<td class="col-num col-chap">' + fmt(val) + '</td>';
-            }
-
-            secPrev += prev;
-            secTotal += rowTotal;
-
-            rows += '<tr>'
-              + '<td class="col-code">' + sc.code + '</td>'
-              + '<td class="col-libelle">' + (sc.libelle || '') + '</td>'
-              + '<td class="col-num col-prev">' + fmt(prev) + '</td>'
-              + chapCells
-              + '<td class="col-num col-total">' + fmt(rowTotal) + '</td>'
-              + '</tr>';
-          });
-
-          // Section total
-          let secChapCells = '';
-          for (let i = 1; i <= 8; i++) {
-            const val = secChap[i] || 0;
-            if (!grandChap[i]) grandChap[i] = 0;
-            grandChap[i] += val;
-            secChapCells += '<td class="col-num col-chap">' + fmt(val) + '</td>';
+          if (!hierarchy[secCode]) hierarchy[secCode] = { chapitres: {} };
+          if (!hierarchy[secCode].chapitres[chapCode]) {
+            // Find chapitre libelle
+            const chapObj = chapitres.find((c) => c.code === chapCode);
+            hierarchy[secCode].chapitres[chapCode] = {
+              libelle: chapObj ? chapObj.libelle : '',
+              articles: [],
+            };
           }
 
-          rows += '<tr class="total-section">'
-            + '<td></td>'
-            + '<td>TOTAL SECTION ' + secCode + '</td>'
-            + '<td class="col-num col-prev">' + fmt(secPrev) + '</td>'
-            + secChapCells
-            + '<td class="col-num col-total">' + fmt(secTotal) + '</td>'
-            + '</tr>';
+          hierarchy[secCode].chapitres[chapCode].articles.push(sc);
+        });
+
+        let grandPrev = 0,
+          grandMandats = 0,
+          grandCredits = 0;
+        let grandImmTrav = 0,
+          grandImmInterv = 0;
+        let grandMobTrav = 0,
+          grandMobInterv = 0;
+        let grandIncTrav = 0,
+          grandIncInterv = 0;
+        let grandTotalVentil = 0;
+
+        let rows = '';
+        const sectionCodes = Object.keys(hierarchy).sort();
+
+        sectionCodes.forEach((secCode) => {
+          const secLabel = SECTIONS[secCode] || '';
+
+          rows +=
+            '<tr class="section-header"><td colspan="11">SECTION ' +
+            secCode +
+            ' - ' +
+            secLabel +
+            '</td></tr>';
+
+          let secPrev = 0,
+            secMandats = 0,
+            secCredits = 0;
+          let secImmTrav = 0,
+            secImmInterv = 0;
+          let secMobTrav = 0,
+            secMobInterv = 0;
+          let secIncTrav = 0,
+            secIncInterv = 0;
+          let secTotalVentil = 0;
+
+          const chapCodes = Object.keys(hierarchy[secCode].chapitres).sort();
+
+          chapCodes.forEach((chapCode) => {
+            const chapData = hierarchy[secCode].chapitres[chapCode];
+
+            rows +=
+              '<tr><td colspan="11" class="chapitre-header">CHAPITRE ' +
+              chapCode +
+              ' - ' +
+              chapData.libelle +
+              '</td></tr>';
+
+            let chapPrev = 0,
+              chapMandats = 0,
+              chapCredits = 0;
+            let chapImmTrav = 0,
+              chapImmInterv = 0;
+            let chapMobTrav = 0,
+              chapMobInterv = 0;
+            let chapIncTrav = 0,
+              chapIncInterv = 0;
+            let chapTotalVentil = 0;
+
+            // Sort articles
+            const articles = chapData.articles.sort((a, b) => a.code.localeCompare(b.code));
+
+            articles.forEach((art) => {
+              const prev = prevMap[art.id] || 0;
+              const mandats = engMap[art.id] || 0;
+              const credits = prev - mandats;
+
+              // For demonstration, we put all mandats in "IMMOBILIERS - Travaux"
+              // In a real app, this would be ventilated based on other criteria
+              const immTrav = mandats;
+              const immInterv = 0;
+              const mobTrav = 0;
+              const mobInterv = 0;
+              const incTrav = 0;
+              const incInterv = 0;
+              const totalVentil = immTrav + immInterv + mobTrav + mobInterv + incTrav + incInterv;
+
+              chapPrev += prev;
+              chapMandats += mandats;
+              chapCredits += credits;
+              chapImmTrav += immTrav;
+              chapTotalVentil += totalVentil;
+
+              // Article header
+              rows +=
+                '<tr><td colspan="11" class="article-header">' +
+                art.code +
+                ' - ' +
+                (art.libelle || '') +
+                '</td></tr>';
+
+              // Category: IMMOBILIERS
+              rows +=
+                '<tr><td colspan="11"><div class="category-title">IMMOBILIERS</div></td></tr>';
+
+              // Detail rows
+              rows +=
+                '<tr class="detail-row">' +
+                "<td>Travaux et services à l'entreprise</td>" +
+                '<td class="col-num">' +
+                fmt(prev) +
+                '</td>' +
+                '<td class="col-num">' +
+                fmt(mandats) +
+                '</td>' +
+                '<td class="col-num">' +
+                fmt(credits) +
+                '</td>' +
+                '<td class="col-num">' +
+                fmt(immTrav) +
+                '</td>' +
+                '<td class="col-num">' +
+                fmt(immInterv) +
+                '</td>' +
+                '<td class="col-num">' +
+                fmt(mobTrav) +
+                '</td>' +
+                '<td class="col-num">' +
+                fmt(mobInterv) +
+                '</td>' +
+                '<td class="col-num">' +
+                fmt(incTrav) +
+                '</td>' +
+                '<td class="col-num">' +
+                fmt(incInterv) +
+                '</td>' +
+                '<td class="col-num">' +
+                fmt(totalVentil) +
+                '</td>' +
+                '</tr>';
+
+              rows +=
+                '<tr class="detail-row">' +
+                '<td>Interventions et transferts</td>' +
+                '<td class="col-num">-</td>' +
+                '<td class="col-num">-</td>' +
+                '<td class="col-num">-</td>' +
+                '<td class="col-num">-</td>' +
+                '<td class="col-num">-</td>' +
+                '<td class="col-num">-</td>' +
+                '<td class="col-num">-</td>' +
+                '<td class="col-num">-</td>' +
+                '<td class="col-num">-</td>' +
+                '<td class="col-num">-</td>' +
+                '</tr>';
+
+              // Sous total article
+              rows +=
+                '<tr>' +
+                '<td class="sous-total">SOUS TOTAL ARTICLE ' +
+                art.code +
+                '</td>' +
+                '<td class="col-num">' +
+                fmt(prev) +
+                '</td>' +
+                '<td class="col-num">' +
+                fmt(mandats) +
+                '</td>' +
+                '<td class="col-num">' +
+                fmt(credits) +
+                '</td>' +
+                '<td class="col-num">' +
+                fmt(immTrav) +
+                '</td>' +
+                '<td class="col-num">' +
+                fmt(immInterv) +
+                '</td>' +
+                '<td class="col-num">' +
+                fmt(mobTrav) +
+                '</td>' +
+                '<td class="col-num">' +
+                fmt(mobInterv) +
+                '</td>' +
+                '<td class="col-num">' +
+                fmt(incTrav) +
+                '</td>' +
+                '<td class="col-num">' +
+                fmt(incInterv) +
+                '</td>' +
+                '<td class="col-num">' +
+                fmt(totalVentil) +
+                '</td>' +
+                '</tr>';
+            });
+
+            // Sous total chapitre
+            rows +=
+              '<tr>' +
+              '<td class="sous-total">SOUS TOTAL CHAPITRE ' +
+              chapCode +
+              '</td>' +
+              '<td class="col-num">' +
+              fmt(chapPrev) +
+              '</td>' +
+              '<td class="col-num">' +
+              fmt(chapMandats) +
+              '</td>' +
+              '<td class="col-num">' +
+              fmt(chapCredits) +
+              '</td>' +
+              '<td class="col-num">' +
+              fmt(chapImmTrav) +
+              '</td>' +
+              '<td class="col-num">' +
+              fmt(chapImmInterv) +
+              '</td>' +
+              '<td class="col-num">' +
+              fmt(chapMobTrav) +
+              '</td>' +
+              '<td class="col-num">' +
+              fmt(chapMobInterv) +
+              '</td>' +
+              '<td class="col-num">' +
+              fmt(chapIncTrav) +
+              '</td>' +
+              '<td class="col-num">' +
+              fmt(chapIncInterv) +
+              '</td>' +
+              '<td class="col-num">' +
+              fmt(chapTotalVentil) +
+              '</td>' +
+              '</tr>';
+
+            secPrev += chapPrev;
+            secMandats += chapMandats;
+            secCredits += chapCredits;
+            secImmTrav += chapImmTrav;
+            secTotalVentil += chapTotalVentil;
+          });
+
+          // Total section
+          rows +=
+            '<tr class="total-section">' +
+            '<td>TOTAL SECTION ' +
+            secCode +
+            '</td>' +
+            '<td class="col-num">' +
+            fmt(secPrev) +
+            '</td>' +
+            '<td class="col-num">' +
+            fmt(secMandats) +
+            '</td>' +
+            '<td class="col-num">' +
+            fmt(secCredits) +
+            '</td>' +
+            '<td class="col-num">' +
+            fmt(secImmTrav) +
+            '</td>' +
+            '<td class="col-num">' +
+            fmt(secImmInterv) +
+            '</td>' +
+            '<td class="col-num">' +
+            fmt(secMobTrav) +
+            '</td>' +
+            '<td class="col-num">' +
+            fmt(secMobInterv) +
+            '</td>' +
+            '<td class="col-num">' +
+            fmt(secIncTrav) +
+            '</td>' +
+            '<td class="col-num">' +
+            fmt(secIncInterv) +
+            '</td>' +
+            '<td class="col-num">' +
+            fmt(secTotalVentil) +
+            '</td>' +
+            '</tr>';
 
           grandPrev += secPrev;
-          grandTotal += secTotal;
+          grandMandats += secMandats;
+          grandCredits += secCredits;
+          grandImmTrav += secImmTrav;
+          grandTotalVentil += secTotalVentil;
         });
 
         // Grand total
-        let grandChapCells = '';
-        for (let i = 1; i <= 8; i++) {
-          grandChapCells += '<td class="col-num col-chap">' + fmt(grandChap[i] || 0) + '</td>';
-        }
+        rows +=
+          '<tr class="grand-total">' +
+          '<td>TOTAL GENERAL DES DEPENSES AU TITRE II</td>' +
+          '<td class="col-num">' +
+          fmt(grandPrev) +
+          '</td>' +
+          '<td class="col-num">' +
+          fmt(grandMandats) +
+          '</td>' +
+          '<td class="col-num">' +
+          fmt(grandCredits) +
+          '</td>' +
+          '<td class="col-num">' +
+          fmt(grandImmTrav) +
+          '</td>' +
+          '<td class="col-num">' +
+          fmt(grandImmInterv) +
+          '</td>' +
+          '<td class="col-num">' +
+          fmt(grandMobTrav) +
+          '</td>' +
+          '<td class="col-num">' +
+          fmt(grandMobInterv) +
+          '</td>' +
+          '<td class="col-num">' +
+          fmt(grandIncTrav) +
+          '</td>' +
+          '<td class="col-num">' +
+          fmt(grandIncInterv) +
+          '</td>' +
+          '<td class="col-num">' +
+          fmt(grandTotalVentil) +
+          '</td>' +
+          '</tr>';
 
-        rows += '<tr class="grand-total">'
-          + '<td></td>'
-          + '<td>TOTAL GENERAL</td>'
-          + '<td class="col-num col-prev">' + fmt(grandPrev) + '</td>'
-          + grandChapCells
-          + '<td class="col-num col-total">' + fmt(grandTotal) + '</td>'
-          + '</tr>';
-
-        // Build header columns
-        let chapHeaders = '';
-        for (let i = 1; i <= 8; i++) {
-          chapHeaders += '<th class="col-chap">' + i + '-' + CHAPITRE_LABELS[i] + '</th>';
-        }
-
-        document.getElementById('content').innerHTML = '<table>'
-          + '<thead>'
-          + '<tr><td colspan="12" class="doc-header-cell">'
-          + '<div class="doc-header-grid">'
-          + '<div class="doc-header-block doc-header-left">REPUBLIQUE DE COTE D\'IVOIRE<br>' + mairieNom + '</div>'
-          + '<div class="doc-header-block doc-header-center"><div class="main-title">COMPTE ADMINISTRATIF - DEPENSES INVESTISSEMENT VENTILEES</div><div>Exercice ' + exercice + '</div></div>'
-          + '<div class="doc-header-block doc-header-right">Page <span class="page-num">1</span></div>'
-          + '</div></td></tr>'
-          + '<tr>'
-          + '<th class="col-code">Code</th>'
-          + '<th class="col-libelle">Libelle</th>'
-          + '<th class="col-prev">Prevu</th>'
-          + chapHeaders
-          + '<th class="col-total">Total</th>'
-          + '</tr>'
-          + '</thead>'
-          + '<tbody>' + rows + '</tbody>'
-          + '</table>';
+        document.getElementById('content').innerHTML =
+          '<table>' +
+          '<thead>' +
+          '<tr>' +
+          '<th rowspan="3" colspan="2" style="border:none;"></th>' +
+          '<th colspan="7" style="font-size: 12px;">COMPTE ADMINISTRATIF DEPENSES D\'INVESTISSEMENT</th>' +
+          '<th colspan="2">ANNEE<br>' +
+          exercice +
+          '</th>' +
+          '</tr>' +
+          '<tr>' +
+          '<th rowspan="2" class="col-rubrique">COMPTES ET RUBRIQUES BUDGETAIRES</th>' +
+          '<th rowspan="2">PREVISIONS</th>' +
+          '<th rowspan="2">MANDATS</th>' +
+          '<th rowspan="2">CREDITS SANS EMPLOI</th>' +
+          '<th colspan="6">VENTILATION DES DEPENSES PAR PARAGRAPHE</th>' +
+          '<th rowspan="2">TOTAL</th>' +
+          '</tr>' +
+          '<tr>' +
+          '<th colspan="2">IMMOBILIERS</th>' +
+          '<th colspan="2">MOBILIERS</th>' +
+          '<th colspan="2">INCORPOREL</th>' +
+          '</tr>' +
+          '<tr>' +
+          '<th>1</th>' +
+          '<th>2</th>' +
+          '<th>3</th>' +
+          '<th>4</th>' +
+          "<th>Travaux et services à l'entreprise<br>5</th>" +
+          '<th>Intervention et transfert<br>6</th>' +
+          "<th>Travaux et services à l'entreprise<br>7</th>" +
+          '<th>Intervention et transfert<br>8</th>' +
+          "<th>Travaux et services à l'entreprise<br>9</th>" +
+          '<th>Intervention et transfert<br>10</th>' +
+          '<th>11</th>' +
+          '</tr>' +
+          '</thead>' +
+          '<tbody>' +
+          rows +
+          '</tbody>' +
+          '</table>';
       }
 
       function processMessage(msgData) {
@@ -283,7 +587,7 @@
       let pendingData = null;
       let dataProcessed = false;
 
-      window.addEventListener('message', function(event) {
+      window.addEventListener('message', function (event) {
         if (document.readyState === 'complete' || document.readyState === 'interactive') {
           processMessage(event.data);
           dataProcessed = true;
@@ -292,21 +596,21 @@
         }
       });
 
-      window.addEventListener('DOMContentLoaded', async function() {
+      window.addEventListener('DOMContentLoaded', async function () {
         if (pendingData && !dataProcessed) {
           processMessage(pendingData);
           dataProcessed = true;
           return;
         }
 
-        await new Promise(r => setTimeout(r, 500));
+        await new Promise((r) => setTimeout(r, 500));
 
         if (!dataProcessed) {
           try {
             const result = await loadData();
             render(result);
             dataProcessed = true;
-          } catch(e) {
+          } catch (e) {
             console.warn('Erreur chargement IndexedDB:', e);
           }
         }
@@ -315,13 +619,19 @@
           try {
             const db = new Dexie('TresorDatabase');
             db.version(28).stores({ printData: '++id, type, createdAt' });
-            const records = await db.table('printData').where('type').equals('FILL_COMPTE_ADMIN_DATA').toArray();
+            const records = await db
+              .table('printData')
+              .where('type')
+              .equals('FILL_COMPTE_ADMIN_DATA')
+              .toArray();
             if (records.length > 0) {
-              const latest = records.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+              const latest = records.sort(
+                (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+              )[0];
               processMessage(latest.data);
               await db.table('printData').delete(latest.id);
             }
-          } catch(e) {
+          } catch (e) {
             console.warn('Erreur printData:', e);
           }
         }

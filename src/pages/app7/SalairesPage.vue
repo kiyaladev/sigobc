@@ -441,10 +441,7 @@
             <div class="col-12 col-sm-6">
               <q-select
                 v-model="genService"
-                :options="[
-                  { label: 'Tous les services', value: null },
-                  ...servicesOptions,
-                ]"
+                :options="[{ label: 'Tous les services', value: null }, ...servicesOptions]"
                 label="Service"
                 outlined
                 dense
@@ -490,7 +487,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import { useQuasar } from 'quasar';
-import { db, type FichePaie, type Employe, type ParametresPaie, type ServiceApp7 } from 'src/database/db';
+import {
+  db,
+  type FichePaie,
+  type Employe,
+  type ParametresPaie,
+  type ServiceApp7,
+} from 'src/database/db';
 import PageHeader from 'src/components/PageHeader.vue';
 import DataTable from 'src/components/DataTable.vue';
 import { openPrintWindow } from 'src/utils/printUrl';
@@ -642,9 +645,12 @@ function recalculate() {
     (form.value.autresIndemnites || 0);
   form.value.montantBrut = brut;
 
+  // L'indemnité de transport est exonérée d'impôt
+  const taxableBase = brut - (form.value.indemniteTransport || 0);
+
   if (parametresPaie.value) {
-    const cnps = Math.round(brut * (parametresPaie.value.tauxCnpsEmploye / 100));
-    const its = Math.round(brut * (parametresPaie.value.tauxIts / 100));
+    const cnps = Math.round(taxableBase * (parametresPaie.value.tauxCnpsEmploye / 100));
+    const its = Math.round(taxableBase * (parametresPaie.value.tauxIts / 100));
     form.value.cotisationCNPS = cnps;
     form.value.impotSurSalaire = its;
   }
@@ -822,11 +828,14 @@ async function generateBulletins() {
         (e.indemniteTransport || 0) +
         (e.autresIndemnites || 0);
 
+      // L'indemnité de transport est exonérée d'impôt
+      const taxableBase = brut - (e.indemniteTransport || 0);
+
       let calcCnps = 0;
       let calcIts = 0;
       if (parametresPaie.value) {
-        calcCnps = Math.round(brut * (parametresPaie.value.tauxCnpsEmploye / 100));
-        calcIts = Math.round(brut * (parametresPaie.value.tauxIts / 100));
+        calcCnps = Math.round(taxableBase * (parametresPaie.value.tauxCnpsEmploye / 100));
+        calcIts = Math.round(taxableBase * (parametresPaie.value.tauxIts / 100));
       }
 
       return {

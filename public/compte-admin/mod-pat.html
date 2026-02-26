@@ -16,7 +16,9 @@
         margin: 0;
         padding: 10px;
       }
-      .container { width: 100%; }
+      .container {
+        width: 100%;
+      }
       .main-title {
         text-decoration: underline;
         font-size: 14px;
@@ -28,7 +30,8 @@
         margin-top: 0;
         margin-bottom: 15px;
       }
-      th, td {
+      th,
+      td {
         border: 1px solid #000;
         padding: 3px 4px;
       }
@@ -38,13 +41,34 @@
         vertical-align: middle;
         font-size: 9px;
       }
-      .col-rubrique { width: 30%; text-align: left; }
-      .col-num { text-align: right; white-space: nowrap; }
-      .section-header { background-color: #e0e0e0; font-weight: bold; }
-      .total-section { background-color: #d0d0d0; font-weight: bold; border-top: 2px solid #000; }
-      .grand-total { background-color: #bbb; font-weight: bold; border-top: 3px double #000; }
-      .positive { color: #2e7d32; }
-      .negative { color: #c62828; }
+      .col-rubrique {
+        width: 30%;
+        text-align: left;
+      }
+      .col-num {
+        text-align: right;
+        white-space: nowrap;
+      }
+      .section-header {
+        background-color: #e0e0e0;
+        font-weight: bold;
+      }
+      .total-section {
+        background-color: #d0d0d0;
+        font-weight: bold;
+        border-top: 2px solid #000;
+      }
+      .grand-total {
+        background-color: #bbb;
+        font-weight: bold;
+        border-top: 3px double #000;
+      }
+      .positive {
+        color: #2e7d32;
+      }
+      .negative {
+        color: #c62828;
+      }
       .section-title {
         font-size: 12px;
         font-weight: bold;
@@ -53,24 +77,66 @@
         background: #e8e8e8;
         border: 1px solid #000;
       }
-      .doc-header-cell { padding: 0 !important; background: #fff !important; }
-      .doc-header-grid { width: 100%; display: grid; grid-template-columns: 1fr 2fr 1fr; }
-      .doc-header-block { padding: 4px 6px; min-height: 70px; }
-      .doc-header-block + .doc-header-block { border-left: 1px solid #000; }
-      .doc-header-left { text-align: left; font-weight: bold; }
-      .doc-header-center { text-align: center; font-weight: bold; }
-      .doc-header-right { text-align: right; font-weight: bold; }
-      .doc-header-center .main-title { margin: 0 0 4px 0; }
-      .print-button {
-        position: fixed; top: 20px; right: 20px; padding: 10px 20px;
-        background: #009688; color: white; border: none; border-radius: 5px;
-        cursor: pointer; font-size: 14px; z-index: 1000;
+      .doc-header-cell {
+        padding: 0 !important;
+        background: #fff !important;
       }
-      .print-button:hover { background: #00796B; }
-      .loading { text-align: center; padding: 50px; font-size: 16px; color: #666; }
+      .doc-header-grid {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 2fr 1fr;
+      }
+      .doc-header-block {
+        padding: 4px 6px;
+        min-height: 70px;
+      }
+      .doc-header-block + .doc-header-block {
+        border-left: 1px solid #000;
+      }
+      .doc-header-left {
+        text-align: left;
+        font-weight: bold;
+      }
+      .doc-header-center {
+        text-align: center;
+        font-weight: bold;
+      }
+      .doc-header-right {
+        text-align: right;
+        font-weight: bold;
+      }
+      .doc-header-center .main-title {
+        margin: 0 0 4px 0;
+      }
+      .print-button {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 10px 20px;
+        background: #009688;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        z-index: 1000;
+      }
+      .print-button:hover {
+        background: #00796b;
+      }
+      .loading {
+        text-align: center;
+        padding: 50px;
+        font-size: 16px;
+        color: #666;
+      }
       @media print {
-        .no-print { display: none !important; }
-        body { padding: 0; }
+        .no-print {
+          display: none !important;
+        }
+        body {
+          padding: 0;
+        }
       }
     </style>
   </head>
@@ -83,223 +149,239 @@
     </div>
 
     <script>
-      function fmt(v) { return v ? new Intl.NumberFormat('fr-FR').format(v) : '0'; }
-      function resClass(v) { return v >= 0 ? 'positive' : 'negative'; }
+      function fmt(v) {
+        return v ? new Intl.NumberFormat('fr-FR').format(v) : '0';
+      }
+      function resClass(v) {
+        return v >= 0 ? 'positive' : 'negative';
+      }
 
       // Mapping between invest dep sections (9x) and invest rec sections (0x)
       const PATRIMOINE_SECTIONS = [
-        { depSec: '90', recSec: '01', label: 'Immobilisations incorporelles / Dotations de l\'Etat' },
+        {
+          depSec: '90',
+          recSec: '01',
+          label: "Immobilisations incorporelles / Dotations de l'Etat",
+        },
         { depSec: '91', recSec: '02', label: 'Immobilisations corporelles / Emprunts' },
         { depSec: '92', recSec: '03', label: 'Immobilisations en cours / Cessions immobilieres' },
-        { depSec: '93', recSec: '04', label: 'Immobilisations financieres / Subventions investissement' },
+        {
+          depSec: '93',
+          recSec: '04',
+          label: 'Immobilisations financieres / Subventions investissement',
+        },
         { depSec: '94', recSec: '05', label: 'Remboursement emprunts / Fonds propres' },
-        { depSec: '95', recSec: '06', label: 'Autres depenses invest. / Autres recettes invest.' }
+        { depSec: '95', recSec: '06', label: 'Autres depenses invest. / Autres recettes invest.' },
       ];
 
       async function loadData() {
         const db = new Dexie('TresorDatabase');
         db.version(28).stores({
-          mandats: '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
+          mandats:
+            '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
           previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
           sousChapitres: '++id, code, libelle, parentId, mairieId, actif',
           chapitres: '++id, code, libelle, mairieId, actif',
           taxes: '++id, code, libelle, mairieId, type, actif',
-          declarations: '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
+          declarations:
+            '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
           previsionsRecettes: '++id, exercice, taxeId, mairieId, statut, personnelId',
           mairies: '++id, nom, code, ville',
-          printData: '++id, type, createdAt'
+          printData: '++id, type, createdAt',
         });
 
         const exercice = new Date().getFullYear();
 
-        const [sousChapitres, taxes, mandats, declarations, previsions, previsionsRecettes, mairie] = await Promise.all([
-          db.sousChapitres.toArray(),
-          db.taxes.toArray(),
-          db.mandats.where('exercice').equals(exercice).toArray(),
-          db.declarations.where('exercice').equals(exercice).toArray(),
-          db.previsions.where('exercice').equals(exercice).toArray(),
-          db.previsionsRecettes.where('exercice').equals(exercice).toArray(),
-          db.mairies.toCollection().first()
-        ]);
-
-        // Build maps
-        const scMap = {};
-        sousChapitres.forEach(sc => { scMap[sc.id] = sc.code; });
-        const taxeMap = {};
-        taxes.forEach(t => { taxeMap[t.id] = t.code; });
-
-        // Depenses by sous-chapitre section prefix
-        const depBySection = {};
-        mandats.forEach(m => {
-          if (m.statut === 'annule') return;
-          const scCode = scMap[m.sousChapitreId] || '';
-          const sec = scCode.substring(0, 2);
-          if (!depBySection[sec]) depBySection[sec] = 0;
-          depBySection[sec] += (m.montant || 0);
-        });
-
-        // Recettes by taxe section prefix
-        const recBySection = {};
-        declarations.forEach(d => {
-          if (d.statut === 'annulee') return;
-          const taxeCode = taxeMap[d.taxeId] || '';
-          const sec = taxeCode.substring(0, 2);
-          if (!recBySection[sec]) recBySection[sec] = 0;
-          recBySection[sec] += (d.montantRecette || d.montant || 0);
-        });
-
-        // Previsions depenses by sous-chapitre section
-        const prevDepBySection = {};
-        previsions.forEach(p => {
-          if (p.sousChapitreId) {
-            const scCode = scMap[p.sousChapitreId] || '';
-            const sec = scCode.substring(0, 2);
-            if (!prevDepBySection[sec]) prevDepBySection[sec] = 0;
-            prevDepBySection[sec] += (p.montantPrevu || 0);
-          }
-        });
-
-        // Previsions recettes by taxe section
-        const prevRecBySection = {};
-        previsionsRecettes.forEach(p => {
-          const taxeCode = taxeMap[p.taxeId] || '';
-          const sec = taxeCode.substring(0, 2);
-          if (!prevRecBySection[sec]) prevRecBySection[sec] = 0;
-          prevRecBySection[sec] += (p.montantPrevu || 0);
-        });
-
-        return { depBySection, recBySection, prevDepBySection, prevRecBySection, exercice, mairie, scMap, taxeMap };
+        return {
+          mandats,
+          declarations,
+          previsions,
+          previsionsRecettes,
+          sousChapitres,
+          taxes,
+          exercice,
+          mairie,
+          scMap,
+          taxeMap,
+        };
       }
 
       function render(data) {
-        const { depBySection, recBySection, prevDepBySection, prevRecBySection, exercice, mairie } = data;
+        const {
+          mandats,
+          declarations,
+          previsions,
+          previsionsRecettes,
+          sousChapitres,
+          taxes,
+          exercice,
+          mairie,
+          scMap,
+          taxeMap,
+        } = data;
         const mairieNom = mairie ? mairie.nom || 'Mairie de Vavoua' : 'Mairie de Vavoua';
+
+        // Group data by sousChapitreId (for acquisitions)
+        const acqMap = {}; // { scId: { prev: 0, real: 0, code: '', libelle: '' } }
+        sousChapitres.forEach((sc) => {
+          if (sc.code && sc.code.startsWith('9')) {
+            acqMap[sc.id] = { prev: 0, real: 0, code: sc.code, libelle: sc.libelle };
+          }
+        });
+
+        previsions.forEach((p) => {
+          if (p.sousChapitreId && acqMap[p.sousChapitreId]) {
+            acqMap[p.sousChapitreId].prev += p.montantPrevu || 0;
+          }
+        });
+
+        mandats.forEach((m) => {
+          if (m.statut !== 'annule' && m.sousChapitreId && acqMap[m.sousChapitreId]) {
+            acqMap[m.sousChapitreId].real += m.montant || 0;
+          }
+        });
+
+        const items = Object.values(acqMap).filter((item) => item.prev > 0 || item.real > 0);
+
+        // Split into "IMMOBILIERS" and "MOBILIER" based on keywords
+        const mobiliersKeywords =
+          /moto|vehicule|ordinateur|bureau|table|mobilier|equipement inform|vehicules|motos/i;
+        const immobiliers = [];
+        const mobiliers = [];
+
+        items.forEach((item) => {
+          if (mobiliersKeywords.test(item.libelle)) {
+            mobiliers.push(item);
+          } else {
+            immobiliers.push(item);
+          }
+        });
 
         let content = '';
 
-        // Document header
-        content += '<table><thead><tr><td colspan="4" class="doc-header-cell">'
-          + '<div class="doc-header-grid">'
-          + '<div class="doc-header-block doc-header-left">REPUBLIQUE DE COTE D\'IVOIRE<br>' + mairieNom + '</div>'
-          + '<div class="doc-header-block doc-header-center"><div class="main-title">COMPTE ADMINISTRATIF - MODIFICATIONS DU PATRIMOINE</div><div>Exercice ' + exercice + '</div></div>'
-          + '<div class="doc-header-block doc-header-right">Page <span class="page-num">1</span></div>'
-          + '</div></td></tr></thead></table>';
+        // Grid layout for title
+        content +=
+          '<div style="text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 5px;">TABLEAU DES MODIFICATIONS PREVUES DANS LA COMPOSITION DU PATRIMOINE</div>';
 
-        // ============ TABLE 1: MODIFICATIONS DU PATRIMOINE ============
-        content += '<div class="section-title">1. MODIFICATIONS DU PATRIMOINE</div>';
         content += '<table>';
-        content += '<thead><tr>'
-          + '<th class="col-rubrique">Rubrique</th>'
-          + '<th class="col-num">Acquisitions (Depenses)</th>'
-          + '<th class="col-num">Cessions (Recettes)</th>'
-          + '<th class="col-num">Variation nette</th>'
-          + '</tr></thead>';
+        content += '<thead>';
+        // Row 1
+        content += '<tr>';
+        content +=
+          '<th colspan="3" style="text-align: left; padding-left: 20px;">COMPTE ADMINISTRATIF</th>';
+        content +=
+          '<th colspan="3" style="font-weight: normal; text-align: right; padding-right: 15px;">ANNEE : &nbsp;&nbsp;&nbsp;' +
+          exercice +
+          '</th>';
+        content +=
+          '<th colspan="4" style="font-weight: normal; text-align: left; padding-left: 15px;">N° &nbsp;&nbsp;&nbsp; 36</th>';
+        content += '</tr>';
+
+        // Row 2
+        content += '<tr>';
+        content += '<th rowspan="3" style="width: 30px;">N°<br>D\'ORDRE</th>';
+        content += '<th rowspan="3" style="width: 40px;">Ref.PT<br>24-26</th>';
+        content += '<th rowspan="3" style="width: 250px;">DESCRIPTION</th>';
+        content += '<th colspan="2">COMPTES</th>';
+        content += '<th colspan="2">ACQUISITIONS PREVUES</th>';
+        content += '<th colspan="3">ALIENATION PREVUES</th>';
+        content += '</tr>';
+
+        // Row 3
+        content += '<tr>';
+        content += '<th rowspan="2" style="width: 50px;">Fonct</th>';
+        content += '<th rowspan="2" style="width: 50px;">Patrim</th>';
+        content += '<th rowspan="2" style="width: 80px;">MONTANT</th>';
+        content += '<th rowspan="2" style="width: 80px;">REALISES</th>';
+        content += '<th colspan="2">comptes</th>';
+        content += '<th rowspan="2" style="width: 80px;">MONTANT</th>';
+        content += '</tr>';
+
+        // Row 4
+        content += '<tr>';
+        content += '<th style="width: 60px;">Fonctionnel</th>';
+        content += '<th style="width: 60px;">Patrimoniaux</th>';
+        content += '</tr>';
+        content += '</thead>';
         content += '<tbody>';
 
-        let totalAcq = 0, totalCes = 0;
+        let order = 1;
+        let grandPrev = 0,
+          grandReal = 0;
 
-        PATRIMOINE_SECTIONS.forEach(sec => {
-          const acq = depBySection[sec.depSec] || 0;
-          const ces = recBySection[sec.recSec] || 0;
-          const variation = acq - ces;
+        function drawSection(title, list) {
+          content += '<tr>';
+          content +=
+            '<td colspan="3" style="font-weight: bold; text-align: center;">' + title + '</td>';
+          content += '<td></td><td></td><td></td><td></td><td></td><td></td><td></td>';
+          content += '</tr>';
 
-          totalAcq += acq;
-          totalCes += ces;
+          let subPrev = 0,
+            subReal = 0;
+          list.forEach((item) => {
+            content += '<tr>';
+            content += '<td class="col-num" style="text-align: center;">' + order++ + '</td>';
+            content += '<td></td>';
+            content += '<td style="text-align: left;">' + (item.libelle || '') + '</td>';
+            content += '<td style="text-align: right;">' + item.code + '</td>';
+            content += '<td style="text-align: right;"></td>'; // Patrim blank since we don't have it
+            content += '<td class="col-num">' + fmt(item.prev) + '</td>';
+            content += '<td class="col-num">' + fmt(item.real) + '</td>';
+            content += '<td></td><td></td><td></td>';
+            content += '</tr>';
+            subPrev += item.prev;
+            subReal += item.real;
+          });
 
-          content += '<tr>'
-            + '<td class="col-rubrique">' + sec.label + '</td>'
-            + '<td class="col-num">' + fmt(acq) + '</td>'
-            + '<td class="col-num">' + fmt(ces) + '</td>'
-            + '<td class="col-num ' + resClass(variation) + '">' + fmt(variation) + '</td>'
-            + '</tr>';
+          content += '<tr style="background-color: #f1f1f1; font-weight: bold;">';
+          content +=
+            '<td colspan="3" style="text-align: right; padding-right: 10px;">Sous-total ' +
+            title.toLowerCase() +
+            '</td>';
+          content += '<td></td><td></td>';
+          content += '<td class="col-num">' + fmt(subPrev) + '</td>';
+          content += '<td class="col-num">' + fmt(subReal) + '</td>';
+          content += '<td></td><td></td><td></td>';
+          content += '</tr>';
+
+          grandPrev += subPrev;
+          grandReal += subReal;
+        }
+
+        if (immobiliers.length > 0) drawSection('IMMOBILIERS', immobiliers);
+        if (mobiliers.length > 0) drawSection('MOBILIER', mobiliers);
+
+        content += '<tr style="background-color: #ddd; font-weight: bold;">';
+        content += '<td colspan="3" style="text-align: center;">TOTAL GENERAL</td>';
+        content += '<td></td><td></td>';
+        content += '<td class="col-num">' + fmt(grandPrev) + '</td>';
+        content += '<td class="col-num">' + fmt(grandReal) + '</td>';
+        content += '<td></td><td></td><td></td>';
+        content += '</tr>';
+
+        content += '</tbody></table>';
+
+        const today = new Date();
+        const dateStr = today.toLocaleDateString('fr-FR', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
         });
 
-        const totalVariation = totalAcq - totalCes;
-        content += '<tr class="grand-total">'
-          + '<td class="col-rubrique">TOTAL PATRIMOINE</td>'
-          + '<td class="col-num">' + fmt(totalAcq) + '</td>'
-          + '<td class="col-num">' + fmt(totalCes) + '</td>'
-          + '<td class="col-num ' + resClass(totalVariation) + '">' + fmt(totalVariation) + '</td>'
-          + '</tr>';
-
-        content += '</tbody></table>';
-
-        // ============ TABLE 2: SYNTHESE ============
-        content += '<div class="section-title">2. SYNTHESE</div>';
-        content += '<table>';
-        content += '<thead><tr>'
-          + '<th class="col-rubrique">Section</th>'
-          + '<th class="col-num">Prev.Dep</th>'
-          + '<th class="col-num">Real.Dep</th>'
-          + '<th class="col-num">Prev.Rec</th>'
-          + '<th class="col-num">Real.Rec</th>'
-          + '<th class="col-num">Resultat</th>'
-          + '</tr></thead>';
-        content += '<tbody>';
-
-        // Fonctionnement: dep sections 6x, rec sections 7x
-        let foncPrevDep = 0, foncRealDep = 0, foncPrevRec = 0, foncRealRec = 0;
-        for (let i = 60; i <= 69; i++) {
-          const sec = String(i);
-          foncPrevDep += (prevDepBySection[sec] || 0);
-          foncRealDep += (depBySection[sec] || 0);
-        }
-        for (let i = 70; i <= 79; i++) {
-          const sec = String(i);
-          foncPrevRec += (prevRecBySection[sec] || 0);
-          foncRealRec += (recBySection[sec] || 0);
-        }
-        const foncResultat = foncRealRec - foncRealDep;
-
-        content += '<tr>'
-          + '<td class="col-rubrique">Fonctionnement</td>'
-          + '<td class="col-num">' + fmt(foncPrevDep) + '</td>'
-          + '<td class="col-num">' + fmt(foncRealDep) + '</td>'
-          + '<td class="col-num">' + fmt(foncPrevRec) + '</td>'
-          + '<td class="col-num">' + fmt(foncRealRec) + '</td>'
-          + '<td class="col-num ' + resClass(foncResultat) + '">' + fmt(foncResultat) + '</td>'
-          + '</tr>';
-
-        // Investissement: dep sections 9x, rec sections 0x
-        let invPrevDep = 0, invRealDep = 0, invPrevRec = 0, invRealRec = 0;
-        for (let i = 90; i <= 95; i++) {
-          const sec = String(i);
-          invPrevDep += (prevDepBySection[sec] || 0);
-          invRealDep += (depBySection[sec] || 0);
-        }
-        for (let i = 1; i <= 6; i++) {
-          const sec = '0' + i;
-          invPrevRec += (prevRecBySection[sec] || 0);
-          invRealRec += (recBySection[sec] || 0);
-        }
-        const invResultat = invRealRec - invRealDep;
-
-        content += '<tr>'
-          + '<td class="col-rubrique">Investissement</td>'
-          + '<td class="col-num">' + fmt(invPrevDep) + '</td>'
-          + '<td class="col-num">' + fmt(invRealDep) + '</td>'
-          + '<td class="col-num">' + fmt(invPrevRec) + '</td>'
-          + '<td class="col-num">' + fmt(invRealRec) + '</td>'
-          + '<td class="col-num ' + resClass(invResultat) + '">' + fmt(invResultat) + '</td>'
-          + '</tr>';
-
-        // Total General
-        const totPrevDep = foncPrevDep + invPrevDep;
-        const totRealDep = foncRealDep + invRealDep;
-        const totPrevRec = foncPrevRec + invPrevRec;
-        const totRealRec = foncRealRec + invRealRec;
-        const totResultat = totRealRec - totRealDep;
-
-        content += '<tr class="grand-total">'
-          + '<td class="col-rubrique">TOTAL GENERAL</td>'
-          + '<td class="col-num">' + fmt(totPrevDep) + '</td>'
-          + '<td class="col-num">' + fmt(totRealDep) + '</td>'
-          + '<td class="col-num">' + fmt(totPrevRec) + '</td>'
-          + '<td class="col-num">' + fmt(totRealRec) + '</td>'
-          + '<td class="col-num ' + resClass(totResultat) + '">' + fmt(totResultat) + '</td>'
-          + '</tr>';
-
-        content += '</tbody></table>';
+        content += '<table style="border: none; margin-top: 50px; width: 100%;">';
+        content += '<tr>';
+        content +=
+          '<td style="border: none; text-align: left; padding-left: 50px; vertical-align: bottom;"><br><strong>LE TRESORIER PRINCIPAL</strong><br><br><br><br><br><br><strong>MOBIE BOKA WILFREED</strong></td>';
+        content +=
+          '<td style="border: none; text-align: center; vertical-align: top;">Rapport sur la compatibilité</td>';
+        content +=
+          '<td style="border: none; text-align: right; padding-right: 50px; vertical-align: top;">Fait à ' +
+          (mairie.ville || 'VAVOUA').toUpperCase() +
+          ' le, ' +
+          dateStr +
+          '<br><br><strong>LE MAIRE</strong><br><br><br><br><br><br><strong>KALOU BONAVENTURE</strong></td>';
+        content += '</tr>';
+        content += '</table>';
 
         document.getElementById('content').innerHTML = content;
       }
@@ -315,7 +397,7 @@
       let pendingData = null;
       let dataProcessed = false;
 
-      window.addEventListener('message', function(event) {
+      window.addEventListener('message', function (event) {
         if (document.readyState === 'complete' || document.readyState === 'interactive') {
           processMessage(event.data);
           dataProcessed = true;
@@ -324,21 +406,21 @@
         }
       });
 
-      window.addEventListener('DOMContentLoaded', async function() {
+      window.addEventListener('DOMContentLoaded', async function () {
         if (pendingData && !dataProcessed) {
           processMessage(pendingData);
           dataProcessed = true;
           return;
         }
 
-        await new Promise(r => setTimeout(r, 500));
+        await new Promise((r) => setTimeout(r, 500));
 
         if (!dataProcessed) {
           try {
             const result = await loadData();
             render(result);
             dataProcessed = true;
-          } catch(e) {
+          } catch (e) {
             console.warn('Erreur chargement IndexedDB:', e);
           }
         }
@@ -347,13 +429,19 @@
           try {
             const db = new Dexie('TresorDatabase');
             db.version(28).stores({ printData: '++id, type, createdAt' });
-            const records = await db.table('printData').where('type').equals('FILL_COMPTE_ADMIN_DATA').toArray();
+            const records = await db
+              .table('printData')
+              .where('type')
+              .equals('FILL_COMPTE_ADMIN_DATA')
+              .toArray();
             if (records.length > 0) {
-              const latest = records.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+              const latest = records.sort(
+                (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+              )[0];
               processMessage(latest.data);
               await db.table('printData').delete(latest.id);
             }
-          } catch(e) {
+          } catch (e) {
             console.warn('Erreur printData:', e);
           }
         }

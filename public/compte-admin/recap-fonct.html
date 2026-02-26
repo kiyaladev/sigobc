@@ -6,82 +6,384 @@
     <title>Compte Administratif - Récapitulatif Fonctionnement</title>
     <script src="../dexie.min.js"></script>
     <style>
-      @page { size: A4 landscape; margin: 10mm; }
-      body { font-family: Arial, Helvetica, sans-serif; font-size: 10px; margin: 0; padding: 10px; }
-      table { width: 100%; border-collapse: collapse; }
-      th, td { border: 1px solid #000; padding: 3px 4px; }
-      th { background-color: #f0f0f0; text-align: center; vertical-align: middle; font-size: 9px; }
-      .text-right { text-align: right; }
-      .text-center { text-align: center; }
-      .section-title { text-align: center; font-weight: bold; font-size: 14px; margin: 15px 0 8px 0; }
-      .sub-title { text-align: center; font-weight: bold; font-size: 11px; margin: 10px 0 5px 0; }
-      .total-row { background-color: #e8e8e8; font-weight: bold; }
-      .col-num-row td { text-align: center; font-size: 8px; font-style: italic; background-color: #fafafa; }
-      .doc-header-cell { padding: 0 !important; background: #fff !important; }
-      .doc-header-grid { width: 100%; display: grid; grid-template-columns: 1fr 2fr 1fr; }
-      .doc-header-block { padding: 4px 6px; min-height: 40px; }
-      .doc-header-block + .doc-header-block { border-left: 1px solid #000; }
-      .doc-header-left { text-align: left; font-weight: bold; }
-      .doc-header-center { text-align: center; font-weight: bold; }
-      .doc-header-right { text-align: right; font-weight: bold; }
-      .print-button { position: fixed; top: 20px; right: 20px; padding: 10px 20px; background: #009688; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; z-index: 1000; }
-      .print-button:hover { background: #00796b; }
-      @media print { .no-print { display: none !important; } }
-      .loading { text-align: center; padding: 50px; font-size: 16px; color: #666; }
+      @page {
+        size: A4 landscape;
+        margin: 10mm;
+      }
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 10px;
+        margin: 0;
+        padding: 10px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        border: 1px solid #000;
+        padding: 3px 4px;
+      }
+      th {
+        background-color: #f0f0f0;
+        text-align: center;
+        vertical-align: middle;
+        font-size: 9px;
+      }
+      .text-right {
+        text-align: right;
+      }
+      .text-center {
+        text-align: center;
+      }
+      .section-title {
+        text-align: center;
+        font-weight: bold;
+        font-size: 14px;
+        margin: 15px 0 8px 0;
+      }
+      .sub-title {
+        text-align: center;
+        font-weight: bold;
+        font-size: 11px;
+        margin: 10px 0 5px 0;
+      }
+      .total-row {
+        background-color: #e8e8e8;
+        font-weight: bold;
+      }
+      .col-num-row td {
+        text-align: center;
+        font-size: 8px;
+        font-style: italic;
+        background-color: #fafafa;
+      }
+      .doc-header-cell {
+        padding: 0 !important;
+        background: #fff !important;
+      }
+      .doc-header-grid {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 2fr 1fr;
+      }
+      .doc-header-block {
+        padding: 4px 6px;
+        min-height: 40px;
+      }
+      .doc-header-block + .doc-header-block {
+        border-left: 1px solid #000;
+      }
+      .doc-header-left {
+        text-align: left;
+        font-weight: bold;
+      }
+      .doc-header-center {
+        text-align: center;
+        font-weight: bold;
+      }
+      .doc-header-right {
+        text-align: right;
+        font-weight: bold;
+      }
+      .print-button {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 10px 20px;
+        background: #009688;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        z-index: 1000;
+      }
+      .print-button:hover {
+        background: #00796b;
+      }
+      @media print {
+        .no-print {
+          display: none !important;
+        }
+      }
+      .loading {
+        text-align: center;
+        padding: 50px;
+        font-size: 16px;
+        color: #666;
+      }
     </style>
   </head>
   <body>
     <button class="print-button no-print" onclick="window.print()">Imprimer</button>
     <div id="content"><div class="loading">Chargement des données...</div></div>
-    <script>
-      var exercice = new Date().getFullYear();
-      var dbInstance = new Dexie('TresorDatabase');
-      dbInstance.version(28).stores({
-        mandats: '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
-        previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
-        sousChapitres: '++id, code, libelle, parentId, mairieId, actif',
-        taxes: '++id, code, libelle, mairieId, type, actif',
-        declarations: '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
-        previsionsRecettes: '++id, exercice, taxeId, mairieId, statut, personnelId',
-        mairies: '++id, nom, code, ville', printData: '++id, type, createdAt',
-      });
-      function fmt(v) { return v ? new Intl.NumberFormat('fr-FR').format(v) : '-'; }
-      var params = new URLSearchParams(window.location.search);
-      if (params.get('exercice')) exercice = parseInt(params.get('exercice'));
-      window.addEventListener('message', function(e) { if (e.data && e.data.type === 'FILL_COMPTE_ADMIN_DATA') { if (e.data.exercice) exercice = e.data.exercice; loadAndRender(); } });
-      document.addEventListener('DOMContentLoaded', function() { setTimeout(loadAndRender, 500); });
+    var exercice = new Date().getFullYear(); var dbInstance = new Dexie('TresorDatabase');
+    dbInstance.version(28).stores({ mandats: '++id, numeroMandat, dateMandat, exercice, chapitreId,
+    sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId', previsions:
+    '++id, exercice, chapitreId, mairieId, statut, personnelId', sousChapitres: '++id, code,
+    libelle, parentId, mairieId, actif', taxes: '++id, code, libelle, mairieId, type, actif',
+    declarations: '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId,
+    personnelId, exercice', previsionsRecettes: '++id, exercice, taxeId, mairieId, statut,
+    personnelId', mairies: '++id, nom, code, ville', printData: '++id, type, createdAt', });
+    function fmt(v) { return (v && v !== 0) ? new Intl.NumberFormat('fr-FR').format(v) : '-'; } var
+    params = new URLSearchParams(window.location.search); if (params.get('exercice')) exercice =
+    parseInt(params.get('exercice')); window.addEventListener('message', function(e) { if (e.data &&
+    e.data.type === 'FILL_COMPTE_ADMIN_DATA') { if (e.data.exercice) exercice = e.data.exercice;
+    loadAndRender(); } }); document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(loadAndRender, 500); }); async function loadAndRender() { try { var pd = await
+    dbInstance.table('printData').toArray(); var latest = pd.filter(p =>
+    p.type==='FILL_COMPTE_ADMIN_DATA').sort((a,b)=>b.createdAt-a.createdAt)[0]; if (latest &&
+    latest.data && latest.data.exercice) exercice = latest.data.exercice; } catch(e) {} const mairie
+    = await dbInstance.table('mairies').toCollection().first() || {}; var mandats = await
+    dbInstance.table('mandats').filter(m => m.exercice===exercice&&m.statut==='paye').toArray(); var
+    previsions = await dbInstance.table('previsions').filter(p => p.exercice===exercice).toArray();
+    var sousChapitres = await dbInstance.table('sousChapitres').toArray(); var taxes = await
+    dbInstance.table('taxes').toArray(); var declarations = await
+    dbInstance.table('declarations').filter(d =>
+    d.exercice===exercice&&d.statut==='validee').toArray(); var previsionsRecettes = await
+    dbInstance.table('previsionsRecettes').filter(p => p.exercice===exercice).toArray(); var
+    prevMap={}; previsions.forEach(p => { if(p.sousChapitreId)
+    prevMap[p.sousChapitreId]=(prevMap[p.sousChapitreId]||0)+p.montantPrevu; }); var engageMap={};
+    mandats.forEach(m => { engageMap[m.sousChapitreId]=(engageMap[m.sousChapitreId]||0)+m.montant;
+    }); var prevRecMap={}; previsionsRecettes.forEach(p => {
+    prevRecMap[p.taxeId]=(prevRecMap[p.taxeId]||0)+p.montantPrevu; }); var emisMap={},
+    recouvreMap={}; declarations.forEach(d => { var mt = d.montant || d.montantRecette || 0;
+    emisMap[d.taxeId] = (emisMap[d.taxeId]||0) + mt; if (d.dateEncaissement) recouvreMap[d.taxeId] =
+    (recouvreMap[d.taxeId]||0) + mt; }); var recSections=[ {code:'70',libelle:'70 - Recettes
+    fiscales'}, {code:'71',libelle:'71 - Recettes des prestations et services'},
+    {code:'72',libelle:'72 - Revenus du patrimoine et du portefeuille'}, {code:'73',libelle:"73 -
+    Aide de l'état, fonds de concours, aides extérieures"}, {code:'74',libelle:'74 - Recettes divers
+    au titre I'} ]; var recData=recSections.map(s => { var prevu=0, em=0, rec=0; taxes.forEach(tx =>
+    { if(tx.code && tx.code.startsWith(s.code)){ prevu+=prevRecMap[tx.id]||0; em+=emisMap[tx.id]||0;
+    rec+=recouvreMap[tx.id]||0; } }); return { libelle: s.libelle, prevu: prevu, emissions: em,
+    recouvrement: rec, ecart: prevu-em, taux: prevu > 0 ? ((em/prevu)*100).toFixed(2)+'%' : '-' };
+    }); var tRP=recData.reduce((s,r)=>s+r.prevu,0); var tRE=recData.reduce((s,r)=>s+r.emissions,0);
+    var tRR=recData.reduce((s,r)=>s+r.recouvrement,0); var depSections=[ {code:'60',libelle:'60 -
+    Dépenses des services généraux'}, {code:'61',libelle:'61 - Dépenses des services de
+    collectivité'}, {code:'62',libelle:'62 - Dépenses des services socioculturels et de prom.
+    Hum.'}, {code:'63',libelle:'63 - Dépenses des services économiques'}, {code:'64',libelle:'64 -
+    Dépenses diverses au titre I'} ]; var depData=depSections.map(s => { var prevu=0, m=0;
+    sousChapitres.forEach(sc => { if(sc.code && sc.code.startsWith(s.code)){
+    prevu+=prevMap[sc.id]||0; m+=engageMap[sc.id]||0; } }); return { libelle: s.libelle, prevu:
+    prevu, pct: prevu > 0 ? ((m/prevu)*100).toFixed(2) : '0.00', mandatees: m }; }); var
+    tDP=depData.reduce((s,r)=>s+r.prevu,0); var tDM=depData.reduce((s,r)=>s+r.mandatees,0); const
+    contentHtml = `
+    <table style="width: 100%; border-collapse: collapse">
+      <tbody>
+        <tr>
+          <td style="width: 30%; text-align: center; font-weight: bold; padding: 10px">
+            COMMUNE DE ${(mairie.nom || 'VAVOUA').replace(/^mairie de /i, '').toUpperCase()}
+          </td>
+          <td style="width: 50%; text-align: center; font-weight: bold; font-size: 14px">
+            COMPTE ADMINISTRATIF - RECAPITULATIF
+          </td>
+          <td style="width: 10%; text-align: center">ANNEE<br />${exercice}</td>
+          <td style="width: 10%; text-align: center">N°<br />3</td>
+        </tr>
+        <tr>
+          <td
+            colspan="4"
+            style="
+              text-align: center;
+              font-weight: bold;
+              font-size: 16px;
+              padding: 15px;
+              border-bottom: 1px solid #000;
+              letter-spacing: 1px;
+            "
+          >
+            TITRE I - BUDGET DE FONCTIONNEMENT
+          </td>
+        </tr>
+        <!-- RECETTES -->
+        <tr>
+          <td
+            colspan="4"
+            style="
+              text-align: center;
+              font-weight: bold;
+              font-size: 12px;
+              padding: 8px;
+              border-bottom: 2px solid #000;
+            "
+          >
+            RECETTES DE FONCTIONNEMENT
+          </td>
+        </tr>
+        <tr>
+          <td colspan="4" style="padding: 0; border: none">
+            <table style="width: 100%; border: none; border-collapse: collapse; margin: 0">
+              <thead>
+                <tr>
+                  <th
+                    rowspan="2"
+                    style="width: 30%; text-align: center; border-top: none; border-left: none"
+                  >
+                    SECTIONS BUDGETAIRES
+                  </th>
+                  <th rowspan="2" style="width: 10%; border-top: none">PREVISIONS</th>
+                  <th colspan="4" style="text-align: center; border-top: none">
+                    EXECUTION DU BUDGET
+                  </th>
+                  <th rowspan="2" style="width: 10%; border-top: none">
+                    ECART PREVISION<br />EMISSION
+                  </th>
+                  <th rowspan="2" style="width: 5%; border-top: none; border-right: none">
+                    E / P %
+                  </th>
+                </tr>
+                <tr>
+                  <th style="width: 10%">EMISSIONS</th>
+                  <th style="width: 10%">RECOUVREMENT</th>
+                  <th style="width: 10%">NON VALEUR</th>
+                  <th style="width: 10%">RESTE A<br />RECOUVRER</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${recData.map(r => `
+                <tr>
+                  <td style="border-left: none">${r.libelle}</td>
+                  <td class="text-right">${fmt(r.prevu)}</td>
+                  <td class="text-right">${fmt(r.emissions)}</td>
+                  <td class="text-right">${fmt(r.recouvrement)}</td>
+                  <td class="text-right"></td>
+                  <td class="text-right">${fmt(Math.max(0, r.emissions - r.recouvrement))}</td>
+                  <td class="text-right">${fmt(r.ecart)}</td>
+                  <td class="text-right" style="border-right: none">${r.taux}</td>
+                </tr>
+                `).join('')}
+                <!-- RECETTES TOTAL -->
+                <tr>
+                  <td style="text-align: center; font-size: 10px; border-left: none">
+                    TOTAL DES RECETTES AU TITRE I
+                  </td>
+                  <td class="text-right" style="font-size: 10px">${fmt(tRP)}</td>
+                  <td class="text-right" style="font-size: 10px">${fmt(tRE)}</td>
+                  <td class="text-right" style="font-size: 10px">${fmt(tRR)}</td>
+                  <td class="text-right" style="font-size: 10px"></td>
+                  <td class="text-right" style="font-size: 10px">${fmt(Math.max(0, tRE - tRR))}</td>
+                  <td class="text-right" style="font-size: 10px">${fmt(tRP - tRE)}</td>
+                  <td class="text-right" style="font-size: 10px; border-right: none">
+                    ${tRP > 0 ? ((tRE / tRP) * 100).toFixed(2) + '%' : '-'}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
 
-      async function loadAndRender() {
-        try { var pd = await dbInstance.table('printData').toArray(); var latest = pd.filter(function(p){return p.type==='FILL_COMPTE_ADMIN_DATA';}).sort(function(a,b){return b.createdAt-a.createdAt;})[0]; if (latest&&latest.data&&latest.data.exercice) exercice=latest.data.exercice; } catch(e){}
-        var mandats = await dbInstance.table('mandats').filter(function(m){return m.exercice===exercice&&m.statut==='paye';}).toArray();
-        var previsions = await dbInstance.table('previsions').filter(function(p){return p.exercice===exercice;}).toArray();
-        var sousChapitres = await dbInstance.table('sousChapitres').toArray();
-        var taxes = await dbInstance.table('taxes').toArray();
-        var declarations = await dbInstance.table('declarations').filter(function(d){return d.exercice===exercice&&d.statut==='validee';}).toArray();
-        var previsionsRecettes = await dbInstance.table('previsionsRecettes').filter(function(p){return p.exercice===exercice;}).toArray();
-        var prevMap={};previsions.forEach(function(p){if(p.sousChapitreId)prevMap[p.sousChapitreId]=(prevMap[p.sousChapitreId]||0)+p.montantPrevu;});
-        var engageMap={};mandats.forEach(function(m){engageMap[m.sousChapitreId]=(engageMap[m.sousChapitreId]||0)+m.montant;});
-        var prevRecMap={};previsionsRecettes.forEach(function(p){prevRecMap[p.taxeId]=(prevRecMap[p.taxeId]||0)+p.montantPrevu;});
-        var emisMap={},recouvreMap={};declarations.forEach(function(d){var mt=d.montant||d.montantRecette||0;emisMap[d.taxeId]=(emisMap[d.taxeId]||0)+mt;if(d.dateEncaissement)recouvreMap[d.taxeId]=(recouvreMap[d.taxeId]||0)+mt;});
-        var recSections=[{code:'70',libelle:'70 - Recettes fiscales'},{code:'71',libelle:'71 - Recettes des prestations et services'},{code:'72',libelle:'72 - Revenus du patrimoine et du portefeuille'},{code:'73',libelle:"73 - Aide de l'état, fonds de concours, aides extérieures"},{code:'74',libelle:'74 - Recettes divers au titre I'}];
-        var recData=recSections.map(function(s){var prevu=0,em=0,rec=0;taxes.forEach(function(tx){if(tx.code.startsWith(s.code)){prevu+=prevRecMap[tx.id]||0;em+=emisMap[tx.id]||0;rec+=recouvreMap[tx.id]||0;}});return{libelle:s.libelle,prevu:prevu,emissions:em,recouvrement:rec,ecart:prevu-em,taux:prevu>0?((em/prevu)*100).toFixed(2)+'%':'-'};});
-        var tRP=recData.reduce(function(s,r){return s+r.prevu;},0),tRE=recData.reduce(function(s,r){return s+r.emissions;},0),tRR=recData.reduce(function(s,r){return s+r.recouvrement;},0);
-        var depSections=[{code:'60',libelle:'60 - Dépenses des services généraux'},{code:'61',libelle:'61 - Dépenses des services de collectivité'},{code:'62',libelle:'62 - Dépenses des services socioculturels et de prom. Hum.'},{code:'63',libelle:'63 - Dépenses des services économiques'},{code:'64',libelle:'64 - Dépenses diverses au titre I'}];
-        var depData=depSections.map(function(s){var prevu=0,m=0;sousChapitres.forEach(function(sc){if(sc.code.startsWith(s.code)){prevu+=prevMap[sc.id]||0;m+=engageMap[sc.id]||0;}});return{libelle:s.libelle,prevu:prevu,pct:prevu>0?((m/prevu)*100).toFixed(2):'0.00',mandatees:m};});
-        var tDP=depData.reduce(function(s,r){return s+r.prevu;},0),tDM=depData.reduce(function(s,r){return s+r.mandatees;},0);
-        var h='<table><tr><td colspan="8" class="doc-header-cell"><div class="doc-header-grid"><div class="doc-header-block doc-header-left">COMMUNE DE VAVOUA</div><div class="doc-header-block doc-header-center">COMPTE ADMINISTRATIF - RECAPITULATIF</div><div class="doc-header-block doc-header-right">ANNEE<br>'+exercice+'</div></div></td></tr></table>';
-        h+='<div class="section-title">TITRE I - BUDGET DE FONCTIONNEMENT</div>';
-        h+='<div class="sub-title">RECETTES DE FONCTIONNEMENT</div>';
-        h+='<table><thead><tr><th rowspan="2" style="width:280px;text-align:left">SECTIONS BUDGETAIRES</th><th rowspan="2" class="text-right">PREVISIONS</th><th colspan="4" class="text-center">EXECUTION DU BUDGET</th><th rowspan="2" class="text-right">ECART PREVISION<br>EMISSION</th><th rowspan="2" class="text-right">E / P %</th></tr><tr><th class="text-right">EMISSIONS</th><th class="text-right">RECOUVREMENT</th><th class="text-right">NON VALEUR</th><th class="text-right">RESTE A<br>RECOUVRER</th></tr></thead><tbody>';
-        recData.forEach(function(r){h+='<tr><td>'+r.libelle+'</td><td class="text-right">'+fmt(r.prevu)+'</td><td class="text-right">'+fmt(r.emissions)+'</td><td class="text-right">'+fmt(r.recouvrement)+'</td><td class="text-right">-</td><td class="text-right">'+(r.emissions-r.recouvrement>0?fmt(r.emissions-r.recouvrement):'-')+'</td><td class="text-right">'+fmt(r.ecart)+'</td><td class="text-right">'+r.taux+'</td></tr>';});
-        h+='<tr class="total-row"><td class="text-center">TOTAL DES RECETTES AU TITRE I</td><td class="text-right">'+fmt(tRP)+'</td><td class="text-right">'+fmt(tRE)+'</td><td class="text-right">'+fmt(tRR)+'</td><td class="text-right"></td><td class="text-right"></td><td class="text-right">'+fmt(tRP-tRE)+'</td><td class="text-right">'+(tRP>0?((tRE/tRP)*100).toFixed(2)+'%':'-')+'</td></tr></tbody></table>';
-        h+='<div class="sub-title">DEPENSES DE FONCTIONNEMENT</div>';
-        h+='<table><thead><tr><th rowspan="2" style="width:280px;text-align:left">SECTIONS BUDGETAIRES</th><th rowspan="2" class="text-right">PREVISIONS<br>ENGAGEES</th><th rowspan="2" class="text-right">POURCENTAGE<br>REALISATION</th><th rowspan="2" class="text-right">DEPENSES<br>MANDATEES</th><th colspan="4" class="text-center">ENGAGEMENTS NON MANDATES</th></tr><tr><th class="text-right">COMMANDES<br>NON LIVREES</th><th class="text-right">COMMANDES<br>LIVREES NON<br>FACTUREES</th><th class="text-right">COMMANDES<br>FACTUREES</th><th class="text-right">TOTAL<br>(6+7+8)</th></tr></thead><tbody>';
-        h+='<tr class="col-num-row"><td>1</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td></tr>';
-        depData.forEach(function(r){h+='<tr><td>'+r.libelle+'</td><td class="text-right">'+fmt(r.prevu)+'</td><td class="text-right">'+r.pct+'</td><td class="text-right">'+fmt(r.mandatees)+'</td><td class="text-right">-</td><td class="text-right">-</td><td class="text-right">-</td><td class="text-right">-</td></tr>';});
-        h+='<tr class="total-row"><td class="text-center">TOTAL DES DEPENSES AU TITRE I</td><td class="text-right">'+fmt(tDP)+'</td><td class="text-right">'+(tDP>0?((tDM/tDP)*100).toFixed(2):'0.00')+'</td><td class="text-right">'+fmt(tDM)+'</td><td class="text-right">-</td><td class="text-right">-</td><td class="text-right">-</td><td class="text-right">-</td></tr></tbody></table>';
-        document.getElementById('content').innerHTML=h;
-      }
-    </script>
+        <!-- DEPENSES -->
+        <tr>
+          <td
+            colspan="4"
+            style="
+              text-align: center;
+              font-weight: bold;
+              font-size: 12px;
+              padding: 8px;
+              border-top: 2px solid #000;
+              border-bottom: 2px solid #000;
+            "
+          >
+            DEPENSES DE FONCTIONNEMENT
+          </td>
+        </tr>
+        <tr>
+          <td colspan="4" style="padding: 0; border: none">
+            <table style="width: 100%; border: none; border-collapse: collapse; margin: 0">
+              <thead>
+                <tr>
+                  <th
+                    rowspan="2"
+                    style="width: 30%; text-align: center; border-top: none; border-left: none"
+                  >
+                    SECTIONS BUDGETAIRES
+                  </th>
+                  <th rowspan="2" style="width: 10%; border-top: none">PREVISIONS<br />ENGAGEES</th>
+                  <th rowspan="2" style="width: 10%; border-top: none">
+                    POURCENTAGE<br />REALISATION
+                  </th>
+                  <th rowspan="2" style="width: 10%; border-top: none">DEPENSES<br />MANDATEES</th>
+                  <th colspan="4" style="text-align: center; border-top: none; border-right: none">
+                    ENGAGEMENTS NON MANDATES
+                  </th>
+                </tr>
+                <tr>
+                  <th style="width: 10%">COMMANDES<br />NON LIVREES</th>
+                  <th style="width: 10%">COMMANDES<br />LIVREES NON<br />FACTUREES</th>
+                  <th style="width: 10%">COMMANDES<br />FACTUREES</th>
+                  <th style="width: 10%; border-right: none">TOTAL (6 + 7 + 8)</th>
+                </tr>
+                <tr
+                  style="
+                    background-color: #fff;
+                    font-size: 9px;
+                    font-weight: bold;
+                    text-align: center;
+                  "
+                >
+                  <th style="border-left: none; background-color: #fff">1</th>
+                  <th style="background-color: #fff">3</th>
+                  <th style="background-color: #fff">4</th>
+                  <th style="background-color: #fff">5</th>
+                  <th style="background-color: #fff">6</th>
+                  <th style="background-color: #fff">7</th>
+                  <th style="background-color: #fff">8</th>
+                  <th style="border-right: none; background-color: #fff">9</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${depData.map(r => `
+                <tr>
+                  <td style="border-left: none">${r.libelle}</td>
+                  <td class="text-right">${fmt(r.prevu)}</td>
+                  <td class="text-right">${r.pct}</td>
+                  <td class="text-right">${fmt(r.mandatees)}</td>
+                  <td class="text-right">-</td>
+                  <td class="text-right">-</td>
+                  <td class="text-right">-</td>
+                  <td class="text-right" style="border-right: none">-</td>
+                </tr>
+                `).join('')}
+                <!-- DEPENSES TOTAL -->
+                <tr>
+                  <td
+                    style="
+                      text-align: center;
+                      font-size: 10px;
+                      border-bottom: none;
+                      border-left: none;
+                    "
+                  >
+                    TOTAL DES DEPENSES AU TITRE I
+                  </td>
+                  <td class="text-right" style="border-bottom: none; font-size: 10px">
+                    ${fmt(tDP)}
+                  </td>
+                  <td class="text-right" style="border-bottom: none; font-size: 10px">
+                    ${(tDP>0?((tDM/tDP)*100).toFixed(2):'0.00')}
+                  </td>
+                  <td class="text-right" style="border-bottom: none; font-size: 10px">
+                    ${fmt(tDM)}
+                  </td>
+                  <td class="text-right" style="border-bottom: none; font-size: 10px">-</td>
+                  <td class="text-right" style="border-bottom: none; font-size: 10px">-</td>
+                  <td class="text-right" style="border-bottom: none; font-size: 10px">-</td>
+                  <td
+                    class="text-right"
+                    style="border-bottom: none; border-right: none; font-size: 10px"
+                  >
+                    -
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    `; document.getElementById('content').innerHTML = contentHtml; }
   </body>
 </html>

@@ -16,7 +16,9 @@
         margin: 0;
         padding: 10px;
       }
-      .container { width: 100%; }
+      .container {
+        width: 100%;
+      }
       .main-title {
         text-decoration: underline;
         font-size: 14px;
@@ -27,7 +29,8 @@
         border-collapse: collapse;
         margin-top: 0;
       }
-      th, td {
+      th,
+      td {
         border: 1px solid #000;
         padding: 3px 4px;
       }
@@ -37,31 +40,97 @@
         vertical-align: middle;
         font-size: 9px;
       }
-      .col-code { width: 8%; text-align: center; }
-      .col-libelle { width: 30%; text-align: left; }
-      .col-num { width: 14%; text-align: right; white-space: nowrap; }
-      .col-percent { width: 8%; text-align: center; }
-      .section-header { background-color: #e0e0e0; font-weight: bold; }
-      .total-section { background-color: #d0d0d0; font-weight: bold; border-top: 2px solid #000; }
-      .grand-total { background-color: #bbb; font-weight: bold; border-top: 3px double #000; }
-      .doc-header-cell { padding: 0 !important; background: #fff !important; }
-      .doc-header-grid { width: 100%; display: grid; grid-template-columns: 1fr 2fr 1fr; }
-      .doc-header-block { padding: 4px 6px; min-height: 70px; }
-      .doc-header-block + .doc-header-block { border-left: 1px solid #000; }
-      .doc-header-left { text-align: left; font-weight: bold; }
-      .doc-header-center { text-align: center; font-weight: bold; }
-      .doc-header-right { text-align: right; font-weight: bold; }
-      .doc-header-center .main-title { margin: 0 0 4px 0; }
-      .print-button {
-        position: fixed; top: 20px; right: 20px; padding: 10px 20px;
-        background: #009688; color: white; border: none; border-radius: 5px;
-        cursor: pointer; font-size: 14px; z-index: 1000;
+      .col-code {
+        width: 8%;
+        text-align: center;
       }
-      .print-button:hover { background: #00796B; }
-      .loading { text-align: center; padding: 50px; font-size: 16px; color: #666; }
+      .col-libelle {
+        width: 30%;
+        text-align: left;
+      }
+      .col-num {
+        width: 14%;
+        text-align: right;
+        white-space: nowrap;
+      }
+      .col-percent {
+        width: 8%;
+        text-align: center;
+      }
+      .section-header {
+        background-color: #e0e0e0;
+        font-weight: bold;
+      }
+      .total-section {
+        background-color: #d0d0d0;
+        font-weight: bold;
+        border-top: 2px solid #000;
+      }
+      .grand-total {
+        background-color: #bbb;
+        font-weight: bold;
+        border-top: 3px double #000;
+      }
+      .doc-header-cell {
+        padding: 0 !important;
+        background: #fff !important;
+      }
+      .doc-header-grid {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 2fr 1fr;
+      }
+      .doc-header-block {
+        padding: 4px 6px;
+        min-height: 70px;
+      }
+      .doc-header-block + .doc-header-block {
+        border-left: 1px solid #000;
+      }
+      .doc-header-left {
+        text-align: left;
+        font-weight: bold;
+      }
+      .doc-header-center {
+        text-align: center;
+        font-weight: bold;
+      }
+      .doc-header-right {
+        text-align: right;
+        font-weight: bold;
+      }
+      .doc-header-center .main-title {
+        margin: 0 0 4px 0;
+      }
+      .print-button {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 10px 20px;
+        background: #009688;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        z-index: 1000;
+      }
+      .print-button:hover {
+        background: #00796b;
+      }
+      .loading {
+        text-align: center;
+        padding: 50px;
+        font-size: 16px;
+        color: #666;
+      }
       @media print {
-        .no-print { display: none !important; }
-        body { padding: 0; }
+        .no-print {
+          display: none !important;
+        }
+        body {
+          padding: 0;
+        }
       }
     </style>
   </head>
@@ -74,30 +143,36 @@
     </div>
 
     <script>
-      function fmt(v) { return v ? new Intl.NumberFormat('fr-FR').format(v) : '0'; }
-      function pct(a, b) { return b ? ((a / b) * 100).toFixed(2) : '0.00'; }
+      function fmt(v) {
+        return v ? new Intl.NumberFormat('fr-FR').format(v) : '0';
+      }
+      function pct(a, b) {
+        return b ? ((a / b) * 100).toFixed(2) : '0.00';
+      }
 
       const SECTIONS = {
-        '01': 'Dotations de l\'Etat',
+        '01': "Dotations de l'Etat",
         '02': 'Emprunts',
         '03': 'Cessions immobilieres',
         '04': 'Subventions investissement',
         '05': 'Fonds propres',
-        '06': 'Autres recettes investissement'
+        '06': 'Autres recettes investissement',
       };
 
       async function loadData() {
         const db = new Dexie('TresorDatabase');
         db.version(28).stores({
-          mandats: '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
+          mandats:
+            '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
           previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
           sousChapitres: '++id, code, libelle, parentId, mairieId, actif',
           chapitres: '++id, code, libelle, mairieId, actif',
           taxes: '++id, code, libelle, mairieId, type, actif',
-          declarations: '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
+          declarations:
+            '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
           previsionsRecettes: '++id, exercice, taxeId, mairieId, statut, personnelId',
           mairies: '++id, nom, code, ville',
-          printData: '++id, type, createdAt'
+          printData: '++id, type, createdAt',
         });
 
         const exercice = new Date().getFullYear();
@@ -106,30 +181,30 @@
           db.taxes.toArray(),
           db.previsionsRecettes.where('exercice').equals(exercice).toArray(),
           db.declarations.where('exercice').equals(exercice).toArray(),
-          db.mairies.toCollection().first()
+          db.mairies.toCollection().first(),
         ]);
 
         // Filter taxes with code starting with '0' (investissement recettes)
-        const investTaxes = taxes.filter(t => t.code && t.code.startsWith('0'));
+        const investTaxes = taxes.filter((t) => t.code && t.code.startsWith('0'));
 
         // Build prevision map by taxeId
         const prevMap = {};
-        previsionsRecettes.forEach(p => {
+        previsionsRecettes.forEach((p) => {
           if (!prevMap[p.taxeId]) prevMap[p.taxeId] = 0;
-          prevMap[p.taxeId] += (p.montantPrevu || 0);
+          prevMap[p.taxeId] += p.montantPrevu || 0;
         });
 
         // Build emissions and recouvrements maps by taxeId
         const emissionMap = {};
         const recouvrementMap = {};
-        declarations.forEach(d => {
+        declarations.forEach((d) => {
           if (d.statut === 'annulee') return;
           const tid = d.taxeId;
           if (!emissionMap[tid]) emissionMap[tid] = 0;
           if (!recouvrementMap[tid]) recouvrementMap[tid] = 0;
-          emissionMap[tid] += (d.montant || d.montantRecette || 0);
+          emissionMap[tid] += d.montant || d.montantRecette || 0;
           if (d.dateEncaissement) {
-            recouvrementMap[tid] += (d.montantRecette || d.montant || 0);
+            recouvrementMap[tid] += d.montantRecette || d.montant || 0;
           }
         });
 
@@ -140,91 +215,258 @@
         const { investTaxes, prevMap, emissionMap, recouvrementMap, exercice, mairie } = data;
         const mairieNom = mairie ? mairie.nom || 'Mairie de Vavoua' : 'Mairie de Vavoua';
 
-        // Group taxes by section (first 2 chars of code)
-        const grouped = {};
-        investTaxes.forEach(t => {
-          const sec = t.code.substring(0, 2);
-          if (!grouped[sec]) grouped[sec] = [];
-          grouped[sec].push(t);
+        const content = document.getElementById('content');
+        content.innerHTML = '';
+
+        // Header table like in screenshot
+        const headerHtml = `
+          <table style="border: none; margin-bottom: 5px;">
+            <tr>
+              <td style="width: 30%; font-weight: bold; text-align: center; border: 1px solid #000;">
+                COMMUNE DE ${(mairie.nom || 'VAVOUA').replace(/^mairie de /i, '').toUpperCase()}
+              </td>
+              <td style="width: 50%; font-weight: bold; text-align: center; border: 1px solid #000;">
+                COMPTE ADMINISTRATIF - RECETTES D'INVESTISSEMENT
+              </td>
+              <td style="width: 15%; font-weight: bold; text-align: center; border: 1px solid #000;">
+                ANNEE<br>${exercice}
+              </td>
+              <td style="width: 5%; font-weight: bold; text-align: center; border: 1px solid #000;">
+                N°<br>27
+              </td>
+            </tr>
+          </table>
+        `;
+
+        // Main Table Header
+        const tableHtml = `
+          <table>
+            <thead>
+              <tr>
+                <th rowspan="2" style="width: 30%; text-align: center;">COMPTES ET RUBRIQUES BUDGETAIRES</th>
+                <th rowspan="2" style="width: 10%;">PREVISIONS</th>
+                <th colspan="4" style="padding: 6px;">EXECUTION DU BUDGET</th>
+                <th rowspan="2" style="width: 10%;">ECART<br>PREVISIONS<br>RECOUVREMENTS</th>
+                <th rowspan="2" style="width: 5%;">P</th>
+                <th rowspan="2" style="width: 5%;">R /<br>%</th>
+              </tr>
+              <tr>
+                <th style="width: 10%;">EMISSIONS</th>
+                <th style="width: 10%;">RECOU-<br>VREMENT</th>
+                <th style="width: 10%;">NON VALEUR</th>
+                <th style="width: 10%;">RESTE A RECOUVRER</th>
+              </tr>
+            </thead>
+            <tbody id="table-body">
+            </tbody>
+          </table>
+        `;
+        content.innerHTML = headerHtml + tableHtml;
+        const tbody = document.getElementById('table-body');
+
+        // Organize hierarchy
+        const sections = {};
+        const chapitres = {};
+        const articles = [];
+
+        investTaxes.forEach((t) => {
+          const c = t.code || '';
+          if (c.length === 2 && !sections[c]) {
+            sections[c] = { label: t.libelle, prev: 0, emis: 0, rec: 0, chapitres: {} };
+          } else if (c.length === 3 && !chapitres[c]) {
+            chapitres[c] = { label: t.libelle, prev: 0, emis: 0, rec: 0, articles: [] };
+          } else if (c.length >= 4) {
+            articles.push(t);
+          }
         });
 
-        let grandPrev = 0, grandEmis = 0, grandRec = 0;
+        // Map articles and bubble totals
+        articles.forEach((art) => {
+          const c = art.code;
+          const secCode = c.substring(0, 2);
+          const chapCode = c.substring(0, 3);
 
-        let rows = '';
-        const sectionCodes = Object.keys(SECTIONS).sort();
+          if (!sections[secCode]) {
+            const secTitle = SECTIONS[secCode] || 'SECTION ' + secCode;
+            sections[secCode] = { label: secTitle, prev: 0, emis: 0, rec: 0, chapitres: {} };
+          }
+          if (!sections[secCode].chapitres[chapCode]) {
+            if (!chapitres[chapCode]) {
+              chapitres[chapCode] = {
+                label: 'Chapitre ' + chapCode,
+                prev: 0,
+                emis: 0,
+                rec: 0,
+                articles: [],
+              };
+            }
+            sections[secCode].chapitres[chapCode] = chapitres[chapCode];
+          }
+          sections[secCode].chapitres[chapCode].articles.push(art);
 
-        sectionCodes.forEach(secCode => {
-          const secLabel = SECTIONS[secCode];
-          const taxesInSection = (grouped[secCode] || []).sort((a, b) => a.code.localeCompare(b.code));
+          // Bubble up totals
+          const prev = prevMap[art.id] || 0;
+          const emis = emissionMap[art.id] || 0;
+          const rec = recouvrementMap[art.id] || 0;
 
-          let secPrev = 0, secEmis = 0, secRec = 0;
+          sections[secCode].chapitres[chapCode].prev += prev;
+          sections[secCode].chapitres[chapCode].emis += emis;
+          sections[secCode].chapitres[chapCode].rec += rec;
 
-          rows += '<tr class="section-header"><td>' + secCode + '</td><td colspan="5">SECTION ' + secCode + ' - ' + secLabel + '</td></tr>';
+          sections[secCode].prev += prev;
+          sections[secCode].emis += emis;
+          sections[secCode].rec += rec;
+        });
 
-          taxesInSection.forEach(t => {
-            const prev = prevMap[t.id] || 0;
-            const emis = emissionMap[t.id] || 0;
-            const rec = recouvrementMap[t.id] || 0;
-            const tauxRec = pct(rec, emis);
+        function dashFormat(v) {
+          return v && v !== 0 ? fmt(v) : '-';
+        }
 
-            secPrev += prev;
-            secEmis += emis;
-            secRec += rec;
+        let grandPrev = 0,
+          grandEmis = 0,
+          grandRec = 0;
+        let htmlRows = '';
 
-            rows += '<tr>'
-              + '<td class="col-code">' + t.code + '</td>'
-              + '<td class="col-libelle">' + (t.libelle || '') + '</td>'
-              + '<td class="col-num">' + fmt(prev) + '</td>'
-              + '<td class="col-num">' + fmt(emis) + '</td>'
-              + '<td class="col-num">' + fmt(rec) + '</td>'
-              + '<td class="col-percent">' + tauxRec + '</td>'
-              + '</tr>';
+        Object.keys(sections)
+          .sort()
+          .forEach((secCode) => {
+            const sec = sections[secCode];
+            if (sec.prev === 0 && sec.emis === 0 && sec.rec === 0) return; // Skip empty sections
+
+            htmlRows += '<tr class="section-header">';
+            htmlRows +=
+              '<td colspan="9" style="text-align: left; padding: 10px 5px; background: #fff;"><strong>SECTION ' +
+              secCode +
+              ' - ' +
+              (sec.label || '').toUpperCase() +
+              '</strong></td>';
+            htmlRows += '</tr>';
+
+            Object.keys(sec.chapitres)
+              .sort()
+              .forEach((chapCode) => {
+                const chap = sec.chapitres[chapCode];
+                if (chap.articles.length === 0) return;
+
+                htmlRows += '<tr>';
+                htmlRows +=
+                  '<td colspan="9" style="text-align: left; padding-left: 15px;"><strong>Chapitre ' +
+                  chapCode +
+                  ' - ' +
+                  (chap.label || 'Chapitre ' + chapCode).replace(/^CHAP\.\s*\d+\s*-\s*/i, '') +
+                  '</strong></td>';
+                htmlRows += '</tr>';
+
+                chap.articles
+                  .sort((a, b) => (a.code || '').localeCompare(b.code || ''))
+                  .forEach((art) => {
+                    const p = prevMap[art.id] || 0;
+                    const e = emissionMap[art.id] || 0;
+                    const r = recouvrementMap[art.id] || 0;
+                    const reste = Math.max(0, e - r);
+                    // ECART PREVISIONS RECOUVREMENTS = Prev - Rec (in image, 498M Prev, 0 Rec, 498M Ecart)
+                    const ecart = p - r;
+                    let pctVal = '-';
+                    if (p > 0) {
+                      pctVal = (Math.round((r / p) * 10000) / 100).toFixed(2);
+                    } else if (r > 0) {
+                      pctVal = '100.00';
+                    }
+
+                    htmlRows += '<tr>';
+                    htmlRows +=
+                      '<td style="text-align: left; padding-left: 25px;">Article ' +
+                      art.code +
+                      ' - ' +
+                      (art.libelle || '') +
+                      '</td>';
+                    htmlRows += '<td class="col-num">' + dashFormat(p) + '</td>';
+                    htmlRows += '<td class="col-num">' + dashFormat(e) + '</td>';
+                    htmlRows += '<td class="col-num">' + dashFormat(r) + '</td>';
+                    htmlRows += '<td class="col-num"></td>'; // Non valeur
+                    htmlRows += '<td class="col-num">' + dashFormat(reste) + '</td>';
+                    htmlRows += '<td class="col-num">' + dashFormat(ecart) + '</td>';
+                    htmlRows += '<td style="text-align: center;"></td>';
+                    htmlRows += '<td style="text-align: center;">' + pctVal + '</td>';
+                    htmlRows += '</tr>';
+                  });
+
+                // Chapitre Total
+                const chapReste = Math.max(0, chap.emis - chap.rec);
+                const chapEcart = chap.prev - chap.rec;
+                let chapPct = '-';
+                if (chap.prev > 0) {
+                  chapPct = (Math.round((chap.rec / chap.prev) * 10000) / 100).toFixed(2);
+                } else if (chap.rec > 0) {
+                  chapPct = '100.00';
+                }
+
+                htmlRows += '<tr style="font-weight: bold; text-align: center;">';
+                htmlRows +=
+                  '<td style="text-align: center;">SOUS TOTAL CHAPITRE - ' + chapCode + '</td>';
+                htmlRows += '<td class="col-num">' + dashFormat(chap.prev) + '</td>';
+                htmlRows += '<td class="col-num">' + dashFormat(chap.emis) + '</td>';
+                htmlRows += '<td class="col-num">' + dashFormat(chap.rec) + '</td>';
+                htmlRows += '<td class="col-num"></td>';
+                htmlRows += '<td class="col-num">' + dashFormat(chapReste) + '</td>';
+                htmlRows += '<td class="col-num">' + dashFormat(chapEcart) + '</td>';
+                htmlRows += '<td style="text-align: center;"></td>';
+                htmlRows += '<td style="text-align: center;">' + chapPct + '</td>';
+                htmlRows += '</tr>';
+              });
+
+            // Section Total
+            const secReste = Math.max(0, sec.emis - sec.rec);
+            const secEcart = sec.prev - sec.rec;
+            let secPct = '-';
+            if (sec.prev > 0) {
+              secPct = (Math.round((sec.rec / sec.prev) * 10000) / 100).toFixed(2);
+            } else if (sec.rec > 0) {
+              secPct = '100.00';
+            }
+
+            htmlRows += '<tr style="font-weight: bold;">';
+            htmlRows += '<td style="text-align: center;">TOTAL SECTION - ' + secCode + '</td>';
+            htmlRows += '<td class="col-num">' + dashFormat(sec.prev) + '</td>';
+            htmlRows += '<td class="col-num">' + dashFormat(sec.emis) + '</td>';
+            htmlRows += '<td class="col-num">' + dashFormat(sec.rec) + '</td>';
+            htmlRows += '<td class="col-num"></td>';
+            htmlRows += '<td class="col-num">' + dashFormat(secReste) + '</td>';
+            htmlRows += '<td class="col-num">' + dashFormat(secEcart) + '</td>';
+            htmlRows += '<td style="text-align: center;"></td>';
+            htmlRows += '<td style="text-align: center;">' + secPct + '</td>';
+            htmlRows += '</tr>';
+
+            grandPrev += sec.prev;
+            grandEmis += sec.emis;
+            grandRec += sec.rec;
           });
 
-          // Section total
-          rows += '<tr class="total-section">'
-            + '<td></td>'
-            + '<td>TOTAL SECTION ' + secCode + '</td>'
-            + '<td class="col-num">' + fmt(secPrev) + '</td>'
-            + '<td class="col-num">' + fmt(secEmis) + '</td>'
-            + '<td class="col-num">' + fmt(secRec) + '</td>'
-            + '<td class="col-percent">' + pct(secRec, secEmis) + '</td>'
-            + '</tr>';
+        // Grand Total
+        const grandReste = Math.max(0, grandEmis - grandRec);
+        const grandEcart = grandPrev - grandRec;
+        let grandPct = '-';
+        if (grandPrev > 0) {
+          grandPct = (Math.round((grandRec / grandPrev) * 10000) / 100).toFixed(2);
+        } else if (grandRec > 0) {
+          grandPct = '100.00';
+        }
 
-          grandPrev += secPrev;
-          grandEmis += secEmis;
-          grandRec += secRec;
-        });
+        htmlRows += '<tr style="font-weight: bold; font-size: 11px;">';
+        htmlRows += '<td style="text-align: center;">TOTAL DES RECETTES AU TITRE - II</td>';
+        htmlRows += '<td class="col-num">' + dashFormat(grandPrev) + '</td>';
+        htmlRows += '<td class="col-num">' + dashFormat(grandEmis) + '</td>';
+        htmlRows += '<td class="col-num">' + dashFormat(grandRec) + '</td>';
+        htmlRows += '<td class="col-num"></td>';
+        htmlRows += '<td class="col-num">' + dashFormat(grandReste) + '</td>';
+        htmlRows += '<td class="col-num">' + dashFormat(grandEcart) + '</td>';
+        htmlRows += '<td style="text-align: center;"></td>';
+        htmlRows += '<td style="text-align: center;">' + grandPct + '</td>';
+        htmlRows += '</tr>';
 
-        // Grand total
-        rows += '<tr class="grand-total">'
-          + '<td></td>'
-          + '<td>TOTAL GENERAL RECETTES INVESTISSEMENT</td>'
-          + '<td class="col-num">' + fmt(grandPrev) + '</td>'
-          + '<td class="col-num">' + fmt(grandEmis) + '</td>'
-          + '<td class="col-num">' + fmt(grandRec) + '</td>'
-          + '<td class="col-percent">' + pct(grandRec, grandEmis) + '</td>'
-          + '</tr>';
+        tbody.innerHTML = htmlRows;
 
-        document.getElementById('content').innerHTML = '<table>'
-          + '<thead>'
-          + '<tr><td colspan="6" class="doc-header-cell">'
-          + '<div class="doc-header-grid">'
-          + '<div class="doc-header-block doc-header-left">REPUBLIQUE DE COTE D\'IVOIRE<br>' + mairieNom + '</div>'
-          + '<div class="doc-header-block doc-header-center"><div class="main-title">COMPTE ADMINISTRATIF - RECETTES INVESTISSEMENT</div><div>Exercice ' + exercice + '</div></div>'
-          + '<div class="doc-header-block doc-header-right">Page <span class="page-num">1</span></div>'
-          + '</div></td></tr>'
-          + '<tr>'
-          + '<th class="col-code">Code</th>'
-          + '<th class="col-libelle">Libelle</th>'
-          + '<th class="col-num">Previsions</th>'
-          + '<th class="col-num">Emissions</th>'
-          + '<th class="col-num">Recouvrements</th>'
-          + '<th class="col-percent">Taux Rec.(%)</th>'
-          + '</tr>'
-          + '</thead>'
-          + '<tbody>' + rows + '</tbody>'
-          + '</table>';
+        document.title = "Compte Administratif - Recettes d'Investissement - " + exercice;
       }
 
       function processMessage(msgData) {
@@ -238,7 +480,7 @@
       let pendingData = null;
       let dataProcessed = false;
 
-      window.addEventListener('message', function(event) {
+      window.addEventListener('message', function (event) {
         if (document.readyState === 'complete' || document.readyState === 'interactive') {
           processMessage(event.data);
           dataProcessed = true;
@@ -247,21 +489,21 @@
         }
       });
 
-      window.addEventListener('DOMContentLoaded', async function() {
+      window.addEventListener('DOMContentLoaded', async function () {
         if (pendingData && !dataProcessed) {
           processMessage(pendingData);
           dataProcessed = true;
           return;
         }
 
-        await new Promise(r => setTimeout(r, 500));
+        await new Promise((r) => setTimeout(r, 500));
 
         if (!dataProcessed) {
           try {
             const result = await loadData();
             render(result);
             dataProcessed = true;
-          } catch(e) {
+          } catch (e) {
             console.warn('Erreur chargement IndexedDB:', e);
           }
         }
@@ -271,13 +513,19 @@
           try {
             const db = new Dexie('TresorDatabase');
             db.version(28).stores({ printData: '++id, type, createdAt' });
-            const records = await db.table('printData').where('type').equals('FILL_COMPTE_ADMIN_DATA').toArray();
+            const records = await db
+              .table('printData')
+              .where('type')
+              .equals('FILL_COMPTE_ADMIN_DATA')
+              .toArray();
             if (records.length > 0) {
-              const latest = records.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+              const latest = records.sort(
+                (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+              )[0];
               processMessage(latest.data);
               await db.table('printData').delete(latest.id);
             }
-          } catch(e) {
+          } catch (e) {
             console.warn('Erreur printData:', e);
           }
         }
