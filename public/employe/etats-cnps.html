@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>État de Paiement CNPS - Vavoua</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../tailwindcss.js"></script>
     <script src="../dexie.min.js"></script>
     <style>
       body {
@@ -55,8 +55,8 @@
       table.data-table th,
       table.data-table td {
         border: 1px solid #000;
-        padding: 5px 8px;
-        font-size: 13px;
+        padding: 3px 5px;
+        font-size: 11px;
       }
       table.data-table th {
         text-align: center;
@@ -231,9 +231,9 @@
       }
       function buildTableHead(tauxCnps) {
         return `<thead><tr class="text-center font-bold">
-          <th class="p-1" style="width:5%">N°</th><th class="p-1 text-left" style="width:30%">NOM ET PRENOMS</th>
-          <th class="p-1" style="width:8%">NBRE DE<br/>MOIS</th><th class="p-1" style="width:18%">SALAIRE DE<br/>BASE</th>
-          <th class="p-1" style="width:18%">INDEMNITE<br/>DE RESIDENCE</th><th class="p-1" style="width:18%">IMPOSABLE<br/>SALAIRE BRUT</th>
+          <th class="p-1" style="width:4%">N°</th><th class="p-1 text-left" style="width:26%">NOM ET PRENOMS</th>
+          <th class="p-1" style="width:7%">NBRE DE<br/>MOIS</th><th class="p-1" style="width:16%">SALAIRE DE<br/>BASE</th>
+          <th class="p-1" style="width:16%">INDEMNITE<br/>DE RESIDENCE</th><th class="p-1" style="width:16%">IMPOSABLE<br/>SALAIRE BRUT</th>
           <th class="p-1" style="width:15%">CNPS/PART<br/>EMPLOYES -${tauxCnps.toLocaleString('fr-FR')}%</th></tr></thead>`;
       }
 

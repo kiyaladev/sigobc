@@ -640,9 +640,11 @@ function onEmployeSelected(id: number) {
 // Seuls les Salariés sont imposables (CNPS + ITS)
 function isExemptFromTax(typeEmploye: string | undefined): boolean {
   if (!typeEmploye) return false;
-  return typeEmploye.startsWith('Contractuels') ||
+  return (
+    typeEmploye.startsWith('Contractuels') ||
     typeEmploye.startsWith("Agents de l'État") ||
-    typeEmploye.startsWith('Maire et Adjoints');
+    typeEmploye.startsWith('Maire et Adjoints')
+  );
 }
 
 function recalculate() {
@@ -672,8 +674,13 @@ function recalculate() {
 
     const taxableBase = brut - (form.value.indemniteTransport || 0);
     if (parametresPaie.value) {
-      form.value.cotisationCNPS = Math.round(taxableBase * (parametresPaie.value.tauxCnpsEmploye / 100));
-      form.value.impotSurSalaire = Math.round(taxableBase * (parametresPaie.value.tauxIts / 100));
+      form.value.cotisationCNPS = Math.round(
+        taxableBase * (parametresPaie.value.tauxCnpsEmploye / 100),
+      );
+      const salaireNetAvantIts = taxableBase - form.value.cotisationCNPS;
+      form.value.impotSurSalaire = Math.round(
+        salaireNetAvantIts * (parametresPaie.value.tauxIts / 100),
+      );
     }
 
     form.value.montantNet =
@@ -866,7 +873,8 @@ async function generateBulletins() {
         if (parametresPaie.value) {
           const taxableBase = brut - (e.indemniteTransport || 0);
           calcCnps = Math.round(taxableBase * (parametresPaie.value.tauxCnpsEmploye / 100));
-          calcIts = Math.round(taxableBase * (parametresPaie.value.tauxIts / 100));
+          const salaireNetAvantIts = taxableBase - calcCnps;
+          calcIts = Math.round(salaireNetAvantIts * (parametresPaie.value.tauxIts / 100));
         }
         netPay = brut - calcCnps - calcIts;
       }

@@ -1547,7 +1547,8 @@ async function seedFichesPaie(employeIds: number[]) {
       const autresIndemnites = emp.autresIndemnites ?? 0;
       const montantBrut = salaireBase + indemniteLogement;
       const cotisationCNPS = Math.round(montantBrut * 0.063);
-      const impotSurSalaire = Math.round(montantBrut * 0.016);
+      const salaireNetAvantIts = montantBrut - cotisationCNPS;
+      const impotSurSalaire = Math.round(salaireNetAvantIts * 0.016);
       const autresRetenues = 0;
       const montantNet =
         montantBrut - cotisationCNPS - impotSurSalaire + indemniteTransport + autresIndemnites;

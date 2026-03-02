@@ -341,8 +341,9 @@
         </div>
         <div class="header-col header-right text-center">
           <p class="uppercase">
-            TRESORERIE PRINCIPALE<br />DE <span data-field="mairieVille"></span>
+            TRESORERIE PRINCIPALE<br />DE <span data-field="mairieTresorerie"></span>
           </p>
+          <p data-field="mairieNom"></p>
           <div class="text-left mt-2" style="font-size: 0.8em">
             <p>N° d'inscription au livre d'exécution</p>
             <p>des opérations budgétaires :</p>
@@ -684,7 +685,9 @@
             mairieDepartement: mairie?.ville || '',
             mairieCommune: mairie?.ville || '',
             mairieCode: mairie?.code || '',
-            mairieVille: mairie?.nom || mairie?.ville || '',
+            mairieVille: mairie?.ville || '',
+            mairieNom: mairie?.nom || '',
+            mairieTresorerie: mairie?.ville || '',
           };
 
           remplirFormulaire(data);

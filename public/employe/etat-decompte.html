@@ -4,59 +4,234 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>État des Décomptes - Mairie de Vavoua</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../tailwindcss.js"></script>
     <script src="../dexie.min.js"></script>
     <style>
-      body { font-family: 'Times New Roman', Times, serif; background-color: #e5e7eb; color: #111; }
+      body {
+        font-family: 'Times New Roman', Times, serif;
+        background-color: #e5e7eb;
+        color: #111;
+      }
       .print-btn {
-        position: fixed; top: 10px; right: 10px; background: #1976d2; color: white;
-        border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;
-        font-size: 14px; z-index: 999; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: #1976d2;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        z-index: 999;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
       }
-      .print-btn:hover { background: #1565c0; }
+      .print-btn:hover {
+        background: #1565c0;
+      }
       .print-page {
-        width: 297mm; min-height: 210mm; background: #fff;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.12); margin: 20px auto;
-        padding: 0.8cm 1.2cm; position: relative; page-break-after: always;
+        width: 297mm;
+        min-height: 210mm;
+        background: #fff;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        margin: 20px auto;
+        padding: 0.8cm 1.2cm;
+        position: relative;
+        page-break-after: always;
       }
-      .print-page:last-child { page-break-after: auto; }
-      .page-number { position: absolute; bottom: 6mm; right: 10mm; font-size: 9px; color: #999; }
-      table.data-table { border-collapse: collapse; width: 100%; font-size: 11px; margin-top: 10px; }
-      table.data-table th, table.data-table td { border: 1px solid black; padding: 4px 6px; text-align: center; }
-      table.data-table th { font-weight: bold; vertical-align: middle; }
-      .text-left-col { text-align: left !important; }
-      .text-right-col { text-align: right !important; }
-      tr.report-row td { background: #fef3c7 !important; font-weight: bold; font-style: italic; }
-      tr.total-row td { background: #dbeafe !important; font-weight: bold; }
-      .editable-date { cursor: pointer; border-bottom: 1px dashed #999; padding: 0 2px; min-width: 80px; display: inline-block; }
-      .editable-date:hover { background: #e8f0fe; }
-      .editable-date:focus { outline: 2px solid #1976d2; background: #fff; border-bottom: none; }
+      .print-page:last-child {
+        page-break-after: auto;
+      }
+      .page-number {
+        position: absolute;
+        bottom: 6mm;
+        right: 10mm;
+        font-size: 9px;
+        color: #999;
+      }
+      table.data-table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 11px;
+        margin-top: 10px;
+      }
+      table.data-table th,
+      table.data-table td {
+        border: 1px solid black;
+        padding: 4px 6px;
+        text-align: center;
+      }
+      table.data-table th {
+        font-weight: bold;
+        vertical-align: middle;
+      }
+      .text-left-col {
+        text-align: left !important;
+      }
+      .text-right-col {
+        text-align: right !important;
+      }
+      tr.report-row td {
+        background: #fef3c7 !important;
+        font-weight: bold;
+        font-style: italic;
+      }
+      tr.total-row td {
+        background: #dbeafe !important;
+        font-weight: bold;
+      }
+      .editable-date {
+        cursor: pointer;
+        border-bottom: 1px dashed #999;
+        padding: 0 2px;
+        min-width: 80px;
+        display: inline-block;
+      }
+      .editable-date:hover {
+        background: #e8f0fe;
+      }
+      .editable-date:focus {
+        outline: 2px solid #1976d2;
+        background: #fff;
+        border-bottom: none;
+      }
       @media print {
-        @page { size: A4 landscape; margin: 0; }
-        body { background: white; padding: 0; margin: 0; }
-        .print-btn { display: none !important; }
-        .editable-date { border-bottom: none; }
-        .print-page { box-shadow: none; margin: 0; width: 100%; min-height: 100vh; padding: 6mm 8mm; }
+        @page {
+          size: A4 landscape;
+          margin: 0;
+        }
+        body {
+          background: white;
+          padding: 0;
+          margin: 0;
+        }
+        .print-btn {
+          display: none !important;
+        }
+        .editable-date {
+          border-bottom: none;
+        }
+        .print-page {
+          box-shadow: none;
+          margin: 0;
+          width: 100%;
+          min-height: 100vh;
+          padding: 6mm 8mm;
+        }
       }
     </style>
   </head>
   <body>
     <button class="print-btn" onclick="window.print()">Imprimer</button>
     <div id="content">
-      <div class="print-page" style="display:flex;align-items:center;justify-content:center;color:#888">Chargement...</div>
+      <div
+        class="print-page"
+        style="display: flex; align-items: center; justify-content: center; color: #888"
+      >
+        Chargement...
+      </div>
     </div>
     <script>
-      const MOIS_LABELS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+      const MOIS_LABELS = [
+        'Janvier',
+        'Février',
+        'Mars',
+        'Avril',
+        'Mai',
+        'Juin',
+        'Juillet',
+        'Août',
+        'Septembre',
+        'Octobre',
+        'Novembre',
+        'Décembre',
+      ];
       const ROWS_PER_PAGE = 10;
-      function fmt(n) { return Number(n||0).toLocaleString('fr-FR'); }
+      function fmt(n) {
+        return Number(n || 0).toLocaleString('fr-FR');
+      }
       function numberToWords(num) {
-        if(num===0)return'ZÉRO';const units=['','un','deux','trois','quatre','cinq','six','sept','huit','neuf','dix','onze','douze','treize','quatorze','quinze','seize','dix-sept','dix-huit','dix-neuf'];const tens=['','','vingt','trente','quarante','cinquante','soixante','soixante','quatre-vingt','quatre-vingt'];
-        function lt1000(n){if(n<20)return units[n];if(n<100){const t=Math.floor(n/10),u=n%10;if(t===7)return'soixante-'+units[10+u];if(t===9)return'quatre-vingt-'+(u===0?'s':units[u]);return tens[t]+(u===1&&t!==8?'-et-un':u>0?'-'+units[u]:t===8?'s':'');}const h=Math.floor(n/100),r=n%100;return(h===1?'cent':units[h]+'-cent')+(r===0&&h>1?'s':'')+(r>0?'-'+lt1000(r):'');}
-        function conv(n){if(!n)return'';if(n>=1e6){const m=Math.floor(n/1e6),r=n%1e6;return(m===1?'un million':lt1000(m)+' millions')+(r>0?' '+conv(r):'');}if(n>=1000){const k=Math.floor(n/1000),r=n%1000;return(k===1?'mille':lt1000(k)+' mille')+(r>0?' '+lt1000(r):'');}return lt1000(n);}
-        return conv(num).toUpperCase()+' FRANCS CFA';
+        if (num === 0) return 'ZÉRO';
+        const units = [
+          '',
+          'un',
+          'deux',
+          'trois',
+          'quatre',
+          'cinq',
+          'six',
+          'sept',
+          'huit',
+          'neuf',
+          'dix',
+          'onze',
+          'douze',
+          'treize',
+          'quatorze',
+          'quinze',
+          'seize',
+          'dix-sept',
+          'dix-huit',
+          'dix-neuf',
+        ];
+        const tens = [
+          '',
+          '',
+          'vingt',
+          'trente',
+          'quarante',
+          'cinquante',
+          'soixante',
+          'soixante',
+          'quatre-vingt',
+          'quatre-vingt',
+        ];
+        function lt1000(n) {
+          if (n < 20) return units[n];
+          if (n < 100) {
+            const t = Math.floor(n / 10),
+              u = n % 10;
+            if (t === 7) return 'soixante-' + units[10 + u];
+            if (t === 9) return 'quatre-vingt-' + (u === 0 ? 's' : units[u]);
+            return (
+              tens[t] +
+              (u === 1 && t !== 8 ? '-et-un' : u > 0 ? '-' + units[u] : t === 8 ? 's' : '')
+            );
+          }
+          const h = Math.floor(n / 100),
+            r = n % 100;
+          return (
+            (h === 1 ? 'cent' : units[h] + '-cent') +
+            (r === 0 && h > 1 ? 's' : '') +
+            (r > 0 ? '-' + lt1000(r) : '')
+          );
+        }
+        function conv(n) {
+          if (!n) return '';
+          if (n >= 1e6) {
+            const m = Math.floor(n / 1e6),
+              r = n % 1e6;
+            return (
+              (m === 1 ? 'un million' : lt1000(m) + ' millions') + (r > 0 ? ' ' + conv(r) : '')
+            );
+          }
+          if (n >= 1000) {
+            const k = Math.floor(n / 1000),
+              r = n % 1000;
+            return (k === 1 ? 'mille' : lt1000(k) + ' mille') + (r > 0 ? ' ' + lt1000(r) : '');
+          }
+          return lt1000(n);
+        }
+        return conv(num).toUpperCase() + ' FRANCS CFA';
       }
       const db = new Dexie('TresorDatabase');
-      db.version(28).stores({ mairies:'++id', employes:'++id,matricule,nom,prenom,typeEmploye,service,departement,mairieId,actif', fichesPaie:'++id,employeId,mois,annee,exercice,mairieId,statut,[annee+mois+employeId]', parametresPaie:'++id, mairieId', servicesApp7:'++id, nom, compte, mairieId, actif' });
+      db.version(28).stores({
+        mairies: '++id',
+        employes: '++id,matricule,nom,prenom,typeEmploye,service,departement,mairieId,actif',
+        fichesPaie: '++id,employeId,mois,annee,exercice,mairieId,statut,[annee+mois+employeId]',
+        parametresPaie: '++id, mairieId',
+        servicesApp7: '++id, nom, compte, mairieId, actif',
+      });
 
       function buildHeader(annee, periodeText, chapitre, compte) {
         return `<div class="flex justify-between items-start text-sm">
@@ -74,72 +249,119 @@
       function buildTableHead(TAUX_PF, TAUX_AT, TAUX_RG, TAUX_TOTAL) {
         return `<thead>
           <tr><th rowspan="2" style="width:5%">N°</th><th rowspan="2" style="width:25%">NOM ET PRÉNOMS</th><th rowspan="2" style="width:14%">Salaires Brut<br/>soumis à cotisation</th><th colspan="3">DIFFÉRENTS TAUX DE PRÉLÈVEMENT</th><th rowspan="2" style="width:14%" class="font-bold">Total cotisation<br/>à reverser<br/>${TAUX_TOTAL.toLocaleString('fr-FR')}%</th></tr>
-          <tr><th style="width:14%;padding:0"><div class="font-bold" style="border-bottom:1px solid black;padding:2px">Prestation familiale<br/>${(TAUX_PF*100).toLocaleString('fr-FR')}%</div><div style="padding:2px">Plafond imposable<br/>70 000 F CFA</div></th><th style="width:14%;padding:0"><div class="font-bold" style="border-bottom:1px solid black;padding:2px">Accident de travail<br/>${(TAUX_AT*100).toLocaleString('fr-FR')}%</div><div style="padding:2px">Plafond imposable<br/>70 000 F CFA</div></th><th style="width:14%;padding:0"><div class="font-bold" style="border-bottom:1px solid black;padding:2px">Régime général de<br/>retraite ${(TAUX_RG*100).toLocaleString('fr-FR')}%</div><div style="padding:2px">Salaire brut<br/>imposable</div></th></tr>
+          <tr><th style="width:14%;padding:0"><div class="font-bold" style="border-bottom:1px solid black;padding:2px">Prestation familiale<br/>${(TAUX_PF * 100).toLocaleString('fr-FR')}%</div><div style="padding:2px">Plafond imposable<br/>70 000 F CFA</div></th><th style="width:14%;padding:0"><div class="font-bold" style="border-bottom:1px solid black;padding:2px">Accident de travail<br/>${(TAUX_AT * 100).toLocaleString('fr-FR')}%</div><div style="padding:2px">Plafond imposable<br/>70 000 F CFA</div></th><th style="width:14%;padding:0"><div class="font-bold" style="border-bottom:1px solid black;padding:2px">Régime général de<br/>retraite ${(TAUX_RG * 100).toLocaleString('fr-FR')}%</div><div style="padding:2px">Salaire brut<br/>imposable</div></th></tr>
         </thead>`;
       }
 
       document.addEventListener('DOMContentLoaded', async () => {
         const p = new URLSearchParams(window.location.search);
-        const mois = parseInt(p.get('mois')||String(new Date().getMonth()+1),10);
-        const annee = parseInt(p.get('annee')||String(new Date().getFullYear()),10);
-        const premierJour = `01/${String(mois).padStart(2,'0')}/${annee}`;
-        const dernierJour = `${new Date(annee,mois,0).getDate()}/${String(mois).padStart(2,'0')}/${annee}`;
+        const mois = parseInt(p.get('mois') || String(new Date().getMonth() + 1), 10);
+        const annee = parseInt(p.get('annee') || String(new Date().getFullYear()), 10);
+        const premierJour = `01/${String(mois).padStart(2, '0')}/${annee}`;
+        const dernierJour = `${new Date(annee, mois, 0).getDate()}/${String(mois).padStart(2, '0')}/${annee}`;
         const periodeText = `Les Agents de l'État Civil et population du ${premierJour} au ${dernierJour}`;
         const dateSig = `À Vavoua, le ${new Date().toLocaleDateString('fr-FR')}`;
         const compteParam = p.get('compte') || '';
         const chapitreParam = p.get('chapitre') || '';
 
-        let fiches = await db.fichesPaie.where('[annee+mois+employeId]').between([annee,mois,-Infinity],[annee,mois,Infinity]).filter(f=>f.statut!=='brouillon').toArray().catch(()=>db.fichesPaie.filter(f=>f.mois===mois&&f.annee===annee&&f.statut!=='brouillon').toArray());
-        const sf=p.get('service'),tf=p.get('typeEmploye');
-        if(sf||tf){const fl=[];for(const f of fiches){const e=await db.employes.get(f.employeId);if(e){if(sf&&e.service!==sf)continue;if(tf&&e.typeEmploye!==tf)continue;fl.push(f);}}fiches=fl;}
+        let fiches = await db.fichesPaie
+          .where('[annee+mois+employeId]')
+          .between([annee, mois, -Infinity], [annee, mois, Infinity])
+          .filter((f) => f.statut !== 'brouillon')
+          .toArray()
+          .catch(() =>
+            db.fichesPaie
+              .filter((f) => f.mois === mois && f.annee === annee && f.statut !== 'brouillon')
+              .toArray(),
+          );
+        const sf = p.get('service'),
+          tf = p.get('typeEmploye');
+        if (sf || tf) {
+          const fl = [];
+          for (const f of fiches) {
+            const e = await db.employes.get(f.employeId);
+            if (e) {
+              if (sf && e.service !== sf) continue;
+              if (tf && e.typeEmploye !== tf) continue;
+              fl.push(f);
+            }
+          }
+          fiches = fl;
+        }
 
-        if(!fiches.length){ document.getElementById('content').innerHTML=`<div class="print-page"><p style="padding:40px;text-align:center;color:#888">Aucun bulletin pour cette période</p></div>`; return; }
+        if (!fiches.length) {
+          document.getElementById('content').innerHTML =
+            `<div class="print-page"><p style="padding:40px;text-align:center;color:#888">Aucun bulletin pour cette période</p></div>`;
+          return;
+        }
 
         const paramsDb = await db.parametresPaie.toCollection().first();
-        const TAUX_PF = paramsDb ? paramsDb.tauxCnpsPatronalPrestationFamiliale/100 : 0.0575;
-        const TAUX_AT = paramsDb ? paramsDb.tauxCnpsPatronalAccidentTravail/100 : 0.02;
-        const TAUX_RG = paramsDb ? paramsDb.tauxCnpsPatronalRetraite/100 : 0.077;
-        const TAUX_TOTAL = (TAUX_PF+TAUX_AT+TAUX_RG)*100;
+        const TAUX_PF = paramsDb ? paramsDb.tauxCnpsPatronalPrestationFamiliale / 100 : 0.0575;
+        const TAUX_AT = paramsDb ? paramsDb.tauxCnpsPatronalAccidentTravail / 100 : 0.02;
+        const TAUX_RG = paramsDb ? paramsDb.tauxCnpsPatronalRetraite / 100 : 0.077;
+        const TAUX_TOTAL = (TAUX_PF + TAUX_AT + TAUX_RG) * 100;
         const PLAFOND_PF_AT = 70000;
 
-        const data = await Promise.all(fiches.map(async (f,i) => {
-          const emp = await db.employes.get(f.employeId);
-          const nom = emp ? `${emp.nom} ${emp.prenom}` : `Agent #${f.employeId}`;
-          const brut = f.montantBrut||0, basePfAt = Math.min(brut, PLAFOND_PF_AT);
-          const pf = Math.round(basePfAt*TAUX_PF), at = Math.round(basePfAt*TAUX_AT), rg = Math.round(brut*TAUX_RG);
-          return { idx:i+1, nom, brut, pf, at, rg, total:pf+at+rg };
-        }));
+        const data = await Promise.all(
+          fiches.map(async (f, i) => {
+            const emp = await db.employes.get(f.employeId);
+            const nom = emp ? `${emp.nom} ${emp.prenom}` : `Agent #${f.employeId}`;
+            const brut = f.montantBrut || 0,
+              basePfAt = Math.min(brut, PLAFOND_PF_AT);
+            const pf = Math.round(basePfAt * TAUX_PF),
+              at = Math.round(basePfAt * TAUX_AT),
+              rg = Math.round(brut * TAUX_RG);
+            return { idx: i + 1, nom, brut, pf, at, rg, total: pf + at + rg };
+          }),
+        );
 
         const pages = [];
-        for(let i=0;i<data.length;i+=ROWS_PER_PAGE) pages.push(data.slice(i,i+ROWS_PER_PAGE));
+        for (let i = 0; i < data.length; i += ROWS_PER_PAGE)
+          pages.push(data.slice(i, i + ROWS_PER_PAGE));
         const totalPages = pages.length;
         let cumulTotal = 0;
         let html = '';
 
         pages.forEach((pageData, idx) => {
-          const isLast = idx===totalPages-1;
+          const isLast = idx === totalPages - 1;
           const reportTotal = cumulTotal;
           let pageTotal = 0;
-          pageData.forEach(d => { pageTotal += d.total; });
+          pageData.forEach((d) => {
+            pageTotal += d.total;
+          });
           cumulTotal += pageTotal;
 
-          const reportRow = idx>0 ? `<tr class="report-row"><td colspan="6" class="text-left-col" style="padding-left:12px">REPORT</td><td class="text-right-col">${fmt(reportTotal)}</td></tr>` : '';
-          const dataRows = pageData.map(d => `<tr><td>${String(d.idx).padStart(2,'0')}</td><td class="text-left-col font-semibold">${d.nom}</td><td class="text-right-col">${fmt(d.brut)}</td><td class="text-right-col">${fmt(d.pf)}</td><td class="text-right-col">${fmt(d.at)}</td><td class="text-right-col">${fmt(d.rg)}</td><td class="text-right-col font-bold">${fmt(d.total)}</td></tr>`).join('');
-          const totalRow = `<tr class="total-row"><td colspan="6" class="text-left-col" style="padding-left:12px"><strong>${isLast?'TOTAL GÉNÉRAL':'TOTAL'}</strong></td><td class="text-right-col"><strong>${fmt(cumulTotal)}</strong></td></tr>`;
+          const reportRow =
+            idx > 0
+              ? `<tr class="report-row"><td colspan="6" class="text-left-col" style="padding-left:12px">REPORT</td><td class="text-right-col">${fmt(reportTotal)}</td></tr>`
+              : '';
+          const dataRows = pageData
+            .map(
+              (d) =>
+                `<tr><td>${String(d.idx).padStart(2, '0')}</td><td class="text-left-col font-semibold">${d.nom}</td><td class="text-right-col">${fmt(d.brut)}</td><td class="text-right-col">${fmt(d.pf)}</td><td class="text-right-col">${fmt(d.at)}</td><td class="text-right-col">${fmt(d.rg)}</td><td class="text-right-col font-bold">${fmt(d.total)}</td></tr>`,
+            )
+            .join('');
+          const totalRow = `<tr class="total-row"><td colspan="6" class="text-left-col" style="padding-left:12px"><strong>${isLast ? 'TOTAL GÉNÉRAL' : 'TOTAL'}</strong></td><td class="text-right-col"><strong>${fmt(cumulTotal)}</strong></td></tr>`;
 
           html += `<div class="print-page">
             ${buildHeader(annee, periodeText, chapitreParam, compteParam)}
             <table class="data-table">${buildTableHead(TAUX_PF, TAUX_AT, TAUX_RG, TAUX_TOTAL)}<tbody>${reportRow}${dataRows}${totalRow}</tbody></table>
-            ${isLast ? `<div class="flex justify-between items-start text-sm mt-4">
+            ${
+              isLast
+                ? `<div class="flex justify-between items-start text-sm mt-4">
               <div style="width:70%"><p>Arrêté le présent état à la somme de : <span class="font-bold underline uppercase">${numberToWords(cumulTotal)}</span></p><p class="mt-1">Payé et enregistré sous le n°07/${annee}</p><p>Pour acquis global</p></div>
               <div class="text-center" style="width:30%"><p class="font-bold underline">Certifié le service fait</p><p class="font-bold underline">Vu, vérifié et liquidé</p><p class="mt-2">À Vavoua, le <span class="editable-date" contenteditable="true">${new Date().toLocaleDateString('fr-FR')}</span></p><p class="font-bold mt-1">P/Le Maire & P.D.</p></div>
-            </div>` : ''}
-            <div class="page-number">Page ${idx+1}/${totalPages}</div>
+            </div>`
+                : ''
+            }
+            <div class="page-number">Page ${idx + 1}/${totalPages}</div>
           </div>`;
         });
 
         document.getElementById('content').innerHTML = html;
-        setTimeout(()=>{ if(p.get('print')==='true') window.print(); },500);
+        setTimeout(() => {
+          if (p.get('print') === 'true') window.print();
+        }, 500);
       });
     </script>
   </body>
