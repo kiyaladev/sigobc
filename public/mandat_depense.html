@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mandat de Paiement</title>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Arimo:wght@400;700&display=swap');
+      /* Fonts: use system sans-serif fallbacks for offline support */
 
       /* Configuration impression portrait avec marges minimales */
       @page {
@@ -343,7 +343,7 @@
           <p class="uppercase">
             TRESORERIE PRINCIPALE<br />DE <span data-field="mairieTresorerie"></span>
           </p>
-          <p data-field="mairieNom"></p>
+          <!-- <p data-field="mairieNom"></p> -->
           <div class="text-left mt-2" style="font-size: 0.8em">
             <p>N° d'inscription au livre d'exécution</p>
             <p>des opérations budgétaires :</p>
@@ -409,16 +409,16 @@
           </div>
 
           <div class="justification-section">
-            <br />
             <div>
               <p>Pièces justificatives de la dépense :</p>
               <p class="bold italic ml-2">Voir état de solde ci-joint</p>
             </div>
-            <br />
 
-            <div class="mt-1"><span class="dotted-line"></span></div>
-            <br />
+            <!-- <div><span class="dotted-line"></span></div> -->
             <div class="mt-1">
+              <p class="bold">Décision d'engagement:</p>
+              <hr />
+              <br />
               <p>
                 Référence du Marché : <span class="bold small" data-field="referenceMarche"></span>
               </p>

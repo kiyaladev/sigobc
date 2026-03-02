@@ -253,7 +253,9 @@ function formatMontant(v: number): string {
 async function loadStats() {
   const [employes, fiches, conges, missions] = await Promise.all([
     db.employes.toArray(),
-    db.fichesPaie.filter((f) => f.annee === filterAnnee.value).toArray(),
+    db.fichesPaie
+      .filter((f) => f.annee === filterAnnee.value && f.statut !== 'brouillon')
+      .toArray(),
     db.conges
       .filter((c) => {
         const d = new Date(c.dateDebut);

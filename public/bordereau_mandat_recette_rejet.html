@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Bordereau de Rejet des Ordres de Recette</title>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Arimo:wght@400;700&display=swap');
+      /* Fonts: use system sans-serif fallbacks for offline support */
 
       /* Configuration impression paysage avec marges minimales */
       @page {
@@ -270,13 +270,27 @@
       }
 
       /* Editable date */
-      .editable-date { cursor: pointer; border-bottom: 1px dashed #999; padding: 0 2px; min-width: 80px; display: inline-block; }
-      .editable-date:hover { background: #e8f0fe; }
-      .editable-date:focus { outline: 2px solid #1976d2; background: #fff; border-bottom: none; }
+      .editable-date {
+        cursor: pointer;
+        border-bottom: 1px dashed #999;
+        padding: 0 2px;
+        min-width: 80px;
+        display: inline-block;
+      }
+      .editable-date:hover {
+        background: #e8f0fe;
+      }
+      .editable-date:focus {
+        outline: 2px solid #1976d2;
+        background: #fff;
+        border-bottom: none;
+      }
 
       /* MEDIA QUERIES IMPRESSION */
       @media print {
-        .editable-date { border-bottom: none; }
+        .editable-date {
+          border-bottom: none;
+        }
         body {
           background: none;
           padding: 0;

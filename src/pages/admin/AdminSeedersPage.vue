@@ -36,161 +36,161 @@
 
     <!-- Actual content -->
     <template v-if="isUnlocked">
-    <PageHeader
-      title="Gestion de la Base de Données"
-      subtitle="Initialisation et génération de données de test"
-      icon="database"
-    />
+      <PageHeader
+        title="Gestion de la Base de Données"
+        subtitle="Initialisation et génération de données de test"
+        icon="database"
+      />
 
-    <q-banner class="bg-warning text-white q-mb-md" rounded>
-      <template v-slot:avatar>
-        <q-icon name="warning" />
-      </template>
-      <strong>Attention :</strong> Les actions sur cette page peuvent supprimer définitivement les
-      données.
-    </q-banner>
+      <q-banner class="bg-warning text-white q-mb-md" rounded>
+        <template v-slot:avatar>
+          <q-icon name="warning" />
+        </template>
+        <strong>Attention :</strong> Les actions sur cette page peuvent supprimer définitivement les
+        données.
+      </q-banner>
 
-    <div class="row q-col-gutter-md">
-      <!-- Actions Principales -->
-      <div class="col-12 col-md-6">
-        <q-card>
-          <q-card-section>
-            <div class="text-h6">🚀 Actions Rapides</div>
-          </q-card-section>
-          <q-list separator>
-            <q-item>
-              <q-item-section>
-                <q-item-label>Initialiser la base de données</q-item-label>
-                <q-item-label caption
-                  >Vide la DB et la remplit avec les données par défaut (chapitres, sous-chapitres,
-                  admin, etc.).</q-item-label
-                >
-              </q-item-section>
-              <q-item-section side>
-                <q-btn
-                  label="Initialiser"
-                  color="primary"
-                  icon="rocket_launch"
-                  @click="runSeedDefault"
-                  :loading="loading.default"
-                />
-              </q-item-section>
-            </q-item>
+      <div class="row q-col-gutter-md">
+        <!-- Actions Principales -->
+        <div class="col-12 col-md-6">
+          <q-card>
+            <q-card-section>
+              <div class="text-h6">🚀 Actions Rapides</div>
+            </q-card-section>
+            <q-list separator>
+              <q-item>
+                <q-item-section>
+                  <q-item-label>Initialiser la base de données</q-item-label>
+                  <q-item-label caption
+                    >Vide la DB et la remplit avec les données par défaut (chapitres,
+                    sous-chapitres, admin, etc.).</q-item-label
+                  >
+                </q-item-section>
+                <q-item-section side>
+                  <q-btn
+                    label="Initialiser"
+                    color="primary"
+                    icon="rocket_launch"
+                    @click="runSeedDefault"
+                    :loading="loading.default"
+                  />
+                </q-item-section>
+              </q-item>
 
-            <q-item>
-              <q-item-section>
-                <q-item-label>Supprimer toutes les données</q-item-label>
-                <q-item-label caption
-                  >Vide complètement la base de données. Action irréversible.</q-item-label
-                >
-              </q-item-section>
-              <q-item-section side>
-                <q-btn
-                  label="Supprimer"
-                  color="negative"
-                  icon="delete_forever"
-                  @click="runClear"
-                  :loading="loading.clear"
-                />
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </q-card>
-      </div>
+              <q-item>
+                <q-item-section>
+                  <q-item-label>Supprimer toutes les données</q-item-label>
+                  <q-item-label caption
+                    >Vide complètement la base de données. Action irréversible.</q-item-label
+                  >
+                </q-item-section>
+                <q-item-section side>
+                  <q-btn
+                    label="Supprimer"
+                    color="negative"
+                    icon="delete_forever"
+                    @click="runClear"
+                    :loading="loading.clear"
+                  />
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-card>
+        </div>
 
-      <!-- Seeder de Test -->
-      <div class="col-12 col-md-6">
-        <q-card>
-          <q-card-section>
-            <div class="text-h6">🧪 Générer des Données de Test</div>
-            <div class="text-caption">
-              Remplit la base avec un grand volume de données aléatoires pour les tests.
-            </div>
-          </q-card-section>
+        <!-- Seeder de Test -->
+        <div class="col-12 col-md-6">
+          <q-card>
+            <q-card-section>
+              <div class="text-h6">🧪 Générer des Données de Test</div>
+              <div class="text-caption">
+                Remplit la base avec un grand volume de données aléatoires pour les tests.
+              </div>
+            </q-card-section>
 
-          <q-card-section>
-            <q-expansion-item icon="settings" label="Personnaliser les quantités" class="q-mb-md">
-              <div class="q-gutter-md q-pt-md">
-                <q-input
-                  v-model.number="testDataOptions.mandats"
-                  type="number"
-                  label="Mandats"
-                  filled
-                  dense
-                />
-                <q-input
-                  v-model.number="testDataOptions.bordereauMandats"
-                  type="number"
-                  label="Bordereaux de Mandats"
-                  filled
-                  dense
-                />
-                <q-separator />
-                <div class="text-subtitle2">Génération des données</div>
-                <div class="text-caption">
-                  Les données seront générées pour l'exercice 2025 ainsi que des historiques pour
-                  2023-2024.
+            <q-card-section>
+              <q-expansion-item icon="settings" label="Personnaliser les quantités" class="q-mb-md">
+                <div class="q-gutter-md q-pt-md">
+                  <q-input
+                    v-model.number="testDataOptions.mandats"
+                    type="number"
+                    label="Mandats"
+                    filled
+                    dense
+                  />
+                  <q-input
+                    v-model.number="testDataOptions.bordereauMandats"
+                    type="number"
+                    label="Bordereaux de Mandats"
+                    filled
+                    dense
+                  />
+                  <q-separator />
+                  <div class="text-subtitle2">Génération des données</div>
+                  <div class="text-caption">
+                    Les données seront générées pour l'exercice 2025 ainsi que des historiques pour
+                    2023-2024.
+                  </div>
+                </div>
+              </q-expansion-item>
+            </q-card-section>
+
+            <q-card-actions align="right">
+              <q-btn
+                label="Générer Données de Test"
+                color="secondary"
+                icon="science"
+                @click="runSeedTest"
+                :loading="loading.test"
+              />
+            </q-card-actions>
+          </q-card>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="col-12">
+          <q-card>
+            <q-card-section>
+              <div class="text-h6">📊 Données Actuelles</div>
+            </q-card-section>
+            <q-card-section>
+              <div class="row q-col-gutter-md">
+                <div class="col-6 col-sm-4 col-md-2" v-for="stat in stats" :key="stat.label">
+                  <q-card flat bordered>
+                    <q-card-section class="text-center">
+                      <div class="text-h4 text-primary">{{ stat.count }}</div>
+                      <div class="text-caption text-grey-7">{{ stat.label }}</div>
+                    </q-card-section>
+                  </q-card>
                 </div>
               </div>
-            </q-expansion-item>
-          </q-card-section>
+            </q-card-section>
+            <q-card-actions align="right">
+              <q-btn flat label="Actualiser" icon="refresh" color="primary" @click="loadStats" />
+            </q-card-actions>
+          </q-card>
+        </div>
 
-          <q-card-actions align="right">
-            <q-btn
-              label="Générer Données de Test"
-              color="secondary"
-              icon="science"
-              @click="runSeedTest"
-              :loading="loading.test"
-            />
-          </q-card-actions>
-        </q-card>
+        <!-- Logs -->
+        <div class="col-12" v-if="logs.length > 0">
+          <q-card>
+            <q-card-section>
+              <div class="text-h6">📝 Logs d'exécution</div>
+            </q-card-section>
+            <q-card-section style="max-height: 300px; overflow-y: auto">
+              <div
+                v-for="(log, index) in logs"
+                :key="index"
+                class="text-caption q-mb-xs"
+                v-html="log"
+              ></div>
+            </q-card-section>
+            <q-card-actions align="right">
+              <q-btn flat label="Effacer" icon="clear" color="grey" @click="logs = []" />
+            </q-card-actions>
+          </q-card>
+        </div>
       </div>
-
-      <!-- Statistiques -->
-      <div class="col-12">
-        <q-card>
-          <q-card-section>
-            <div class="text-h6">📊 Données Actuelles</div>
-          </q-card-section>
-          <q-card-section>
-            <div class="row q-col-gutter-md">
-              <div class="col-6 col-sm-4 col-md-2" v-for="stat in stats" :key="stat.label">
-                <q-card flat bordered>
-                  <q-card-section class="text-center">
-                    <div class="text-h4 text-primary">{{ stat.count }}</div>
-                    <div class="text-caption text-grey-7">{{ stat.label }}</div>
-                  </q-card-section>
-                </q-card>
-              </div>
-            </div>
-          </q-card-section>
-          <q-card-actions align="right">
-            <q-btn flat label="Actualiser" icon="refresh" color="primary" @click="loadStats" />
-          </q-card-actions>
-        </q-card>
-      </div>
-
-      <!-- Logs -->
-      <div class="col-12" v-if="logs.length > 0">
-        <q-card>
-          <q-card-section>
-            <div class="text-h6">📝 Logs d'exécution</div>
-          </q-card-section>
-          <q-card-section style="max-height: 300px; overflow-y: auto">
-            <div
-              v-for="(log, index) in logs"
-              :key="index"
-              class="text-caption q-mb-xs"
-              v-html="log"
-            ></div>
-          </q-card-section>
-          <q-card-actions align="right">
-            <q-btn flat label="Effacer" icon="clear" color="grey" @click="logs = []" />
-          </q-card-actions>
-        </q-card>
-      </div>
-    </div>
     </template>
   </q-page>
 </template>
@@ -243,16 +243,33 @@ const testDataOptions = ref<SeedOptions>({
 });
 
 const stats = ref([
+  // Système
+  { label: 'Mairies', count: 0, table: 'mairies' },
   { label: 'Utilisateurs', count: 0, table: 'utilisateurs' },
+  { label: 'Exercices', count: 0, table: 'exercices' },
+  // App3 - Dépenses
   { label: 'Chapitres Dép.', count: 0, table: 'chapitres' },
   { label: 'Sous-chapitres Dép.', count: 0, table: 'sousChapitres' },
   { label: 'Prévisions Dép.', count: 0, table: 'previsions' },
   { label: 'Mandats Dép.', count: 0, table: 'mandats' },
   { label: 'Bordereaux Mandats Dép.', count: 0, table: 'bordereauMandats' },
-  { label: 'Bordereaux Mandats Dép.', count: 0, table: 'bordereauMandats' },
+  { label: 'États Fin. Mensuels Dép.', count: 0, table: 'etatFinancierMensuel' },
+  // App6 - Recettes
   { label: 'Taxes/Recettes', count: 0, table: 'taxes' },
+  { label: 'Chapitres Recettes', count: 0, table: 'chapitresRecette' },
   { label: 'Déclarations', count: 0, table: 'declarations' },
   { label: 'Bordereaux Recettes', count: 0, table: 'bordereauxRecette' },
+  { label: 'Prévisions Recettes', count: 0, table: 'previsionsRecettes' },
+  { label: 'Mandats Recettes', count: 0, table: 'mandatsRecette' },
+  { label: 'Bord. Mandats Recettes', count: 0, table: 'bordereauMandatsRecette' },
+  { label: 'États Fin. Mensuels Rec.', count: 0, table: 'etatFinancierMensuelRecette' },
+  // App7 - Employés
+  { label: 'Employés', count: 0, table: 'employes' },
+  { label: 'Fiches de Paie', count: 0, table: 'fichesPaie' },
+  { label: 'Congés', count: 0, table: 'conges' },
+  { label: 'Ordres de Mission', count: 0, table: 'ordresMission' },
+  { label: 'Paramètres Paie', count: 0, table: 'parametresPaie' },
+  { label: 'Services (App7)', count: 0, table: 'servicesApp7' },
 ]);
 
 function addLog(message: string) {

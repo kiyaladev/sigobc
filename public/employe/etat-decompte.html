@@ -306,8 +306,10 @@
           fiches.map(async (f, i) => {
             const emp = await db.employes.get(f.employeId);
             const nom = emp ? `${emp.nom} ${emp.prenom}` : `Agent #${f.employeId}`;
-            const brut = f.montantBrut || 0,
-              basePfAt = Math.min(brut, PLAFOND_PF_AT);
+            const base = f.salaireBase || 0;
+            const log = f.indemniteLogement || 0;
+            const brut = base + log;
+            const basePfAt = Math.min(brut, PLAFOND_PF_AT);
             const pf = Math.round(basePfAt * TAUX_PF),
               at = Math.round(basePfAt * TAUX_AT),
               rg = Math.round(brut * TAUX_RG);

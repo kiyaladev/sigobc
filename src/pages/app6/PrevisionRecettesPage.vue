@@ -569,11 +569,16 @@ async function generateEtatMensuel() {
       }
     });
 
-    // Récupérer les déclarations de l'année
-    const declarations = await db.declarations.filter((d) => d.exercice === annee).toArray();
+    // Récupérer uniquement les déclarations validées de l'année
+    // (brouillon et annulé ne doivent pas impacter l'état d'exécution)
+    const declarations = await db.declarations
+      .filter((d) => d.exercice === annee && d.statut === 'validee')
+      .toArray();
 
-    // Récupérer les mandats de recettes de l'année
-    const mandatsRecette = await db.mandatsRecette.filter((m) => m.exercice === annee).toArray();
+    // Récupérer uniquement les mandats de recettes payés de l'année
+    const mandatsRecette = await db.mandatsRecette
+      .filter((m) => m.exercice === annee && m.statut === 'paye')
+      .toArray();
 
     // Récupérer les prévisions de l'année en cours
     const previsionsAnnee = previsions.value.filter((p) => p.exercice === annee);

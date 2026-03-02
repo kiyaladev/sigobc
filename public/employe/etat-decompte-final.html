@@ -4,9 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>État des Décomptes - Mairie de Vavoua</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../tailwindcss.js"></script>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap');
+      /* Fonts: use system serif fallbacks for offline support */
 
       body {
         background-color: #f3f4f6;
@@ -115,12 +115,26 @@
       }
 
       /* Editable date */
-      .editable-date { cursor: pointer; border-bottom: 1px dashed #999; padding: 0 2px; min-width: 80px; display: inline-block; }
-      .editable-date:hover { background: #e8f0fe; }
-      .editable-date:focus { outline: 2px solid #1976d2; background: #fff; border-bottom: none; }
+      .editable-date {
+        cursor: pointer;
+        border-bottom: 1px dashed #999;
+        padding: 0 2px;
+        min-width: 80px;
+        display: inline-block;
+      }
+      .editable-date:hover {
+        background: #e8f0fe;
+      }
+      .editable-date:focus {
+        outline: 2px solid #1976d2;
+        background: #fff;
+        border-bottom: none;
+      }
 
       @media print {
-        .editable-date { border-bottom: none; }
+        .editable-date {
+          border-bottom: none;
+        }
       }
     </style>
   </head>

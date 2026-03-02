@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mandat de Recette</title>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Arimo:wght@400;700&display=swap');
+      /* Fonts: use system sans-serif fallbacks for offline support */
 
       /* Configuration impression portrait avec marges minimales */
       @page {
@@ -252,13 +252,27 @@
       }
 
       /* Editable date */
-      .editable-date { cursor: pointer; border-bottom: 1px dashed #999; padding: 0 2px; min-width: 80px; display: inline-block; }
-      .editable-date:hover { background: #e8f0fe; }
-      .editable-date:focus { outline: 2px solid #1976d2; background: #fff; border-bottom: none; }
+      .editable-date {
+        cursor: pointer;
+        border-bottom: 1px dashed #999;
+        padding: 0 2px;
+        min-width: 80px;
+        display: inline-block;
+      }
+      .editable-date:hover {
+        background: #e8f0fe;
+      }
+      .editable-date:focus {
+        outline: 2px solid #1976d2;
+        background: #fff;
+        border-bottom: none;
+      }
 
       /* Print styles */
       @media print {
-        .editable-date { border-bottom: none; }
+        .editable-date {
+          border-bottom: none;
+        }
         body {
           background: none;
           padding: 0;
@@ -428,7 +442,9 @@
           <div class="signature-section">
             <p class="uppercase mt-2">
               A <span data-field="mairieVille"></span> , le
-              <span class="editable-date" contenteditable="true"><span data-field="dateEmission">15/01/2025</span></span>
+              <span class="editable-date" contenteditable="true"
+                ><span data-field="dateEmission">15/01/2025</span></span
+              >
             </p>
             <p class="text-sm italic mt-1">Signature et cachet de l'Ordonnateur</p>
             <p class="bold mt-2">P/ LE MAIRE & P.D.</p>

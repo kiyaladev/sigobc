@@ -36,6 +36,13 @@
               clearable
             />
           </div>
+          <div class="col-12 col-md-2">
+            <q-input v-model="filterSearch" label="Rechercher un agent" outlined dense clearable>
+              <template v-slot:prepend>
+                <q-icon name="search" />
+              </template>
+            </q-input>
+          </div>
           <div class="col-12 col-md-6 q-gutter-sm row">
             <q-btn
               icon="bolt"
@@ -101,6 +108,9 @@
         >
           <template v-slot:body-cell-employe="props">
             <q-td :props="props">{{ getEmployeNom(props.row.employeId) }}</q-td>
+          </template>
+          <template v-slot:body-cell-typeAgent="props">
+            <q-td :props="props">{{ getEmployeType(props.row.employeId) }}</q-td>
           </template>
           <template v-slot:body-cell-statut="props">
             <q-td :props="props">
@@ -512,6 +522,7 @@ const now = new Date();
 const filterMois = ref<number | null>(null);
 const filterAnnee = ref(now.getFullYear());
 const filterStatut = ref<string | null>(null);
+const filterSearch = ref('');
 const genMois = ref(now.getMonth() + 1);
 const genAnnee = ref(now.getFullYear());
 const genService = ref<string | null>(null);
@@ -698,6 +709,16 @@ const filteredFiches = computed(() => {
     return true;
   });
   if (filterStatut.value) r = r.filter((f) => f.statut === filterStatut.value);
+  if (filterSearch.value) {
+    const needle = filterSearch.value.toLowerCase();
+    r = r.filter((f) => {
+      const emp = employes.value.find((e) => e.id === f.employeId);
+      if (!emp) return false;
+      const nom = `${emp.nom} ${emp.prenom} ${emp.matricule}`.toLowerCase();
+      const type = (emp.typeEmploye || '').toLowerCase();
+      return nom.includes(needle) || type.includes(needle);
+    });
+  }
   return r;
 });
 
@@ -748,6 +769,11 @@ function getEmployeNom(id: number): string {
   return e ? `${e.nom} ${e.prenom}` : '-';
 }
 
+function getEmployeType(id: number): string {
+  const e = employes.value.find((x) => x.id === id);
+  return e?.typeEmploye || '-';
+}
+
 function getStatutColor(s: string): string {
   return s === 'paye' ? 'positive' : s === 'valide' ? 'blue' : 'grey';
 }
@@ -766,6 +792,13 @@ function formatMontant(v: number): string {
 
 const columns = [
   { name: 'employe', label: 'Agent', field: 'employeId', align: 'left' as const, sortable: true },
+  {
+    name: 'typeAgent',
+    label: "Type d'agent",
+    field: 'employeId',
+    align: 'left' as const,
+    sortable: true,
+  },
   {
     name: 'mois',
     label: 'Mois',
