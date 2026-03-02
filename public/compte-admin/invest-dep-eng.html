@@ -73,6 +73,7 @@
       </div>
     </div>
 
+    <script>
       function fmt(v) { return (v && v !== 0) ? new Intl.NumberFormat('fr-FR').format(v) : '-'; }
       function pct(real, prev) { return prev && prev > 0 ? ((real / prev) * 100).toFixed(2).replace('.', ',') : '-'; }
 
@@ -98,18 +99,9 @@
       };
 
       async function loadAndRender() {
+        try {
         const db = new Dexie('TresorDatabase');
-        db.version(28).stores({
-          mandats: '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
-          previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
-          sousChapitres: '++id, code, libelle, parentId, mairieId, actif',
-          chapitres: '++id, code, libelle, mairieId, actif',
-          taxes: '++id, code, libelle, mairieId, type, actif',
-          declarations: '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
-          previsionsRecettes: '++id, exercice, taxeId, mairieId, statut, personnelId',
-          mairies: '++id, nom, code, ville',
-          printData: '++id, type, createdAt'
-        });
+        await db.open();
 
         let exercice = new Date().getFullYear();
         try {
@@ -121,12 +113,15 @@
         var params = new URLSearchParams(window.location.search);
         if (params.get('exercice')) exercice = parseInt(params.get('exercice'));
 
-        const [sousChapitres, previsions, mandats, mairie] = await Promise.all([
+        const [sousChapitres, allPrevisions, allMandats, mairieRaw] = await Promise.all([
           db.table('sousChapitres').toArray(),
-          db.table('previsions').where('exercice').equals(exercice).toArray(),
-          db.table('mandats').where('exercice').equals(exercice).toArray(),
+          db.table('previsions').toArray(),
+          db.table('mandats').toArray(),
           db.table('mairies').toCollection().first()
         ]);
+        const mairie = mairieRaw || {};
+        const previsions = allPrevisions.filter(p => p.exercice === exercice);
+        const mandats = allMandats.filter(m => m.exercice === exercice);
 
         const investSC = sousChapitres.filter(sc => sc.code && sc.code.startsWith('9'));
 
@@ -266,38 +261,42 @@
         const nomMairie = (mairie && mairie.nom ? mairie.nom : 'VAVOUA').replace(/^mairie de /i, '').toUpperCase();
 
         const contentHtml = `
-          <table>
+          <table style="table-layout:fixed">
+            <colgroup>
+              <col style="width:26%"><col style="width:9%"><col style="width:9%"><col style="width:8%"><col style="width:9%">
+              <col style="width:8%"><col style="width:9%"><col style="width:11%"><col style="width:11%">
+            </colgroup>
             <thead>
               <tr>
-                <th rowspan="4" style="width: 35%; text-align: center; vertical-align: middle;">COMPTES ET RUBRIQUES<br>BUDGETAIRES</th>
-                <th rowspan="4" style="width: 10%; text-align: center; vertical-align: middle;">PREVISIONS</th>
-                <th colspan="7" style="text-align: center; padding: 10px; font-size: 13px;">COMPTE ADMINISTRATIF DEPENSES D'INVESTISSEMENT</th>
-                <th colspan="2" style="text-align: center; padding: 5px;">ANNEE<br>${exercice}</th>
-                <th colspan="1" style="text-align: center; padding: 5px;">N°<br>28</th>
+                <th rowspan="4" style="text-align:center; vertical-align:middle; font-size:10px;">COMPTES ET RUBRIQUES<br>BUDGETAIRES</th>
+                <th rowspan="4" style="text-align:center; vertical-align:middle; font-size:9px;">PREVISIONS</th>
+                <th colspan="5" style="text-align:center; padding:8px; font-size:12px; font-weight:bold;">COMPTE ADMINISTRATIF DEPENSES D'INVESTISSEMENT</th>
+                <th style="text-align:center; padding:4px; font-size:9px;">ANNEE<br><b>${exercice}</b></th>
+                <th style="text-align:center; padding:4px; font-size:9px;">N&deg;<br><b>28</b></th>
               </tr>
               <tr>
-                <th rowspan="3" style="width: 8%; text-align: center; font-size: 8px;">DEPENSES<br>ENGAGEES</th>
-                <th rowspan="3" style="width: 8%; text-align: center; font-size: 8px;">POURCENTAGE<br>DE<br>REALISATION</th>
-                <th rowspan="3" style="width: 8%; text-align: center; font-size: 8px;">DEPENSES<br>MANDATEES</th>
-                <th colspan="4" style="text-align: center; font-size: 9px;">ENGAGEMENTS NON MANDATES</th>
+                <th rowspan="3" style="text-align:center; font-size:8px; vertical-align:middle;">DEPENSES<br>ENGAGEES</th>
+                <th rowspan="3" style="text-align:center; font-size:8px; vertical-align:middle;">POURCENTAGE<br>DE<br>REALISATION</th>
+                <th rowspan="3" style="text-align:center; font-size:8px; vertical-align:middle;">DEPENSES<br>MANDATEES</th>
+                <th colspan="4" style="text-align:center; font-size:9px;">ENGAGEMENTS NON MANDATES</th>
               </tr>
               <tr>
-                <th rowspan="2" style="width: 7%; text-align: center; font-size: 7px;">COMMANDES<br>NON<br>LIVREES</th>
-                <th rowspan="2" style="width: 8%; text-align: center; font-size: 7px;">COMMANDES<br>LIVREES NON<br>FACTUREES</th>
-                <th rowspan="2" style="width: 8%; text-align: center; font-size: 7px;">COMMANDES<br>FACTUREES</th>
-                <th rowspan="2" style="width: 8%; text-align: center; font-size: 8px;">T O T A L<br>(6+7+8)</th>
+                <th rowspan="2" style="text-align:center; font-size:7px; vertical-align:middle;">COMMANDES<br>NON<br>LIVREES</th>
+                <th rowspan="2" style="text-align:center; font-size:7px; vertical-align:middle;">COMMANDES<br>LIVREES NON<br>FACTUREES</th>
+                <th rowspan="2" style="text-align:center; font-size:7px; vertical-align:middle;">COMMANDES<br>FACTUREES</th>
+                <th rowspan="2" style="text-align:center; font-size:8px; vertical-align:middle;">T O T A L<br>(6+7+8)</th>
               </tr>
               <tr></tr>
-              <tr style="font-size: 9px;">
-                <th style="background-color: #fff; border-bottom: 2px solid #000;">1</th>
-                <th style="background-color: #fff; border-bottom: 2px solid #000;">2</th>
-                <th style="background-color: #fff; border-bottom: 2px solid #000;">3</th>
-                <th style="background-color: #fff; border-bottom: 2px solid #000;">4</th>
-                <th style="background-color: #fff; border-bottom: 2px solid #000;">5</th>
-                <th style="background-color: #fff; border-bottom: 2px solid #000;">6</th>
-                <th style="background-color: #fff; border-bottom: 2px solid #000;">7</th>
-                <th style="background-color: #fff; border-bottom: 2px solid #000;">8</th>
-                <th style="background-color: #fff; border-bottom: 2px solid #000;">9</th>
+              <tr style="font-size:9px;">
+                <th style="background-color:#fff; border-bottom:2px solid #000;">1</th>
+                <th style="background-color:#fff; border-bottom:2px solid #000;">2</th>
+                <th style="background-color:#fff; border-bottom:2px solid #000;">3</th>
+                <th style="background-color:#fff; border-bottom:2px solid #000;">4</th>
+                <th style="background-color:#fff; border-bottom:2px solid #000;">5</th>
+                <th style="background-color:#fff; border-bottom:2px solid #000;">6</th>
+                <th style="background-color:#fff; border-bottom:2px solid #000;">7</th>
+                <th style="background-color:#fff; border-bottom:2px solid #000;">8</th>
+                <th style="background-color:#fff; border-bottom:2px solid #000;">9</th>
               </tr>
             </thead>
             <tbody>
@@ -306,6 +305,11 @@
           </table>
         `;
         document.getElementById('content').innerHTML = contentHtml;
+        } catch (e) {
+          console.error('Erreur chargement:', e);
+          document.getElementById('content').innerHTML =
+            '<div style="color:red;padding:20px;font-size:14px">Erreur: ' + e.message + '<br><pre>' + e.stack + '</pre></div>';
+        }
       }
 
       window.addEventListener('message', function(event) {

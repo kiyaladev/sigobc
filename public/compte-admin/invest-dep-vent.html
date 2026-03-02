@@ -29,6 +29,7 @@
         width: 100%;
         border-collapse: collapse;
         margin-top: 0;
+        table-layout: fixed;
       }
       th,
       td {
@@ -149,29 +150,19 @@
 
       async function loadData() {
         const db = new Dexie('TresorDatabase');
-        db.version(28).stores({
-          mandats:
-            '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
-          previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
-          sousChapitres: '++id, code, libelle, parentId, mairieId, actif',
-          chapitres: '++id, code, libelle, mairieId, actif',
-          taxes: '++id, code, libelle, mairieId, type, actif',
-          declarations:
-            '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
-          previsionsRecettes: '++id, exercice, taxeId, mairieId, statut, personnelId',
-          mairies: '++id, nom, code, ville',
-          printData: '++id, type, createdAt',
-        });
+        await db.open();
 
         const exercice = new Date().getFullYear();
 
-        const [sousChapitres, chapitres, previsions, mandats, mairie] = await Promise.all([
-          db.sousChapitres.toArray(),
-          db.chapitres.toArray(),
-          db.previsions.where('exercice').equals(exercice).toArray(),
-          db.mandats.where('exercice').equals(exercice).toArray(),
-          db.mairies.toCollection().first(),
+        const [sousChapitres, chapitres, allPrevisions, allMandats, mairie] = await Promise.all([
+          db.table('sousChapitres').toArray(),
+          db.table('chapitres').toArray(),
+          db.table('previsions').toArray(),
+          db.table('mandats').toArray(),
+          db.table('mairies').toCollection().first(),
         ]);
+        const previsions = allPrevisions.filter(p => p.exercice === exercice);
+        const mandats = allMandats.filter(m => m.exercice === exercice);
 
         // Filter sous-chapitres with code starting with '9'
         const investSC = sousChapitres.filter((sc) => sc.code && sc.code.startsWith('9'));
@@ -199,6 +190,7 @@
 
       function render(data) {
         const { investSC, chapitres, prevMap, engMap, exercice, mairie } = data;
+        const communeNom = ((mairie && mairie.nom) || 'COMMUNE').replace(/^mairie de /i, '').toUpperCase();
 
         // Group by Section (2 digits), Chapitre (3 digits), Article (4 digits)
         const hierarchy = {};
@@ -535,39 +527,48 @@
 
         document.getElementById('content').innerHTML =
           '<table>' +
+          '<colgroup>' +
+          '<col style="width:22%">' +
+          '<col style="width:7%"><col style="width:7%"><col style="width:7%">' +
+          '<col style="width:7%"><col style="width:7%"><col style="width:7%"><col style="width:7%">' +
+          '<col style="width:7%"><col style="width:7%"><col style="width:8%">' +
+          '</colgroup>' +
           '<thead>' +
+          // Document header row
           '<tr>' +
-          '<th rowspan="3" colspan="2" style="border:none;"></th>' +
-          '<th colspan="7" style="font-size: 12px;">COMPTE ADMINISTRATIF DEPENSES D\'INVESTISSEMENT</th>' +
-          '<th colspan="2">ANNEE<br>' +
-          exercice +
-          '</th>' +
+          '<th style="text-align:center; font-size:9px">COMMUNE DE ' + communeNom + '</th>' +
+          '<th colspan="8" style="font-size:12px">COMPTE ADMINISTRATIF DEPENSES D\'INVESTISSEMENT</th>' +
+          '<th style="font-size:8px">ANNEE<br><b>' + exercice + '</b></th>' +
+          '<th style="font-size:8px">N&deg;<br><b>28</b></th>' +
           '</tr>' +
+          // Column headers row 1
           '<tr>' +
-          '<th rowspan="2" class="col-rubrique">COMPTES ET RUBRIQUES BUDGETAIRES</th>' +
-          '<th rowspan="2">PREVISIONS</th>' +
-          '<th rowspan="2">MANDATS</th>' +
-          '<th rowspan="2">CREDITS SANS EMPLOI</th>' +
-          '<th colspan="6">VENTILATION DES DEPENSES PAR PARAGRAPHE</th>' +
-          '<th rowspan="2">TOTAL</th>' +
+          '<th rowspan="2" style="vertical-align:middle; font-size:8px">COMPTES ET RUBRIQUES BUDGETAIRES</th>' +
+          '<th rowspan="2" style="vertical-align:middle; font-size:8px">PREVISIONS</th>' +
+          '<th rowspan="2" style="vertical-align:middle; font-size:8px">MANDATS</th>' +
+          '<th rowspan="2" style="vertical-align:middle; font-size:8px">CREDITS<br>SANS<br>EMPLOI</th>' +
+          '<th colspan="6" style="font-size:8px">VENTILATION DES DEPENSES PAR PARAGRAPHE</th>' +
+          '<th rowspan="2" style="vertical-align:middle; font-size:8px">TOTAL</th>' +
           '</tr>' +
+          // Column headers row 2 (sub-headers under VENTILATION)
           '<tr>' +
-          '<th colspan="2">IMMOBILIERS</th>' +
-          '<th colspan="2">MOBILIERS</th>' +
-          '<th colspan="2">INCORPOREL</th>' +
+          '<th colspan="2" style="font-size:8px">IMMOBILIERS</th>' +
+          '<th colspan="2" style="font-size:8px">MOBILIERS</th>' +
+          '<th colspan="2" style="font-size:8px">INCORPOREL</th>' +
           '</tr>' +
+          // Column numbers row
           '<tr>' +
-          '<th>1</th>' +
-          '<th>2</th>' +
-          '<th>3</th>' +
-          '<th>4</th>' +
-          "<th>Travaux et services à l'entreprise<br>5</th>" +
-          '<th>Intervention et transfert<br>6</th>' +
-          "<th>Travaux et services à l'entreprise<br>7</th>" +
-          '<th>Intervention et transfert<br>8</th>' +
-          "<th>Travaux et services à l'entreprise<br>9</th>" +
-          '<th>Intervention et transfert<br>10</th>' +
-          '<th>11</th>' +
+          '<th style="font-size:7px">1</th>' +
+          '<th style="font-size:7px">2</th>' +
+          '<th style="font-size:7px">3</th>' +
+          '<th style="font-size:7px">4</th>' +
+          "<th style=\"font-size:7px\">Travaux et services &agrave; l'entreprise<br>5</th>" +
+          '<th style="font-size:7px">Intervention et transfert<br>6</th>' +
+          "<th style=\"font-size:7px\">Travaux et services &agrave; l'entreprise<br>7</th>" +
+          '<th style="font-size:7px">Intervention et transfert<br>8</th>' +
+          "<th style=\"font-size:7px\">Travaux et services &agrave; l'entreprise<br>9</th>" +
+          '<th style="font-size:7px">Intervention et transfert<br>10</th>' +
+          '<th style="font-size:7px">11</th>' +
           '</tr>' +
           '</thead>' +
           '<tbody>' +
@@ -576,65 +577,25 @@
           '</table>';
       }
 
-      function processMessage(msgData) {
-        if (msgData && msgData.type === 'FILL_COMPTE_ADMIN_DATA') {
-          if (msgData.data) {
-            render(msgData.data);
-          }
+      async function loadAndRender() {
+        try {
+          const result = await loadData();
+          render(result);
+        } catch (e) {
+          console.error('Erreur chargement:', e);
+          document.getElementById('content').innerHTML =
+            '<div style="color:red;padding:20px;font-size:14px">Erreur: ' + e.message + '<br><pre>' + e.stack + '</pre></div>';
         }
       }
 
-      let pendingData = null;
-      let dataProcessed = false;
-
-      window.addEventListener('message', function (event) {
-        if (document.readyState === 'complete' || document.readyState === 'interactive') {
-          processMessage(event.data);
-          dataProcessed = true;
-        } else {
-          pendingData = event.data;
+      window.addEventListener('message', function (e) {
+        if (e.data && e.data.type === 'FILL_COMPTE_ADMIN_DATA') {
+          loadAndRender();
         }
       });
 
-      window.addEventListener('DOMContentLoaded', async function () {
-        if (pendingData && !dataProcessed) {
-          processMessage(pendingData);
-          dataProcessed = true;
-          return;
-        }
-
-        await new Promise((r) => setTimeout(r, 500));
-
-        if (!dataProcessed) {
-          try {
-            const result = await loadData();
-            render(result);
-            dataProcessed = true;
-          } catch (e) {
-            console.warn('Erreur chargement IndexedDB:', e);
-          }
-        }
-
-        if (!dataProcessed) {
-          try {
-            const db = new Dexie('TresorDatabase');
-            db.version(28).stores({ printData: '++id, type, createdAt' });
-            const records = await db
-              .table('printData')
-              .where('type')
-              .equals('FILL_COMPTE_ADMIN_DATA')
-              .toArray();
-            if (records.length > 0) {
-              const latest = records.sort(
-                (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
-              )[0];
-              processMessage(latest.data);
-              await db.table('printData').delete(latest.id);
-            }
-          } catch (e) {
-            console.warn('Erreur printData:', e);
-          }
-        }
+      document.addEventListener('DOMContentLoaded', function () {
+        setTimeout(loadAndRender, 500);
       });
     </script>
   </body>

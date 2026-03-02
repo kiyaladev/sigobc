@@ -119,271 +119,278 @@
   <body>
     <button class="print-button no-print" onclick="window.print()">Imprimer</button>
     <div id="content"><div class="loading">Chargement des données...</div></div>
-    var exercice = new Date().getFullYear(); var dbInstance = new Dexie('TresorDatabase');
-    dbInstance.version(28).stores({ mandats: '++id, numeroMandat, dateMandat, exercice, chapitreId,
-    sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId', previsions:
-    '++id, exercice, chapitreId, mairieId, statut, personnelId', sousChapitres: '++id, code,
-    libelle, parentId, mairieId, actif', taxes: '++id, code, libelle, mairieId, type, actif',
-    declarations: '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId,
-    personnelId, exercice', previsionsRecettes: '++id, exercice, taxeId, mairieId, statut,
-    personnelId', mairies: '++id, nom, code, ville', printData: '++id, type, createdAt', });
-    function fmt(v) { return (v && v !== 0) ? new Intl.NumberFormat('fr-FR').format(v) : '-'; } var
-    params = new URLSearchParams(window.location.search); if (params.get('exercice')) exercice =
-    parseInt(params.get('exercice')); window.addEventListener('message', function(e) { if (e.data &&
-    e.data.type === 'FILL_COMPTE_ADMIN_DATA') { if (e.data.exercice) exercice = e.data.exercice;
-    loadAndRender(); } }); document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(loadAndRender, 500); }); async function loadAndRender() { try { var pd = await
-    dbInstance.table('printData').toArray(); var latest = pd.filter(p =>
-    p.type==='FILL_COMPTE_ADMIN_DATA').sort((a,b)=>b.createdAt-a.createdAt)[0]; if (latest &&
-    latest.data && latest.data.exercice) exercice = latest.data.exercice; } catch(e) {} const mairie
-    = await dbInstance.table('mairies').toCollection().first() || {}; var mandats = await
-    dbInstance.table('mandats').filter(m => m.exercice===exercice&&m.statut==='paye').toArray(); var
-    previsions = await dbInstance.table('previsions').filter(p => p.exercice===exercice).toArray();
-    var sousChapitres = await dbInstance.table('sousChapitres').toArray(); var taxes = await
-    dbInstance.table('taxes').toArray(); var declarations = await
-    dbInstance.table('declarations').filter(d =>
-    d.exercice===exercice&&d.statut==='validee').toArray(); var previsionsRecettes = await
-    dbInstance.table('previsionsRecettes').filter(p => p.exercice===exercice).toArray(); var
-    prevMap={}; previsions.forEach(p => { if(p.sousChapitreId)
-    prevMap[p.sousChapitreId]=(prevMap[p.sousChapitreId]||0)+p.montantPrevu; }); var engageMap={};
-    mandats.forEach(m => { engageMap[m.sousChapitreId]=(engageMap[m.sousChapitreId]||0)+m.montant;
-    }); var prevRecMap={}; previsionsRecettes.forEach(p => {
-    prevRecMap[p.taxeId]=(prevRecMap[p.taxeId]||0)+p.montantPrevu; }); var emisMap={},
-    recouvreMap={}; declarations.forEach(d => { var mt = d.montant || d.montantRecette || 0;
-    emisMap[d.taxeId] = (emisMap[d.taxeId]||0) + mt; if (d.dateEncaissement) recouvreMap[d.taxeId] =
-    (recouvreMap[d.taxeId]||0) + mt; }); var recSections=[ {code:'70',libelle:'70 - Recettes
-    fiscales'}, {code:'71',libelle:'71 - Recettes des prestations et services'},
-    {code:'72',libelle:'72 - Revenus du patrimoine et du portefeuille'}, {code:'73',libelle:"73 -
-    Aide de l'état, fonds de concours, aides extérieures"}, {code:'74',libelle:'74 - Recettes divers
-    au titre I'} ]; var recData=recSections.map(s => { var prevu=0, em=0, rec=0; taxes.forEach(tx =>
-    { if(tx.code && tx.code.startsWith(s.code)){ prevu+=prevRecMap[tx.id]||0; em+=emisMap[tx.id]||0;
-    rec+=recouvreMap[tx.id]||0; } }); return { libelle: s.libelle, prevu: prevu, emissions: em,
-    recouvrement: rec, ecart: prevu-em, taux: prevu > 0 ? ((em/prevu)*100).toFixed(2)+'%' : '-' };
-    }); var tRP=recData.reduce((s,r)=>s+r.prevu,0); var tRE=recData.reduce((s,r)=>s+r.emissions,0);
-    var tRR=recData.reduce((s,r)=>s+r.recouvrement,0); var depSections=[ {code:'60',libelle:'60 -
-    Dépenses des services généraux'}, {code:'61',libelle:'61 - Dépenses des services de
-    collectivité'}, {code:'62',libelle:'62 - Dépenses des services socioculturels et de prom.
-    Hum.'}, {code:'63',libelle:'63 - Dépenses des services économiques'}, {code:'64',libelle:'64 -
-    Dépenses diverses au titre I'} ]; var depData=depSections.map(s => { var prevu=0, m=0;
-    sousChapitres.forEach(sc => { if(sc.code && sc.code.startsWith(s.code)){
-    prevu+=prevMap[sc.id]||0; m+=engageMap[sc.id]||0; } }); return { libelle: s.libelle, prevu:
-    prevu, pct: prevu > 0 ? ((m/prevu)*100).toFixed(2) : '0.00', mandatees: m }; }); var
-    tDP=depData.reduce((s,r)=>s+r.prevu,0); var tDM=depData.reduce((s,r)=>s+r.mandatees,0); const
-    contentHtml = `
-    <table style="width: 100%; border-collapse: collapse">
-      <tbody>
-        <tr>
-          <td style="width: 30%; text-align: center; font-weight: bold; padding: 10px">
-            COMMUNE DE ${(mairie.nom || 'VAVOUA').replace(/^mairie de /i, '').toUpperCase()}
-          </td>
-          <td style="width: 50%; text-align: center; font-weight: bold; font-size: 14px">
-            COMPTE ADMINISTRATIF - RECAPITULATIF
-          </td>
-          <td style="width: 10%; text-align: center">ANNEE<br />${exercice}</td>
-          <td style="width: 10%; text-align: center">N°<br />3</td>
-        </tr>
-        <tr>
-          <td
-            colspan="4"
-            style="
-              text-align: center;
-              font-weight: bold;
-              font-size: 16px;
-              padding: 15px;
-              border-bottom: 1px solid #000;
-              letter-spacing: 1px;
-            "
-          >
-            TITRE I - BUDGET DE FONCTIONNEMENT
-          </td>
-        </tr>
-        <!-- RECETTES -->
-        <tr>
-          <td
-            colspan="4"
-            style="
-              text-align: center;
-              font-weight: bold;
-              font-size: 12px;
-              padding: 8px;
-              border-bottom: 2px solid #000;
-            "
-          >
-            RECETTES DE FONCTIONNEMENT
-          </td>
-        </tr>
-        <tr>
-          <td colspan="4" style="padding: 0; border: none">
-            <table style="width: 100%; border: none; border-collapse: collapse; margin: 0">
-              <thead>
-                <tr>
-                  <th
-                    rowspan="2"
-                    style="width: 30%; text-align: center; border-top: none; border-left: none"
-                  >
-                    SECTIONS BUDGETAIRES
-                  </th>
-                  <th rowspan="2" style="width: 10%; border-top: none">PREVISIONS</th>
-                  <th colspan="4" style="text-align: center; border-top: none">
-                    EXECUTION DU BUDGET
-                  </th>
-                  <th rowspan="2" style="width: 10%; border-top: none">
-                    ECART PREVISION<br />EMISSION
-                  </th>
-                  <th rowspan="2" style="width: 5%; border-top: none; border-right: none">
-                    E / P %
-                  </th>
-                </tr>
-                <tr>
-                  <th style="width: 10%">EMISSIONS</th>
-                  <th style="width: 10%">RECOUVREMENT</th>
-                  <th style="width: 10%">NON VALEUR</th>
-                  <th style="width: 10%">RESTE A<br />RECOUVRER</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${recData.map(r => `
-                <tr>
-                  <td style="border-left: none">${r.libelle}</td>
-                  <td class="text-right">${fmt(r.prevu)}</td>
-                  <td class="text-right">${fmt(r.emissions)}</td>
-                  <td class="text-right">${fmt(r.recouvrement)}</td>
-                  <td class="text-right"></td>
-                  <td class="text-right">${fmt(Math.max(0, r.emissions - r.recouvrement))}</td>
-                  <td class="text-right">${fmt(r.ecart)}</td>
-                  <td class="text-right" style="border-right: none">${r.taux}</td>
-                </tr>
-                `).join('')}
-                <!-- RECETTES TOTAL -->
-                <tr>
-                  <td style="text-align: center; font-size: 10px; border-left: none">
-                    TOTAL DES RECETTES AU TITRE I
-                  </td>
-                  <td class="text-right" style="font-size: 10px">${fmt(tRP)}</td>
-                  <td class="text-right" style="font-size: 10px">${fmt(tRE)}</td>
-                  <td class="text-right" style="font-size: 10px">${fmt(tRR)}</td>
-                  <td class="text-right" style="font-size: 10px"></td>
-                  <td class="text-right" style="font-size: 10px">${fmt(Math.max(0, tRE - tRR))}</td>
-                  <td class="text-right" style="font-size: 10px">${fmt(tRP - tRE)}</td>
-                  <td class="text-right" style="font-size: 10px; border-right: none">
-                    ${tRP > 0 ? ((tRE / tRP) * 100).toFixed(2) + '%' : '-'}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </td>
-        </tr>
+    <script>
+      function fmt(v) {
+        return v && v !== 0 ? new Intl.NumberFormat('fr-FR').format(v) : '-';
+      }
 
-        <!-- DEPENSES -->
-        <tr>
-          <td
-            colspan="4"
-            style="
-              text-align: center;
-              font-weight: bold;
-              font-size: 12px;
-              padding: 8px;
-              border-top: 2px solid #000;
-              border-bottom: 2px solid #000;
-            "
-          >
-            DEPENSES DE FONCTIONNEMENT
-          </td>
-        </tr>
-        <tr>
-          <td colspan="4" style="padding: 0; border: none">
-            <table style="width: 100%; border: none; border-collapse: collapse; margin: 0">
-              <thead>
-                <tr>
-                  <th
-                    rowspan="2"
-                    style="width: 30%; text-align: center; border-top: none; border-left: none"
-                  >
-                    SECTIONS BUDGETAIRES
-                  </th>
-                  <th rowspan="2" style="width: 10%; border-top: none">PREVISIONS<br />ENGAGEES</th>
-                  <th rowspan="2" style="width: 10%; border-top: none">
-                    POURCENTAGE<br />REALISATION
-                  </th>
-                  <th rowspan="2" style="width: 10%; border-top: none">DEPENSES<br />MANDATEES</th>
-                  <th colspan="4" style="text-align: center; border-top: none; border-right: none">
-                    ENGAGEMENTS NON MANDATES
-                  </th>
-                </tr>
-                <tr>
-                  <th style="width: 10%">COMMANDES<br />NON LIVREES</th>
-                  <th style="width: 10%">COMMANDES<br />LIVREES NON<br />FACTUREES</th>
-                  <th style="width: 10%">COMMANDES<br />FACTUREES</th>
-                  <th style="width: 10%; border-right: none">TOTAL (6 + 7 + 8)</th>
-                </tr>
-                <tr
-                  style="
-                    background-color: #fff;
-                    font-size: 9px;
-                    font-weight: bold;
-                    text-align: center;
-                  "
-                >
-                  <th style="border-left: none; background-color: #fff">1</th>
-                  <th style="background-color: #fff">3</th>
-                  <th style="background-color: #fff">4</th>
-                  <th style="background-color: #fff">5</th>
-                  <th style="background-color: #fff">6</th>
-                  <th style="background-color: #fff">7</th>
-                  <th style="background-color: #fff">8</th>
-                  <th style="border-right: none; background-color: #fff">9</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${depData.map(r => `
-                <tr>
-                  <td style="border-left: none">${r.libelle}</td>
-                  <td class="text-right">${fmt(r.prevu)}</td>
-                  <td class="text-right">${r.pct}</td>
-                  <td class="text-right">${fmt(r.mandatees)}</td>
-                  <td class="text-right">-</td>
-                  <td class="text-right">-</td>
-                  <td class="text-right">-</td>
-                  <td class="text-right" style="border-right: none">-</td>
-                </tr>
-                `).join('')}
-                <!-- DEPENSES TOTAL -->
-                <tr>
-                  <td
-                    style="
-                      text-align: center;
-                      font-size: 10px;
-                      border-bottom: none;
-                      border-left: none;
-                    "
-                  >
-                    TOTAL DES DEPENSES AU TITRE I
-                  </td>
-                  <td class="text-right" style="border-bottom: none; font-size: 10px">
-                    ${fmt(tDP)}
-                  </td>
-                  <td class="text-right" style="border-bottom: none; font-size: 10px">
-                    ${(tDP>0?((tDM/tDP)*100).toFixed(2):'0.00')}
-                  </td>
-                  <td class="text-right" style="border-bottom: none; font-size: 10px">
-                    ${fmt(tDM)}
-                  </td>
-                  <td class="text-right" style="border-bottom: none; font-size: 10px">-</td>
-                  <td class="text-right" style="border-bottom: none; font-size: 10px">-</td>
-                  <td class="text-right" style="border-bottom: none; font-size: 10px">-</td>
-                  <td
-                    class="text-right"
-                    style="border-bottom: none; border-right: none; font-size: 10px"
-                  >
-                    -
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    `; document.getElementById('content').innerHTML = contentHtml; }
+      var exercice = new Date().getFullYear();
+      var params = new URLSearchParams(window.location.search);
+      if (params.get('exercice')) exercice = parseInt(params.get('exercice'));
+
+      window.addEventListener('message', function (e) {
+        if (e.data && e.data.type === 'FILL_COMPTE_ADMIN_DATA') {
+          if (e.data.exercice) exercice = e.data.exercice;
+          loadAndRender();
+        }
+      });
+
+      document.addEventListener('DOMContentLoaded', function () {
+        setTimeout(loadAndRender, 500);
+      });
+
+      async function loadAndRender() {
+        try {
+          var db = new Dexie('TresorDatabase');
+          await db.open();
+
+          // Try to get exercice from printData
+          try {
+            var pd = await db.table('printData').toArray();
+            var latest = pd
+              .filter(function (p) {
+                return p.type === 'FILL_COMPTE_ADMIN_DATA';
+              })
+              .sort(function (a, b) {
+                return b.createdAt - a.createdAt;
+              })[0];
+            if (latest && latest.data && latest.data.exercice) exercice = latest.data.exercice;
+          } catch (e) {}
+
+          var mairie = (await db.table('mairies').toCollection().first()) || {};
+          var allMandats = await db.table('mandats').toArray();
+          var mandats = allMandats.filter(function (m) {
+            return m.exercice === exercice && m.statut === 'paye';
+          });
+          var allPrevisions = await db.table('previsions').toArray();
+          var previsions = allPrevisions.filter(function (p) {
+            return p.exercice === exercice;
+          });
+          var sousChapitres = await db.table('sousChapitres').toArray();
+          var taxes = await db.table('taxes').toArray();
+          var allDeclarations = await db.table('declarations').toArray();
+          var declarations = allDeclarations.filter(function (d) {
+            return d.exercice === exercice && d.statut === 'validee';
+          });
+          var allPrevRec = await db.table('previsionsRecettes').toArray();
+          var previsionsRecettes = allPrevRec.filter(function (p) {
+            return p.exercice === exercice;
+          });
+
+          // Build maps
+          var prevMap = {};
+          previsions.forEach(function (p) {
+            if (p.sousChapitreId)
+              prevMap[p.sousChapitreId] = (prevMap[p.sousChapitreId] || 0) + p.montantPrevu;
+          });
+
+          var engageMap = {};
+          mandats.forEach(function (m) {
+            engageMap[m.sousChapitreId] = (engageMap[m.sousChapitreId] || 0) + m.montant;
+          });
+
+          var prevRecMap = {};
+          previsionsRecettes.forEach(function (p) {
+            prevRecMap[p.taxeId] = (prevRecMap[p.taxeId] || 0) + p.montantPrevu;
+          });
+
+          var emisMap = {};
+          var recouvreMap = {};
+          declarations.forEach(function (d) {
+            var mt = d.montant || d.montantRecette || 0;
+            emisMap[d.taxeId] = (emisMap[d.taxeId] || 0) + mt;
+            if (d.dateEncaissement)
+              recouvreMap[d.taxeId] = (recouvreMap[d.taxeId] || 0) + mt;
+          });
+
+          // Recettes sections
+          var recSections = [
+            { code: '70', libelle: '70 - Recettes fiscales' },
+            { code: '71', libelle: '71 - Recettes des prestations et services' },
+            { code: '72', libelle: '72 - Revenus du patrimoine et du portefeuille' },
+            { code: '73', libelle: "73 - Aide de l'etat, fonds de concours, aides exterieures" },
+            { code: '74', libelle: '74 - Recettes divers au titre I' },
+          ];
+
+          var recData = recSections.map(function (s) {
+            var prevu = 0, em = 0, rec = 0;
+            taxes.forEach(function (tx) {
+              if (tx.code && tx.code.startsWith(s.code)) {
+                prevu += prevRecMap[tx.id] || 0;
+                em += emisMap[tx.id] || 0;
+                rec += recouvreMap[tx.id] || 0;
+              }
+            });
+            return {
+              libelle: s.libelle,
+              prevu: prevu,
+              emissions: em,
+              recouvrement: rec,
+              ecart: prevu - em,
+              taux: prevu > 0 ? ((em / prevu) * 100).toFixed(2) + '%' : '-',
+            };
+          });
+
+          var tRP = recData.reduce(function (s, r) { return s + r.prevu; }, 0);
+          var tRE = recData.reduce(function (s, r) { return s + r.emissions; }, 0);
+          var tRR = recData.reduce(function (s, r) { return s + r.recouvrement; }, 0);
+
+          // Depenses sections
+          var depSections = [
+            { code: '60', libelle: '60 - Depenses des services generaux' },
+            { code: '61', libelle: '61 - Depenses des services de collectivite' },
+            { code: '62', libelle: '62 - Depenses des services socioculturels et de prom. Hum.' },
+            { code: '63', libelle: '63 - Depenses des services economiques' },
+            { code: '64', libelle: '64 - Depenses diverses au titre I' },
+          ];
+
+          var depData = depSections.map(function (s) {
+            var prevu = 0, m = 0;
+            sousChapitres.forEach(function (sc) {
+              if (sc.code && sc.code.startsWith(s.code)) {
+                prevu += prevMap[sc.id] || 0;
+                m += engageMap[sc.id] || 0;
+              }
+            });
+            return {
+              libelle: s.libelle,
+              prevu: prevu,
+              pct: prevu > 0 ? ((m / prevu) * 100).toFixed(2) : '0.00',
+              mandatees: m,
+            };
+          });
+
+          var tDP = depData.reduce(function (s, r) { return s + r.prevu; }, 0);
+          var tDM = depData.reduce(function (s, r) { return s + r.mandatees; }, 0);
+
+          // Build recettes rows
+          var recRows = recData.map(function (r) {
+            return '<tr>'
+              + '<td style="padding:4px; border:1px solid #000">' + r.libelle + '</td>'
+              + '<td class="text-right" style="padding:4px; border:1px solid #000">' + fmt(r.prevu) + '</td>'
+              + '<td class="text-right" style="padding:4px; border:1px solid #000">' + fmt(r.emissions) + '</td>'
+              + '<td class="text-right" style="padding:4px; border:1px solid #000">' + fmt(r.recouvrement) + '</td>'
+              + '<td class="text-center" style="padding:4px; border:1px solid #000">-</td>'
+              + '<td class="text-center" style="padding:4px; border:1px solid #000">' + fmt(Math.max(0, r.emissions - r.recouvrement)) + '</td>'
+              + '<td class="text-right" style="padding:4px; border:1px solid #000">' + fmt(r.ecart) + '</td>'
+              + '<td class="text-right" style="padding:4px; border:1px solid #000">' + r.taux + '</td>'
+              + '</tr>';
+          }).join('');
+
+          // Build depenses rows
+          var depRows = depData.map(function (r) {
+            return '<tr>'
+              + '<td style="padding:4px; border:1px solid #000">' + r.libelle + '</td>'
+              + '<td class="text-right" style="padding:4px; border:1px solid #000">' + fmt(r.prevu) + '</td>'
+              + '<td class="text-right" style="padding:4px; border:1px solid #000">' + r.pct + '</td>'
+              + '<td class="text-right" style="padding:4px; border:1px solid #000">' + fmt(r.mandatees) + '</td>'
+              + '<td class="text-center" style="padding:4px; border:1px solid #000">-</td>'
+              + '<td class="text-center" style="padding:4px; border:1px solid #000">-</td>'
+              + '<td class="text-center" style="padding:4px; border:1px solid #000">-</td>'
+              + '<td class="text-center" style="padding:4px; border:1px solid #000">-</td>'
+              + '</tr>';
+          }).join('');
+
+          var communeNom = (mairie.nom || 'VAVOUA').replace(/^mairie de /i, '').toUpperCase();
+
+          var contentHtml = '<table style="width:100%; border-collapse:collapse; table-layout:fixed">'
+            + '<colgroup>'
+            + '<col style="width:28%"><col style="width:11%"><col style="width:11%"><col style="width:12%">'
+            + '<col style="width:8%"><col style="width:8%"><col style="width:13%"><col style="width:9%">'
+            + '</colgroup>'
+            // Document header
+            + '<tr>'
+            + '<td style="text-align:center; font-weight:bold; padding:6px; border:1px solid #000">COMMUNE DE ' + communeNom + '</td>'
+            + '<td colspan="5" style="text-align:center; font-weight:bold; font-size:14px; padding:6px; border:1px solid #000">COMPTE ADMINISTRATIF &nbsp;-&nbsp; RECAPITULATIF</td>'
+            + '<td style="text-align:center; padding:4px; border:1px solid #000; font-size:9px">ANNEE<br><b>' + exercice + '</b></td>'
+            + '<td style="text-align:center; padding:4px; border:1px solid #000; font-size:9px">N&deg;<br><b>3</b></td>'
+            + '</tr>'
+            // Titre
+            + '<tr><td colspan="8" style="text-align:center; font-weight:bold; font-size:16px; padding:12px 0; border:1px solid #000; letter-spacing:2px">TITRE &nbsp;I &nbsp;- &nbsp;BUDGET DE FONCTIONNEMENT</td></tr>'
+            // RECETTES title
+            + '<tr><td colspan="8" style="text-align:center; font-weight:bold; font-size:11px; padding:6px; border:1px solid #000; letter-spacing:4px">RECETTES &nbsp;&nbsp;DE &nbsp;&nbsp;FONCTIONNEMENT</td></tr>'
+            // Recettes header row 1
+            + '<tr>'
+            + '<th rowspan="2" style="border:1px solid #000; padding:3px; text-align:center; vertical-align:middle; font-size:9px; background:#f0f0f0">SECTIONS BUDGETAIRES</th>'
+            + '<th rowspan="2" style="border:1px solid #000; padding:3px; text-align:center; vertical-align:middle; font-size:9px; background:#f0f0f0">PREVISIONS</th>'
+            + '<th colspan="4" style="border:1px solid #000; padding:3px; text-align:center; font-size:9px; background:#f0f0f0">EXECUTION DU BUDGET</th>'
+            + '<th rowspan="2" style="border:1px solid #000; padding:3px; text-align:center; vertical-align:middle; font-size:9px; background:#f0f0f0">ECART PREVISION<br>EMISSION</th>'
+            + '<th rowspan="2" style="border:1px solid #000; padding:3px; text-align:center; vertical-align:middle; font-size:9px; background:#f0f0f0">E / P &nbsp;&nbsp;%</th>'
+            + '</tr>'
+            // Recettes header row 2
+            + '<tr>'
+            + '<th style="border:1px solid #000; padding:3px; text-align:center; font-size:9px; background:#f0f0f0">EMISSIONS</th>'
+            + '<th style="border:1px solid #000; padding:3px; text-align:center; font-size:9px; background:#f0f0f0">RECOUVREMENT</th>'
+            + '<th style="border:1px solid #000; padding:3px; text-align:center; font-size:9px; background:#f0f0f0">NON VALEUR</th>'
+            + '<th style="border:1px solid #000; padding:3px; text-align:center; font-size:9px; background:#f0f0f0">RESTE A<br>RECOUVRER</th>'
+            + '</tr>'
+            // Blank spacer row
+            + '<tr><td colspan="8" style="border-left:1px solid #000; border-right:1px solid #000; padding:4px; border-top:none; border-bottom:none">&nbsp;</td></tr>'
+            // Recettes data
+            + recRows
+            // Total recettes
+            + '<tr style="font-weight:bold">'
+            + '<td style="text-align:center; padding:4px; border:1px solid #000; font-size:10px">TOTAL DES RECETTES AU TITRE I</td>'
+            + '<td class="text-right" style="padding:4px; border:1px solid #000; font-size:10px">' + fmt(tRP) + '</td>'
+            + '<td class="text-right" style="padding:4px; border:1px solid #000; font-size:10px">' + fmt(tRE) + '</td>'
+            + '<td class="text-right" style="padding:4px; border:1px solid #000; font-size:10px">' + fmt(tRR) + '</td>'
+            + '<td style="padding:4px; border:1px solid #000; font-size:10px"></td>'
+            + '<td style="padding:4px; border:1px solid #000; font-size:10px"></td>'
+            + '<td class="text-right" style="padding:4px; border:1px solid #000; font-size:10px">' + fmt(tRP - tRE) + '</td>'
+            + '<td class="text-right" style="padding:4px; border:1px solid #000; font-size:10px">' + (tRP > 0 ? ((tRE / tRP) * 100).toFixed(2) + '%' : '-') + '</td>'
+            + '</tr>'
+            // DEPENSES title
+            + '<tr><td colspan="8" style="text-align:center; font-weight:bold; font-size:11px; padding:6px; border:1px solid #000; letter-spacing:4px">DEPENSES &nbsp;&nbsp;DE &nbsp;&nbsp;FONCTIONNEMENT</td></tr>'
+            // Depenses header row 1
+            + '<tr>'
+            + '<th rowspan="2" style="border:1px solid #000; padding:3px; text-align:center; vertical-align:middle; font-size:9px; background:#f0f0f0">SECTIONS BUDGETAIRES</th>'
+            + '<th rowspan="2" style="border:1px solid #000; padding:3px; text-align:center; vertical-align:middle; font-size:9px; background:#f0f0f0">PREVISIONS ENGAGEES</th>'
+            + '<th rowspan="2" style="border:1px solid #000; padding:3px; text-align:center; vertical-align:middle; font-size:9px; background:#f0f0f0">POURCENTAGE<br>REALISATION</th>'
+            + '<th rowspan="2" style="border:1px solid #000; padding:3px; text-align:center; vertical-align:middle; font-size:9px; background:#f0f0f0">DEPENSES MANDATEES</th>'
+            + '<th colspan="4" style="border:1px solid #000; padding:3px; text-align:center; font-size:9px; background:#f0f0f0">ENGAGEMENTS NON MANDATES</th>'
+            + '</tr>'
+            // Depenses header row 2
+            + '<tr>'
+            + '<th style="border:1px solid #000; padding:3px; text-align:center; font-size:8px; background:#f0f0f0">COMMANDES<br>NON LIVREES</th>'
+            + '<th style="border:1px solid #000; padding:3px; text-align:center; font-size:8px; background:#f0f0f0">COMMANDES<br>LIVREES NON<br>FACTUREES</th>'
+            + '<th style="border:1px solid #000; padding:3px; text-align:center; font-size:8px; background:#f0f0f0">COMMANDES FACTUREES</th>'
+            + '<th style="border:1px solid #000; padding:3px; text-align:center; font-size:8px; background:#f0f0f0">TOTAL (6 + 7 + 8)</th>'
+            + '</tr>'
+            // Column numbers row
+            + '<tr>'
+            + '<td style="text-align:center; font-size:8px; font-weight:bold; border:1px solid #000; padding:2px">1</td>'
+            + '<td style="text-align:center; font-size:8px; font-weight:bold; border:1px solid #000; padding:2px">3</td>'
+            + '<td style="text-align:center; font-size:8px; font-weight:bold; border:1px solid #000; padding:2px">4</td>'
+            + '<td style="text-align:center; font-size:8px; font-weight:bold; border:1px solid #000; padding:2px">5</td>'
+            + '<td style="text-align:center; font-size:8px; font-weight:bold; border:1px solid #000; padding:2px">6</td>'
+            + '<td style="text-align:center; font-size:8px; font-weight:bold; border:1px solid #000; padding:2px">7</td>'
+            + '<td style="text-align:center; font-size:8px; font-weight:bold; border:1px solid #000; padding:2px">8</td>'
+            + '<td style="text-align:center; font-size:8px; font-weight:bold; border:1px solid #000; padding:2px">9</td>'
+            + '</tr>'
+            // Blank spacer row
+            + '<tr><td colspan="8" style="border-left:1px solid #000; border-right:1px solid #000; padding:4px; border-top:none; border-bottom:none">&nbsp;</td></tr>'
+            // Depenses data
+            + depRows
+            // Total depenses
+            + '<tr style="font-weight:bold">'
+            + '<td style="text-align:center; padding:4px; border:1px solid #000; font-size:10px">TOTAL DES DEPENSES AU TITRE I</td>'
+            + '<td class="text-right" style="padding:4px; border:1px solid #000; font-size:10px">' + fmt(tDP) + '</td>'
+            + '<td class="text-right" style="padding:4px; border:1px solid #000; font-size:10px">' + (tDP > 0 ? ((tDM / tDP) * 100).toFixed(2) : '0.00') + '</td>'
+            + '<td class="text-right" style="padding:4px; border:1px solid #000; font-size:10px">' + fmt(tDM) + '</td>'
+            + '<td class="text-center" style="padding:4px; border:1px solid #000; font-size:10px">-</td>'
+            + '<td class="text-center" style="padding:4px; border:1px solid #000; font-size:10px">-</td>'
+            + '<td class="text-center" style="padding:4px; border:1px solid #000; font-size:10px">-</td>'
+            + '<td class="text-center" style="padding:4px; border:1px solid #000; font-size:10px">-</td>'
+            + '</tr>'
+            + '</table>';
+
+          document.getElementById('content').innerHTML = contentHtml;
+        } catch (e) {
+          console.error('[RecapFonct] Erreur:', e);
+          document.getElementById('content').innerHTML =
+            '<div style="color:red;padding:20px">Erreur: ' + e.message + '</div>';
+        }
+      }
+    </script>
   </body>
 </html>

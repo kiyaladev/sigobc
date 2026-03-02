@@ -148,19 +148,7 @@
 
       async function loadData() {
         const db = new Dexie('TresorDatabase');
-        db.version(28).stores({
-          mandats:
-            '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
-          previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
-          sousChapitres: '++id, code, libelle, parentId, mairieId, actif',
-          chapitres: '++id, code, libelle, mairieId, actif',
-          taxes: '++id, code, libelle, mairieId, type, actif',
-          declarations:
-            '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
-          previsionsRecettes: '++id, exercice, taxeId, mairieId, statut, personnelId',
-          mairies: '++id, nom, code, ville',
-          printData: '++id, type, createdAt',
-        });
+        await db.open();
 
         const exercice = new Date().getFullYear();
         const exercicePrev = exercice - 1;
@@ -168,22 +156,24 @@
         const [
           sousChapitres,
           taxes,
-          mandatsN,
-          mandatsN1,
-          declarationsN,
-          declarationsN1,
-          previsionsN,
-          mairie,
+          allMandats,
+          allDeclarations,
+          allPrevisions,
+          mairieRaw,
         ] = await Promise.all([
-          db.sousChapitres.toArray(),
-          db.taxes.toArray(),
-          db.mandats.where('exercice').equals(exercice).toArray(),
-          db.mandats.where('exercice').equals(exercicePrev).toArray(),
-          db.declarations.where('exercice').equals(exercice).toArray(),
-          db.declarations.where('exercice').equals(exercicePrev).toArray(),
-          db.previsions.where('exercice').equals(exercice).toArray(),
-          db.mairies.toCollection().first(),
+          db.table('sousChapitres').toArray(),
+          db.table('taxes').toArray(),
+          db.table('mandats').toArray(),
+          db.table('declarations').toArray(),
+          db.table('previsions').toArray(),
+          db.table('mairies').toCollection().first(),
         ]);
+        const mairie = mairieRaw || {};
+        const mandatsN = allMandats.filter(m => m.exercice === exercice);
+        const mandatsN1 = allMandats.filter(m => m.exercice === exercicePrev);
+        const declarationsN = allDeclarations.filter(d => d.exercice === exercice);
+        const declarationsN1 = allDeclarations.filter(d => d.exercice === exercicePrev);
+        const previsionsN = allPrevisions.filter(p => p.exercice === exercice);
 
         // Build sous-chapitre map (id -> code)
         const scMap = {};
@@ -493,65 +483,25 @@
         document.getElementById('content').innerHTML = content;
       }
 
-      function processMessage(msgData) {
-        if (msgData && msgData.type === 'FILL_COMPTE_ADMIN_DATA') {
-          if (msgData.data) {
-            render(msgData.data);
-          }
+      async function loadAndRender() {
+        try {
+          const result = await loadData();
+          render(result);
+        } catch (e) {
+          console.error('Erreur chargement:', e);
+          document.getElementById('content').innerHTML =
+            '<div style="color:red;padding:20px;font-size:14px">Erreur: ' + e.message + '<br><pre>' + e.stack + '</pre></div>';
         }
       }
 
-      let pendingData = null;
-      let dataProcessed = false;
-
-      window.addEventListener('message', function (event) {
-        if (document.readyState === 'complete' || document.readyState === 'interactive') {
-          processMessage(event.data);
-          dataProcessed = true;
-        } else {
-          pendingData = event.data;
+      window.addEventListener('message', function (e) {
+        if (e.data && e.data.type === 'FILL_COMPTE_ADMIN_DATA') {
+          loadAndRender();
         }
       });
 
-      window.addEventListener('DOMContentLoaded', async function () {
-        if (pendingData && !dataProcessed) {
-          processMessage(pendingData);
-          dataProcessed = true;
-          return;
-        }
-
-        await new Promise((r) => setTimeout(r, 500));
-
-        if (!dataProcessed) {
-          try {
-            const result = await loadData();
-            render(result);
-            dataProcessed = true;
-          } catch (e) {
-            console.warn('Erreur chargement IndexedDB:', e);
-          }
-        }
-
-        if (!dataProcessed) {
-          try {
-            const db = new Dexie('TresorDatabase');
-            db.version(28).stores({ printData: '++id, type, createdAt' });
-            const records = await db
-              .table('printData')
-              .where('type')
-              .equals('FILL_COMPTE_ADMIN_DATA')
-              .toArray();
-            if (records.length > 0) {
-              const latest = records.sort(
-                (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
-              )[0];
-              processMessage(latest.data);
-              await db.table('printData').delete(latest.id);
-            }
-          } catch (e) {
-            console.warn('Erreur printData:', e);
-          }
-        }
+      document.addEventListener('DOMContentLoaded', function () {
+        setTimeout(loadAndRender, 500);
       });
     </script>
   </body>

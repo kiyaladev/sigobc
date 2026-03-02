@@ -176,21 +176,30 @@
 
       async function loadData() {
         const db = new Dexie('TresorDatabase');
-        db.version(28).stores({
-          mandats:
-            '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
-          previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
-          sousChapitres: '++id, code, libelle, parentId, mairieId, actif',
-          chapitres: '++id, code, libelle, mairieId, actif',
-          taxes: '++id, code, libelle, mairieId, type, actif',
-          declarations:
-            '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
-          previsionsRecettes: '++id, exercice, taxeId, mairieId, statut, personnelId',
-          mairies: '++id, nom, code, ville',
-          printData: '++id, type, createdAt',
-        });
+        await db.open();
 
         const exercice = new Date().getFullYear();
+
+        const [allMandats, allDeclarations, allPrevisions, allPrevisionsRecettes, sousChapitres, taxes, mairieRaw] = await Promise.all([
+          db.table('mandats').toArray(),
+          db.table('declarations').toArray(),
+          db.table('previsions').toArray(),
+          db.table('previsionsRecettes').toArray(),
+          db.table('sousChapitres').toArray(),
+          db.table('taxes').toArray(),
+          db.table('mairies').toCollection().first(),
+        ]);
+        const mairie = mairieRaw || {};
+        const mandats = allMandats.filter(m => m.exercice === exercice);
+        const declarations = allDeclarations.filter(d => d.exercice === exercice);
+        const previsions = allPrevisions.filter(p => p.exercice === exercice);
+        const previsionsRecettes = allPrevisionsRecettes.filter(p => p.exercice === exercice);
+
+        const scMap = {};
+        sousChapitres.forEach(sc => { scMap[sc.id] = sc.code; });
+
+        const taxeMap = {};
+        taxes.forEach(t => { taxeMap[t.id] = t.code; });
 
         return {
           mandats,
@@ -386,65 +395,25 @@
         document.getElementById('content').innerHTML = content;
       }
 
-      function processMessage(msgData) {
-        if (msgData && msgData.type === 'FILL_COMPTE_ADMIN_DATA') {
-          if (msgData.data) {
-            render(msgData.data);
-          }
+      async function loadAndRender() {
+        try {
+          const result = await loadData();
+          render(result);
+        } catch (e) {
+          console.error('Erreur chargement:', e);
+          document.getElementById('content').innerHTML =
+            '<div style="color:red;padding:20px;font-size:14px">Erreur: ' + e.message + '<br><pre>' + e.stack + '</pre></div>';
         }
       }
 
-      let pendingData = null;
-      let dataProcessed = false;
-
-      window.addEventListener('message', function (event) {
-        if (document.readyState === 'complete' || document.readyState === 'interactive') {
-          processMessage(event.data);
-          dataProcessed = true;
-        } else {
-          pendingData = event.data;
+      window.addEventListener('message', function (e) {
+        if (e.data && e.data.type === 'FILL_COMPTE_ADMIN_DATA') {
+          loadAndRender();
         }
       });
 
-      window.addEventListener('DOMContentLoaded', async function () {
-        if (pendingData && !dataProcessed) {
-          processMessage(pendingData);
-          dataProcessed = true;
-          return;
-        }
-
-        await new Promise((r) => setTimeout(r, 500));
-
-        if (!dataProcessed) {
-          try {
-            const result = await loadData();
-            render(result);
-            dataProcessed = true;
-          } catch (e) {
-            console.warn('Erreur chargement IndexedDB:', e);
-          }
-        }
-
-        if (!dataProcessed) {
-          try {
-            const db = new Dexie('TresorDatabase');
-            db.version(28).stores({ printData: '++id, type, createdAt' });
-            const records = await db
-              .table('printData')
-              .where('type')
-              .equals('FILL_COMPTE_ADMIN_DATA')
-              .toArray();
-            if (records.length > 0) {
-              const latest = records.sort(
-                (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
-              )[0];
-              processMessage(latest.data);
-              await db.table('printData').delete(latest.id);
-            }
-          } catch (e) {
-            console.warn('Erreur printData:', e);
-          }
-        }
+      document.addEventListener('DOMContentLoaded', function () {
+        setTimeout(loadAndRender, 500);
       });
     </script>
   </body>

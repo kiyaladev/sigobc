@@ -462,6 +462,8 @@ export interface OrdreMission {
   nombreJours: number;
   indemniteJournaliere: number;
   fraisTransport?: number;
+  fraisHebergement?: number;
+  fraisNourriture?: number;
   montantTotal: number;
   mandatId?: number;
   statut: 'brouillon' | 'valide' | 'paye';

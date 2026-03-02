@@ -149,17 +149,6 @@
         64: 'SECTION 64 - INTERVENTIONS ET CHARGES DIVERSES',
       };
 
-      var dataProcessed = false;
-      let pendingData = null;
-
-      function processData(messageData) {
-        if (dataProcessed) return;
-        if (messageData && messageData.type === 'FILL_COMPTE_ADMIN_DATA') {
-          dataProcessed = true;
-          renderPage(messageData.data);
-        }
-      }
-
       function renderPage(data) {
         const exercice = data.exercice || new Date().getFullYear();
         const mairie = data.mairie || {};
@@ -328,121 +317,66 @@
         document.title = 'Compte Administratif - Dépenses Engagées - ' + exercice;
       }
 
-      // Listen for postMessage
-      window.addEventListener('message', function (event) {
-        if (document.readyState === 'complete' || document.readyState === 'interactive') {
-          processData(event.data);
-        } else {
-          pendingData = event.data;
+      // Load data directly from IndexedDB
+      async function loadAndRender() {
+        try {
+          var db = new Dexie('TresorDatabase');
+          await db.open();
+
+          var exercice = new Date().getFullYear();
+
+          // Check printData
+          try {
+            var pd = await db.table('printData').toArray();
+            var latest = pd.filter(function (p) { return p.type === 'FILL_COMPTE_ADMIN_DATA'; })
+              .sort(function (a, b) { return b.createdAt - a.createdAt; })[0];
+            if (latest && latest.data && latest.data.exercice) exercice = latest.data.exercice;
+          } catch (e) {}
+
+          var params = new URLSearchParams(window.location.search);
+          if (params.get('exercice')) exercice = parseInt(params.get('exercice'));
+
+          var mairie = (await db.table('mairies').toCollection().first()) || {};
+          var allSousChapitres = await db.table('sousChapitres').toArray();
+          var allPrevisions = await db.table('previsions').toArray();
+          var previsions = allPrevisions.filter(function (p) { return p.exercice === exercice; });
+          var allMandats = await db.table('mandats').toArray();
+          var mandats = allMandats.filter(function (m) { return m.exercice === exercice && m.statut === 'paye'; });
+
+          // Build per-sous-chapitre aggregation for codes starting with 6
+          var scAggregation = {};
+          allSousChapitres.forEach(function (sc) {
+            if (!(sc.code || '').startsWith('6')) return;
+            scAggregation[sc.id] = { code: sc.code, libelle: sc.libelle, previsions: 0, engagements: 0 };
+          });
+
+          previsions.forEach(function (p) {
+            if (scAggregation[p.sousChapitreId]) scAggregation[p.sousChapitreId].previsions += p.montantPrevu || 0;
+          });
+
+          mandats.forEach(function (m) {
+            if (scAggregation[m.sousChapitreId]) scAggregation[m.sousChapitreId].engagements += m.montant || 0;
+          });
+
+          renderPage({
+            exercice: exercice,
+            mairie: mairie,
+            lignesDepenses: Object.values(scAggregation),
+          });
+        } catch (e) {
+          console.error('[DepEng] Erreur:', e);
+          document.getElementById('content').innerHTML = '<div style="color:red;padding:20px">Erreur: ' + e.message + '</div>';
+        }
+      }
+
+      window.addEventListener('message', function (e) {
+        if (e.data && e.data.type === 'FILL_COMPTE_ADMIN_DATA') {
+          loadAndRender();
         }
       });
 
-      // Fallback: IndexedDB
-      window.addEventListener('DOMContentLoaded', async function () {
-        console.log('[DepEng] DOMContentLoaded fired');
-
-        if (pendingData && !dataProcessed) {
-          processData(pendingData);
-          return;
-        }
-
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        if (!dataProcessed) {
-          try {
-            var db = new Dexie('TresorDatabase');
-            db.version(28).stores({
-              mandats:
-                '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
-              previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
-              sousChapitres: '++id, code, libelle, parentId, mairieId, actif',
-              chapitres: '++id, code, libelle, mairieId, actif',
-              taxes: '++id, code, libelle, mairieId, type, actif',
-              declarations:
-                '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
-              previsionsRecettes: '++id, exercice, taxeId, mairieId, statut, personnelId',
-              mairies: '++id, nom, code, ville',
-              printData: '++id, type, createdAt',
-            });
-
-            // Check printData first
-            var printDataRecords = await db
-              .table('printData')
-              .where('type')
-              .equals('FILL_COMPTE_ADMIN_DATA')
-              .toArray();
-
-            if (printDataRecords.length > 0) {
-              var latestRecord = printDataRecords.sort(function (a, b) {
-                return new Date(b.createdAt) - new Date(a.createdAt);
-              })[0];
-              processData(latestRecord.data);
-              await db.table('printData').delete(latestRecord.id);
-              return;
-            }
-
-            // Fallback: aggregate from DB
-            var params = new URLSearchParams(window.location.search);
-            var exercice = parseInt(params.get('exercice')) || new Date().getFullYear();
-            var mairieId = parseInt(params.get('mairieId')) || 1;
-
-            var mairie = await db.table('mairies').get(mairieId);
-            var allSousChapitres = await db
-              .table('sousChapitres')
-              .where('mairieId')
-              .equals(mairieId)
-              .toArray();
-            var allPrevisions = await db
-              .table('previsions')
-              .where('exercice')
-              .equals(exercice)
-              .toArray();
-            var allMandats = await db.table('mandats').where('exercice').equals(exercice).toArray();
-
-            var scMap = {};
-            allSousChapitres.forEach(function (sc) {
-              scMap[sc.id] = sc;
-            });
-
-            // Build per-sous-chapitre aggregation for codes starting with 6
-            var scAggregation = {};
-            allSousChapitres.forEach(function (sc) {
-              if (!(sc.code || '').startsWith('6')) return;
-              scAggregation[sc.id] = {
-                code: sc.code,
-                libelle: sc.libelle,
-                previsions: 0,
-                engagements: 0,
-              };
-            });
-
-            allPrevisions.forEach(function (p) {
-              if (scAggregation[p.sousChapitreId]) {
-                scAggregation[p.sousChapitreId].previsions += p.montantPrevu || 0;
-              }
-            });
-
-            allMandats.forEach(function (m) {
-              if (m.statut !== 'paye') return;
-              if (scAggregation[m.sousChapitreId]) {
-                scAggregation[m.sousChapitreId].engagements += m.montant || 0;
-              }
-            });
-
-            var lignesDepenses = Object.values(scAggregation);
-
-            processData({
-              type: 'FILL_COMPTE_ADMIN_DATA',
-              data: {
-                exercice: exercice,
-                mairie: mairie || {},
-                lignesDepenses: lignesDepenses,
-              },
-            });
-          } catch (e) {
-            console.warn('Erreur lors de la lecture de IndexedDB:', e);
-          }
-        }
+      document.addEventListener('DOMContentLoaded', function () {
+        setTimeout(loadAndRender, 500);
       });
     </script>
   </body>

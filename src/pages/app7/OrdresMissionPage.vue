@@ -188,13 +188,37 @@
             </div>
             <div class="row q-col-gutter-sm q-mt-sm">
               <div class="col-12 col-md-4">
-                <q-toggle v-model="form.hebergementAssure" label="Hébergement assuré" />
+                <q-toggle v-model="form.hebergementAssure" label="Hébergement assuré" @update:model-value="calcTotal" />
               </div>
               <div class="col-12 col-md-4">
-                <q-toggle v-model="form.nourritureAssuree" label="Nourriture assurée" />
+                <q-toggle v-model="form.nourritureAssuree" label="Nourriture assurée" @update:model-value="calcTotal" />
               </div>
               <div class="col-12 col-md-4">
                 <q-input v-model="form.moyenTransport" label="Moyen de transport" outlined dense />
+              </div>
+            </div>
+            <div class="row q-col-gutter-sm" v-if="!form.hebergementAssure || !form.nourritureAssuree">
+              <div class="col-12 col-md-4" v-if="!form.hebergementAssure">
+                <q-input
+                  v-model.number="form.fraisHebergement"
+                  label="Frais d'hébergement"
+                  outlined
+                  dense
+                  type="number"
+                  suffix="CFA"
+                  @update:model-value="calcTotal"
+                />
+              </div>
+              <div class="col-12 col-md-4" v-if="!form.nourritureAssuree">
+                <q-input
+                  v-model.number="form.fraisNourriture"
+                  label="Frais de nourriture"
+                  outlined
+                  dense
+                  type="number"
+                  suffix="CFA"
+                  @update:model-value="calcTotal"
+                />
               </div>
             </div>
             <q-separator class="q-my-sm" />
@@ -290,6 +314,8 @@ const defaultForm = () => ({
   nombreJours: 1,
   indemniteJournaliere: 0,
   fraisTransport: 0,
+  fraisHebergement: 0,
+  fraisNourriture: 0,
   montantTotal: 0,
   statut: 'valide' as OrdreMission['statut'],
   observations: '',
@@ -329,9 +355,13 @@ function calcJours() {
 }
 
 function calcTotal() {
+  const hebergement = form.value.hebergementAssure ? 0 : (form.value.fraisHebergement || 0);
+  const nourriture = form.value.nourritureAssuree ? 0 : (form.value.fraisNourriture || 0);
   form.value.montantTotal =
     (form.value.indemniteJournaliere || 0) * (form.value.nombreJours || 1) +
-    (form.value.fraisTransport || 0);
+    (form.value.fraisTransport || 0) +
+    hebergement +
+    nourriture;
 }
 
 function getEmployeNom(id: number): string {
@@ -458,6 +488,8 @@ function editMission(row: OrdreMission) {
     nombreJours: row.nombreJours,
     indemniteJournaliere: row.indemniteJournaliere,
     fraisTransport: row.fraisTransport || 0,
+    fraisHebergement: row.fraisHebergement || 0,
+    fraisNourriture: row.fraisNourriture || 0,
     montantTotal: row.montantTotal,
     statut: row.statut,
     observations: row.observations || '',
@@ -482,6 +514,8 @@ async function saveMission() {
     nombreJours: form.value.nombreJours,
     indemniteJournaliere: form.value.indemniteJournaliere,
     fraisTransport: form.value.fraisTransport || undefined,
+    fraisHebergement: form.value.hebergementAssure ? undefined : (form.value.fraisHebergement || undefined),
+    fraisNourriture: form.value.nourritureAssuree ? undefined : (form.value.fraisNourriture || undefined),
     montantTotal: form.value.montantTotal,
     statut: form.value.statut,
     observations: form.value.observations || undefined,

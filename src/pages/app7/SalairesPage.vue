@@ -637,29 +637,51 @@ function onEmployeSelected(id: number) {
   recalculate();
 }
 
+// Seuls les Salariés sont imposables (CNPS + ITS)
+function isExemptFromTax(typeEmploye: string | undefined): boolean {
+  if (!typeEmploye) return false;
+  return typeEmploye.startsWith('Contractuels') ||
+    typeEmploye.startsWith("Agents de l'État") ||
+    typeEmploye.startsWith('Maire et Adjoints');
+}
+
 function recalculate() {
-  const brut =
-    (form.value.salaireBase || 0) +
-    (form.value.indemniteLogement || 0) +
-    (form.value.indemniteTransport || 0) +
-    (form.value.autresIndemnites || 0);
-  form.value.montantBrut = brut;
+  const emp = employes.value.find((e) => e.id === form.value.employeId);
+  const exempt = isExemptFromTax(emp?.typeEmploye);
 
-  // L'indemnité de transport est exonérée d'impôt
-  const taxableBase = brut - (form.value.indemniteTransport || 0);
+  if (exempt) {
+    // Non-salariés : brut = base + logement, pas de taxes, net = brut + primes
+    const base = form.value.salaireBase || 0;
+    const log = form.value.indemniteLogement || 0;
+    const transport = form.value.indemniteTransport || 0;
+    const autres = form.value.autresIndemnites || 0;
+    const brut = base + log;
+    form.value.montantBrut = brut;
+    form.value.cotisationCNPS = 0;
+    form.value.impotSurSalaire = 0;
+    form.value.autresRetenues = 0;
+    form.value.montantNet = brut + transport + autres;
+  } else {
+    // Salariés : calcul complet
+    const brut =
+      (form.value.salaireBase || 0) +
+      (form.value.indemniteLogement || 0) +
+      (form.value.indemniteTransport || 0) +
+      (form.value.autresIndemnites || 0);
+    form.value.montantBrut = brut;
 
-  if (parametresPaie.value) {
-    const cnps = Math.round(taxableBase * (parametresPaie.value.tauxCnpsEmploye / 100));
-    const its = Math.round(taxableBase * (parametresPaie.value.tauxIts / 100));
-    form.value.cotisationCNPS = cnps;
-    form.value.impotSurSalaire = its;
+    const taxableBase = brut - (form.value.indemniteTransport || 0);
+    if (parametresPaie.value) {
+      form.value.cotisationCNPS = Math.round(taxableBase * (parametresPaie.value.tauxCnpsEmploye / 100));
+      form.value.impotSurSalaire = Math.round(taxableBase * (parametresPaie.value.tauxIts / 100));
+    }
+
+    form.value.montantNet =
+      brut -
+      (form.value.cotisationCNPS || 0) -
+      (form.value.impotSurSalaire || 0) -
+      (form.value.autresRetenues || 0);
   }
-
-  form.value.montantNet =
-    brut -
-    (form.value.cotisationCNPS || 0) -
-    (form.value.impotSurSalaire || 0) -
-    (form.value.autresRetenues || 0);
 }
 
 const filteredFiches = computed(() => {
@@ -822,20 +844,31 @@ async function generateBulletins() {
   const newFiches = candidates
     .filter((e) => !existingIds.has(e.id!))
     .map((e) => {
-      const brut =
-        e.salaireBase +
-        (e.indemniteLogement || 0) +
-        (e.indemniteTransport || 0) +
-        (e.autresIndemnites || 0);
+      const exempt = isExemptFromTax(e.typeEmploye);
 
-      // L'indemnité de transport est exonérée d'impôt
-      const taxableBase = brut - (e.indemniteTransport || 0);
-
+      let brut: number;
       let calcCnps = 0;
       let calcIts = 0;
-      if (parametresPaie.value) {
-        calcCnps = Math.round(taxableBase * (parametresPaie.value.tauxCnpsEmploye / 100));
-        calcIts = Math.round(taxableBase * (parametresPaie.value.tauxIts / 100));
+      let netPay: number;
+
+      if (exempt) {
+        // Non-salariés : brut = base + logement, pas de taxes, net = brut + primes
+        brut = e.salaireBase + (e.indemniteLogement || 0);
+        netPay = brut + (e.indemniteTransport || 0) + (e.autresIndemnites || 0);
+      } else {
+        // Salariés : calcul complet
+        brut =
+          e.salaireBase +
+          (e.indemniteLogement || 0) +
+          (e.indemniteTransport || 0) +
+          (e.autresIndemnites || 0);
+
+        if (parametresPaie.value) {
+          const taxableBase = brut - (e.indemniteTransport || 0);
+          calcCnps = Math.round(taxableBase * (parametresPaie.value.tauxCnpsEmploye / 100));
+          calcIts = Math.round(taxableBase * (parametresPaie.value.tauxIts / 100));
+        }
+        netPay = brut - calcCnps - calcIts;
       }
 
       return {
@@ -852,7 +885,7 @@ async function generateBulletins() {
         cotisationCNPS: calcCnps,
         impotSurSalaire: calcIts,
         autresRetenues: 0,
-        montantNet: brut - calcCnps - calcIts,
+        montantNet: netPay,
         statut: 'paye' as const,
         personnelId: 1,
         createdAt: new Date(),

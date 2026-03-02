@@ -16,91 +16,11 @@
         margin: 0;
         padding: 10px;
       }
-      .container {
-        width: 100%;
-      }
-      .main-title {
-        text-decoration: underline;
-        font-size: 14px;
-        margin: 5px 0;
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 0;
-      }
-      th,
-      td {
-        border: 1px solid #000;
-        padding: 3px 4px;
-      }
-      th {
-        background-color: #f0f0f0;
-        text-align: center;
-        vertical-align: middle;
-        font-size: 9px;
-      }
-      .col-code {
-        width: 8%;
-        text-align: center;
-      }
-      .col-libelle {
-        width: 30%;
-        text-align: left;
-      }
-      .col-num {
-        width: 14%;
+      .text-right {
         text-align: right;
-        white-space: nowrap;
       }
-      .col-percent {
-        width: 8%;
+      .text-center {
         text-align: center;
-      }
-      .section-header {
-        background-color: #e0e0e0;
-        font-weight: bold;
-      }
-      .total-section {
-        background-color: #d0d0d0;
-        font-weight: bold;
-        border-top: 2px solid #000;
-      }
-      .grand-total {
-        background-color: #bbb;
-        font-weight: bold;
-        border-top: 3px double #000;
-      }
-      .doc-header-cell {
-        padding: 0 !important;
-        background: #fff !important;
-      }
-      .doc-header-grid {
-        width: 100%;
-        display: grid;
-        grid-template-columns: 1fr 2fr 1fr;
-      }
-      .doc-header-block {
-        padding: 4px 6px;
-        min-height: 70px;
-      }
-      .doc-header-block + .doc-header-block {
-        border-left: 1px solid #000;
-      }
-      .doc-header-left {
-        text-align: left;
-        font-weight: bold;
-      }
-      .doc-header-center {
-        text-align: center;
-        font-weight: bold;
-      }
-      .doc-header-right {
-        text-align: right;
-        font-weight: bold;
-      }
-      .doc-header-center .main-title {
-        margin: 0 0 4px 0;
       }
       .print-button {
         position: fixed;
@@ -136,18 +56,16 @@
   </head>
   <body>
     <button class="print-button no-print" onclick="window.print()">Imprimer</button>
-    <div class="container">
-      <div id="content">
-        <div class="loading" id="loading">Chargement des donnees...</div>
-      </div>
+    <div id="content">
+      <div class="loading">Chargement des donnees...</div>
     </div>
 
     <script>
       function fmt(v) {
         return v ? new Intl.NumberFormat('fr-FR').format(v) : '0';
       }
-      function pct(a, b) {
-        return b ? ((a / b) * 100).toFixed(2) : '0.00';
+      function dashFormat(v) {
+        return v && v !== 0 ? fmt(v) : '-';
       }
 
       const SECTIONS = {
@@ -161,40 +79,28 @@
 
       async function loadData() {
         const db = new Dexie('TresorDatabase');
-        db.version(28).stores({
-          mandats:
-            '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
-          previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
-          sousChapitres: '++id, code, libelle, parentId, mairieId, actif',
-          chapitres: '++id, code, libelle, mairieId, actif',
-          taxes: '++id, code, libelle, mairieId, type, actif',
-          declarations:
-            '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
-          previsionsRecettes: '++id, exercice, taxeId, mairieId, statut, personnelId',
-          mairies: '++id, nom, code, ville',
-          printData: '++id, type, createdAt',
-        });
+        await db.open();
 
         const exercice = new Date().getFullYear();
 
-        const [taxes, previsionsRecettes, declarations, mairie] = await Promise.all([
-          db.taxes.toArray(),
-          db.previsionsRecettes.where('exercice').equals(exercice).toArray(),
-          db.declarations.where('exercice').equals(exercice).toArray(),
-          db.mairies.toCollection().first(),
+        const [taxes, allPrevisionsRecettes, allDeclarations, mairieRaw] = await Promise.all([
+          db.table('taxes').toArray(),
+          db.table('previsionsRecettes').toArray(),
+          db.table('declarations').toArray(),
+          db.table('mairies').toCollection().first(),
         ]);
+        const mairie = mairieRaw || {};
+        const previsionsRecettes = allPrevisionsRecettes.filter(r => r.exercice === exercice);
+        const declarations = allDeclarations.filter(d => d.exercice === exercice);
 
-        // Filter taxes with code starting with '0' (investissement recettes)
         const investTaxes = taxes.filter((t) => t.code && t.code.startsWith('0'));
 
-        // Build prevision map by taxeId
         const prevMap = {};
         previsionsRecettes.forEach((p) => {
           if (!prevMap[p.taxeId]) prevMap[p.taxeId] = 0;
           prevMap[p.taxeId] += p.montantPrevu || 0;
         });
 
-        // Build emissions and recouvrements maps by taxeId
         const emissionMap = {};
         const recouvrementMap = {};
         declarations.forEach((d) => {
@@ -213,56 +119,7 @@
 
       function render(data) {
         const { investTaxes, prevMap, emissionMap, recouvrementMap, exercice, mairie } = data;
-        const mairieNom = mairie ? mairie.nom || 'Mairie de Vavoua' : 'Mairie de Vavoua';
-
-        const content = document.getElementById('content');
-        content.innerHTML = '';
-
-        // Header table like in screenshot
-        const headerHtml = `
-          <table style="border: none; margin-bottom: 5px;">
-            <tr>
-              <td style="width: 30%; font-weight: bold; text-align: center; border: 1px solid #000;">
-                COMMUNE DE ${(mairie.nom || 'VAVOUA').replace(/^mairie de /i, '').toUpperCase()}
-              </td>
-              <td style="width: 50%; font-weight: bold; text-align: center; border: 1px solid #000;">
-                COMPTE ADMINISTRATIF - RECETTES D'INVESTISSEMENT
-              </td>
-              <td style="width: 15%; font-weight: bold; text-align: center; border: 1px solid #000;">
-                ANNEE<br>${exercice}
-              </td>
-              <td style="width: 5%; font-weight: bold; text-align: center; border: 1px solid #000;">
-                N°<br>27
-              </td>
-            </tr>
-          </table>
-        `;
-
-        // Main Table Header
-        const tableHtml = `
-          <table>
-            <thead>
-              <tr>
-                <th rowspan="2" style="width: 30%; text-align: center;">COMPTES ET RUBRIQUES BUDGETAIRES</th>
-                <th rowspan="2" style="width: 10%;">PREVISIONS</th>
-                <th colspan="4" style="padding: 6px;">EXECUTION DU BUDGET</th>
-                <th rowspan="2" style="width: 10%;">ECART<br>PREVISIONS<br>RECOUVREMENTS</th>
-                <th rowspan="2" style="width: 5%;">P</th>
-                <th rowspan="2" style="width: 5%;">R /<br>%</th>
-              </tr>
-              <tr>
-                <th style="width: 10%;">EMISSIONS</th>
-                <th style="width: 10%;">RECOU-<br>VREMENT</th>
-                <th style="width: 10%;">NON VALEUR</th>
-                <th style="width: 10%;">RESTE A RECOUVRER</th>
-              </tr>
-            </thead>
-            <tbody id="table-body">
-            </tbody>
-          </table>
-        `;
-        content.innerHTML = headerHtml + tableHtml;
-        const tbody = document.getElementById('table-body');
+        const communeNom = (mairie.nom || 'VAVOUA').replace(/^mairie de /i, '').toUpperCase();
 
         // Organize hierarchy
         const sections = {};
@@ -280,7 +137,6 @@
           }
         });
 
-        // Map articles and bubble totals
         articles.forEach((art) => {
           const c = art.code;
           const secCode = c.substring(0, 2);
@@ -292,19 +148,12 @@
           }
           if (!sections[secCode].chapitres[chapCode]) {
             if (!chapitres[chapCode]) {
-              chapitres[chapCode] = {
-                label: 'Chapitre ' + chapCode,
-                prev: 0,
-                emis: 0,
-                rec: 0,
-                articles: [],
-              };
+              chapitres[chapCode] = { label: 'Chapitre ' + chapCode, prev: 0, emis: 0, rec: 0, articles: [] };
             }
             sections[secCode].chapitres[chapCode] = chapitres[chapCode];
           }
           sections[secCode].chapitres[chapCode].articles.push(art);
 
-          // Bubble up totals
           const prev = prevMap[art.id] || 0;
           const emis = emissionMap[art.id] || 0;
           const rec = recouvrementMap[art.id] || 0;
@@ -318,217 +167,140 @@
           sections[secCode].rec += rec;
         });
 
-        function dashFormat(v) {
-          return v && v !== 0 ? fmt(v) : '-';
+        var B = 'border:1px solid #000;';
+        var P = 'padding:3px 4px;';
+
+        let grandPrev = 0, grandEmis = 0, grandRec = 0;
+        var dataRows = '';
+
+        function makeDataCells(prev, emis, rec) {
+          var ecart = prev - rec;
+          var pctVal = '-';
+          if (prev > 0) pctVal = (Math.round((rec / prev) * 10000) / 100).toFixed(2);
+          else if (rec > 0) pctVal = '100.00';
+          return '<td class="text-right" style="' + B + P + '">' + dashFormat(prev) + '</td>'
+            + '<td class="text-right" style="' + B + P + '">' + dashFormat(emis) + '</td>'
+            + '<td class="text-right" style="' + B + P + '">' + dashFormat(rec) + '</td>'
+            + '<td class="text-center" style="' + B + P + '"></td>'
+            + '<td class="text-center" style="' + B + P + '">' + dashFormat(Math.max(0, emis - rec)) + '</td>'
+            + '<td class="text-right" style="' + B + P + '">' + dashFormat(ecart) + '</td>'
+            + '<td class="text-right" style="' + B + P + '">' + pctVal + '</td>';
         }
 
-        let grandPrev = 0,
-          grandEmis = 0,
-          grandRec = 0;
-        let htmlRows = '';
+        Object.keys(sections).sort().forEach(function (secCode) {
+          var sec = sections[secCode];
+          if (sec.prev === 0 && sec.emis === 0 && sec.rec === 0) return;
 
-        Object.keys(sections)
-          .sort()
-          .forEach((secCode) => {
-            const sec = sections[secCode];
-            if (sec.prev === 0 && sec.emis === 0 && sec.rec === 0) return; // Skip empty sections
+          // Section header
+          dataRows += '<tr><td colspan="8" style="' + B + 'text-align:left; padding:8px 4px; font-weight:bold">'
+            + 'SECTION ' + secCode + ' - ' + (sec.label || '').toUpperCase()
+            + '</td></tr>';
 
-            htmlRows += '<tr class="section-header">';
-            htmlRows +=
-              '<td colspan="9" style="text-align: left; padding: 10px 5px; background: #fff;"><strong>SECTION ' +
-              secCode +
-              ' - ' +
-              (sec.label || '').toUpperCase() +
-              '</strong></td>';
-            htmlRows += '</tr>';
+          Object.keys(sec.chapitres).sort().forEach(function (chapCode) {
+            var chap = sec.chapitres[chapCode];
+            if (chap.articles.length === 0) return;
 
-            Object.keys(sec.chapitres)
-              .sort()
-              .forEach((chapCode) => {
-                const chap = sec.chapitres[chapCode];
-                if (chap.articles.length === 0) return;
+            // Chapitre header
+            dataRows += '<tr><td colspan="8" style="' + B + 'text-align:left; padding:4px 4px 4px 10px; font-weight:bold">'
+              + 'Chapitre ' + chapCode + ' - ' + (chap.label || '').replace(/^CHAP\.\s*\d+\s*-\s*/i, '')
+              + '</td></tr>';
 
-                htmlRows += '<tr>';
-                htmlRows +=
-                  '<td colspan="9" style="text-align: left; padding-left: 15px;"><strong>Chapitre ' +
-                  chapCode +
-                  ' - ' +
-                  (chap.label || 'Chapitre ' + chapCode).replace(/^CHAP\.\s*\d+\s*-\s*/i, '') +
-                  '</strong></td>';
-                htmlRows += '</tr>';
+            // Articles
+            chap.articles.sort(function (a, b) { return (a.code || '').localeCompare(b.code || ''); }).forEach(function (art) {
+              var p = prevMap[art.id] || 0;
+              var e = emissionMap[art.id] || 0;
+              var r = recouvrementMap[art.id] || 0;
 
-                chap.articles
-                  .sort((a, b) => (a.code || '').localeCompare(b.code || ''))
-                  .forEach((art) => {
-                    const p = prevMap[art.id] || 0;
-                    const e = emissionMap[art.id] || 0;
-                    const r = recouvrementMap[art.id] || 0;
-                    const reste = Math.max(0, e - r);
-                    // ECART PREVISIONS RECOUVREMENTS = Prev - Rec (in image, 498M Prev, 0 Rec, 498M Ecart)
-                    const ecart = p - r;
-                    let pctVal = '-';
-                    if (p > 0) {
-                      pctVal = (Math.round((r / p) * 10000) / 100).toFixed(2);
-                    } else if (r > 0) {
-                      pctVal = '100.00';
-                    }
+              dataRows += '<tr>'
+                + '<td style="' + B + 'padding:3px 4px 3px 20px">Article ' + art.code + ' - ' + (art.libelle || '') + '</td>'
+                + makeDataCells(p, e, r)
+                + '</tr>';
+            });
 
-                    htmlRows += '<tr>';
-                    htmlRows +=
-                      '<td style="text-align: left; padding-left: 25px;">Article ' +
-                      art.code +
-                      ' - ' +
-                      (art.libelle || '') +
-                      '</td>';
-                    htmlRows += '<td class="col-num">' + dashFormat(p) + '</td>';
-                    htmlRows += '<td class="col-num">' + dashFormat(e) + '</td>';
-                    htmlRows += '<td class="col-num">' + dashFormat(r) + '</td>';
-                    htmlRows += '<td class="col-num"></td>'; // Non valeur
-                    htmlRows += '<td class="col-num">' + dashFormat(reste) + '</td>';
-                    htmlRows += '<td class="col-num">' + dashFormat(ecart) + '</td>';
-                    htmlRows += '<td style="text-align: center;"></td>';
-                    htmlRows += '<td style="text-align: center;">' + pctVal + '</td>';
-                    htmlRows += '</tr>';
-                  });
-
-                // Chapitre Total
-                const chapReste = Math.max(0, chap.emis - chap.rec);
-                const chapEcart = chap.prev - chap.rec;
-                let chapPct = '-';
-                if (chap.prev > 0) {
-                  chapPct = (Math.round((chap.rec / chap.prev) * 10000) / 100).toFixed(2);
-                } else if (chap.rec > 0) {
-                  chapPct = '100.00';
-                }
-
-                htmlRows += '<tr style="font-weight: bold; text-align: center;">';
-                htmlRows +=
-                  '<td style="text-align: center;">SOUS TOTAL CHAPITRE - ' + chapCode + '</td>';
-                htmlRows += '<td class="col-num">' + dashFormat(chap.prev) + '</td>';
-                htmlRows += '<td class="col-num">' + dashFormat(chap.emis) + '</td>';
-                htmlRows += '<td class="col-num">' + dashFormat(chap.rec) + '</td>';
-                htmlRows += '<td class="col-num"></td>';
-                htmlRows += '<td class="col-num">' + dashFormat(chapReste) + '</td>';
-                htmlRows += '<td class="col-num">' + dashFormat(chapEcart) + '</td>';
-                htmlRows += '<td style="text-align: center;"></td>';
-                htmlRows += '<td style="text-align: center;">' + chapPct + '</td>';
-                htmlRows += '</tr>';
-              });
-
-            // Section Total
-            const secReste = Math.max(0, sec.emis - sec.rec);
-            const secEcart = sec.prev - sec.rec;
-            let secPct = '-';
-            if (sec.prev > 0) {
-              secPct = (Math.round((sec.rec / sec.prev) * 10000) / 100).toFixed(2);
-            } else if (sec.rec > 0) {
-              secPct = '100.00';
-            }
-
-            htmlRows += '<tr style="font-weight: bold;">';
-            htmlRows += '<td style="text-align: center;">TOTAL SECTION - ' + secCode + '</td>';
-            htmlRows += '<td class="col-num">' + dashFormat(sec.prev) + '</td>';
-            htmlRows += '<td class="col-num">' + dashFormat(sec.emis) + '</td>';
-            htmlRows += '<td class="col-num">' + dashFormat(sec.rec) + '</td>';
-            htmlRows += '<td class="col-num"></td>';
-            htmlRows += '<td class="col-num">' + dashFormat(secReste) + '</td>';
-            htmlRows += '<td class="col-num">' + dashFormat(secEcart) + '</td>';
-            htmlRows += '<td style="text-align: center;"></td>';
-            htmlRows += '<td style="text-align: center;">' + secPct + '</td>';
-            htmlRows += '</tr>';
-
-            grandPrev += sec.prev;
-            grandEmis += sec.emis;
-            grandRec += sec.rec;
+            // Chapitre subtotal
+            dataRows += '<tr style="font-weight:bold">'
+              + '<td style="' + B + P + 'text-align:center">SOUS TOTAL CHAPITRE - ' + chapCode + '</td>'
+              + makeDataCells(chap.prev, chap.emis, chap.rec)
+              + '</tr>';
           });
 
-        // Grand Total
-        const grandReste = Math.max(0, grandEmis - grandRec);
-        const grandEcart = grandPrev - grandRec;
-        let grandPct = '-';
-        if (grandPrev > 0) {
-          grandPct = (Math.round((grandRec / grandPrev) * 10000) / 100).toFixed(2);
-        } else if (grandRec > 0) {
-          grandPct = '100.00';
-        }
+          // Section total
+          dataRows += '<tr style="font-weight:bold">'
+            + '<td style="' + B + P + 'text-align:center">TOTAL SECTION - ' + secCode + '</td>'
+            + makeDataCells(sec.prev, sec.emis, sec.rec)
+            + '</tr>';
 
-        htmlRows += '<tr style="font-weight: bold; font-size: 11px;">';
-        htmlRows += '<td style="text-align: center;">TOTAL DES RECETTES AU TITRE - II</td>';
-        htmlRows += '<td class="col-num">' + dashFormat(grandPrev) + '</td>';
-        htmlRows += '<td class="col-num">' + dashFormat(grandEmis) + '</td>';
-        htmlRows += '<td class="col-num">' + dashFormat(grandRec) + '</td>';
-        htmlRows += '<td class="col-num"></td>';
-        htmlRows += '<td class="col-num">' + dashFormat(grandReste) + '</td>';
-        htmlRows += '<td class="col-num">' + dashFormat(grandEcart) + '</td>';
-        htmlRows += '<td style="text-align: center;"></td>';
-        htmlRows += '<td style="text-align: center;">' + grandPct + '</td>';
-        htmlRows += '</tr>';
+          // Spacer row between sections
+          dataRows += '<tr><td colspan="8" style="border-left:1px solid #000; border-right:1px solid #000; padding:4px; border-top:none; border-bottom:none">&nbsp;</td></tr>';
 
-        tbody.innerHTML = htmlRows;
+          grandPrev += sec.prev;
+          grandEmis += sec.emis;
+          grandRec += sec.rec;
+        });
 
+        // Grand total
+        dataRows += '<tr style="font-weight:bold; font-size:11px">'
+          + '<td style="' + B + P + 'text-align:center">TOTAL DES RECETTES AU TITRE - II</td>'
+          + makeDataCells(grandPrev, grandEmis, grandRec)
+          + '</tr>';
+
+        // Build full single table
+        var html = '<table style="width:100%; border-collapse:collapse; table-layout:fixed">'
+          + '<colgroup>'
+          + '<col style="width:35%"><col style="width:10%"><col style="width:10%"><col style="width:10%">'
+          + '<col style="width:7%"><col style="width:7%"><col style="width:12%"><col style="width:9%">'
+          + '</colgroup>'
+          // Document header
+          + '<tr>'
+          + '<td style="text-align:center; font-weight:bold; padding:6px; ' + B + '">COMMUNE DE ' + communeNom + '</td>'
+          + '<td colspan="5" style="text-align:center; font-weight:bold; font-size:14px; padding:6px; ' + B + '">COMPTE ADMINISTRATIF &nbsp;-&nbsp; RECETTES D\'INVESTISSEMENT</td>'
+          + '<td style="text-align:center; padding:4px; ' + B + ' font-size:9px">ANNEE<br><b>' + exercice + '</b></td>'
+          + '<td style="text-align:center; padding:4px; ' + B + ' font-size:9px">N&deg;<br><b>27</b></td>'
+          + '</tr>'
+          // Table header row 1
+          + '<tr>'
+          + '<th rowspan="2" style="' + B + 'padding:3px; text-align:center; vertical-align:middle; font-size:9px">COMPTES ET RUBRIQUES BUDGETAIRES</th>'
+          + '<th rowspan="2" style="' + B + 'padding:3px; text-align:center; vertical-align:middle; font-size:9px">PREVISIONS</th>'
+          + '<th colspan="4" style="' + B + 'padding:3px; text-align:center; font-size:9px">EXECUTION DU BUDGET</th>'
+          + '<th rowspan="2" style="' + B + 'padding:3px; text-align:center; vertical-align:middle; font-size:9px">ECART<br>PREVISIONS<br>RECOUVREMENTS</th>'
+          + '<th rowspan="2" style="' + B + 'padding:3px; text-align:center; vertical-align:middle; font-size:9px">R /<br>%</th>'
+          + '</tr>'
+          // Table header row 2
+          + '<tr>'
+          + '<th style="' + B + 'padding:3px; text-align:center; font-size:9px">EMISSIONS</th>'
+          + '<th style="' + B + 'padding:3px; text-align:center; font-size:9px">RECOU -<br>VREMENT</th>'
+          + '<th style="' + B + 'padding:3px; text-align:center; font-size:9px">NON VALEUR</th>'
+          + '<th style="' + B + 'padding:3px; text-align:center; font-size:9px">RESTE A RECOUVRER</th>'
+          + '</tr>'
+          // Spacer
+          + '<tr><td colspan="8" style="border-left:1px solid #000; border-right:1px solid #000; padding:4px; border-top:none; border-bottom:none">&nbsp;</td></tr>'
+          // Data rows
+          + dataRows
+          + '</table>';
+
+        document.getElementById('content').innerHTML = html;
         document.title = "Compte Administratif - Recettes d'Investissement - " + exercice;
       }
 
-      function processMessage(msgData) {
-        if (msgData && msgData.type === 'FILL_COMPTE_ADMIN_DATA') {
-          if (msgData.data) {
-            render(msgData.data);
-          }
+      async function loadAndRender() {
+        try {
+          const result = await loadData();
+          render(result);
+        } catch (e) {
+          console.error('Erreur chargement:', e);
+          document.getElementById('content').innerHTML =
+            '<div style="color:red;padding:20px;font-size:14px">Erreur: ' + e.message + '<br><pre>' + e.stack + '</pre></div>';
         }
       }
 
-      let pendingData = null;
-      let dataProcessed = false;
-
-      window.addEventListener('message', function (event) {
-        if (document.readyState === 'complete' || document.readyState === 'interactive') {
-          processMessage(event.data);
-          dataProcessed = true;
-        } else {
-          pendingData = event.data;
+      window.addEventListener('message', function (e) {
+        if (e.data && e.data.type === 'FILL_COMPTE_ADMIN_DATA') {
+          loadAndRender();
         }
       });
 
-      window.addEventListener('DOMContentLoaded', async function () {
-        if (pendingData && !dataProcessed) {
-          processMessage(pendingData);
-          dataProcessed = true;
-          return;
-        }
-
-        await new Promise((r) => setTimeout(r, 500));
-
-        if (!dataProcessed) {
-          try {
-            const result = await loadData();
-            render(result);
-            dataProcessed = true;
-          } catch (e) {
-            console.warn('Erreur chargement IndexedDB:', e);
-          }
-        }
-
-        // Also try printData table
-        if (!dataProcessed) {
-          try {
-            const db = new Dexie('TresorDatabase');
-            db.version(28).stores({ printData: '++id, type, createdAt' });
-            const records = await db
-              .table('printData')
-              .where('type')
-              .equals('FILL_COMPTE_ADMIN_DATA')
-              .toArray();
-            if (records.length > 0) {
-              const latest = records.sort(
-                (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
-              )[0];
-              processMessage(latest.data);
-              await db.table('printData').delete(latest.id);
-            }
-          } catch (e) {
-            console.warn('Erreur printData:', e);
-          }
-        }
+      document.addEventListener('DOMContentLoaded', function () {
+        setTimeout(loadAndRender, 500);
       });
     </script>
   </body>
