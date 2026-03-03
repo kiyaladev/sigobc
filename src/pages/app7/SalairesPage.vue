@@ -103,6 +103,8 @@
           :columns="columns"
           :loading="loading"
           :show-actions="false"
+          :pagination="tablePagination"
+          @update:pagination="(v: any) => (tablePagination = v)"
           show-export-csv
           export-filename="fiches-paie"
         >
@@ -146,6 +148,32 @@
                 <q-tooltip>Supprimer</q-tooltip>
               </q-btn>
             </q-td>
+          </template>
+          <!-- Report row (page 2+) -->
+          <template v-slot:top-row>
+            <q-tr v-if="tablePagination.page > 1" class="report-row">
+              <q-td class="text-weight-bold text-italic">REPORT</q-td>
+              <q-td></q-td>
+              <q-td></q-td>
+              <q-td></q-td>
+              <q-td class="text-right text-weight-bold text-italic">{{ formatMontant(reportValues.montantBrut) }}</q-td>
+              <q-td class="text-right text-weight-bold text-italic">{{ formatMontant(reportValues.montantNet) }}</q-td>
+              <q-td></q-td>
+              <q-td></q-td>
+            </q-tr>
+          </template>
+          <!-- Total row -->
+          <template v-slot:bottom-row>
+            <q-tr class="total-row">
+              <q-td class="text-weight-bold">TOTAL</q-td>
+              <q-td></q-td>
+              <q-td></q-td>
+              <q-td></q-td>
+              <q-td class="text-right text-weight-bold">{{ formatMontant(totalPageValues.montantBrut) }}</q-td>
+              <q-td class="text-right text-weight-bold">{{ formatMontant(totalPageValues.montantNet) }}</q-td>
+              <q-td></q-td>
+              <q-td></q-td>
+            </q-tr>
           </template>
         </DataTable>
       </q-card-section>
@@ -519,6 +547,8 @@ const employes = ref<Employe[]>([]);
 const parametresPaie = ref<ParametresPaie | null>(null);
 
 const now = new Date();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const tablePagination = ref<any>({ page: 1, rowsPerPage: 10 });
 const filterMois = ref<number | null>(null);
 const filterAnnee = ref(now.getFullYear());
 const filterStatut = ref<string | null>(null);
@@ -724,6 +754,32 @@ const filteredFiches = computed(() => {
 
 const totalBrut = computed(() => filteredFiches.value.reduce((s, f) => s + f.montantBrut, 0));
 const totalNet = computed(() => filteredFiches.value.reduce((s, f) => s + f.montantNet, 0));
+
+// Report (cumul pages précédentes) et Total (cumul jusqu'à page courante)
+const reportValues = computed(() => {
+  const page = tablePagination.value.page;
+  const perPage = tablePagination.value.rowsPerPage;
+  if (page <= 1 || perPage <= 0) return { montantBrut: 0, montantNet: 0 };
+  const rows = filteredFiches.value.slice(0, (page - 1) * perPage);
+  return {
+    montantBrut: rows.reduce((s, f) => s + f.montantBrut, 0),
+    montantNet: rows.reduce((s, f) => s + f.montantNet, 0),
+  };
+});
+
+const totalPageValues = computed(() => {
+  const page = tablePagination.value.page;
+  const perPage = tablePagination.value.rowsPerPage;
+  const endIdx =
+    perPage <= 0
+      ? filteredFiches.value.length
+      : Math.min(page * perPage, filteredFiches.value.length);
+  const rows = filteredFiches.value.slice(0, endIdx);
+  return {
+    montantBrut: rows.reduce((s, f) => s + f.montantBrut, 0),
+    montantNet: rows.reduce((s, f) => s + f.montantNet, 0),
+  };
+});
 
 // Cartes de statistiques avec animations
 const statsCards = computed(() => {
@@ -1110,6 +1166,21 @@ onMounted(() => {
 
 .pulse-animation {
   animation: pulse 2s ease-in-out infinite;
+}
+
+// Report & Total rows
+:deep(.report-row) {
+  background: #fef3c7 !important;
+  td {
+    font-style: italic;
+    font-weight: 600;
+  }
+}
+:deep(.total-row) {
+  background: #dbeafe !important;
+  td {
+    font-weight: 700;
+  }
 }
 
 // Animations

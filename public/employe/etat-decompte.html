@@ -321,21 +321,24 @@
         for (let i = 0; i < data.length; i += ROWS_PER_PAGE)
           pages.push(data.slice(i, i + ROWS_PER_PAGE));
         const totalPages = pages.length;
-        let cumulTotal = 0;
+        let cBrut = 0, cPf = 0, cAt = 0, cRg = 0, cTotal = 0;
         let html = '';
 
         pages.forEach((pageData, idx) => {
           const isLast = idx === totalPages - 1;
-          const reportTotal = cumulTotal;
-          let pageTotal = 0;
+          const rBrut = cBrut, rPf = cPf, rAt = cAt, rRg = cRg, rTotal = cTotal;
+
           pageData.forEach((d) => {
-            pageTotal += d.total;
+            cBrut += d.brut;
+            cPf += d.pf;
+            cAt += d.at;
+            cRg += d.rg;
+            cTotal += d.total;
           });
-          cumulTotal += pageTotal;
 
           const reportRow =
             idx > 0
-              ? `<tr class="report-row"><td colspan="6" class="text-left-col" style="padding-left:12px">REPORT</td><td class="text-right-col">${fmt(reportTotal)}</td></tr>`
+              ? `<tr class="report-row"><td colspan="2" class="text-left-col" style="padding-left:12px">REPORT</td><td class="text-right-col">${fmt(rBrut)}</td><td class="text-right-col">${fmt(rPf)}</td><td class="text-right-col">${fmt(rAt)}</td><td class="text-right-col">${fmt(rRg)}</td><td class="text-right-col">${fmt(rTotal)}</td></tr>`
               : '';
           const dataRows = pageData
             .map(
@@ -343,7 +346,7 @@
                 `<tr><td>${String(d.idx).padStart(2, '0')}</td><td class="text-left-col font-semibold">${d.nom}</td><td class="text-right-col">${fmt(d.brut)}</td><td class="text-right-col">${fmt(d.pf)}</td><td class="text-right-col">${fmt(d.at)}</td><td class="text-right-col">${fmt(d.rg)}</td><td class="text-right-col font-bold">${fmt(d.total)}</td></tr>`,
             )
             .join('');
-          const totalRow = `<tr class="total-row"><td colspan="6" class="text-left-col" style="padding-left:12px"><strong>${isLast ? 'TOTAL GÉNÉRAL' : 'TOTAL'}</strong></td><td class="text-right-col"><strong>${fmt(cumulTotal)}</strong></td></tr>`;
+          const totalRow = `<tr class="total-row"><td colspan="2" class="text-left-col" style="padding-left:12px"><strong>${isLast ? 'TOTAL GÉNÉRAL' : 'TOTAL'}</strong></td><td class="text-right-col"><strong>${fmt(cBrut)}</strong></td><td class="text-right-col"><strong>${fmt(cPf)}</strong></td><td class="text-right-col"><strong>${fmt(cAt)}</strong></td><td class="text-right-col"><strong>${fmt(cRg)}</strong></td><td class="text-right-col"><strong>${fmt(cTotal)}</strong></td></tr>`;
 
           html += `<div class="print-page">
             ${buildHeader(annee, periodeText, chapitreParam, compteParam)}
@@ -351,7 +354,7 @@
             ${
               isLast
                 ? `<div class="flex justify-between items-start text-sm mt-4">
-              <div style="width:70%"><p>Arrêté le présent état à la somme de : <span class="font-bold underline uppercase">${numberToWords(cumulTotal)}</span></p><p class="mt-1">Payé et enregistré sous le n°07/${annee}</p><p>Pour acquis global</p></div>
+              <div style="width:70%"><p>Arrêté le présent état à la somme de : <span class="font-bold underline uppercase">${numberToWords(cTotal)}</span></p><p class="mt-1">Payé et enregistré sous le n°07/${annee}</p><p>Pour acquis global</p></div>
               <div class="text-center" style="width:30%"><p class="font-bold underline">Certifié le service fait</p><p class="font-bold underline">Vu, vérifié et liquidé</p><p class="mt-2">À Vavoua, le <span class="editable-date" contenteditable="true">${new Date().toLocaleDateString('fr-FR')}</span></p><p class="font-bold mt-1">P/Le Maire & P.D.</p></div>
             </div>`
                 : ''

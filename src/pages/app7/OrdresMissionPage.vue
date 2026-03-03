@@ -72,6 +72,8 @@
           :rows="filteredMissions"
           :columns="columns"
           :loading="loading"
+          :pagination="tablePagination"
+          @update:pagination="(v: any) => (tablePagination = v)"
           show-print
           show-export-csv
           export-filename="ordres-mission"
@@ -88,6 +90,32 @@
                 {{ getStatutLabel(props.row.statut) }}
               </q-chip>
             </q-td>
+          </template>
+          <!-- Report row (page 2+) -->
+          <template v-slot:top-row>
+            <q-tr v-if="tablePagination.page > 1" class="report-row">
+              <q-td class="text-weight-bold text-italic">REPORT</q-td>
+              <q-td></q-td>
+              <q-td></q-td>
+              <q-td></q-td>
+              <q-td class="text-center text-weight-bold text-italic">{{ reportValues.nombreJours }}</q-td>
+              <q-td class="text-right text-weight-bold text-italic">{{ formatMontant(reportValues.montantTotal) }}</q-td>
+              <q-td></q-td>
+              <q-td></q-td>
+            </q-tr>
+          </template>
+          <!-- Total row -->
+          <template v-slot:bottom-row>
+            <q-tr class="total-row">
+              <q-td class="text-weight-bold">TOTAL</q-td>
+              <q-td></q-td>
+              <q-td></q-td>
+              <q-td></q-td>
+              <q-td class="text-center text-weight-bold">{{ totalPageValues.nombreJours }}</q-td>
+              <q-td class="text-right text-weight-bold">{{ formatMontant(totalPageValues.montantTotal) }}</q-td>
+              <q-td></q-td>
+              <q-td></q-td>
+            </q-tr>
           </template>
         </DataTable>
       </q-card-section>
@@ -294,6 +322,8 @@ const showDialog = ref(false);
 const editingId = ref<number | null>(null);
 const filter = ref('');
 const filterStatut = ref<string | null>(null);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const tablePagination = ref<any>({ page: 1, rowsPerPage: 10 });
 const missions = ref<OrdreMission[]>([]);
 const employes = ref<Employe[]>([]);
 const filteredEmpOptions = ref<{ label: string; value: number }[]>([]);
@@ -423,6 +453,32 @@ const filteredMissions = computed(() => {
     );
   }
   return r;
+});
+
+// Report (cumul pages précédentes) et Total (cumul jusqu'à page courante)
+const reportValues = computed(() => {
+  const page = tablePagination.value.page;
+  const perPage = tablePagination.value.rowsPerPage;
+  if (page <= 1 || perPage <= 0) return { nombreJours: 0, montantTotal: 0 };
+  const rows = filteredMissions.value.slice(0, (page - 1) * perPage);
+  return {
+    nombreJours: rows.reduce((s, m) => s + (m.nombreJours || 0), 0),
+    montantTotal: rows.reduce((s, m) => s + (m.montantTotal || 0), 0),
+  };
+});
+
+const totalPageValues = computed(() => {
+  const page = tablePagination.value.page;
+  const perPage = tablePagination.value.rowsPerPage;
+  const endIdx =
+    perPage <= 0
+      ? filteredMissions.value.length
+      : Math.min(page * perPage, filteredMissions.value.length);
+  const rows = filteredMissions.value.slice(0, endIdx);
+  return {
+    nombreJours: rows.reduce((s, m) => s + (m.nombreJours || 0), 0),
+    montantTotal: rows.reduce((s, m) => s + (m.montantTotal || 0), 0),
+  };
 });
 
 // Cartes de statistiques avec animations
@@ -673,6 +729,21 @@ onMounted(() => {
 
 .pulse-animation {
   animation: pulse 2s ease-in-out infinite;
+}
+
+// Report & Total rows
+:deep(.report-row) {
+  background: #fef3c7 !important;
+  td {
+    font-style: italic;
+    font-weight: 600;
+  }
+}
+:deep(.total-row) {
+  background: #dbeafe !important;
+  td {
+    font-weight: 700;
+  }
 }
 
 // Animations

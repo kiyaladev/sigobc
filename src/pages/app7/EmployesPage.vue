@@ -64,6 +64,8 @@
           :rows="filteredEmployes"
           :columns="columns"
           :loading="loading"
+          :pagination="tablePagination"
+          @update:pagination="(v: any) => (tablePagination = v)"
           show-export-csv
           export-filename="employes"
           @edit="editEmploye"
@@ -85,6 +87,34 @@
             <q-td :props="props" class="text-right">
               {{ formatMontant(props.row.salaireBase) }}
             </q-td>
+          </template>
+          <!-- Report row (page 2+) -->
+          <template v-slot:top-row>
+            <q-tr v-if="tablePagination.page > 1" class="report-row">
+              <q-td class="text-weight-bold text-italic">REPORT</q-td>
+              <q-td></q-td>
+              <q-td></q-td>
+              <q-td></q-td>
+              <q-td></q-td>
+              <q-td class="text-right text-weight-bold text-italic">{{ formatMontant(reportValues.salaireBase) }}</q-td>
+              <q-td></q-td>
+              <q-td></q-td>
+              <q-td></q-td>
+            </q-tr>
+          </template>
+          <!-- Total row -->
+          <template v-slot:bottom-row>
+            <q-tr class="total-row">
+              <q-td class="text-weight-bold">TOTAL</q-td>
+              <q-td></q-td>
+              <q-td></q-td>
+              <q-td></q-td>
+              <q-td></q-td>
+              <q-td class="text-right text-weight-bold">{{ formatMontant(totalPageValues.salaireBase) }}</q-td>
+              <q-td></q-td>
+              <q-td></q-td>
+              <q-td></q-td>
+            </q-tr>
           </template>
         </DataTable>
       </q-card-section>
@@ -301,6 +331,8 @@ const loading = ref(false);
 const filter = ref('');
 const showDialog = ref(false);
 const showInactifs = ref(false);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const tablePagination = ref<any>({ page: 1, rowsPerPage: 10 });
 const editingId = ref<number | null>(null);
 const employes = ref<Employe[]>([]);
 
@@ -428,6 +460,30 @@ const filteredEmployes = computed(() => {
     );
   }
   return result;
+});
+
+// Report (cumul pages précédentes) et Total (cumul jusqu'à page courante)
+const reportValues = computed(() => {
+  const page = tablePagination.value.page;
+  const perPage = tablePagination.value.rowsPerPage;
+  if (page <= 1 || perPage <= 0) return { salaireBase: 0 };
+  const rows = filteredEmployes.value.slice(0, (page - 1) * perPage);
+  return {
+    salaireBase: rows.reduce((s, e) => s + (e.salaireBase || 0), 0),
+  };
+});
+
+const totalPageValues = computed(() => {
+  const page = tablePagination.value.page;
+  const perPage = tablePagination.value.rowsPerPage;
+  const endIdx =
+    perPage <= 0
+      ? filteredEmployes.value.length
+      : Math.min(page * perPage, filteredEmployes.value.length);
+  const rows = filteredEmployes.value.slice(0, endIdx);
+  return {
+    salaireBase: rows.reduce((s, e) => s + (e.salaireBase || 0), 0),
+  };
 });
 
 function formatMontant(montant: number): string {
@@ -616,6 +672,21 @@ onMounted(() => {
 
 .pulse-animation {
   animation: pulse 2s ease-in-out infinite;
+}
+
+// Report & Total rows
+:deep(.report-row) {
+  background: #fef3c7 !important;
+  td {
+    font-style: italic;
+    font-weight: 600;
+  }
+}
+:deep(.total-row) {
+  background: #dbeafe !important;
+  td {
+    font-weight: 700;
+  }
 }
 
 // Animations

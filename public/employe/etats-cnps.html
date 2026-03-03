@@ -296,21 +296,23 @@
         for (let i = 0; i < data.length; i += ROWS_PER_PAGE)
           pages.push(data.slice(i, i + ROWS_PER_PAGE));
         const totalPages = pages.length;
-        let cumulCnps = 0;
+        let cBase = 0, cLog = 0, cBrut = 0, cCnps = 0;
         let html = '';
 
         pages.forEach((pageData, idx) => {
           const isLast = idx === totalPages - 1;
-          const reportCnps = cumulCnps;
-          let pageCnps = 0;
+          const rBase = cBase, rLog = cLog, rBrut = cBrut, rCnps = cCnps;
+
           pageData.forEach((d) => {
-            pageCnps += d.cnps;
+            cBase += d.base;
+            cLog += d.log;
+            cBrut += d.brut;
+            cCnps += d.cnps;
           });
-          cumulCnps += pageCnps;
 
           const reportRow =
             idx > 0
-              ? `<tr class="report-row"><td class="p-1 text-center" colspan="6">REPORT</td><td class="p-1 text-right pr-3">${fmt(reportCnps)}</td></tr>`
+              ? `<tr class="report-row"><td class="p-1 text-center" colspan="3">REPORT</td><td class="p-1 text-right pr-3">${fmt(rBase)}</td><td class="p-1 text-right pr-3">${fmt(rLog)}</td><td class="p-1 text-right pr-3">${fmt(rBrut)}</td><td class="p-1 text-right pr-3">${fmt(rCnps)}</td></tr>`
               : '';
           const dataRows = pageData
             .map(
@@ -318,14 +320,14 @@
                 `<tr><td class="p-1 text-center">${d.idx}</td><td class="p-1 pl-3">${d.nom}</td><td class="p-1 text-center">1</td><td class="p-1 text-right pr-3">${fmt(d.base)}</td><td class="p-1 text-right pr-3">${fmt(d.log)}</td><td class="p-1 text-right pr-3">${fmt(d.brut)}</td><td class="p-1 text-right pr-3">${fmt(d.cnps)}</td></tr>`,
             )
             .join('');
-          const totalRow = `<tr class="total-row"><td class="p-1 text-center" colspan="6"><strong>${isLast ? 'TOTAL GÉNÉRAL' : 'TOTAL'}</strong></td><td class="p-1 text-right pr-3"><strong>${fmt(cumulCnps)}</strong></td></tr>`;
+          const totalRow = `<tr class="total-row"><td class="p-1 text-center" colspan="3"><strong>${isLast ? 'TOTAL GÉNÉRAL' : 'TOTAL'}</strong></td><td class="p-1 text-right pr-3"><strong>${fmt(cBase)}</strong></td><td class="p-1 text-right pr-3"><strong>${fmt(cLog)}</strong></td><td class="p-1 text-right pr-3"><strong>${fmt(cBrut)}</strong></td><td class="p-1 text-right pr-3"><strong>${fmt(cCnps)}</strong></td></tr>`;
 
           html += `<div class="print-page">
             ${buildHeader(moisLabel, annee, chapitreParam, compteParam)}
             <table class="data-table">${buildTableHead(tauxCnps)}<tbody>${reportRow}${dataRows}${totalRow}</tbody></table>
             ${
               isLast
-                ? `<div class="mt-6 text-sm"><p>Arrêté le présent état à la somme de: <span class="font-bold">${numberToWords(cumulCnps)}</span></p></div>
+                ? `<div class="mt-6 text-sm"><p>Arrêté le présent état à la somme de: <span class="font-bold">${numberToWords(cCnps)}</span></p></div>
               <div class="flex justify-end mt-8 text-sm"><div class="text-center mr-8"><p>VAVOUA, le <span class="editable-date" contenteditable="true">${new Date().toLocaleDateString('fr-FR')}</span></p><p class="font-bold mt-2">P/LE MAIRE & P.D</p></div></div>`
                 : ''
             }
