@@ -41,3 +41,5 @@ license.dat
 # local .env files
 .env.local*
 backend/.env
+backend/dist/
+backend/node_modules/
