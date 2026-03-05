@@ -40,3 +40,4 @@ license.dat
 
 # local .env files
 .env.local*
+backend/.env
