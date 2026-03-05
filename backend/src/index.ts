@@ -1,8 +1,10 @@
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
-import { client, connect, dbName, resetConnection } from './db.js';
-import usersRouter from './routes/users.js';
+import mongoose from 'mongoose';
+import { connect } from './db.js';
+import { MODEL_REGISTRY } from './models/index.js';
+import { makeCrudRouter } from './routes/crud.js';
 
 dotenv.config();
 
@@ -12,15 +14,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// ─── utility routes ──────────────────────────────────────────────────────────
+
 app.get('/api/health', async (_req, res) => {
-  try {
-    await connect();
-    await client.db(dbName).command({ ping: 1 });
+  const state = mongoose.connection.readyState;
+  if (state === 1) {
     res.json({ ok: true, service: 'backend', database: 'connected' });
-  } catch (error) {
-    resetConnection();
-    const message = error instanceof Error ? error.message : 'unknown error';
-    res.status(500).json({ ok: false, service: 'backend', database: message });
+  } else {
+    res.status(503).json({ ok: false, service: 'backend', database: 'disconnected' });
   }
 });
 
@@ -28,7 +29,13 @@ app.get('/api/version', (_req, res) => {
   res.json({ name: 'declarapp-backend', runtime: process.version });
 });
 
-app.use('/api/users', usersRouter);
+// ─── CRUD routes (one per collection) ────────────────────────────────────────
+
+for (const [name, collectionModel] of Object.entries(MODEL_REGISTRY)) {
+  app.use(`/api/${name}`, makeCrudRouter(collectionModel, name));
+}
+
+// ─── startup ─────────────────────────────────────────────────────────────────
 
 const start = async (): Promise<void> => {
   app.listen(port, () => {
@@ -37,7 +44,7 @@ const start = async (): Promise<void> => {
 
   try {
     await connect();
-    console.log(`MongoDB connected to ${dbName}`);
+    console.log('MongoDB connected');
   } catch (error) {
     const message = error instanceof Error ? error.message : 'unknown error';
     console.warn(`MongoDB not connected at startup: ${message}`);

@@ -1,4 +1,4 @@
-import Dexie, { type EntityTable } from 'dexie';
+import { Collection } from './collection';
 
 // Constante pour l'ID de la mairie par défaut (Mairie de Vavoua)
 export const DEFAULT_MAIRIE_ID = 1;
@@ -524,42 +524,54 @@ export interface Exercice {
   updatedAt: Date;
 }
 
-// Classe Dexie pour la base de données
-class TresorDatabase extends Dexie {
-  mairies!: EntityTable<Mairie, 'id'>;
-  utilisateurs!: EntityTable<Utilisateur, 'id'>;
+// ─── Instance de base de données (remplace Dexie → Collection via API backend) ─
 
-  // App3 - Gestion des Dépenses
-  chapitres!: EntityTable<Chapitre, 'id'>;
-  sousChapitres!: EntityTable<SousChapitre, 'id'>;
-  previsions!: EntityTable<Prevision, 'id'>;
-  mandats!: EntityTable<Mandat, 'id'>;
-  bordereauMandats!: EntityTable<BordereauMandat, 'id'>;
-  etatFinancierMensuel!: EntityTable<EtatFinancierMensuel, 'id'>;
+export const db = {
+  // ── Mairie / Auth ──────────────────────────────────────────────────
+  mairies: new Collection<Mairie>('mairies'),
+  utilisateurs: new Collection<Utilisateur>('utilisateurs'),
 
-  // App6 - Gestion des Recettes
-  taxes!: EntityTable<Taxe, 'id'>;
-  declarations!: EntityTable<Declaration, 'id'>;
-  bordereauxRecette!: EntityTable<BordereauRecette, 'id'>;
-  previsionsRecettes!: EntityTable<PrevisionRecette, 'id'>;
-  mandatsRecette!: EntityTable<MandatRecette, 'id'>;
-  bordereauMandatsRecette!: EntityTable<BordereauMandatRecette, 'id'>;
-  chapitresRecette!: EntityTable<ChapitreRecette, 'id'>;
-  etatFinancierMensuelRecette!: EntityTable<EtatFinancierMensuelRecette, 'id'>;
+  // ── App3 - Gestion des Dépenses ────────────────────────────────────
+  chapitres: new Collection<Chapitre>('chapitres'),
+  sousChapitres: new Collection<SousChapitre>('sousChapitres'),
+  previsions: new Collection<Prevision>('previsions'),
+  mandats: new Collection<Mandat>('mandats'),
+  bordereauMandats: new Collection<BordereauMandat>('bordereauMandats'),
+  etatFinancierMensuel: new Collection<EtatFinancierMensuel>('etatFinancierMensuel'),
 
-  // Table temporaire pour les données d'impression
-  printData!: EntityTable<PrintData, 'id'>;
+  // ── App6 - Gestion des Recettes ────────────────────────────────────
+  taxes: new Collection<Taxe>('taxes'),
+  declarations: new Collection<Declaration>('declarations'),
+  bordereauxRecette: new Collection<BordereauRecette>('bordereauxRecette'),
+  previsionsRecettes: new Collection<PrevisionRecette>('previsionsRecettes'),
+  mandatsRecette: new Collection<MandatRecette>('mandatsRecette'),
+  bordereauMandatsRecette: new Collection<BordereauMandatRecette>('bordereauMandatsRecette'),
+  chapitresRecette: new Collection<ChapitreRecette>('chapitresRecette'),
+  etatFinancierMensuelRecette: new Collection<EtatFinancierMensuelRecette>(
+    'etatFinancierMensuelRecette',
+  ),
 
-  // Gestion des exercices budgétaires
-  exercices!: EntityTable<Exercice, 'id'>;
+  // ── Impression temporaire ──────────────────────────────────────────
+  printData: new Collection<PrintData>('printData'),
 
-  // App7 - Gestion des Employés
-  employes!: EntityTable<Employe, 'id'>;
-  fichesPaie!: EntityTable<FichePaie, 'id'>;
-  conges!: EntityTable<Conge, 'id'>;
-  ordresMission!: EntityTable<OrdreMission, 'id'>;
-  parametresPaie!: EntityTable<ParametresPaie, 'id'>;
-  servicesApp7!: EntityTable<ServiceApp7, 'id'>;
+  // ── Exercices budgétaires ─────────────────────────────────────────
+  exercices: new Collection<Exercice>('exercices'),
+
+  // ── App7 - Gestion des Employés ────────────────────────────────────
+  employes: new Collection<Employe>('employes'),
+  fichesPaie: new Collection<FichePaie>('fichesPaie'),
+  conges: new Collection<Conge>('conges'),
+  ordresMission: new Collection<OrdreMission>('ordresMission'),
+  parametresPaie: new Collection<ParametresPaie>('parametresPaie'),
+  servicesApp7: new Collection<ServiceApp7>('servicesApp7'),
+
+  /** Shim pour db.transaction('rw', tables, callback) — pas de vrai ACID. */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  transaction: async (_mode: string, _tables: any, callback: () => Promise<void>) => {
+    await callback();
+  },
+};
+
 
   constructor() {
     super('TresorDatabase');
@@ -741,9 +753,6 @@ class TresorDatabase extends Dexie {
     });
   }
 }
-
-// Instance unique de la base de données
-export const db = new TresorDatabase();
 
 // Fonction d'initialisation avec données de démonstration
 export async function initializeDatabase() {
