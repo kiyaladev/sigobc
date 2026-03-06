@@ -16,6 +16,36 @@
 
         <q-space />
 
+        <!-- Sélecteur mode de données -->
+        <q-btn-dropdown
+          flat
+          dense
+          no-caps
+          :icon="dataModeIcon"
+          :label="dataModeLabel"
+          class="q-mr-sm"
+        >
+          <q-list dense style="min-width: 200px">
+            <q-item
+              v-for="opt in dataModeOptions"
+              :key="opt.value"
+              clickable
+              v-close-popup
+              @click="onSetDataMode(opt.value)"
+              :active="dataMode === opt.value"
+              active-class="text-primary"
+            >
+              <q-item-section avatar>
+                <q-icon :name="opt.icon" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>{{ opt.label }}</q-item-label>
+                <q-item-label caption>{{ opt.caption }}</q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-btn-dropdown>
+
         <!-- Toggle mode sombre -->
         <ThemeToggle class="q-mr-sm" />
 
@@ -612,6 +642,7 @@ import { useQuasar } from 'quasar';
 import { useAuthStore } from 'src/stores/auth-store';
 import ThemeToggle from 'src/components/ThemeToggle.vue';
 import logoMairie from '/logo-mairie-vavoua.png';
+import { dataMode, setDataMode, type DataMode } from 'src/database/connectivity';
 
 const router = useRouter();
 const route = useRoute();
@@ -619,6 +650,33 @@ const $q = useQuasar();
 const authStore = useAuthStore();
 
 const leftDrawerOpen = ref(false);
+
+// Data mode selector
+const dataModeOptions = [
+  {
+    value: 'offline' as DataMode,
+    label: 'Hors ligne',
+    caption: 'Données locales uniquement',
+    icon: 'cloud_off',
+  },
+  {
+    value: 'offline-sync' as DataMode,
+    label: 'Hors ligne + Sync',
+    caption: 'Local avec synchronisation',
+    icon: 'sync',
+  },
+  { value: 'online' as DataMode, label: 'En ligne', caption: 'Serveur uniquement', icon: 'cloud' },
+];
+const dataModeIcon = computed(
+  () => dataModeOptions.find((o) => o.value === dataMode.value)?.icon ?? 'sync',
+);
+const dataModeLabel = computed(
+  () => dataModeOptions.find((o) => o.value === dataMode.value)?.label ?? '',
+);
+function onSetDataMode(mode: DataMode) {
+  setDataMode(mode);
+  window.location.reload();
+}
 
 // Déterminer quelle section est active pour ouvrir le bon accordéon
 const isApp3Active = computed(() => route.path.startsWith('/app3'));

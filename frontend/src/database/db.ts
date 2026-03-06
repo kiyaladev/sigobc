@@ -570,189 +570,28 @@ export const db = {
   transaction: async (_mode: string, _tables: any, callback: () => Promise<void>) => {
     await callback();
   },
+
+  /** Shim for db.delete() — clears the local Dexie cache (MongoDB data is unaffected). */
+  delete: async () => {
+    const { offlineDb } = await import('./offline-db');
+    for (const key of Object.keys(offlineDb.tables)) {
+      try {
+        await offlineDb.table(key).clear();
+      } catch {
+        /* non-critical */
+      }
+    }
+  },
+
+  /** Shim for db.open() — no-op in MongoDB mode. */
+  open: async () => {
+    /* no-op */
+  },
+
+  /** Returns a named collection by string, for backward-compat with db.table('name'). */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  table: (name: string): Collection<any> => (db as Record<string, any>)[name],
 };
-
-
-  constructor() {
-    super('TresorDatabase');
-
-    this.version(24).stores({
-      mairies: '++id, nom, code, ville',
-      utilisateurs: '++id, username, email, role, mairieId, actif',
-
-      // App3
-      chapitres: '++id, code, libelle, mairieId, actif',
-      sousChapitres: '++id, code, libelle, parentId, mairieId, actif',
-      previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
-      mandats:
-        '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
-      bordereauMandats: '++id, numero, exercice, mairieId, statut, personnelId',
-      etatFinancierMensuel:
-        '++id, annee, sousChapitreId, chapitreId, mairieId, [annee+sousChapitreId+chapitreId]',
-
-      // App6 - Recettes
-      taxes: '++id, code, libelle, mairieId, type, actif',
-      declarations:
-        '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
-      bordereauxRecette: '++id, numero, annee, mairieId, statut, personnelId',
-      previsionsRecettes: '++id, exercice, taxeId, mairieId, statut, personnelId',
-
-      // App6 - Mandats de Recettes
-      mandatsRecette:
-        '++id, numeroMandat, dateMandat, exercice, chapitreId, taxeId, previsionRecetteId, bordereauMandatRecetteId, mairieId, statut, personnelId',
-      bordereauMandatsRecette: '++id, numero, exercice, mairieId, statut, personnelId',
-
-      // App6 - Chapitres Recettes (Nature des recettes) et États Mensuels
-      chapitresRecette: '++id, code, libelle, mairieId, actif',
-      etatFinancierMensuelRecette:
-        '++id, annee, taxeId, chapitreRecetteId, mairieId, [annee+taxeId+chapitreRecetteId]',
-
-      // Table temporaire pour les données d'impression (utilisée en mode Electron)
-      printData: '++id, type, createdAt',
-
-      // Gestion des exercices budgétaires
-      exercices: '++id, annee, statut, mairieId',
-    });
-
-    this.version(25).stores({
-      mairies: '++id, nom, code, ville',
-      utilisateurs: '++id, username, email, role, mairieId, actif',
-
-      // App3
-      chapitres: '++id, code, libelle, mairieId, actif',
-      sousChapitres: '++id, code, libelle, parentId, mairieId, actif',
-      previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
-      mandats:
-        '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
-      bordereauMandats: '++id, numero, exercice, mairieId, statut, personnelId',
-      etatFinancierMensuel:
-        '++id, annee, sousChapitreId, chapitreId, mairieId, [annee+sousChapitreId+chapitreId]',
-
-      // App6 - Recettes
-      taxes: '++id, code, libelle, mairieId, type, actif',
-      declarations:
-        '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
-      bordereauxRecette: '++id, numero, annee, mairieId, statut, personnelId',
-      previsionsRecettes: '++id, exercice, taxeId, mairieId, statut, personnelId',
-      mandatsRecette:
-        '++id, numeroMandat, dateMandat, exercice, chapitreId, taxeId, previsionRecetteId, bordereauMandatRecetteId, mairieId, statut, personnelId',
-      bordereauMandatsRecette: '++id, numero, exercice, mairieId, statut, personnelId',
-      chapitresRecette: '++id, code, libelle, mairieId, actif',
-      etatFinancierMensuelRecette:
-        '++id, annee, taxeId, chapitreRecetteId, mairieId, [annee+taxeId+chapitreRecetteId]',
-
-      // Table temporaire pour les données d'impression
-      printData: '++id, type, createdAt',
-
-      // Gestion des exercices budgétaires
-      exercices: '++id, annee, statut, mairieId',
-
-      // App7 - Gestion des Employés
-      employes: '++id, matricule, nom, prenom, typeEmploye, service, mairieId, actif',
-      fichesPaie:
-        '++id, employeId, mois, annee, exercice, mairieId, statut, [annee+mois+employeId]',
-      conges: '++id, employeId, type, dateDebut, dateFin, statut, mairieId',
-      ordresMission: '++id, numero, employeId, exercice, dateDebut, statut, mairieId',
-    });
-
-    this.version(26).stores({
-      mairies: '++id, nom, code, ville',
-      utilisateurs: '++id, username, email, role, mairieId, actif',
-      chapitres: '++id, code, libelle, mairieId, actif',
-      sousChapitres: '++id, code, libelle, parentId, mairieId, actif',
-      previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
-      mandats:
-        '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
-      bordereauMandats: '++id, numero, exercice, mairieId, statut, personnelId',
-      etatFinancierMensuel:
-        '++id, annee, sousChapitreId, chapitreId, mairieId, [annee+sousChapitreId+chapitreId]',
-      taxes: '++id, code, libelle, mairieId, type, actif',
-      declarations:
-        '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
-      bordereauxRecette: '++id, numero, annee, mairieId, statut, personnelId',
-      previsionsRecettes: '++id, exercice, taxeId, mairieId, statut, personnelId',
-      mandatsRecette:
-        '++id, numeroMandat, dateMandat, exercice, chapitreId, taxeId, previsionRecetteId, bordereauMandatRecetteId, mairieId, statut, personnelId',
-      bordereauMandatsRecette: '++id, numero, exercice, mairieId, statut, personnelId',
-      chapitresRecette: '++id, code, libelle, mairieId, actif',
-      etatFinancierMensuelRecette:
-        '++id, annee, taxeId, chapitreRecetteId, mairieId, [annee+taxeId+chapitreRecetteId]',
-      printData: '++id, type, createdAt',
-      exercices: '++id, annee, statut, mairieId',
-      employes: '++id, matricule, nom, prenom, typeEmploye, service, mairieId, actif',
-      fichesPaie:
-        '++id, employeId, mois, annee, exercice, mairieId, statut, [annee+mois+employeId]',
-      conges: '++id, employeId, type, dateDebut, dateFin, statut, mairieId',
-      ordresMission: '++id, numero, employeId, exercice, dateDebut, statut, mairieId',
-      parametresPaie: '++id, mairieId',
-    });
-
-    this.version(27).stores({
-      mairies: '++id, nom, code, ville',
-      utilisateurs: '++id, username, email, role, mairieId, actif',
-      chapitres: '++id, code, libelle, mairieId, actif',
-      sousChapitres: '++id, code, libelle, parentId, mairieId, actif',
-      previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
-      mandats:
-        '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
-      bordereauMandats: '++id, numero, exercice, mairieId, statut, personnelId',
-      etatFinancierMensuel:
-        '++id, annee, sousChapitreId, chapitreId, mairieId, [annee+sousChapitreId+chapitreId]',
-      taxes: '++id, code, libelle, mairieId, type, actif',
-      declarations:
-        '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
-      bordereauxRecette: '++id, numero, annee, mairieId, statut, personnelId',
-      previsionsRecettes: '++id, exercice, taxeId, mairieId, statut, personnelId',
-      mandatsRecette:
-        '++id, numeroMandat, dateMandat, exercice, chapitreId, taxeId, previsionRecetteId, bordereauMandatRecetteId, mairieId, statut, personnelId',
-      bordereauMandatsRecette: '++id, numero, exercice, mairieId, statut, personnelId',
-      chapitresRecette: '++id, code, libelle, mairieId, actif',
-      etatFinancierMensuelRecette:
-        '++id, annee, taxeId, chapitreRecetteId, mairieId, [annee+taxeId+chapitreRecetteId]',
-      printData: '++id, type, createdAt',
-      exercices: '++id, annee, statut, mairieId',
-      employes: '++id, matricule, nom, prenom, typeEmploye, service, mairieId, actif',
-      fichesPaie:
-        '++id, employeId, mois, annee, exercice, mairieId, statut, [annee+mois+employeId]',
-      conges: '++id, employeId, type, dateDebut, dateFin, statut, mairieId',
-      ordresMission: '++id, numero, employeId, exercice, dateDebut, statut, mairieId',
-      parametresPaie: '++id, mairieId',
-    });
-
-    this.version(28).stores({
-      mairies: '++id, nom, code, ville',
-      utilisateurs: '++id, username, email, role, mairieId, actif',
-      chapitres: '++id, code, libelle, mairieId, actif',
-      sousChapitres: '++id, code, libelle, parentId, mairieId, actif',
-      previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
-      mandats:
-        '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
-      bordereauMandats: '++id, numero, exercice, mairieId, statut, personnelId',
-      etatFinancierMensuel:
-        '++id, annee, sousChapitreId, chapitreId, mairieId, [annee+sousChapitreId+chapitreId]',
-      taxes: '++id, code, libelle, mairieId, type, actif',
-      declarations:
-        '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
-      bordereauxRecette: '++id, numero, annee, mairieId, statut, personnelId',
-      previsionsRecettes: '++id, exercice, taxeId, mairieId, statut, personnelId',
-      mandatsRecette:
-        '++id, numeroMandat, dateMandat, exercice, chapitreId, taxeId, previsionRecetteId, bordereauMandatRecetteId, mairieId, statut, personnelId',
-      bordereauMandatsRecette: '++id, numero, exercice, mairieId, statut, personnelId',
-      chapitresRecette: '++id, code, libelle, mairieId, actif',
-      etatFinancierMensuelRecette:
-        '++id, annee, taxeId, chapitreRecetteId, mairieId, [annee+taxeId+chapitreRecetteId]',
-      printData: '++id, type, createdAt',
-      exercices: '++id, annee, statut, mairieId',
-      employes: '++id, matricule, nom, prenom, typeEmploye, service, departement, mairieId, actif',
-      fichesPaie:
-        '++id, employeId, mois, annee, exercice, mairieId, statut, [annee+mois+employeId]',
-      conges: '++id, employeId, type, dateDebut, dateFin, statut, mairieId',
-      ordresMission: '++id, numero, employeId, exercice, dateDebut, statut, mairieId',
-      parametresPaie: '++id, mairieId',
-      servicesApp7: '++id, nom, compte, mairieId, actif',
-    });
-  }
-}
 
 // Fonction d'initialisation avec données de démonstration
 export async function initializeDatabase() {
@@ -795,7 +634,7 @@ export async function initializeDatabase() {
         code: '70',
         libelle: 'SECTION 70 - RECETTES FISCALES',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -804,7 +643,7 @@ export async function initializeDatabase() {
         code: '700',
         libelle: 'CHAP.700 - IMPOTS ATTRIBUES AUX COMMUNES',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -813,7 +652,7 @@ export async function initializeDatabase() {
         code: '7000',
         libelle: 'Contribution foncière des propriétés bâties',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -822,7 +661,7 @@ export async function initializeDatabase() {
         code: '7001',
         libelle: 'Contribution foncière des propriétés non bâties',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -831,7 +670,7 @@ export async function initializeDatabase() {
         code: '7004',
         libelle: 'Contribution des patentes',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -840,7 +679,7 @@ export async function initializeDatabase() {
         code: '7005',
         libelle: 'Contribution des licences',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -849,7 +688,7 @@ export async function initializeDatabase() {
         code: '702',
         libelle: 'CHAP.702 - TAXES COMMUNALES PAR VOIE DE ROLE',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -858,7 +697,7 @@ export async function initializeDatabase() {
         code: '70261',
         libelle: 'Impôt synthétique',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -867,7 +706,7 @@ export async function initializeDatabase() {
         code: '70262',
         libelle: 'Taxes forfaitaires petits commerçants/artisans',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -876,7 +715,7 @@ export async function initializeDatabase() {
         code: '7027',
         libelle: 'Taxe sur les locaux loués en garnis',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -885,7 +724,7 @@ export async function initializeDatabase() {
         code: '703',
         libelle: 'CHAP.703 - TAXES SUR TITRE DE RECETTES PROPRES',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -894,7 +733,7 @@ export async function initializeDatabase() {
         code: '7030',
         libelle: 'Taxes sur les pompes distributrices de carburant',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -903,7 +742,7 @@ export async function initializeDatabase() {
         code: '7031',
         libelle: 'Taxes sur les charrettes',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -912,7 +751,7 @@ export async function initializeDatabase() {
         code: '7036',
         libelle: 'Taxes sur les spectacles et galas',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -921,7 +760,7 @@ export async function initializeDatabase() {
         code: '7038',
         libelle: 'Taxes sur les établissements de nuit',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -930,7 +769,7 @@ export async function initializeDatabase() {
         code: '704',
         libelle: 'CHAP.704 - TAXES SUR TITRE DE RECETTES PAR LES COMMUNES',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -939,7 +778,7 @@ export async function initializeDatabase() {
         code: '7041',
         libelle: 'Taxes sur les taxis',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -948,7 +787,7 @@ export async function initializeDatabase() {
         code: '7042',
         libelle: 'Taxes sur la publicité',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -959,7 +798,7 @@ export async function initializeDatabase() {
         code: '71',
         libelle: 'SECTION 71 - RECETTES DES PRESTATIONS ET SERVICES',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -968,7 +807,7 @@ export async function initializeDatabase() {
         code: '710',
         libelle: 'CHAP.710 - RECETTES DES SERVICES GENERAUX',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -977,7 +816,7 @@ export async function initializeDatabase() {
         code: '7100',
         libelle: 'Administration générale',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -987,7 +826,7 @@ export async function initializeDatabase() {
         libelle: 'Légalisation de signatures et certifications',
         type: 'fixe',
         montant: 500,
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -997,7 +836,7 @@ export async function initializeDatabase() {
         libelle: 'Délivrance livrets de famille et documents',
         type: 'fixe',
         montant: 1000,
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1006,7 +845,7 @@ export async function initializeDatabase() {
         code: '71006',
         libelle: 'Autres recettes administration générale',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1015,7 +854,7 @@ export async function initializeDatabase() {
         code: '7101',
         libelle: 'Administration financière et domaniale',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1024,7 +863,7 @@ export async function initializeDatabase() {
         code: '71010',
         libelle: "Taxe sur délivrance permis d'habiter",
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1033,7 +872,7 @@ export async function initializeDatabase() {
         code: '71016',
         libelle: 'Autres recettes admin. financière/domaniale',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1042,7 +881,7 @@ export async function initializeDatabase() {
         code: '71030',
         libelle: 'Taxe de séquestre',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1051,7 +890,7 @@ export async function initializeDatabase() {
         code: '71031',
         libelle: 'Produits de ventes de la fourrière',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1060,7 +899,7 @@ export async function initializeDatabase() {
         code: '711',
         libelle: 'CHAP.711 - RECETTES DES SERVICES DE COLLECTIVITE',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1069,7 +908,7 @@ export async function initializeDatabase() {
         code: '7112',
         libelle: 'Urbanisme et environnement',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1078,7 +917,7 @@ export async function initializeDatabase() {
         code: '71120',
         libelle: 'Taxes ou redevance de bornage',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1087,7 +926,7 @@ export async function initializeDatabase() {
         code: '71126',
         libelle: 'Autres recettes urbanisme/environnement',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1096,7 +935,7 @@ export async function initializeDatabase() {
         code: '7113',
         libelle: "Hygiène, salubrité, hydraulique, adduction d'eau",
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1106,7 +945,7 @@ export async function initializeDatabase() {
         libelle: "Taxe d'enlèvement des ordures ménagères",
         type: 'fixe',
         montant: 15000,
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1115,7 +954,7 @@ export async function initializeDatabase() {
         code: '71150',
         libelle: 'Cimetières - services funéraires',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1124,7 +963,7 @@ export async function initializeDatabase() {
         code: '71152',
         libelle: 'Morgue - Dépôts de cercueils',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1133,7 +972,7 @@ export async function initializeDatabase() {
         code: '71154',
         libelle: 'Autres recettes services funéraires',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1142,7 +981,7 @@ export async function initializeDatabase() {
         code: '712',
         libelle: 'CHAP.712 - RECETTES SERVICES SOCIAUX/CULTURELS',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1151,7 +990,7 @@ export async function initializeDatabase() {
         code: '7125',
         libelle: 'Activités culturelles - Taxes, Redevances',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1160,7 +999,7 @@ export async function initializeDatabase() {
         code: '71250',
         libelle: 'Administration activités culturelles',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1169,7 +1008,7 @@ export async function initializeDatabase() {
         code: '71256',
         libelle: 'Autres recettes services sociaux/culturels',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1178,7 +1017,7 @@ export async function initializeDatabase() {
         code: '713',
         libelle: 'CHAP.713 - RECETTES DES SERVICES ECONOMIQUES',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1187,7 +1026,7 @@ export async function initializeDatabase() {
         code: '7133',
         libelle: 'Transports - communications',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1196,7 +1035,7 @@ export async function initializeDatabase() {
         code: '71330',
         libelle: 'Administration transports et communications',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1205,7 +1044,7 @@ export async function initializeDatabase() {
         code: '71331',
         libelle: 'Gare routière - stations de taxis',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1214,7 +1053,7 @@ export async function initializeDatabase() {
         code: '7134',
         libelle: 'Industrie et commerce',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1223,7 +1062,7 @@ export async function initializeDatabase() {
         code: '71341',
         libelle: 'Abattoirs, conservation et transport de viande',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1232,7 +1071,7 @@ export async function initializeDatabase() {
         code: '71344',
         libelle: 'Marchés',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1241,7 +1080,7 @@ export async function initializeDatabase() {
         code: '71345',
         libelle: 'Foires et expositions',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1252,7 +1091,7 @@ export async function initializeDatabase() {
         code: '72',
         libelle: 'SECTION 72 - REVENU DU PATRIMOINE',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1261,7 +1100,7 @@ export async function initializeDatabase() {
         code: '720',
         libelle: 'CHAP.720 - REVENU DU PATRIMOINE IMMOBILIER',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1270,7 +1109,7 @@ export async function initializeDatabase() {
         code: '7200',
         libelle: 'Location terrains et immeubles domaine privé',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1279,7 +1118,7 @@ export async function initializeDatabase() {
         code: '72000',
         libelle: 'Baux à loyer',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1288,7 +1127,7 @@ export async function initializeDatabase() {
         code: '7203',
         libelle: 'Revenus occupations temporaires domaine public',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1297,7 +1136,7 @@ export async function initializeDatabase() {
         code: '72031',
         libelle: 'Concessions sur accord conventionnel',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1306,7 +1145,7 @@ export async function initializeDatabase() {
         code: '72032',
         libelle: 'Droit de dépôts temporaires',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1317,7 +1156,7 @@ export async function initializeDatabase() {
         code: '73',
         libelle: "SECTION 73 - AIDE DE L'ETAT - FONDS DE CONCOURS",
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1326,7 +1165,7 @@ export async function initializeDatabase() {
         code: '730',
         libelle: 'CHAP.730 - DOTATION GLOBALE DE FONCTIONNEMENT',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1335,7 +1174,7 @@ export async function initializeDatabase() {
         code: '7300',
         libelle: 'Partie minimale',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1344,7 +1183,7 @@ export async function initializeDatabase() {
         code: '7301',
         libelle: 'Partie complémentaire, versement général',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1353,7 +1192,7 @@ export async function initializeDatabase() {
         code: '7302',
         libelle: 'Partie complémentaire, versement spécial',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1364,7 +1203,7 @@ export async function initializeDatabase() {
         code: '74',
         libelle: 'SECTION 74 - RECETTES DIVERSES AU TITRE I',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1373,7 +1212,7 @@ export async function initializeDatabase() {
         code: '742',
         libelle: 'CHAP.742 - PRELEVEMENT SUR FONDS DE RESERVE',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1382,7 +1221,7 @@ export async function initializeDatabase() {
         code: '743',
         libelle: 'CHAP.743 - RECETTES ACCIDENTELLES',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1391,7 +1230,7 @@ export async function initializeDatabase() {
         code: '7406',
         libelle: 'Autres versements (Vignettes auto)',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1400,7 +1239,7 @@ export async function initializeDatabase() {
         code: '7436',
         libelle: 'Recettes accidentelles',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1411,7 +1250,7 @@ export async function initializeDatabase() {
         code: '02',
         libelle: "SECTION 02 - PRELEVEMENT SUR FONDS D'INVESTISSEMENT",
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1422,7 +1261,7 @@ export async function initializeDatabase() {
         code: '04',
         libelle: "SECTION 04 - AIDE DE L'ETAT - FONDS DE CONCOURS",
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1431,7 +1270,7 @@ export async function initializeDatabase() {
         code: '040',
         libelle: "CHAP.040 - AIDE ET CONCOURS DE L'ETAT",
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1440,7 +1279,7 @@ export async function initializeDatabase() {
         code: '0401',
         libelle: "Subvention d'équipement de l'Etat",
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1451,7 +1290,7 @@ export async function initializeDatabase() {
         code: '06',
         libelle: 'SECTION 06 - RECETTES DIVERSES AU TITRE II',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1460,7 +1299,7 @@ export async function initializeDatabase() {
         code: '066',
         libelle: 'CHAP.066 - AUTRES RECETTES DIVERSES AU TITRE II',
         type: 'variable',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1472,7 +1311,7 @@ export async function initializeDatabase() {
       {
         code: '1',
         libelle: 'SALAIRE ET INDEM.',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1480,7 +1319,7 @@ export async function initializeDatabase() {
       {
         code: '2',
         libelle: 'CHARGES SOCIALES',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1488,7 +1327,7 @@ export async function initializeDatabase() {
       {
         code: '3',
         libelle: 'TRANSP. & FRAIS DE MISS.',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1496,7 +1335,7 @@ export async function initializeDatabase() {
       {
         code: '4',
         libelle: 'CARBUR. ET LUBRIF.',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1504,7 +1343,7 @@ export async function initializeDatabase() {
       {
         code: '5',
         libelle: 'MATERIEL ET FOURNIT.',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1512,7 +1351,7 @@ export async function initializeDatabase() {
       {
         code: '6',
         libelle: 'ABONN. EAU, ELEC, TELEPH.',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1520,7 +1359,7 @@ export async function initializeDatabase() {
       {
         code: '7',
         libelle: "TRAVAUX & SCES A L'ENTREP.",
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1528,7 +1367,7 @@ export async function initializeDatabase() {
       {
         code: '8',
         libelle: 'INTERVEN ET TRANSF.',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1540,7 +1379,7 @@ export async function initializeDatabase() {
       {
         code: '6000',
         libelle: 'ADMINISTRATION',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1548,7 +1387,7 @@ export async function initializeDatabase() {
       {
         code: '60010',
         libelle: 'FONCTIONNEMENT DU CONSEIL ET DES COMMISSIONS',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1556,7 +1395,7 @@ export async function initializeDatabase() {
       {
         code: '60011',
         libelle: 'FONCTIONNEMENT DE LA MUNICIPALITÉ',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1564,7 +1403,7 @@ export async function initializeDatabase() {
       {
         code: '60012',
         libelle: 'FONCTIONNEMENT CABINET DU MAIRE',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1572,7 +1411,7 @@ export async function initializeDatabase() {
       {
         code: '60013',
         libelle: 'INDEMNITÉS DE FONCTION ET DE REPRÉSENTATION',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1580,7 +1419,7 @@ export async function initializeDatabase() {
       {
         code: '60015',
         libelle: 'FRAIS DE MISSIONS EN DEHORS DU TERRITOIRE NATIONALE',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1588,7 +1427,7 @@ export async function initializeDatabase() {
       {
         code: '60016',
         libelle: 'AUTRES DÉPENSES AU TITRE DES AUTORITÉS MUNICIPALES',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1596,7 +1435,7 @@ export async function initializeDatabase() {
       {
         code: '6002',
         libelle: 'ETAT CIVIL ET POPULATION',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1604,7 +1443,7 @@ export async function initializeDatabase() {
       {
         code: '6006',
         libelle: "AUTRES DÉPENSES D'ADMINISTRATION GÉNÉRALE",
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1612,7 +1451,7 @@ export async function initializeDatabase() {
       {
         code: '6010',
         libelle: 'ADMINISTRATION',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1620,7 +1459,7 @@ export async function initializeDatabase() {
       {
         code: '6016',
         libelle: 'AUTRES DÉPENSES RELATIVES AU DOMAINE COMMUNAL',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1628,7 +1467,7 @@ export async function initializeDatabase() {
       {
         code: '6020',
         libelle: 'ADMINISTRATION',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1636,7 +1475,7 @@ export async function initializeDatabase() {
       {
         code: '6021',
         libelle: 'FRAIS DE RECOUVREMENTS ET DE POURSUITES',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1644,7 +1483,7 @@ export async function initializeDatabase() {
       {
         code: '6031',
         libelle: 'GARDES MUNICIPAUX',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1652,7 +1491,7 @@ export async function initializeDatabase() {
       {
         code: '6100',
         libelle: 'ADMINISTRATION',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1660,7 +1499,7 @@ export async function initializeDatabase() {
       {
         code: '6101',
         libelle: 'VOIRIES-ROUTES-CHEMINS',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1668,7 +1507,7 @@ export async function initializeDatabase() {
       {
         code: '6131',
         libelle: "OPÉRATIONS D'ASSAINISSEMENT",
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1676,7 +1515,7 @@ export async function initializeDatabase() {
       {
         code: '6133',
         libelle: 'NETTOIEMENT DE LA VOIRIE- ENLÈVEMENT DES ORDURES',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1684,7 +1523,7 @@ export async function initializeDatabase() {
       {
         code: '6136',
         libelle: "AUTRES DÉPENSES D'HYGIÈNES ET SALUBRITÉ PUBLIQUE-HYDRAULIQUE",
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1692,7 +1531,7 @@ export async function initializeDatabase() {
       {
         code: '6141',
         libelle: 'PROTECTION CIVILE',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1700,7 +1539,7 @@ export async function initializeDatabase() {
       {
         code: '6151',
         libelle: 'CIMETIÈRES-INHUMATION-EXHUMATIONS-CREUSEMENTS DE FOSSES',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1708,7 +1547,7 @@ export async function initializeDatabase() {
       {
         code: '6206',
         libelle: "AUTRES DÉPENSES D'ÉDUCATION",
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1716,7 +1555,7 @@ export async function initializeDatabase() {
       {
         code: '6214',
         libelle: 'EVACUATIONS SANITAIRES-SERVICE AMBULANCE',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1724,7 +1563,7 @@ export async function initializeDatabase() {
       {
         code: '6216',
         libelle: 'AUTRES DÉPENSES DE SANTÉ PUBLIQUE',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1732,7 +1571,7 @@ export async function initializeDatabase() {
       {
         code: '6223',
         libelle: 'HANDICAPÉS',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1740,7 +1579,7 @@ export async function initializeDatabase() {
       {
         code: '6224',
         libelle: 'AIDE FAMILIALE ,SOCIALE ET PERSONNES AGÉES',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1748,7 +1587,7 @@ export async function initializeDatabase() {
       {
         code: '6225',
         libelle: 'AIDE AUX INDIGENTS',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1756,7 +1595,7 @@ export async function initializeDatabase() {
       {
         code: '6246',
         libelle: 'AUTRES DÉPENSES AU TITRE DES SPORTS ET LOISIRS',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1764,7 +1603,7 @@ export async function initializeDatabase() {
       {
         code: '6250',
         libelle: 'ADMINISTRATION',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1772,7 +1611,7 @@ export async function initializeDatabase() {
       {
         code: '6256',
         libelle: 'AUTRES DÉPENSES AU TITRE DES ACTIVITÉS CULTURELLES',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1780,7 +1619,7 @@ export async function initializeDatabase() {
       {
         code: '626',
         libelle: 'AUTRES DEPENSES DES SERVICES SOCIAUX ,CULTURELS ET DE PROMOTION HUMAINE',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1788,7 +1627,7 @@ export async function initializeDatabase() {
       {
         code: '6336',
         libelle: 'AUTRES DÉPENSES DE TRANSPORT ET COMMUNICATIONS',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1796,7 +1635,7 @@ export async function initializeDatabase() {
       {
         code: '6341',
         libelle: 'ABATTOIRS-CONSERVATION ET TRANSPORTS DE VIANDE',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1804,7 +1643,7 @@ export async function initializeDatabase() {
       {
         code: '6344',
         libelle: 'MARCHÉS',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1812,7 +1651,7 @@ export async function initializeDatabase() {
       {
         code: '6406',
         libelle: 'AUTRES DETTES DE LA COMMUNE (OU DE LA VILLE )',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1820,7 +1659,7 @@ export async function initializeDatabase() {
       {
         code: '6415',
         libelle: 'CONFÉRENCES INTERCOMMUNALES -ASSOCIATION DES VILLES ET COMMUNES',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1828,7 +1667,7 @@ export async function initializeDatabase() {
       {
         code: '6416',
         libelle: 'AUTRES CONTRIBUTIONS ET TRANSFERTS',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1836,7 +1675,7 @@ export async function initializeDatabase() {
       {
         code: '6420',
         libelle: 'RESPONSABILITÉ CIVILE',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1844,7 +1683,7 @@ export async function initializeDatabase() {
       {
         code: '6422',
         libelle: 'ASSURANCES DES VÉHICULES',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1852,7 +1691,7 @@ export async function initializeDatabase() {
       {
         code: '6426',
         libelle: 'AUTRES ASSURANCES',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1860,7 +1699,7 @@ export async function initializeDatabase() {
       {
         code: '6430',
         libelle: 'CÉRÉMONIES PUBLIQUES',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1868,7 +1707,7 @@ export async function initializeDatabase() {
       {
         code: '6431',
         libelle: 'FÊTES ET RÉCEPTIONS OFFICIELLES',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1876,7 +1715,7 @@ export async function initializeDatabase() {
       {
         code: '6441',
         libelle: "FONDS D'INVESTISSEMENT",
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1884,7 +1723,7 @@ export async function initializeDatabase() {
       {
         code: '6456',
         libelle: 'AUTRES REMBOURSEMENTS DIVERS',
-        mairieId: mairieId as number,
+        mairieId: mairieId,
         actif: true,
         createdAt: now,
         updatedAt: now,
@@ -1897,7 +1736,7 @@ export async function initializeDatabase() {
   // Vérifier et initialiser les paramètres de paie si inexistants
   const paramsCount = await db.parametresPaie.count();
   if (paramsCount === 0) {
-    const defaultMairie = await db.mairies.toCollection().first();
+    const defaultMairie = (await db.mairies.toArray())[0];
     const mId = defaultMairie?.id || DEFAULT_MAIRIE_ID;
 
     await db.parametresPaie.add({

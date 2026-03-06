@@ -16,6 +16,9 @@ declare module 'vue' {
 // for each client)
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'https://sigobc.altdigit.africa/api',
+  // After 10 s without a response we treat the connection as offline.
+  // This prevents the app from "freezing" on unstable / slow links.
+  timeout: 10000,
 });
 
 export default defineBoot(({ app }) => {
