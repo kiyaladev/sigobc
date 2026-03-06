@@ -16,15 +16,21 @@ function m(name: string, schema: Schema): mongoose.Model<any> {
 
 const MairieSchema = new Schema({
   id: { type: Number, required: true, unique: true },
-  nom: String, code: String, adresse: String,
-  ville: String, departement: String, region: String,
-  codePostal: String, telephone: String, email: String,
-  maire: String, logo: String, ...ts,
+  nom: String,
+  code: String,
+  adresse: String,
+  ville: String,
+  departement: String,
+  region: String,
+  codePostal: String,
+  telephone: String,
+  email: String,
+  maire: String,
+  logo: String,
+  ...ts,
 });
-export const MairieModel = m(
-  'Mairie',
-  MairieSchema.index({ code: 1 }),
-);
+MairieSchema.index({ code: 1 });
+export const MairieModel = m('Mairie', MairieSchema);
 
 // ─── Utilisateur ─────────────────────────────────────────────────────────────
 
@@ -32,10 +38,14 @@ const UtilisateurSchema = new Schema({
   id: { type: Number, required: true, unique: true },
   username: { type: String, required: true },
   password: { type: String, required: true },
-  nom: String, prenom: String, email: String,
+  nom: String,
+  prenom: String,
+  email: String,
   role: { type: String, enum: ['admin', 'gestionnaire', 'operateur', 'agent', 'comptable'] },
-  mairieId: Number, actif: Boolean,
-  derniereConnexion: Date, ...ts,
+  mairieId: Number,
+  actif: Boolean,
+  derniereConnexion: Date,
+  ...ts,
 });
 export const UtilisateurModel = m('Utilisateur', UtilisateurSchema);
 
@@ -43,10 +53,15 @@ export const UtilisateurModel = m('Utilisateur', UtilisateurSchema);
 
 const TaxeSchema = new Schema({
   id: { type: Number, required: true, unique: true },
-  code: String, libelle: String, description: String,
-  taux: Number, montant: Number,
+  code: String,
+  libelle: String,
+  description: String,
+  taux: Number,
+  montant: Number,
   type: { type: String, enum: ['fixe', 'variable'] },
-  mairieId: Number, actif: Boolean, ...ts,
+  mairieId: Number,
+  actif: Boolean,
+  ...ts,
 });
 export const TaxeModel = m('Taxe', TaxeSchema);
 
@@ -54,8 +69,12 @@ export const TaxeModel = m('Taxe', TaxeSchema);
 
 const ChapitreSchema = new Schema({
   id: { type: Number, required: true, unique: true },
-  code: String, libelle: String, description: String,
-  mairieId: Number, actif: Boolean, ...ts,
+  code: String,
+  libelle: String,
+  description: String,
+  mairieId: Number,
+  actif: Boolean,
+  ...ts,
 });
 export const ChapitreModel = m('Chapitre', ChapitreSchema);
 
@@ -63,8 +82,13 @@ export const ChapitreModel = m('Chapitre', ChapitreSchema);
 
 const SousChapitreSchema = new Schema({
   id: { type: Number, required: true, unique: true },
-  code: String, libelle: String, description: String,
-  parentId: Number, mairieId: Number, actif: Boolean, ...ts,
+  code: String,
+  libelle: String,
+  description: String,
+  parentId: Number,
+  mairieId: Number,
+  actif: Boolean,
+  ...ts,
 });
 export const SousChapitreModel = m('SousChapitre', SousChapitreSchema);
 
@@ -72,11 +96,17 @@ export const SousChapitreModel = m('SousChapitre', SousChapitreSchema);
 
 const PrevisionSchema = new Schema({
   id: { type: Number, required: true, unique: true },
-  exercice: Number, chapitreId: Number, sousChapitreId: Number,
-  mairieId: Number, montantPrevu: Number, montantEngage: Number,
-  montantDisponible: Number, observations: String,
+  exercice: Number,
+  chapitreId: Number,
+  sousChapitreId: Number,
+  mairieId: Number,
+  montantPrevu: Number,
+  montantEngage: Number,
+  montantDisponible: Number,
+  observations: String,
   statut: { type: String, enum: ['brouillon', 'validee'] },
-  personnelId: Number, ...ts,
+  personnelId: Number,
+  ...ts,
 });
 export const PrevisionModel = m('Prevision', PrevisionSchema);
 
@@ -84,20 +114,34 @@ export const PrevisionModel = m('Prevision', PrevisionSchema);
 
 const MandatSchema = new Schema({
   id: { type: Number, required: true, unique: true },
-  numeroOrdre: Number, exercice: Number,
-  numeroMandat: String, dateMandat: Date,
-  chapitreId: Number, sousChapitreId: Number,
-  etatMensuelId: String, previsionId: Number,
-  bordereauMandatId: Number, mairieId: Number,
-  beneficiaire: String, rib: String, patrimonial: String,
-  objet: String, montant: Number,
-  numeroFacture: String, dateFacture: Date,
+  numeroOrdre: Number,
+  exercice: Number,
+  numeroMandat: String,
+  dateMandat: Date,
+  chapitreId: Number,
+  sousChapitreId: Number,
+  etatMensuelId: String,
+  previsionId: Number,
+  bordereauMandatId: Number,
+  mairieId: Number,
+  beneficiaire: String,
+  rib: String,
+  patrimonial: String,
+  objet: String,
+  montant: Number,
+  numeroFacture: String,
+  dateFacture: Date,
   modePaiement: { type: String, enum: ['virement', 'cheque', 'especes', 'autre'] },
   statut: { type: String, enum: ['brouillon', 'paye', 'annule'] },
-  motifAnnulation: String, observations: String,
-  referenceMarche: String, avisMunicipalite: String,
-  numeroDeliberation: String, dateDeliberation: Date,
-  montantPrecompter: Number, personnelId: Number, ...ts,
+  motifAnnulation: String,
+  observations: String,
+  referenceMarche: String,
+  avisMunicipalite: String,
+  numeroDeliberation: String,
+  dateDeliberation: Date,
+  montantPrecompter: Number,
+  personnelId: Number,
+  ...ts,
 });
 export const MandatModel = m('Mandat', MandatSchema);
 
@@ -105,11 +149,17 @@ export const MandatModel = m('Mandat', MandatSchema);
 
 const BordereauMandatSchema = new Schema({
   id: { type: Number, required: true, unique: true },
-  numero: Number, exercice: Number, dateEmission: Date,
-  mairieId: Number, montantTotal: Number,
-  totalPrecedent: Number, nombreMandats: Number,
+  numero: Number,
+  exercice: Number,
+  dateEmission: Date,
+  mairieId: Number,
+  montantTotal: Number,
+  totalPrecedent: Number,
+  nombreMandats: Number,
   statut: { type: String, enum: ['ouvert', 'ferme'] },
-  observations: String, personnelId: Number, ...ts,
+  observations: String,
+  personnelId: Number,
+  ...ts,
 });
 export const BordereauMandatModel = m('BordereauMandat', BordereauMandatSchema);
 
@@ -123,25 +173,33 @@ for (let i = 1; i <= 12; i++) {
 
 const EtatFinancierMensuelSchema = new Schema({
   id: { type: Number, required: true, unique: true },
-  annee: Number, sousChapitreId: Number, chapitreId: Number,
-  sousChapitreCode: String, chapitreCode: String,
-  mairieId: Number, ...efmFields, ...ts,
+  annee: Number,
+  sousChapitreId: Number,
+  chapitreId: Number,
+  sousChapitreCode: String,
+  chapitreCode: String,
+  mairieId: Number,
+  ...efmFields,
+  ...ts,
 });
 EtatFinancierMensuelSchema.index({ annee: 1, sousChapitreId: 1, chapitreId: 1 });
-export const EtatFinancierMensuelModel = m(
-  'EtatFinancierMensuel',
-  EtatFinancierMensuelSchema,
-);
+export const EtatFinancierMensuelModel = m('EtatFinancierMensuel', EtatFinancierMensuelSchema);
 
 // ─── BordereauRecette ────────────────────────────────────────────────────────
 
 const BordereauRecetteSchema = new Schema({
   id: { type: Number, required: true, unique: true },
-  numero: Number, annee: Number, mairieId: Number,
-  montantTotal: Number, totalPrecedent: Number,
-  nombreDeclarations: Number, dateTransmission: Date,
+  numero: Number,
+  annee: Number,
+  mairieId: Number,
+  montantTotal: Number,
+  totalPrecedent: Number,
+  nombreDeclarations: Number,
+  dateTransmission: Date,
   statut: { type: String, enum: ['ouvert', 'ferme'] },
-  observations: String, personnelId: Number, ...ts,
+  observations: String,
+  personnelId: Number,
+  ...ts,
 });
 export const BordereauRecetteModel = m('BordereauRecette', BordereauRecetteSchema);
 
@@ -149,17 +207,27 @@ export const BordereauRecetteModel = m('BordereauRecette', BordereauRecetteSchem
 
 const DeclarationSchema = new Schema({
   id: { type: Number, required: true, unique: true },
-  exercice: Number, numeroPiece: Schema.Types.Mixed,
-  dateDeclaration: Date, dateEncaissement: Date,
-  bordereauRecetteId: Number, bordereauId: Number,
-  taxeId: Number, mairieId: Number,
-  contribuable: String, nomPartieVersante: String,
-  adresse: String, numeroLivre: String,
-  numeroEncaissement: String, montant: Number,
-  montantRecette: Number, patrimonial: String,
+  exercice: Number,
+  numeroPiece: Schema.Types.Mixed,
+  dateDeclaration: Date,
+  dateEncaissement: Date,
+  bordereauRecetteId: Number,
+  bordereauId: Number,
+  taxeId: Number,
+  mairieId: Number,
+  contribuable: String,
+  nomPartieVersante: String,
+  adresse: String,
+  numeroLivre: String,
+  numeroEncaissement: String,
+  montant: Number,
+  montantRecette: Number,
+  patrimonial: String,
   modePaiement: { type: String, enum: ['especes', 'cheque', 'virement', 'autre'] },
   statut: { type: String, enum: ['brouillon', 'validee', 'annulee'] },
-  observations: String, personnelId: Number, ...ts,
+  observations: String,
+  personnelId: Number,
+  ...ts,
 });
 export const DeclarationModel = m('Declaration', DeclarationSchema);
 
@@ -167,10 +235,15 @@ export const DeclarationModel = m('Declaration', DeclarationSchema);
 
 const PrevisionRecetteSchema = new Schema({
   id: { type: Number, required: true, unique: true },
-  exercice: Number, taxeId: Number, mairieId: Number,
-  montantPrevu: Number, montantRealise: Number,
+  exercice: Number,
+  taxeId: Number,
+  mairieId: Number,
+  montantPrevu: Number,
+  montantRealise: Number,
   statut: { type: String, enum: ['brouillon', 'validee'] },
-  observations: String, personnelId: Number, ...ts,
+  observations: String,
+  personnelId: Number,
+  ...ts,
 });
 export const PrevisionRecetteModel = m('PrevisionRecette', PrevisionRecetteSchema);
 
@@ -178,15 +251,26 @@ export const PrevisionRecetteModel = m('PrevisionRecette', PrevisionRecetteSchem
 
 const MandatRecetteSchema = new Schema({
   id: { type: Number, required: true, unique: true },
-  exercice: Number, numeroMandat: String, dateMandat: Date,
-  chapitreId: Number, taxeId: Number,
-  previsionRecetteId: Number, bordereauMandatRecetteId: Number,
-  mairieId: Number, partieVersante: String, rib: String,
-  patrimonial: String, objet: String, montant: Number,
-  numeroFacture: String, dateFacture: Date,
+  exercice: Number,
+  numeroMandat: String,
+  dateMandat: Date,
+  chapitreId: Number,
+  taxeId: Number,
+  previsionRecetteId: Number,
+  bordereauMandatRecetteId: Number,
+  mairieId: Number,
+  partieVersante: String,
+  rib: String,
+  patrimonial: String,
+  objet: String,
+  montant: Number,
+  numeroFacture: String,
+  dateFacture: Date,
   modePaiement: { type: String, enum: ['virement', 'cheque', 'especes', 'autre'] },
   statut: { type: String, enum: ['brouillon', 'paye', 'annule'] },
-  observations: String, personnelId: Number, ...ts,
+  observations: String,
+  personnelId: Number,
+  ...ts,
 });
 export const MandatRecetteModel = m('MandatRecette', MandatRecetteSchema);
 
@@ -194,11 +278,17 @@ export const MandatRecetteModel = m('MandatRecette', MandatRecetteSchema);
 
 const BordereauMandatRecetteSchema = new Schema({
   id: { type: Number, required: true, unique: true },
-  numero: Number, exercice: Number, dateEmission: Date,
-  mairieId: Number, montantTotal: Number,
-  totalPrecedent: Number, nombreMandats: Number,
+  numero: Number,
+  exercice: Number,
+  dateEmission: Date,
+  mairieId: Number,
+  montantTotal: Number,
+  totalPrecedent: Number,
+  nombreMandats: Number,
   statut: { type: String, enum: ['ouvert', 'ferme'] },
-  observations: String, personnelId: Number, ...ts,
+  observations: String,
+  personnelId: Number,
+  ...ts,
 });
 export const BordereauMandatRecetteModel = m(
   'BordereauMandatRecette',
@@ -209,8 +299,12 @@ export const BordereauMandatRecetteModel = m(
 
 const ChapitreRecetteSchema = new Schema({
   id: { type: Number, required: true, unique: true },
-  code: String, libelle: String, description: String,
-  mairieId: Number, actif: Boolean, ...ts,
+  code: String,
+  libelle: String,
+  description: String,
+  mairieId: Number,
+  actif: Boolean,
+  ...ts,
 });
 export const ChapitreRecetteModel = m('ChapitreRecette', ChapitreRecetteSchema);
 
@@ -224,9 +318,14 @@ for (let i = 1; i <= 12; i++) {
 
 const EtatFinancierMensuelRecetteSchema = new Schema({
   id: { type: Number, required: true, unique: true },
-  annee: Number, taxeId: Number, chapitreRecetteId: Number,
-  taxeCode: String, chapitreRecetteCode: String,
-  mairieId: Number, ...efmrFields, ...ts,
+  annee: Number,
+  taxeId: Number,
+  chapitreRecetteId: Number,
+  taxeCode: String,
+  chapitreRecetteCode: String,
+  mairieId: Number,
+  ...efmrFields,
+  ...ts,
 });
 EtatFinancierMensuelRecetteSchema.index({ annee: 1, taxeId: 1, chapitreRecetteId: 1 });
 export const EtatFinancierMensuelRecetteModel = m(
@@ -238,14 +337,28 @@ export const EtatFinancierMensuelRecetteModel = m(
 
 const EmployeSchema = new Schema({
   id: { type: Number, required: true, unique: true },
-  matricule: String, nom: String, prenom: String,
-  dateNaissance: Date, sexe: { type: String, enum: ['M', 'F'] },
-  typeEmploye: String, poste: String, grade: String,
-  categorie: String, service: String, departement: String,
-  dateEmbauche: Date, salaireBase: Number,
-  indemniteLogement: Number, indemniteTransport: Number,
-  autresIndemnites: Number, numeroCNPS: String, rib: String,
-  mairieId: Number, actif: Boolean, observations: String, ...ts,
+  matricule: String,
+  nom: String,
+  prenom: String,
+  dateNaissance: Date,
+  sexe: { type: String, enum: ['M', 'F'] },
+  typeEmploye: String,
+  poste: String,
+  grade: String,
+  categorie: String,
+  service: String,
+  departement: String,
+  dateEmbauche: Date,
+  salaireBase: Number,
+  indemniteLogement: Number,
+  indemniteTransport: Number,
+  autresIndemnites: Number,
+  numeroCNPS: String,
+  rib: String,
+  mairieId: Number,
+  actif: Boolean,
+  observations: String,
+  ...ts,
 });
 export const EmployeModel = m('Employe', EmployeSchema);
 
@@ -253,15 +366,25 @@ export const EmployeModel = m('Employe', EmployeSchema);
 
 const FichePaieSchema = new Schema({
   id: { type: Number, required: true, unique: true },
-  employeId: Number, mois: Number, annee: Number,
-  exercice: Number, mairieId: Number,
-  salaireBase: Number, indemniteLogement: Number,
-  indemniteTransport: Number, autresIndemnites: Number,
-  montantBrut: Number, cotisationCNPS: Number,
-  impotSurSalaire: Number, autresRetenues: Number,
+  employeId: Number,
+  mois: Number,
+  annee: Number,
+  exercice: Number,
+  mairieId: Number,
+  salaireBase: Number,
+  indemniteLogement: Number,
+  indemniteTransport: Number,
+  autresIndemnites: Number,
+  montantBrut: Number,
+  cotisationCNPS: Number,
+  impotSurSalaire: Number,
+  autresRetenues: Number,
   montantNet: Number,
   statut: { type: String, enum: ['brouillon', 'valide', 'paye'] },
-  mandatId: Number, observations: String, personnelId: Number, ...ts,
+  mandatId: Number,
+  observations: String,
+  personnelId: Number,
+  ...ts,
 });
 FichePaieSchema.index({ annee: 1, mois: 1, employeId: 1 });
 export const FichePaieModel = m('FichePaie', FichePaieSchema);
@@ -270,12 +393,17 @@ export const FichePaieModel = m('FichePaie', FichePaieSchema);
 
 const CongeSchema = new Schema({
   id: { type: Number, required: true, unique: true },
-  employeId: Number, mairieId: Number,
+  employeId: Number,
+  mairieId: Number,
   type: { type: String, enum: ['annuel', 'maladie', 'maternite', 'circonstance', 'autre'] },
-  dateDebut: Date, dateFin: Date, nombreJours: Number,
+  dateDebut: Date,
+  dateFin: Date,
+  nombreJours: Number,
   motif: String,
   statut: { type: String, enum: ['demande', 'approuve', 'refuse', 'annule'] },
-  observations: String, personnelId: Number, ...ts,
+  observations: String,
+  personnelId: Number,
+  ...ts,
 });
 export const CongeModel = m('Conge', CongeSchema);
 
@@ -283,16 +411,28 @@ export const CongeModel = m('Conge', CongeSchema);
 
 const OrdreMissionSchema = new Schema({
   id: { type: Number, required: true, unique: true },
-  numero: String, employeId: Number, mairieId: Number,
-  exercice: Number, objet: String, destination: String,
-  dateDebut: Date, dateFin: Date, nombreJours: Number,
-  indemniteJournaliere: Number, fraisTransport: Number,
-  fraisHebergement: Number, fraisNourriture: Number,
-  montantTotal: Number, mandatId: Number,
+  numero: String,
+  employeId: Number,
+  mairieId: Number,
+  exercice: Number,
+  objet: String,
+  destination: String,
+  dateDebut: Date,
+  dateFin: Date,
+  nombreJours: Number,
+  indemniteJournaliere: Number,
+  fraisTransport: Number,
+  fraisHebergement: Number,
+  fraisNourriture: Number,
+  montantTotal: Number,
+  mandatId: Number,
   statut: { type: String, enum: ['brouillon', 'valide', 'paye'] },
-  observations: String, hebergementAssure: Boolean,
-  nourritureAssuree: Boolean, moyenTransport: String,
-  personnelId: Number, ...ts,
+  observations: String,
+  hebergementAssure: Boolean,
+  nourritureAssuree: Boolean,
+  moyenTransport: String,
+  personnelId: Number,
+  ...ts,
 });
 export const OrdreMissionModel = m('OrdreMission', OrdreMissionSchema);
 
@@ -301,7 +441,9 @@ export const OrdreMissionModel = m('OrdreMission', OrdreMissionSchema);
 const ParametresPaieSchema = new Schema({
   id: { type: Number, required: true, unique: true },
   mairieId: Number,
-  tauxCnpsEmploye: Number, tauxIts: Number, tauxFns: Number,
+  tauxCnpsEmploye: Number,
+  tauxIts: Number,
+  tauxFns: Number,
   tauxIndemniteResidence: Number,
   tauxCnpsPatronalPrestationFamiliale: Number,
   tauxCnpsPatronalAccidentTravail: Number,
@@ -314,8 +456,12 @@ export const ParametresPaieModel = m('ParametresPaie', ParametresPaieSchema);
 
 const ServiceApp7Schema = new Schema({
   id: { type: Number, required: true, unique: true },
-  nom: String, compte: String, chapitre: String,
-  mairieId: Number, actif: Boolean, ...ts,
+  nom: String,
+  compte: String,
+  chapitre: String,
+  mairieId: Number,
+  actif: Boolean,
+  ...ts,
 });
 export const ServiceApp7Model = m('ServiceApp7', ServiceApp7Schema);
 
@@ -323,7 +469,8 @@ export const ServiceApp7Model = m('ServiceApp7', ServiceApp7Schema);
 
 const PrintDataSchema = new Schema({
   id: { type: Number, required: true, unique: true },
-  type: String, data: Schema.Types.Mixed,
+  type: String,
+  data: Schema.Types.Mixed,
   createdAt: { type: Date, default: Date.now },
 });
 export const PrintDataModel = m('PrintData', PrintDataSchema);
@@ -332,16 +479,20 @@ export const PrintDataModel = m('PrintData', PrintDataSchema);
 
 const ExerciceSchema = new Schema({
   id: { type: Number, required: true, unique: true },
-  annee: Number, libelle: String,
+  annee: Number,
+  libelle: String,
   statut: { type: String, enum: ['ouvert', 'verrouille'] },
-  mairieId: Number, dateOuverture: Date, dateVerrouillage: Date,
-  observations: String, ...ts,
+  mairieId: Number,
+  dateOuverture: Date,
+  dateVerrouillage: Date,
+  observations: String,
+  ...ts,
 });
 export const ExerciceModel = m('Exercice', ExerciceSchema);
 
 // ─── Registry (collection name → model) ─────────────────────────────────────
 
-export const MODEL_REGISTRY: Record<string, mongoose.Model<any>> = {
+export const MODEL_REGISTRY: Record<string, mongoose.Model<mongoose.AnyObject>> = {
   mairies: MairieModel,
   utilisateurs: UtilisateurModel,
   taxes: TaxeModel,
@@ -367,5 +518,3 @@ export const MODEL_REGISTRY: Record<string, mongoose.Model<any>> = {
   printData: PrintDataModel,
   exercices: ExerciceModel,
 };
-
-
