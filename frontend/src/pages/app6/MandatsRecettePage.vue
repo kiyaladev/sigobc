@@ -820,7 +820,7 @@ function printMandat(mandat: MandatRecette) {
 }
 
 function downloadMandatPDF(mandat: MandatRecette) {
-  openPrintWindow('mandat/ordre_de_recette.html', { mandatRecetteId: mandat.id!, print: 'true' });
+  openPrintWindow('mandat/ordre_de_recette.html', { mandatRecetteId: mandat.id! });
 }
 
 watch(

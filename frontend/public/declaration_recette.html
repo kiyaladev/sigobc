@@ -421,15 +421,14 @@
       const { createApp } = Vue;
 
       // Initialiser Dexie
-      const db = new Dexie('TresorDatabase');
-      db.version(1).stores({
-        mairies: '++id, nom, code, ville',
-        taxes: '++id, code, libelle, mairieId, type, actif',
-        declarations:
-          '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
-        bordereaux: '++id, numero, annee, mairieId, statut, personnelId',
-        utilisateurs: '++id, username, email, role, mairieId, actif',
-      });
+      let db;
+      try {
+        db = new Dexie('TresorOfflineDB');
+        await db.open();
+      } catch (_e) {
+        db = new Dexie('TresorDatabase');
+        await db.open();
+      }
 
       createApp({
         data() {
@@ -555,7 +554,7 @@
               }
 
               // Charger la déclaration
-              this.declaration = await db.declarations.get(parseInt(declarationId));
+              this.declaration = await db.table('declarations').get(parseInt(declarationId));
 
               if (!this.declaration) {
                 this.error = 'Déclaration non trouvée';
@@ -564,12 +563,12 @@
 
               // Charger la mairie associée
               if (this.declaration.mairieId) {
-                this.mairie = await db.mairies.get(this.declaration.mairieId);
+                this.mairie = await db.table('mairies').get(this.declaration.mairieId);
               }
 
               // Charger la taxe associée
               if (this.declaration.taxeId) {
-                this.taxe = await db.taxes.get(this.declaration.taxeId);
+                this.taxe = await db.table('taxes').get(this.declaration.taxeId);
               }
 
               console.log('Déclaration chargée:', this.declaration);

@@ -100,8 +100,14 @@
 
       async function loadAndRender() {
         try {
-        const db = new Dexie('TresorDatabase');
-        await db.open();
+        let db;
+        try {
+          db = new Dexie('TresorOfflineDB');
+          await db.open();
+        } catch (_e) {
+          db = new Dexie('TresorDatabase');
+          await db.open();
+        }
 
         let exercice = new Date().getFullYear();
         try {

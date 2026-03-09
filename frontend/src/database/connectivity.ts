@@ -21,10 +21,10 @@ export type DataMode = 'offline' | 'offline-sync' | 'online';
 const STORAGE_KEY = '_tresor_dataMode';
 
 function loadMode(): DataMode {
-  if (typeof localStorage === 'undefined') return 'offline-sync';
+  if (typeof localStorage === 'undefined') return 'offline';
   const stored = localStorage.getItem(STORAGE_KEY);
   if (stored === 'offline' || stored === 'offline-sync' || stored === 'online') return stored;
-  return 'offline-sync';
+  return 'offline';
 }
 
 /** The user-chosen data mode, persisted in localStorage. */

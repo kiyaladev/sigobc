@@ -9,7 +9,7 @@
  *  - Periodically probe the API when offline so that reconnection is detected
  *    even when the network interface stays up (WiFi connected, internet down).
  *  - On reconnection (and at startup), flush `_syncQueue` in chronological order.
- *  - Remap temporary negative IDs to real server IDs so that FK references
+ *  - Remap local IDs to real server IDs so that FK references
  *    stored in later queue entries are fixed up before they are sent.
  *  - Prefetch all collections into the local cache at startup (when online) so
  *    that every page has data available immediately when the user goes offline.
@@ -21,7 +21,7 @@ import axios from 'axios';
 import type { Table } from 'dexie';
 import { api } from 'src/boot/axios';
 import { isOnline, useApi, useCache, useSyncQueue } from './connectivity';
-import { offlineDb, resetTempIdCounter } from './offline-db';
+import { offlineDb } from './offline-db';
 import type { SyncEntry } from './offline-db';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -79,14 +79,14 @@ function isOfflineError(error: unknown): boolean {
   return axios.isAxiosError(error) && !error.response;
 }
 
-/** Replace every negative number in `payload` that exists in `idMap`. */
+/** Replace every local ID in `payload` that exists in `idMap` with the server ID. */
 function remapPayload(
   payload: Record<string, unknown>,
   idMap: Map<number, number>,
 ): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(payload)) {
-    if (typeof value === 'number' && value < 0 && idMap.has(value)) {
+    if (typeof value === 'number' && idMap.has(value)) {
       out[key] = idMap.get(value);
     } else {
       out[key] = value;
@@ -244,12 +244,6 @@ export async function syncPendingChanges(): Promise<void> {
       }
     }
 
-    // If the queue is now empty, reset the temp-ID counter so it stays compact.
-    const remaining = await offlineDb._syncQueue.count();
-    if (remaining === 0) {
-      resetTempIdCounter();
-    }
-
     console.log('[Sync] Done.');
   } finally {
     _syncing = false;
@@ -264,7 +258,7 @@ async function processEntry(entry: SyncEntry, idMap: Map<number, number>): Promi
     case 'add': {
       const raw = entry.payload as Record<string, unknown>;
       const remapped = remapPayload(raw, idMap);
-      delete remapped['id']; // Remove the temp negative ID
+      delete remapped['id']; // Remove the local auto-increment ID
 
       const { data } = await api.post<{ ok: boolean; id: number }>(col, remapped);
       const serverId = data.id;

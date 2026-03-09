@@ -126,13 +126,6 @@
 
       function fmt(n) { return Number(n||0).toLocaleString('fr-FR'); }
 
-      const db = new Dexie('TresorDatabase');
-      db.version(25).stores({
-        mairies:'++id, nom, code, ville',
-        employes:'++id, matricule, nom, prenom, service, mairieId, actif',
-        fichesPaie:'++id, employeId, mois, annee, exercice, mairieId, statut, [annee+mois+employeId]',
-      });
-
       function buildHeader(maisVille, maisCode, moisLabel, annee, totalBrut, totalRetenues, totalNet, nbAgents) {
         return `
           <div class="header">
@@ -176,6 +169,15 @@
       }
 
       document.addEventListener('DOMContentLoaded', async () => {
+        let db;
+        try {
+          db = new Dexie('TresorOfflineDB');
+          await db.open();
+        } catch (_e) {
+          db = new Dexie('TresorDatabase');
+          await db.open();
+        }
+
         const params = new URLSearchParams(window.location.search);
         const mois = parseInt(params.get('mois'),10)||new Date().getMonth()+1;
         const annee = parseInt(params.get('annee'),10)||new Date().getFullYear();
@@ -183,7 +185,7 @@
 
         try {
           const [mairie, employes, toutesLesFiches] = await Promise.all([
-            db.mairies.toCollection().first(), db.employes.toArray(), db.fichesPaie.toArray(),
+            db.table('mairies').toCollection().first(), db.table('employes').toArray(), db.table('fichesPaie').toArray(),
           ]);
 
           const fiches = toutesLesFiches.filter(f=>f.mois===mois&&f.annee===annee);

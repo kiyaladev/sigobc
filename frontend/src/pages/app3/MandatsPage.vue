@@ -800,7 +800,6 @@ function printMandat(mandat: Mandat) {
   // Le fichier HTML charge les données directement depuis IndexedDB
   openPrintWindow('mandat_depense.html', {
     mandatId: mandat.id!,
-    print: 'true',
   });
 }
 

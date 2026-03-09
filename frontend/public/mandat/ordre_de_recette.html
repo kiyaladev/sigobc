@@ -324,7 +324,7 @@
             <div class="header-cell header-center">
               <div class="document-title">ORDRE DE RECETTE</div>
               <div class="field-line">EXERCICE : {{ mandat.exercice }}</div>
-              <div class="field-line">TITRE DU BUDGET : I</div>
+              <div class="field-line">TITRE DU BUDGET : {{ titreBudget }}</div>
               <div class="section-title">IMPUTATION</div>
               <div class="field-line">Fonctionnelle : {{ taxeCode }}</div>
               <div class="field-line">Patrimoniale : {{ mandat.patrimonial || ''}}</div>
@@ -441,7 +441,7 @@
             <div class="header-cell header-center">
               <div class="document-title">ORDRE DE RECETTE</div>
               <div class="field-line">EXERCICE : {{ mandat.exercice }}</div>
-              <div class="field-line">TITRE DU BUDGET : I</div>
+              <div class="field-line">TITRE DU BUDGET : {{ titreBudget }}</div>
               <div class="section-title">IMPUTATION</div>
               <div class="field-line">Fonctionnelle : {{ taxeCode }}</div>
               <div class="field-line">Patrimoniale : {{ mandat.patrimonial || ''}}</div>
@@ -550,7 +550,7 @@
             <div class="header-cell header-center">
               <div class="document-title">ORDRE DE RECETTE</div>
               <div class="field-line">EXERCICE : {{ mandat.exercice }}</div>
-              <div class="field-line">TITRE DU BUDGET : I</div>
+              <div class="field-line">TITRE DU BUDGET : {{ titreBudget }}</div>
               <div class="section-title">IMPUTATION</div>
               <div class="field-line">Fonctionnelle : {{ taxeCode }}</div>
               <div class="field-line">Patrimoniale : {{ mandat.patrimonial || ''}}</div>
@@ -662,39 +662,15 @@
     <script type="module">
       const { createApp } = Vue;
 
-      // Initialiser Dexie
-      const db = new Dexie('TresorDatabase');
-      db.version(23).stores({
-        mairies: '++id, nom, code, ville',
-        utilisateurs: '++id, username, email, role, mairieId, actif',
-
-        // App3
-        chapitres: '++id, code, libelle, mairieId, actif',
-        sousChapitres: '++id, code, libelle, parentId, mairieId, actif',
-        previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
-        mandats:
-          '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
-        bordereauMandats: '++id, numero, exercice, mairieId, statut, personnelId',
-        etatFinancierMensuel:
-          '++id, annee, sousChapitreId, chapitreId, mairieId, [annee+sousChapitreId+chapitreId]',
-
-        // App6 - Recettes
-        taxes: '++id, code, libelle, mairieId, type, actif',
-        declarations:
-          '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
-        bordereauxRecette: '++id, numero, annee, mairieId, statut, personnelId',
-        previsionsRecettes: '++id, exercice, taxeId, mairieId, statut, personnelId',
-
-        // App6 - Mandats de Recettes
-        mandatsRecette:
-          '++id, numeroMandat, dateMandat, exercice, chapitreId, taxeId, previsionRecetteId, bordereauMandatRecetteId, mairieId, statut, personnelId',
-        bordereauMandatsRecette: '++id, numero, exercice, mairieId, statut, personnelId',
-
-        // App6 - Chapitres Recettes (Nature des recettes) et États Mensuels
-        chapitresRecette: '++id, code, libelle, mairieId, actif',
-        etatFinancierMensuelRecette:
-          '++id, annee, taxeId, chapitreRecetteId, mairieId, [annee+taxeId+chapitreRecetteId]',
-      });
+      // Initialiser Dexie - ouvrir la base existante dynamiquement
+      let db;
+      try {
+        db = new Dexie('TresorOfflineDB');
+        await db.open();
+      } catch (_e) {
+        db = new Dexie('TresorDatabase');
+        await db.open();
+      }
 
       createApp({
         data() {
@@ -710,6 +686,11 @@
         computed: {
           taxeCode() {
             return this.taxe?.code || '';
+          },
+          titreBudget() {
+            const code = this.taxe?.code || '';
+            if (String(code).startsWith('0')) return 'II';
+            return 'I';
           },
           bordereauNumero() {
             if (!this.bordereau) return '';
@@ -828,7 +809,7 @@
               }
 
               // Charger le mandat depuis la base de données
-              this.mandat = await db.mandatsRecette.get(parseInt(mandatRecetteId));
+              this.mandat = await db.table('mandatsRecette').get(parseInt(mandatRecetteId));
 
               if (!this.mandat) {
                 this.error = 'Mandat non trouvé';
@@ -837,17 +818,17 @@
 
               // Charger la mairie
               if (this.mandat.mairieId) {
-                this.mairie = await db.mairies.get(this.mandat.mairieId);
+                this.mairie = await db.table('mairies').get(this.mandat.mairieId);
               }
 
               // Charger la taxe
               if (this.mandat.taxeId) {
-                this.taxe = await db.taxes.get(this.mandat.taxeId);
+                this.taxe = await db.table('taxes').get(this.mandat.taxeId);
               }
 
               // Charger le bordereau
               if (this.mandat.bordereauMandatRecetteId) {
-                this.bordereau = await db.bordereauMandatsRecette.get(
+                this.bordereau = await db.table('bordereauMandatsRecette').get(
                   this.mandat.bordereauMandatRecetteId,
                 );
               }

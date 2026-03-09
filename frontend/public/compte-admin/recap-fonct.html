@@ -141,8 +141,14 @@
 
       async function loadAndRender() {
         try {
-          var db = new Dexie('TresorDatabase');
-          await db.open();
+          let db;
+          try {
+            db = new Dexie('TresorOfflineDB');
+            await db.open();
+          } catch (_e) {
+            db = new Dexie('TresorDatabase');
+            await db.open();
+          }
 
           // Try to get exercice from printData
           try {

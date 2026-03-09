@@ -567,19 +567,16 @@
         }
       });
 
-      // Configuration IndexedDB avec Dexie
-      const db = new Dexie('TresorDatabase');
-      db.version(12).stores({
-        mairies: '++id, nom, code, ville',
-        taxes: '++id, code, libelle, mairieId, type, actif',
-        declarations:
-          '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauRecetteId, personnelId, exercice',
-        bordereauxRecette: '++id, numero, annee, mairieId, statut, personnelId',
-        utilisateurs: '++id, username, email, role, mairieId, actif',
-      });
-
       // Charger les données depuis IndexedDB si bordereauId est fourni
       async function loadFromDatabase() {
+        let db;
+        try {
+          db = new Dexie('TresorOfflineDB');
+          await db.open();
+        } catch (_e) {
+          db = new Dexie('TresorDatabase');
+          await db.open();
+        }
         const urlParams = new URLSearchParams(window.location.search);
         const bordereauId = parseInt(urlParams.get('bordereauId'), 10);
         const shouldPrint = urlParams.get('print') === 'true';
@@ -591,7 +588,7 @@
 
         try {
           console.log('Chargement du bordereau depuis IndexedDB:', bordereauId);
-          const bordereau = await db.bordereauxRecette.get(bordereauId);
+          const bordereau = await db.table('bordereauxRecette').get(bordereauId);
 
           if (!bordereau) {
             console.error('Bordereau non trouvé:', bordereauId);
@@ -599,16 +596,15 @@
           }
 
           // Récupérer la mairie
-          const mairie = await db.mairies.toCollection().first();
+          const mairie = await db.table('mairies').toCollection().first();
 
           // Récupérer les déclarations liées à ce bordereau
-          const declarations = await db.declarations
-            .where('bordereauRecetteId')
-            .equals(bordereauId)
+          const declarations = await db.table('declarations')
+            .filter((d) => d.bordereauRecetteId === bordereauId || d.bordereauId === bordereauId)
             .toArray();
 
           // Récupérer toutes les taxes pour le mapping
-          const taxes = await db.taxes.toArray();
+          const taxes = await db.table('taxes').toArray();
           const taxesMap = new Map(taxes.map((t) => [t.id, t]));
 
           // Formater les déclarations pour l'affichage

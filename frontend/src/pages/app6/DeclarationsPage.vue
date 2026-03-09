@@ -611,7 +611,6 @@ function downloadDeclarationPDF(declaration: Declaration) {
   // Ouvrir le template et lancer l'impression automatiquement
   const printWindow = openPrintWindow('declaration_recette_new.html', {
     declarationId: declaration.id!,
-    print: 'true',
   });
 
   if (printWindow) {

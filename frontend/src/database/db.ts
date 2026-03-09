@@ -571,19 +571,14 @@ export const db = {
     await callback();
   },
 
-  /** Shim for db.delete() — clears the local Dexie cache (MongoDB data is unaffected). */
+  /** Deletes and recreates the Dexie database (clears all data and resets auto-increment counters). */
   delete: async () => {
     const { offlineDb } = await import('./offline-db');
-    for (const key of Object.keys(offlineDb.tables)) {
-      try {
-        await offlineDb.table(key).clear();
-      } catch {
-        /* non-critical */
-      }
-    }
+    await offlineDb.delete();
+    await offlineDb.open();
   },
 
-  /** Shim for db.open() — no-op in MongoDB mode. */
+  /** Shim for db.open() — no-op since offlineDb opens automatically. */
   open: async () => {
     /* no-op */
   },

@@ -10,7 +10,7 @@
  * ├──────────────────────────────────────────────────────────────────┤
  * │  Offline mode (isOnline = false, or network failure)             │
  * │   Reads  → Dexie cache                                           │
- * │   Writes → Dexie cache (temp negative ID) + _syncQueue entry     │
+ * │   Writes → Dexie cache (auto-increment ID) + _syncQueue entry     │
  * └──────────────────────────────────────────────────────────────────┘
  *
  * When the connection is restored (sync.ts), pending _syncQueue entries
@@ -24,7 +24,7 @@ import axios from 'axios';
 import type { Table } from 'dexie';
 import { api } from 'src/boot/axios';
 import { isOnline, useApi, useCache, useSyncQueue } from './connectivity';
-import { offlineDb, nextTempId, type SyncOp } from './offline-db';
+import { offlineDb, type SyncOp } from './offline-db';
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
@@ -380,18 +380,17 @@ export class Collection<T> {
     }
 
     // ── local path (offline / offline-sync) ──
-    const tempId = nextTempId();
-    await this.cacheUpsert({ ...(item as object), id: tempId });
+    const newId = await this.cache!.add(item as Record<string, unknown>);
     if (this.canQueue) {
       await offlineDb._syncQueue.add({
         collection: this.endpoint,
         op: 'add',
-        localId: tempId,
+        localId: newId,
         payload: item,
         timestamp: Date.now(),
       });
     }
-    return tempId;
+    return newId;
   }
 
   /** Upsert: PUT if item has an id, POST otherwise. */
@@ -414,15 +413,13 @@ export class Collection<T> {
 
     if (this.canCache) await this.cacheUpsert(item);
     if (this.canQueue) {
-      const putEntry = {
+      await offlineDb._syncQueue.add({
         collection: this.endpoint,
-        op: (id < 0 ? 'add' : 'put') as SyncOp,
+        op: 'put' as SyncOp,
+        serverId: id,
         payload: item as unknown,
         timestamp: Date.now(),
-      };
-      if (id < 0) Object.assign(putEntry, { localId: id });
-      else Object.assign(putEntry, { serverId: id });
-      await offlineDb._syncQueue.add(putEntry);
+      });
     }
     return id;
   }
@@ -450,15 +447,13 @@ export class Collection<T> {
       await this.cacheUpsert({ ...(existing ?? {}), ...(changes as object), id });
     }
     if (!this.canQueue) return;
-    const updateEntry = {
+    await offlineDb._syncQueue.add({
       collection: this.endpoint,
       op: 'update' as const,
+      serverId: id,
       payload: changes as unknown,
       timestamp: Date.now(),
-    };
-    if (id > 0) Object.assign(updateEntry, { serverId: id });
-    else Object.assign(updateEntry, { localId: id });
-    await offlineDb._syncQueue.add(updateEntry);
+    });
   }
 
   async delete(id: number | undefined): Promise<void> {
@@ -478,19 +473,13 @@ export class Collection<T> {
 
     if (this.canCache) await this.cacheRemove(id);
     if (this.canQueue) {
-      if (id > 0) {
-        await offlineDb._syncQueue.add({
-          collection: this.endpoint,
-          op: 'delete',
-          serverId: id,
-          payload: null,
-          timestamp: Date.now(),
-        });
-      } else {
-        // Cancel pending add/put/update for this temp item
-        const pending = await offlineDb._syncQueue.where('localId').equals(id).toArray();
-        await offlineDb._syncQueue.bulkDelete(pending.map((p) => p.id!));
-      }
+      await offlineDb._syncQueue.add({
+        collection: this.endpoint,
+        op: 'delete',
+        serverId: id,
+        payload: null,
+        timestamp: Date.now(),
+      });
     }
   }
 
@@ -515,23 +504,21 @@ export class Collection<T> {
       }
     }
 
-    // Queue each item as an individual 'add' so tempId remapping works correctly
-    const tempIds: number[] = [];
+    const newIds: number[] = [];
     for (const item of items) {
-      const tempId = nextTempId();
-      tempIds.push(tempId);
-      await this.cacheUpsert({ ...(item as object), id: tempId });
+      const newId = await this.cache!.add(item as Record<string, unknown>);
+      newIds.push(newId);
       if (this.canQueue) {
         await offlineDb._syncQueue.add({
           collection: this.endpoint,
           op: 'add',
-          localId: tempId,
+          localId: newId,
           payload: item,
           timestamp: Date.now(),
         });
       }
     }
-    return tempIds;
+    return newIds;
   }
 
   async bulkPut(items: T[]): Promise<void> {

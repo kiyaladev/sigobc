@@ -630,10 +630,14 @@
         if (!dataProcessed) {
           try {
             // Initialiser Dexie pour accéder à la table printData
-            var db = new Dexie('TresorDatabase');
-            db.version(24).stores({
-              printData: '++id, type, createdAt',
-            });
+            let db;
+            try {
+              db = new Dexie('TresorOfflineDB');
+              await db.open();
+            } catch (_e2) {
+              db = new Dexie('TresorDatabase');
+              await db.open();
+            }
 
             // Chercher les données d'impression les plus récentes pour ce type
             var printDataRecords = await db

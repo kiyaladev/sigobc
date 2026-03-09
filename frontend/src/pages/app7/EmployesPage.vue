@@ -136,7 +136,7 @@
             <!-- Identité -->
             <div class="text-subtitle2 text-grey-8 q-mb-xs">Identité</div>
             <div class="row q-col-gutter-sm">
-              <div class="col-12 col-md-3">
+              <div class="col-12 col-md-2">
                 <q-input
                   v-model="form.matricule"
                   label="Matricule *"
@@ -163,12 +163,12 @@
                   :rules="[(v) => !!v || 'Obligatoire']"
                 />
               </div>
-              <div class="col-12 col-md-1">
+              <div class="col-12 col-md-2">
                 <q-select
                   v-model="form.sexe"
                   :options="[
-                    { label: 'M', value: 'M' },
-                    { label: 'F', value: 'F' },
+                    { label: 'Masculin', value: 'M' },
+                    { label: 'Féminin', value: 'F' },
                   ]"
                   label="Sexe"
                   outlined
@@ -179,7 +179,7 @@
               </div>
             </div>
             <div class="row q-col-gutter-sm">
-              <div class="col-12 col-md-4">
+              <div class="col-12 col-md-3">
                 <q-input
                   v-model="form.dateNaissance"
                   label="Date de naissance"
@@ -188,7 +188,7 @@
                   type="date"
                 />
               </div>
-              <div class="col-12 col-md-4">
+              <div class="col-12 col-md-3">
                 <q-input
                   v-model="form.dateEmbauche"
                   label="Date d'embauche"
@@ -197,30 +197,33 @@
                   type="date"
                 />
               </div>
-              <div class="col-12 col-md-4">
+              <div class="col-12 col-md-3">
                 <q-input v-model="form.numeroCNPS" label="N° CNPS" outlined dense />
+              </div>
+              <div class="col-12 col-md-3">
+                <q-input v-model="form.rib" label="RIB / Compte bancaire" outlined dense />
               </div>
             </div>
 
             <q-separator class="q-my-sm" />
 
             <!-- Poste -->
-            <div class="text-subtitle2 text-grey-8 q-mb-xs">Poste, Type & Service</div>
+            <div class="text-subtitle2 text-grey-8 q-mb-xs">Poste & Affectation</div>
             <div class="row q-col-gutter-sm">
               <div class="col-12 col-md-3">
-                <q-input
-                  v-model="form.poste"
-                  label="Poste / Fonction *"
+                <q-select
+                  v-model="form.typeEmploye"
+                  :options="typeEmployeOptions"
+                  label="Type d'agent *"
                   outlined
                   dense
                   :rules="[(v) => !!v || 'Obligatoire']"
                 />
               </div>
               <div class="col-12 col-md-3">
-                <q-select
-                  v-model="form.typeEmploye"
-                  :options="typeEmployeOptions"
-                  label="Type d'agent *"
+                <q-input
+                  v-model="form.poste"
+                  label="Poste / Fonction *"
                   outlined
                   dense
                   :rules="[(v) => !!v || 'Obligatoire']"
@@ -243,12 +246,23 @@
                 />
               </div>
             </div>
+
             <q-separator class="q-my-sm" />
 
-            <!-- Salaire -->
-            <div class="text-subtitle2 text-grey-8 q-mb-xs">Rémunération</div>
+            <!-- Rémunération -->
+            <div class="row items-center q-mb-xs">
+              <div class="text-subtitle2 text-grey-8">Rémunération</div>
+              <q-space />
+              <q-toggle
+                v-model="hasIndemniteLogement"
+                label="Indemnité de logement"
+                dense
+                left-label
+                class="text-caption"
+              />
+            </div>
             <div class="row q-col-gutter-sm">
-              <div class="col-12 col-md-3">
+              <div class="col-12 col-md-4">
                 <q-input
                   v-model.number="form.salaireBase"
                   label="Salaire de base *"
@@ -259,17 +273,19 @@
                   :rules="[(v) => v >= 0 || 'Invalide']"
                 />
               </div>
-              <div class="col-12 col-md-3">
+              <div v-if="hasIndemniteLogement" class="col-12 col-md-2">
                 <q-input
-                  v-model.number="form.indemniteLogement"
-                  label="Indem. logement"
+                  :model-value="form.indemniteLogement"
+                  :label="`Logement (${parametresPaie?.tauxIndemniteResidence ?? 15}%)`"
                   outlined
                   dense
                   type="number"
                   suffix="CFA"
+                  readonly
+                  bg-color="blue-1"
                 />
               </div>
-              <div class="col-12 col-md-3">
+              <div :class="hasIndemniteLogement ? 'col-12 col-md-3' : 'col-12 col-md-4'">
                 <q-input
                   v-model.number="form.indemniteTransport"
                   label="Indem. transport"
@@ -279,7 +295,7 @@
                   suffix="CFA"
                 />
               </div>
-              <div class="col-12 col-md-3">
+              <div :class="hasIndemniteLogement ? 'col-12 col-md-3' : 'col-12 col-md-4'">
                 <q-input
                   v-model.number="form.autresIndemnites"
                   label="Autres indemnités"
@@ -290,23 +306,22 @@
                 />
               </div>
             </div>
-            <div class="row q-col-gutter-sm">
-              <div class="col-12 col-md-6">
-                <q-input v-model="form.rib" label="RIB / Compte bancaire" outlined dense />
-              </div>
-              <div class="col-12 col-md-6">
+
+            <q-separator class="q-my-sm" />
+
+            <div class="row q-col-gutter-sm items-center">
+              <div class="col-auto">
                 <q-toggle v-model="form.actif" label="Agent actif" />
               </div>
+              <div class="col">
+                <q-input
+                  v-model="form.observations"
+                  label="Observations"
+                  outlined
+                  dense
+                />
+              </div>
             </div>
-
-            <q-input
-              v-model="form.observations"
-              label="Observations"
-              outlined
-              dense
-              type="textarea"
-              rows="2"
-            />
 
             <div class="row justify-end q-gutter-sm q-mt-md">
               <q-btn label="Annuler" flat color="grey-7" v-close-popup />
@@ -320,9 +335,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useQuasar, date } from 'quasar';
-import { db, type Employe } from 'src/database/db';
+import { db, type Employe, type ParametresPaie } from 'src/database/db';
 import PageHeader from 'src/components/PageHeader.vue';
 import DataTable from 'src/components/DataTable.vue';
 
@@ -335,6 +350,7 @@ const showInactifs = ref(false);
 const tablePagination = ref<any>({ page: 1, rowsPerPage: 10 });
 const editingId = ref<number | null>(null);
 const employes = ref<Employe[]>([]);
+const parametresPaie = ref<ParametresPaie | null>(null);
 
 // Cartes de statistiques avec animations
 const statsCards = computed(() => {
@@ -401,6 +417,21 @@ const defaultForm = () => ({
 });
 
 const form = ref(defaultForm());
+const hasIndemniteLogement = ref(false);
+
+// Auto-calcul de l'indemnité de logement à partir du salaire de base
+watch(
+  [() => form.value.salaireBase, hasIndemniteLogement],
+  ([newBase, hasIndem]) => {
+    if (hasIndem && parametresPaie.value) {
+      form.value.indemniteLogement = Math.round(
+        (newBase || 0) * (parametresPaie.value.tauxIndemniteResidence / 100),
+      );
+    } else if (!hasIndem) {
+      form.value.indemniteLogement = 0;
+    }
+  },
+);
 
 const columns = [
   {
@@ -497,10 +528,13 @@ function formatMontant(montant: number): string {
 async function loadData() {
   loading.value = true;
   try {
-    employes.value = await db.employes.toArray();
-
-    // Load available services from DB instead of hardcoded
-    const svcs = await db.servicesApp7.toArray();
+    const [loadedEmployes, loadedParams, svcs] = await Promise.all([
+      db.employes.toArray(),
+      db.parametresPaie.toCollection().first(),
+      db.servicesApp7.toArray(),
+    ]);
+    employes.value = loadedEmployes;
+    parametresPaie.value = loadedParams ?? null;
     servicesOptions.value = svcs.map((s) => s.nom);
   } finally {
     loading.value = false;
@@ -510,11 +544,13 @@ async function loadData() {
 function openAdd() {
   editingId.value = null;
   form.value = defaultForm();
+  hasIndemniteLogement.value = false;
   showDialog.value = true;
 }
 
 function editEmploye(row: Employe) {
   editingId.value = row.id!;
+  hasIndemniteLogement.value = (row.indemniteLogement || 0) > 0;
   form.value = {
     matricule: row.matricule,
     nom: row.nom,

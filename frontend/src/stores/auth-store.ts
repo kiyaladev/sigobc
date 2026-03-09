@@ -26,6 +26,8 @@ export const useAuthStore = defineStore('auth', () => {
 
   // Actions
   async function ensureAdminExists(): Promise<void> {
+    const DEFAULT_ADMIN_PASSWORD = 'Sigobc@2026!';
+
     try {
       const adminUser = await db.utilisateurs.where('username').equals('admin').first();
 
@@ -33,7 +35,7 @@ export const useAuthStore = defineStore('auth', () => {
         console.log('🔧 Création du compte admin par défaut...');
         await db.utilisateurs.add({
           username: 'admin',
-          password: 'Sigobc@2026!',
+          password: DEFAULT_ADMIN_PASSWORD,
           nom: 'Administrateur',
           prenom: 'Système',
           email: 'admin@sigobc.gov',
@@ -43,14 +45,18 @@ export const useAuthStore = defineStore('auth', () => {
           updatedAt: new Date(),
         });
         console.log('✅ Compte admin créé avec succès');
-      } else if (!adminUser.actif) {
-        // S'assurer que le compte admin est actif
-        console.log('🔧 Réactivation du compte admin...');
-        await db.utilisateurs.update(adminUser.id, {
-          actif: true,
-          updatedAt: new Date(),
-        });
-        console.log('✅ Compte admin réactivé avec succès');
+      } else {
+        // S'assurer que le compte admin est actif et a le bon rôle
+        const needsUpdate = !adminUser.actif || adminUser.role !== 'admin';
+        if (needsUpdate) {
+          console.log('🔧 Réparation du compte admin...');
+          await db.utilisateurs.update(adminUser.id, {
+            actif: true,
+            role: 'admin',
+            updatedAt: new Date(),
+          });
+          console.log('✅ Compte admin réparé avec succès');
+        }
       }
 
       // Créer le compte démo s'il n'existe pas
@@ -127,7 +133,30 @@ export const useAuthStore = defineStore('auth', () => {
       // Vérifier si le compte admin existe, sinon le créer
       await ensureAdminExists();
 
-      const user = await db.utilisateurs.where('username').equals(username).first();
+      let user = await db.utilisateurs.where('username').equals(username).first();
+
+      // Si l'admin n'a pas été trouvé malgré ensureAdminExists,
+      // tenter une création directe en dernier recours
+      if (!user && username === 'admin') {
+        console.log('⚠️ Admin introuvable après ensureAdminExists, tentative de création directe...');
+        try {
+          await db.utilisateurs.add({
+            username: 'admin',
+            password: 'Sigobc@2026!',
+            nom: 'Administrateur',
+            prenom: 'Système',
+            email: 'admin@sigobc.gov',
+            role: 'admin',
+            actif: true,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          });
+          user = await db.utilisateurs.where('username').equals('admin').first();
+          console.log('✅ Admin créé en dernier recours:', user ? 'Oui' : 'Non');
+        } catch (e) {
+          console.error('❌ Échec de la création directe de l\'admin:', e);
+        }
+      }
 
       console.log('👤 Utilisateur trouvé:', user ? 'Oui' : 'Non');
       if (user) {

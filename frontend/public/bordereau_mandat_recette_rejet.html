@@ -915,21 +915,17 @@
         return convert(num);
       }
 
-      const db = new Dexie('TresorDatabase');
-      db.version(23).stores({
-        mairies: '++id, nom, code, ville',
-        taxes: '++id, code, libelle, mairieId, type, actif',
-        declarations:
-          '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
-        bordereauxRecette: '++id, numero, annee, mairieId, statut, personnelId',
-        // App6 - Recettes
-        mandatsRecette:
-          '++id, numeroMandat, dateMandat, exercice, chapitreId, taxeId, previsionRecetteId, bordereauMandatRecetteId, mairieId, statut, personnelId',
-        bordereauMandatsRecette: '++id, numero, exercice, mairieId, statut, personnelId',
-        chapitresRecette: '++id, code, libelle, mairieId, actif',
-      });
+      let db;
 
       document.addEventListener('DOMContentLoaded', async () => {
+        try {
+          db = new Dexie('TresorOfflineDB');
+          await db.open();
+        } catch (_e) {
+          db = new Dexie('TresorDatabase');
+          await db.open();
+        }
+
         const params = new URLSearchParams(window.location.search);
         const bordereauId = parseInt(params.get('bordereauId'), 10);
         const shouldPrint = params.get('print') === 'true';
@@ -940,21 +936,20 @@
         }
 
         try {
-          const bordereau = await db.bordereauMandatsRecette.get(bordereauId);
+          const bordereau = await db.table('bordereauMandatsRecette').get(bordereauId);
           if (!bordereau) {
             document.body.innerHTML = `Bordereau avec ID ${bordereauId} non trouvé.`;
             return;
           }
 
           // Récupérer la première mairie de la base de données
-          const mairie = await db.mairies.toCollection().first();
-          const allMandats = await db.mandatsRecette
-            .where('bordereauMandatRecetteId')
-            .equals(bordereauId)
+          const mairie = await db.table('mairies').toCollection().first();
+          const allMandats = await db.table('mandatsRecette')
+            .filter((m) => m.bordereauMandatRecetteId === bordereauId)
             .toArray();
           // Filtrer uniquement les mandats rejetés
           const mandats = allMandats.filter((m) => m.statut === 'rejete');
-          const taxes = await db.taxes.toArray();
+          const taxes = await db.table('taxes').toArray();
           const taxesMap = new Map(taxes.map((t) => [t.id, t]));
 
           // Dans App6, le "chapitre" dans mandatRecette se réfère à ChapitreRecette qui n'existe peut-être pas encore comme table majeure

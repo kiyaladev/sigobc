@@ -3,6 +3,7 @@
 
 import { defineConfig } from '#q-app/wrappers';
 import { fileURLToPath } from 'node:url';
+import path from 'node:path';
 
 export default defineConfig((ctx) => {
   return {
@@ -99,6 +100,10 @@ export default defineConfig((ctx) => {
     devServer: {
       // https: true,
       open: true, // opens browser window automatically
+      fs: {
+        // Allow serving files from the root node_modules (pnpm hoisted packages)
+        allow: [path.resolve(__dirname, '..')],
+      },
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#framework

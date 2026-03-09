@@ -298,15 +298,14 @@
       const { createApp } = Vue;
 
       // Initialiser Dexie
-      const db = new Dexie('TresorDatabase');
-      db.version(1).stores({
-        mairies: '++id, nom, code, ville',
-        taxes: '++id, code, libelle, mairieId, type, actif',
-        declarations:
-          '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
-        bordereaux: '++id, numero, annee, mairieId, statut, personnelId',
-        utilisateurs: '++id, username, email, role, mairieId, actif',
-      });
+      let db;
+      try {
+        db = new Dexie('TresorOfflineDB');
+        await db.open();
+      } catch (_e) {
+        db = new Dexie('TresorDatabase');
+        await db.open();
+      }
 
       createApp({
         data() {
@@ -452,7 +451,7 @@
               }
 
               // Charger le bordereau
-              this.bordereau = await db.bordereaux.get(parseInt(bordereauId));
+              this.bordereau = await db.table('bordereaux').get(parseInt(bordereauId));
 
               if (!this.bordereau) {
                 this.error = 'Bordereau non trouvé';
@@ -461,11 +460,11 @@
 
               // Charger la mairie associée
               if (this.bordereau.mairieId) {
-                this.mairie = await db.mairies.get(this.bordereau.mairieId);
+                this.mairie = await db.table('mairies').get(this.bordereau.mairieId);
               }
 
               // Charger les déclarations du bordereau
-              this.declarations = await db.declarations
+              this.declarations = await db.table('declarations')
                 .where('bordereauId')
                 .equals(parseInt(bordereauId))
                 .toArray();
@@ -474,12 +473,12 @@
               if (!this.mairie && this.declarations.length > 0) {
                 const firstDecl = this.declarations[0];
                 if (firstDecl.mairieId) {
-                  this.mairie = await db.mairies.get(firstDecl.mairieId);
+                  this.mairie = await db.table('mairies').get(firstDecl.mairieId);
                 }
               }
 
               // Charger toutes les taxes pour affichage
-              this.taxes = await db.taxes.toArray();
+              this.taxes = await db.table('taxes').toArray();
 
               console.log('Bordereau chargé:', this.bordereau);
               console.log('Mairie:', this.mairie);

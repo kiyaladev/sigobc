@@ -404,15 +404,15 @@
         return convert(num);
       }
 
-      const db = new Dexie('TresorDatabase');
-      db.version(25).stores({
-        mairies: '++id, nom, code, ville',
-        employes: '++id, matricule, nom, prenom, service, mairieId, actif',
-        fichesPaie:
-          '++id, employeId, mois, annee, exercice, mairieId, statut, [annee+mois+employeId]',
-      });
-
       document.addEventListener('DOMContentLoaded', async () => {
+        let db;
+        try {
+          db = new Dexie('TresorOfflineDB');
+          await db.open();
+        } catch (_e) {
+          db = new Dexie('TresorDatabase');
+          await db.open();
+        }
         const params = new URLSearchParams(window.location.search);
         const fichePaieId = parseInt(params.get('fichePaieId'), 10);
         const shouldPrint = params.get('print') === 'true';
@@ -425,14 +425,14 @@
         }
 
         try {
-          const fiche = await db.fichesPaie.get(fichePaieId);
+          const fiche = await db.table('fichesPaie').get(fichePaieId);
           if (!fiche) {
             content.innerHTML = `<p style="color:red;padding:20px">Bulletin introuvable (ID: ${fichePaieId}).</p>`;
             return;
           }
 
-          const emp = await db.employes.get(fiche.employeId);
-          const mairie = await db.mairies.toCollection().first();
+          const emp = await db.table('employes').get(fiche.employeId);
+          const mairie = await db.table('mairies').toCollection().first();
 
           const moisLabel = MOIS_LABELS[(fiche.mois || 1) - 1] || '';
           const totalRetenues =

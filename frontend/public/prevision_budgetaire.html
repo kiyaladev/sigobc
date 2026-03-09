@@ -355,20 +355,14 @@
       const { createApp } = Vue;
 
       // Initialiser Dexie
-      const db = new Dexie('TresorDatabase');
-      db.version(2).stores({
-        mairies: '++id, nom, code, ville',
-        taxes: '++id, code, libelle, mairieId, type, actif',
-        declarations:
-          '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
-        bordereaux: '++id, numero, annee, mairieId, statut, personnelId',
-        utilisateurs: '++id, username, email, role, mairieId, actif',
-        // App3
-        chapitres: '++id, code, libelle, mairieId, actif',
-        previsions: '++id, exercice, chapitreId, mairieId, statut, personnelId',
-        mandats:
-          '++id, numeroMandat, dateMandat, exercice, chapitreId, previsionId, mairieId, statut, personnelId',
-      });
+      let db;
+      try {
+        db = new Dexie('TresorOfflineDB');
+        await db.open();
+      } catch (_e) {
+        db = new Dexie('TresorDatabase');
+        await db.open();
+      }
 
       createApp({
         data() {
@@ -519,7 +513,7 @@
               }
 
               // Charger la prévision
-              this.prevision = await db.previsions.get(parseInt(previsionId));
+              this.prevision = await db.table('previsions').get(parseInt(previsionId));
 
               if (!this.prevision) {
                 this.error = 'Prévision non trouvée';
@@ -528,12 +522,12 @@
 
               // Charger la mairie associée
               if (this.prevision.mairieId) {
-                this.mairie = await db.mairies.get(this.prevision.mairieId);
+                this.mairie = await db.table('mairies').get(this.prevision.mairieId);
               }
 
               // Charger le chapitre associé
               if (this.prevision.chapitreId) {
-                this.chapitre = await db.chapitres.get(this.prevision.chapitreId);
+                this.chapitre = await db.table('chapitres').get(this.prevision.chapitreId);
               }
 
               console.log('Prévision chargée:', this.prevision);

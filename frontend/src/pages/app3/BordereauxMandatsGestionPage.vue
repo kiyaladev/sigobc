@@ -544,7 +544,7 @@ function printBordereau(bordereau: BordereauMandat) {
 }
 
 function downloadBordereauPDF(bordereau: BordereauMandat) {
-  openPrintWindow('bordereau_mandat.html', { bordereauId: bordereau.id!, print: 'true' });
+  openPrintWindow('bordereau_mandat.html', { bordereauId: bordereau.id! });
 }
 
 const isDev = import.meta.env.VITE_ENV === 'development';

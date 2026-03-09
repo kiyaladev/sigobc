@@ -920,20 +920,7 @@
         return convert(num);
       }
 
-      const db = new Dexie('TresorDatabase');
-      db.version(23).stores({
-        mairies: '++id, nom, code, ville',
-        taxes: '++id, code, libelle, mairieId, type, actif',
-        declarations:
-          '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
-        bordereauxRecette: '++id, numero, annee, mairieId, statut, personnelId',
-        // App3 - Dépenses
-        mandats:
-          '++id, numeroMandat, dateMandat, exercice, chapitreId, sousChapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
-        bordereauMandats: '++id, numero, exercice, mairieId, statut, personnelId',
-        chapitres: '++id, code, libelle, mairieId, actif',
-        sousChapitres: '++id, code, libelle, mairieId, actif',
-      });
+      let db;
 
       // Variables globales pour le filtrage
       let allMandatsData = [];
@@ -1040,6 +1027,14 @@
       }
 
       document.addEventListener('DOMContentLoaded', async () => {
+        try {
+          db = new Dexie('TresorOfflineDB');
+          await db.open();
+        } catch (_e) {
+          db = new Dexie('TresorDatabase');
+          await db.open();
+        }
+
         const params = new URLSearchParams(window.location.search);
         const bordereauId = parseInt(params.get('bordereauId'), 10);
         const shouldPrint = params.get('print') === 'true';
@@ -1050,7 +1045,7 @@
         }
 
         try {
-          const bordereau = await db.bordereauMandats.get(bordereauId);
+          const bordereau = await db.table('bordereauMandats').get(bordereauId);
           if (!bordereau) {
             document.body.innerHTML = `Bordereau avec ID ${bordereauId} non trouvé.`;
             return;
@@ -1058,17 +1053,17 @@
           currentBordereau = bordereau;
 
           // Récupérer la première mairie de la base de données
-          const mairie = await db.mairies.toCollection().first();
+          const mairie = await db.table('mairies').toCollection().first();
           currentMairie = mairie;
 
           // Récupérer tous les mandats du bordereau
-          allMandatsData = await db.mandats
+          allMandatsData = await db.table('mandats')
             .where('bordereauMandatId')
             .equals(bordereauId)
             .toArray();
 
-          const chapitres = await db.chapitres.toArray();
-          const sousChapitres = await db.sousChapitres.toArray();
+          const chapitres = await db.table('chapitres').toArray();
+          const sousChapitres = await db.table('sousChapitres').toArray();
           chapitresMap = new Map(chapitres.map((c) => [c.id, c]));
           sousChapitresMap = new Map(sousChapitres.map((sc) => [sc.id, sc]));
 

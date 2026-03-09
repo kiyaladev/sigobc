@@ -6,9 +6,8 @@
  *   2. Offline store    — when the API is unreachable, reads come from here
  *                          and writes are queued in `_syncQueue`.
  *
- * Primary keys use explicit `id` (not `++id`) because server-assigned
- * integer IDs must be preserved.  Offline-created items receive temporary
- * negative IDs (see `nextTempId`) until they are synced and remapped.
+ * Primary keys use `++id` (auto-increment) so Dexie assigns sequential IDs
+ * automatically when no explicit `id` is provided.
  */
 
 import Dexie, { type Table } from 'dexie';
@@ -21,7 +20,7 @@ export interface SyncEntry {
   id?: number; // Dexie auto-increment key
   collection: string; // API endpoint, e.g. 'mandats'
   op: SyncOp;
-  localId?: number; // Temporary negative ID assigned offline
+  localId?: number; // Auto-increment ID assigned offline
   serverId?: number; // Real server ID
   payload: unknown; // Data for add / put / update / bulkPut / bulkDelete
   timestamp: number;
@@ -71,23 +70,17 @@ export class OfflineDb extends Dexie {
   constructor() {
     super('TresorOfflineDB');
 
+    // Version 1: original schema with explicit IDs
     this.version(1).stores({
       _syncQueue: '++id, collection, op, timestamp',
-
-      // Auth / Mairie
       mairies: 'id, nom, code, ville',
       utilisateurs: 'id, username, email, role, mairieId, actif',
-
-      // App3
       chapitres: 'id, code, libelle, mairieId, actif',
       sousChapitres: 'id, code, libelle, parentId, mairieId, actif',
       previsions: 'id, exercice, chapitreId, mairieId, statut',
-      mandats:
-        'id, numeroMandat, exercice, chapitreId, sousChapitreId, bordereauMandatId, mairieId, statut',
+      mandats: 'id, numeroMandat, exercice, chapitreId, sousChapitreId, bordereauMandatId, mairieId, statut',
       bordereauMandats: 'id, numero, exercice, mairieId, statut',
       etatFinancierMensuel: 'id, annee, sousChapitreId, chapitreId, mairieId',
-
-      // App6
       taxes: 'id, code, libelle, mairieId, type, actif',
       declarations: 'id, numeroPiece, mairieId, taxeId, statut, exercice, bordereauId',
       bordereauxRecette: 'id, numero, annee, mairieId, statut',
@@ -96,51 +89,57 @@ export class OfflineDb extends Dexie {
       bordereauMandatsRecette: 'id, numero, exercice, mairieId, statut',
       chapitresRecette: 'id, code, libelle, mairieId, actif',
       etatFinancierMensuelRecette: 'id, annee, taxeId, chapitreRecetteId, mairieId',
-
-      // App7
       employes: 'id, matricule, nom, mairieId, actif',
       fichesPaie: 'id, employeId, mois, annee, exercice, mairieId, statut',
       conges: 'id, employeId, type, statut, mairieId',
       ordresMission: 'id, numero, employeId, exercice, statut, mairieId',
       parametresPaie: 'id, mairieId',
       servicesApp7: 'id, nom, mairieId, actif',
-
-      // Misc
       printData: 'id, type, createdAt',
       exercices: 'id, annee, statut, mairieId',
+    });
+
+    // Version 2: auto-increment IDs
+    this.version(2).stores({
+      _syncQueue: '++id, collection, op, timestamp',
+
+      // Auth / Mairie
+      mairies: '++id, nom, code, ville',
+      utilisateurs: '++id, username, email, role, mairieId, actif',
+
+      // App3
+      chapitres: '++id, code, libelle, mairieId, actif',
+      sousChapitres: '++id, code, libelle, parentId, mairieId, actif',
+      previsions: '++id, exercice, chapitreId, mairieId, statut',
+      mandats:
+        '++id, numeroMandat, exercice, chapitreId, sousChapitreId, bordereauMandatId, mairieId, statut',
+      bordereauMandats: '++id, numero, exercice, mairieId, statut',
+      etatFinancierMensuel: '++id, annee, sousChapitreId, chapitreId, mairieId',
+
+      // App6
+      taxes: '++id, code, libelle, mairieId, type, actif',
+      declarations: '++id, numeroPiece, mairieId, taxeId, statut, exercice, bordereauId',
+      bordereauxRecette: '++id, numero, annee, mairieId, statut',
+      previsionsRecettes: '++id, exercice, taxeId, mairieId, statut',
+      mandatsRecette: '++id, numeroMandat, exercice, chapitreId, taxeId, mairieId, statut',
+      bordereauMandatsRecette: '++id, numero, exercice, mairieId, statut',
+      chapitresRecette: '++id, code, libelle, mairieId, actif',
+      etatFinancierMensuelRecette: '++id, annee, taxeId, chapitreRecetteId, mairieId',
+
+      // App7
+      employes: '++id, matricule, nom, mairieId, actif',
+      fichesPaie: '++id, employeId, mois, annee, exercice, mairieId, statut',
+      conges: '++id, employeId, type, statut, mairieId',
+      ordresMission: '++id, numero, employeId, exercice, statut, mairieId',
+      parametresPaie: '++id, mairieId',
+      servicesApp7: '++id, nom, mairieId, actif',
+
+      // Misc
+      printData: '++id, type, createdAt',
+      exercices: '++id, annee, statut, mairieId',
     });
   }
 }
 
 export const offlineDb = new OfflineDb();
 
-// ─── Temporary ID generator ───────────────────────────────────────────────────
-
-/**
- * Persisted in localStorage so the counter never restarts at -1 after a page
- * reload.  Without this, a second offline session would produce IDs that
- * collide with items already sitting in the sync queue from the first session.
- */
-const COUNTER_KEY = '_tresor_tempIdCounter';
-
-let _tempIdCounter: number = (() => {
-  if (typeof localStorage === 'undefined') return -1;
-  const stored = localStorage.getItem(COUNTER_KEY);
-  return stored ? parseInt(stored, 10) : -1;
-})();
-
-export function nextTempId(): number {
-  const id = _tempIdCounter--;
-  if (typeof localStorage !== 'undefined') {
-    localStorage.setItem(COUNTER_KEY, String(_tempIdCounter));
-  }
-  return id;
-}
-
-/** Reset after the sync queue is fully drained (called by sync.ts). */
-export function resetTempIdCounter(): void {
-  _tempIdCounter = -1;
-  if (typeof localStorage !== 'undefined') {
-    localStorage.removeItem(COUNTER_KEY);
-  }
-}

@@ -320,8 +320,14 @@
       // Load data directly from IndexedDB
       async function loadAndRender() {
         try {
-          var db = new Dexie('TresorDatabase');
-          await db.open();
+          let db;
+          try {
+            db = new Dexie('TresorOfflineDB');
+            await db.open();
+          } catch (_e) {
+            db = new Dexie('TresorDatabase');
+            await db.open();
+          }
 
           var exercice = new Date().getFullYear();
 

@@ -328,7 +328,7 @@
         <div class="header-col text-center">
           <p class="bold uppercase" style="font-size: 1.1em">MANDAT DE PAIEMENT</p>
           <p class="bold uppercase mt-2">EXERCICE : <span data-field="exercice">2019</span></p>
-          <p class="bold uppercase mt-2">TITRE DU BUDGET : I</p>
+          <p class="bold uppercase mt-2">TITRE DU BUDGET : <span data-field="titreBudget">I</span></p>
           <p class="bold uppercase mt-4">IMPUTATION</p>
           <div class="w-full text-left mt-2" style="padding-left: 10px">
             <p>
@@ -616,20 +616,21 @@
         }
       }
 
-      // Initialiser la base de données IndexedDB
-      const db = new Dexie('TresorDatabase');
-      db.version(1).stores({
-        mairies: '++id, nom, code, ville, departement, actif',
-        chapitres: '++id, code, libelle, actif, type',
-        sousChapitres: '++id, code, libelle, chapitreId, actif',
-        mandats:
-          '++id, numeroMandat, dateMandat, beneficiaire, objet, montant, exercice, chapitreId, sousChapitreId, bordereauMandatId, statut',
-        bordereauMandats: '++id, numero, exercice, dateCreation, statut',
-      });
+      // Dexie sera initialisé dans loadMandatData()
+      let db;
 
       // Charger les données du mandat depuis IndexedDB
       async function loadMandatData() {
         try {
+          // Initialiser Dexie dynamiquement
+          try {
+            db = new Dexie('TresorOfflineDB');
+            await db.open();
+          } catch (_e) {
+            db = new Dexie('TresorDatabase');
+            await db.open();
+          }
+
           const urlParams = new URLSearchParams(window.location.search);
           const mandatId = parseInt(urlParams.get('mandatId'));
           const shouldPrint = urlParams.get('print') === 'true';
@@ -640,7 +641,7 @@
           }
 
           // Récupérer le mandat
-          const mandat = await db.mandats.get(mandatId);
+          const mandat = await db.table('mandats').get(mandatId);
           if (!mandat) {
             console.error('Mandat not found:', mandatId);
             return;
@@ -648,15 +649,17 @@
 
           // Récupérer les données associées
           const [mairie, chapitre, sousChapitre, bordereau] = await Promise.all([
-            db.mairies.toCollection().first(),
-            mandat.chapitreId ? db.chapitres.get(mandat.chapitreId) : null,
-            mandat.sousChapitreId ? db.sousChapitres.get(mandat.sousChapitreId) : null,
-            mandat.bordereauMandatId ? db.bordereauMandats.get(mandat.bordereauMandatId) : null,
+            db.table('mairies').toCollection().first(),
+            mandat.chapitreId ? db.table('chapitres').get(mandat.chapitreId) : null,
+            mandat.sousChapitreId ? db.table('sousChapitres').get(mandat.sousChapitreId) : null,
+            mandat.bordereauMandatId ? db.table('bordereauMandats').get(mandat.bordereauMandatId) : null,
           ]);
 
           // Préparer les données pour l'affichage
+          const chapCode = sousChapitre?.code || chapitre?.code || '';
           const data = {
             exercice: mandat.exercice,
+            titreBudget: String(chapCode).startsWith('9') ? 'II' : 'I',
             imputationFonctionnelle: sousChapitre
               ? `${sousChapitre.code}/${chapitre?.code || ''}`
               : chapitre?.code || '',

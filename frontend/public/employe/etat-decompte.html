@@ -224,15 +224,6 @@
         }
         return conv(num).toUpperCase() + ' FRANCS CFA';
       }
-      const db = new Dexie('TresorDatabase');
-      db.version(28).stores({
-        mairies: '++id',
-        employes: '++id,matricule,nom,prenom,typeEmploye,service,departement,mairieId,actif',
-        fichesPaie: '++id,employeId,mois,annee,exercice,mairieId,statut,[annee+mois+employeId]',
-        parametresPaie: '++id, mairieId',
-        servicesApp7: '++id, nom, compte, mairieId, actif',
-      });
-
       function buildHeader(annee, periodeText, chapitre, compte) {
         return `<div class="flex justify-between items-start text-sm">
             <div class="leading-tight font-bold text-center"><p>DÉPARTEMENT DE VAVOUA</p><div class="w-10 h-[1px] bg-black mx-auto my-1"></div><p>COMMUNE DE VAVOUA</p><p>Code: 433</p></div>
@@ -254,6 +245,15 @@
       }
 
       document.addEventListener('DOMContentLoaded', async () => {
+        let db;
+        try {
+          db = new Dexie('TresorOfflineDB');
+          await db.open();
+        } catch (_e) {
+          db = new Dexie('TresorDatabase');
+          await db.open();
+        }
+
         const p = new URLSearchParams(window.location.search);
         const mois = parseInt(p.get('mois') || String(new Date().getMonth() + 1), 10);
         const annee = parseInt(p.get('annee') || String(new Date().getFullYear()), 10);
@@ -264,25 +264,18 @@
         const compteParam = p.get('compte') || '';
         const chapitreParam = p.get('chapitre') || '';
 
-        let fiches = await db.fichesPaie
-          .where('[annee+mois+employeId]')
-          .between([annee, mois, -Infinity], [annee, mois, Infinity])
-          .filter((f) => f.statut !== 'brouillon')
-          .toArray()
-          .catch(() =>
-            db.fichesPaie
-              .filter((f) => f.mois === mois && f.annee === annee && f.statut !== 'brouillon')
-              .toArray(),
-          );
+        let fiches = await db.table('fichesPaie')
+          .filter((f) => f.mois === mois && f.annee === annee && f.statut !== 'brouillon')
+          .toArray();
         const sf = p.get('service'),
           tf = p.get('typeEmploye');
         if (sf || tf) {
           const fl = [];
           for (const f of fiches) {
-            const e = await db.employes.get(f.employeId);
+            const e = await db.table('employes').get(f.employeId);
             if (e) {
               if (sf && e.service !== sf) continue;
-              if (tf && e.typeEmploye !== tf) continue;
+              if (tf && !e.typeEmploye?.startsWith(tf)) continue;
               fl.push(f);
             }
           }
@@ -295,7 +288,7 @@
           return;
         }
 
-        const paramsDb = await db.parametresPaie.toCollection().first();
+        const paramsDb = await db.table('parametresPaie').toCollection().first();
         const TAUX_PF = paramsDb ? paramsDb.tauxCnpsPatronalPrestationFamiliale / 100 : 0.0575;
         const TAUX_AT = paramsDb ? paramsDb.tauxCnpsPatronalAccidentTravail / 100 : 0.02;
         const TAUX_RG = paramsDb ? paramsDb.tauxCnpsPatronalRetraite / 100 : 0.077;
@@ -304,7 +297,7 @@
 
         const data = await Promise.all(
           fiches.map(async (f, i) => {
-            const emp = await db.employes.get(f.employeId);
+            const emp = await db.table('employes').get(f.employeId);
             const nom = emp ? `${emp.nom} ${emp.prenom}` : `Agent #${f.employeId}`;
             const base = f.salaireBase || 0;
             const log = f.indemniteLogement || 0;
@@ -338,15 +331,15 @@
 
           const reportRow =
             idx > 0
-              ? `<tr class="report-row"><td colspan="2" class="text-left-col" style="padding-left:12px">REPORT</td><td class="text-right-col">${fmt(rBrut)}</td><td class="text-right-col">${fmt(rPf)}</td><td class="text-right-col">${fmt(rAt)}</td><td class="text-right-col">${fmt(rRg)}</td><td class="text-right-col">${fmt(rTotal)}</td></tr>`
+              ? `<tr class="report-row"><td colspan="2" class="text-left-col" style="padding-left:12px">REPORT</td><td>${fmt(rBrut)}</td><td>${fmt(rPf)}</td><td>${fmt(rAt)}</td><td>${fmt(rRg)}</td><td>${fmt(rTotal)}</td></tr>`
               : '';
           const dataRows = pageData
             .map(
               (d) =>
-                `<tr><td>${String(d.idx).padStart(2, '0')}</td><td class="text-left-col font-semibold">${d.nom}</td><td class="text-right-col">${fmt(d.brut)}</td><td class="text-right-col">${fmt(d.pf)}</td><td class="text-right-col">${fmt(d.at)}</td><td class="text-right-col">${fmt(d.rg)}</td><td class="text-right-col font-bold">${fmt(d.total)}</td></tr>`,
+                `<tr><td>${String(d.idx).padStart(2, '0')}</td><td class="text-left-col font-semibold">${d.nom}</td><td>${fmt(d.brut)}</td><td>${fmt(d.pf)}</td><td>${fmt(d.at)}</td><td>${fmt(d.rg)}</td><td class="font-bold">${fmt(d.total)}</td></tr>`,
             )
             .join('');
-          const totalRow = `<tr class="total-row"><td colspan="2" class="text-left-col" style="padding-left:12px"><strong>${isLast ? 'TOTAL GÉNÉRAL' : 'TOTAL'}</strong></td><td class="text-right-col"><strong>${fmt(cBrut)}</strong></td><td class="text-right-col"><strong>${fmt(cPf)}</strong></td><td class="text-right-col"><strong>${fmt(cAt)}</strong></td><td class="text-right-col"><strong>${fmt(cRg)}</strong></td><td class="text-right-col"><strong>${fmt(cTotal)}</strong></td></tr>`;
+          const totalRow = `<tr class="total-row"><td colspan="2" class="text-left-col" style="padding-left:12px"><strong>${isLast ? 'TOTAL GÉNÉRAL' : 'TOTAL'}</strong></td><td><strong>${fmt(cBrut)}</strong></td><td><strong>${fmt(cPf)}</strong></td><td><strong>${fmt(cAt)}</strong></td><td><strong>${fmt(cRg)}</strong></td><td><strong>${fmt(cTotal)}</strong></td></tr>`;
 
           html += `<div class="print-page">
             ${buildHeader(annee, periodeText, chapitreParam, compteParam)}

@@ -811,10 +811,14 @@
 
         if (!dataProcessed) {
           try {
-            var db = new Dexie('TresorDatabase');
-            db.version(24).stores({
-              printData: '++id, type, createdAt',
-            });
+            let db;
+            try {
+              db = new Dexie('TresorOfflineDB');
+              await db.open();
+            } catch (_e) {
+              db = new Dexie('TresorDatabase');
+              await db.open();
+            }
 
             var printDataRecords = await db
               .table('printData')

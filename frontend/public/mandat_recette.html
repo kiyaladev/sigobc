@@ -467,15 +467,8 @@
     </div>
     <script src="dexie.min.js"></script>
     <script>
-      // Initialiser Dexie
-      const db = new Dexie('TresorDatabase');
-      db.version(21).stores({
-        mairies: '++id, nom, code, ville',
-        taxes: '++id, code, libelle, mairieId, type, actif',
-        declarations:
-          '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
-        bordereauxRecette: '++id, numero, annee, mairieId, statut, personnelId',
-      });
+      // Dexie sera initialisé dans loadDeclaration()
+      let db;
 
       // Fonction pour formater un nombre avec espaces
       function formatMontant(montant) {
@@ -575,6 +568,15 @@
       // Charger les données depuis IndexedDB
       async function loadDeclaration() {
         try {
+          // Initialiser Dexie dynamiquement
+          try {
+            db = new Dexie('TresorOfflineDB');
+            await db.open();
+          } catch (_e) {
+            db = new Dexie('TresorDatabase');
+            await db.open();
+          }
+
           const urlParams = new URLSearchParams(window.location.search);
           const declarationId = urlParams.get('declarationId');
 
@@ -583,18 +585,18 @@
             return;
           }
 
-          const declaration = await db.declarations.get(parseInt(declarationId));
+          const declaration = await db.table('declarations').get(parseInt(declarationId));
           if (!declaration) {
             console.error('Déclaration non trouvée');
             return;
           }
 
-          const mairie = await db.mairies.toCollection().first();
-          const taxe = await db.taxes.get(declaration.taxeId);
+          const mairie = await db.table('mairies').toCollection().first();
+          const taxe = await db.table('taxes').get(declaration.taxeId);
 
           let numeroBordereau = '';
           if (declaration.bordereauRecetteId) {
-            const bordereau = await db.bordereauxRecette.get(declaration.bordereauRecetteId);
+            const bordereau = await db.table('bordereauxRecette').get(declaration.bordereauRecetteId);
             if (bordereau) {
               numeroBordereau = `${bordereau.numero}-${bordereau.annee % 100}`;
             }

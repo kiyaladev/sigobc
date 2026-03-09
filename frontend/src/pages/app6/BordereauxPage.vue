@@ -579,7 +579,6 @@ async function downloadBordereauPDF(bordereau: BordereauRecette) {
     // Ouvrir le template et demander l'impression
     const printWindow = openPrintWindow('bordereau_recouvrements_v2.html', {
       bordereauId: bordereau.id,
-      print: 'true',
     });
 
     if (printWindow) {

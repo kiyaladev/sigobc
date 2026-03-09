@@ -705,22 +705,20 @@ function recalculate() {
     form.value.autresRetenues = 0;
     form.value.montantNet = brut + transport + autres;
   } else {
-    // Salariés : calcul complet
-    const brut =
-      (form.value.salaireBase || 0) +
-      (form.value.indemniteLogement || 0) +
-      (form.value.indemniteTransport || 0) +
-      (form.value.autresIndemnites || 0);
+    // Salariés : brut = base + logement, taxes sur le brut, net = brut - taxes + primes
+    const base = form.value.salaireBase || 0;
+    const log = form.value.indemniteLogement || 0;
+    const transport = form.value.indemniteTransport || 0;
+    const autres = form.value.autresIndemnites || 0;
+    const brut = base + log;
     form.value.montantBrut = brut;
 
-    const taxableBase = brut - (form.value.indemniteTransport || 0);
     if (parametresPaie.value) {
       form.value.cotisationCNPS = Math.round(
-        taxableBase * (parametresPaie.value.tauxCnpsEmploye / 100),
+        brut * (parametresPaie.value.tauxCnpsEmploye / 100),
       );
-      const salaireNetAvantIts = taxableBase - form.value.cotisationCNPS;
       form.value.impotSurSalaire = Math.round(
-        salaireNetAvantIts * (parametresPaie.value.tauxIts / 100),
+        brut * (parametresPaie.value.tauxIts / 100),
       );
     }
 
@@ -728,7 +726,9 @@ function recalculate() {
       brut -
       (form.value.cotisationCNPS || 0) -
       (form.value.impotSurSalaire || 0) -
-      (form.value.autresRetenues || 0);
+      (form.value.autresRetenues || 0) +
+      transport +
+      autres;
   }
 }
 
@@ -952,20 +952,14 @@ async function generateBulletins() {
         brut = e.salaireBase + (e.indemniteLogement || 0);
         netPay = brut + (e.indemniteTransport || 0) + (e.autresIndemnites || 0);
       } else {
-        // Salariés : calcul complet
-        brut =
-          e.salaireBase +
-          (e.indemniteLogement || 0) +
-          (e.indemniteTransport || 0) +
-          (e.autresIndemnites || 0);
+        // Salariés : brut = base + logement, taxes sur le brut, net = brut - taxes + primes
+        brut = e.salaireBase + (e.indemniteLogement || 0);
 
         if (parametresPaie.value) {
-          const taxableBase = brut - (e.indemniteTransport || 0);
-          calcCnps = Math.round(taxableBase * (parametresPaie.value.tauxCnpsEmploye / 100));
-          const salaireNetAvantIts = taxableBase - calcCnps;
-          calcIts = Math.round(salaireNetAvantIts * (parametresPaie.value.tauxIts / 100));
+          calcCnps = Math.round(brut * (parametresPaie.value.tauxCnpsEmploye / 100));
+          calcIts = Math.round(brut * (parametresPaie.value.tauxIts / 100));
         }
-        netPay = brut - calcCnps - calcIts;
+        netPay = brut - calcCnps - calcIts + (e.indemniteTransport || 0) + (e.autresIndemnites || 0);
       }
 
       return {
@@ -983,7 +977,7 @@ async function generateBulletins() {
         impotSurSalaire: calcIts,
         autresRetenues: 0,
         montantNet: netPay,
-        statut: 'paye' as const,
+        statut: 'valide' as const,
         personnelId: 1,
         createdAt: new Date(),
         updatedAt: new Date(),

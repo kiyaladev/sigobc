@@ -313,6 +313,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useQuasar, date } from 'quasar';
 import { db, type OrdreMission, type Employe, type PrintData } from 'src/database/db';
+import { openPrintWindow } from 'src/utils/printUrl';
 import PageHeader from 'src/components/PageHeader.vue';
 import DataTable from 'src/components/DataTable.vue';
 
@@ -618,7 +619,6 @@ async function printMission(row: OrdreMission) {
   try {
     const emp = employes.value.find((e) => e.id === row.employeId);
 
-    // Preparer les données complètes pour l'impression finale
     const missionData = {
       ...row,
       agentNom: emp?.nom || '',
@@ -629,29 +629,13 @@ async function printMission(row: OrdreMission) {
       agentService: emp?.service || '-',
     };
 
-    // Sauvegarder dans PrintData pour l'accès de l'autre page
-
     const printId = await db.printData.add({
       type: 'PRINT_ORDRE_MISSION',
       data: JSON.stringify(missionData),
       createdAt: new Date(),
     } as PrintData);
 
-    // Ouvrir la fenêtre d'impression avec le printId
-    const url = `/employe/ordre-mission.html?printId=${printId}&print=true`;
-
-    // Si on est dans Electron, informer le main process (le cas échéant)
-    // Sinon on ouvre une nouvelle fenêtre (cas du web browser)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((window as any).electronAPI) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (window as any).electronAPI.printDocument({
-        url: url,
-        title: `Ordre de Mission N° ${row.numero}`,
-      });
-    } else {
-      window.open(url, '_blank');
-    }
+    openPrintWindow('employe/ordre-mission.html', { printId });
   } catch (error) {
     console.error("Erreur lors de l'impression :", error);
     $q.notify({ type: 'negative', message: "Erreur lors de la préparation de l'impression" });

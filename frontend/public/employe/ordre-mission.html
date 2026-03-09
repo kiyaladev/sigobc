@@ -378,19 +378,20 @@
               // En environnement Electron, on peut aussi lire depuis printData
               const printId = urlParams.get('printId');
 
-              const db = new Dexie('TresorDatabase');
-
-              db.version(25).stores({
-                ordresMission: '++id, numero, employeId, exercice, dateDebut, statut, mairieId',
-                employes: '++id, matricule, nom, prenom, service, mairieId, actif',
-                printData: '++id, type, createdAt',
-              });
+              let db;
+              try {
+                db = new Dexie('TresorOfflineDB');
+                await db.open();
+              } catch (_e) {
+                db = new Dexie('TresorDatabase');
+                await db.open();
+              }
 
               let missionData = null;
 
               if (printId) {
                 // Lecture via la table temporaire pour Electron
-                const pd = await db.printData.get(parseInt(printId));
+                const pd = await db.table('printData').get(parseInt(printId));
                 if (pd && pd.data) {
                   missionData = JSON.parse(pd.data);
                 } else {
@@ -398,10 +399,10 @@
                 }
               } else if (id) {
                 // Lecture directe en DB web (mode dev/web)
-                const mission = await db.ordresMission.get(parseInt(id));
+                const mission = await db.table('ordresMission').get(parseInt(id));
                 if (!mission) throw new Error('Ordre de mission introuvable.');
 
-                const employe = await db.employes.get(mission.employeId);
+                const employe = await db.table('employes').get(mission.employeId);
                 if (!employe) throw new Error('Employé introuvable.');
 
                 missionData = {
@@ -415,12 +416,12 @@
                 };
               } else {
                 // Mode test : on prend le dernier ordre de mission
-                const missions = await db.ordresMission.toArray();
+                const missions = await db.table('ordresMission').toArray();
                 if (missions.length === 0) {
                   throw new Error('Aucun ordre de mission dans la base (Test).');
                 }
                 const mission = missions[missions.length - 1];
-                const employe = await db.employes.get(mission.employeId);
+                const employe = await db.table('employes').get(mission.employeId);
 
                 missionData = {
                   ...mission,

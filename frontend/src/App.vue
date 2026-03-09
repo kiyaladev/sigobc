@@ -14,6 +14,8 @@ import {
 
 // Initialiser la base de données au démarrage de l'application
 onMounted(async () => {
+  const authStore = useAuthStore();
+
   try {
     // Vérifier si l'utilisateur a explicitement vidé la base
     const dbCleared = localStorage.getItem('sigobc_db_cleared');
@@ -44,13 +46,17 @@ onMounted(async () => {
     // Migration: s'assurer que les sous-chapitres 9xx (investissement) existent
     await ensureSousChapitres9xxExist();
 
-    // S'assurer que les comptes admin et démo existent
-    const authStore = useAuthStore();
-    await authStore.ensureAdminExists();
-
     console.log('Application initialisée avec succès');
   } catch (error) {
     console.error("Erreur lors de l'initialisation de l'application:", error);
+  }
+
+  // CRITIQUE: Toujours s'assurer que le compte admin existe,
+  // même si l'initialisation de la base a échoué
+  try {
+    await authStore.ensureAdminExists();
+  } catch (error) {
+    console.error('Erreur critique lors de la création du compte admin:', error);
   }
 });
 </script>

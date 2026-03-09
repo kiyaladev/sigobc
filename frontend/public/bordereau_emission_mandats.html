@@ -437,22 +437,14 @@
       const { createApp } = Vue;
 
       // Initialiser Dexie
-      const db = new Dexie('TresorDatabase');
-      db.version(7).stores({
-        mairies: '++id, nom, code, ville',
-        taxes: '++id, code, libelle, mairieId, type, actif',
-        declarations:
-          '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauId, personnelId, exercice',
-        bordereaux: '++id, numero, annee, mairieId, statut, personnelId',
-        utilisateurs: '++id, username, email, role, mairieId, actif',
-        // App3
-        chapitres: '++id, code, libelle, rubriqueId, mairieId, actif',
-        rubriques: '++id, code, libelle, mairieId, actif',
-        previsions: '++id, exercice, rubriqueId, mairieId, statut, personnelId',
-        mandats:
-          '++id, numeroMandat, dateMandat, exercice, rubriqueId, chapitreId, previsionId, bordereauMandatId, mairieId, statut, personnelId',
-        bordereauMandats: '++id, numero, exercice, mairieId, statut, personnelId',
-      });
+      let db;
+      try {
+        db = new Dexie('TresorOfflineDB');
+        await db.open();
+      } catch (_e) {
+        db = new Dexie('TresorDatabase');
+        await db.open();
+      }
 
       createApp({
         data() {
@@ -591,7 +583,7 @@
               // Si un bordereauId est fourni, charger ce bordereau spécifique
               if (bordereauId) {
                 // Charger le bordereau depuis la base de données
-                this.bordereauData = await db.bordereauMandats.get(parseInt(bordereauId));
+                this.bordereauData = await db.table('bordereauMandats').get(parseInt(bordereauId));
 
                 if (!this.bordereauData) {
                   this.error = 'Bordereau non trouvé';
@@ -599,13 +591,13 @@
                 }
 
                 // Charger les mandats associés à ce bordereau
-                this.mandats = await db.mandats
+                this.mandats = await db.table('mandats')
                   .where('bordereauMandatId')
                   .equals(parseInt(bordereauId))
                   .toArray();
               } else if (exercice) {
                 // Mode legacy: charger par exercice
-                let query = db.mandats.where('exercice').equals(parseInt(exercice));
+                let query = db.table('mandats').where('exercice').equals(parseInt(exercice));
 
                 if (mairieId) {
                   this.mandats = await query
@@ -635,14 +627,14 @@
 
               // Charger la mairie
               if (this.bordereauData.mairieId) {
-                this.mairie = await db.mairies.get(this.bordereauData.mairieId);
+                this.mairie = await db.table('mairies').get(this.bordereauData.mairieId);
               } else if (this.mandats.length > 0) {
                 const premierMandat = this.mandats[0];
-                this.mairie = await db.mairies.get(premierMandat.mairieId);
+                this.mairie = await db.table('mairies').get(premierMandat.mairieId);
               }
 
               // Charger tous les chapitres
-              this.chapitres = await db.chapitres.toArray();
+              this.chapitres = await db.table('chapitres').toArray();
 
               console.log('Bordereau chargé:', this.bordereauData);
               console.log('Mandats:', this.mandats.length);

@@ -272,8 +272,15 @@
 
       document.addEventListener('DOMContentLoaded', async () => {
         try {
-          const db = new Dexie('TresorDatabase');
-          await db.open();
+          // Try TresorOfflineDB first, fall back to TresorDatabase
+          let db;
+          try {
+            db = new Dexie('TresorOfflineDB');
+            await db.open();
+          } catch (_e) {
+            db = new Dexie('TresorDatabase');
+            await db.open();
+          }
 
           const params = new URLSearchParams(window.location.search);
           const mois = parseInt(params.get('mois') || String(new Date().getMonth() + 1), 10);
@@ -291,16 +298,8 @@
 
           let fiches = await db
             .table('fichesPaie')
-            .where('[annee+mois+employeId]')
-            .between([annee, mois, -Infinity], [annee, mois, Infinity])
-            .filter((f) => f.statut !== 'brouillon')
-            .toArray()
-            .catch(() =>
-              db
-                .table('fichesPaie')
-                .filter((f) => f.mois === mois && f.annee === annee && f.statut !== 'brouillon')
-                .toArray(),
-            );
+            .filter((f) => f.mois === mois && f.annee === annee && f.statut !== 'brouillon')
+            .toArray();
           const sf = params.get('service'),
             tf = params.get('typeEmploye');
           if (sf || tf) {
@@ -309,7 +308,7 @@
               const e = await db.table('employes').get(f.employeId);
               if (e) {
                 if (sf && e.service !== sf) continue;
-                if (tf && e.typeEmploye !== tf) continue;
+                if (tf && !e.typeEmploye?.startsWith(tf)) continue;
                 fl.push(f);
               }
             }

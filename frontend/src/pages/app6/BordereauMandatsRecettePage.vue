@@ -585,7 +585,7 @@ function printBordereau(bordereau: BordereauMandatRecette) {
 }
 
 function downloadBordereauPDF(bordereau: BordereauMandatRecette) {
-  openPrintWindow('bordereau_mandat_recette.html', { bordereauId: bordereau.id!, print: 'true' });
+  openPrintWindow('bordereau_mandat_recette.html', { bordereauId: bordereau.id! });
 }
 
 const isDev = import.meta.env.VITE_ENV === 'development';

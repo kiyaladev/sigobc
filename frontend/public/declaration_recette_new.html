@@ -715,17 +715,20 @@
         }
       });
 
-      // Configuration IndexedDB avec Dexie
-      const db = new Dexie('TresorDatabase');
-      db.version(12).stores({
-        mairies: '++id, nom, code, ville',
-        taxes: '++id, code, libelle, mairieId, type, actif',
-        declarations: '++id, numeroPiece, dateEncaissement, mairieId, taxeId, statut, bordereauRecetteId, personnelId, exercice',
-        bordereauxRecette: '++id, numero, annee, mairieId, statut, personnelId',
-      });
+      // Dexie sera initialisé dans loadFromDatabase()
+      let db;
 
       // Charger les données depuis IndexedDB si declarationId est fourni
       async function loadFromDatabase() {
+        // Initialiser Dexie dynamiquement
+        try {
+          db = new Dexie('TresorOfflineDB');
+          await db.open();
+        } catch (_e) {
+          db = new Dexie('TresorDatabase');
+          await db.open();
+        }
+
         const urlParams = new URLSearchParams(window.location.search);
         const declarationId = parseInt(urlParams.get('declarationId'), 10);
         const shouldPrint = urlParams.get('print') === 'true';
@@ -737,7 +740,7 @@
 
         try {
           console.log('Chargement de la déclaration depuis IndexedDB:', declarationId);
-          const declaration = await db.declarations.get(declarationId);
+          const declaration = await db.table('declarations').get(declarationId);
           
           if (!declaration) {
             console.error('Déclaration non trouvée:', declarationId);
@@ -745,8 +748,8 @@
           }
 
           // Récupérer la mairie et la taxe
-          const mairie = await db.mairies.toCollection().first();
-          const taxe = declaration.taxeId ? await db.taxes.get(declaration.taxeId) : null;
+          const mairie = await db.table('mairies').toCollection().first();
+          const taxe = declaration.taxeId ? await db.table('taxes').get(declaration.taxeId) : null;
 
           // Formater la date
           const dateEncaissement = declaration.dateEncaissement 
