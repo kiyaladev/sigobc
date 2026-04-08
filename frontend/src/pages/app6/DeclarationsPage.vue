@@ -77,7 +77,7 @@
 
     <!-- Dialog de création/modification -->
     <q-dialog v-model="dialogVisible" persistent>
-      <q-card style="min-width: 600px; max-width: 90vw">
+      <q-card style="min-width: 700px; max-width: 70vw">
         <q-card-section class="bg-primary text-white row items-center">
           <div class="text-h6">{{ isEditing ? 'Modifier' : 'Nouvelle' }} Déclaration</div>
           <q-space />
@@ -228,7 +228,7 @@ const dialogVisible = ref(false);
 const isEditing = ref(false);
 const currentDeclaration = ref<Declaration | null>(null);
 const search = ref('');
-const filterStatut = ref('');
+const filterStatut = ref('validee');
 const filterExercice = ref<number | null>(null);
 const filterTaxe = ref<number | null>(null);
 const filterDateDebut = ref('');
@@ -248,7 +248,7 @@ const form = ref<Partial<Declaration>>({
   adresse: '',
   montantRecette: 0,
   numeroEncaissement: '',
-  statut: 'brouillon',
+  statut: 'validee',
   observations: '',
   mairieId: DEFAULT_MAIRIE_ID,
 });
@@ -477,7 +477,7 @@ function openDialog(declaration?: Declaration) {
       adresse: mairies.value[0]?.ville || 'Vavoua',
       montantRecette: 0,
       numeroEncaissement: '',
-      statut: 'brouillon',
+      statut: 'validee',
       observations: '',
       mairieId: DEFAULT_MAIRIE_ID,
     };

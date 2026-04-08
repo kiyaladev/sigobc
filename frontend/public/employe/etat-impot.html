@@ -326,12 +326,8 @@
               ${buildTableHead(tIts)}
               <tbody>${reportRow}${dataRows}${totalRow}</tbody>
             </table>
-            ${
-              isLast
-                ? `<div class="mt-6 text-[13px]"><p>Arrêté le présent état à la somme de: <span class="font-bold">${numberToWords(cIts)}</span></p></div>
-              <div class="flex justify-end mt-8 text-[13px]"><div class="text-center mr-8"><p>VAVOUA, le <span class="editable-date" contenteditable="true">${new Date().toLocaleDateString('fr-FR')}</span></p><p class="font-bold mt-2">P/Le Maire & P.D</p></div></div>`
-                : ''
-            }
+            <div class="mt-6 text-[13px]"><p>Arrêté le présent état à la somme de: <span class="font-bold">${numberToWords(cIts)}</span></p></div>
+            <div class="flex justify-end mt-8 text-[13px]"><div class="text-center mr-8"><p>VAVOUA, le <span class="editable-date" contenteditable="true">${new Date().toLocaleDateString('fr-FR')}</span></p><p class="font-bold mt-2">P/Le Maire & P.D</p></div></div>
             <div class="page-number">Page ${idx + 1}/${totalPages}</div>
           </div>`;
         });

@@ -23,3 +23,38 @@ Use this mapping to know the current vs. former names—so you can correctly int
 - When troubleshooting issues, invoke **troubleshoot** tool if available.
 - Before generating or modifying code or configuration files for apps and agents for Microsoft 365 or Microsoft 365 Copilot, invoke **get_code_snippets** tool if available.
 - Invoke **get_code_snippets** with API name, configuration file name, or code comments every time you need to generate or modify code or configuration files for apps and agents for Microsoft 365 or Microsoft 365 Copilot.
+
+<!-- github-copilot-toolbox:mcp-skills-awareness-begin -->
+
+### MCP & Skills awareness (GitHub Copilot Toolbox)
+
+_Last synced: 2026-04-07T22:12:59.071Z._
+
+- **Full report:** `.github/copilot-toolbox-mcp-skills-awareness.md` in this workspace (auto-overwritten on each scan). Use it as ground truth for configured servers and skill folders.
+- **MCP:** For **live tools**, use **Copilot Chat → Agent** and **trust/start** the right servers in the MCP UI.
+- **When the user’s task matches a server** (e.g. “open this Confluence page” and a **Confluence** / **Atlassian** MCP is listed), **prefer that server id** and plan on Agent + MCP for actions—not only file search.
+- **Skills:** Folders below contain `SKILL.md`; attach or cite paths in chat when relevant.
+
+#### Workspace MCP
+
+- `c:\Users\Coumbassa Stephane\Documents\GitHub\declarapp\.vscode\mcp.json` _(workspace: declarapp)_ — _servers defined_
+
+| Server id | Kind | Detail |
+|-----------|------|--------|
+| m365agentstoolkit | stdio | npx @microsoft/m365agentstoolkit-mcp@latest server start |
+
+#### User MCP
+
+- `C:\Users\Coumbassa Stephane\AppData\Roaming\Code\User\mcp.json` — _file missing_
+
+_No active user-scoped servers in mcp.json._
+
+#### Project skills
+
+_None found (or no workspace open)._
+
+#### User skills
+
+- **microsoft-foundry** — `C:\Users\Coumbassa Stephane\.agents\skills\microsoft-foundry` — Deploy, evaluate, and manage Foundry agents end-to-end: Docker build, ACR push, hosted/prompt agent create, container start, batch eval, prompt optimization, prompt optimizer workflows, agent.yaml, dataset curation from
+
+<!-- github-copilot-toolbox:mcp-skills-awareness-end -->

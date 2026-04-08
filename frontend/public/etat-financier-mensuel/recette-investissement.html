@@ -243,6 +243,16 @@
         placeholder="Ex: 5"
         oninput="rerenderWithPageNumber(this.value)"
       />
+      <label for="inputLignes" style="margin-left:8px;">Lignes/page :</label>
+      <input
+        type="number"
+        id="inputLignes"
+        value="22"
+        min="5"
+        max="50"
+        style="width:55px;"
+        oninput="rerenderWithRowsPerPage(this.value)"
+      />
     </div>
     <button class="print-button no-print" onclick="window.print()">🖨️ Imprimer</button>
     <div class="container">
@@ -582,6 +592,7 @@
       let currentData = null;
       let generatedRows = [];
       let currentPageStart = 1;
+      let currentRowsPerPage = 22;
 
       // Fonction principale appelée quand les données arrivent
       function processEtatData(messageData) {
@@ -614,11 +625,18 @@
         }
       }
 
+      function rerenderWithRowsPerPage(val) {
+        currentRowsPerPage = parseInt(val, 10) || 22;
+        if (currentData && generatedRows.length > 0) {
+          renderPages();
+        }
+      }
+
       function renderPages() {
         const content = document.getElementById('content');
         content.innerHTML = '';
 
-        const ROWS_PER_PAGE = 30;
+        const ROWS_PER_PAGE = currentRowsPerPage;
         let currentRowIndex = 0;
         let pageIndex = 0;
 

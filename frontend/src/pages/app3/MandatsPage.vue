@@ -389,6 +389,18 @@
 
             <div class="row q-col-gutter-sm">
               <div class="col-12 col-md-6">
+                <q-select
+                  v-model="formData.typeBien"
+                  :options="typeBienOptions"
+                  label="Type de bien"
+                  outlined
+                  dense
+                  emit-value
+                  map-options
+                  clearable
+                />
+              </div>
+              <div class="col-12 col-md-6">
                 <q-input
                   v-model="formData.numeroDeliberation"
                   label="N° Délibération"
@@ -396,6 +408,9 @@
                   dense
                 />
               </div>
+            </div>
+
+            <div class="row q-col-gutter-sm">
               <div class="col-12 col-md-6">
                 <q-input
                   v-model="formData.dateDeliberation"
@@ -519,6 +534,7 @@ const formData = ref({
   numeroDeliberation: '',
   dateDeliberation: '',
   montantPrecompter: 0,
+  typeBien: '' as '' | 'immobilier' | 'mobilier' | 'incorporel',
 });
 
 const chapitreOptions = computed(() =>
@@ -783,6 +799,12 @@ const statutOptions = [
   { label: 'Brouillon', value: 'brouillon' },
 ];
 
+const typeBienOptions = [
+  { label: 'Immobilier', value: 'immobilier' },
+  { label: 'Mobilier', value: 'mobilier' },
+  { label: 'Incorporel', value: 'incorporel' },
+];
+
 function getStatutLabel(statut: string): string {
   switch (statut) {
     case 'brouillon':
@@ -857,6 +879,7 @@ function resetForm() {
     numeroDeliberation: '',
     dateDeliberation: '',
     montantPrecompter: 0,
+    typeBien: '',
   };
   editingId.value = null;
 }
@@ -1037,6 +1060,7 @@ function editMandat(row: Mandat) {
       ? date.formatDate(row.dateDeliberation, 'YYYY-MM-DD')
       : '',
     montantPrecompter: row.montantPrecompter || 0,
+    typeBien: (row.typeBien as '' | 'immobilier' | 'mobilier' | 'incorporel') || '',
   };
   showAddDialog.value = true;
 }

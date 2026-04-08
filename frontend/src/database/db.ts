@@ -125,6 +125,7 @@ export interface Mandat {
   numeroDeliberation?: string; // N° Délibération
   dateDeliberation?: Date; // Date de Délibération
   montantPrecompter?: number; // Montant à précompter
+  typeBien?: 'immobilier' | 'mobilier' | 'incorporel'; // Type de bien
   personnelId: number; // Agent qui a créé le mandat
   createdAt: Date;
   updatedAt: Date;

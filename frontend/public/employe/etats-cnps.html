@@ -322,12 +322,8 @@
           html += `<div class="print-page">
             ${buildHeader(moisLabel, annee, chapitreParam, compteParam)}
             <table class="data-table">${buildTableHead(tauxCnps)}<tbody>${reportRow}${dataRows}${totalRow}</tbody></table>
-            ${
-              isLast
-                ? `<div class="mt-6 text-sm"><p>Arrêté le présent état à la somme de: <span class="font-bold">${numberToWords(cCnps)}</span></p></div>
-              <div class="flex justify-end mt-8 text-sm"><div class="text-center mr-8"><p>VAVOUA, le <span class="editable-date" contenteditable="true">${new Date().toLocaleDateString('fr-FR')}</span></p><p class="font-bold mt-2">P/LE MAIRE & P.D</p></div></div>`
-                : ''
-            }
+            <div class="mt-6 text-sm"><p>Arrêté le présent état à la somme de: <span class="font-bold">${numberToWords(cCnps)}</span></p></div>
+            <div class="flex justify-end mt-8 text-sm"><div class="text-center mr-8"><p>VAVOUA, le <span class="editable-date" contenteditable="true">${new Date().toLocaleDateString('fr-FR')}</span></p><p class="font-bold mt-2">P/LE MAIRE & P.D</p></div></div>
             <div class="page-number">Page ${idx + 1}/${totalPages}</div>
           </div>`;
         });
