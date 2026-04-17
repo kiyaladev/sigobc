@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Compte Administratif - Dépenses Engagées</title>
+    <title>Compte Administratif - Depenses Engagees</title>
     <script src="../dexie.min.js"></script>
     <style>
       @page {
@@ -69,6 +69,9 @@
       .padding-left-sm {
         padding-left: 10px;
       }
+      .padding-left-lg {
+        padding-left: 30px;
+      }
       .total-row {
         font-weight: bold;
       }
@@ -128,7 +131,7 @@
     <button class="print-button no-print" onclick="window.print()">Imprimer</button>
     <div class="container">
       <div id="content">
-        <div class="loading">Chargement des données...</div>
+        <div class="loading">Chargement des donnees...</div>
       </div>
     </div>
 
@@ -141,35 +144,35 @@
         return ((real / prev) * 100).toFixed(2).replace('.', ',');
       }
 
-      const sectionLabels = {
-        60: 'SECTION 60 - SALAIRES ET ACCESSOIRES',
-        61: 'SECTION 61 - MATÉRIEL ET FONCTIONNEMENT',
-        62: "SECTION 62 - CHARGES SOCIALES DE L'ÉTAT",
-        63: 'SECTION 63 - SUBVENTIONS ET TRANSFERTS',
-        64: 'SECTION 64 - INTERVENTIONS ET CHARGES DIVERSES',
+      var sectionLabels = {
+        60: 'SECTION 60 - DEPENSES DES SERVICES GENERAUX',
+        61: 'SECTION 61 - DEPENSES DES SERVICES DE COLLECTIVITE',
+        62: 'SECTION 62 - DEPENSES DES SERVICES SOCIOCULTURELS ET DE PROM. HUM.',
+        63: 'SECTION 63 - DEPENSES DES SERVICES ECONOMIQUES',
+        64: 'SECTION 64 - DEPENSES DIVERSES AU TITRE I',
       };
 
       function renderPage(data) {
-        const exercice = data.exercice || new Date().getFullYear();
-        const mairie = data.mairie || {};
-        const lignes = data.lignesDepenses || [];
+        var exercice = data.exercice || new Date().getFullYear();
+        var mairie = data.mairie || {};
+        var lignes = data.lignesDepenses || [];
 
-        const content = document.getElementById('content');
+        var content = document.getElementById('content');
         content.innerHTML = '';
 
         // Table
-        const table = document.createElement('table');
+        var table = document.createElement('table');
         table.innerHTML = `
           <thead>
             <tr>
               <th rowspan="2" class="align-center bold uppercase" style="font-size: 11px;">COMMUNE DE <span id="mairie-nom-header"></span></th>
               <th rowspan="2" colspan="6" class="align-center bold uppercase" style="font-size: 11px;">COMPTE ADMINISTRATIF - DEPENSES DE FONCTIONNEMENT</th>
               <th class="align-center bold uppercase" style="font-size: 10px; width: 60px;">ANNEE</th>
-              <th class="align-center bold uppercase" style="font-size: 10px; width: 40px;">N°</th>
+              <th class="align-center bold uppercase" style="font-size: 10px; width: 40px;">N&deg;</th>
             </tr>
             <tr>
               <th class="align-center" style="font-size: 10px;">${exercice}</th>
-              <th class="align-center" style="font-size: 10px;">1</th>
+              <th class="align-center" style="font-size: 10px;">&nbsp;</th>
             </tr>
             <tr>
               <th rowspan="2" class="align-center bold" style="font-size: 10px; width: 35%;">RUBRIQUES BUDGETAIRES</th>
@@ -188,15 +191,15 @@
           </thead>
           <tbody></tbody>
         `;
-        const tbody = table.querySelector('tbody');
+        var tbody = table.querySelector('tbody');
 
         // Update mairie info
-        const nomMairie = (mairie.nom || '').replace(/^mairie de /i, '');
+        var nomMairie = (mairie.nom || '').replace(/^mairie de /i, '');
         table.querySelector('#mairie-nom-header').textContent = nomMairie.toUpperCase();
 
-        // Group lines by section
-        const sections = {};
-        const sectionOrder = ['60', '61', '62', '63', '64'];
+        // Group lines by section (2-digit prefix)
+        var sections = {};
+        var sectionOrder = ['60', '61', '62', '63', '64'];
         sectionOrder.forEach(function (s) {
           sections[s] = [];
         });
@@ -208,7 +211,7 @@
           }
         });
 
-        let grandPrev = 0,
+        var grandPrev = 0,
           grandEng = 0;
 
         sectionOrder.forEach(function (secCode) {
@@ -219,76 +222,122 @@
             return (a.code || '').localeCompare(b.code || '', undefined, { numeric: true });
           });
 
-          // Section header
+          // Section header row
           var secRow = document.createElement('tr');
-          secRow.innerHTML = `
-            <td class="bold underline padding-left-md uppercase" style="font-size: 9px;">${sectionLabels[secCode] || 'SECTION ' + secCode}</td>
-            <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-          `;
+          secRow.innerHTML =
+            '<td class="bold underline padding-left-md uppercase" style="font-size: 9px;">' +
+            (sectionLabels[secCode] || 'SECTION ' + secCode) +
+            '</td>' +
+            '<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>';
           tbody.appendChild(secRow);
+
+          // Group items by 3-digit chapitre prefix
+          var chapitreOrder = [];
+          var chapitreGroups = {};
+
+          items.forEach(function (l) {
+            var chap = (l.code || '').substring(0, 3);
+            if (!chapitreGroups[chap]) {
+              chapitreGroups[chap] = [];
+              chapitreOrder.push(chap);
+            }
+            chapitreGroups[chap].push(l);
+          });
 
           var secPrev = 0,
             secEng = 0;
 
-          items.forEach(function (l) {
-            var prev = l.previsions || 0;
-            var eng = l.engagements || 0;
-            secPrev += prev;
-            secEng += eng;
+          chapitreOrder.forEach(function (chapCode) {
+            var chapItems = chapitreGroups[chapCode];
 
-            var codeStr = l.code || '';
-            var libStr = l.libelle || '';
-            var td1 = codeStr + (codeStr && libStr ? ' ' : '') + libStr;
+            // Chapitre header row
+            var chapRow = document.createElement('tr');
+            chapRow.innerHTML =
+              '<td class="bold padding-left-sm uppercase" style="font-size: 9px;">CHAPITRE ' +
+              chapCode +
+              '</td>' +
+              '<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>';
+            tbody.appendChild(chapRow);
 
-            var tr = document.createElement('tr');
-            tr.innerHTML = `
-              <td class="padding-left-sm align-left" style="font-size: 9px;">${td1}</td>
-              <td class="col-num">${fmt(prev)}</td>
-              <td class="col-num">${fmt(eng)}</td>
-              <td class="col-center">${pct(eng, prev)}</td>
-              <td class="col-num">${fmt(eng)}</td>
-              <td class="col-center">-</td>
-              <td class="col-center">-</td>
-              <td class="col-center">-</td>
-              <td class="col-center">-</td>
-            `;
-            tbody.appendChild(tr);
+            var chapPrev = 0,
+              chapEng = 0;
+
+            // Individual sous-chapitre rows
+            chapItems.forEach(function (l) {
+              var prev = l.previsions || 0;
+              var eng = l.engagements || 0;
+              chapPrev += prev;
+              chapEng += eng;
+
+              var codeStr = l.code || '';
+              var libStr = l.libelle || '';
+              var td1 = codeStr + (codeStr && libStr ? ' ' : '') + libStr;
+
+              var tr = document.createElement('tr');
+              tr.innerHTML =
+                '<td class="padding-left-lg align-left" style="font-size: 9px;">' + td1 + '</td>' +
+                '<td class="col-num">' + fmt(prev) + '</td>' +
+                '<td class="col-num">' + fmt(eng) + '</td>' +
+                '<td class="col-center">' + pct(eng, prev) + '</td>' +
+                '<td class="col-num">' + fmt(eng) + '</td>' +
+                '<td class="col-center">-</td>' +
+                '<td class="col-center">-</td>' +
+                '<td class="col-center">-</td>' +
+                '<td class="col-center">-</td>';
+              tbody.appendChild(tr);
+            });
+
+            // Sous total chapitre row
+            var chapTotalRow = document.createElement('tr');
+            chapTotalRow.className = 'total-row';
+            chapTotalRow.innerHTML =
+              '<td class="bold align-right uppercase" style="font-size: 8px;">SOUS TOTAL CHAPITRE ' + chapCode + '</td>' +
+              '<td class="col-num">' + fmt(chapPrev) + '</td>' +
+              '<td class="col-num">' + fmt(chapEng) + '</td>' +
+              '<td class="col-center">' + pct(chapEng, chapPrev) + '</td>' +
+              '<td class="col-num">' + fmt(chapEng) + '</td>' +
+              '<td class="col-center">-</td>' +
+              '<td class="col-center">-</td>' +
+              '<td class="col-center">-</td>' +
+              '<td class="col-center">-</td>';
+            tbody.appendChild(chapTotalRow);
+
+            secPrev += chapPrev;
+            secEng += chapEng;
           });
 
-          // Section subtotal
+          // Total section row
           var stRow = document.createElement('tr');
           stRow.className = 'total-row';
-          stRow.innerHTML = `
-            <td class="bold align-right uppercase" style="font-size: 8px;">SOUS TOTAL SECTION ${secCode}</td>
-            <td class="col-num">${fmt(secPrev)}</td>
-            <td class="col-num">${fmt(secEng)}</td>
-            <td class="col-center">${pct(secEng, secPrev)}</td>
-            <td class="col-num">${fmt(secEng)}</td>
-            <td class="col-center">-</td>
-            <td class="col-center">-</td>
-            <td class="col-center">-</td>
-            <td class="col-center">-</td>
-          `;
+          stRow.innerHTML =
+            '<td class="bold align-right uppercase" style="font-size: 8px;">TOTAL SECTION ' + secCode + '</td>' +
+            '<td class="col-num">' + fmt(secPrev) + '</td>' +
+            '<td class="col-num">' + fmt(secEng) + '</td>' +
+            '<td class="col-center">' + pct(secEng, secPrev) + '</td>' +
+            '<td class="col-num">' + fmt(secEng) + '</td>' +
+            '<td class="col-center">-</td>' +
+            '<td class="col-center">-</td>' +
+            '<td class="col-center">-</td>' +
+            '<td class="col-center">-</td>';
           tbody.appendChild(stRow);
 
           grandPrev += secPrev;
           grandEng += secEng;
         });
 
-        // Grand total
+        // Grand total row
         var totalRow = document.createElement('tr');
         totalRow.className = 'total-row';
-        totalRow.innerHTML = `
-          <td class="bold align-right uppercase">TOTAL GENERAL DEPENSES ENGAGEES</td>
-          <td class="col-num">${fmt(grandPrev)}</td>
-          <td class="col-num">${fmt(grandEng)}</td>
-          <td class="col-center">${pct(grandEng, grandPrev)}</td>
-          <td class="col-num">${fmt(grandEng)}</td>
-          <td class="col-center">-</td>
-          <td class="col-center">-</td>
-          <td class="col-center">-</td>
-          <td class="col-center">-</td>
-        `;
+        totalRow.innerHTML =
+          '<td class="bold align-right uppercase">TOTAL GENERAL DEPENSES ENGAGEES</td>' +
+          '<td class="col-num">' + fmt(grandPrev) + '</td>' +
+          '<td class="col-num">' + fmt(grandEng) + '</td>' +
+          '<td class="col-center">' + pct(grandEng, grandPrev) + '</td>' +
+          '<td class="col-num">' + fmt(grandEng) + '</td>' +
+          '<td class="col-center">-</td>' +
+          '<td class="col-center">-</td>' +
+          '<td class="col-center">-</td>' +
+          '<td class="col-center">-</td>';
         tbody.appendChild(totalRow);
 
         content.appendChild(table);
@@ -302,19 +351,18 @@
           month: 'long',
           year: 'numeric',
         });
-        sigs.innerHTML = `
-          <div class="signature-box">
-            ${mairie.nom || '---'}, le ${dateStr}<br/>
-            <strong>Le Trésorier Principal</strong>
-          </div>
-          <div class="signature-box">
-            <br/>
-            <strong>Le Maire</strong>
-          </div>
-        `;
+        sigs.innerHTML =
+          '<div class="signature-box">' +
+            (mairie.nom || '---') + ', le ' + dateStr + '<br/>' +
+            '<strong>Le Tresorier Principal</strong>' +
+          '</div>' +
+          '<div class="signature-box">' +
+            '<br/>' +
+            '<strong>Le Maire</strong>' +
+          '</div>';
         content.appendChild(sigs);
 
-        document.title = 'Compte Administratif - Dépenses Engagées - ' + exercice;
+        document.title = 'Compte Administratif - Depenses Engagees - ' + exercice;
       }
 
       // Load data directly from IndexedDB

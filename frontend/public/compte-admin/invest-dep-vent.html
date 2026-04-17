@@ -19,96 +19,82 @@
       .container {
         width: 100%;
       }
-      .main-title {
-        font-size: 12px;
-        font-weight: bold;
-        text-align: center;
-        margin-bottom: 10px;
-      }
       table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 0;
-        table-layout: fixed;
+        margin-top: 5px;
       }
       th,
       td {
         border: 1px solid #000;
-        padding: 2px 4px;
+        padding: 3px 5px;
+        color: #000;
       }
       th {
-        background-color: #fff;
+        font-weight: bold;
         text-align: center;
         vertical-align: middle;
-        font-size: 8px;
-        font-weight: bold;
-      }
-      .col-rubrique {
-        width: 25%;
-        text-align: left;
       }
       .col-num {
         text-align: right;
         white-space: nowrap;
-        width: 7%;
+        font-size: 9px;
       }
-      .section-header {
+      .bold {
         font-weight: bold;
+      }
+      .underline {
+        text-decoration: underline;
+      }
+      .align-center {
+        text-align: center;
+      }
+      .align-right {
+        text-align: right;
+      }
+      .align-left {
+        text-align: left;
+      }
+      .uppercase {
         text-transform: uppercase;
       }
-      .chapitre-header {
-        font-weight: bold;
-        text-decoration: underline;
-        padding-left: 10px;
-      }
-      .article-header {
-        font-weight: bold;
+      .padding-left-md {
         padding-left: 20px;
       }
-      .sous-total {
+      .padding-left-sm {
+        padding-left: 10px;
+      }
+      .total-row {
         font-weight: bold;
+      }
+      .signatures {
+        margin-top: 30px;
+        display: flex;
+        justify-content: space-between;
+        padding: 0 50px;
+        font-size: 10px;
+      }
+      .signature-box {
         text-align: center;
-      }
-      .total-section {
-        font-weight: bold;
-        text-align: center;
-      }
-      .grand-total {
-        font-weight: bold;
-        text-align: center;
-      }
-      .category-title {
-        text-decoration: underline;
-        text-align: center;
-        margin: 2px 0;
-      }
-      .detail-row td:first-child {
-        padding-left: 30px;
-      }
-      .header-table {
-        width: 100%;
-        border: none;
-        margin-bottom: 5px;
-      }
-      .header-table td {
-        border: none;
-        padding: 0;
+        width: 200px;
       }
       .print-button {
         position: fixed;
         top: 20px;
         right: 20px;
-        padding: 10px 20px;
-        background: #009688;
+        padding: 12px 24px;
+        background-color: #1976d2;
         color: white;
         border: none;
-        border-radius: 5px;
+        border-radius: 4px;
         cursor: pointer;
         font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         z-index: 1000;
       }
       .print-button:hover {
-        background: #00796b;
+        background-color: #1565c0;
       }
       .loading {
         text-align: center;
@@ -116,12 +102,20 @@
         font-size: 16px;
         color: #666;
       }
+      .print-footer {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
       @media print {
-        .no-print {
-          display: none !important;
-        }
         body {
           padding: 0;
+        }
+        .no-print {
+          display: none;
+        }
+        .print-footer {
+          break-inside: avoid;
+          page-break-inside: avoid;
         }
       }
     </style>
@@ -130,467 +124,1310 @@
     <button class="print-button no-print" onclick="window.print()">Imprimer</button>
     <div class="container">
       <div id="content">
-        <div class="loading" id="loading">Chargement des donnees...</div>
+        <div class="loading">Chargement des donnees...</div>
       </div>
     </div>
 
     <script>
       function fmt(v) {
-        return v ? new Intl.NumberFormat('fr-FR').format(v) : '-';
+        return v ? new Intl.NumberFormat('fr-FR').format(Math.round(v)) : '0';
+      }
+      function fmtOrDash(v) {
+        return v ? new Intl.NumberFormat('fr-FR').format(Math.round(v)) : '-';
+      }
+      function fmtCredits(prevu, mandat) {
+        var c = prevu - mandat;
+        return c > 0 ? new Intl.NumberFormat('fr-FR').format(Math.round(c)) : '-';
       }
 
-      const SECTIONS = {
+      var SECTION_LABELS = {
         90: 'EQUIPEMENT DES SERVICES GENERAUX',
         91: 'EQUIPEMENT DES SERVICES DE COLLECTIVITE',
-        92: 'EQUIPEMENT DES SERVICES SOCIAUX',
-        93: 'EQUIPEMENT DES SERVICES ECONOMIQUES',
+        92: 'URBANISME ET ASSAINISSEMENT',
+        93: 'INVESTISSEMENTS FINANCIERS',
         94: 'REMBOURSEMENT EMPRUNTS',
-        95: 'AUTRES DEPENSES INVESTISSEMENT',
+        95: 'DEPENSES DIVERSES',
       };
 
-      async function loadData() {
-        let db;
-        try {
-          db = new Dexie('TresorOfflineDB');
-          await db.open();
-        } catch (_e) {
-          db = new Dexie('TresorDatabase');
-          await db.open();
-        }
+      function renderPage(data) {
+        var exercice = data.exercice || new Date().getFullYear();
+        var mairie = data.mairie || {};
+        var articles = data.articles || [];
 
-        const exercice = new Date().getFullYear();
+        var content = document.getElementById('content');
+        content.innerHTML = '';
 
-        const [sousChapitres, chapitres, allPrevisions, allMandats, mairie] = await Promise.all([
-          db.table('sousChapitres').toArray(),
-          db.table('chapitres').toArray(),
-          db.table('previsions').toArray(),
-          db.table('mandats').toArray(),
-          db.table('mairies').toCollection().first(),
-        ]);
-        const previsions = allPrevisions.filter(p => p.exercice === exercice);
-        const mandats = allMandats.filter(m => m.exercice === exercice);
-
-        // Filter sous-chapitres with code starting with '9'
-        const investSC = sousChapitres.filter((sc) => sc.code && sc.code.startsWith('9'));
-
-        // Build prevision map by sousChapitreId
-        const prevMap = {};
-        previsions.forEach((p) => {
-          if (p.sousChapitreId) {
-            if (!prevMap[p.sousChapitreId]) prevMap[p.sousChapitreId] = 0;
-            prevMap[p.sousChapitreId] += p.montantPrevu || 0;
-          }
-        });
-
-        // Build engagements map by sousChapitreId
-        const engMap = {};
-        mandats.forEach((m) => {
-          if (m.statut === 'annule') return;
-          const scId = m.sousChapitreId;
-          if (!engMap[scId]) engMap[scId] = 0;
-          engMap[scId] += m.montant || 0;
-        });
-
-        return { investSC, chapitres, prevMap, engMap, exercice, mairie };
-      }
-
-      function render(data) {
-        const { investSC, chapitres, prevMap, engMap, exercice, mairie } = data;
-        const communeNom = ((mairie && mairie.nom) || 'COMMUNE').replace(/^mairie de /i, '').toUpperCase();
-
-        // Group by Section (2 digits), Chapitre (3 digits), Article (4 digits)
-        const hierarchy = {};
-
-        investSC.forEach((sc) => {
-          const code = sc.code;
-          if (!code || code.length < 2) return;
-
-          const secCode = code.substring(0, 2);
-          const chapCode = code.length >= 3 ? code.substring(0, 3) : code;
-
-          if (!hierarchy[secCode]) hierarchy[secCode] = { chapitres: {} };
-          if (!hierarchy[secCode].chapitres[chapCode]) {
-            // Find chapitre libelle
-            const chapObj = chapitres.find((c) => c.code === chapCode);
-            hierarchy[secCode].chapitres[chapCode] = {
-              libelle: chapObj ? chapObj.libelle : '',
-              articles: [],
-            };
-          }
-
-          hierarchy[secCode].chapitres[chapCode].articles.push(sc);
-        });
-
-        let grandPrev = 0,
-          grandMandats = 0,
-          grandCredits = 0;
-        let grandImmTrav = 0,
-          grandImmInterv = 0;
-        let grandMobTrav = 0,
-          grandMobInterv = 0;
-        let grandIncTrav = 0,
-          grandIncInterv = 0;
-        let grandTotalVentil = 0;
-
-        let rows = '';
-        const sectionCodes = Object.keys(hierarchy).sort();
-
-        sectionCodes.forEach((secCode) => {
-          const secLabel = SECTIONS[secCode] || '';
-
-          rows +=
-            '<tr class="section-header"><td colspan="11">SECTION ' +
-            secCode +
-            ' - ' +
-            secLabel +
-            '</td></tr>';
-
-          let secPrev = 0,
-            secMandats = 0,
-            secCredits = 0;
-          let secImmTrav = 0,
-            secImmInterv = 0;
-          let secMobTrav = 0,
-            secMobInterv = 0;
-          let secIncTrav = 0,
-            secIncInterv = 0;
-          let secTotalVentil = 0;
-
-          const chapCodes = Object.keys(hierarchy[secCode].chapitres).sort();
-
-          chapCodes.forEach((chapCode) => {
-            const chapData = hierarchy[secCode].chapitres[chapCode];
-
-            rows +=
-              '<tr><td colspan="11" class="chapitre-header">CHAPITRE ' +
-              chapCode +
-              ' - ' +
-              chapData.libelle +
-              '</td></tr>';
-
-            let chapPrev = 0,
-              chapMandats = 0,
-              chapCredits = 0;
-            let chapImmTrav = 0,
-              chapImmInterv = 0;
-            let chapMobTrav = 0,
-              chapMobInterv = 0;
-            let chapIncTrav = 0,
-              chapIncInterv = 0;
-            let chapTotalVentil = 0;
-
-            // Sort articles
-            const articles = chapData.articles.sort((a, b) => a.code.localeCompare(b.code));
-
-            articles.forEach((art) => {
-              const prev = prevMap[art.id] || 0;
-              const mandats = engMap[art.id] || 0;
-              const credits = prev - mandats;
-
-              // For demonstration, we put all mandats in "IMMOBILIERS - Travaux"
-              // In a real app, this would be ventilated based on other criteria
-              const immTrav = mandats;
-              const immInterv = 0;
-              const mobTrav = 0;
-              const mobInterv = 0;
-              const incTrav = 0;
-              const incInterv = 0;
-              const totalVentil = immTrav + immInterv + mobTrav + mobInterv + incTrav + incInterv;
-
-              chapPrev += prev;
-              chapMandats += mandats;
-              chapCredits += credits;
-              chapImmTrav += immTrav;
-              chapTotalVentil += totalVentil;
-
-              // Article header
-              rows +=
-                '<tr><td colspan="11" class="article-header">' +
-                art.code +
-                ' - ' +
-                (art.libelle || '') +
-                '</td></tr>';
-
-              // Category: IMMOBILIERS
-              rows +=
-                '<tr><td colspan="11"><div class="category-title">IMMOBILIERS</div></td></tr>';
-
-              // Detail rows
-              rows +=
-                '<tr class="detail-row">' +
-                "<td>Travaux et services à l'entreprise</td>" +
-                '<td class="col-num">' +
-                fmt(prev) +
-                '</td>' +
-                '<td class="col-num">' +
-                fmt(mandats) +
-                '</td>' +
-                '<td class="col-num">' +
-                fmt(credits) +
-                '</td>' +
-                '<td class="col-num">' +
-                fmt(immTrav) +
-                '</td>' +
-                '<td class="col-num">' +
-                fmt(immInterv) +
-                '</td>' +
-                '<td class="col-num">' +
-                fmt(mobTrav) +
-                '</td>' +
-                '<td class="col-num">' +
-                fmt(mobInterv) +
-                '</td>' +
-                '<td class="col-num">' +
-                fmt(incTrav) +
-                '</td>' +
-                '<td class="col-num">' +
-                fmt(incInterv) +
-                '</td>' +
-                '<td class="col-num">' +
-                fmt(totalVentil) +
-                '</td>' +
-                '</tr>';
-
-              rows +=
-                '<tr class="detail-row">' +
-                '<td>Interventions et transferts</td>' +
-                '<td class="col-num">-</td>' +
-                '<td class="col-num">-</td>' +
-                '<td class="col-num">-</td>' +
-                '<td class="col-num">-</td>' +
-                '<td class="col-num">-</td>' +
-                '<td class="col-num">-</td>' +
-                '<td class="col-num">-</td>' +
-                '<td class="col-num">-</td>' +
-                '<td class="col-num">-</td>' +
-                '<td class="col-num">-</td>' +
-                '</tr>';
-
-              // Sous total article
-              rows +=
-                '<tr>' +
-                '<td class="sous-total">SOUS TOTAL ARTICLE ' +
-                art.code +
-                '</td>' +
-                '<td class="col-num">' +
-                fmt(prev) +
-                '</td>' +
-                '<td class="col-num">' +
-                fmt(mandats) +
-                '</td>' +
-                '<td class="col-num">' +
-                fmt(credits) +
-                '</td>' +
-                '<td class="col-num">' +
-                fmt(immTrav) +
-                '</td>' +
-                '<td class="col-num">' +
-                fmt(immInterv) +
-                '</td>' +
-                '<td class="col-num">' +
-                fmt(mobTrav) +
-                '</td>' +
-                '<td class="col-num">' +
-                fmt(mobInterv) +
-                '</td>' +
-                '<td class="col-num">' +
-                fmt(incTrav) +
-                '</td>' +
-                '<td class="col-num">' +
-                fmt(incInterv) +
-                '</td>' +
-                '<td class="col-num">' +
-                fmt(totalVentil) +
-                '</td>' +
-                '</tr>';
-            });
-
-            // Sous total chapitre
-            rows +=
-              '<tr>' +
-              '<td class="sous-total">SOUS TOTAL CHAPITRE ' +
-              chapCode +
-              '</td>' +
-              '<td class="col-num">' +
-              fmt(chapPrev) +
-              '</td>' +
-              '<td class="col-num">' +
-              fmt(chapMandats) +
-              '</td>' +
-              '<td class="col-num">' +
-              fmt(chapCredits) +
-              '</td>' +
-              '<td class="col-num">' +
-              fmt(chapImmTrav) +
-              '</td>' +
-              '<td class="col-num">' +
-              fmt(chapImmInterv) +
-              '</td>' +
-              '<td class="col-num">' +
-              fmt(chapMobTrav) +
-              '</td>' +
-              '<td class="col-num">' +
-              fmt(chapMobInterv) +
-              '</td>' +
-              '<td class="col-num">' +
-              fmt(chapIncTrav) +
-              '</td>' +
-              '<td class="col-num">' +
-              fmt(chapIncInterv) +
-              '</td>' +
-              '<td class="col-num">' +
-              fmt(chapTotalVentil) +
-              '</td>' +
-              '</tr>';
-
-            secPrev += chapPrev;
-            secMandats += chapMandats;
-            secCredits += chapCredits;
-            secImmTrav += chapImmTrav;
-            secTotalVentil += chapTotalVentil;
-          });
-
-          // Total section
-          rows +=
-            '<tr class="total-section">' +
-            '<td>TOTAL SECTION ' +
-            secCode +
-            '</td>' +
-            '<td class="col-num">' +
-            fmt(secPrev) +
-            '</td>' +
-            '<td class="col-num">' +
-            fmt(secMandats) +
-            '</td>' +
-            '<td class="col-num">' +
-            fmt(secCredits) +
-            '</td>' +
-            '<td class="col-num">' +
-            fmt(secImmTrav) +
-            '</td>' +
-            '<td class="col-num">' +
-            fmt(secImmInterv) +
-            '</td>' +
-            '<td class="col-num">' +
-            fmt(secMobTrav) +
-            '</td>' +
-            '<td class="col-num">' +
-            fmt(secMobInterv) +
-            '</td>' +
-            '<td class="col-num">' +
-            fmt(secIncTrav) +
-            '</td>' +
-            '<td class="col-num">' +
-            fmt(secIncInterv) +
-            '</td>' +
-            '<td class="col-num">' +
-            fmt(secTotalVentil) +
-            '</td>' +
-            '</tr>';
-
-          grandPrev += secPrev;
-          grandMandats += secMandats;
-          grandCredits += secCredits;
-          grandImmTrav += secImmTrav;
-          grandTotalVentil += secTotalVentil;
-        });
-
-        // Grand total
-        rows +=
-          '<tr class="grand-total">' +
-          '<td>TOTAL GENERAL DES DEPENSES AU TITRE II</td>' +
-          '<td class="col-num">' +
-          fmt(grandPrev) +
-          '</td>' +
-          '<td class="col-num">' +
-          fmt(grandMandats) +
-          '</td>' +
-          '<td class="col-num">' +
-          fmt(grandCredits) +
-          '</td>' +
-          '<td class="col-num">' +
-          fmt(grandImmTrav) +
-          '</td>' +
-          '<td class="col-num">' +
-          fmt(grandImmInterv) +
-          '</td>' +
-          '<td class="col-num">' +
-          fmt(grandMobTrav) +
-          '</td>' +
-          '<td class="col-num">' +
-          fmt(grandMobInterv) +
-          '</td>' +
-          '<td class="col-num">' +
-          fmt(grandIncTrav) +
-          '</td>' +
-          '<td class="col-num">' +
-          fmt(grandIncInterv) +
-          '</td>' +
-          '<td class="col-num">' +
-          fmt(grandTotalVentil) +
-          '</td>' +
-          '</tr>';
-
-        document.getElementById('content').innerHTML =
-          '<table>' +
+        var table = document.createElement('table');
+        table.style.tableLayout = 'fixed';
+        table.innerHTML =
           '<colgroup>' +
-          '<col style="width:22%">' +
-          '<col style="width:7%"><col style="width:7%"><col style="width:7%">' +
-          '<col style="width:7%"><col style="width:7%"><col style="width:7%"><col style="width:7%">' +
-          '<col style="width:7%"><col style="width:7%"><col style="width:8%">' +
+          '<col style="width:28%">' +
+          '<col style="width:10%">' +
+          '<col style="width:10%">' +
+          '<col style="width:10%">' +
+          '<col style="width:12%">' +
+          '<col style="width:12%">' +
+          '<col style="width:12%">' +
+          '<col style="width:6%">' +
           '</colgroup>' +
           '<thead>' +
-          // Document header row
           '<tr>' +
-          '<th style="text-align:center; font-size:9px">COMMUNE DE ' + communeNom + '</th>' +
-          '<th colspan="8" style="font-size:12px">COMPTE ADMINISTRATIF DEPENSES D\'INVESTISSEMENT</th>' +
-          '<th style="font-size:8px">ANNEE<br><b>' + exercice + '</b></th>' +
-          '<th style="font-size:8px">N&deg;<br><b>28</b></th>' +
+          '<th rowspan="2" class="align-center bold uppercase" style="font-size: 10px;">COMPTES ET RUBRIQUES BUDGETAIRES</th>' +
+          '<th rowspan="2" class="align-center uppercase" style="font-size: 8px;">PREVISIONS</th>' +
+          '<th rowspan="2" class="align-center uppercase" style="font-size: 8px;">MANDATS</th>' +
+          '<th rowspan="2" class="align-center uppercase" style="font-size: 8px;">CREDITS<br>SANS EMPLOI</th>' +
+          '<th colspan="3" class="align-center bold uppercase" style="font-size: 9px;">VENTILATION DES DEPENSES PAR TYPE DE BIEN</th>' +
+          '<th rowspan="2" class="align-center bold uppercase" style="font-size: 9px;">TOTAL</th>' +
           '</tr>' +
-          // Column headers row 1
           '<tr>' +
-          '<th rowspan="2" style="vertical-align:middle; font-size:8px">COMPTES ET RUBRIQUES BUDGETAIRES</th>' +
-          '<th rowspan="2" style="vertical-align:middle; font-size:8px">PREVISIONS</th>' +
-          '<th rowspan="2" style="vertical-align:middle; font-size:8px">MANDATS</th>' +
-          '<th rowspan="2" style="vertical-align:middle; font-size:8px">CREDITS<br>SANS<br>EMPLOI</th>' +
-          '<th colspan="6" style="font-size:8px">VENTILATION DES DEPENSES PAR PARAGRAPHE</th>' +
-          '<th rowspan="2" style="vertical-align:middle; font-size:8px">TOTAL</th>' +
-          '</tr>' +
-          // Column headers row 2 (sub-headers under VENTILATION)
-          '<tr>' +
-          '<th colspan="2" style="font-size:8px">IMMOBILIERS</th>' +
-          '<th colspan="2" style="font-size:8px">MOBILIERS</th>' +
-          '<th colspan="2" style="font-size:8px">INCORPOREL</th>' +
-          '</tr>' +
-          // Column numbers row
-          '<tr>' +
-          '<th style="font-size:7px">1</th>' +
-          '<th style="font-size:7px">2</th>' +
-          '<th style="font-size:7px">3</th>' +
-          '<th style="font-size:7px">4</th>' +
-          "<th style=\"font-size:7px\">Travaux et services &agrave; l'entreprise<br>5</th>" +
-          '<th style="font-size:7px">Intervention et transfert<br>6</th>' +
-          "<th style=\"font-size:7px\">Travaux et services &agrave; l'entreprise<br>7</th>" +
-          '<th style="font-size:7px">Intervention et transfert<br>8</th>' +
-          "<th style=\"font-size:7px\">Travaux et services &agrave; l'entreprise<br>9</th>" +
-          '<th style="font-size:7px">Intervention et transfert<br>10</th>' +
-          '<th style="font-size:7px">11</th>' +
+          '<th class="align-center bold uppercase" style="font-size: 8px;">IMMOBILIER</th>' +
+          '<th class="align-center bold uppercase" style="font-size: 8px;">MOBILIER</th>' +
+          '<th class="align-center bold uppercase" style="font-size: 8px;">INCORPOREL</th>' +
           '</tr>' +
           '</thead>' +
-          '<tbody>' +
-          rows +
-          '</tbody>' +
-          '</table>';
+          '<tbody></tbody>';
+
+        var tbody = table.querySelector('tbody');
+
+        var sectionOrder = ['90', '91', '92', '93', '94', '95'];
+        var sections = {};
+        sectionOrder.forEach(function (s) {
+          sections[s] = [];
+        });
+
+        articles.forEach(function (art) {
+          var prefix = (art.code || '').substring(0, 2);
+          if (sections[prefix]) {
+            sections[prefix].push(art);
+          }
+        });
+
+        var grandPrevu = 0;
+        var grandTotal = 0;
+        var grandImmo = 0;
+        var grandMob = 0;
+        var grandIncorp = 0;
+
+        sectionOrder.forEach(function (secCode) {
+          var items = sections[secCode];
+          if (items.length === 0) return;
+
+          items.sort(function (a, b) {
+            return (a.code || '').localeCompare(b.code || '', undefined, { numeric: true });
+          });
+
+          // Section header
+          var secRow = document.createElement('tr');
+          secRow.style.backgroundColor = '#e3f2fd';
+          secRow.innerHTML =
+            '<td colspan="8" class="bold underline padding-left-sm uppercase" style="font-size: 9px;">SECTION ' +
+            secCode +
+            ' - ' +
+            (SECTION_LABELS[secCode] || '') +
+            '</td>';
+          tbody.appendChild(secRow);
+
+          var secPrevu = 0;
+          var secTotal = 0;
+          var secImmo = 0;
+          var secMob = 0;
+          var secIncorp = 0;
+
+          items.forEach(function (art) {
+            var row = document.createElement('tr');
+            var html =
+              '<td class="padding-left-md" style="font-size: 9px;">' +
+              art.code +
+              ' - ' +
+              (art.libelle || '') +
+              '</td>';
+            html += '<td class="col-num">' + fmt(art.montantPrevu) + '</td>';
+            html += '<td class="col-num">' + fmtOrDash(art.total) + '</td>';
+            html += '<td class="col-num">' + fmtCredits(art.montantPrevu, art.total) + '</td>';
+            html += '<td class="col-num">' + fmtOrDash(art.immobilier) + '</td>';
+            html += '<td class="col-num">' + fmtOrDash(art.mobilier) + '</td>';
+            html += '<td class="col-num">' + fmtOrDash(art.incorporel) + '</td>';
+            html += '<td class="col-num">' + fmtOrDash(art.total) + '</td>';
+            row.innerHTML = html;
+            tbody.appendChild(row);
+
+            secPrevu += art.montantPrevu;
+            secTotal += art.total;
+            secImmo += art.immobilier;
+            secMob += art.mobilier;
+            secIncorp += art.incorporel;
+          });
+
+          // TOTAL SECTION
+          var secTotalRow = document.createElement('tr');
+          secTotalRow.className = 'total-row';
+          secTotalRow.style.backgroundColor = '#e0e0e0';
+          var secHtml =
+            '<td class="bold align-right uppercase" style="font-size: 8px;">TOTAL SECTION ' +
+            secCode +
+            '</td>';
+          secHtml += '<td class="col-num">' + fmt(secPrevu) + '</td>';
+          secHtml += '<td class="col-num">' + fmtOrDash(secTotal) + '</td>';
+          secHtml += '<td class="col-num">' + fmtCredits(secPrevu, secTotal) + '</td>';
+          secHtml += '<td class="col-num">' + fmtOrDash(secImmo) + '</td>';
+          secHtml += '<td class="col-num">' + fmtOrDash(secMob) + '</td>';
+          secHtml += '<td class="col-num">' + fmtOrDash(secIncorp) + '</td>';
+          secHtml += '<td class="col-num">' + fmtOrDash(secTotal) + '</td>';
+          secTotalRow.innerHTML = secHtml;
+          tbody.appendChild(secTotalRow);
+
+          grandPrevu += secPrevu;
+          grandTotal += secTotal;
+          grandImmo += secImmo;
+          grandMob += secMob;
+          grandIncorp += secIncorp;
+        });
+
+        // TOTAL GENERAL
+        var totalRow = document.createElement('tr');
+        totalRow.className = 'total-row';
+        totalRow.style.backgroundColor = '#bdbdbd';
+        var tHtml =
+          '<td class="bold align-right uppercase" style="font-size: 9px;">TOTAL GENERAL DES DEPENSES AU TITRE II</td>';
+        tHtml += '<td class="col-num">' + fmt(grandPrevu) + '</td>';
+        tHtml += '<td class="col-num">' + fmtOrDash(grandTotal) + '</td>';
+        tHtml += '<td class="col-num">' + fmtCredits(grandPrevu, grandTotal) + '</td>';
+        tHtml += '<td class="col-num">' + fmtOrDash(grandImmo) + '</td>';
+        tHtml += '<td class="col-num">' + fmtOrDash(grandMob) + '</td>';
+        tHtml += '<td class="col-num">' + fmtOrDash(grandIncorp) + '</td>';
+        tHtml += '<td class="col-num">' + fmtOrDash(grandTotal) + '</td>';
+        totalRow.innerHTML = tHtml;
+        tbody.appendChild(totalRow);
+
+        table.appendChild(tbody);
+        content.appendChild(table);
+
+        // Signatures
+        var sigs = document.createElement('div');
+        sigs.className = 'signatures print-footer';
+        var today = new Date();
+        var dateStr = today.toLocaleDateString('fr-FR', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+        });
+        sigs.innerHTML =
+          '<div class="signature-box">' +
+          (mairie.nom || '---') +
+          ', le ' +
+          dateStr +
+          '<br/>' +
+          '<strong>Le Tresorier Principal</strong>' +
+          '</div>' +
+          '<div class="signature-box">' +
+          '<br/>' +
+          '<strong>Le Maire</strong>' +
+          '</div>';
+        content.appendChild(sigs);
+
+        document.title = 'Compte Administratif - Depenses Investissement Ventilees - ' + exercice;
       }
 
+      // Load data directly from IndexedDB
       async function loadAndRender() {
         try {
-          const result = await loadData();
-          render(result);
+          let db;
+          try {
+            db = new Dexie('TresorOfflineDB');
+            await db.open();
+          } catch (_e) {
+            db = new Dexie('TresorDatabase');
+            await db.open();
+          }
+
+          var exercice = new Date().getFullYear();
+
+          // Check printData for exercice override
+          try {
+            var pd = await db.table('printData').toArray();
+            var latest = pd
+              .filter(function (p) {
+                return p.type === 'FILL_COMPTE_ADMIN_DATA';
+              })
+              .sort(function (a, b) {
+                return b.createdAt - a.createdAt;
+              })[0];
+            if (latest && latest.data && latest.data.exercice) exercice = latest.data.exercice;
+          } catch (e) {}
+
+          var params = new URLSearchParams(window.location.search);
+          if (params.get('exercice')) exercice = parseInt(params.get('exercice'));
+
+          var mairie = (await db.table('mairies').toCollection().first()) || {};
+          var allSousChapitres = await db.table('sousChapitres').toArray();
+          var allPrevisions = await db.table('previsions').toArray();
+          var previsions = allPrevisions.filter(function (p) {
+            return p.exercice === exercice;
+          });
+          var allMandats = await db.table('mandats').toArray();
+          var mandats = allMandats.filter(function (m) {
+            return m.exercice === exercice && m.statut === 'paye';
+          });
+
+          // Filter sous-chapitres starting with '9' (investment)
+          var investSC = allSousChapitres.filter(function (sc) {
+            return (sc.code || '').startsWith('9');
+          });
+
+          // Build prevision totals per sous-chapitre
+          var prevMap = {};
+          previsions.forEach(function (p) {
+            if (!p.sousChapitreId) return;
+            prevMap[p.sousChapitreId] = (prevMap[p.sousChapitreId] || 0) + (p.montantPrevu || 0);
+          });
+
+          // Build ventilation map: group mandats by (sousChapitreId, typeBien)
+          var ventMap = {};
+          mandats.forEach(function (m) {
+            if (!m.sousChapitreId || !m.typeBien) return;
+            var key = m.sousChapitreId + '-' + m.typeBien;
+            ventMap[key] = (ventMap[key] || 0) + (m.montant || 0);
+          });
+
+          // Build article list with immobilier/mobilier/incorporel
+          var articlesList = [];
+          investSC.forEach(function (sc) {
+            var montantPrevu = prevMap[sc.id] || 0;
+            var immobilier = ventMap[sc.id + '-immobilier'] || 0;
+            var mobilier = ventMap[sc.id + '-mobilier'] || 0;
+            var incorporel = ventMap[sc.id + '-incorporel'] || 0;
+            var total = immobilier + mobilier + incorporel;
+
+            if (montantPrevu > 0 || total > 0) {
+              articlesList.push({
+                code: sc.code,
+                libelle: sc.libelle,
+                montantPrevu: montantPrevu,
+                immobilier: immobilier,
+                mobilier: mobilier,
+                incorporel: incorporel,
+                total: total,
+              });
+            }
+          });
+
+          renderPage({
+            exercice: exercice,
+            mairie: mairie,
+            articles: articlesList,
+          });
         } catch (e) {
-          console.error('Erreur chargement:', e);
+          console.error('[InvestDepVent] Erreur:', e);
           document.getElementById('content').innerHTML =
-            '<div style="color:red;padding:20px;font-size:14px">Erreur: ' + e.message + '<br><pre>' + e.stack + '</pre></div>';
+            '<div style="color:red;padding:20px">Erreur: ' + e.message + '</div>';
+        }
+      }
+
+      window.addEventListener('message', function (e) {
+        if (e.data && e.data.type === 'FILL_COMPTE_ADMIN_DATA') {
+          loadAndRender();
+        }
+      });
+
+      document.addEventListener('DOMContentLoaded', function () {
+        setTimeout(loadAndRender, 500);
+      });
+    </script>
+  </body>
+</html>
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Compte Administratif - Depenses Investissement Ventilees</title>
+    <script src="../dexie.min.js"></script>
+    <style>
+      @page {
+        size: A4 landscape;
+        margin: 10mm;
+      }
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 9px;
+        margin: 0;
+        padding: 10px;
+      }
+      .container {
+        width: 100%;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 5px;
+      }
+      th,
+      td {
+        border: 1px solid #000;
+        padding: 3px 5px;
+        color: #000;
+      }
+      th {
+        font-weight: bold;
+        text-align: center;
+        vertical-align: middle;
+      }
+      .col-num {
+        text-align: right;
+        white-space: nowrap;
+        font-size: 9px;
+      }
+      .col-center {
+        text-align: center;
+        white-space: nowrap;
+        font-size: 9px;
+      }
+      .bold {
+        font-weight: bold;
+      }
+      .underline {
+        text-decoration: underline;
+      }
+      .align-center {
+        text-align: center;
+      }
+      .align-right {
+        text-align: right;
+      }
+      .align-left {
+        text-align: left;
+      }
+      .uppercase {
+        text-transform: uppercase;
+      }
+      .padding-left-md {
+        padding-left: 20px;
+      }
+      .padding-left-sm {
+        padding-left: 10px;
+      }
+      .padding-left-lg {
+        padding-left: 30px;
+      }
+      .total-row {
+        font-weight: bold;
+      }
+      .signatures {
+        margin-top: 30px;
+        display: flex;
+        justify-content: space-between;
+        padding: 0 50px;
+        font-size: 10px;
+      }
+      .signature-box {
+        text-align: center;
+        width: 200px;
+      }
+      .print-button {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 24px;
+        background-color: #1976d2;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+      }
+      .print-button:hover {
+        background-color: #1565c0;
+      }
+      .loading {
+        text-align: center;
+        padding: 50px;
+        font-size: 16px;
+        color: #666;
+      }
+      .print-footer {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      @media print {
+        body {
+          padding: 0;
+        }
+        .no-print {
+          display: none;
+        }
+        .print-footer {
+          break-inside: avoid;
+          page-break-inside: avoid;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <button class="print-button no-print" onclick="window.print()">Imprimer</button>
+    <div class="container">
+      <div id="content">
+        <div class="loading">Chargement des donnees...</div>
+      </div>
+    </div>
+
+    <script>
+      function fmt(v) {
+        return v ? new Intl.NumberFormat('fr-FR').format(Math.round(v)) : '0';
+      }
+      function fmtOrDash(v) {
+        return v ? new Intl.NumberFormat('fr-FR').format(Math.round(v)) : '-';
+      }
+      function fmtCredits(prevu, mandat) {
+        var c = prevu - mandat;
+        return c > 0 ? new Intl.NumberFormat('fr-FR').format(Math.round(c)) : '-';
+      }
+
+      var SECTION_LABELS = {
+        90: 'EQUIPEMENT DES SERVICES GENERAUX',
+        91: 'EQUIPEMENT DES SERVICES DE COLLECTIVITE',
+        92: 'URBANISME ET ASSAINISSEMENT',
+        93: 'INVESTISSEMENTS FINANCIERS',
+        94: 'REMBOURSEMENT EMPRUNTS',
+        95: 'DEPENSES DIVERSES',
+      };
+
+      function renderPage(data) {
+        var exercice = data.exercice || new Date().getFullYear();
+        var mairie = data.mairie || {};
+        var articles = data.articles || [];
+
+        var content = document.getElementById('content');
+        content.innerHTML = '';
+
+        var table = document.createElement('table');
+        table.style.tableLayout = 'fixed';
+        table.innerHTML =
+          '<colgroup>' +
+          '<col style="width:24%">' +
+          '<col style="width:8%">' +
+          '<col style="width:8%">' +
+          '<col style="width:8%">' +
+          '<col style="width:7%">' +
+          '<col style="width:7%">' +
+          '<col style="width:7%">' +
+          '<col style="width:7%">' +
+          '<col style="width:7%">' +
+          '<col style="width:7%">' +
+          '<col style="width:10%">' +
+          '</colgroup>' +
+          '<thead>' +
+          '<tr>' +
+          '<th rowspan="3" class="align-center bold uppercase" style="font-size: 10px;">COMPTES ET RUBRIQUES BUDGETAIRES</th>' +
+          '<th rowspan="3" class="align-center uppercase" style="font-size: 8px;">PREVISIONS</th>' +
+          '<th rowspan="3" class="align-center uppercase" style="font-size: 8px;">MANDATS</th>' +
+          '<th rowspan="3" class="align-center uppercase" style="font-size: 8px;">CREDITS<br>SANS EMPLOI</th>' +
+          '<th colspan="6" class="align-center bold uppercase" style="font-size: 9px;">VENTILATION DES DEPENSES PAR PARAGRAPHE</th>' +
+          '<th rowspan="3" class="align-center bold uppercase" style="font-size: 9px;">TOTAL</th>' +
+          '</tr>' +
+          '<tr>' +
+          '<th colspan="2" class="align-center bold uppercase" style="font-size: 8px;">IMMOBILIERS</th>' +
+          '<th colspan="2" class="align-center bold uppercase" style="font-size: 8px;">MOBILIERS</th>' +
+          '<th colspan="2" class="align-center bold uppercase" style="font-size: 8px;">INCORPOREL</th>' +
+          '</tr>' +
+          '<tr>' +
+          '<th class="align-center uppercase" style="font-size: 6px;">Travaux et services<br>a l\'entreprise</th>' +
+          '<th class="align-center uppercase" style="font-size: 6px;">Intervention<br>et transfert</th>' +
+          '<th class="align-center uppercase" style="font-size: 6px;">Travaux et services<br>a l\'entreprise</th>' +
+          '<th class="align-center uppercase" style="font-size: 6px;">Intervention<br>et transfert</th>' +
+          '<th class="align-center uppercase" style="font-size: 6px;">Travaux et services<br>a l\'entreprise</th>' +
+          '<th class="align-center uppercase" style="font-size: 6px;">Intervention<br>et transfert</th>' +
+          '</tr>' +
+          '</thead>' +
+          '<tbody></tbody>';
+
+        var tbody = table.querySelector('tbody');
+
+        var sectionOrder = ['90', '91', '92', '93', '94', '95'];
+        var sections = {};
+        sectionOrder.forEach(function (s) {
+          sections[s] = [];
+        });
+
+        articles.forEach(function (art) {
+          var prefix = (art.code || '').substring(0, 2);
+          if (sections[prefix]) {
+            sections[prefix].push(art);
+          }
+        });
+
+        var grandPrevu = 0;
+        var grandTotal = 0;
+        var grandChaps = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+
+        sectionOrder.forEach(function (secCode) {
+          var items = sections[secCode];
+          if (items.length === 0) return;
+
+          items.sort(function (a, b) {
+            return (a.code || '').localeCompare(b.code || '', undefined, { numeric: true });
+          });
+
+          // Section header
+          var secRow = document.createElement('tr');
+          secRow.style.backgroundColor = '#e3f2fd';
+          secRow.innerHTML =
+            '<td colspan="11" class="bold underline padding-left-sm uppercase" style="font-size: 9px;">SECTION ' +
+            secCode +
+            ' - ' +
+            (SECTION_LABELS[secCode] || '') +
+            '</td>';
+          tbody.appendChild(secRow);
+
+          var secPrevu = 0;
+          var secTotal = 0;
+          var secChaps = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+
+          items.forEach(function (art) {
+            var row = document.createElement('tr');
+            var html =
+              '<td class="padding-left-md" style="font-size: 9px;">' +
+              art.code +
+              ' - ' +
+              (art.libelle || '') +
+              '</td>';
+            html += '<td class="col-num">' + fmt(art.montantPrevu) + '</td>';
+            html += '<td class="col-num">' + fmtOrDash(art.total) + '</td>';
+            html += '<td class="col-num">' + fmtCredits(art.montantPrevu, art.total) + '</td>';
+            html += '<td class="col-num">' + fmtOrDash(art.chap1) + '</td>';
+            html += '<td class="col-num">' + fmtOrDash(art.chap2) + '</td>';
+            html += '<td class="col-num">' + fmtOrDash(art.chap3) + '</td>';
+            html += '<td class="col-num">' + fmtOrDash(art.chap4) + '</td>';
+            html += '<td class="col-num">' + fmtOrDash(art.chap5) + '</td>';
+            html += '<td class="col-num">' + fmtOrDash(art.chap6) + '</td>';
+            html += '<td class="col-num">' + fmtOrDash(art.total) + '</td>';
+            row.innerHTML = html;
+            tbody.appendChild(row);
+
+            secPrevu += art.montantPrevu;
+            secTotal += art.total;
+            for (var c = 1; c <= 6; c++) {
+              secChaps[c] += art['chap' + c];
+            }
+          });
+
+          // TOTAL SECTION
+          var secTotalRow = document.createElement('tr');
+          secTotalRow.className = 'total-row';
+          secTotalRow.style.backgroundColor = '#e0e0e0';
+          var secHtml =
+            '<td class="bold align-right uppercase" style="font-size: 8px;">TOTAL SECTION ' +
+            secCode +
+            '</td>';
+          secHtml += '<td class="col-num">' + fmt(secPrevu) + '</td>';
+          secHtml += '<td class="col-num">' + fmtOrDash(secTotal) + '</td>';
+          secHtml += '<td class="col-num">' + fmtCredits(secPrevu, secTotal) + '</td>';
+          for (var c = 1; c <= 6; c++) {
+            secHtml += '<td class="col-num">' + fmtOrDash(secChaps[c]) + '</td>';
+          }
+          secHtml += '<td class="col-num">' + fmtOrDash(secTotal) + '</td>';
+          secTotalRow.innerHTML = secHtml;
+          tbody.appendChild(secTotalRow);
+
+          grandPrevu += secPrevu;
+          grandTotal += secTotal;
+          for (var c = 1; c <= 6; c++) {
+            grandChaps[c] += secChaps[c];
+          }
+        });
+
+        // TOTAL GENERAL
+        var totalRow = document.createElement('tr');
+        totalRow.className = 'total-row';
+        totalRow.style.backgroundColor = '#bdbdbd';
+        var tHtml =
+          '<td class="bold align-right uppercase" style="font-size: 9px;">TOTAL GENERAL DES DEPENSES AU TITRE II</td>';
+        tHtml += '<td class="col-num">' + fmt(grandPrevu) + '</td>';
+        tHtml += '<td class="col-num">' + fmtOrDash(grandTotal) + '</td>';
+        tHtml += '<td class="col-num">' + fmtCredits(grandPrevu, grandTotal) + '</td>';
+        for (var c = 1; c <= 6; c++) {
+          tHtml += '<td class="col-num">' + fmtOrDash(grandChaps[c]) + '</td>';
+        }
+        tHtml += '<td class="col-num">' + fmtOrDash(grandTotal) + '</td>';
+        totalRow.innerHTML = tHtml;
+        tbody.appendChild(totalRow);
+
+        table.appendChild(tbody);
+        content.appendChild(table);
+
+        // Signatures
+        var sigs = document.createElement('div');
+        sigs.className = 'signatures print-footer';
+        var today = new Date();
+        var dateStr = today.toLocaleDateString('fr-FR', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+        });
+        sigs.innerHTML =
+          '<div class="signature-box">' +
+          (mairie.nom || '---') +
+          ', le ' +
+          dateStr +
+          '<br/>' +
+          '<strong>Le Tresorier Principal</strong>' +
+          '</div>' +
+          '<div class="signature-box">' +
+          '<br/>' +
+          '<strong>Le Maire</strong>' +
+          '</div>';
+        content.appendChild(sigs);
+
+        document.title = 'Compte Administratif - Depenses Investissement Ventilees - ' + exercice;
+      }
+
+      // Load data directly from IndexedDB
+      async function loadAndRender() {
+        try {
+          let db;
+          try {
+            db = new Dexie('TresorOfflineDB');
+            await db.open();
+          } catch (_e) {
+            db = new Dexie('TresorDatabase');
+            await db.open();
+          }
+
+          var exercice = new Date().getFullYear();
+
+          // Check printData for exercice override
+          try {
+            var pd = await db.table('printData').toArray();
+            var latest = pd
+              .filter(function (p) {
+                return p.type === 'FILL_COMPTE_ADMIN_DATA';
+              })
+              .sort(function (a, b) {
+                return b.createdAt - a.createdAt;
+              })[0];
+            if (latest && latest.data && latest.data.exercice) exercice = latest.data.exercice;
+          } catch (e) {}
+
+          var params = new URLSearchParams(window.location.search);
+          if (params.get('exercice')) exercice = parseInt(params.get('exercice'));
+
+          var mairie = (await db.table('mairies').toCollection().first()) || {};
+          var allSousChapitres = await db.table('sousChapitres').toArray();
+          var allChapitres = await db.table('chapitres').toArray();
+          var allPrevisions = await db.table('previsions').toArray();
+          var previsions = allPrevisions.filter(function (p) {
+            return p.exercice === exercice;
+          });
+          var allMandats = await db.table('mandats').toArray();
+          var mandats = allMandats.filter(function (m) {
+            return m.exercice === exercice && m.statut === 'paye';
+          });
+
+          // Build chapitre code map: chapitreId -> code
+          var chapCodeMap = {};
+          allChapitres.forEach(function (ch) {
+            chapCodeMap[ch.id] = ch.code || '';
+          });
+
+          // Filter sous-chapitres starting with '9' (investment)
+          var investSC = allSousChapitres.filter(function (sc) {
+            return (sc.code || '').startsWith('9');
+          });
+
+          // Build prevision totals per sous-chapitre
+          var prevMap = {};
+          previsions.forEach(function (p) {
+            if (!p.sousChapitreId) return;
+            prevMap[p.sousChapitreId] = (prevMap[p.sousChapitreId] || 0) + (p.montantPrevu || 0);
+          });
+
+          // Build ventilation map: group mandats by (sousChapitreId, chapitreCode 1-6)
+          var ventMap = {};
+          mandats.forEach(function (m) {
+            if (!m.sousChapitreId) return;
+            var chapCode = chapCodeMap[m.chapitreId] || '';
+            var chapNum = parseInt(chapCode, 10) || 0;
+            if (chapNum < 1 || chapNum > 6) return;
+            var key = m.sousChapitreId + '-' + chapNum;
+            ventMap[key] = (ventMap[key] || 0) + (m.montant || 0);
+          });
+
+          // Build article list with chap1-chap6
+          var articlesList = [];
+          investSC.forEach(function (sc) {
+            var montantPrevu = prevMap[sc.id] || 0;
+            var chap1 = ventMap[sc.id + '-1'] || 0;
+            var chap2 = ventMap[sc.id + '-2'] || 0;
+            var chap3 = ventMap[sc.id + '-3'] || 0;
+            var chap4 = ventMap[sc.id + '-4'] || 0;
+            var chap5 = ventMap[sc.id + '-5'] || 0;
+            var chap6 = ventMap[sc.id + '-6'] || 0;
+            var total = chap1 + chap2 + chap3 + chap4 + chap5 + chap6;
+
+            if (montantPrevu > 0 || total > 0) {
+              articlesList.push({
+                code: sc.code,
+                libelle: sc.libelle,
+                montantPrevu: montantPrevu,
+                chap1: chap1,
+                chap2: chap2,
+                chap3: chap3,
+                chap4: chap4,
+                chap5: chap5,
+                chap6: chap6,
+                total: total,
+              });
+            }
+          });
+
+          renderPage({
+            exercice: exercice,
+            mairie: mairie,
+            articles: articlesList,
+          });
+        } catch (e) {
+          console.error('[InvestDepVent] Erreur:', e);
+          document.getElementById('content').innerHTML =
+            '<div style="color:red;padding:20px">Erreur: ' + e.message + '</div>';
+        }
+      }
+
+      window.addEventListener('message', function (e) {
+        if (e.data && e.data.type === 'FILL_COMPTE_ADMIN_DATA') {
+          loadAndRender();
+        }
+      });
+
+      document.addEventListener('DOMContentLoaded', function () {
+        setTimeout(loadAndRender, 500);
+      });
+    </script>
+  </body>
+</html>
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Compte Administratif - Depenses Investissement Ventilees</title>
+    <script src="../dexie.min.js"></script>
+    <style>
+      @page {
+        size: A4 landscape;
+        margin: 10mm;
+      }
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 9px;
+        margin: 0;
+        padding: 10px;
+      }
+      .container {
+        width: 100%;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 5px;
+      }
+      th,
+      td {
+        border: 1px solid #000;
+        padding: 3px 5px;
+        color: #000;
+      }
+      th {
+        font-weight: bold;
+        text-align: center;
+        vertical-align: middle;
+      }
+      .col-num {
+        text-align: right;
+        white-space: nowrap;
+        font-size: 9px;
+      }
+      .col-center {
+        text-align: center;
+        white-space: nowrap;
+        font-size: 9px;
+      }
+      .bold {
+        font-weight: bold;
+      }
+      .underline {
+        text-decoration: underline;
+      }
+      .align-center {
+        text-align: center;
+      }
+      .align-right {
+        text-align: right;
+      }
+      .align-left {
+        text-align: left;
+      }
+      .uppercase {
+        text-transform: uppercase;
+      }
+      .padding-left-md {
+        padding-left: 20px;
+      }
+      .padding-left-sm {
+        padding-left: 10px;
+      }
+      .padding-left-lg {
+        padding-left: 30px;
+      }
+      .total-row {
+        font-weight: bold;
+      }
+      .signatures {
+        margin-top: 30px;
+        display: flex;
+        justify-content: space-between;
+        padding: 0 50px;
+        font-size: 10px;
+      }
+      .signature-box {
+        text-align: center;
+        width: 200px;
+      }
+      .print-button {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 24px;
+        background-color: #1976d2;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+      }
+      .print-button:hover {
+        background-color: #1565c0;
+      }
+      .loading {
+        text-align: center;
+        padding: 50px;
+        font-size: 16px;
+        color: #666;
+      }
+      .print-footer {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      @media print {
+        body {
+          padding: 0;
+        }
+        .no-print {
+          display: none;
+        }
+        .print-footer {
+          break-inside: avoid;
+          page-break-inside: avoid;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <button class="print-button no-print" onclick="window.print()">Imprimer</button>
+    <div class="container">
+      <div id="content">
+        <div class="loading">Chargement des donnees...</div>
+      </div>
+    </div>
+
+    <script>
+      function fmt(v) {
+        return v ? new Intl.NumberFormat('fr-FR').format(Math.round(v)) : '0';
+      }
+      function fmtOrDash(v) {
+        return v ? new Intl.NumberFormat('fr-FR').format(Math.round(v)) : '-';
+      }
+      function fmtCredits(prevu, mandat) {
+        var c = prevu - mandat;
+        return c > 0 ? new Intl.NumberFormat('fr-FR').format(Math.round(c)) : '-';
+      }
+
+      var SECTION_LABELS = {
+        90: 'EQUIPEMENT DES SERVICES GENERAUX',
+        91: 'EQUIPEMENT DES SERVICES DE COLLECTIVITE',
+        92: 'URBANISME ET ASSAINISSEMENT',
+        93: 'INVESTISSEMENTS FINANCIERS',
+        94: 'REMBOURSEMENT EMPRUNTS',
+        95: 'DEPENSES DIVERSES',
+      };
+
+      function renderPage(data) {
+        var exercice = data.exercice || new Date().getFullYear();
+        var mairie = data.mairie || {};
+        var articles = data.articles || [];
+
+        var content = document.getElementById('content');
+        content.innerHTML = '';
+
+        var table = document.createElement('table');
+        table.style.tableLayout = 'fixed';
+        table.innerHTML =
+          '<colgroup>' +
+          '<col style="width:21%"><col style="width:7%"><col style="width:7%"><col style="width:7%">' +
+          '<col style="width:6%"><col style="width:6%"><col style="width:6%"><col style="width:6%">' +
+          '<col style="width:6%"><col style="width:6%"><col style="width:6%"><col style="width:6%">' +
+          '<col style="width:7%"><col style="width:3%">' +
+          '</colgroup>' +
+          '<thead>' +
+          '<tr>' +
+          '<th rowspan="4" class="align-center bold uppercase" style="font-size: 10px;">RUBRIQUES BUDGETAIRES</th>' +
+          '<th rowspan="4" class="align-center uppercase" style="font-size: 8px;">PREVISIONS</th>' +
+          '<th rowspan="4" class="align-center uppercase" style="font-size: 8px;">MANDATS</th>' +
+          '<th rowspan="4" class="align-center uppercase" style="font-size: 8px;">CREDITS SANS EMPLOIS</th>' +
+          '<th colspan="8" rowspan="2" class="align-center bold uppercase" style="font-size: 10px;">VENTILATION DES DEPENSES PAR PARAGRAPHE</th>' +
+          '<th class="align-center bold uppercase" style="font-size: 10px;">ANNEE</th>' +
+          '<th class="align-center bold uppercase" style="font-size: 10px;">N&deg;</th>' +
+          '</tr>' +
+          '<tr>' +
+          '<th class="align-center" style="font-size: 10px;">' +
+          exercice +
+          '</th>' +
+          '<th class="align-center" style="font-size: 10px;">&nbsp;</th>' +
+          '</tr>' +
+          '<tr>' +
+          '<th rowspan="2" class="align-center bold uppercase" style="font-size: 6px;">SALAIRES<br>ET<br>INDEMNITES</th>' +
+          '<th rowspan="2" class="align-center bold uppercase" style="font-size: 6px;">CHARGES<br>SOCIALES</th>' +
+          '<th rowspan="2" class="align-center bold uppercase" style="font-size: 6px;">TRANSPORT ET FRAIS<br>DE MISSION</th>' +
+          '<th rowspan="2" class="align-center bold uppercase" style="font-size: 6px;">CARBURANT ET<br>LUBRIFIANTS</th>' +
+          '<th rowspan="2" class="align-center bold uppercase" style="font-size: 6px;">MATERIELS ET<br>FOURNITURES</th>' +
+          '<th rowspan="2" class="align-center bold uppercase" style="font-size: 6px;">ABONNEMENT EAU,<br>ELECTRICITE,<br>TELEPHONE</th>' +
+          '<th rowspan="2" class="align-center bold uppercase" style="font-size: 6px;">TRAVAUX ET SERVICES<br>A L\'ENTREPRISE</th>' +
+          '<th rowspan="2" class="align-center bold uppercase" style="font-size: 6px;">INTERVENTIONS ET<br>TRANSFERTS</th>' +
+          '<th colspan="2" rowspan="2" class="align-center bold uppercase" style="font-size: 7px;">TOTAUX</th>' +
+          '</tr>' +
+          '<tr></tr>' +
+          '</thead>' +
+          '<tbody></tbody>';
+
+        var tbody = table.querySelector('tbody');
+
+        // Group articles by section (first 2 digits of code)
+        var sectionOrder = ['90', '91', '92', '93', '94', '95'];
+        var sections = {};
+        sectionOrder.forEach(function (s) {
+          sections[s] = [];
+        });
+
+        articles.forEach(function (art) {
+          var prefix = (art.code || '').substring(0, 2);
+          if (sections[prefix]) {
+            sections[prefix].push(art);
+          }
+        });
+
+        var grandPrevu = 0;
+        var grandMandats = 0;
+        var grandCredits = 0;
+        var grandParas = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0 };
+        var grandTotal = 0;
+
+        sectionOrder.forEach(function (secCode) {
+          var items = sections[secCode];
+          if (items.length === 0) return;
+
+          items.sort(function (a, b) {
+            return (a.code || '').localeCompare(b.code || '', undefined, { numeric: true });
+          });
+
+          // Section header
+          var secRow = document.createElement('tr');
+          secRow.innerHTML =
+            '<td class="bold underline padding-left-sm uppercase" style="font-size: 9px;">SECTION ' +
+            secCode +
+            ' - ' +
+            (SECTION_LABELS[secCode] || '') +
+            '</td>' +
+            '<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td colspan="2"></td>';
+          tbody.appendChild(secRow);
+
+          var secPrevu = 0;
+          var secMandats = 0;
+          var secCredits = 0;
+          var secParas = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0 };
+          var secTotal = 0;
+
+          items.forEach(function (art) {
+            // Article header row
+            var artHeaderRow = document.createElement('tr');
+            artHeaderRow.innerHTML =
+              '<td class="bold padding-left-md" style="font-size: 9px;">' +
+              art.code +
+              ' ' +
+              (art.libelle || '') +
+              '</td>' +
+              '<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td colspan="2"></td>';
+            tbody.appendChild(artHeaderRow);
+
+            var artPrevu = 0;
+            var artMandats = 0;
+            var artCredits = 0;
+            var artParas = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0 };
+            var artTotal = 0;
+
+            // Paragraph rows /1 through /8
+            for (var p = 1; p <= 8; p++) {
+              var paraPrev = (art.prevByPara && art.prevByPara[p]) || 0;
+              var paraMand = (art.ventilation && art.ventilation[p]) || 0;
+
+              // Only show if prevision > 0 OR mandat > 0
+              if (paraPrev === 0 && paraMand === 0) continue;
+
+              var paraCredits = paraPrev - paraMand;
+
+              artPrevu += paraPrev;
+              artMandats += paraMand;
+              artCredits += paraCredits;
+              artParas[p] += paraMand;
+              artTotal += paraMand;
+
+              var paraRow = document.createElement('tr');
+              var html =
+                '<td class="padding-left-lg align-left" style="font-size: 9px;">' +
+                art.code +
+                '/' +
+                p +
+                ' ' +
+                PARAGRAPH_LABELS[p] +
+                '</td>';
+              html += '<td class="col-num">' + fmtOrDash(paraPrev) + '</td>';
+              html += '<td class="col-num">' + fmtOrDash(paraMand) + '</td>';
+              html += '<td class="col-num">' + fmtOrDash(paraCredits) + '</td>';
+
+              // Ventilation columns: put the mandat amount in the matching paragraph column
+              for (var c = 1; c <= 8; c++) {
+                if (c === p) {
+                  html += '<td class="col-num">' + fmtOrDash(paraMand) + '</td>';
+                } else {
+                  html += '<td class="col-num">-</td>';
+                }
+              }
+
+              html += '<td class="col-num" colspan="2">' + fmtOrDash(paraMand) + '</td>';
+              paraRow.innerHTML = html;
+              tbody.appendChild(paraRow);
+            }
+
+            // SOUS TOTAL ARTICLE
+            var stArtRow = document.createElement('tr');
+            stArtRow.className = 'total-row';
+            var stArtHtml =
+              '<td class="bold align-right uppercase" style="font-size: 8px;">SOUS TOTAL ARTICLE ' +
+              art.code +
+              '</td>';
+            stArtHtml += '<td class="col-num">' + fmtOrDash(artPrevu) + '</td>';
+            stArtHtml += '<td class="col-num">' + fmtOrDash(artMandats) + '</td>';
+            stArtHtml += '<td class="col-num">' + fmtOrDash(artCredits) + '</td>';
+            for (var c = 1; c <= 8; c++) {
+              stArtHtml += '<td class="col-num">' + fmtOrDash(artParas[c]) + '</td>';
+            }
+            stArtHtml += '<td class="col-num" colspan="2">' + fmtOrDash(artTotal) + '</td>';
+            stArtRow.innerHTML = stArtHtml;
+            tbody.appendChild(stArtRow);
+
+            secPrevu += artPrevu;
+            secMandats += artMandats;
+            secCredits += artCredits;
+            for (var c = 1; c <= 8; c++) {
+              secParas[c] += artParas[c];
+            }
+            secTotal += artTotal;
+          });
+
+          // TOTAL SECTION
+          var secTotalRow = document.createElement('tr');
+          secTotalRow.className = 'total-row';
+          var secHtml =
+            '<td class="bold align-right uppercase" style="font-size: 8px;">TOTAL SECTION ' +
+            secCode +
+            '</td>';
+          secHtml += '<td class="col-num">' + fmtOrDash(secPrevu) + '</td>';
+          secHtml += '<td class="col-num">' + fmtOrDash(secMandats) + '</td>';
+          secHtml += '<td class="col-num">' + fmtOrDash(secCredits) + '</td>';
+          for (var c = 1; c <= 8; c++) {
+            secHtml += '<td class="col-num">' + fmtOrDash(secParas[c]) + '</td>';
+          }
+          secHtml += '<td class="col-num" colspan="2">' + fmtOrDash(secTotal) + '</td>';
+          secTotalRow.innerHTML = secHtml;
+          tbody.appendChild(secTotalRow);
+
+          grandPrevu += secPrevu;
+          grandMandats += secMandats;
+          grandCredits += secCredits;
+          for (var c = 1; c <= 8; c++) {
+            grandParas[c] += secParas[c];
+          }
+          grandTotal += secTotal;
+        });
+
+        // TOTAL GENERAL DES DEPENSES AU TITRE II
+        var totalRow = document.createElement('tr');
+        totalRow.className = 'total-row';
+        var tHtml =
+          '<td class="bold align-right uppercase">TOTAL GENERAL DES DEPENSES AU TITRE II</td>';
+        tHtml += '<td class="col-num">' + fmtOrDash(grandPrevu) + '</td>';
+        tHtml += '<td class="col-num">' + fmtOrDash(grandMandats) + '</td>';
+        tHtml += '<td class="col-num">' + fmtOrDash(grandCredits) + '</td>';
+        for (var c = 1; c <= 8; c++) {
+          tHtml += '<td class="col-num">' + fmtOrDash(grandParas[c]) + '</td>';
+        }
+        tHtml += '<td class="col-num" colspan="2">' + fmtOrDash(grandTotal) + '</td>';
+        totalRow.innerHTML = tHtml;
+        tbody.appendChild(totalRow);
+
+        table.appendChild(tbody);
+        content.appendChild(table);
+
+        // Signatures
+        var sigs = document.createElement('div');
+        sigs.className = 'signatures print-footer';
+        var today = new Date();
+        var dateStr = today.toLocaleDateString('fr-FR', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+        });
+        sigs.innerHTML =
+          '<div class="signature-box">' +
+          (mairie.nom || '---') +
+          ', le ' +
+          dateStr +
+          '<br/>' +
+          '<strong>Le Tresorier Principal</strong>' +
+          '</div>' +
+          '<div class="signature-box">' +
+          '<br/>' +
+          '<strong>Le Maire</strong>' +
+          '</div>';
+        content.appendChild(sigs);
+
+        document.title = 'Compte Administratif - Depenses Investissement Ventilees - ' + exercice;
+      }
+
+      // Load data directly from IndexedDB
+      async function loadAndRender() {
+        try {
+          let db;
+          try {
+            db = new Dexie('TresorOfflineDB');
+            await db.open();
+          } catch (_e) {
+            db = new Dexie('TresorDatabase');
+            await db.open();
+          }
+
+          var exercice = new Date().getFullYear();
+
+          // Check printData for exercice override
+          try {
+            var pd = await db.table('printData').toArray();
+            var latest = pd
+              .filter(function (p) {
+                return p.type === 'FILL_COMPTE_ADMIN_DATA';
+              })
+              .sort(function (a, b) {
+                return b.createdAt - a.createdAt;
+              })[0];
+            if (latest && latest.data && latest.data.exercice) exercice = latest.data.exercice;
+          } catch (e) {}
+
+          var params = new URLSearchParams(window.location.search);
+          if (params.get('exercice')) exercice = parseInt(params.get('exercice'));
+
+          var mairie = (await db.table('mairies').toCollection().first()) || {};
+          var allSousChapitres = await db.table('sousChapitres').toArray();
+          var allChapitres = await db.table('chapitres').toArray();
+          var allPrevisions = await db.table('previsions').toArray();
+          var previsions = allPrevisions.filter(function (p) {
+            return p.exercice === exercice;
+          });
+          var allMandats = await db.table('mandats').toArray();
+          var mandats = allMandats.filter(function (m) {
+            return m.exercice === exercice && m.statut === 'paye';
+          });
+
+          // Build chapitre map (id -> chapitre object)
+          var chapMap = {};
+          allChapitres.forEach(function (ch) {
+            chapMap[ch.id] = ch;
+          });
+
+          // Filter sous-chapitres starting with '9' (investment)
+          var investSC = allSousChapitres.filter(function (sc) {
+            return (sc.code || '').startsWith('9');
+          });
+
+          // Build article aggregation map keyed by sous-chapitre id
+          var scAggregation = {};
+          investSC.forEach(function (sc) {
+            scAggregation[sc.id] = {
+              code: sc.code,
+              libelle: sc.libelle,
+              prevByPara: {},
+              ventilation: {},
+            };
+          });
+
+          // Build prevision per paragraph: group previsions by (sousChapitreId, chapitreId)
+          // The chapitre code is the paragraph number (1-8)
+          previsions.forEach(function (p) {
+            if (!scAggregation[p.sousChapitreId]) return;
+            var chapitre = chapMap[p.chapitreId];
+            var chapCode = chapitre ? chapitre.code || '' : '';
+            var paraNum = parseInt(chapCode, 10) || 0;
+            if (paraNum < 1 || paraNum > 8) return;
+            if (!scAggregation[p.sousChapitreId].prevByPara[paraNum]) {
+              scAggregation[p.sousChapitreId].prevByPara[paraNum] = 0;
+            }
+            scAggregation[p.sousChapitreId].prevByPara[paraNum] += p.montantPrevu || 0;
+          });
+
+          // Build ventilation map: group mandats by (sousChapitreId, chapitreId)
+          mandats.forEach(function (m) {
+            if (!scAggregation[m.sousChapitreId]) return;
+            var chapitre = chapMap[m.chapitreId];
+            var chapCode = chapitre ? chapitre.code || '' : '';
+            var paraNum = parseInt(chapCode, 10) || 0;
+            if (paraNum < 1 || paraNum > 8) return;
+            if (!scAggregation[m.sousChapitreId].ventilation[paraNum]) {
+              scAggregation[m.sousChapitreId].ventilation[paraNum] = 0;
+            }
+            scAggregation[m.sousChapitreId].ventilation[paraNum] += m.montant || 0;
+          });
+
+          // Filter out articles that have no data at all
+          var articlesList = Object.values(scAggregation).filter(function (art) {
+            var hasPrev = Object.values(art.prevByPara).some(function (v) {
+              return v > 0;
+            });
+            var hasMand = Object.values(art.ventilation).some(function (v) {
+              return v > 0;
+            });
+            return hasPrev || hasMand;
+          });
+
+          renderPage({
+            exercice: exercice,
+            mairie: mairie,
+            articles: articlesList,
+          });
+        } catch (e) {
+          console.error('[InvestDepVent] Erreur:', e);
+          document.getElementById('content').innerHTML =
+            '<div style="color:red;padding:20px">Erreur: ' + e.message + '</div>';
         }
       }
 

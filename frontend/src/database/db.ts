@@ -89,8 +89,33 @@ export interface Prevision {
   montantPrevu: number; // Montant total prévu pour ce chapitre
   montantEngage: number; // Montant déjà engagé (mandats)
   montantDisponible: number; // Reste à mandater
+  typeBien?: 'immobilier' | 'mobilier' | 'incorporel'; // Type de bien
   observations?: string;
   statut: 'brouillon' | 'validee';
+  personnelId: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// ========== Interface pour les Projets (App3) ==========
+
+export interface Projet {
+  id?: number;
+  numeroOrdre?: string; // N° d'ordre dans le tableau MOD.PAT
+  refPT?: string; // Ref. Programme Triennal (ex: "PT 24-26")
+  libelle: string;
+  sousChapitreId?: number; // Compte fonctionnel
+  patrimoine?: string; // Imputation patrimoniale
+  montant: number; // Montant du projet
+  realise: number; // Montant réalisé
+  annee: number; // Année du projet
+  typeBien?: 'immobilier' | 'mobilier' | 'incorporel';
+  statut: 'en_cours' | 'termine' | 'annule';
+  observations?: string;
+  alienationCompteFonctionnel?: string; // Aliénation prévue - compte fonctionnel
+  alienationComptePatrimonial?: string; // Aliénation prévue - compte patrimonial
+  alienationMontant?: number; // Aliénation prévue - montant
+  mairieId: number;
   personnelId: number;
   createdAt: Date;
   updatedAt: Date;
@@ -126,6 +151,7 @@ export interface Mandat {
   dateDeliberation?: Date; // Date de Délibération
   montantPrecompter?: number; // Montant à précompter
   typeBien?: 'immobilier' | 'mobilier' | 'incorporel'; // Type de bien
+  projetId?: number; // Lien vers un projet (investissement)
   personnelId: number; // Agent qui a créé le mandat
   createdAt: Date;
   updatedAt: Date;
@@ -551,6 +577,9 @@ export const db = {
   etatFinancierMensuelRecette: new Collection<EtatFinancierMensuelRecette>(
     'etatFinancierMensuelRecette',
   ),
+
+  // ── Projets (App3) ─────────────────────────────────────────────────
+  projets: new Collection<Projet>('projets'),
 
   // ── Impression temporaire ──────────────────────────────────────────
   printData: new Collection<PrintData>('printData'),

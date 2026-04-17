@@ -12,101 +12,48 @@
       }
       body {
         font-family: Arial, Helvetica, sans-serif;
-        font-size: 10px;
+        font-size: 11px;
         margin: 0;
         padding: 10px;
       }
       .container {
         width: 100%;
       }
-      .main-title {
-        text-decoration: underline;
-        font-size: 14px;
-        margin: 5px 0;
-      }
       table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 0;
         margin-bottom: 15px;
       }
       th,
       td {
         border: 1px solid #000;
-        padding: 3px 4px;
+        padding: 4px 6px;
       }
       th {
-        background-color: #f0f0f0;
+        background-color: #e8e8e8;
         text-align: center;
         vertical-align: middle;
-        font-size: 9px;
-      }
-      .col-rubrique {
-        width: 30%;
-        text-align: left;
+        font-size: 10px;
       }
       .col-num {
         text-align: right;
         white-space: nowrap;
       }
-      .section-header {
+      .col-center {
+        text-align: center;
+      }
+      .total-row {
         background-color: #e0e0e0;
         font-weight: bold;
-      }
-      .total-section {
-        background-color: #d0d0d0;
-        font-weight: bold;
-        border-top: 2px solid #000;
       }
       .grand-total {
         background-color: #bbb;
         font-weight: bold;
-        border-top: 3px double #000;
-      }
-      .positive {
-        color: #2e7d32;
-      }
-      .negative {
-        color: #c62828;
       }
       .section-title {
-        font-size: 12px;
+        background-color: #f5f5f5;
         font-weight: bold;
-        margin: 15px 0 5px 0;
-        padding: 4px 8px;
-        background: #e8e8e8;
-        border: 1px solid #000;
-      }
-      .doc-header-cell {
-        padding: 0 !important;
-        background: #fff !important;
-      }
-      .doc-header-grid {
-        width: 100%;
-        display: grid;
-        grid-template-columns: 1fr 2fr 1fr;
-      }
-      .doc-header-block {
-        padding: 4px 6px;
-        min-height: 70px;
-      }
-      .doc-header-block + .doc-header-block {
-        border-left: 1px solid #000;
-      }
-      .doc-header-left {
-        text-align: left;
-        font-weight: bold;
-      }
-      .doc-header-center {
         text-align: center;
-        font-weight: bold;
-      }
-      .doc-header-right {
-        text-align: right;
-        font-weight: bold;
-      }
-      .doc-header-center .main-title {
-        margin: 0 0 4px 0;
       }
       .print-button {
         position: fixed;
@@ -143,281 +90,224 @@
   <body>
     <button class="print-button no-print" onclick="window.print()">Imprimer</button>
     <div class="container">
-      <div id="content">
-        <div class="loading" id="loading">Chargement des donnees...</div>
-      </div>
+      <div id="content"><div class="loading">Chargement des donnees...</div></div>
     </div>
 
     <script>
       function fmt(v) {
-        return v ? new Intl.NumberFormat('fr-FR').format(v) : '0';
-      }
-      function resClass(v) {
-        return v >= 0 ? 'positive' : 'negative';
-      }
-
-      // Mapping between invest dep sections (9x) and invest rec sections (0x)
-      const PATRIMOINE_SECTIONS = [
-        {
-          depSec: '90',
-          recSec: '01',
-          label: "Immobilisations incorporelles / Dotations de l'Etat",
-        },
-        { depSec: '91', recSec: '02', label: 'Immobilisations corporelles / Emprunts' },
-        { depSec: '92', recSec: '03', label: 'Immobilisations en cours / Cessions immobilieres' },
-        {
-          depSec: '93',
-          recSec: '04',
-          label: 'Immobilisations financieres / Subventions investissement',
-        },
-        { depSec: '94', recSec: '05', label: 'Remboursement emprunts / Fonds propres' },
-        { depSec: '95', recSec: '06', label: 'Autres depenses invest. / Autres recettes invest.' },
-      ];
-
-      async function loadData() {
-        let db;
-        try {
-          db = new Dexie('TresorOfflineDB');
-          await db.open();
-        } catch (_e) {
-          db = new Dexie('TresorDatabase');
-          await db.open();
-        }
-
-        const exercice = new Date().getFullYear();
-
-        const [allMandats, allDeclarations, allPrevisions, allPrevisionsRecettes, sousChapitres, taxes, mairieRaw] = await Promise.all([
-          db.table('mandats').toArray(),
-          db.table('declarations').toArray(),
-          db.table('previsions').toArray(),
-          db.table('previsionsRecettes').toArray(),
-          db.table('sousChapitres').toArray(),
-          db.table('taxes').toArray(),
-          db.table('mairies').toCollection().first(),
-        ]);
-        const mairie = mairieRaw || {};
-        const mandats = allMandats.filter(m => m.exercice === exercice);
-        const declarations = allDeclarations.filter(d => d.exercice === exercice);
-        const previsions = allPrevisions.filter(p => p.exercice === exercice);
-        const previsionsRecettes = allPrevisionsRecettes.filter(p => p.exercice === exercice);
-
-        const scMap = {};
-        sousChapitres.forEach(sc => { scMap[sc.id] = sc.code; });
-
-        const taxeMap = {};
-        taxes.forEach(t => { taxeMap[t.id] = t.code; });
-
-        return {
-          mandats,
-          declarations,
-          previsions,
-          previsionsRecettes,
-          sousChapitres,
-          taxes,
-          exercice,
-          mairie,
-          scMap,
-          taxeMap,
-        };
-      }
-
-      function render(data) {
-        const {
-          mandats,
-          declarations,
-          previsions,
-          previsionsRecettes,
-          sousChapitres,
-          taxes,
-          exercice,
-          mairie,
-          scMap,
-          taxeMap,
-        } = data;
-        const mairieNom = mairie ? mairie.nom || 'Mairie de Vavoua' : 'Mairie de Vavoua';
-
-        // Group data by sousChapitreId (for acquisitions)
-        const acqMap = {}; // { scId: { prev: 0, real: 0, code: '', libelle: '' } }
-        sousChapitres.forEach((sc) => {
-          if (sc.code && sc.code.startsWith('9')) {
-            acqMap[sc.id] = { prev: 0, real: 0, code: sc.code, libelle: sc.libelle };
-          }
-        });
-
-        previsions.forEach((p) => {
-          if (p.sousChapitreId && acqMap[p.sousChapitreId]) {
-            acqMap[p.sousChapitreId].prev += p.montantPrevu || 0;
-          }
-        });
-
-        mandats.forEach((m) => {
-          if (m.statut !== 'annule' && m.sousChapitreId && acqMap[m.sousChapitreId]) {
-            acqMap[m.sousChapitreId].real += m.montant || 0;
-          }
-        });
-
-        const items = Object.values(acqMap).filter((item) => item.prev > 0 || item.real > 0);
-
-        // Split into "IMMOBILIERS" and "MOBILIER" based on keywords
-        const mobiliersKeywords =
-          /moto|vehicule|ordinateur|bureau|table|mobilier|equipement inform|vehicules|motos/i;
-        const immobiliers = [];
-        const mobiliers = [];
-
-        items.forEach((item) => {
-          if (mobiliersKeywords.test(item.libelle)) {
-            mobiliers.push(item);
-          } else {
-            immobiliers.push(item);
-          }
-        });
-
-        let content = '';
-
-        // Grid layout for title
-        content +=
-          '<div style="text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 5px;">TABLEAU DES MODIFICATIONS PREVUES DANS LA COMPOSITION DU PATRIMOINE</div>';
-
-        content += '<table>';
-        content += '<thead>';
-        // Row 1
-        content += '<tr>';
-        content +=
-          '<th colspan="3" style="text-align: left; padding-left: 20px;">COMPTE ADMINISTRATIF</th>';
-        content +=
-          '<th colspan="3" style="font-weight: normal; text-align: right; padding-right: 15px;">ANNEE : &nbsp;&nbsp;&nbsp;' +
-          exercice +
-          '</th>';
-        content +=
-          '<th colspan="4" style="font-weight: normal; text-align: left; padding-left: 15px;">N° &nbsp;&nbsp;&nbsp; 36</th>';
-        content += '</tr>';
-
-        // Row 2
-        content += '<tr>';
-        content += '<th rowspan="3" style="width: 30px;">N°<br>D\'ORDRE</th>';
-        content += '<th rowspan="3" style="width: 40px;">Ref.PT<br>24-26</th>';
-        content += '<th rowspan="3" style="width: 250px;">DESCRIPTION</th>';
-        content += '<th colspan="2">COMPTES</th>';
-        content += '<th colspan="2">ACQUISITIONS PREVUES</th>';
-        content += '<th colspan="3">ALIENATION PREVUES</th>';
-        content += '</tr>';
-
-        // Row 3
-        content += '<tr>';
-        content += '<th rowspan="2" style="width: 50px;">Fonct</th>';
-        content += '<th rowspan="2" style="width: 50px;">Patrim</th>';
-        content += '<th rowspan="2" style="width: 80px;">MONTANT</th>';
-        content += '<th rowspan="2" style="width: 80px;">REALISES</th>';
-        content += '<th colspan="2">comptes</th>';
-        content += '<th rowspan="2" style="width: 80px;">MONTANT</th>';
-        content += '</tr>';
-
-        // Row 4
-        content += '<tr>';
-        content += '<th style="width: 60px;">Fonctionnel</th>';
-        content += '<th style="width: 60px;">Patrimoniaux</th>';
-        content += '</tr>';
-        content += '</thead>';
-        content += '<tbody>';
-
-        let order = 1;
-        let grandPrev = 0,
-          grandReal = 0;
-
-        function drawSection(title, list) {
-          content += '<tr>';
-          content +=
-            '<td colspan="3" style="font-weight: bold; text-align: center;">' + title + '</td>';
-          content += '<td></td><td></td><td></td><td></td><td></td><td></td><td></td>';
-          content += '</tr>';
-
-          let subPrev = 0,
-            subReal = 0;
-          list.forEach((item) => {
-            content += '<tr>';
-            content += '<td class="col-num" style="text-align: center;">' + order++ + '</td>';
-            content += '<td></td>';
-            content += '<td style="text-align: left;">' + (item.libelle || '') + '</td>';
-            content += '<td style="text-align: right;">' + item.code + '</td>';
-            content += '<td style="text-align: right;"></td>'; // Patrim blank since we don't have it
-            content += '<td class="col-num">' + fmt(item.prev) + '</td>';
-            content += '<td class="col-num">' + fmt(item.real) + '</td>';
-            content += '<td></td><td></td><td></td>';
-            content += '</tr>';
-            subPrev += item.prev;
-            subReal += item.real;
-          });
-
-          content += '<tr style="background-color: #f1f1f1; font-weight: bold;">';
-          content +=
-            '<td colspan="3" style="text-align: right; padding-right: 10px;">Sous-total ' +
-            title.toLowerCase() +
-            '</td>';
-          content += '<td></td><td></td>';
-          content += '<td class="col-num">' + fmt(subPrev) + '</td>';
-          content += '<td class="col-num">' + fmt(subReal) + '</td>';
-          content += '<td></td><td></td><td></td>';
-          content += '</tr>';
-
-          grandPrev += subPrev;
-          grandReal += subReal;
-        }
-
-        if (immobiliers.length > 0) drawSection('IMMOBILIERS', immobiliers);
-        if (mobiliers.length > 0) drawSection('MOBILIER', mobiliers);
-
-        content += '<tr style="background-color: #ddd; font-weight: bold;">';
-        content += '<td colspan="3" style="text-align: center;">TOTAL GENERAL</td>';
-        content += '<td></td><td></td>';
-        content += '<td class="col-num">' + fmt(grandPrev) + '</td>';
-        content += '<td class="col-num">' + fmt(grandReal) + '</td>';
-        content += '<td></td><td></td><td></td>';
-        content += '</tr>';
-
-        content += '</tbody></table>';
-
-        const today = new Date();
-        const dateStr = today.toLocaleDateString('fr-FR', {
-          day: 'numeric',
-          month: 'long',
-          year: 'numeric',
-        });
-
-        content += '<table style="border: none; margin-top: 50px; width: 100%;">';
-        content += '<tr>';
-        content +=
-          '<td style="border: none; text-align: left; padding-left: 50px; vertical-align: bottom;"><br><strong>LE TRESORIER PRINCIPAL</strong><br><br><br><br><br><br><strong>MOBIE BOKA WILFREED</strong></td>';
-        content +=
-          '<td style="border: none; text-align: center; vertical-align: top;">Rapport sur la compatibilité</td>';
-        content +=
-          '<td style="border: none; text-align: right; padding-right: 50px; vertical-align: top;">Fait à ' +
-          (mairie.ville || 'VAVOUA').toUpperCase() +
-          ' le, ' +
-          dateStr +
-          '<br><br><strong>LE MAIRE</strong><br><br><br><br><br><br><strong>KALOU BONAVENTURE</strong></td>';
-        content += '</tr>';
-        content += '</table>';
-
-        document.getElementById('content').innerHTML = content;
+        return v ? new Intl.NumberFormat('fr-FR').format(v) : '';
       }
 
       async function loadAndRender() {
         try {
-          const result = await loadData();
-          render(result);
+          var db;
+          try {
+            db = new Dexie('TresorOfflineDB');
+            await db.open();
+          } catch (_e) {
+            db = new Dexie('TresorDatabase');
+            await db.open();
+          }
+
+          var exercice = new Date().getFullYear();
+          try {
+            var pd = await db.table('printData').toArray();
+            var latest = pd
+              .filter(function (p) {
+                return p.type === 'FILL_COMPTE_ADMIN_DATA';
+              })
+              .sort(function (a, b) {
+                return b.createdAt - a.createdAt;
+              })[0];
+            if (latest && latest.data && latest.data.exercice) exercice = latest.data.exercice;
+          } catch (e) {}
+
+          var params = new URLSearchParams(window.location.search);
+          if (params.get('exercice')) exercice = parseInt(params.get('exercice'));
+
+          var mairie = (await db.table('mairies').toCollection().first()) || {};
+          var sousChapitres = await db.table('sousChapitres').toArray();
+          var allProjets = await db.table('projets').toArray();
+          var projets = allProjets.filter(function (p) {
+            return p.annee === exercice && p.statut !== 'annule';
+          });
+
+          // Load mandats payés for the exercice to compute réalisés
+          var allMandats = await db.table('mandats').toArray();
+          var mandatsPaye = allMandats.filter(function (m) {
+            return m.exercice === exercice && m.statut === 'paye';
+          });
+
+          // Build map: projetId → sum of mandat montants
+          var realiseMap = {};
+          mandatsPaye.forEach(function (m) {
+            if (m.projetId) {
+              realiseMap[m.projetId] = (realiseMap[m.projetId] || 0) + (m.montant || 0);
+            }
+          });
+
+          // Build sous-chapitre code map
+          var scMap = {};
+          sousChapitres.forEach(function (sc) {
+            if (sc.id) scMap[sc.id] = sc.code || '';
+          });
+
+          // Separate by type
+          var immobiliers = projets.filter(function (p) {
+            return p.typeBien === 'immobilier';
+          });
+          var mobiliers = projets.filter(function (p) {
+            return p.typeBien === 'mobilier' || p.typeBien === 'incorporel';
+          });
+
+          var communeNom = (mairie.nom || 'VAVOUA').replace(/^mairie de /i, '').toUpperCase();
+          var content = '';
+
+          // Title
+          content +=
+            '<div style="text-align:center; font-weight:bold; font-size:14px; margin-bottom:5px">';
+          content += 'TABLEAU DES MODIFICATIONS PREVUES DANS LA COMPOSITION DU PATRIMOINE</div>';
+          content +=
+            '<div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:10px">';
+          content += '<div>COMPTE ADMINISTRATIF</div>';
+          content += '<div>ANNEE : ' + exercice + '</div>';
+          content += '</div>';
+
+          // Table
+          content += '<table>';
+          content += '<thead>';
+          content += '<tr>';
+          content += '<th rowspan="3" style="width:40px">N°<br>D\'ORD<br>RE</th>';
+          content += '<th rowspan="3" style="width:45px">Ref.P<br>T 24-<br>26</th>';
+          content += '<th rowspan="3" style="text-align:left; min-width:200px">DESCRIPTION</th>';
+          content += '<th colspan="2" rowspan="2">COMPTES</th>';
+          content += '<th colspan="2">ACQUISITIONS PREVUES</th>';
+          content += '<th colspan="3">ALIENATION PREVUES</th>';
+          content += '</tr>';
+          content += '<tr>';
+          content += '<th rowspan="2">MONTANT</th>';
+          content += '<th rowspan="2">REALISES</th>';
+          content += '<th colspan="2">comptes</th>';
+          content += '<th rowspan="2">MONTANT</th>';
+          content += '</tr>';
+          content += '<tr>';
+          content += '<th>Fonct</th>';
+          content += '<th>Patrim</th>';
+          content += '<th>Fonctionnel</th>';
+          content += '<th>Patrimoniaux</th>';
+          content += '</tr>';
+          content += '</thead>';
+          content += '<tbody>';
+
+          var num = 0;
+          var totalImmoMontant = 0,
+            totalImmoRealise = 0,
+            totalImmoAlienation = 0;
+          var totalMobMontant = 0,
+            totalMobRealise = 0,
+            totalMobAlienation = 0;
+
+          // IMMOBILIERS
+          content += '<tr><td colspan="10" class="section-title">IMMOBILIERS</td></tr>';
+          immobiliers.forEach(function (p) {
+            num++;
+            var realise = realiseMap[p.id] || 0;
+            totalImmoMontant += p.montant || 0;
+            totalImmoRealise += realise;
+            totalImmoAlienation += p.alienationMontant || 0;
+            content += '<tr>';
+            content +=
+              '<td class="col-center">' + (p.numeroOrdre != null ? p.numeroOrdre : '') + '</td>';
+            content += '<td class="col-center">' + (p.refPT || '') + '</td>';
+            content += '<td>' + (p.libelle || '') + '</td>';
+            content += '<td class="col-center">' + (scMap[p.sousChapitreId] || '') + '</td>';
+            content += '<td class="col-center">' + (p.patrimoine || '') + '</td>';
+            content += '<td class="col-num">' + fmt(p.montant) + '</td>';
+            content += '<td class="col-num">' + fmt(realise) + '</td>';
+            content += '<td class="col-center">' + (p.alienationCompteFonctionnel || '') + '</td>';
+            content += '<td class="col-center">' + (p.alienationComptePatrimonial || '') + '</td>';
+            content += '<td class="col-num">' + fmt(p.alienationMontant) + '</td>';
+            content += '</tr>';
+          });
+          content += '<tr class="total-row">';
+          content += '<td colspan="5" class="col-center">Sous-total Immobiliers</td>';
+          content += '<td class="col-num">' + fmt(totalImmoMontant) + '</td>';
+          content += '<td class="col-num">' + fmt(totalImmoRealise) + '</td>';
+          content += '<td></td><td></td>';
+          content += '<td class="col-num">' + fmt(totalImmoAlienation) + '</td>';
+          content += '</tr>';
+
+          // MOBILIER
+          content += '<tr><td colspan="10" class="section-title">MOBILIER</td></tr>';
+          mobiliers.forEach(function (p) {
+            num++;
+            var realise = realiseMap[p.id] || 0;
+            totalMobMontant += p.montant || 0;
+            totalMobRealise += realise;
+            totalMobAlienation += p.alienationMontant || 0;
+            content += '<tr>';
+            content +=
+              '<td class="col-center">' + (p.numeroOrdre != null ? p.numeroOrdre : '') + '</td>';
+            content += '<td class="col-center">' + (p.refPT || '') + '</td>';
+            content += '<td>' + (p.libelle || '') + '</td>';
+            content += '<td class="col-center">' + (scMap[p.sousChapitreId] || '') + '</td>';
+            content += '<td class="col-center">' + (p.patrimoine || '') + '</td>';
+            content += '<td class="col-num">' + fmt(p.montant) + '</td>';
+            content += '<td class="col-num">' + fmt(realise) + '</td>';
+            content += '<td class="col-center">' + (p.alienationCompteFonctionnel || '') + '</td>';
+            content += '<td class="col-center">' + (p.alienationComptePatrimonial || '') + '</td>';
+            content += '<td class="col-num">' + fmt(p.alienationMontant) + '</td>';
+            content += '</tr>';
+          });
+          content += '<tr class="total-row">';
+          content += '<td colspan="5" class="col-center">Sous-total mobiliers</td>';
+          content += '<td class="col-num">' + fmt(totalMobMontant) + '</td>';
+          content += '<td class="col-num">' + fmt(totalMobRealise) + '</td>';
+          content += '<td></td><td></td>';
+          content += '<td class="col-num">' + fmt(totalMobAlienation) + '</td>';
+          content += '</tr>';
+
+          // TOTAL GENERAL
+          content += '<tr class="grand-total">';
+          content += '<td colspan="5" class="col-center">TOTAL GENERAL</td>';
+          content += '<td class="col-num">' + fmt(totalImmoMontant + totalMobMontant) + '</td>';
+          content += '<td class="col-num">' + fmt(totalImmoRealise + totalMobRealise) + '</td>';
+          content += '<td></td><td></td>';
+          content +=
+            '<td class="col-num">' + fmt(totalImmoAlienation + totalMobAlienation) + '</td>';
+          content += '</tr>';
+
+          content += '</tbody></table>';
+
+          // Signatures
+          var today = new Date();
+          var dateStr = today.toLocaleDateString('fr-FR', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+          });
+          content +=
+            '<div style="display:flex; justify-content:space-between; padding:30px 50px 0; font-size:10px">';
+          content += '<div style="text-align:center"><strong>LE TRESORIER PRINCIPAL</strong></div>';
+          content +=
+            '<div style="text-align:center">Fait a ' +
+            (mairie.ville || 'VAVOUA').toUpperCase() +
+            ' le, ' +
+            dateStr +
+            '<br><strong>LE MAIRE</strong></div>';
+          content += '</div>';
+
+          document.getElementById('content').innerHTML = content;
         } catch (e) {
-          console.error('Erreur chargement:', e);
+          console.error('Erreur:', e);
           document.getElementById('content').innerHTML =
-            '<div style="color:red;padding:20px;font-size:14px">Erreur: ' + e.message + '<br><pre>' + e.stack + '</pre></div>';
+            '<div style="color:red;padding:20px">Erreur: ' + e.message + '</div>';
         }
       }
 
       window.addEventListener('message', function (e) {
-        if (e.data && e.data.type === 'FILL_COMPTE_ADMIN_DATA') {
-          loadAndRender();
-        }
+        if (e.data && e.data.type === 'FILL_COMPTE_ADMIN_DATA') loadAndRender();
       });
-
       document.addEventListener('DOMContentLoaded', function () {
         setTimeout(loadAndRender, 500);
       });

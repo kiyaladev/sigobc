@@ -89,15 +89,21 @@
 
         const exercice = new Date().getFullYear();
 
-        const [taxes, allPrevisionsRecettes, allDeclarations, mairieRaw] = await Promise.all([
-          db.table('taxes').toArray(),
-          db.table('previsionsRecettes').toArray(),
-          db.table('declarations').toArray(),
-          db.table('mairies').toCollection().first(),
-        ]);
+        const [taxes, allPrevisionsRecettes, allDeclarations, allMandatsRecette, mairieRaw] =
+          await Promise.all([
+            db.table('taxes').toArray(),
+            db.table('previsionsRecettes').toArray(),
+            db.table('declarations').toArray(),
+            db
+              .table('mandatsRecette')
+              .toArray()
+              .catch(() => []),
+            db.table('mairies').toCollection().first(),
+          ]);
         const mairie = mairieRaw || {};
-        const previsionsRecettes = allPrevisionsRecettes.filter(r => r.exercice === exercice);
-        const declarations = allDeclarations.filter(d => d.exercice === exercice);
+        const previsionsRecettes = allPrevisionsRecettes.filter((r) => r.exercice === exercice);
+        const declarations = allDeclarations.filter((d) => d.exercice === exercice);
+        const mandatsRecette = allMandatsRecette.filter((m) => m.exercice === exercice);
 
         const investTaxes = taxes.filter((t) => t.code && t.code.startsWith('0'));
 
@@ -117,6 +123,17 @@
           emissionMap[tid] += d.montant || d.montantRecette || 0;
           if (d.dateEncaissement) {
             recouvrementMap[tid] += d.montantRecette || d.montant || 0;
+          }
+        });
+
+        mandatsRecette.forEach((mr) => {
+          if (mr.statut === 'annule') return;
+          const tid = mr.taxeId;
+          if (!emissionMap[tid]) emissionMap[tid] = 0;
+          if (!recouvrementMap[tid]) recouvrementMap[tid] = 0;
+          emissionMap[tid] += mr.montant || 0;
+          if (mr.statut === 'paye') {
+            recouvrementMap[tid] += mr.montant || 0;
           }
         });
 
@@ -154,7 +171,13 @@
           }
           if (!sections[secCode].chapitres[chapCode]) {
             if (!chapitres[chapCode]) {
-              chapitres[chapCode] = { label: 'Chapitre ' + chapCode, prev: 0, emis: 0, rec: 0, articles: [] };
+              chapitres[chapCode] = {
+                label: 'Chapitre ' + chapCode,
+                prev: 0,
+                emis: 0,
+                rec: 0,
+                articles: [],
+              };
             }
             sections[secCode].chapitres[chapCode] = chapitres[chapCode];
           }
@@ -176,7 +199,9 @@
         var B = 'border:1px solid #000;';
         var P = 'padding:3px 4px;';
 
-        let grandPrev = 0, grandEmis = 0, grandRec = 0;
+        let grandPrev = 0,
+          grandEmis = 0,
+          grandRec = 0;
         var dataRows = '';
 
         function makeDataCells(prev, emis, rec) {
@@ -184,105 +209,215 @@
           var pctVal = '-';
           if (prev > 0) pctVal = (Math.round((rec / prev) * 10000) / 100).toFixed(2);
           else if (rec > 0) pctVal = '100.00';
-          return '<td class="text-right" style="' + B + P + '">' + dashFormat(prev) + '</td>'
-            + '<td class="text-right" style="' + B + P + '">' + dashFormat(emis) + '</td>'
-            + '<td class="text-right" style="' + B + P + '">' + dashFormat(rec) + '</td>'
-            + '<td class="text-center" style="' + B + P + '"></td>'
-            + '<td class="text-center" style="' + B + P + '">' + dashFormat(Math.max(0, emis - rec)) + '</td>'
-            + '<td class="text-right" style="' + B + P + '">' + dashFormat(ecart) + '</td>'
-            + '<td class="text-right" style="' + B + P + '">' + pctVal + '</td>';
+          return (
+            '<td class="text-right" style="' +
+            B +
+            P +
+            '">' +
+            dashFormat(prev) +
+            '</td>' +
+            '<td class="text-right" style="' +
+            B +
+            P +
+            '">' +
+            dashFormat(emis) +
+            '</td>' +
+            '<td class="text-right" style="' +
+            B +
+            P +
+            '">' +
+            dashFormat(rec) +
+            '</td>' +
+            '<td class="text-center" style="' +
+            B +
+            P +
+            '"></td>' +
+            '<td class="text-center" style="' +
+            B +
+            P +
+            '">' +
+            dashFormat(Math.max(0, prev - rec)) +
+            '</td>' +
+            '<td class="text-right" style="' +
+            B +
+            P +
+            '">' +
+            dashFormat(ecart) +
+            '</td>' +
+            '<td class="text-right" style="' +
+            B +
+            P +
+            '">' +
+            pctVal +
+            '</td>'
+          );
         }
 
-        Object.keys(sections).sort().forEach(function (secCode) {
-          var sec = sections[secCode];
-          if (sec.prev === 0 && sec.emis === 0 && sec.rec === 0) return;
+        Object.keys(sections)
+          .sort()
+          .forEach(function (secCode) {
+            var sec = sections[secCode];
+            if (sec.prev === 0 && sec.emis === 0 && sec.rec === 0) return;
 
-          // Section header
-          dataRows += '<tr><td colspan="8" style="' + B + 'text-align:left; padding:8px 4px; font-weight:bold">'
-            + 'SECTION ' + secCode + ' - ' + (sec.label || '').toUpperCase()
-            + '</td></tr>';
+            // Section header
+            dataRows +=
+              '<tr><td colspan="8" style="' +
+              B +
+              'text-align:left; padding:8px 4px; font-weight:bold">' +
+              'SECTION ' +
+              secCode +
+              ' - ' +
+              (sec.label || '').toUpperCase() +
+              '</td></tr>';
 
-          Object.keys(sec.chapitres).sort().forEach(function (chapCode) {
-            var chap = sec.chapitres[chapCode];
-            if (chap.articles.length === 0) return;
+            Object.keys(sec.chapitres)
+              .sort()
+              .forEach(function (chapCode) {
+                var chap = sec.chapitres[chapCode];
+                if (chap.articles.length === 0) return;
 
-            // Chapitre header
-            dataRows += '<tr><td colspan="8" style="' + B + 'text-align:left; padding:4px 4px 4px 10px; font-weight:bold">'
-              + 'Chapitre ' + chapCode + ' - ' + (chap.label || '').replace(/^CHAP\.\s*\d+\s*-\s*/i, '')
-              + '</td></tr>';
+                // Chapitre header
+                dataRows +=
+                  '<tr><td colspan="8" style="' +
+                  B +
+                  'text-align:left; padding:4px 4px 4px 10px; font-weight:bold">' +
+                  'Chapitre ' +
+                  chapCode +
+                  ' - ' +
+                  (chap.label || '').replace(/^CHAP\.\s*\d+\s*-\s*/i, '') +
+                  '</td></tr>';
 
-            // Articles
-            chap.articles.sort(function (a, b) { return (a.code || '').localeCompare(b.code || ''); }).forEach(function (art) {
-              var p = prevMap[art.id] || 0;
-              var e = emissionMap[art.id] || 0;
-              var r = recouvrementMap[art.id] || 0;
+                // Articles
+                chap.articles
+                  .sort(function (a, b) {
+                    return (a.code || '').localeCompare(b.code || '');
+                  })
+                  .forEach(function (art) {
+                    var p = prevMap[art.id] || 0;
+                    var e = emissionMap[art.id] || 0;
+                    var r = recouvrementMap[art.id] || 0;
 
-              dataRows += '<tr>'
-                + '<td style="' + B + 'padding:3px 4px 3px 20px">Article ' + art.code + ' - ' + (art.libelle || '') + '</td>'
-                + makeDataCells(p, e, r)
-                + '</tr>';
-            });
+                    dataRows +=
+                      '<tr>' +
+                      '<td style="' +
+                      B +
+                      'padding:3px 4px 3px 20px">Article ' +
+                      art.code +
+                      ' - ' +
+                      (art.libelle || '') +
+                      '</td>' +
+                      makeDataCells(p, e, r) +
+                      '</tr>';
+                  });
 
-            // Chapitre subtotal
-            dataRows += '<tr style="font-weight:bold">'
-              + '<td style="' + B + P + 'text-align:center">SOUS TOTAL CHAPITRE - ' + chapCode + '</td>'
-              + makeDataCells(chap.prev, chap.emis, chap.rec)
-              + '</tr>';
+                // Chapitre subtotal
+                dataRows +=
+                  '<tr style="font-weight:bold">' +
+                  '<td style="' +
+                  B +
+                  P +
+                  'text-align:center">SOUS TOTAL CHAPITRE - ' +
+                  chapCode +
+                  '</td>' +
+                  makeDataCells(chap.prev, chap.emis, chap.rec) +
+                  '</tr>';
+              });
+
+            // Section total
+            dataRows +=
+              '<tr style="font-weight:bold">' +
+              '<td style="' +
+              B +
+              P +
+              'text-align:center">TOTAL SECTION - ' +
+              secCode +
+              '</td>' +
+              makeDataCells(sec.prev, sec.emis, sec.rec) +
+              '</tr>';
+
+            // Spacer row between sections
+            dataRows +=
+              '<tr><td colspan="8" style="border-left:1px solid #000; border-right:1px solid #000; padding:4px; border-top:none; border-bottom:none">&nbsp;</td></tr>';
+
+            grandPrev += sec.prev;
+            grandEmis += sec.emis;
+            grandRec += sec.rec;
           });
 
-          // Section total
-          dataRows += '<tr style="font-weight:bold">'
-            + '<td style="' + B + P + 'text-align:center">TOTAL SECTION - ' + secCode + '</td>'
-            + makeDataCells(sec.prev, sec.emis, sec.rec)
-            + '</tr>';
-
-          // Spacer row between sections
-          dataRows += '<tr><td colspan="8" style="border-left:1px solid #000; border-right:1px solid #000; padding:4px; border-top:none; border-bottom:none">&nbsp;</td></tr>';
-
-          grandPrev += sec.prev;
-          grandEmis += sec.emis;
-          grandRec += sec.rec;
-        });
-
         // Grand total
-        dataRows += '<tr style="font-weight:bold; font-size:11px">'
-          + '<td style="' + B + P + 'text-align:center">TOTAL DES RECETTES AU TITRE - II</td>'
-          + makeDataCells(grandPrev, grandEmis, grandRec)
-          + '</tr>';
+        dataRows +=
+          '<tr style="font-weight:bold; font-size:11px">' +
+          '<td style="' +
+          B +
+          P +
+          'text-align:center">TOTAL DES RECETTES AU TITRE - II</td>' +
+          makeDataCells(grandPrev, grandEmis, grandRec) +
+          '</tr>';
 
         // Build full single table
-        var html = '<table style="width:100%; border-collapse:collapse; table-layout:fixed">'
-          + '<colgroup>'
-          + '<col style="width:35%"><col style="width:10%"><col style="width:10%"><col style="width:10%">'
-          + '<col style="width:7%"><col style="width:7%"><col style="width:12%"><col style="width:9%">'
-          + '</colgroup>'
+        var html =
+          '<table style="width:100%; border-collapse:collapse; table-layout:fixed">' +
+          '<colgroup>' +
+          '<col style="width:35%"><col style="width:10%"><col style="width:10%"><col style="width:10%">' +
+          '<col style="width:7%"><col style="width:7%"><col style="width:12%"><col style="width:9%">' +
+          '</colgroup>' +
           // Document header
-          + '<tr>'
-          + '<td style="text-align:center; font-weight:bold; padding:6px; ' + B + '">COMMUNE DE ' + communeNom + '</td>'
-          + '<td colspan="5" style="text-align:center; font-weight:bold; font-size:14px; padding:6px; ' + B + '">COMPTE ADMINISTRATIF &nbsp;-&nbsp; RECETTES D\'INVESTISSEMENT</td>'
-          + '<td style="text-align:center; padding:4px; ' + B + ' font-size:9px">ANNEE<br><b>' + exercice + '</b></td>'
-          + '<td style="text-align:center; padding:4px; ' + B + ' font-size:9px">N&deg;<br><b>27</b></td>'
-          + '</tr>'
+          '<tr>' +
+          '<td style="text-align:center; font-weight:bold; padding:6px; ' +
+          B +
+          '">COMMUNE DE ' +
+          communeNom +
+          '</td>' +
+          '<td colspan="5" style="text-align:center; font-weight:bold; font-size:14px; padding:6px; ' +
+          B +
+          '">COMPTE ADMINISTRATIF &nbsp;-&nbsp; RECETTES D\'INVESTISSEMENT</td>' +
+          '<td style="text-align:center; padding:4px; ' +
+          B +
+          ' font-size:9px">ANNEE<br><b>' +
+          exercice +
+          '</b></td>' +
+          '<td style="text-align:center; padding:4px; ' +
+          B +
+          ' font-size:9px">N&deg;<br><b>&nbsp;</b></td>' +
+          '</tr>' +
           // Table header row 1
-          + '<tr>'
-          + '<th rowspan="2" style="' + B + 'padding:3px; text-align:center; vertical-align:middle; font-size:9px">COMPTES ET RUBRIQUES BUDGETAIRES</th>'
-          + '<th rowspan="2" style="' + B + 'padding:3px; text-align:center; vertical-align:middle; font-size:9px">PREVISIONS</th>'
-          + '<th colspan="4" style="' + B + 'padding:3px; text-align:center; font-size:9px">EXECUTION DU BUDGET</th>'
-          + '<th rowspan="2" style="' + B + 'padding:3px; text-align:center; vertical-align:middle; font-size:9px">ECART<br>PREVISIONS<br>RECOUVREMENTS</th>'
-          + '<th rowspan="2" style="' + B + 'padding:3px; text-align:center; vertical-align:middle; font-size:9px">R /<br>%</th>'
-          + '</tr>'
+          '<tr>' +
+          '<th rowspan="2" style="' +
+          B +
+          'padding:3px; text-align:center; vertical-align:middle; font-size:9px">COMPTES ET RUBRIQUES BUDGETAIRES</th>' +
+          '<th rowspan="2" style="' +
+          B +
+          'padding:3px; text-align:center; vertical-align:middle; font-size:9px">PREVISIONS</th>' +
+          '<th colspan="4" style="' +
+          B +
+          'padding:3px; text-align:center; font-size:9px">EXECUTION DU BUDGET</th>' +
+          '<th rowspan="2" style="' +
+          B +
+          'padding:3px; text-align:center; vertical-align:middle; font-size:9px">ECART<br>PREVISIONS<br>RECOUVREMENTS</th>' +
+          '<th rowspan="2" style="' +
+          B +
+          'padding:3px; text-align:center; vertical-align:middle; font-size:9px">R /<br>%</th>' +
+          '</tr>' +
           // Table header row 2
-          + '<tr>'
-          + '<th style="' + B + 'padding:3px; text-align:center; font-size:9px">EMISSIONS</th>'
-          + '<th style="' + B + 'padding:3px; text-align:center; font-size:9px">RECOU -<br>VREMENT</th>'
-          + '<th style="' + B + 'padding:3px; text-align:center; font-size:9px">NON VALEUR</th>'
-          + '<th style="' + B + 'padding:3px; text-align:center; font-size:9px">RESTE A RECOUVRER</th>'
-          + '</tr>'
+          '<tr>' +
+          '<th style="' +
+          B +
+          'padding:3px; text-align:center; font-size:9px">EMISSIONS</th>' +
+          '<th style="' +
+          B +
+          'padding:3px; text-align:center; font-size:9px">RECOU -<br>VREMENT</th>' +
+          '<th style="' +
+          B +
+          'padding:3px; text-align:center; font-size:9px">NON VALEUR</th>' +
+          '<th style="' +
+          B +
+          'padding:3px; text-align:center; font-size:9px">RESTE A RECOUVRER</th>' +
+          '</tr>' +
           // Spacer
-          + '<tr><td colspan="8" style="border-left:1px solid #000; border-right:1px solid #000; padding:4px; border-top:none; border-bottom:none">&nbsp;</td></tr>'
+          '<tr><td colspan="8" style="border-left:1px solid #000; border-right:1px solid #000; padding:4px; border-top:none; border-bottom:none">&nbsp;</td></tr>' +
           // Data rows
-          + dataRows
-          + '</table>';
+          dataRows +
+          '</table>';
 
         document.getElementById('content').innerHTML = html;
         document.title = "Compte Administratif - Recettes d'Investissement - " + exercice;
@@ -295,7 +430,11 @@
         } catch (e) {
           console.error('Erreur chargement:', e);
           document.getElementById('content').innerHTML =
-            '<div style="color:red;padding:20px;font-size:14px">Erreur: ' + e.message + '<br><pre>' + e.stack + '</pre></div>';
+            '<div style="color:red;padding:20px;font-size:14px">Erreur: ' +
+            e.message +
+            '<br><pre>' +
+            e.stack +
+            '</pre></div>';
         }
       }
 

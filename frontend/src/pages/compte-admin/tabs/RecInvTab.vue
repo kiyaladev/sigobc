@@ -23,67 +23,84 @@
       <tbody>
         <template v-for="section in sections" :key="section.code">
           <!-- Section header -->
-          <tr class="bg-grey-3 text-weight-bold">
+          <tr class="section-header-row">
             <td colspan="8">{{ section.libelle }}</td>
           </tr>
-          <!-- Chapitres -->
-          <template v-for="chap in getChapitres(section.code)" :key="chap.code">
-            <tr class="bg-grey-1 text-weight-medium">
-              <td colspan="8" class="q-pl-md">{{ chap.libelle }}</td>
+
+          <!-- Chapitre groups -->
+          <template
+            v-for="chapGroup in getChapitreGroups(section.code)"
+            :key="chapGroup.code"
+          >
+            <!-- Chapitre header (only if has child articles) -->
+            <tr v-if="chapGroup.articles.length > 0" class="chapitre-header-row">
+              <td colspan="8" class="q-pl-md">CHAPITRE {{ chapGroup.code }}</td>
             </tr>
-            <!-- Articles -->
-            <tr v-for="article in getArticles(chap.code)" :key="article.taxeId" class="article-row">
-              <td class="q-pl-lg">Article {{ article.code }} - {{ article.libelle }}</td>
+
+            <!-- Articles under this chapitre -->
+            <tr
+              v-for="article in chapGroup.articles"
+              :key="article.taxeId"
+              class="article-row"
+            >
+              <td class="q-pl-lg">{{ article.code }} - {{ article.libelle }}</td>
               <td class="text-right">{{ fmtZ(article.montantPrevu) }}</td>
               <td class="text-right">{{ fmtZ(article.montantEmis) }}</td>
               <td class="text-right">{{ fmtZ(article.montantRecouvre) }}</td>
               <td class="text-right">-</td>
               <td class="text-right">
-                {{ article.montantEmis - article.montantRecouvre > 0 ? fmt(article.montantEmis - article.montantRecouvre) : '-' }}
+                {{ article.montantPrevu - article.montantRecouvre > 0 ? fmt(article.montantPrevu - article.montantRecouvre) : '-' }}
               </td>
               <td class="text-right">{{ fmtZ(article.montantPrevu - article.montantRecouvre) }}</td>
               <td class="text-right">
                 {{ article.montantPrevu > 0 ? ((article.montantRecouvre / article.montantPrevu) * 100).toFixed(2) : '-' }}
               </td>
             </tr>
-            <!-- Chapitre subtotal -->
-            <tr class="bg-grey-1 text-weight-bold text-caption">
-              <td class="q-pl-md text-italic">SOUS TOTAL CHAPITRE - {{ chap.code }}</td>
-              <td class="text-right">{{ fmtZ(chapTotal(chap.code, 'montantPrevu')) }}</td>
-              <td class="text-right">{{ fmtZ(chapTotal(chap.code, 'montantEmis')) }}</td>
-              <td class="text-right">{{ fmtZ(chapTotal(chap.code, 'montantRecouvre')) }}</td>
+
+            <!-- Chapitre subtotal (only if more than 1 article) -->
+            <tr v-if="chapGroup.articles.length > 1" class="subtotal-row">
+              <td class="q-pl-md text-italic">SOUS TOTAL CHAPITRE {{ chapGroup.code }}</td>
+              <td class="text-right">{{ fmtZ(groupTotal(chapGroup, 'montantPrevu')) }}</td>
+              <td class="text-right">{{ fmtZ(groupTotal(chapGroup, 'montantEmis')) }}</td>
+              <td class="text-right">{{ fmtZ(groupTotal(chapGroup, 'montantRecouvre')) }}</td>
               <td class="text-right">-</td>
               <td class="text-right">
-                {{ chapTotal(chap.code, 'montantEmis') - chapTotal(chap.code, 'montantRecouvre') > 0 ? fmt(chapTotal(chap.code, 'montantEmis') - chapTotal(chap.code, 'montantRecouvre')) : '-' }}
+                {{ groupTotal(chapGroup, 'montantPrevu') - groupTotal(chapGroup, 'montantRecouvre') > 0 ? fmt(groupTotal(chapGroup, 'montantPrevu') - groupTotal(chapGroup, 'montantRecouvre')) : '-' }}
               </td>
-              <td class="text-right">{{ fmtZ(chapTotal(chap.code, 'montantPrevu') - chapTotal(chap.code, 'montantRecouvre')) }}</td>
+              <td class="text-right">{{ fmtZ(groupTotal(chapGroup, 'montantPrevu') - groupTotal(chapGroup, 'montantRecouvre')) }}</td>
               <td class="text-right">
-                {{ chapTotal(chap.code, 'montantPrevu') > 0 ? ((chapTotal(chap.code, 'montantRecouvre') / chapTotal(chap.code, 'montantPrevu')) * 100).toFixed(2) : '-' }}
+                {{ groupTotal(chapGroup, 'montantPrevu') > 0 ? ((groupTotal(chapGroup, 'montantRecouvre') / groupTotal(chapGroup, 'montantPrevu')) * 100).toFixed(2) : '-' }}
               </td>
             </tr>
           </template>
+
           <!-- Section total -->
-          <tr class="bg-grey-3 text-weight-bold">
-            <td class="text-center">TOTAL SECTION - {{ section.code }}</td>
+          <tr class="section-total-row">
+            <td class="text-center">TOTAL SECTION {{ section.code }}</td>
             <td class="text-right">{{ fmt(sectionTotal(section.code, 'montantPrevu')) }}</td>
             <td class="text-right">{{ fmtZ(sectionTotal(section.code, 'montantEmis')) }}</td>
             <td class="text-right">{{ fmtZ(sectionTotal(section.code, 'montantRecouvre')) }}</td>
             <td class="text-right">-</td>
-            <td class="text-right">-</td>
+            <td class="text-right">
+              {{ sectionTotal(section.code, 'montantPrevu') - sectionTotal(section.code, 'montantRecouvre') > 0 ? fmt(sectionTotal(section.code, 'montantPrevu') - sectionTotal(section.code, 'montantRecouvre')) : '-' }}
+            </td>
             <td class="text-right">{{ fmtZ(sectionTotal(section.code, 'montantPrevu') - sectionTotal(section.code, 'montantRecouvre')) }}</td>
             <td class="text-right">
               {{ sectionTotal(section.code, 'montantPrevu') > 0 ? ((sectionTotal(section.code, 'montantRecouvre') / sectionTotal(section.code, 'montantPrevu')) * 100).toFixed(2) : '-' }}
             </td>
           </tr>
         </template>
+
         <!-- Grand total -->
-        <tr class="bg-grey-4 text-weight-bold">
-          <td class="text-center">TOTAL DES RECETTES AU TITRE - II</td>
+        <tr class="grand-total-row">
+          <td class="text-center">TOTAL DES RECETTES AU TITRE II</td>
           <td class="text-right">{{ fmt(data.totalPrevuRecInvest.value) }}</td>
           <td class="text-right">{{ fmtZ(data.totalEmissionsInvest.value) }}</td>
           <td class="text-right">{{ fmtZ(data.totalRecettesInvest.value) }}</td>
-          <td class="text-right"></td>
-          <td class="text-right"></td>
+          <td class="text-right">-</td>
+          <td class="text-right">
+            {{ data.totalPrevuRecInvest.value - data.totalRecettesInvest.value > 0 ? fmt(data.totalPrevuRecInvest.value - data.totalRecettesInvest.value) : '-' }}
+          </td>
           <td class="text-right">{{ fmtZ(data.totalPrevuRecInvest.value - data.totalRecettesInvest.value) }}</td>
           <td class="text-right">
             {{ data.totalPrevuRecInvest.value > 0 ? ((data.totalRecettesInvest.value / data.totalPrevuRecInvest.value) * 100).toFixed(2) : '-' }}
@@ -101,32 +118,53 @@ const props = defineProps<{ data: ReturnType<typeof useCompteAdmin> }>();
 
 const sections = [
   { code: '01', libelle: "SECTION 01 - DOTATIONS DE L'ETAT" },
-  { code: '02', libelle: 'SECTION 02 - PRELEVEMENTS SUR FONDS D\'INVESTISSEMENT' },
+  { code: '02', libelle: "SECTION 02 - PRELEVEMENTS SUR FONDS D'INVESTISSEMENT" },
   { code: '03', libelle: 'SECTION 03 - CESSIONS IMMOBILIERES' },
   { code: '04', libelle: "SECTION 04 - AIDE DE L'ETAT - FONDS DE CONCOURS - AIDES EXTERIEURES" },
   { code: '05', libelle: 'SECTION 05 - FONDS PROPRES' },
   { code: '06', libelle: 'SECTION 06 - RECETTES DIVERSES AU TITRE II' },
 ];
 
-function getChapitres(sectionCode: string) {
-  return props.data.recettesInvestissement.value.filter(
-    (r) => r.code.startsWith(sectionCode) && r.code.length === 3,
-  );
+interface ChapitreGroup {
+  code: string;
+  articles: LigneRecette[];
 }
 
-function getArticles(chapitreCode: string): LigneRecette[] {
-  return props.data.recettesInvestissement.value.filter(
-    (r) => r.code.startsWith(chapitreCode) && r.code.length > 3,
+// Group all entries under a section, excluding the 2-digit section-level entries
+function getChapitreGroups(sectionCode: string): ChapitreGroup[] {
+  // Get all entries for this section
+  const allEntries = props.data.recettesInvestissement.value.filter(
+    (r) => r.code.startsWith(sectionCode),
   );
+
+  if (allEntries.length === 0) return [];
+
+  // Group by first 3 digits
+  const groupMap = new Map<string, LigneRecette[]>();
+
+  for (const entry of allEntries) {
+    const groupCode = entry.code.substring(0, 3);
+    if (!groupMap.has(groupCode)) {
+      groupMap.set(groupCode, []);
+    }
+    groupMap.get(groupCode)!.push(entry);
+  }
+
+  return Array.from(groupMap.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([code, articles]) => ({
+      code,
+      articles: articles.sort((a, b) => a.code.localeCompare(b.code)),
+    }));
 }
 
-function chapTotal(chapCode: string, field: 'montantPrevu' | 'montantEmis' | 'montantRecouvre'): number {
-  return getArticles(chapCode).reduce((s, r) => s + r[field], 0);
+function groupTotal(group: ChapitreGroup, field: 'montantPrevu' | 'montantEmis' | 'montantRecouvre'): number {
+  return group.articles.reduce((s, r) => s + r[field], 0);
 }
 
 function sectionTotal(sectionCode: string, field: 'montantPrevu' | 'montantEmis' | 'montantRecouvre'): number {
   return props.data.recettesInvestissement.value
-    .filter((r) => r.code.startsWith(sectionCode) && r.code.length > 2)
+    .filter((r) => r.code.startsWith(sectionCode))
     .reduce((s, r) => s + r[field], 0);
 }
 
@@ -143,4 +181,9 @@ function fmtZ(v: number) {
 .recinv-table { font-size: 11px; }
 .recinv-table th { font-size: 9px; background-color: #f0f0f0; }
 .article-row td { font-size: 10px; }
+.section-header-row td { font-weight: bold; background-color: #e3f2fd; }
+.chapitre-header-row td { font-weight: bold; background-color: #e8eaf6; font-size: 10px; }
+.subtotal-row td { font-weight: bold; background-color: #f5f5f5; font-size: 10px; }
+.section-total-row td { font-weight: bold; background-color: #e0e0e0; }
+.grand-total-row td { font-weight: bold; background-color: #bdbdbd; }
 </style>

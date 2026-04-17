@@ -38,8 +38,10 @@
           <td class="text-right">{{ fmt(data.totalPrevuRecInvest.value) }}</td>
           <td class="text-right">{{ fmt(data.totalEmissionsInvest.value) }}</td>
           <td class="text-right">{{ fmt(data.totalRecettesInvest.value) }}</td>
-          <td class="text-right"></td>
-          <td class="text-right"></td>
+          <td class="text-right">-</td>
+          <td class="text-right">
+            {{ fmt(data.totalPrevuRecInvest.value - data.totalRecettesInvest.value) }}
+          </td>
           <td class="text-right">
             {{ fmt(data.totalPrevuRecInvest.value - data.totalEmissionsInvest.value) }}
           </td>
@@ -63,7 +65,7 @@
       <thead>
         <tr>
           <th rowspan="2" class="text-left" style="width: 280px">SECTIONS BUDGETAIRES</th>
-          <th rowspan="2" class="text-right">PREVISIONS<br />ENGAGEES</th>
+          <th rowspan="2" class="text-right">PREVISIONS</th>
           <th rowspan="2" class="text-right">POURCENTAGE<br />REALISATION</th>
           <th rowspan="2" class="text-right">DEPENSES<br />MANDATEES</th>
           <th colspan="4" class="text-center">ENGAGEMENTS NON MANDATES</th>
@@ -92,10 +94,9 @@
           <td class="text-right">
             {{
               data.totalPrevuDepInvest.value > 0
-                ? (
-                    (data.totalDepensesInvest.value / data.totalPrevuDepInvest.value) *
-                    100
-                  ).toFixed(2)
+                ? ((data.totalDepensesInvest.value / data.totalPrevuDepInvest.value) * 100).toFixed(
+                    2,
+                  )
                 : '0.00'
             }}
           </td>
@@ -122,10 +123,10 @@ function fmt(v: number) {
 
 <style scoped>
 .recap-table {
-  font-size: 12px;
+  font-size: 11px;
 }
 .recap-table th {
-  font-size: 10px;
-  background-color: #f5f5f5;
+  font-size: 9px;
+  background-color: #f0f0f0;
 }
 </style>

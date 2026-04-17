@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Compte Administratif - Dépenses Ventilées</title>
+    <title>Compte Administratif - Depenses Ventilees</title>
     <script src="../dexie.min.js"></script>
     <style>
       @page {
@@ -69,8 +69,37 @@
       .padding-left-sm {
         padding-left: 10px;
       }
+      .padding-left-lg {
+        padding-left: 30px;
+      }
       .total-row {
         font-weight: bold;
+      }
+      .section-header td {
+        font-weight: bold;
+        background-color: #e3f2fd;
+      }
+      .chapitre-header td {
+        font-weight: bold;
+        background-color: #e8eaf6;
+        font-size: 9px;
+      }
+      .article-header td {
+        font-weight: bold;
+        font-size: 9px;
+      }
+      .subtotal-article td {
+        font-weight: bold;
+        background-color: #f5f5f5;
+        font-size: 9px;
+      }
+      .section-total td {
+        font-weight: bold;
+        background-color: #e0e0e0;
+      }
+      .grand-total td {
+        font-weight: bold;
+        background-color: #bdbdbd;
       }
       .signatures {
         margin-top: 30px;
@@ -129,7 +158,7 @@
     <button class="print-button no-print" onclick="window.print()">Imprimer</button>
     <div class="container">
       <div id="content">
-        <div class="loading">Chargement des données...</div>
+        <div class="loading">Chargement des donnees...</div>
       </div>
     </div>
 
@@ -137,36 +166,40 @@
       function fmt(v) {
         return v ? new Intl.NumberFormat('fr-FR').format(Math.round(v)) : '0';
       }
+      function fmtZ(v) {
+        return v ? new Intl.NumberFormat('fr-FR').format(Math.round(v)) : '-';
+      }
 
-      const chapitreLabels = {
-        1: '1-Salaires',
-        2: '2-Matériel',
-        3: '3-Charges',
-        4: '4-Subvent.',
-        5: '5-Interv.',
-        6: '6-Autres',
-        7: '7-Réserve',
-        8: '8-Divers',
+      var paragraphLabels = {
+        1: 'Salaires et indemnites',
+        2: 'Charges sociales',
+        3: 'Transport et frais de mission',
+        4: 'Carburant et lubrifiants',
+        5: 'Materiels et fournitures',
+        6: 'Abonnements eau, electricite et telephone',
+        7: "Travaux et services a l'entreprise",
+        8: 'Intervention et transfert',
       };
 
-      const sectionLabels = {
-        60: 'SECTION 60 - SALAIRES ET ACCESSOIRES',
-        61: 'SECTION 61 - MATÉRIEL ET FONCTIONNEMENT',
-        62: "SECTION 62 - CHARGES SOCIALES DE L'ÉTAT",
-        63: 'SECTION 63 - SUBVENTIONS ET TRANSFERTS',
-        64: 'SECTION 64 - INTERVENTIONS ET CHARGES DIVERSES',
+      var sectionLabels = {
+        60: 'DEPENSES DES SERVICES GENERAUX',
+        61: 'DEPENSES DES SERVICES DE COLLECTIVITE',
+        62: 'DEPENSES DES SERVICES SOCIOCULTURELS ET DE PROM. HUM.',
+        63: 'DEPENSES DES SERVICES ECONOMIQUES',
+        64: 'DEPENSES DIVERSES AU TITRE I',
       };
 
       function renderPage(data) {
-        const exercice = data.exercice || new Date().getFullYear();
-        const mairie = data.mairie || {};
-        const lignes = data.lignesVentilees || [];
+        var exercice = data.exercice || new Date().getFullYear();
+        var mairie = data.mairie || {};
+        var scList = data.scList || [];
+        var prevParPara = data.prevParPara || {};
+        var mandatParPara = data.mandatParPara || {};
 
-        const content = document.getElementById('content');
+        var content = document.getElementById('content');
         content.innerHTML = '';
 
-        // Table
-        const table = document.createElement('table');
+        var table = document.createElement('table');
         table.style.tableLayout = 'fixed';
         table.innerHTML = `
           <colgroup>
@@ -187,7 +220,7 @@
             </tr>
             <tr>
               <th class="align-center" style="font-size: 10px;">${exercice}</th>
-              <th class="align-center" style="font-size: 10px;">25</th>
+              <th class="align-center" style="font-size: 10px;">&nbsp;</th>
             </tr>
             <tr>
               <th rowspan="2" class="align-center bold uppercase" style="font-size: 6px;">SALAIRES<br>ET<br>INDEMNITES</th>
@@ -204,42 +237,39 @@
           </thead>
           <tbody></tbody>
         `;
-        const tbody = table.querySelector('tbody');
+        var tbody = table.querySelector('tbody');
 
-        // Group lines by section
-        const sections = {};
-        const sectionOrder = ['60', '61', '62', '63', '64'];
-        sectionOrder.forEach(function (s) {
-          sections[s] = [];
-        });
+        // Group sous-chapitres by section (first 2 digits) then by chapitre group (first 3 digits)
+        var sectionOrder = ['60', '61', '62', '63', '64'];
 
-        lignes.forEach(function (l) {
-          var prefix = (l.code || '').substring(0, 2);
-          if (sections[prefix]) {
-            sections[prefix].push(l);
-          }
-        });
+        var grandPrevu = 0;
+        var grandMandats = 0;
+        var grandCredits = 0;
+        var grandChaps = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0 };
+        var grandTotal = 0;
 
-        let grandPrevu = 0;
-        let grandMandats = 0;
-        let grandCredits = 0;
-        let grandChaps = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0 };
-        let grandTotal = 0;
+        function makeEmptyRow(html) {
+          var tr = document.createElement('tr');
+          tr.innerHTML = html;
+          return tr;
+        }
 
         sectionOrder.forEach(function (secCode) {
-          var items = sections[secCode];
-          if (items.length === 0) return;
+          var sectionItems = scList.filter(function (sc) {
+            return (sc.code || '').substring(0, 2) === secCode;
+          });
+          if (sectionItems.length === 0) return;
 
-          items.sort(function (a, b) {
+          sectionItems.sort(function (a, b) {
             return (a.code || '').localeCompare(b.code || '', undefined, { numeric: true });
           });
 
-          // Section header using format from dep-eng.png
+          // Section header row
           var secRow = document.createElement('tr');
-          secRow.innerHTML = `
-            <td class="bold underline padding-left-md uppercase" style="font-size: 9px;">CHAPITRE ${secCode} - ${sectionLabels[secCode] ? sectionLabels[secCode].replace(/^SECTION \d+ - /, '') : ''}</td>
-            <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td colspan="2"></td>
-          `;
+          secRow.className = 'section-header';
+          secRow.innerHTML =
+            '<td class="bold uppercase" style="font-size: 9px;">SECTION ' + secCode + ' - ' + (sectionLabels[secCode] || '') + '</td>' +
+            '<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td colspan="2"></td>';
           tbody.appendChild(secRow);
 
           var secPrevu = 0;
@@ -248,68 +278,124 @@
           var secChaps = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0 };
           var secTotal = 0;
 
-          items.forEach(function (l) {
-            var prevu = l.prevu || 0;
-            var ventilation = l.ventilation || {};
-            var lineTotal = 0;
-            secPrevu += prevu;
-
-            for (var c = 1; c <= 8; c++) {
-              var val = ventilation[c] || 0;
-              lineTotal += val;
-              secChaps[c] += val;
+          // Group by chapitre (first 3 digits)
+          var chapGroups = {};
+          var chapOrder = [];
+          sectionItems.forEach(function (sc) {
+            var chapCode = (sc.code || '').substring(0, 3);
+            if (!chapGroups[chapCode]) {
+              chapGroups[chapCode] = [];
+              chapOrder.push(chapCode);
             }
-            secTotal += lineTotal;
-            secMandats += lineTotal;
-            var credits = prevu - lineTotal;
-            secCredits += credits;
+            chapGroups[chapCode].push(sc);
+          });
+          chapOrder.sort();
 
-            var codeStr = l.code || '';
-            var libStr = l.libelle || '';
-            var td1 = codeStr + (codeStr && libStr ? ' ' : '') + libStr;
+          chapOrder.forEach(function (chapCode) {
+            // Chapitre header row
+            var chapRow = document.createElement('tr');
+            chapRow.className = 'chapitre-header';
+            chapRow.innerHTML =
+              '<td class="bold padding-left-sm uppercase">CHAPITRE ' + chapCode + '</td>' +
+              '<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td colspan="2"></td>';
+            tbody.appendChild(chapRow);
 
-            var tr = document.createElement('tr');
-            var html =
-              '<td class="padding-left-sm align-left" style="font-size: 9px;">' + td1 + '</td>';
-            html += '<td class="col-num">' + fmt(prevu) + '</td>';
-            html +=
-              '<td class="col-num">' + (fmt(lineTotal) !== '0' ? fmt(lineTotal) : '-') + '</td>';
-            html += '<td class="col-num">' + fmt(credits) + '</td>';
+            var articles = chapGroups[chapCode];
+            articles.sort(function (a, b) {
+              return (a.code || '').localeCompare(b.code || '', undefined, { numeric: true });
+            });
 
-            for (var c = 1; c <= 8; c++) {
-              var val = ventilation[c] || 0;
-              html += '<td class="col-num">' + (fmt(val) !== '0' ? fmt(val) : '-') + '</td>';
-            }
+            articles.forEach(function (sc) {
+              var scId = sc.id;
+              var scCode = sc.code || '';
+              var scLib = sc.libelle || '';
 
-            html +=
-              '<td class="col-num" colspan="2">' + (fmt(lineTotal) !== '0' ? fmt(lineTotal) : '-') + '</td>';
-            tr.innerHTML = html;
-            tbody.appendChild(tr);
+              // Article header row
+              var artRow = document.createElement('tr');
+              artRow.className = 'article-header';
+              artRow.innerHTML =
+                '<td class="bold padding-left-md" style="font-size: 9px;">' + scCode + ' ' + scLib + '</td>' +
+                '<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td colspan="2"></td>';
+              tbody.appendChild(artRow);
+
+              var artPrevu = 0;
+              var artMandat = 0;
+              var artChaps = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0 };
+              var artTotal = 0;
+
+              // Paragraph rows (1-8)
+              for (var n = 1; n <= 8; n++) {
+                var paraKey = scId + '-' + n;
+                var paraPrev = prevParPara[paraKey] || 0;
+                var paraMandat = mandatParPara[paraKey] || 0;
+
+                if (paraPrev === 0 && paraMandat === 0) continue;
+
+                var paraCredits = paraPrev - paraMandat;
+                artPrevu += paraPrev;
+                artMandat += paraMandat;
+                artChaps[n] += paraMandat;
+                artTotal += paraMandat;
+
+                var tr = document.createElement('tr');
+                var html = '<td class="padding-left-lg" style="font-size: 9px;">' + scCode + '/' + n + ' ' + paragraphLabels[n] + '</td>';
+                html += '<td class="col-num">' + fmtZ(paraPrev) + '</td>';
+                html += '<td class="col-num">' + fmtZ(paraMandat) + '</td>';
+                html += '<td class="col-num">' + fmtZ(paraCredits) + '</td>';
+
+                // Ventilation columns: only column n has the mandat value
+                for (var c = 1; c <= 8; c++) {
+                  if (c === n) {
+                    html += '<td class="col-num">' + fmtZ(paraMandat) + '</td>';
+                  } else {
+                    html += '<td class="col-num">-</td>';
+                  }
+                }
+                html += '<td class="col-num" colspan="2">' + fmtZ(paraMandat) + '</td>';
+                tr.innerHTML = html;
+                tbody.appendChild(tr);
+              }
+
+              var artCredits = artPrevu - artTotal;
+
+              // SOUS TOTAL ARTICLE row
+              var stArt = document.createElement('tr');
+              stArt.className = 'subtotal-article';
+              var stArtHtml = '<td class="bold align-right padding-left-md" style="font-size: 8px;">SOUS TOTAL ARTICLE ' + scCode + '</td>';
+              stArtHtml += '<td class="col-num">' + fmtZ(artPrevu) + '</td>';
+              stArtHtml += '<td class="col-num">' + fmtZ(artMandat) + '</td>';
+              stArtHtml += '<td class="col-num">' + fmtZ(artCredits) + '</td>';
+              for (var c = 1; c <= 8; c++) {
+                stArtHtml += '<td class="col-num">' + fmtZ(artChaps[c]) + '</td>';
+              }
+              stArtHtml += '<td class="col-num" colspan="2">' + fmtZ(artTotal) + '</td>';
+              stArt.innerHTML = stArtHtml;
+              tbody.appendChild(stArt);
+
+              // Accumulate into section totals
+              secPrevu += artPrevu;
+              secMandats += artMandat;
+              secCredits += artCredits;
+              for (var c = 1; c <= 8; c++) {
+                secChaps[c] += artChaps[c];
+              }
+              secTotal += artTotal;
+            });
           });
 
-          // Section subtotal
-          var stRow = document.createElement('tr');
-          stRow.className = 'total-row';
-          var stHtml =
-            '<td class="bold align-right uppercase" style="font-size: 8px;">SOUS TOTAL CHAPITRE ' +
-            secCode +
-            '</td>';
-          stHtml +=
-            '<td class="col-num">' + (fmt(secPrevu) !== '0' ? fmt(secPrevu) : '-') + '</td>';
-          stHtml +=
-            '<td class="col-num">' + (fmt(secMandats) !== '0' ? fmt(secMandats) : '-') + '</td>';
-          stHtml +=
-            '<td class="col-num">' + (fmt(secCredits) !== '0' ? fmt(secCredits) : '-') + '</td>';
+          // TOTAL SECTION row
+          var secTotalRow = document.createElement('tr');
+          secTotalRow.className = 'section-total';
+          var stHtml = '<td class="bold align-center uppercase">TOTAL SECTION ' + secCode + '</td>';
+          stHtml += '<td class="col-num">' + fmtZ(secPrevu) + '</td>';
+          stHtml += '<td class="col-num">' + fmtZ(secMandats) + '</td>';
+          stHtml += '<td class="col-num">' + fmtZ(secCredits) + '</td>';
           for (var c = 1; c <= 8; c++) {
-            stHtml +=
-              '<td class="col-num">' +
-              (fmt(secChaps[c]) !== '0' ? fmt(secChaps[c]) : '-') +
-              '</td>';
+            stHtml += '<td class="col-num">' + fmtZ(secChaps[c]) + '</td>';
           }
-          stHtml +=
-            '<td class="col-num" colspan="2">' + (fmt(secTotal) !== '0' ? fmt(secTotal) : '-') + '</td>';
-          stRow.innerHTML = stHtml;
-          tbody.appendChild(stRow);
+          stHtml += '<td class="col-num" colspan="2">' + fmtZ(secTotal) + '</td>';
+          secTotalRow.innerHTML = stHtml;
+          tbody.appendChild(secTotalRow);
 
           grandPrevu += secPrevu;
           grandMandats += secMandats;
@@ -320,25 +406,17 @@
           grandTotal += secTotal;
         });
 
-        // Grand total
+        // TOTAL GENERAL row
         var totalRow = document.createElement('tr');
-        totalRow.className = 'total-row';
-        var tHtml =
-          '<td class="bold align-right uppercase">TOTAL GENERAL DES DEPENSES AU TITRE I</td>';
-        tHtml +=
-          '<td class="col-num">' + (fmt(grandPrevu) !== '0' ? fmt(grandPrevu) : '-') + '</td>';
-        tHtml +=
-          '<td class="col-num">' + (fmt(grandMandats) !== '0' ? fmt(grandMandats) : '-') + '</td>';
-        tHtml +=
-          '<td class="col-num">' + (fmt(grandCredits) !== '0' ? fmt(grandCredits) : '-') + '</td>';
+        totalRow.className = 'grand-total';
+        var tHtml = '<td class="bold align-center uppercase">TOTAL GENERAL DES DEPENSES AU TITRE I</td>';
+        tHtml += '<td class="col-num">' + fmtZ(grandPrevu) + '</td>';
+        tHtml += '<td class="col-num">' + fmtZ(grandMandats) + '</td>';
+        tHtml += '<td class="col-num">' + fmtZ(grandCredits) + '</td>';
         for (var c = 1; c <= 8; c++) {
-          tHtml +=
-            '<td class="col-num">' +
-            (fmt(grandChaps[c]) !== '0' ? fmt(grandChaps[c]) : '-') +
-            '</td>';
+          tHtml += '<td class="col-num">' + fmtZ(grandChaps[c]) + '</td>';
         }
-        tHtml +=
-          '<td class="col-num" colspan="2">' + (fmt(grandTotal) !== '0' ? fmt(grandTotal) : '-') + '</td>';
+        tHtml += '<td class="col-num" colspan="2">' + fmtZ(grandTotal) + '</td>';
         totalRow.innerHTML = tHtml;
         tbody.appendChild(totalRow);
 
@@ -357,7 +435,7 @@
         sigs.innerHTML = `
           <div class="signature-box">
             ${mairie.nom || '---'}, le ${dateStr}<br/>
-            <strong>Le Trésorier Principal</strong>
+            <strong>Le Tresorier Principal</strong>
           </div>
           <div class="signature-box">
             <br/>
@@ -366,7 +444,7 @@
         `;
         content.appendChild(sigs);
 
-        document.title = 'Compte Administratif - Dépenses Ventilées - ' + exercice;
+        document.title = 'Compte Administratif - Depenses Ventilees - ' + exercice;
       }
 
       // Load data directly from IndexedDB
@@ -405,32 +483,43 @@
           var chapMap = {};
           allChapitres.forEach(function (ch) { chapMap[ch.id] = ch; });
 
-          // Build per sous-chapitre with ventilation by chapitre
-          var scAggregation = {};
-          allSousChapitres.forEach(function (sc) {
-            if (!(sc.code || '').startsWith('6')) return;
-            scAggregation[sc.id] = { code: sc.code, libelle: sc.libelle, prevu: 0, ventilation: {} };
+          // Build sous-chapitre list (codes starting with 6)
+          var scList = allSousChapitres.filter(function (sc) {
+            return (sc.code || '').startsWith('6');
           });
 
+          // Build prevision per paragraph: key = "sousChapitreId-chapCode"
+          var prevParPara = {};
           previsions.forEach(function (p) {
-            if (scAggregation[p.sousChapitreId]) scAggregation[p.sousChapitreId].prevu += p.montantPrevu || 0;
+            if (!p.sousChapitreId) return;
+            var sc = scList.find(function (s) { return s.id === p.sousChapitreId; });
+            if (!sc) return;
+            var chap = chapMap[p.chapitreId];
+            var chapCode = chap ? (chap.code || '') : '';
+            if (!chapCode) return;
+            var key = p.sousChapitreId + '-' + chapCode;
+            prevParPara[key] = (prevParPara[key] || 0) + (p.montantPrevu || 0);
           });
 
+          // Build mandat per paragraph: key = "sousChapitreId-chapCode"
+          var mandatParPara = {};
           mandats.forEach(function (m) {
-            if (!scAggregation[m.sousChapitreId]) return;
-            var chapitre = chapMap[m.chapitreId];
-            var chapCode = chapitre ? chapitre.code || '' : '';
-            var chapNum = parseInt(chapCode, 10) || m.chapitreId;
-            if (!scAggregation[m.sousChapitreId].ventilation[chapNum]) {
-              scAggregation[m.sousChapitreId].ventilation[chapNum] = 0;
-            }
-            scAggregation[m.sousChapitreId].ventilation[chapNum] += m.montant || 0;
+            if (!m.sousChapitreId) return;
+            var sc = scList.find(function (s) { return s.id === m.sousChapitreId; });
+            if (!sc) return;
+            var chap = chapMap[m.chapitreId];
+            var chapCode = chap ? (chap.code || '') : '';
+            if (!chapCode) return;
+            var key = m.sousChapitreId + '-' + chapCode;
+            mandatParPara[key] = (mandatParPara[key] || 0) + (m.montant || 0);
           });
 
           renderPage({
             exercice: exercice,
             mairie: mairie,
-            lignesVentilees: Object.values(scAggregation),
+            scList: scList,
+            prevParPara: prevParPara,
+            mandatParPara: mandatParPara,
           });
         } catch (e) {
           console.error('[DepFonc] Erreur:', e);

@@ -2,6 +2,7 @@ import { db, DEFAULT_MAIRIE_ID } from './db';
 import type {
   SousChapitre,
   Prevision,
+  Projet,
   Mandat,
   BordereauMandat,
   BordereauRecette,
@@ -68,6 +69,184 @@ export interface SeedOptions {
   mandats?: number;
   bordereauMandats?: number;
 }
+
+interface ReferenceProjetSeed {
+  libelle: string;
+  compteCode: string;
+  patrimoine: string;
+  montant: number;
+  realise: number;
+  typeBien: 'immobilier' | 'mobilier' | 'incorporel';
+}
+
+function getProjetStatut(montant: number, realise: number): Projet['statut'] {
+  if (realise <= 0) return 'en_cours';
+  if (realise >= montant * 0.995) return 'termine';
+  return 'en_cours';
+}
+
+const REFERENCE_PROJETS: ReferenceProjetSeed[] = [
+  {
+    libelle: 'Ouverture de voies au quartier Zouah Bi Bah',
+    compteCode: '9101',
+    patrimoine: '2220',
+    montant: 29000000,
+    realise: 28999750,
+    typeBien: 'immobilier',
+  },
+  {
+    libelle: 'Réhabilitation du bâtiment de la municipale de la mairie',
+    compteCode: '900',
+    patrimoine: '2210',
+    montant: 16990000,
+    realise: 0,
+    typeBien: 'immobilier',
+  },
+  {
+    libelle: "Construction d'un centre de santé à DEMA",
+    compteCode: '9212',
+    patrimoine: '2214',
+    montant: 10358000,
+    realise: 6590815,
+    typeBien: 'immobilier',
+  },
+  {
+    libelle: "Construction d'une école primaire publique SEBOUAFLA",
+    compteCode: '9201',
+    patrimoine: '2212',
+    montant: 95723000,
+    realise: 74247877,
+    typeBien: 'immobilier',
+  },
+  {
+    libelle: "Construction d'une école primaire publique BOUHITAFLA",
+    compteCode: '9201',
+    patrimoine: '2212',
+    montant: 30000000,
+    realise: 22925555,
+    typeBien: 'immobilier',
+  },
+  {
+    libelle: 'Extension du réseau électrique sur 800 mètres au quartier Château',
+    compteCode: '9103',
+    patrimoine: '2224',
+    montant: 54000000,
+    realise: 44690615,
+    typeBien: 'immobilier',
+  },
+  {
+    libelle: 'Extension du réseau électrique sur 900 mètres au quartier Rouge',
+    compteCode: '9103',
+    patrimoine: '2224',
+    montant: 65000000,
+    realise: 47165980,
+    typeBien: 'immobilier',
+  },
+  {
+    libelle: 'Extension du réseau électrique sur 250 mètres au centre de santé DEMA',
+    compteCode: '9103',
+    patrimoine: '2224',
+    montant: 15000000,
+    realise: 13930224,
+    typeBien: 'immobilier',
+  },
+  {
+    libelle: 'Réhabilitation de 40 magasins gare routière de Vavoua',
+    compteCode: '9344',
+    patrimoine: '2213',
+    montant: 2321000,
+    realise: 0,
+    typeBien: 'immobilier',
+  },
+  {
+    libelle: 'Réhabilitation de 3 bâtiments du groupe scolaire 2-7-9',
+    compteCode: '9201',
+    patrimoine: '2212',
+    montant: 2476000,
+    realise: 0,
+    typeBien: 'immobilier',
+  },
+  {
+    libelle: 'Réhabilitation de 6 salles de classe EPP GOUABAFLA',
+    compteCode: '9201',
+    patrimoine: '2212',
+    montant: 1264000,
+    realise: 0,
+    typeBien: 'immobilier',
+  },
+  {
+    libelle: 'Équipement de 15 forages en pompe scolaire dans les villages',
+    compteCode: '9134',
+    patrimoine: '2222',
+    montant: 3650000,
+    realise: 0,
+    typeBien: 'immobilier',
+  },
+  {
+    libelle: 'Construction de 7 forages dans les villages',
+    compteCode: '9134',
+    patrimoine: '2222',
+    montant: 57335000,
+    realise: 0,
+    typeBien: 'immobilier',
+  },
+  {
+    libelle: "Construction d'un bâtiment au groupe scolaire 146",
+    compteCode: '9201',
+    patrimoine: '2212',
+    montant: 26710000,
+    realise: 0,
+    typeBien: 'immobilier',
+  },
+  {
+    libelle: 'Équipement du centre de santé de DEMA en mobilier de bureau',
+    compteCode: '9212',
+    patrimoine: '2260',
+    montant: 20578000,
+    realise: 20570000,
+    typeBien: 'mobilier',
+  },
+  {
+    libelle: 'Acquisition de 5 motos pour les chefs de service de la mairie',
+    compteCode: '900',
+    patrimoine: '2244',
+    montant: 7500000,
+    realise: 7500000,
+    typeBien: 'mobilier',
+  },
+  {
+    libelle: "Acquisition d'un véhicule de fonction pour le maire",
+    compteCode: '900',
+    patrimoine: '2257',
+    montant: 29000000,
+    realise: 29000000,
+    typeBien: 'mobilier',
+  },
+  {
+    libelle: "Acquisition d'un véhicule de fonction pour le secrétaire général",
+    compteCode: '900',
+    patrimoine: '2257',
+    montant: 25000000,
+    realise: 25000000,
+    typeBien: 'mobilier',
+  },
+  {
+    libelle: 'Acquisition de 5 ordinateurs portables pour les chefs de service',
+    compteCode: '900',
+    patrimoine: '2262',
+    montant: 1800000,
+    realise: 1799975,
+    typeBien: 'mobilier',
+  },
+  {
+    libelle: 'Acquisition de 450 tables-bancs pour les EPP de SEBOUAFLA et BOUHITAFLA',
+    compteCode: '9201',
+    patrimoine: '2264',
+    montant: 29500000,
+    realise: 29452500,
+    typeBien: 'mobilier',
+  },
+];
 
 // =================================================================
 //                      SEEDER DE DONNÉES PAR DÉFAUT
@@ -1298,6 +1477,9 @@ export async function seedTestData(options: SeedOptions = {}) {
     console.log('🌱 Mise à jour des montants engagés dans les prévisions...');
     await updatePrevisionsFromMandats();
 
+    console.log('🌱 Seeding projets de référence...');
+    await seedReferenceProjects();
+
     // =================================================================
     // APP6 - RECETTES SEEDERS
     // =================================================================
@@ -1349,6 +1531,67 @@ export async function seedTestData(options: SeedOptions = {}) {
     console.error('❌ Error during test data seeding:', error);
     throw error;
   }
+}
+
+export async function seedReferenceProjects() {
+  console.log('🚀 Seeding projets de référence du compte administratif...');
+
+  const sousChapitres = await db.sousChapitres.toArray();
+  const projetsExistants = await db.projets.toArray();
+  const sousChapitreByCode = new Map(sousChapitres.map((item) => [item.code, item.id!]));
+  const existingKeys = new Set(
+    projetsExistants.map((projet) => `${projet.annee}::${projet.libelle.toLowerCase()}`),
+  );
+
+  const now = new Date();
+  const projetsToCreate: Omit<Projet, 'id'>[] = [];
+  const missingCodes = new Set<string>();
+  let skipped = 0;
+
+  for (const item of REFERENCE_PROJETS) {
+    const key = `${CURRENT_YEAR}::${item.libelle.toLowerCase()}`;
+    if (existingKeys.has(key)) {
+      skipped += 1;
+      continue;
+    }
+
+    const sousChapitreId = sousChapitreByCode.get(item.compteCode);
+    if (!sousChapitreId) {
+      missingCodes.add(item.compteCode);
+    }
+
+    const observations = !sousChapitreId
+      ? `Projet de test créé via seeder. Compte fonctionnel source introuvable: ${item.compteCode}`
+      : 'Projet de test créé via seeder.';
+
+    projetsToCreate.push({
+      libelle: item.libelle,
+      ...(sousChapitreId ? { sousChapitreId } : {}),
+      patrimoine: item.patrimoine,
+      montant: item.montant,
+      realise: item.realise,
+      annee: CURRENT_YEAR,
+      typeBien: item.typeBien,
+      statut: getProjetStatut(item.montant, item.realise),
+      observations,
+      mairieId: DEFAULT_MAIRIE_ID,
+      personnelId: 1,
+      createdAt: now,
+      updatedAt: now,
+    });
+  }
+
+  if (projetsToCreate.length > 0) {
+    await db.projets.bulkAdd(projetsToCreate);
+  }
+
+  if (missingCodes.size > 0) {
+    console.log(
+      `⚠️ Comptes fonctionnels introuvables dans le référentiel local: ${Array.from(missingCodes).join(', ')}`,
+    );
+  }
+
+  console.log(`✅ ${projetsToCreate.length} projets de référence créés, ${skipped} déjà présents.`);
 }
 
 // =================================================================
@@ -1701,7 +1944,7 @@ async function seedEmployes(): Promise<(Employe & { id: number })[]> {
     {
       matricule: 'EMP018',
       nom: 'AKOU',
-      prenom: 'N\'Guessan Patricia',
+      prenom: "N'Guessan Patricia",
       sexe: 'F',
       typeEmploye: 'Salariés (6000/2)',
       poste: 'Responsable État Civil',

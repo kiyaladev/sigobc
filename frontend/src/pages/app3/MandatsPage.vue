@@ -232,9 +232,21 @@
                   @filter="filterSousChapitre"
                 />
               </div>
+              <div v-if="isInvestissement" class="col-12 col-md-6">
+                <q-select
+                  v-model="formData.typeBien"
+                  :options="typeBienOptions"
+                  label="Type de bien"
+                  outlined
+                  dense
+                  emit-value
+                  map-options
+                  clearable
+                />
+              </div>
             </div>
 
-            <div class="row q-col-gutter-sm">
+            <div class="row q-col-gutter-sm q-mt-xs">
               <div class="col-12 col-md-6">
                 <q-select
                   v-model="formData.bordereauMandatId"
@@ -262,6 +274,28 @@
                   dense
                   placeholder="Ex: 6000/1"
                 />
+              </div>
+            </div>
+
+            <div v-if="isInvestissement" class="row q-col-gutter-sm q-mt-xs">
+              <div class="col-12 col-md-6">
+                <q-select
+                  v-model="formData.projetId"
+                  :options="filteredProjetOptions"
+                  label="Projet d'investissement"
+                  outlined
+                  dense
+                  emit-value
+                  map-options
+                  clearable
+                  use-input
+                  input-debounce="0"
+                  @filter="filterProjet"
+                >
+                  <template v-slot:prepend>
+                    <q-icon name="engineering" color="primary" />
+                  </template>
+                </q-select>
               </div>
             </div>
 
@@ -389,18 +423,6 @@
 
             <div class="row q-col-gutter-sm">
               <div class="col-12 col-md-6">
-                <q-select
-                  v-model="formData.typeBien"
-                  :options="typeBienOptions"
-                  label="Type de bien"
-                  outlined
-                  dense
-                  emit-value
-                  map-options
-                  clearable
-                />
-              </div>
-              <div class="col-12 col-md-6">
                 <q-input
                   v-model="formData.numeroDeliberation"
                   label="N° Délibération"
@@ -408,9 +430,6 @@
                   dense
                 />
               </div>
-            </div>
-
-            <div class="row q-col-gutter-sm">
               <div class="col-12 col-md-6">
                 <q-input
                   v-model="formData.dateDeliberation"
@@ -477,6 +496,7 @@ import {
   type BordereauMandat,
   type Mairie,
   type Exercice,
+  type Projet,
 } from 'src/database/db';
 import PageHeader from 'src/components/PageHeader.vue';
 import DataTable from 'src/components/DataTable.vue';
@@ -501,6 +521,7 @@ const sousChapitres = ref<SousChapitre[]>([]);
 const bordereauMandats = ref<BordereauMandat[]>([]);
 const mairies = ref<Mairie[]>([]);
 const exercices = ref<Exercice[]>([]);
+const projets = ref<Projet[]>([]);
 
 const lockedYears = computed(() =>
   exercices.value.filter((e) => e.statut === 'verrouille').map((e) => e.annee),
@@ -535,6 +556,7 @@ const formData = ref({
   dateDeliberation: '',
   montantPrecompter: 0,
   typeBien: '' as '' | 'immobilier' | 'mobilier' | 'incorporel',
+  projetId: null as number | null,
 });
 
 const chapitreOptions = computed(() =>
@@ -562,6 +584,23 @@ const bordereauMandatOptions = computed(() =>
     })),
 );
 
+const isInvestissement = computed(() => {
+  if (!formData.value.sousChapitreId) return false;
+  const sc = sousChapitres.value.find((s) => s.id === formData.value.sousChapitreId);
+  return sc?.code.startsWith('9') ?? false;
+});
+
+const projetOptions = computed(() =>
+  projets.value
+    .filter((p) => p.statut !== 'annule')
+    .map((p) => ({
+      label: `${p.libelle} (${p.annee})`,
+      value: p.id,
+    })),
+);
+
+const filteredProjetOptions = ref(projetOptions.value);
+
 const filteredChapitreOptions = ref(chapitreOptions.value);
 const filteredSousChapitreOptions = ref(sousChapitreOptions.value);
 const filteredBordereauMandatOptions = ref(bordereauMandatOptions.value);
@@ -576,6 +615,17 @@ watch(sousChapitreOptions, (newOptions) => {
 
 watch(bordereauMandatOptions, (newOptions) => {
   filteredBordereauMandatOptions.value = newOptions;
+});
+
+watch(projetOptions, (newOptions) => {
+  filteredProjetOptions.value = newOptions;
+});
+
+watch(isInvestissement, (newValue) => {
+  if (!newValue) {
+    formData.value.typeBien = '';
+    formData.value.projetId = null;
+  }
 });
 
 function filterChapitre(val: string, update: (callback: () => void) => void) {
@@ -618,6 +668,21 @@ function filterBordereauMandat(val: string, update: (callback: () => void) => vo
   update(() => {
     const needle = val.toLowerCase();
     filteredBordereauMandatOptions.value = bordereauMandatOptions.value.filter(
+      (v) => v.label.toLowerCase().indexOf(needle) > -1,
+    );
+  });
+}
+
+function filterProjet(val: string, update: (callback: () => void) => void) {
+  if (val === '') {
+    update(() => {
+      filteredProjetOptions.value = projetOptions.value;
+    });
+    return;
+  }
+  update(() => {
+    const needle = val.toLowerCase();
+    filteredProjetOptions.value = projetOptions.value.filter(
       (v) => v.label.toLowerCase().indexOf(needle) > -1,
     );
   });
@@ -835,6 +900,7 @@ async function loadData() {
       bordereauMandats.value,
       mairies.value,
       exercices.value,
+      projets.value,
     ] = await Promise.all([
       db.mandats.toArray(),
       db.chapitres.filter((c) => c.actif).toArray(),
@@ -842,6 +908,7 @@ async function loadData() {
       db.bordereauMandats.toArray(),
       db.mairies.toArray(),
       db.exercices.toArray(),
+      db.projets.toArray(),
     ]);
   } catch (error) {
     console.error('Erreur lors du chargement:', error);
@@ -880,6 +947,7 @@ function resetForm() {
     dateDeliberation: '',
     montantPrecompter: 0,
     typeBien: '',
+    projetId: null,
   };
   editingId.value = null;
 }
@@ -966,6 +1034,7 @@ async function saveMandat() {
       ...(formData.value.bordereauMandatId
         ? { bordereauMandatId: formData.value.bordereauMandatId }
         : {}),
+      ...(formData.value.projetId ? { projetId: formData.value.projetId } : {}),
       mairieId,
       personnelId,
     };
@@ -1061,6 +1130,7 @@ function editMandat(row: Mandat) {
       : '',
     montantPrecompter: row.montantPrecompter || 0,
     typeBien: (row.typeBien as '' | 'immobilier' | 'mobilier' | 'incorporel') || '',
+    projetId: row.projetId || null,
   };
   showAddDialog.value = true;
 }

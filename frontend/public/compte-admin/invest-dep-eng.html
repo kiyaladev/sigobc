@@ -41,17 +41,10 @@
       .col-libelle { width: 28%; text-align: left; }
       .col-num { width: 16%; text-align: right; white-space: nowrap; }
       .col-percent { width: 8%; text-align: center; }
+      .col-center { text-align: center; }
       .section-header { background-color: #e0e0e0; font-weight: bold; }
       .total-section { background-color: #d0d0d0; font-weight: bold; border-top: 2px solid #000; }
       .grand-total { background-color: #bbb; font-weight: bold; border-top: 3px double #000; }
-      .doc-header-cell { padding: 0 !important; background: #fff !important; }
-      .doc-header-grid { width: 100%; display: grid; grid-template-columns: 1fr 2fr 1fr; }
-      .doc-header-block { padding: 4px 6px; min-height: 70px; }
-      .doc-header-block + .doc-header-block { border-left: 1px solid #000; }
-      .doc-header-left { text-align: left; font-weight: bold; }
-      .doc-header-center { text-align: center; font-weight: bold; }
-      .doc-header-right { text-align: right; font-weight: bold; }
-      .doc-header-center .main-title { margin: 0 0 4px 0; }
       .print-button {
         position: fixed; top: 20px; right: 20px; padding: 10px 20px;
         background: #009688; color: white; border: none; border-radius: 5px;
@@ -80,22 +73,10 @@
       const sectionLabels = {
         '90': 'SECTION 90 - EQUIPEMENT DES SERVICES GENERAUX',
         '91': 'SECTION 91 - EQUIPEMENT DES SERVICES DE COLLECTIVITE',
-        '92': 'SECTION 92 - EQUIPEMENT DES SERVICES SOCIOCULTURELS ET DE PROM. HUM.',
-        '93': 'SECTION 93 - EQUIPEMENT DES SERVICES ECONOMIQUES',
-        '94': 'SECTION 94 - REMBOURSEMENT D\'EMPRUNTS',
-        '95': 'SECTION 95 - AUTRES DEPENSES D\'INVESTISSEMENT'
-      };
-      
-      const chapitreLabels = {
-        '900': 'ADMINISTRATION GENERALE',
-        '903': 'POLICE ET ORDRE PUBLIC',
-        '910': 'VOIRIES ET RESEAUX',
-        '912': 'URBANISME ET ENVIRONNEMENT',
-        '913': 'HYGIENE ET SALUBRITE PUBLIQUES, HYDRAULIQUE, ADDUCTIONS D\'EAU',
-        '920': 'ENSEIGNEMENT PRIMAIRE ET PRE-SCOLAIRE',
-        '921': 'SANTE PUBLIQUE',
-        '930': 'PROJETS AGRICOLES',
-        '934': 'INDUSTRIE ET COMMERCE'
+        '92': 'SECTION 92 - URBANISME ET ASSAINISSEMENT',
+        '93': 'SECTION 93 - INVESTISSEMENTS FINANCIERS',
+        '94': 'SECTION 94 - REMBOURSEMENT EMPRUNTS',
+        '95': 'SECTION 95 - DEPENSES DIVERSES'
       };
 
       async function loadAndRender() {
@@ -115,7 +96,7 @@
           var latest = pd.filter(p => p.type === 'FILL_COMPTE_ADMIN_DATA').sort((a,b) => b.createdAt - a.createdAt)[0];
           if (latest && latest.data && latest.data.exercice) exercice = latest.data.exercice;
         } catch(e) {}
-        
+
         var params = new URLSearchParams(window.location.search);
         if (params.get('exercice')) exercice = parseInt(params.get('exercice'));
 
@@ -137,14 +118,19 @@
         });
 
         const engMap = {};
+        const mandatMap = {};
         mandats.forEach(m => {
           if (m.statut === 'annule') return;
-          if (m.sousChapitreId) engMap[m.sousChapitreId] = (engMap[m.sousChapitreId] || 0) + (m.montant || 0);
+          if (m.sousChapitreId) {
+            engMap[m.sousChapitreId] = (engMap[m.sousChapitreId] || 0) + (m.montant || 0);
+            if (m.statut === 'mandate' || m.statut === 'paye') {
+              mandatMap[m.sousChapitreId] = (mandatMap[m.sousChapitreId] || 0) + (m.montant || 0);
+            }
+          }
         });
 
         var tbodyHtml = '';
-        var tSectionP = 0, tSectionE = 0;
-        var tGeneralP = 0, tGeneralE = 0;
+        var tGeneralP = 0, tGeneralE = 0, tGeneralM = 0;
 
         var sections = {};
         investSC.forEach(sc => {
@@ -154,8 +140,8 @@
         });
 
         Object.keys(sections).sort().forEach(sec => {
-          tbodyHtml += `<tr><td colspan="9" style="font-weight: bold; font-size: 11px; text-decoration: underline;">${sectionLabels[sec] || 'SECTION ' + sec}</td></tr>`;
-          
+          tbodyHtml += `<tr><td colspan="9" style="font-weight: bold; font-size: 11px; text-decoration: underline; background-color: #e0e0e0;">${sectionLabels[sec] || 'SECTION ' + sec}</td></tr>`;
+
           var scs = sections[sec].sort((a,b) => a.code.localeCompare(b.code));
           var chapitres = {};
           scs.forEach(sc => {
@@ -163,101 +149,71 @@
             if (!chapitres[chap]) chapitres[chap] = [];
             chapitres[chap].push(sc);
           });
-          
-          var secPrev = 0, secEng = 0;
+
+          var secPrev = 0, secEng = 0, secMand = 0;
 
           Object.keys(chapitres).sort().forEach(chap => {
-            var cLabel = chapitreLabels[chap] || chapitres[chap][0].libelle || chap;
-            tbodyHtml += `<tr><td colspan="9" style="font-weight: bold; font-size: 10px; text-decoration: underline;">CHAPITRE ${chap} - ${cLabel}</td></tr>`;
-            
-            var chapPrev = 0, chapEng = 0;
-            
+            tbodyHtml += `<tr><td colspan="9" style="font-weight: bold; font-size: 10px; text-decoration: underline;">CHAPITRE ${chap}</td></tr>`;
+
+            var chapPrev = 0, chapEng = 0, chapMand = 0;
+
             chapitres[chap].forEach(sc => {
               var p = prevMap[sc.id] || 0;
               var e = engMap[sc.id] || 0;
-              chapPrev += p; chapEng += e;
-              secPrev += p; secEng += e;
-              
-              var isArticle = sc.code.length >= 4;
-              if (isArticle) {
-                tbodyHtml += `<tr><td colspan="9" style="font-weight: bold; font-size: 9px;">${sc.code} - ${sc.libelle || ''}</td></tr>`;
-              }
-              
-              var isMobilier = /moto|vehicule|ordinateur|bureau|table|mobilier|equipement inform|vehicules/i.test(sc.libelle) || sc.code === '900' || sc.code === '903';
-              var natureTitle = isMobilier ? 'MOBILIERS' : 'IMMOBILIERS';
-              
-              tbodyHtml += `<tr><td colspan="9" style="text-decoration: underline; padding-left: 20px; font-size: 9px;">${natureTitle}</td></tr>`;
+              var m = mandatMap[sc.id] || 0;
+              chapPrev += p; chapEng += e; chapMand += m;
+
               tbodyHtml += `<tr>
-                <td style="padding-left: 20px;">Travaux et services à l'entreprise</td>
+                <td style="padding-left: 10px;">${sc.code} - ${sc.libelle || ''}</td>
                 <td class="col-num">${fmt(p)}</td>
                 <td class="col-num">${fmt(e)}</td>
                 <td class="col-center">${pct(e, p)}</td>
-                <td class="col-num">${fmt(e)}</td>
+                <td class="col-num">${fmt(m)}</td>
                 <td class="col-center">-</td>
                 <td class="col-center">-</td>
                 <td class="col-center">-</td>
                 <td class="col-center">-</td>
               </tr>`;
-              
-              tbodyHtml += `<tr>
-                <td style="padding-left: 20px;">Interventions et transferts</td>
-                <td class="col-center">-</td><td class="col-center">-</td><td class="col-center">-</td><td class="col-center">-</td>
-                <td class="col-center">-</td><td class="col-center">-</td><td class="col-center">-</td><td class="col-center">-</td>
-              </tr>`;
-              
-              if (isArticle) {
-                tbodyHtml += `<tr style="font-weight: bold; background-color: #f9f9f9;">
-                  <td style="text-align: center;">SOUS TOTAL ARTICLE ${sc.code}</td>
-                  <td class="col-num">${fmt(p)}</td>
-                  <td class="col-num">${fmt(e)}</td>
-                  <td class="col-center">${pct(e, p)}</td>
-                  <td class="col-num">${fmt(e)}</td>
-                  <td class="col-center">-</td>
-                  <td class="col-center">-</td>
-                  <td class="col-center">-</td>
-                  <td class="col-center">-</td>
-                </tr>`;
-              }
             });
-            
-            var cWord = chapitres[chap].length === 1 && chapitres[chap][0].code.length >= 4 ? 'ARTICLE' : 'CHAPITRE';
-            var cNum = chapitres[chap].length === 1 && chapitres[chap][0].code.length >= 4 ? chapitres[chap][0].code : chap;
-            
+
             tbodyHtml += `<tr style="font-weight: bold; background-color: #f1f1f1;">
-              <td style="text-align: center;">SOUS TOTAL ${cWord} ${cNum}</td>
+              <td style="text-align: center;">SOUS TOTAL CHAPITRE ${chap}</td>
               <td class="col-num">${fmt(chapPrev)}</td>
               <td class="col-num">${fmt(chapEng)}</td>
               <td class="col-center">${pct(chapEng, chapPrev)}</td>
-              <td class="col-num">${fmt(chapEng)}</td>
+              <td class="col-num">${fmt(chapMand)}</td>
               <td class="col-center">-</td>
               <td class="col-center">-</td>
               <td class="col-center">-</td>
               <td class="col-center">-</td>
             </tr>`;
+
+            secPrev += chapPrev; secEng += chapEng; secMand += chapMand;
           });
-          
+
           tbodyHtml += `<tr style="font-weight: bold; background-color: #e8e8e8;">
             <td style="text-align: center;">TOTAL SECTION ${sec}</td>
             <td class="col-num">${fmt(secPrev)}</td>
             <td class="col-num">${fmt(secEng)}</td>
             <td class="col-center">${pct(secEng, secPrev)}</td>
-            <td class="col-num">${fmt(secEng)}</td>
+            <td class="col-num">${fmt(secMand)}</td>
             <td class="col-center">-</td>
             <td class="col-center">-</td>
             <td class="col-center">-</td>
             <td class="col-center">-</td>
           </tr>`;
-          
+
           tGeneralP += secPrev;
           tGeneralE += secEng;
+          tGeneralM += secMand;
         });
-        
+
         tbodyHtml += `<tr style="font-weight: bold; background-color: #d8d8d8; border-top: 2px solid #000;">
           <td style="text-align: center;">TOTAL GENERAL DES DEPENSES AU TITRE II</td>
           <td class="col-num">${fmt(tGeneralP)}</td>
           <td class="col-num">${fmt(tGeneralE)}</td>
           <td class="col-center">${pct(tGeneralE, tGeneralP)}</td>
-          <td class="col-num">${fmt(tGeneralE)}</td>
+          <td class="col-num">${fmt(tGeneralM)}</td>
           <td class="col-center">-</td>
           <td class="col-center">-</td>
           <td class="col-center">-</td>
@@ -278,11 +234,11 @@
                 <th rowspan="4" style="text-align:center; vertical-align:middle; font-size:9px;">PREVISIONS</th>
                 <th colspan="5" style="text-align:center; padding:8px; font-size:12px; font-weight:bold;">COMPTE ADMINISTRATIF DEPENSES D'INVESTISSEMENT</th>
                 <th style="text-align:center; padding:4px; font-size:9px;">ANNEE<br><b>${exercice}</b></th>
-                <th style="text-align:center; padding:4px; font-size:9px;">N&deg;<br><b>28</b></th>
+                <th style="text-align:center; padding:4px; font-size:9px;">N&deg;<br><b>&nbsp;</b></th>
               </tr>
               <tr>
                 <th rowspan="3" style="text-align:center; font-size:8px; vertical-align:middle;">DEPENSES<br>ENGAGEES</th>
-                <th rowspan="3" style="text-align:center; font-size:8px; vertical-align:middle;">POURCENTAGE<br>DE<br>REALISATION</th>
+                <th rowspan="3" style="text-align:center; font-size:8px; vertical-align:middle;">% E/P</th>
                 <th rowspan="3" style="text-align:center; font-size:8px; vertical-align:middle;">DEPENSES<br>MANDATEES</th>
                 <th colspan="4" style="text-align:center; font-size:9px;">ENGAGEMENTS NON MANDATES</th>
               </tr>

@@ -7,7 +7,9 @@
     <q-markup-table dense bordered flat separator="cell" class="invest-dep-table">
       <thead>
         <tr>
-          <th rowspan="2" class="text-left" style="width: 300px">COMPTES ET RUBRIQUES BUDGETAIRES</th>
+          <th rowspan="2" class="text-left" style="width: 300px">
+            COMPTES ET RUBRIQUES BUDGETAIRES
+          </th>
           <th rowspan="2" class="text-right">PREVISIONS</th>
           <th colspan="2" class="text-center">DEPENSES ENGAGEES</th>
           <th colspan="4" class="text-center">ENGAGEMENTS NON MANDATES</th>
@@ -16,7 +18,9 @@
           <th class="text-right">POURCENTAGE<br />REALISATION</th>
           <th class="text-right">DEPENSES<br />MANDATEES</th>
           <th class="text-right">COMMANDES<br />NON LIVREES</th>
-          <th class="text-right">COMMANDES<br />LIVREES NON<br />FACTUREES</th>
+          <th class="text-right">
+            COMMANDES<br />LIVREES NON<br />FACTUREES
+          </th>
           <th class="text-right">COMMANDES<br />FACTUREES</th>
           <th class="text-right">TOTAL<br />(6 + 7 + 8)</th>
         </tr>
@@ -35,20 +39,33 @@
         </tr>
         <template v-for="section in sections" :key="section.code">
           <!-- Section header -->
-          <tr class="bg-grey-3 text-weight-bold">
+          <tr class="section-header-row">
             <td colspan="8">{{ section.libelle }}</td>
           </tr>
-          <!-- Chapitres under this section -->
-          <template v-for="chap in getChapitres(section.code)" :key="chap.code">
-            <tr class="bg-grey-1 text-weight-medium">
-              <td colspan="8" class="q-pl-md">CHAPITRE {{ chap.code }} - {{ chap.libelle }}</td>
+          <!-- Chapitre groups (3-digit prefix) -->
+          <template
+            v-for="chapGroup in getChapitreGroups(section.code)"
+            :key="chapGroup.code"
+          >
+            <tr class="chapitre-header-row">
+              <td colspan="8" class="q-pl-md">
+                CHAPITRE {{ chapGroup.code }}
+              </td>
             </tr>
             <!-- Articles -->
-            <tr v-for="article in getArticles(chap.code)" :key="article.sousChapitreId" class="article-row">
+            <tr
+              v-for="article in chapGroup.articles"
+              :key="article.sousChapitreId"
+              class="article-row"
+            >
               <td class="q-pl-lg">{{ article.code }} - {{ article.libelle }}</td>
               <td class="text-right">{{ fmtZ(article.montantPrevu) }}</td>
               <td class="text-right">
-                {{ article.montantPrevu > 0 ? ((article.montantEngage / article.montantPrevu) * 100).toFixed(2) : '-' }}
+                {{
+                  article.montantPrevu > 0
+                    ? ((article.montantEngage / article.montantPrevu) * 100).toFixed(2)
+                    : '-'
+                }}
               </td>
               <td class="text-right">{{ fmtZ(article.montantEngage) }}</td>
               <td class="text-right">-</td>
@@ -57,13 +74,23 @@
               <td class="text-right">-</td>
             </tr>
             <!-- Chapitre subtotal -->
-            <tr class="bg-grey-1 text-weight-bold text-caption">
-              <td class="q-pl-md text-italic">SOUS TOTAL CHAPITRE {{ chap.code }}</td>
-              <td class="text-right">{{ fmtZ(chapTotal(chap.code, 'montantPrevu')) }}</td>
-              <td class="text-right">
-                {{ chapTotal(chap.code, 'montantPrevu') > 0 ? ((chapTotal(chap.code, 'montantEngage') / chapTotal(chap.code, 'montantPrevu')) * 100).toFixed(2) : '-' }}
+            <tr class="subtotal-row">
+              <td class="q-pl-md text-italic">
+                SOUS TOTAL CHAPITRE {{ chapGroup.code }}
               </td>
-              <td class="text-right">{{ fmtZ(chapTotal(chap.code, 'montantEngage')) }}</td>
+              <td class="text-right">{{ fmtZ(chapGroupTotal(chapGroup, 'montantPrevu')) }}</td>
+              <td class="text-right">
+                {{
+                  chapGroupTotal(chapGroup, 'montantPrevu') > 0
+                    ? (
+                        (chapGroupTotal(chapGroup, 'montantEngage') /
+                          chapGroupTotal(chapGroup, 'montantPrevu')) *
+                        100
+                      ).toFixed(2)
+                    : '-'
+                }}
+              </td>
+              <td class="text-right">{{ fmtZ(chapGroupTotal(chapGroup, 'montantEngage')) }}</td>
               <td class="text-right">-</td>
               <td class="text-right">-</td>
               <td class="text-right">-</td>
@@ -71,11 +98,19 @@
             </tr>
           </template>
           <!-- Section total -->
-          <tr class="bg-grey-3 text-weight-bold">
+          <tr class="section-total-row">
             <td class="text-center">TOTAL SECTION {{ section.code }}</td>
             <td class="text-right">{{ fmt(sectionTotal(section.code, 'montantPrevu')) }}</td>
             <td class="text-right">
-              {{ sectionTotal(section.code, 'montantPrevu') > 0 ? ((sectionTotal(section.code, 'montantEngage') / sectionTotal(section.code, 'montantPrevu')) * 100).toFixed(2) : '-' }}
+              {{
+                sectionTotal(section.code, 'montantPrevu') > 0
+                  ? (
+                      (sectionTotal(section.code, 'montantEngage') /
+                        sectionTotal(section.code, 'montantPrevu')) *
+                      100
+                    ).toFixed(2)
+                  : '-'
+              }}
             </td>
             <td class="text-right">{{ fmt(sectionTotal(section.code, 'montantEngage')) }}</td>
             <td class="text-right">-</td>
@@ -85,11 +120,15 @@
           </tr>
         </template>
         <!-- Grand total -->
-        <tr class="bg-grey-4 text-weight-bold">
+        <tr class="grand-total-row">
           <td class="text-center">TOTAL GENERAL DES DEPENSES AU TITRE II</td>
           <td class="text-right">{{ fmt(data.totalPrevuDepInvest.value) }}</td>
           <td class="text-right">
-            {{ data.totalPrevuDepInvest.value > 0 ? ((data.totalDepensesInvest.value / data.totalPrevuDepInvest.value) * 100).toFixed(2) : '0.00' }}
+            {{
+              data.totalPrevuDepInvest.value > 0
+                ? ((data.totalDepensesInvest.value / data.totalPrevuDepInvest.value) * 100).toFixed(2)
+                : '0.00'
+            }}
           </td>
           <td class="text-right">{{ fmt(data.totalDepensesInvest.value) }}</td>
           <td class="text-right">-</td>
@@ -116,27 +155,40 @@ const sections = [
   { code: '95', libelle: 'SECTION 95 - DEPENSES DIVERSES' },
 ];
 
-// Get chapitre-level: 3-digit codes under a section (e.g., 900, 901 under 90)
-function getChapitres(sectionCode: string): LigneDepense[] {
-  return props.data.depensesInvestissement.value.filter(
-    (r) => r.code.startsWith(sectionCode) && r.code.length === 3,
-  );
+interface ChapitreGroup {
+  code: string;
+  articles: LigneDepense[];
 }
 
-// Get article-level: 4+ digit codes under a chapitre
-function getArticles(chapitreCode: string): LigneDepense[] {
-  return props.data.depensesInvestissement.value.filter(
-    (r) => r.code.startsWith(chapitreCode) && r.code.length > 3,
+function getChapitreGroups(sectionCode: string): ChapitreGroup[] {
+  const rows = props.data.depensesInvestissement.value.filter(
+    (r) => r.code.startsWith(sectionCode),
   );
+  const groupMap = new Map<string, LigneDepense[]>();
+
+  for (const row of rows) {
+    const chapCode = row.code.substring(0, 3);
+    if (!groupMap.has(chapCode)) {
+      groupMap.set(chapCode, []);
+    }
+    groupMap.get(chapCode)!.push(row);
+  }
+
+  return Array.from(groupMap.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([code, articles]) => ({
+      code,
+      articles: articles.sort((a, b) => a.code.localeCompare(b.code)),
+    }));
 }
 
-function chapTotal(chapCode: string, field: 'montantPrevu' | 'montantEngage'): number {
-  return getArticles(chapCode).reduce((s, r) => s + r[field], 0);
+function chapGroupTotal(group: ChapitreGroup, field: 'montantPrevu' | 'montantEngage'): number {
+  return group.articles.reduce((s, r) => s + r[field], 0);
 }
 
 function sectionTotal(sectionCode: string, field: 'montantPrevu' | 'montantEngage'): number {
   return props.data.depensesInvestissement.value
-    .filter((r) => r.code.startsWith(sectionCode) && r.code.length > 2)
+    .filter((r) => r.code.startsWith(sectionCode))
     .reduce((s, r) => s + r[field], 0);
 }
 
@@ -154,4 +206,9 @@ function fmtZ(v: number) {
 .invest-dep-table th { font-size: 9px; background-color: #f0f0f0; }
 .article-row td { font-size: 10px; }
 .col-num-row td { text-align: center; font-size: 8px; font-style: italic; background-color: #fafafa; }
+.section-header-row td { font-weight: bold; background-color: #e3f2fd; }
+.chapitre-header-row td { font-weight: bold; background-color: #e8eaf6; font-size: 10px; }
+.subtotal-row td { font-weight: bold; background-color: #f5f5f5; font-size: 10px; }
+.section-total-row td { font-weight: bold; background-color: #e0e0e0; }
+.grand-total-row td { font-weight: bold; background-color: #bdbdbd; }
 </style>

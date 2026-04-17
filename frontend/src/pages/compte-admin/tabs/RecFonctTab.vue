@@ -39,7 +39,7 @@
               <td class="text-right">{{ fmtZ(article.montantRecouvre) }}</td>
               <td class="text-right">-</td>
               <td class="text-right">
-                {{ article.montantEmis - article.montantRecouvre > 0 ? fmt(article.montantEmis - article.montantRecouvre) : '-' }}
+                {{ article.montantPrevu - article.montantRecouvre > 0 ? fmt(article.montantPrevu - article.montantRecouvre) : '-' }}
               </td>
               <td class="text-right">
                 {{ article.montantPrevu - article.montantEmis !== 0 ? fmt(article.montantPrevu - article.montantEmis) : '-' }}
@@ -56,7 +56,7 @@
               <td class="text-right">{{ fmtZ(chapTotal(chap.code, 'montantRecouvre')) }}</td>
               <td class="text-right">-</td>
               <td class="text-right">
-                {{ chapTotal(chap.code, 'montantEmis') - chapTotal(chap.code, 'montantRecouvre') > 0 ? fmt(chapTotal(chap.code, 'montantEmis') - chapTotal(chap.code, 'montantRecouvre')) : '-' }}
+                {{ chapTotal(chap.code, 'montantPrevu') - chapTotal(chap.code, 'montantRecouvre') > 0 ? fmt(chapTotal(chap.code, 'montantPrevu') - chapTotal(chap.code, 'montantRecouvre')) : '-' }}
               </td>
               <td class="text-right">
                 {{ fmt(chapTotal(chap.code, 'montantPrevu') - chapTotal(chap.code, 'montantEmis')) }}
@@ -74,7 +74,7 @@
             <td class="text-right">{{ fmt(sectionTotal(section.code, 'montantRecouvre')) }}</td>
             <td class="text-right">-</td>
             <td class="text-right">
-              {{ sectionTotal(section.code, 'montantEmis') - sectionTotal(section.code, 'montantRecouvre') > 0 ? fmt(sectionTotal(section.code, 'montantEmis') - sectionTotal(section.code, 'montantRecouvre')) : '-' }}
+              {{ sectionTotal(section.code, 'montantPrevu') - sectionTotal(section.code, 'montantRecouvre') > 0 ? fmt(sectionTotal(section.code, 'montantPrevu') - sectionTotal(section.code, 'montantRecouvre')) : '-' }}
             </td>
             <td class="text-right">
               {{ fmt(sectionTotal(section.code, 'montantPrevu') - sectionTotal(section.code, 'montantEmis')) }}
@@ -96,7 +96,7 @@
           <td class="text-right">{{ fmt(data.totalRecettesFonct.value) }}</td>
           <td class="text-right">-</td>
           <td class="text-right">
-            {{ data.totalEmissionsFonct.value - data.totalRecettesFonct.value > 0 ? fmt(data.totalEmissionsFonct.value - data.totalRecettesFonct.value) : '-' }}
+            {{ data.totalPrevuRecFonct.value - data.totalRecettesFonct.value > 0 ? fmt(data.totalPrevuRecFonct.value - data.totalRecettesFonct.value) : '-' }}
           </td>
           <td class="text-right">
             {{ fmt(data.totalPrevuRecFonct.value - data.totalEmissionsFonct.value) }}

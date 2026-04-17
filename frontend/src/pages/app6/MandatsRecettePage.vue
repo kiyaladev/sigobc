@@ -35,9 +35,9 @@
           </div>
           <div class="col-12 col-md-2">
             <q-select
-              v-model="filterChapitreId"
-              :options="chapitreOptions"
-              label="Chapitre"
+              v-model="filterCompte"
+              :options="compteFilterOptions"
+              label="Compte"
               outlined
               dense
               emit-value
@@ -190,40 +190,20 @@
               </div>
             </div>
 
-            <div class="row q-col-gutter-md">
-              <div class="col-6">
-                <q-select
-                  v-model="formData.chapitreId"
-                  :options="filteredChapitreOptions"
-                  label="Nature de la recette (barre)"
-                  outlined
-                  dense
-                  emit-value
-                  map-options
-                  use-input
-                  input-debounce="0"
-                  clearable
-                  hint="Sélectionner un chapitre budgétaire"
-                  @filter="filterChapitre"
-                />
-              </div>
-              <div class="col-6">
-                <q-select
-                  v-model="formData.taxeId"
-                  :options="filteredTaxeOptions"
-                  label="Compte fonctionnel"
-                  outlined
-                  dense
-                  emit-value
-                  map-options
-                  clearable
-                  use-input
-                  input-debounce="0"
-                  hint="Sélectionner une taxe"
-                  @filter="filterTaxe"
-                />
-              </div>
-            </div>
+            <q-select
+              v-model="formData.taxeId"
+              :options="filteredTaxeOptions"
+              label="Compte fonctionnel"
+              outlined
+              dense
+              emit-value
+              map-options
+              clearable
+              use-input
+              input-debounce="0"
+              hint="Sélectionner une taxe"
+              @filter="filterTaxe"
+            />
 
             <q-input
               v-model="formData.partieVersante"
@@ -359,7 +339,6 @@ import { useQuasar, date } from 'quasar';
 import {
   db,
   type MandatRecette,
-  type Chapitre,
   type Taxe,
   type BordereauMandatRecette,
   type Exercice,
@@ -372,7 +351,6 @@ import { openPrintWindow } from 'src/utils/printUrl';
 const $q = useQuasar();
 
 const mandats = ref<MandatRecette[]>([]);
-const chapitres = ref<Chapitre[]>([]);
 const taxes = ref<Taxe[]>([]);
 const bordereaux = ref<BordereauMandatRecette[]>([]);
 const exercices = ref<Exercice[]>([]);
@@ -388,7 +366,7 @@ function isYearLocked(annee: number): boolean {
 
 const filter = ref('');
 const filterExercice = ref<number | null>(null);
-const filterChapitreId = ref<number | null>(null);
+const filterCompte = ref<number | null>(null);
 const filterStatut = ref<string | null>(null);
 const filterDateDebut = ref('');
 const filterDateFin = ref('');
@@ -468,9 +446,15 @@ const exerciceFilterOptions = computed(() => {
   return years.map((y) => ({ label: String(y), value: y }));
 });
 
-const chapitreOptions = computed(() =>
-  chapitres.value.map((c) => ({ label: `${c.code} - ${c.libelle}`, value: c.id! })),
-);
+const compteFilterOptions = computed(() => {
+  const usedTaxeIds = [...new Set(mandats.value.map((m) => m.taxeId).filter(Boolean))];
+  return usedTaxeIds
+    .map((id) => {
+      const t = taxes.value.find((tx) => tx.id === id);
+      return t ? { label: `${t.code} - ${t.libelle}`, value: t.id! } : null;
+    })
+    .filter(Boolean) as { label: string; value: number }[];
+});
 
 const taxeOptions = computed(() =>
   taxes.value.map((t) => ({ label: `${t.code} - ${t.libelle}`, value: t.id! })),
@@ -485,13 +469,8 @@ const bordereauOptions = computed(() =>
     })),
 );
 
-const filteredChapitreOptions = ref(chapitreOptions.value);
 const filteredTaxeOptions = ref(taxeOptions.value);
 const filteredBordereauOptions = ref(bordereauOptions.value);
-
-watch(chapitreOptions, (newOptions) => {
-  filteredChapitreOptions.value = newOptions;
-});
 
 watch(taxeOptions, (newOptions) => {
   filteredTaxeOptions.value = newOptions;
@@ -525,8 +504,8 @@ const filteredMandats = computed(() => {
     result = result.filter((m) => m.exercice === filterExercice.value);
   }
 
-  if (filterChapitreId.value) {
-    result = result.filter((m) => m.chapitreId === filterChapitreId.value);
+  if (filterCompte.value) {
+    result = result.filter((m) => m.taxeId === filterCompte.value);
   }
 
   if (filterStatut.value) {
@@ -560,25 +539,10 @@ const filteredMandats = computed(() => {
 function resetFilters() {
   filter.value = '';
   filterExercice.value = null;
-  filterChapitreId.value = null;
+  filterCompte.value = null;
   filterStatut.value = null;
   filterDateDebut.value = '';
   filterDateFin.value = '';
-}
-
-function filterChapitre(val: string, update: (callback: () => void) => void) {
-  if (val === '') {
-    update(() => {
-      filteredChapitreOptions.value = chapitreOptions.value;
-    });
-    return;
-  }
-  update(() => {
-    const needle = val.toLowerCase();
-    filteredChapitreOptions.value = chapitreOptions.value.filter(
-      (v) => v.label.toLowerCase().indexOf(needle) > -1,
-    );
-  });
 }
 
 function filterTaxe(val: string, update: (callback: () => void) => void) {
@@ -651,23 +615,19 @@ function getBordereauNumero(bordereauId?: number): string {
 
 function getCompte(row: MandatRecette): string {
   const taxe = taxes.value.find((t) => t.id === row.taxeId);
-  const ch = chapitres.value.find((c) => c.id === row.chapitreId);
-  const taxeCode = taxe?.code || '?';
-  const chCode = ch?.code || '?';
-  return `${taxeCode}/${chCode}`;
+  if (!taxe) return '-';
+  return `${taxe.code} - ${taxe.libelle}`;
 }
 
 async function loadData() {
   loading.value = true;
   try {
-    [mandats.value, chapitres.value, taxes.value, bordereaux.value, exercices.value] =
-      await Promise.all([
-        db.mandatsRecette.toArray(),
-        db.chapitres.toArray(),
-        db.taxes.toArray(),
-        db.bordereauMandatsRecette.toArray(),
-        db.exercices.toArray(),
-      ]);
+    [mandats.value, taxes.value, bordereaux.value, exercices.value] = await Promise.all([
+      db.mandatsRecette.toArray(),
+      db.taxes.toArray(),
+      db.bordereauMandatsRecette.toArray(),
+      db.exercices.toArray(),
+    ]);
 
     // Trier par date décroissante
     mandats.value.sort((a, b) => {
@@ -724,7 +684,6 @@ async function openDialog(mandat?: MandatRecette) {
       exercice: currentYear,
       numeroMandat: nextNum,
       dateMandat: new Date(),
-      ...(chapitres.value[0]?.id !== undefined && { chapitreId: chapitres.value[0].id }),
       ...(taxes.value[0]?.id !== undefined && { taxeId: taxes.value[0].id }),
       partieVersante: '',
       rib: '',
@@ -842,10 +801,9 @@ async function createFakeMandat() {
       return;
     }
     const nextNum = await getNextMandatNumber(yr);
-    const chapitre = chapitres.value[Math.floor(Math.random() * chapitres.value.length)];
     const taxe = taxes.value[Math.floor(Math.random() * taxes.value.length)];
-    if (!chapitre || !taxe) {
-      $q.notify({ type: 'warning', message: 'Aucun chapitre/taxe disponible' });
+    if (!taxe) {
+      $q.notify({ type: 'warning', message: 'Aucune taxe disponible' });
       return;
     }
     const now = new Date();
@@ -854,7 +812,6 @@ async function createFakeMandat() {
       exercice: yr,
       numeroMandat: nextNum,
       dateMandat: now,
-      chapitreId: chapitre.id!,
       taxeId: taxe.id!,
       partieVersante: `Contribuable Test ${nextNum}`,
       objet: `Recette test ${nextNum}`,

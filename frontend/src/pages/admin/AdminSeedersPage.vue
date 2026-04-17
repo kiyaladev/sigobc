@@ -94,6 +94,25 @@
                   />
                 </q-item-section>
               </q-item>
+
+              <q-item>
+                <q-item-section>
+                  <q-item-label>Seeder projets de référence</q-item-label>
+                  <q-item-label caption
+                    >Ajoute les projets de test issus du compte administratif sans vider la
+                    base.</q-item-label
+                  >
+                </q-item-section>
+                <q-item-section side>
+                  <q-btn
+                    label="Seeder projets"
+                    color="secondary"
+                    icon="engineering"
+                    @click="runSeedProjects"
+                    :loading="loading.projects"
+                  />
+                </q-item-section>
+              </q-item>
             </q-list>
           </q-card>
         </div>
@@ -203,6 +222,7 @@ import PageHeader from 'src/components/PageHeader.vue';
 import {
   seedDefaultData,
   seedTestData,
+  seedReferenceProjects,
   clearDatabase,
   type SeedOptions,
 } from 'src/database/seeders';
@@ -234,6 +254,7 @@ const loading = ref({
   default: false,
   test: false,
   clear: false,
+  projects: false,
 });
 const logs = ref<string[]>([]);
 
@@ -251,6 +272,7 @@ const stats = ref([
   { label: 'Chapitres Dép.', count: 0, table: 'chapitres' },
   { label: 'Sous-chapitres Dép.', count: 0, table: 'sousChapitres' },
   { label: 'Prévisions Dép.', count: 0, table: 'previsions' },
+  { label: 'Projets', count: 0, table: 'projets' },
   { label: 'Mandats Dép.', count: 0, table: 'mandats' },
   { label: 'Bordereaux Mandats Dép.', count: 0, table: 'bordereauMandats' },
   { label: 'États Fin. Mensuels Dép.', count: 0, table: 'etatFinancierMensuel' },
@@ -302,7 +324,7 @@ async function loadStats() {
 // Wrapper pour exécuter une fonction de seeder avec gestion de logs et d'état
 async function runSeederAction(
   action: () => Promise<void>,
-  type: 'default' | 'test' | 'clear',
+  type: 'default' | 'test' | 'clear' | 'projects',
   successMessage: string,
 ) {
   loading.value[type] = true;
@@ -365,6 +387,22 @@ function runClear() {
     color: 'negative',
   }).onOk(() => {
     void runSeederAction(clearDatabase, 'clear', 'Base de données entièrement vidée.');
+  });
+}
+
+function runSeedProjects() {
+  $q.dialog({
+    title: 'Confirmation',
+    message:
+      'Voulez-vous vraiment ajouter les projets de référence pour les tests ? Les projets déjà présents seront conservés.',
+    cancel: true,
+    persistent: true,
+  }).onOk(() => {
+    void runSeederAction(
+      seedReferenceProjects,
+      'projects',
+      'Projets de référence générés avec succès !',
+    );
   });
 }
 

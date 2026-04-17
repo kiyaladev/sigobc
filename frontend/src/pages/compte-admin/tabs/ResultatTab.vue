@@ -42,7 +42,9 @@
             {{ fmtZ(data.totalPrevuDepFonct.value - data.totalDepensesFonct.value) }}
           </td>
           <td class="text-right">
-            {{ data.resultatFonctionnement.value > 0 ? fmt(data.resultatFonctionnement.value) : '' }}
+            {{
+              data.resultatFonctionnement.value > 0 ? fmt(data.resultatFonctionnement.value) : ''
+            }}
           </td>
           <td class="text-right">
             {{
@@ -122,7 +124,9 @@
         {{ fmt(Math.abs(data.resultatCumuleGlobal.value)) }} Francs CFA
       </p>
     </div>
-    <div class="sig-date q-mb-sm">Fait à VAVOUA le 31 Décembre {{ data.exercice.value }}</div>
+    <div class="sig-date q-mb-sm">
+      Fait à {{ data.ville.value || '________' }} le 31 Décembre {{ data.exercice.value }}
+    </div>
     <div class="sig-grid q-mb-xl">
       <div>LE TRESORIER PRINCIPAL</div>
       <div class="text-center">LE</div>
@@ -246,7 +250,9 @@
         {{ fmt(Math.abs(data.resultatCumuleGlobal.value)) }} Francs CFA
       </p>
     </div>
-    <div class="sig-date q-mb-sm">Fait à VAVOUA le 31 Décembre {{ data.exercice.value }}</div>
+    <div class="sig-date q-mb-sm">
+      Fait à {{ data.ville.value || '________' }} le 31 Décembre {{ data.exercice.value }}
+    </div>
     <div class="sig-grid">
       <div>LE TRESORIER PRINCIPAL</div>
       <div class="text-center">LE</div>

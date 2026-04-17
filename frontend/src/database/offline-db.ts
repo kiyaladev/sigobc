@@ -78,9 +78,11 @@ export class OfflineDb extends Dexie {
       chapitres: 'id, code, libelle, mairieId, actif',
       sousChapitres: 'id, code, libelle, parentId, mairieId, actif',
       previsions: 'id, exercice, chapitreId, mairieId, statut',
-      mandats: 'id, numeroMandat, exercice, chapitreId, sousChapitreId, bordereauMandatId, mairieId, statut',
+      mandats:
+        'id, numeroMandat, exercice, chapitreId, sousChapitreId, bordereauMandatId, mairieId, statut',
       bordereauMandats: 'id, numero, exercice, mairieId, statut',
       etatFinancierMensuel: 'id, annee, sousChapitreId, chapitreId, mairieId',
+      projets: 'id, annee, sousChapitreId, mairieId, statut',
       taxes: 'id, code, libelle, mairieId, type, actif',
       declarations: 'id, numeroPiece, mairieId, taxeId, statut, exercice, bordereauId',
       bordereauxRecette: 'id, numero, annee, mairieId, statut',
@@ -115,6 +117,7 @@ export class OfflineDb extends Dexie {
         '++id, numeroMandat, exercice, chapitreId, sousChapitreId, bordereauMandatId, mairieId, statut',
       bordereauMandats: '++id, numero, exercice, mairieId, statut',
       etatFinancierMensuel: '++id, annee, sousChapitreId, chapitreId, mairieId',
+      projets: '++id, annee, sousChapitreId, mairieId, statut',
 
       // App6
       taxes: '++id, code, libelle, mairieId, type, actif',
@@ -142,4 +145,3 @@ export class OfflineDb extends Dexie {
 }
 
 export const offlineDb = new OfflineDb();
-

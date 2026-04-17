@@ -247,6 +247,21 @@
               <q-item-label>Statistiques Dépenses</q-item-label>
             </q-item-section>
           </q-item>
+
+          <q-item
+            clickable
+            v-ripple
+            to="/app3/projets"
+            class="nav-item q-mb-xs"
+            active-class="nav-item-active"
+          >
+            <q-item-section avatar>
+              <q-icon name="engineering" color="primary" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Projets</q-item-label>
+            </q-item-section>
+          </q-item>
         </q-expansion-item>
 
         <q-separator class="q-my-xs" />

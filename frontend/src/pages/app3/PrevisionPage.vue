@@ -193,6 +193,17 @@
             />
 
             <q-select
+              v-model="formData.typeBien"
+              :options="typeBienOptions"
+              label="Type de bien"
+              outlined
+              dense
+              emit-value
+              map-options
+              clearable
+            />
+
+            <q-select
               v-model="formData.statut"
               :options="statutOptions"
               label="Statut *"
@@ -365,6 +376,7 @@ const formData = ref({
   chapitreId: null as number | null,
   sousChapitreId: null as number | null,
   montantPrevu: 0,
+  typeBien: '' as '' | 'immobilier' | 'mobilier' | 'incorporel',
   statut: 'validee' as 'brouillon' | 'validee',
   observations: '',
 });
@@ -401,6 +413,12 @@ const moisOptions = [
 const statutOptions = [
   { label: 'Brouillon', value: 'brouillon' },
   { label: 'Validée', value: 'validee' },
+];
+
+const typeBienOptions = [
+  { label: 'Immobilier', value: 'immobilier' },
+  { label: 'Mobilier', value: 'mobilier' },
+  { label: 'Incorporel', value: 'incorporel' },
 ];
 
 const chapitreOptions = computed(() =>
@@ -484,6 +502,16 @@ const columns = [
     align: 'right' as const,
     field: 'montantPrevu',
     format: (val: number) => formatMontant(val),
+    sortable: true,
+  },
+  {
+    name: 'typeBien',
+    label: 'Type de bien',
+    align: 'center' as const,
+    field: (row: Prevision) => {
+      const opt = typeBienOptions.find((o) => o.value === row.typeBien);
+      return opt ? opt.label : '-';
+    },
     sortable: true,
   },
   {
@@ -985,6 +1013,7 @@ function resetForm() {
     chapitreId: null,
     sousChapitreId: null,
     montantPrevu: 0,
+    typeBien: '',
     statut: 'validee',
     observations: '',
   };
@@ -1003,6 +1032,7 @@ async function savePrevision() {
       montantPrevu: formData.value.montantPrevu,
       montantEngage: 0,
       montantDisponible: formData.value.montantPrevu,
+      ...(formData.value.typeBien ? { typeBien: formData.value.typeBien } : {}),
       statut: formData.value.statut,
       observations: formData.value.observations,
       mairieId,
@@ -1054,6 +1084,7 @@ function editPrevision(row: Prevision) {
     chapitreId: row.chapitreId,
     sousChapitreId: ('sousChapitreId' in row ? row.sousChapitreId : null) || null,
     montantPrevu: row.montantPrevu,
+    typeBien: (row.typeBien as '' | 'immobilier' | 'mobilier' | 'incorporel') || '',
     statut: row.statut,
     observations: row.observations || '',
   };
@@ -1100,6 +1131,8 @@ async function createFakePrevision() {
     }
     const now = new Date();
     const montantPrevu = Math.floor(Math.random() * 10000000) + 500000;
+    const types = ['immobilier', 'mobilier', 'incorporel'] as const;
+    const randomType = types[Math.floor(Math.random() * types.length)]!;
     await db.previsions.add({
       exercice: currentYear,
       chapitreId: chapitre.id!,
@@ -1107,6 +1140,7 @@ async function createFakePrevision() {
       montantPrevu,
       montantEngage: 0,
       montantDisponible: montantPrevu,
+      typeBien: randomType,
       statut: 'validee',
       mairieId: 1,
       personnelId: 1,

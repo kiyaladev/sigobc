@@ -2,12 +2,14 @@ import { ref, computed, watch } from 'vue';
 import { db } from 'src/database/db';
 import type {
   Mandat,
+  MandatRecette,
   Prevision,
   SousChapitre,
   Chapitre,
   Taxe,
   Declaration,
   PrevisionRecette,
+  Projet,
 } from 'src/database/db';
 
 // Types pour les données agrégées
@@ -73,9 +75,21 @@ export interface DepenseVentilee {
   total: number;
 }
 
+export interface DepenseInvestVentilee {
+  sousChapitreId: number;
+  code: string;
+  libelle: string;
+  montantPrevu: number;
+  immobilier: number;
+  mobilier: number;
+  incorporel: number;
+  total: number;
+}
+
 export function useCompteAdmin() {
   const exercice = ref(new Date().getFullYear());
   const loading = ref(false);
+  const ville = ref('');
 
   // Raw data
   const mandats = ref<Mandat[]>([]);
@@ -85,36 +99,46 @@ export function useCompteAdmin() {
   const taxes = ref<Taxe[]>([]);
   const declarations = ref<Declaration[]>([]);
   const previsionsRecettes = ref<PrevisionRecette[]>([]);
+  const mandatsRecette = ref<MandatRecette[]>([]);
 
   // Previous year data for cumulative results
   const mandatsPrev = ref<Mandat[]>([]);
   const previsionsPrev = ref<Prevision[]>([]);
   const declarationsPrev = ref<Declaration[]>([]);
   const previsionsRecettesPrev = ref<PrevisionRecette[]>([]);
+  const mandatsRecettePrev = ref<MandatRecette[]>([]);
+  const projets = ref<Projet[]>([]);
 
   async function loadData() {
     loading.value = true;
     try {
-      const [m, p, sc, ch, tx, decl, pr, mPrev, pPrev, dPrev, prPrev] = await Promise.all([
-        db.mandats.filter((m) => m.exercice === exercice.value && m.statut === 'paye').toArray(),
-        db.previsions.filter((p) => p.exercice === exercice.value).toArray(),
-        db.sousChapitres.toArray(),
-        db.chapitres.toArray(),
-        db.taxes.toArray(),
-        db.declarations
-          .filter((d) => d.exercice === exercice.value && d.statut === 'validee')
-          .toArray(),
-        db.previsionsRecettes.filter((p) => p.exercice === exercice.value).toArray(),
-        // Previous year
-        db.mandats
-          .filter((m) => m.exercice === exercice.value - 1 && m.statut === 'paye')
-          .toArray(),
-        db.previsions.filter((p) => p.exercice === exercice.value - 1).toArray(),
-        db.declarations
-          .filter((d) => d.exercice === exercice.value - 1 && d.statut === 'validee')
-          .toArray(),
-        db.previsionsRecettes.filter((p) => p.exercice === exercice.value - 1).toArray(),
-      ]);
+      const [m, p, sc, ch, tx, decl, pr, mr, mPrev, pPrev, dPrev, prPrev, mrPrev] =
+        await Promise.all([
+          db.mandats.filter((m) => m.exercice === exercice.value && m.statut === 'paye').toArray(),
+          db.previsions.filter((p) => p.exercice === exercice.value).toArray(),
+          db.sousChapitres.toArray(),
+          db.chapitres.toArray(),
+          db.taxes.toArray(),
+          db.declarations
+            .filter((d) => d.exercice === exercice.value && d.statut === 'validee')
+            .toArray(),
+          db.previsionsRecettes.filter((p) => p.exercice === exercice.value).toArray(),
+          db.mandatsRecette
+            .filter((m) => m.exercice === exercice.value && m.statut === 'paye')
+            .toArray(),
+          // Previous year
+          db.mandats
+            .filter((m) => m.exercice === exercice.value - 1 && m.statut === 'paye')
+            .toArray(),
+          db.previsions.filter((p) => p.exercice === exercice.value - 1).toArray(),
+          db.declarations
+            .filter((d) => d.exercice === exercice.value - 1 && d.statut === 'validee')
+            .toArray(),
+          db.previsionsRecettes.filter((p) => p.exercice === exercice.value - 1).toArray(),
+          db.mandatsRecette
+            .filter((m) => m.exercice === exercice.value - 1 && m.statut === 'paye')
+            .toArray(),
+        ]);
 
       mandats.value = m;
       previsions.value = p;
@@ -123,10 +147,21 @@ export function useCompteAdmin() {
       taxes.value = tx;
       declarations.value = decl;
       previsionsRecettes.value = pr;
+      mandatsRecette.value = mr;
       mandatsPrev.value = mPrev;
       previsionsPrev.value = pPrev;
       declarationsPrev.value = dPrev;
       previsionsRecettesPrev.value = prPrev;
+      mandatsRecettePrev.value = mrPrev;
+
+      // Load projets (for MOD.PAT tab)
+      projets.value = await db.projets
+        .filter((p) => p.annee === exercice.value && p.statut !== 'annule')
+        .toArray();
+
+      // Load mairie info
+      const mairie = await db.mairies.toCollection().first();
+      ville.value = mairie?.ville ?? '';
     } finally {
       loading.value = false;
     }
@@ -258,6 +293,32 @@ export function useCompteAdmin() {
     return lignes.sort((a, b) => a.code.localeCompare(b.code));
   });
 
+  // ===== HELPER: Build emission/recouvrement maps from declarations + mandatsRecette =====
+  function buildRecetteMaps() {
+    const emisMap = new Map<number, number>();
+    const recouvreMap = new Map<number, number>();
+
+    // Declarations (émissions + recouvrements)
+    for (const d of declarations.value) {
+      const montant = d.montant || d.montantRecette || 0;
+      emisMap.set(d.taxeId, (emisMap.get(d.taxeId) || 0) + montant);
+      if (d.dateEncaissement) {
+        recouvreMap.set(d.taxeId, (recouvreMap.get(d.taxeId) || 0) + montant);
+      }
+    }
+
+    // Mandats recette (émissions mandatées + recouvrement si payé)
+    for (const mr of mandatsRecette.value) {
+      if (mr.statut === 'annule') continue;
+      emisMap.set(mr.taxeId, (emisMap.get(mr.taxeId) || 0) + mr.montant);
+      if (mr.statut === 'paye') {
+        recouvreMap.set(mr.taxeId, (recouvreMap.get(mr.taxeId) || 0) + mr.montant);
+      }
+    }
+
+    return { emisMap, recouvreMap };
+  }
+
   // ===== RECETTES FONCTIONNEMENT =====
   // Sections recettes fonctionnement: codes 70-74
   const recettesFonctionnement = computed<LigneRecette[]>(() => {
@@ -268,15 +329,7 @@ export function useCompteAdmin() {
       prevMap.set(pr.taxeId, (prevMap.get(pr.taxeId) || 0) + pr.montantPrevu);
     }
 
-    const emisMap = new Map<number, number>();
-    const recouvreMap = new Map<number, number>();
-    for (const d of declarations.value) {
-      const montant = d.montant || d.montantRecette || 0;
-      emisMap.set(d.taxeId, (emisMap.get(d.taxeId) || 0) + montant);
-      if (d.dateEncaissement) {
-        recouvreMap.set(d.taxeId, (recouvreMap.get(d.taxeId) || 0) + montant);
-      }
-    }
+    const { emisMap, recouvreMap } = buildRecetteMaps();
 
     for (const tx of taxes.value) {
       if (!tx.id) continue;
@@ -349,7 +402,7 @@ export function useCompteAdmin() {
         emissions,
         recouvrement,
         nonValeur: 0,
-        resteARecouvrer: emissions - recouvrement,
+        resteARecouvrer: prevu - recouvrement,
         ecartPrevEmission: prevu - emissions,
         tauxEP: prevu > 0 ? (emissions / prevu) * 100 : 0,
       };
@@ -402,15 +455,7 @@ export function useCompteAdmin() {
       prevMap.set(pr.taxeId, (prevMap.get(pr.taxeId) || 0) + pr.montantPrevu);
     }
 
-    const emisMap = new Map<number, number>();
-    const recouvreMap = new Map<number, number>();
-    for (const d of declarations.value) {
-      const montant = d.montant || d.montantRecette || 0;
-      emisMap.set(d.taxeId, (emisMap.get(d.taxeId) || 0) + montant);
-      if (d.dateEncaissement) {
-        recouvreMap.set(d.taxeId, (recouvreMap.get(d.taxeId) || 0) + montant);
-      }
-    }
+    const { emisMap, recouvreMap } = buildRecetteMaps();
 
     for (const tx of taxes.value) {
       if (!tx.id) continue;
@@ -437,12 +482,12 @@ export function useCompteAdmin() {
   // ===== RECAP INVESTISSEMENT =====
   const recapDepensesInvest = computed<RecapSectionDepense[]>(() => {
     const sections = [
-      { code: '90', libelle: '90 - Immobilisations incorporelles' },
-      { code: '91', libelle: '91 - Immobilisations corporelles' },
-      { code: '92', libelle: '92 - Immobilisations en cours' },
-      { code: '93', libelle: '93 - Immobilisations financières' },
-      { code: '94', libelle: '94 - Remboursement emprunts' },
-      { code: '95', libelle: '95 - Autres dépenses investissement' },
+      { code: '90', libelle: '90 - Equipement des services généraux' },
+      { code: '91', libelle: '91 - Equipement des services sociaux' },
+      { code: '92', libelle: '92 - Equipement des services économiques' },
+      { code: '93', libelle: "93 - Travaux neufs d'intérêt national" },
+      { code: '94', libelle: '94 - Dette amortie' },
+      { code: '95', libelle: "95 - Interventions d'investissement" },
     ];
 
     return sections.map((s) => {
@@ -465,12 +510,12 @@ export function useCompteAdmin() {
 
   const recapRecettesInvest = computed<RecapSectionRecette[]>(() => {
     const sections = [
-      { code: '01', libelle: "01 - Dotations de l'État" },
-      { code: '02', libelle: '02 - Emprunts' },
-      { code: '03', libelle: '03 - Cessions immobilières' },
-      { code: '04', libelle: '04 - Subventions investissement' },
-      { code: '05', libelle: '05 - Fonds propres' },
-      { code: '06', libelle: '06 - Autres recettes investissement' },
+      { code: '01', libelle: "01 - Dotations de l'Etat" },
+      { code: '02', libelle: "02 - Prélèvements sur fonds d'investissement" },
+      { code: '03', libelle: '03 - Emprunts intérieurs et extérieurs' },
+      { code: '04', libelle: "04 - Subventions d'investissement" },
+      { code: '05', libelle: "05 - Cessions d'immobilisation" },
+      { code: '06', libelle: "06 - Autres recettes d'investissement" },
     ];
 
     return sections.map((s) => {
@@ -485,7 +530,7 @@ export function useCompteAdmin() {
         emissions,
         recouvrement,
         nonValeur: 0,
-        resteARecouvrer: emissions - recouvrement,
+        resteARecouvrer: prevu - recouvrement,
         ecartPrevEmission: prevu - emissions,
         tauxEP: prevu > 0 ? (emissions / prevu) * 100 : 0,
       };
@@ -493,8 +538,8 @@ export function useCompteAdmin() {
   });
 
   // ===== DEPENSES INVESTISSEMENT VENTILEES =====
-  const depensesInvestVentilees = computed<DepenseVentilee[]>(() => {
-    const lignes: DepenseVentilee[] = [];
+  const depensesInvestVentilees = computed<DepenseInvestVentilee[]>(() => {
+    const lignes: DepenseInvestVentilee[] = [];
     const prevMap = new Map<number, number>();
     for (const p of previsions.value) {
       if (p.sousChapitreId) {
@@ -502,10 +547,21 @@ export function useCompteAdmin() {
       }
     }
 
-    const ventilationMap = new Map<string, number>();
+    // Ventilation par typeBien du mandat
+    const typeBienMap = new Map<
+      number,
+      { immobilier: number; mobilier: number; incorporel: number }
+    >();
     for (const m of mandats.value) {
-      const key = `${m.sousChapitreId}-${m.chapitreId}`;
-      ventilationMap.set(key, (ventilationMap.get(key) || 0) + m.montant);
+      if (!m.sousChapitreId) continue;
+      let entry = typeBienMap.get(m.sousChapitreId);
+      if (!entry) {
+        entry = { immobilier: 0, mobilier: 0, incorporel: 0 };
+        typeBienMap.set(m.sousChapitreId, entry);
+      }
+      if (m.typeBien === 'immobilier') entry.immobilier += m.montant;
+      else if (m.typeBien === 'mobilier') entry.mobilier += m.montant;
+      else if (m.typeBien === 'incorporel') entry.incorporel += m.montant;
     }
 
     for (const sc of sousChapitres.value) {
@@ -513,21 +569,8 @@ export function useCompteAdmin() {
       if (!sc.code.startsWith('9')) continue;
 
       const prevu = prevMap.get(sc.id) || 0;
-      const getChapAmount = (chapCode: string) => {
-        const chap = chapitres.value.find((c) => c.code === chapCode);
-        if (!chap?.id) return 0;
-        return ventilationMap.get(`${sc.id}-${chap.id}`) || 0;
-      };
-
-      const chap1 = getChapAmount('1');
-      const chap2 = getChapAmount('2');
-      const chap3 = getChapAmount('3');
-      const chap4 = getChapAmount('4');
-      const chap5 = getChapAmount('5');
-      const chap6 = getChapAmount('6');
-      const chap7 = getChapAmount('7');
-      const chap8 = getChapAmount('8');
-      const total = chap1 + chap2 + chap3 + chap4 + chap5 + chap6 + chap7 + chap8;
+      const ventil = typeBienMap.get(sc.id) || { immobilier: 0, mobilier: 0, incorporel: 0 };
+      const total = ventil.immobilier + ventil.mobilier + ventil.incorporel;
 
       if (prevu > 0 || total > 0) {
         lignes.push({
@@ -535,14 +578,9 @@ export function useCompteAdmin() {
           code: sc.code,
           libelle: sc.libelle,
           montantPrevu: prevu,
-          chap1,
-          chap2,
-          chap3,
-          chap4,
-          chap5,
-          chap6,
-          chap7,
-          chap8,
+          immobilier: ventil.immobilier,
+          mobilier: ventil.mobilier,
+          incorporel: ventil.incorporel,
           total,
         });
       }
@@ -606,10 +644,18 @@ export function useCompteAdmin() {
 
   const totalRecettesFonctPrev = computed(() => {
     let total = 0;
+    // Declarations avec encaissement
     for (const d of declarationsPrev.value) {
       const tx = taxeMap.value.get(d.taxeId);
       if (tx && tx.code.startsWith('7') && d.dateEncaissement) {
         total += d.montant || d.montantRecette || 0;
+      }
+    }
+    // Mandats recette
+    for (const mr of mandatsRecettePrev.value) {
+      const tx = taxeMap.value.get(mr.taxeId);
+      if (tx && tx.code.startsWith('7')) {
+        total += mr.montant;
       }
     }
     return total;
@@ -626,10 +672,18 @@ export function useCompteAdmin() {
 
   const totalRecettesInvestPrev = computed(() => {
     let total = 0;
+    // Declarations avec encaissement
     for (const d of declarationsPrev.value) {
       const tx = taxeMap.value.get(d.taxeId);
       if (tx && tx.code.startsWith('0') && d.dateEncaissement) {
         total += d.montant || d.montantRecette || 0;
+      }
+    }
+    // Mandats recette
+    for (const mr of mandatsRecettePrev.value) {
+      const tx = taxeMap.value.get(mr.taxeId);
+      if (tx && tx.code.startsWith('0')) {
+        total += mr.montant;
       }
     }
     return total;
@@ -652,6 +706,21 @@ export function useCompteAdmin() {
     () => resultatCumuleFonct.value + resultatCumuleInvest.value,
   );
 
+  // ===== PREVISIONS PAR PARAGRAPHE (sousChapitreId + chapitreCode) =====
+  const previsionParParagraphe = computed(() => {
+    const map = new Map<string, number>();
+    for (const p of previsions.value) {
+      if (p.sousChapitreId) {
+        const chap = chapitreMap.value.get(p.chapitreId);
+        if (chap) {
+          const key = `${p.sousChapitreId}-${chap.code}`;
+          map.set(key, (map.get(key) || 0) + p.montantPrevu);
+        }
+      }
+    }
+    return map;
+  });
+
   // Watch exercice changes
   watch(exercice, () => {
     void loadData();
@@ -661,10 +730,12 @@ export function useCompteAdmin() {
     exercice,
     loading,
     loadData,
+    ville,
     // Raw data
     mandats,
     previsions,
     sousChapitres,
+    projets,
     chapitres,
     taxes,
     declarations,
@@ -696,6 +767,8 @@ export function useCompteAdmin() {
     totalPrevuRecInvest,
     totalEmissionsFonct,
     totalEmissionsInvest,
+    // Prévisions par paragraphe
+    previsionParParagraphe,
     // Résultats
     resultatFonctionnement,
     resultatInvestissement,

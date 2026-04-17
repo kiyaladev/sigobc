@@ -38,18 +38,19 @@
           <td class="text-right">{{ fmt(data.totalPrevuRecFonct.value) }}</td>
           <td class="text-right">{{ fmt(data.totalEmissionsFonct.value) }}</td>
           <td class="text-right">{{ fmt(data.totalRecettesFonct.value) }}</td>
-          <td class="text-right"></td>
-          <td class="text-right"></td>
+          <td class="text-right">-</td>
+          <td class="text-right">
+            {{ fmt(data.totalPrevuRecFonct.value - data.totalRecettesFonct.value) }}
+          </td>
           <td class="text-right">
             {{ fmt(data.totalPrevuRecFonct.value - data.totalEmissionsFonct.value) }}
           </td>
           <td class="text-right">
             {{
               data.totalPrevuRecFonct.value > 0
-                ? (
-                    (data.totalEmissionsFonct.value / data.totalPrevuRecFonct.value) *
-                    100
-                  ).toFixed(2)
+                ? ((data.totalEmissionsFonct.value / data.totalPrevuRecFonct.value) * 100).toFixed(
+                    2,
+                  )
                 : '0.00'
             }}%
           </td>
@@ -62,10 +63,10 @@
     <q-markup-table dense bordered flat separator="cell" class="recap-table">
       <thead>
         <tr>
-          <th rowspan="3" class="text-left" style="width: 280px">SECTIONS BUDGETAIRES</th>
-          <th rowspan="3" class="text-right">PREVISIONS<br />ENGAGEES</th>
-          <th rowspan="3" class="text-right">POURCENTAGE<br />REALISATION</th>
-          <th rowspan="3" class="text-right">DEPENSES<br />MANDATEES</th>
+          <th rowspan="2" class="text-left" style="width: 280px">SECTIONS BUDGETAIRES</th>
+          <th rowspan="2" class="text-right">PREVISIONS</th>
+          <th rowspan="2" class="text-right">POURCENTAGE<br />REALISATION</th>
+          <th rowspan="2" class="text-right">DEPENSES<br />MANDATEES</th>
           <th colspan="4" class="text-center">ENGAGEMENTS NON MANDATES</th>
         </tr>
         <tr>
@@ -74,21 +75,8 @@
           <th class="text-right">COMMANDES<br />FACTUREES</th>
           <th class="text-right">TOTAL<br />(6 + 7 + 8)</th>
         </tr>
-        <tr>
-          <!-- Column numbers -->
-        </tr>
       </thead>
       <tbody>
-        <tr class="text-caption text-grey-7">
-          <td class="text-center">1</td>
-          <td class="text-center">3</td>
-          <td class="text-center">4</td>
-          <td class="text-center">5</td>
-          <td class="text-center">6</td>
-          <td class="text-center">7</td>
-          <td class="text-center">8</td>
-          <td class="text-center">9</td>
-        </tr>
         <tr v-for="row in data.recapDepensesFonct.value" :key="row.code">
           <td>{{ row.libelle }}</td>
           <td class="text-right">{{ fmt(row.previsionsEngagees) }}</td>
@@ -105,10 +93,7 @@
           <td class="text-right">
             {{
               data.totalPrevuDepFonct.value > 0
-                ? (
-                    (data.totalDepensesFonct.value / data.totalPrevuDepFonct.value) *
-                    100
-                  ).toFixed(2)
+                ? ((data.totalDepensesFonct.value / data.totalPrevuDepFonct.value) * 100).toFixed(2)
                 : '0.00'
             }}
           </td>
@@ -135,10 +120,10 @@ function fmt(v: number) {
 
 <style scoped>
 .recap-table {
-  font-size: 12px;
+  font-size: 11px;
 }
 .recap-table th {
-  font-size: 10px;
-  background-color: #f5f5f5;
+  font-size: 9px;
+  background-color: #f0f0f0;
 }
 </style>
