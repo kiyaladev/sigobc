@@ -4,127 +4,186 @@
       title="Prévisions de Recettes"
       subtitle="Gestion des prévisions budgétaires de recettes"
       icon="trending_up"
-    />
+    >
+      <template #stats>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">Prévisions visibles</div>
+                <div class="overview-stat-value">{{ filteredPrevisions.length }}</div>
+              </div>
+              <q-icon name="dataset" size="30px" color="primary" />
+            </q-card-section>
+          </q-card>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">Montant prévu</div>
+                <div class="overview-stat-value">{{ formatMontant(totalPrevu) }}</div>
+              </div>
+              <q-icon name="payments" size="30px" color="secondary" />
+            </q-card-section>
+          </q-card>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">Montant réalisé</div>
+                <div class="overview-stat-value">{{ formatMontant(totalRealise) }}</div>
+                <div class="overview-stat-helper">Écart : {{ formatMontant(ecart) }}</div>
+              </div>
+              <q-icon name="task_alt" size="30px" color="positive" />
+            </q-card-section>
+          </q-card>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">Taux de réalisation</div>
+                <div class="overview-stat-value">{{ tauxRealisation.toFixed(1) }} %</div>
+              </div>
+              <q-icon name="monitoring" size="30px" color="teal" />
+            </q-card-section>
+          </q-card>
+        </div>
+      </template>
+    </PageHeader>
 
     <q-card class="main-card">
       <q-card-section>
-        <!-- Filtres -->
-        <div class="row q-col-gutter-sm q-mb-md">
-          <div class="col-12 col-md-3">
-            <q-select
-              v-model="filterExercice"
-              :options="exerciceFilterOptions"
-              label="Exercice"
-              outlined
-              dense
-              emit-value
-              map-options
-              clearable
-            />
-          </div>
-          <div class="col-12 col-md-3">
-            <q-select
-              v-model="filterTaxeId"
-              :options="taxeOptions"
-              label="Taxe / Recette"
-              outlined
-              dense
-              emit-value
-              map-options
-              clearable
-            />
-          </div>
-          <div class="col-12 col-md-3">
-            <q-select
-              v-model="filterStatut"
-              :options="statutOptions"
-              label="Statut"
-              outlined
-              dense
-              emit-value
-              map-options
-              clearable
-            />
-          </div>
-          <div class="col-12 col-md-3">
-            <q-btn
-              label="Réinitialiser"
-              icon="refresh"
-              flat
-              color="grey-7"
-              @click="resetFilters"
-              class="full-width"
-            />
+        <div class="compact-toolbar q-mb-md">
+          <div class="compact-toolbar-top row items-center q-col-gutter-sm">
+            <div class="col-12 col-md-5">
+              <q-input
+                v-model="filter"
+                placeholder="Rechercher une prévision..."
+                outlined
+                dense
+                clearable
+                class="compact-search"
+              >
+                <template v-slot:prepend>
+                  <q-icon name="search" />
+                </template>
+              </q-input>
+            </div>
+            <div class="col-12 col-md-auto compact-toolbar-summary">
+              <q-chip outline color="primary" icon="filter_alt" size="sm">
+                {{ activeFiltersCount }} filtre{{ activeFiltersCount > 1 ? 's' : '' }}
+              </q-chip>
+            </div>
+            <div class="col-12 col-md-auto compact-toolbar-actions">
+              <q-btn dense outline color="grey-7" icon="tune" label="Filtres" no-caps>
+                <q-menu class="compact-filter-menu" anchor="bottom right" self="top right">
+                  <div class="compact-filter-panel">
+                    <div class="compact-filter-panel-title">Filtres avancés</div>
+                    <div class="row q-col-gutter-sm">
+                      <div class="col-12 col-sm-6 col-md-4">
+                        <q-select
+                          v-model="filterExercice"
+                          :options="exerciceFilterOptions"
+                          label="Exercice"
+                          outlined
+                          dense
+                          emit-value
+                          map-options
+                          clearable
+                        />
+                      </div>
+                      <div class="col-12 col-sm-6 col-md-4">
+                        <q-select
+                          v-model="filterTaxeId"
+                          :options="taxeOptions"
+                          label="Taxe / Recette"
+                          outlined
+                          dense
+                          emit-value
+                          map-options
+                          clearable
+                        />
+                      </div>
+                      <div class="col-12 col-sm-6 col-md-4">
+                        <q-select
+                          v-model="filterStatut"
+                          :options="statutOptions"
+                          label="Statut"
+                          outlined
+                          dense
+                          emit-value
+                          map-options
+                          clearable
+                        />
+                      </div>
+                      <div class="col-12 col-sm-6 col-md-4">
+                        <q-btn
+                          label="Réinitialiser"
+                          icon="refresh"
+                          outline
+                          color="grey-7"
+                          @click="resetFilters"
+                          class="full-width"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </q-menu>
+              </q-btn>
+              <q-btn
+                dense
+                outline
+                color="green"
+                icon="description"
+                label="Fonctionnelle"
+                no-caps
+                @click="openEtatMensuel('fonctionnel')"
+              />
+              <q-btn
+                dense
+                outline
+                color="grey"
+                icon="business_center"
+                label="Investissement"
+                no-caps
+                @click="openEtatMensuel('investissement')"
+              />
+              <q-btn
+                color="primary"
+                icon="add"
+                label="Nouvelle"
+                unelevated
+                no-caps
+                @click="showAddDialog = true"
+              />
+              <q-btn
+                v-if="isDev"
+                color="orange"
+                icon="science"
+                label="Fake"
+                unelevated
+                no-caps
+                @click="createFakePrevision"
+              />
+            </div>
           </div>
         </div>
 
-        <div class="row items-center justify-between q-mb-md">
-          <div class="col-12 col-md-4">
-            <q-input
-              v-model="filter"
-              placeholder="Rechercher une prévision..."
-              outlined
-              dense
-              clearable
-            >
-              <template v-slot:prepend>
-                <q-icon name="search" />
-              </template>
-            </q-input>
-          </div>
-          <div class="col-12 col-md-auto q-mt-sm q-mt-md-none q-gutter-sm">
-            <q-btn
-              color="green"
-              icon="description"
-              label="Recette Fonctionnelle"
-              unelevated
-              @click="openEtatMensuel('fonctionnel')"
-            />
-            <q-btn
-              color="grey"
-              icon="business_center"
-              label="Recette Investissement"
-              unelevated
-              @click="openEtatMensuel('investissement')"
-            />
-            <q-btn
-              color="primary"
-              icon="add"
-              label="Nouvelle Prévision"
-              unelevated
-              @click="showAddDialog = true"
-            />
-            <q-btn
-              v-if="isDev"
-              color="orange"
-              icon="science"
-              label="Fake Prévision"
-              unelevated
-              @click="createFakePrevision"
-            />
-          </div>
-        </div>
-
-        <!-- Tableau des prévisions -->
-        <div class="row justify-end q-mb-sm">
-          <q-btn
-            flat
-            color="primary"
-            icon="download"
-            label="Exporter CSV"
-            @click="exportCsv"
-            no-caps
-          />
-        </div>
-        <q-table
+        <DataTable
           :rows="filteredPrevisions"
           :columns="columns"
           :loading="loading"
           row-key="id"
           :pagination="{ rowsPerPage: 15 }"
-          flat
           bordered
           class="prevision-table"
+          show-export-csv
+          export-filename="previsions-recettes"
+          @edit="editPrevision"
+          @delete="deletePrevision"
         >
           <template v-slot:body-cell-statut="props">
             <q-td :props="props">
@@ -134,61 +193,19 @@
             </q-td>
           </template>
 
-          <template v-slot:body-cell-actions="props">
-            <q-td :props="props" class="q-gutter-xs">
-              <q-btn flat dense icon="edit" color="primary" @click="editPrevision(props.row)">
-                <q-tooltip>Modifier</q-tooltip>
-              </q-btn>
-              <q-btn flat dense icon="delete" color="negative" @click="deletePrevision(props.row)">
-                <q-tooltip>Supprimer</q-tooltip>
-              </q-btn>
-            </q-td>
-          </template>
-
           <template v-slot:no-data>
             <div class="full-width text-center q-pa-lg">
               <q-icon name="inbox" size="48px" color="grey-5" class="q-mb-md" />
               <div class="text-grey-6">Aucune prévision trouvée</div>
             </div>
           </template>
-        </q-table>
-
-        <!-- Totaux -->
-        <div class="row q-col-gutter-sm q-mt-md">
-          <q-card class="col-12 col-md-4 bg-blue-1">
-            <q-card-section>
-              <div class="text-subtitle2 text-grey-7">Total Prévu</div>
-              <div class="text-h5 text-primary text-weight-bold">
-                {{ formatMontant(totalPrevu) }}
-              </div>
-            </q-card-section>
-          </q-card>
-          <q-card class="col-12 col-md-4 bg-green-1">
-            <q-card-section>
-              <div class="text-subtitle2 text-grey-7">Total Réalisé</div>
-              <div class="text-h5 text-positive text-weight-bold">
-                {{ formatMontant(totalRealise) }}
-              </div>
-            </q-card-section>
-          </q-card>
-          <q-card class="col-12 col-md-4 bg-orange-1">
-            <q-card-section>
-              <div class="text-subtitle2 text-grey-7">Écart</div>
-              <div
-                class="text-h5 text-weight-bold"
-                :class="ecart >= 0 ? 'text-positive' : 'text-negative'"
-              >
-                {{ formatMontant(ecart) }}
-              </div>
-            </q-card-section>
-          </q-card>
-        </div>
+        </DataTable>
       </q-card-section>
     </q-card>
 
     <!-- Dialog d'ajout/modification -->
     <q-dialog v-model="showAddDialog" persistent>
-      <q-card style="min-width: 600px">
+      <q-card class="dialog-card" style="width: min(600px, 96vw); max-width: 96vw">
         <q-card-section class="row items-center q-pb-none">
           <div class="text-h6">
             {{ editingId ? 'Modifier la prévision' : 'Nouvelle prévision de recette' }}
@@ -266,7 +283,7 @@
 
     <!-- Dialog État Mensuel -->
     <q-dialog v-model="showEtatMensuelDialog" persistent>
-      <q-card style="min-width: 400px">
+      <q-card class="dialog-card" style="width: min(400px, 96vw); max-width: 96vw">
         <q-card-section class="row items-center q-pb-none">
           <div class="text-h6">
             État Mensuel des Recettes
@@ -329,10 +346,17 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
-import { db, type Taxe, type PrevisionRecette, DEFAULT_MAIRIE_ID } from 'src/database/db';
+import {
+  db,
+  type Taxe,
+  type PrevisionRecette,
+  type Declaration,
+  type MandatRecette,
+  DEFAULT_MAIRIE_ID,
+} from 'src/database/db';
 import PageHeader from 'src/components/PageHeader.vue';
+import DataTable from 'src/components/DataTable.vue';
 import { openPrintWindowWithMessage } from 'src/utils/printUrl';
-import { exportToCsv } from 'src/utils/exportCsv';
 
 const $q = useQuasar();
 const loading = ref(false);
@@ -349,6 +373,8 @@ const filterStatut = ref<string | null>(null);
 
 const previsions = ref<PrevisionRecette[]>([]);
 const taxes = ref<Taxe[]>([]);
+const declarations = ref<Declaration[]>([]);
+const mandatsRecette = ref<MandatRecette[]>([]);
 
 const formData = ref({
   exercice: new Date().getFullYear(),
@@ -408,6 +434,30 @@ const exerciceFilterOptions = computed(() => {
   return years.map((y) => ({ label: String(y), value: y }));
 });
 
+// Compute realise dynamically from declarations + mandats recette
+const realiseMap = computed(() => {
+  const map = new Map<string, number>();
+  // Declarations validees
+  for (const d of declarations.value) {
+    if (d.statut !== 'validee') continue;
+    const key = `${d.exercice}-${d.taxeId}`;
+    const montant = d.montantRecette || d.montant || 0;
+    map.set(key, (map.get(key) || 0) + montant);
+  }
+  // Mandats recette payes
+  for (const m of mandatsRecette.value) {
+    if (m.statut !== 'paye') continue;
+    const key = `${m.exercice}-${m.taxeId}`;
+    map.set(key, (map.get(key) || 0) + m.montant);
+  }
+  return map;
+});
+
+function getRealise(row: PrevisionRecette): number {
+  const key = `${row.exercice}-${row.taxeId}`;
+  return realiseMap.value.get(key) || 0;
+}
+
 const columns = [
   {
     name: 'exercice',
@@ -436,17 +486,17 @@ const columns = [
   },
   {
     name: 'montantRealise',
-    label: 'Réalisé',
+    label: 'Engagé',
     align: 'right' as const,
-    field: 'montantRealise',
+    field: (row: PrevisionRecette) => getRealise(row),
     format: (val: number) => formatMontant(val),
     sortable: true,
   },
   {
-    name: 'ecart',
-    label: 'Écart',
+    name: 'montantDisponible',
+    label: 'Disponible',
     align: 'right' as const,
-    field: (row: PrevisionRecette) => row.montantRealise - row.montantPrevu,
+    field: (row: PrevisionRecette) => row.montantPrevu - getRealise(row),
     format: (val: number) => formatMontant(val),
     sortable: true,
   },
@@ -499,18 +549,20 @@ const totalPrevu = computed(() =>
 );
 
 const totalRealise = computed(() =>
-  filteredPrevisions.value.reduce((sum, p) => sum + p.montantRealise, 0),
+  filteredPrevisions.value.reduce((sum, p) => sum + getRealise(p), 0),
 );
 
 const ecart = computed(() => totalRealise.value - totalPrevu.value);
 
-function exportCsv() {
-  exportToCsv(
-    filteredPrevisions.value as Record<string, unknown>[],
-    columns,
-    'previsions-recettes',
-  );
-}
+const tauxRealisation = computed(() =>
+  totalPrevu.value > 0 ? (totalRealise.value / totalPrevu.value) * 100 : 0,
+);
+
+const activeFiltersCount = computed(() => {
+  return [filterExercice.value, filterTaxeId.value, filterStatut.value].filter(
+    (value) => value !== null && value !== '',
+  ).length;
+});
 
 function resetFilters() {
   filterExercice.value = null;
@@ -717,8 +769,12 @@ async function generateEtatMensuel() {
 async function loadData() {
   loading.value = true;
   try {
-    taxes.value = await db.taxes.filter((t) => t.actif).toArray();
-    previsions.value = await db.previsionsRecettes.toArray();
+    [taxes.value, previsions.value, declarations.value, mandatsRecette.value] = await Promise.all([
+      db.taxes.filter((t) => t.actif).toArray(),
+      db.previsionsRecettes.toArray(),
+      db.declarations.toArray(),
+      db.mandatsRecette.toArray(),
+    ]);
   } catch (error) {
     console.error('Erreur lors du chargement:', error);
     $q.notify({
@@ -872,23 +928,34 @@ onMounted(() => {
 }
 
 .main-card {
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-radius: 24px;
 }
 
-.prevision-table {
-  :deep(.q-table__top) {
-    padding: 0;
-  }
+.overview-stat-card {
+  min-height: 112px;
+}
 
-  :deep(th) {
-    font-weight: 600;
-    background-color: #f5f5f5;
-  }
+.overview-stat-label {
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
 
-  :deep(tr:hover) {
-    background-color: rgba(255, 102, 0, 0.05);
-  }
+.overview-stat-value {
+  color: #0f172a;
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.overview-stat-helper {
+  margin-top: 6px;
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 600;
 }
 
 @media print {

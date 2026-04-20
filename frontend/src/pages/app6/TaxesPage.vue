@@ -4,20 +4,67 @@
       title="Taxes et Recettes"
       subtitle="Gestion des taxes et sources de recettes"
       icon="account_balance"
-    />
+    >
+      <template #stats>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">Taxes visibles</div>
+                <div class="overview-stat-value">{{ filteredTaxes.length }}</div>
+              </div>
+              <q-icon name="dataset" size="30px" color="primary" />
+            </q-card-section>
+          </q-card>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">Actives</div>
+                <div class="overview-stat-value">{{ activeTaxesCount }}</div>
+              </div>
+              <q-icon name="task_alt" size="30px" color="positive" />
+            </q-card-section>
+          </q-card>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">Taxes fixes</div>
+                <div class="overview-stat-value">{{ fixedTaxesCount }}</div>
+              </div>
+              <q-icon name="payments" size="30px" color="secondary" />
+            </q-card-section>
+          </q-card>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">Taxes variables</div>
+                <div class="overview-stat-value">{{ variableTaxesCount }}</div>
+              </div>
+              <q-icon name="tune" size="30px" color="teal" />
+            </q-card-section>
+          </q-card>
+        </div>
+      </template>
+    </PageHeader>
 
     <q-card class="main-card">
       <q-card-section>
         <!-- Barre de recherche et actions -->
-        <div class="row items-center justify-between q-mb-md">
-          <div class="col-12 col-md-6">
+        <div class="listing-toolbar row items-center justify-between q-mb-md">
+          <div class="col-12 col-md-6 listing-search">
             <q-input v-model="filter" placeholder="Rechercher une taxe..." outlined dense clearable>
               <template v-slot:prepend>
                 <q-icon name="search" />
               </template>
             </q-input>
           </div>
-          <div class="col-12 col-md-auto q-mt-sm q-mt-md-none q-gutter-sm">
+          <div class="col-12 col-md-auto q-mt-sm q-mt-md-none listing-actions">
             <q-btn
               color="primary"
               icon="add"
@@ -95,7 +142,7 @@
 
     <!-- Dialog d'ajout/modification -->
     <q-dialog v-model="showAddDialog" persistent>
-      <q-card style="min-width: 600px">
+      <q-card class="dialog-card" style="width: min(600px, 96vw); max-width: 96vw">
         <q-card-section class="row items-center q-pb-none">
           <div class="text-h6">
             {{ editingId ? 'Modifier la taxe' : 'Nouvelle taxe' }}
@@ -260,6 +307,16 @@ const filteredTaxes = computed(() => {
       (t.description && t.description.toLowerCase().includes(searchTerm)),
   );
 });
+
+const activeTaxesCount = computed(() => filteredTaxes.value.filter((taxe) => taxe.actif).length);
+
+const fixedTaxesCount = computed(
+  () => filteredTaxes.value.filter((taxe) => taxe.type === 'fixe').length,
+);
+
+const variableTaxesCount = computed(
+  () => filteredTaxes.value.filter((taxe) => taxe.type === 'variable').length,
+);
 
 function formatMontant(montant: number): string {
   return new Intl.NumberFormat('fr-FR', {
@@ -428,8 +485,28 @@ onMounted(() => {
 }
 
 .main-card {
-  border-radius: 16px;
+  border-radius: 24px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.overview-stat-card {
+  min-height: 112px;
+}
+
+.overview-stat-label {
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.overview-stat-value {
+  color: #0f172a;
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  font-weight: 800;
+  line-height: 1.2;
 }
 
 .taxes-table {

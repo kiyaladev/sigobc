@@ -4,7 +4,7 @@
     @update:model-value="$emit('update:modelValue', $event)"
     persistent
   >
-    <q-card style="min-width: 700px">
+    <q-card class="dialog-card" style="width: min(700px, 96vw); max-width: 96vw">
       <q-card-section class="accent-left">
         <div class="text-h6">{{ isEditing ? 'Modifier' : 'Nouvelle' }} Déclaration</div>
       </q-card-section>

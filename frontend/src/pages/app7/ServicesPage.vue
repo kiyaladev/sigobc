@@ -1,11 +1,58 @@
 <template>
   <q-page class="dashboard-page q-pa-md">
-    <PageHeader title="Services" subtitle="Gestion des Services de la Mairie" icon="business" />
+    <PageHeader title="Services" subtitle="Gestion des Services de la Mairie" icon="business">
+      <template #stats>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">Services visibles</div>
+                <div class="overview-stat-value">{{ filteredServices.length }}</div>
+              </div>
+              <q-icon name="dataset" size="30px" color="primary" />
+            </q-card-section>
+          </q-card>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">Actifs</div>
+                <div class="overview-stat-value">{{ activeServicesCount }}</div>
+              </div>
+              <q-icon name="task_alt" size="30px" color="positive" />
+            </q-card-section>
+          </q-card>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">Avec compte</div>
+                <div class="overview-stat-value">{{ servicesWithCompteCount }}</div>
+              </div>
+              <q-icon name="payments" size="30px" color="secondary" />
+            </q-card-section>
+          </q-card>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">Avec chapitre</div>
+                <div class="overview-stat-value">{{ servicesWithChapitreCount }}</div>
+              </div>
+              <q-icon name="account_tree" size="30px" color="teal" />
+            </q-card-section>
+          </q-card>
+        </div>
+      </template>
+    </PageHeader>
 
     <q-card class="main-card q-mt-md">
       <q-card-section>
-        <div class="row items-center justify-between q-mb-md">
-          <div class="col-12 col-md-4">
+        <div class="listing-toolbar row items-center justify-between q-mb-md">
+          <div class="col-12 col-md-4 listing-search">
             <q-input
               v-model="filter"
               placeholder="Rechercher par nom, compte ou chapitre..."
@@ -18,7 +65,7 @@
               </template>
             </q-input>
           </div>
-          <div class="col-12 col-md-auto q-mt-sm q-mt-md-none q-gutter-x-sm">
+          <div class="col-12 col-md-auto q-mt-sm q-mt-md-none listing-actions">
             <q-toggle v-model="showInactifs" label="Afficher inactifs" dense />
             <q-btn color="primary" icon="add" label="Nouveau Service" unelevated @click="openAdd" />
           </div>
@@ -28,6 +75,8 @@
           :rows="filteredServices"
           :columns="columns"
           :loading="loading"
+          show-export-csv
+          export-filename="services"
           @edit="editService"
           @delete="deleteService"
         >
@@ -49,7 +98,7 @@
 
     <!-- Dialog Ajout/Modification -->
     <q-dialog v-model="showDialog" persistent>
-      <q-card style="min-width: 400px">
+      <q-card class="dialog-card" style="width: min(400px, 96vw); max-width: 96vw">
         <q-card-section class="row items-center q-pb-none">
           <div class="text-h6">
             {{ editingId ? 'Modifier le service' : 'Nouveau service' }}
@@ -150,6 +199,18 @@ const filteredServices = computed(() => {
   return result;
 });
 
+const activeServicesCount = computed(
+  () => filteredServices.value.filter((service) => service.actif).length,
+);
+
+const servicesWithCompteCount = computed(
+  () => filteredServices.value.filter((service) => !!service.compte).length,
+);
+
+const servicesWithChapitreCount = computed(
+  () => filteredServices.value.filter((service) => !!service.chapitre).length,
+);
+
 async function loadData() {
   loading.value = true;
   try {
@@ -238,7 +299,27 @@ onMounted(() => {
 }
 
 .main-card {
-  border-radius: 16px;
+  border-radius: 24px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.overview-stat-card {
+  min-height: 112px;
+}
+
+.overview-stat-label {
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.overview-stat-value {
+  color: #0f172a;
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  font-weight: 800;
+  line-height: 1.2;
 }
 </style>

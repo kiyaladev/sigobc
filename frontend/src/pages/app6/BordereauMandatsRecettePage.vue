@@ -17,23 +17,102 @@
       </template>
     </PageHeader>
 
-    <!-- Recherche et filtres -->
-    <FilterBar
-      v-model:search="search"
-      v-model:statut="filterStatut"
-      v-model:date-debut="filterDateDebut"
-      v-model:date-fin="filterDateFin"
-      :statut-options="statutOptions"
-      show-statut
-      show-date-range
-      search-placeholder="Rechercher N° bordereau..."
-      @reset="resetFilters"
-    />
+    <div class="compact-toolbar q-mb-md">
+      <div class="compact-toolbar-top row items-center q-col-gutter-sm">
+        <div class="col-12 col-md-5">
+          <q-input
+            v-model="search"
+            placeholder="Rechercher N° bordereau..."
+            outlined
+            dense
+            clearable
+            class="compact-search"
+          >
+            <template v-slot:prepend>
+              <q-icon name="search" />
+            </template>
+          </q-input>
+        </div>
+        <div class="col-12 col-md-auto compact-toolbar-summary">
+          <q-chip outline color="primary" icon="filter_alt" size="sm">
+            {{ activeFiltersCount }} filtre{{ activeFiltersCount > 1 ? 's' : '' }}
+          </q-chip>
+        </div>
+        <div class="col-12 col-md-auto compact-toolbar-actions">
+          <q-btn dense outline color="grey-7" icon="tune" label="Filtres" no-caps>
+            <q-menu class="compact-filter-menu" anchor="bottom right" self="top right">
+              <div class="compact-filter-panel">
+                <div class="compact-filter-panel-title">Filtres avancés</div>
+                <div class="row q-col-gutter-sm">
+                  <div class="col-12 col-sm-6 col-md-4">
+                    <q-select
+                      v-model="filterStatut"
+                      :options="statutOptions"
+                      label="Statut"
+                      outlined
+                      dense
+                      clearable
+                    />
+                  </div>
+                  <div class="col-12 col-sm-6 col-md-4">
+                    <q-input
+                      v-model="filterDateDebut"
+                      label="Date début"
+                      outlined
+                      dense
+                      type="date"
+                      clearable
+                    />
+                  </div>
+                  <div class="col-12 col-sm-6 col-md-4">
+                    <q-input
+                      v-model="filterDateFin"
+                      label="Date fin"
+                      outlined
+                      dense
+                      type="date"
+                      clearable
+                    />
+                  </div>
+                  <div class="col-12 col-sm-6 col-md-4">
+                    <q-btn
+                      label="Réinitialiser"
+                      icon="refresh"
+                      outline
+                      color="grey-7"
+                      @click="resetFilters"
+                      class="full-width"
+                    />
+                  </div>
+                </div>
+              </div>
+            </q-menu>
+          </q-btn>
+          <q-btn
+            color="primary"
+            icon="add"
+            label="Nouveau"
+            unelevated
+            no-caps
+            @click="openDialog()"
+          />
+          <q-btn
+            v-if="isDev"
+            color="orange"
+            icon="science"
+            label="Fake"
+            unelevated
+            no-caps
+            @click="createFakeBordereau"
+          />
+        </div>
+      </div>
+    </div>
 
     <!-- Statistiques -->
-    <div class="row q-col-gutter-sm q-mb-md">
+    <div class="listing-stats-row row q-col-gutter-sm q-mb-md">
       <div class="col-12 col-md-3">
-        <q-card>
+        <q-card class="listing-stat-card">
           <q-card-section>
             <div class="text-caption text-grey-7">Total Bordereaux</div>
             <div class="text-h6">{{ filteredBordereaux.length }}</div>
@@ -41,7 +120,7 @@
         </q-card>
       </div>
       <div class="col-12 col-md-3">
-        <q-card>
+        <q-card class="listing-stat-card">
           <q-card-section>
             <div class="text-caption text-grey-7">Montant Total</div>
             <div class="text-h6">{{ formatMontant(totalMontant) }}</div>
@@ -49,7 +128,7 @@
         </q-card>
       </div>
       <div class="col-12 col-md-3">
-        <q-card>
+        <q-card class="listing-stat-card">
           <q-card-section>
             <div class="text-caption text-grey-7">Bordereaux Ouverts</div>
             <div class="text-h6">{{ bordereauxOuverts }}</div>
@@ -57,7 +136,7 @@
         </q-card>
       </div>
       <div class="col-12 col-md-3">
-        <q-card>
+        <q-card class="listing-stat-card">
           <q-card-section>
             <div class="text-caption text-grey-7">Bordereaux Fermés</div>
             <div class="text-h6">{{ bordereauxFermes }}</div>
@@ -120,7 +199,7 @@
 
     <!-- Dialog de création/modification -->
     <q-dialog v-model="dialogVisible" persistent>
-      <q-card style="min-width: 500px">
+      <q-card class="dialog-card" style="width: min(500px, 96vw); max-width: 96vw">
         <q-card-section class="bg-primary text-white row items-center">
           <div class="text-h6">{{ isEditing ? 'Modifier' : 'Nouveau' }} Bordereau</div>
           <q-space />
@@ -238,7 +317,6 @@ import {
   type MandatRecette,
   DEFAULT_MAIRIE_ID,
 } from 'src/database/db';
-import FilterBar from 'src/components/FilterBar.vue';
 import DataTable from 'src/components/DataTable.vue';
 import PageHeader from 'src/components/PageHeader.vue';
 import { openPrintWindow } from 'src/utils/printUrl';
@@ -340,6 +418,12 @@ const mandatsColumns = [
 
 const bordereauMandatsTotal = computed(() => {
   return bordereauMandats.value.reduce((sum, m) => sum + (m.montant || 0), 0);
+});
+
+const activeFiltersCount = computed(() => {
+  return [filterStatut.value, filterDateDebut.value, filterDateFin.value].filter(
+    (value) => value !== null && value !== '',
+  ).length;
 });
 
 const filteredBordereaux = computed(() => {
@@ -626,5 +710,52 @@ onMounted(() => {
   @media print {
     display: none !important;
   }
+}
+.compact-toolbar {
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.92));
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.compact-toolbar-top {
+  gap: 10px 0;
+}
+
+.compact-search :deep(.q-field__control) {
+  min-height: 38px;
+}
+
+.compact-toolbar-summary {
+  display: flex;
+  align-items: center;
+}
+
+.compact-toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.compact-toolbar-actions :deep(.q-btn) {
+  min-height: 36px;
+  border-radius: 12px;
+}
+
+.compact-filter-panel {
+  width: min(760px, 88vw);
+  padding: 14px;
+}
+
+.compact-filter-panel-title {
+  margin-bottom: 10px;
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 </style>

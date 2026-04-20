@@ -1,17 +1,20 @@
 <template>
-  <q-card flat class="q-pa-sm">
-    <q-card-section v-if="showExportCsv" class="q-pb-none">
+  <q-card flat class="data-table-shell">
+    <q-card-section v-if="showExportCsv" class="data-table-top q-pb-none">
       <div class="row justify-end">
         <q-btn
-          flat
+          dense
+          outline
           color="primary"
           icon="download"
           label="Exporter CSV"
           @click="handleExportCsv"
           no-caps
+          class="data-table-export compact-export-btn"
         />
       </div>
     </q-card-section>
+
     <q-table
       :rows="rows"
       :columns="columns"
@@ -19,16 +22,15 @@
       :loading="loading"
       :pagination="pagination"
       flat
+      class="data-table"
       v-bind="$attrs"
     >
-      <!-- Forward all custom column slots -->
       <template v-for="(_, slot) in $slots" v-slot:[slot]="props">
         <slot :name="slot" v-bind="props"></slot>
       </template>
 
-      <!-- Actions column with standard actions -->
       <template v-if="showActions" v-slot:body-cell-actions="props">
-        <q-td :props="props" class="no-print">
+        <q-td :props="props" class="no-print data-table-actions">
           <q-btn
             v-if="showView"
             flat
@@ -36,6 +38,7 @@
             dense
             icon="visibility"
             color="grey-7"
+            class="table-action-btn"
             @click="$emit('view', props.row)"
           >
             <q-tooltip>Voir</q-tooltip>
@@ -47,6 +50,7 @@
             dense
             icon="print"
             color="grey-7"
+            class="table-action-btn"
             @click="$emit('print', props.row)"
           >
             <q-tooltip>Imprimer</q-tooltip>
@@ -58,6 +62,7 @@
             dense
             icon="download"
             color="grey-7"
+            class="table-action-btn"
             @click="$emit('download', props.row)"
           >
             <q-tooltip>Télécharger PDF</q-tooltip>
@@ -68,7 +73,8 @@
             round
             dense
             icon="edit"
-            color="grey-7"
+            color="primary"
+            class="table-action-btn"
             @click="$emit('edit', props.row)"
           >
             <q-tooltip>Modifier</q-tooltip>
@@ -80,12 +86,12 @@
             dense
             icon="delete"
             color="negative"
+            class="table-action-btn"
             @click="$emit('delete', props.row)"
           >
             <q-tooltip>Supprimer</q-tooltip>
           </q-btn>
 
-          <!-- Slot pour actions personnalisées -->
           <slot v-if="showCustomActions" name="custom-actions" :row="props.row"></slot>
         </q-td>
       </template>
@@ -141,3 +147,104 @@ function handleExportCsv() {
   exportToCsv(props.rows, props.columns, props.exportFilename);
 }
 </script>
+
+<style scoped lang="scss">
+.data-table-shell {
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.98));
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+  overflow: hidden;
+}
+
+.data-table-top {
+  padding: 14px 14px 0;
+}
+
+.data-table-export {
+  border-radius: 12px;
+}
+
+.compact-export-btn {
+  min-height: 34px;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+}
+
+.data-table {
+  background: transparent;
+}
+
+.data-table-actions {
+  white-space: nowrap;
+}
+
+.table-action-btn {
+  margin: 0 2px;
+}
+
+:deep(.data-table .q-table__top),
+:deep(.data-table .q-table__bottom) {
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.62);
+}
+
+:deep(.data-table .q-table thead tr),
+:deep(.data-table thead tr) {
+  background: linear-gradient(180deg, #f8fafc 0%, #eff4f8 100%);
+}
+
+:deep(.data-table th) {
+  padding-top: 15px;
+  padding-bottom: 15px;
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.22);
+}
+
+:deep(.data-table td) {
+  padding-top: 14px;
+  padding-bottom: 14px;
+  border-color: rgba(226, 232, 240, 0.85);
+}
+
+:deep(.data-table tbody tr:nth-child(even)) {
+  background: rgba(248, 250, 252, 0.8);
+}
+
+:deep(.data-table tbody tr:hover) {
+  background: rgba(197, 168, 77, 0.08);
+}
+
+:deep(.data-table .q-table__middle) {
+  border-radius: 18px;
+}
+
+:deep(.data-table .q-table__bottom .q-btn) {
+  border-radius: 10px;
+}
+
+:deep(.data-table .q-table__bottom .q-field__control) {
+  border-radius: 10px;
+}
+
+:deep(.data-table .q-table__bottom .q-select),
+:deep(.data-table .q-table__bottom .q-field) {
+  min-width: 72px;
+}
+
+@media (max-width: 768px) {
+  .data-table-shell {
+    border-radius: 18px;
+  }
+
+  :deep(.data-table th),
+  :deep(.data-table td) {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+}
+</style>

@@ -44,6 +44,7 @@ export class OfflineDb extends Dexie {
   mandats!: Table<Record<string, unknown>, number>;
   bordereauMandats!: Table<Record<string, unknown>, number>;
   etatFinancierMensuel!: Table<Record<string, unknown>, number>;
+  fournisseurs!: Table<Record<string, unknown>, number>;
 
   // ── App6 - Recettes ───────────────────────────────────────────────────────
   taxes!: Table<Record<string, unknown>, number>;
@@ -140,6 +141,11 @@ export class OfflineDb extends Dexie {
       // Misc
       printData: '++id, type, createdAt',
       exercices: '++id, annee, statut, mairieId',
+    });
+
+    // Version 3: add fournisseurs table
+    this.version(3).stores({
+      fournisseurs: '++id, nom, compteContribuable, mairieId, actif',
     });
   }
 }

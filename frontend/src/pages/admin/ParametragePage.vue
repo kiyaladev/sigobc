@@ -1,8 +1,8 @@
 <template>
   <q-page class="parametrage-page q-pa-md">
     <!-- Password Gate -->
-    <div v-if="!isUnlocked" class="flex flex-center" style="min-height: 60vh">
-      <q-card style="max-width: 420px; width: 100%" class="q-pa-lg">
+    <div v-if="!isUnlocked" class="admin-password-shell">
+      <q-card class="admin-password-card q-pa-lg">
         <q-card-section class="text-center">
           <q-icon name="lock" size="48px" color="warning" class="q-mb-md" />
           <div class="text-h6 q-mb-sm">Accès protégé</div>
@@ -40,12 +40,27 @@
         title="Paramétrage"
         subtitle="Configuration générale de l'application"
         icon="settings"
-      />
+      >
+        <template #stats>
+          <div v-for="(stat, index) in heroStats" :key="index" class="col-12 col-sm-6 col-lg-3">
+            <q-card flat class="listing-stat-card overview-stat-card">
+              <q-card-section class="row items-center no-wrap">
+                <div class="col">
+                  <div class="overview-stat-label">{{ stat.label }}</div>
+                  <div class="overview-stat-value">{{ stat.value }}</div>
+                  <div v-if="stat.helper" class="overview-stat-helper">{{ stat.helper }}</div>
+                </div>
+                <q-icon :name="stat.icon" size="30px" :color="stat.color" />
+              </q-card-section>
+            </q-card>
+          </div>
+        </template>
+      </PageHeader>
 
       <!-- Gestion des Exercices Budgétaires -->
       <q-card class="main-card q-mt-md">
         <q-card-section>
-          <div class="row items-center justify-between q-mb-md">
+          <div class="listing-toolbar row items-center justify-between q-mb-md">
             <div class="text-h6">
               <q-icon name="calendar_today" class="q-mr-sm" />
               Gestion des Exercices Budgétaires
@@ -135,7 +150,7 @@
       <!-- Informations Mairie -->
       <q-card class="main-card q-mt-md">
         <q-card-section>
-          <div class="row items-center justify-between q-mb-md">
+          <div class="listing-toolbar row items-center justify-between q-mb-md">
             <div class="text-h6">
               <q-icon name="business" class="q-mr-sm" />
               Informations de la Mairie
@@ -267,7 +282,7 @@
       <!-- Paramètres de Paie -->
       <q-card class="main-card q-mt-md">
         <q-card-section>
-          <div class="row items-center justify-between q-mb-md">
+          <div class="listing-toolbar row items-center justify-between q-mb-md">
             <div class="text-h6">
               <q-icon name="payments" class="q-mr-sm" />
               Paramètres de Paie (Taux & Cotisations)
@@ -368,7 +383,7 @@
 
       <!-- Dialog création exercice -->
       <q-dialog v-model="showExerciceDialog" persistent>
-        <q-card style="min-width: 400px">
+        <q-card class="dialog-card" style="width: min(400px, 96vw); max-width: 96vw">
           <q-card-section class="row items-center q-pb-none">
             <div class="text-h6">Nouvel Exercice Budgétaire</div>
             <q-space />
@@ -420,7 +435,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { useQuasar, date } from 'quasar';
 import {
   db,
@@ -486,6 +501,41 @@ const exerciceColumns = [
   { name: 'observations', label: 'Observations', field: 'observations', align: 'left' as const },
   { name: 'actions', label: 'Actions', field: 'actions', align: 'center' as const },
 ];
+
+const openedExercicesCount = computed(
+  () => exercices.value.filter((exercice) => exercice.statut === 'ouvert').length,
+);
+
+const heroStats = computed(() => [
+  {
+    label: 'Exercices',
+    value: exercices.value.length,
+    helper: `${openedExercicesCount.value} ouvert(s)`,
+    icon: 'event_note',
+    color: 'primary',
+  },
+  {
+    label: 'Mairie',
+    value: mairie.value?.code || '--',
+    helper: mairie.value?.nom || 'Aucune mairie configurée',
+    icon: 'location_city',
+    color: 'secondary',
+  },
+  {
+    label: 'Maire',
+    value: mairie.value?.maire ? 'OK' : '--',
+    helper: mairie.value?.maire || 'Information non renseignée',
+    icon: 'person',
+    color: 'teal',
+  },
+  {
+    label: 'Taux ITS',
+    value: `${parametresPaie.value?.tauxIts ?? 0}%`,
+    helper: 'Paramètre de paie actif',
+    icon: 'payments',
+    color: 'positive',
+  },
+]);
 
 function formatDate(dateValue: Date | undefined): string {
   if (!dateValue) return '-';
@@ -682,9 +732,83 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .parametrage-page {
-  .main-card {
-    border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  }
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.overview-stat-card {
+  min-height: 112px;
+}
+
+.overview-stat-label {
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.overview-stat-value {
+  color: #0f172a;
+  font-size: clamp(1.05rem, 1.7vw, 1.45rem);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.overview-stat-helper {
+  margin-top: 6px;
+  color: #64748b;
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
+.admin-password-shell {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-password-card {
+  width: min(440px, 100%);
+  border-radius: 28px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
+  box-shadow: 0 24px 44px rgba(15, 23, 42, 0.08);
+}
+
+.parametrage-page .main-card {
+  border-radius: 24px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
+  box-shadow: 0 18px 34px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.parametrage-page .listing-toolbar {
+  padding: 14px 16px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.parametrage-page :deep(.q-item) {
+  border-radius: 14px;
+  margin: 4px 0;
+}
+
+.parametrage-page :deep(.q-table) {
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.parametrage-page :deep(.q-table thead tr) {
+  background: linear-gradient(180deg, #f8fafc 0%, #eef4f8 100%);
+}
+
+.dialog-card {
+  border-radius: 24px;
+  overflow: hidden;
 }
 </style>

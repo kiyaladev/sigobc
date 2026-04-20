@@ -4,12 +4,19 @@
     <q-card class="login-card q-pa-lg">
       <!-- En-tête avec logo -->
       <q-card-section class="text-center q-pb-md">
+        <div class="login-eyebrow q-mb-sm">Plateforme budgétaire intégrée</div>
         <div class="logo-wrapper q-mb-md">
           <img :src="logoMairie" alt="Logo Mairie" class="logo-image" />
         </div>
         <div class="text-h4 text-weight-bold q-mb-xs">SIGOBC</div>
         <div class="text-subtitle1 text-grey-7">
           Système Informatique de Gestion des opérations Budgétaires des Collectivités
+        </div>
+        <div class="login-badges q-mt-md">
+          <q-chip dense outline color="primary" icon="shield">Accès sécurisé</q-chip>
+          <q-chip dense outline color="secondary" icon="dashboard_customize"
+            >Interface unifiée</q-chip
+          >
         </div>
       </q-card-section>
 
@@ -18,7 +25,8 @@
           <div class="input-wrapper">
             <q-input
               v-model="username"
-              filled
+              outlined
+              dense
               label="Nom d'utilisateur"
               lazy-rules
               :rules="[(val) => (val && val.length > 0) || 'Le nom d\'utilisateur est requis']"
@@ -34,7 +42,8 @@
           <div class="input-wrapper">
             <q-input
               v-model="password"
-              filled
+              outlined
+              dense
               :type="isPwd ? 'password' : 'text'"
               label="Mot de passe"
               lazy-rules
@@ -76,6 +85,13 @@
               class="forgot-btn"
             />
           </div>
+
+          <q-banner class="login-tip-banner" rounded>
+            <template v-slot:avatar>
+              <q-icon name="tips_and_updates" color="primary" />
+            </template>
+            Utilisez votre compte administrateur ou opérateur pour accéder à la plateforme.
+          </q-banner>
 
           <div class="q-mt-lg">
             <q-btn
@@ -224,6 +240,27 @@ function onForgotPassword() {
   animation: logoFloat 3s ease-in-out infinite;
 }
 
+.login-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(27, 94, 59, 0.08), rgba(197, 168, 77, 0.12));
+  color: #47627e;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.login-badges {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 @keyframes logoFloat {
   0%,
   100% {
@@ -294,9 +331,15 @@ function onForgotPassword() {
 
 // Bouton de soumission
 .modern-submit-btn {
-  border-radius: 12px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
+  border-radius: 14px;
+  min-height: 48px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.login-tip-banner {
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(248, 250, 252, 0.92));
 }
 
 // Footer

@@ -8,36 +8,16 @@
     />
 
     <div class="row q-col-gutter-md">
-      <!-- Cartes de statistiques -->
-      <div class="col-12 col-sm-6 col-md-3" v-for="(stat, index) in statsCards" :key="index">
-        <q-card
-          class="stat-card hover-lift"
-          :class="`stat-card-${index}`"
-          :style="{
-            animationDelay: `${index * 0.1}s`,
-            borderLeft: `4px solid var(--q-${stat.color})`,
-          }"
-        >
-          <q-card-section class="stat-card-content">
-            <div class="row items-center no-wrap">
-              <div class="col">
-                <div class="stat-value text-grey-8">{{ stat.value }}</div>
-                <div class="stat-label text-grey-6">{{ stat.label }}</div>
-              </div>
-              <div class="col-auto">
-                <div class="stat-icon-wrapper" :class="`bg-${stat.color}-1`">
-                  <q-icon :name="stat.icon" class="stat-icon" :color="stat.color" />
-                </div>
-              </div>
+      <!-- Cartes KPI -->
+      <div class="col-12 col-sm-6 col-lg-3" v-for="(stat, index) in statsCards" :key="index">
+        <q-card flat class="listing-stat-card overview-stat-card">
+          <q-card-section class="row items-center no-wrap">
+            <div class="col">
+              <div class="overview-stat-label">{{ stat.label }}</div>
+              <div class="overview-stat-value">{{ stat.value }}</div>
+              <div v-if="stat.helper" class="overview-stat-helper">{{ stat.helper }}</div>
             </div>
-
-            <!-- Indicateur de progression -->
-            <q-linear-progress
-              :value="stat.progress || 1"
-              :color="stat.color"
-              class="stat-progress q-mt-md"
-              :class="{ 'pulse-animation': stat.progress < 1 }"
-            />
+            <q-icon :name="stat.icon" size="30px" :color="stat.color" />
           </q-card-section>
         </q-card>
       </div>
@@ -219,35 +199,31 @@ const stats = ref({
 const recentMandats = ref<Mandat[]>([]);
 const activePrevisions = ref<Prevision[]>([]);
 
-// Cartes de statistiques avec animations
-const statsCards = computed(() => [
+// Cartes KPI harmonisées avec la page Prévisions
+const statsCards = computed<{ value: number | string; label: string; icon: string; color: string; helper?: string }[]>(() => [
   {
     value: stats.value.totalChapitres,
     label: 'Chapitres',
     icon: 'category',
     color: 'primary',
-    progress: 0.75,
   },
   {
     value: stats.value.totalPrevisions,
     label: 'Prévisions',
     icon: 'pie_chart',
     color: 'secondary',
-    progress: 0.85,
   },
   {
     value: stats.value.totalMandats,
     label: 'Mandats',
     icon: 'receipt',
-    color: 'primary',
-    progress: 0.6,
+    color: 'teal',
   },
   {
     value: formatMontant(stats.value.montantTotal),
-    label: 'Montant Total (CFA)',
+    label: 'Montant total',
     icon: 'payments',
-    color: 'secondary',
-    progress: 0.9,
+    color: 'positive',
   },
 ]);
 
@@ -326,6 +302,33 @@ onMounted(() => {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.overview-stat-card {
+  min-height: 112px;
+}
+
+.overview-stat-label {
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.overview-stat-value {
+  color: #0f172a;
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.overview-stat-helper {
+  margin-top: 6px;
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 600;
 }
 
 // Cartes de statistiques

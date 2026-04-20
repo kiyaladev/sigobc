@@ -4,114 +4,185 @@
       title="Prévisions Budgétaires"
       subtitle="Gestion des prévisions de dépenses"
       icon="pie_chart"
-    />
+    >
+      <template #stats>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">Prévisions visibles</div>
+                <div class="overview-stat-value">{{ filteredPrevisions.length }}</div>
+              </div>
+              <q-icon name="dataset" size="30px" color="primary" />
+            </q-card-section>
+          </q-card>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">Montant prévu</div>
+                <div class="overview-stat-value">{{ formatMontant(totalPrevu) }}</div>
+              </div>
+              <q-icon name="payments" size="30px" color="secondary" />
+            </q-card-section>
+          </q-card>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">Montant engagé</div>
+                <div class="overview-stat-value">{{ formatMontant(totalEngage) }}</div>
+                <div class="overview-stat-helper">
+                  Disponible : {{ formatMontant(totalDisponible) }}
+                </div>
+              </div>
+              <q-icon name="receipt_long" size="30px" color="teal" />
+            </q-card-section>
+          </q-card>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">Taux d'exécution</div>
+                <div class="overview-stat-value">{{ tauxExecution.toFixed(1) }} %</div>
+              </div>
+              <q-icon name="monitoring" size="30px" color="positive" />
+            </q-card-section>
+          </q-card>
+        </div>
+      </template>
+    </PageHeader>
 
     <q-card class="main-card">
       <q-card-section>
-        <!-- Filtres -->
-        <div class="row q-col-gutter-sm q-mb-md">
-          <div class="col-12 col-md-3">
-            <q-select
-              v-model="filterExercice"
-              :options="exerciceFilterOptions"
-              label="Exercice"
-              outlined
-              dense
-              emit-value
-              map-options
-              clearable
-            />
-          </div>
-          <div class="col-12 col-md-3">
-            <q-select
-              v-model="filterChapitreId"
-              :options="chapitreOptions"
-              label="Chapitre"
-              outlined
-              dense
-              emit-value
-              map-options
-              clearable
-            />
-          </div>
-          <div class="col-12 col-md-3">
-            <q-select
-              v-model="filterSousChapitreId"
-              :options="filteredSousChapitreOptions"
-              label="Sous-chapitre"
-              outlined
-              dense
-              emit-value
-              map-options
-              clearable
-              use-input
-              input-debounce="0"
-              @filter="filterSousChapitre"
-            />
-          </div>
-          <div class="col-12 col-md-3">
-            <q-btn
-              label="Réinitialiser"
-              icon="refresh"
-              flat
-              color="grey-7"
-              @click="resetFilters"
-              class="full-width"
-            />
-          </div>
-        </div>
-
-        <div class="row items-center justify-between q-mb-md">
-          <div class="col-12 col-md-6">
-            <q-input
-              v-model="filter"
-              placeholder="Rechercher une prévision..."
-              outlined
-              dense
-              clearable
-            >
-              <template v-slot:prepend>
-                <q-icon name="search" />
-              </template>
-            </q-input>
-          </div>
-          <div class="col-12 col-md-auto q-mt-sm q-mt-md-none q-gutter-sm">
-            <q-btn
-              color="accent"
-              icon="description"
-              label="État Fonctionnel"
-              unelevated
-              @click="openEtatFinancierMensuel('fonctionnel')"
-            />
-            <q-btn
-              color="teal"
-              icon="business_center"
-              label="État Investissement"
-              unelevated
-              @click="openEtatFinancierMensuel('investissement')"
-            />
-            <q-btn
-              color="secondary"
-              icon="print"
-              label="CT02"
-              unelevated
-              @click="showCT02Dialog = true"
-            />
-            <q-btn
-              color="primary"
-              icon="add"
-              label="Nouvelle Prévision"
-              unelevated
-              @click="showAddDialog = true"
-            />
-            <q-btn
-              v-if="isDev"
-              color="orange"
-              icon="science"
-              label="Fake Prévision"
-              unelevated
-              @click="createFakePrevision"
-            />
+        <div class="compact-toolbar q-mb-md">
+          <div class="compact-toolbar-top row items-center q-col-gutter-sm">
+            <div class="col-12 col-md-5">
+              <q-input
+                v-model="filter"
+                placeholder="Rechercher une prévision..."
+                outlined
+                dense
+                clearable
+                class="compact-search"
+              >
+                <template v-slot:prepend>
+                  <q-icon name="search" />
+                </template>
+              </q-input>
+            </div>
+            <div class="col-12 col-md-auto compact-toolbar-summary">
+              <q-chip outline color="primary" icon="filter_alt" size="sm">
+                {{ activeFiltersCount }} filtre{{ activeFiltersCount > 1 ? 's' : '' }}
+              </q-chip>
+            </div>
+            <div class="col-12 col-md-auto compact-toolbar-actions">
+              <q-btn dense outline color="grey-7" icon="tune" label="Filtres" no-caps>
+                <q-menu class="compact-filter-menu" anchor="bottom right" self="top right">
+                  <div class="compact-filter-panel">
+                    <div class="compact-filter-panel-title">Filtres avancés</div>
+                    <div class="row q-col-gutter-sm">
+                      <div class="col-12 col-sm-6 col-md-4">
+                        <q-select
+                          v-model="filterExercice"
+                          :options="exerciceFilterOptions"
+                          label="Exercice"
+                          outlined
+                          dense
+                          emit-value
+                          map-options
+                          clearable
+                        />
+                      </div>
+                      <div class="col-12 col-sm-6 col-md-4">
+                        <q-select
+                          v-model="filterChapitreId"
+                          :options="chapitreOptions"
+                          label="Chapitre"
+                          outlined
+                          dense
+                          emit-value
+                          map-options
+                          clearable
+                        />
+                      </div>
+                      <div class="col-12 col-sm-6 col-md-4">
+                        <q-select
+                          v-model="filterSousChapitreId"
+                          :options="filteredSousChapitreOptions"
+                          label="Sous-chapitre"
+                          outlined
+                          dense
+                          emit-value
+                          map-options
+                          clearable
+                          use-input
+                          input-debounce="0"
+                          @filter="filterSousChapitre"
+                        />
+                      </div>
+                      <div class="col-12 col-sm-6 col-md-4">
+                        <q-btn
+                          label="Réinitialiser"
+                          icon="refresh"
+                          outline
+                          color="grey-7"
+                          @click="resetFilters"
+                          class="full-width"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </q-menu>
+              </q-btn>
+              <q-btn
+                dense
+                outline
+                color="accent"
+                icon="description"
+                label="Fonctionnel"
+                no-caps
+                @click="openEtatFinancierMensuel('fonctionnel')"
+              />
+              <q-btn
+                dense
+                outline
+                color="teal"
+                icon="business_center"
+                label="Investissement"
+                no-caps
+                @click="openEtatFinancierMensuel('investissement')"
+              />
+              <q-btn
+                dense
+                outline
+                color="secondary"
+                icon="print"
+                label="CT02"
+                no-caps
+                @click="showCT02Dialog = true"
+              />
+              <q-btn
+                color="primary"
+                icon="add"
+                label="Nouvelle"
+                unelevated
+                no-caps
+                @click="showAddDialog = true"
+              />
+              <q-btn
+                v-if="isDev"
+                color="orange"
+                icon="science"
+                label="Fake"
+                unelevated
+                no-caps
+                @click="createFakePrevision"
+              />
+            </div>
           </div>
         </div>
 
@@ -137,7 +208,7 @@
 
     <!-- Dialog d'ajout/modification -->
     <q-dialog v-model="showAddDialog" persistent>
-      <q-card style="min-width: 600px">
+      <q-card class="dialog-card" style="width: min(600px, 96vw); max-width: 96vw">
         <q-card-section class="row items-center q-pb-none">
           <div class="text-h6">
             {{ editingId ? 'Modifier la prévision' : 'Nouvelle prévision' }}
@@ -233,7 +304,7 @@
 
     <!-- Dialog CT02 - Livre d'exécution des opérations budgétaires dépenses -->
     <q-dialog v-model="showCT02Dialog" persistent>
-      <q-card style="min-width: 500px">
+      <q-card class="dialog-card" style="width: min(500px, 96vw); max-width: 96vw">
         <q-card-section class="row items-center q-pb-none">
           <div class="text-h6">CT02 - Livre d'exécution budgétaire</div>
           <q-space />
@@ -283,7 +354,7 @@
     </q-dialog>
 
     <q-dialog v-model="showEtatFinancierDialog" persistent>
-      <q-card style="min-width: 400px">
+      <q-card class="dialog-card" style="width: min(400px, 96vw); max-width: 96vw">
         <q-card-section class="row items-center q-pb-none">
           <div class="text-h6">
             État Financier Mensuel
@@ -548,30 +619,64 @@ const columns = [
 const filteredPrevisions = computed(() => {
   let result = previsions.value;
 
-  // Filtre par exercice
   if (filterExercice.value) {
     result = result.filter((p) => p.exercice === filterExercice.value);
   }
 
-  // Filtre par chapitre
   if (filterChapitreId.value) {
     result = result.filter((p) => p.chapitreId === filterChapitreId.value);
   }
 
-  // Filtre par sous-chapitre
   if (filterSousChapitreId.value) {
     result = result.filter(
       (p) => 'sousChapitreId' in p && p.sousChapitreId === filterSousChapitreId.value,
     );
   }
 
-  // Filtre par texte
   if (filter.value) {
     const searchTerm = filter.value.toLowerCase();
-    result = result.filter((p) => p.exercice.toString().includes(searchTerm));
+    result = result.filter((p) => {
+      const chapitre = chapitres.value.find((c) => c.id === p.chapitreId);
+      const sousChapitre = sousChapitres.value.find((s) => s.id === p.sousChapitreId);
+      return [
+        p.exercice.toString(),
+        chapitre?.code,
+        chapitre?.libelle,
+        sousChapitre?.code,
+        sousChapitre?.libelle,
+        p.typeBien,
+        p.statut,
+      ]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(searchTerm));
+    });
   }
 
   return result;
+});
+
+const totalPrevu = computed(() =>
+  filteredPrevisions.value.reduce((sum, p) => sum + (p.montantPrevu || 0), 0),
+);
+
+const totalEngage = computed(() =>
+  filteredPrevisions.value.reduce((sum, p) => sum + (p.montantEngage || 0), 0),
+);
+
+const totalDisponible = computed(() =>
+  filteredPrevisions.value.reduce((sum, p) => sum + (p.montantDisponible || 0), 0),
+);
+
+const tauxExecution = computed(() =>
+  totalPrevu.value > 0 ? (totalEngage.value / totalPrevu.value) * 100 : 0,
+);
+
+const activeFiltersCount = computed(() => {
+  let count = 0;
+  if (filterExercice.value) count += 1;
+  if (filterChapitreId.value) count += 1;
+  if (filterSousChapitreId.value) count += 1;
+  return count;
 });
 
 function resetFilters() {
@@ -1167,7 +1272,81 @@ onMounted(() => {
 }
 
 .main-card {
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-radius: 24px;
+}
+
+.overview-stat-card {
+  min-height: 112px;
+}
+
+.overview-stat-label {
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.overview-stat-value {
+  color: #0f172a;
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.overview-stat-helper {
+  margin-top: 6px;
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.compact-toolbar {
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.92));
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.compact-toolbar-top {
+  gap: 10px 0;
+}
+
+.compact-search :deep(.q-field__control) {
+  min-height: 38px;
+}
+
+.compact-toolbar-summary {
+  display: flex;
+  align-items: center;
+}
+
+.compact-toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.compact-toolbar-actions :deep(.q-btn) {
+  min-height: 36px;
+  border-radius: 12px;
+}
+
+.compact-filter-panel {
+  width: min(760px, 88vw);
+  padding: 14px;
+}
+
+.compact-filter-panel-title {
+  margin-bottom: 10px;
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 </style>

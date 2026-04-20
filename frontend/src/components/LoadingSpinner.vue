@@ -1,27 +1,13 @@
 <template>
-  <div class="loading-spinner" :class="{ 'fullscreen': fullscreen }">
+  <div class="loading-spinner" :class="{ fullscreen: fullscreen }">
     <div class="spinner-content">
-      <q-spinner-dots 
-        v-if="type === 'dots'"
-        :color="color" 
-        :size="size" 
-      />
-      <q-spinner-rings 
-        v-else-if="type === 'rings'"
-        :color="color" 
-        :size="size" 
-      />
-      <q-spinner-gears 
-        v-else-if="type === 'gears'"
-        :color="color" 
-        :size="size" 
-      />
-      <q-spinner 
-        v-else
-        :color="color" 
-        :size="size" 
-      />
-      
+      <div class="spinner-shell">
+        <q-spinner-dots v-if="type === 'dots'" :color="color" :size="size" />
+        <q-spinner-rings v-else-if="type === 'rings'" :color="color" :size="size" />
+        <q-spinner-gears v-else-if="type === 'gears'" :color="color" :size="size" />
+        <q-spinner v-else :color="color" :size="size" />
+      </div>
+
       <div v-if="message" class="loading-message q-mt-md">
         {{ message }}
       </div>
@@ -52,48 +38,51 @@ withDefaults(defineProps<Props>(), {
   align-items: center;
   justify-content: center;
   padding: 48px;
-  
+
   &.fullscreen {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(4px);
+    inset: 0;
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(8px);
     z-index: 9999;
   }
 }
 
 .spinner-content {
+  min-width: 180px;
+  padding: 24px 20px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.94));
+  box-shadow: 0 18px 34px rgba(15, 23, 42, 0.08);
   text-align: center;
   animation: fadeIn 0.3s ease-out;
 }
 
+.spinner-shell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 82px;
+  height: 82px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, rgba(27, 94, 59, 0.08), rgba(197, 168, 77, 0.12));
+}
+
 .loading-message {
-  color: #666;
-  font-size: 0.875rem;
-  font-weight: 500;
-  animation: pulse 2s ease-in-out infinite;
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 700;
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: scale(0.9);
+    transform: scale(0.96);
   }
   to {
     opacity: 1;
     transform: scale(1);
-  }
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
   }
 }
 </style>

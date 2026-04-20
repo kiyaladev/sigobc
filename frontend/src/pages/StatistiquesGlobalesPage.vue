@@ -4,12 +4,31 @@
       title="Statistiques Globales"
       subtitle="Vue d'ensemble de l'exécution budgétaire"
       icon="analytics"
-    />
+    >
+      <template #stats>
+        <div v-for="(stat, index) in heroStats" :key="index" class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">{{ stat.label }}</div>
+                <div class="overview-stat-value">{{ stat.value }}</div>
+                <div v-if="stat.helper" class="overview-stat-helper">{{ stat.helper }}</div>
+              </div>
+              <q-icon :name="stat.icon" size="30px" :color="stat.color" />
+            </q-card-section>
+          </q-card>
+        </div>
+      </template>
+    </PageHeader>
 
     <!-- Filtres -->
-    <q-card class="filter-card q-mb-md">
-      <q-card-section>
-        <div class="row q-col-gutter-md items-end">
+    <q-card flat bordered class="listing-filter-card compact-toolbar q-mb-md">
+      <q-card-section class="q-pa-md">
+        <div class="listing-filter-title">
+          <q-icon name="tune" size="18px" />
+          <span>Filtres</span>
+        </div>
+        <div class="listing-filter-grid row q-col-gutter-sm items-end">
           <div class="col-12 col-sm-6 col-md-3">
             <q-select
               v-model="selectedExercice"
@@ -36,109 +55,54 @@
       </q-card-section>
     </q-card>
 
-    <!-- Cartes de statistiques principales - Dépenses -->
-    <div class="text-h6 text-grey-8 q-mb-sm">
+    <div class="admin-section-heading q-mb-sm">
       <q-icon name="trending_down" color="orange" class="q-mr-sm" />
       Dépenses
     </div>
     <div class="row q-col-gutter-md q-mb-lg">
-      <div class="col-12 col-sm-6 col-md-3">
-        <StatisticsCard
-          :value="depensesStats.budgetTotal"
-          title="Budget Prévu"
-          subtitle="Prévisions budgétaires"
-          icon="account_balance_wallet"
-          icon-color="grey-7"
-          border-color="#E67E22"
-          format="currency"
-        />
-      </div>
-      <div class="col-12 col-sm-6 col-md-3">
-        <StatisticsCard
-          :value="depensesStats.montantEngage"
-          title="Montant Engagé"
-          :subtitle="`${depensesStats.tauxExecution}% exécuté`"
-          icon="receipt_long"
-          icon-color="grey-7"
-          border-color="#F39C12"
-          format="currency"
-        />
-      </div>
-      <div class="col-12 col-sm-6 col-md-3">
-        <StatisticsCard
-          :value="depensesStats.nombreMandats"
-          title="Mandats"
-          :subtitle="`${depensesStats.mandatsPayes} payés`"
-          icon="receipt"
-          icon-color="grey-7"
-          border-color="#E74C3C"
-        />
-      </div>
-      <div class="col-12 col-sm-6 col-md-3">
-        <StatisticsCard
-          :value="depensesStats.montantDisponible"
-          title="Budget Disponible"
-          :subtitle="`${100 - depensesStats.tauxExecution}% restant`"
-          icon="savings"
-          icon-color="grey-7"
-          border-color="#2E7D32"
-          format="currency"
-        />
+      <div
+        v-for="(stat, index) in depensesCards"
+        :key="`dep-${index}`"
+        class="col-12 col-sm-6 col-md-3"
+      >
+        <q-card flat class="listing-stat-card overview-stat-card secondary-stat-card">
+          <q-card-section class="row items-center no-wrap">
+            <div class="col">
+              <div class="overview-stat-label">{{ stat.label }}</div>
+              <div class="overview-stat-value">{{ stat.value }}</div>
+              <div v-if="stat.helper" class="overview-stat-helper">{{ stat.helper }}</div>
+            </div>
+            <q-icon :name="stat.icon" size="28px" :color="stat.color" />
+          </q-card-section>
+        </q-card>
       </div>
     </div>
 
-    <!-- Cartes de statistiques principales - Recettes -->
-    <div class="text-h6 text-grey-8 q-mb-sm">
-      <q-icon name="trending_up" color="green" class="q-mr-sm" />
+    <div class="admin-section-heading q-mb-sm">
+      <q-icon name="trending_up" color="positive" class="q-mr-sm" />
       Recettes
     </div>
     <div class="row q-col-gutter-md q-mb-lg">
-      <div class="col-12 col-sm-6 col-md-3">
-        <StatisticsCard
-          :value="recettesStats.totalDeclarations"
-          title="Déclarations"
-          :subtitle="`${recettesStats.declarationsValidees} validées`"
-          icon="description"
-          icon-color="grey-7"
-          border-color="#2196F3"
-        />
-      </div>
-      <div class="col-12 col-sm-6 col-md-3">
-        <StatisticsCard
-          :value="recettesStats.montantTotal"
-          title="Montant Total"
-          subtitle="Recettes encaissées"
-          icon="payments"
-          icon-color="grey-7"
-          border-color="#4CAF50"
-          format="currency"
-        />
-      </div>
-      <div class="col-12 col-sm-6 col-md-3">
-        <StatisticsCard
-          :value="recettesStats.totalBordereaux"
-          title="Bordereaux"
-          :subtitle="`${recettesStats.bordereauxFermes} fermés`"
-          icon="receipt_long"
-          icon-color="grey-7"
-          border-color="#9C27B0"
-        />
-      </div>
-      <div class="col-12 col-sm-6 col-md-3">
-        <StatisticsCard
-          :value="recettesStats.tauxValidation"
-          title="Taux Validation"
-          subtitle="Déclarations validées"
-          icon="check_circle"
-          icon-color="grey-7"
-          border-color="#00BCD4"
-          format="percentage"
-        />
+      <div
+        v-for="(stat, index) in recettesCards"
+        :key="`rec-${index}`"
+        class="col-12 col-sm-6 col-md-3"
+      >
+        <q-card flat class="listing-stat-card overview-stat-card secondary-stat-card">
+          <q-card-section class="row items-center no-wrap">
+            <div class="col">
+              <div class="overview-stat-label">{{ stat.label }}</div>
+              <div class="overview-stat-value">{{ stat.value }}</div>
+              <div v-if="stat.helper" class="overview-stat-helper">{{ stat.helper }}</div>
+            </div>
+            <q-icon :name="stat.icon" size="28px" :color="stat.color" />
+          </q-card-section>
+        </q-card>
       </div>
     </div>
 
     <!-- Graphiques -->
-    <div class="row q-col-gutter-md">
+    <div class="row q-col-gutter-md analytics-grid">
       <q-inner-loading :showing="loading">
         <q-spinner-gears size="50px" color="primary" />
       </q-inner-loading>
@@ -146,13 +110,17 @@
       <!-- Message si aucune donnée -->
       <div
         v-if="!loading && depensesStats.budgetTotal === 0 && recettesStats.totalDeclarations === 0"
-        class="col-12 text-center q-pa-xl"
+        class="col-12"
       >
-        <q-icon name="bar_chart" size="64px" color="grey-5" />
-        <div class="text-h6 text-grey-6 q-mt-md">Aucune donnée disponible</div>
-        <div class="text-caption text-grey-5">
-          Créez des prévisions ou des déclarations pour voir les statistiques
-        </div>
+        <q-card class="analytics-empty-state">
+          <q-card-section class="text-center q-pa-xl">
+            <q-icon name="bar_chart" size="64px" color="grey-5" />
+            <div class="text-h6 text-grey-6 q-mt-md">Aucune donnée disponible</div>
+            <div class="text-caption text-grey-5">
+              Créez des prévisions ou des déclarations pour voir les statistiques
+            </div>
+          </q-card-section>
+        </q-card>
       </div>
 
       <!-- Comparaison Dépenses vs Recettes -->
@@ -161,6 +129,7 @@
         class="col-12 col-md-6"
       >
         <ChartCard
+          class="analytics-card analytics-chart-card"
           title="Dépenses vs Recettes"
           :chart-config="comparaisonChartConfig"
           header-class="text-grey-8"
@@ -170,6 +139,7 @@
       <!-- Répartition des mandats par statut -->
       <div v-if="!loading && depensesStats.nombreMandats > 0" class="col-12 col-md-6">
         <ChartCard
+          class="analytics-card analytics-chart-card"
           title="Statut des Mandats"
           :chart-config="mandatsStatutChartConfig"
           header-class="text-grey-8"
@@ -182,6 +152,7 @@
         class="col-12"
       >
         <ChartCard
+          class="analytics-card analytics-chart-card"
           title="Évolution Mensuelle (Dépenses vs Recettes)"
           :chart-config="evolutionChartConfig"
           header-class="text-grey-8"
@@ -194,7 +165,7 @@
         v-if="!loading && (depensesStats.budgetTotal > 0 || recettesStats.montantTotal > 0)"
         class="col-12 col-md-6"
       >
-        <q-card class="summary-card">
+        <q-card class="analytics-card summary-card">
           <q-card-section class="bg-grey-1">
             <div class="text-h6 text-grey-8">Résumé Financier</div>
           </q-card-section>
@@ -256,7 +227,7 @@
 
       <!-- Liens rapides -->
       <div class="col-12 col-md-6">
-        <q-card class="links-card">
+        <q-card class="analytics-card links-card">
           <q-card-section class="bg-grey-1">
             <div class="text-h6 text-grey-8">Accès Rapide</div>
           </q-card-section>
@@ -313,7 +284,6 @@ import { ref, computed, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { type ChartConfiguration, type TooltipItem, type ChartTypeRegistry } from 'chart.js';
 import PageHeader from 'src/components/PageHeader.vue';
-import StatisticsCard from 'src/components/StatisticsCard.vue';
 import ChartCard from 'src/components/ChartCard.vue';
 import { db } from 'src/database/db';
 import type {
@@ -413,6 +383,99 @@ const recettesStats = computed(() => {
 
 // Solde
 const solde = computed(() => recettesStats.value.montantTotal - depensesStats.value.montantEngage);
+
+const heroStats = computed(() => [
+  {
+    label: 'Dépenses prévues',
+    value: formatMontant(depensesStats.value.budgetTotal),
+    helper: `Engagé : ${formatMontant(depensesStats.value.montantEngage)}`,
+    icon: 'payments',
+    color: 'secondary',
+  },
+  {
+    label: 'Recettes encaissées',
+    value: formatMontant(recettesStats.value.montantTotal),
+    helper: `${recettesStats.value.totalDeclarations} déclaration(s)`,
+    icon: 'account_balance_wallet',
+    color: 'teal',
+  },
+  {
+    label: 'Solde',
+    value: formatMontant(Math.abs(solde.value)),
+    helper: solde.value >= 0 ? 'Excédent budgétaire' : 'Déficit budgétaire',
+    icon: 'balance',
+    color: solde.value >= 0 ? 'positive' : 'negative',
+  },
+  {
+    label: 'Exercice',
+    value: selectedExercice.value,
+    helper: `${depensesStats.value.nombreMandats} mandats • ${recettesStats.value.totalBordereaux} bordereaux`,
+    icon: 'event',
+    color: 'primary',
+  },
+]);
+
+const depensesCards = computed(() => [
+  {
+    label: 'Budget prévu',
+    value: formatMontant(depensesStats.value.budgetTotal),
+    helper: 'Prévisions budgétaires',
+    icon: 'account_balance_wallet',
+    color: 'secondary',
+  },
+  {
+    label: 'Montant engagé',
+    value: formatMontant(depensesStats.value.montantEngage),
+    helper: `${depensesStats.value.tauxExecution}% exécuté`,
+    icon: 'receipt_long',
+    color: 'teal',
+  },
+  {
+    label: 'Mandats',
+    value: depensesStats.value.nombreMandats,
+    helper: `${depensesStats.value.mandatsPayes} payés`,
+    icon: 'receipt',
+    color: 'warning',
+  },
+  {
+    label: 'Budget disponible',
+    value: formatMontant(depensesStats.value.montantDisponible),
+    helper: `${100 - depensesStats.value.tauxExecution}% restant`,
+    icon: 'savings',
+    color: 'positive',
+  },
+]);
+
+const recettesCards = computed(() => [
+  {
+    label: 'Déclarations',
+    value: recettesStats.value.totalDeclarations,
+    helper: `${recettesStats.value.declarationsValidees} validées`,
+    icon: 'description',
+    color: 'primary',
+  },
+  {
+    label: 'Montant total',
+    value: formatMontant(recettesStats.value.montantTotal),
+    helper: 'Recettes encaissées',
+    icon: 'payments',
+    color: 'teal',
+  },
+  {
+    label: 'Bordereaux',
+    value: recettesStats.value.totalBordereaux,
+    helper: `${recettesStats.value.bordereauxFermes} fermés`,
+    icon: 'receipt_long',
+    color: 'purple',
+  },
+  {
+    label: 'Taux validation',
+    value: `${recettesStats.value.tauxValidation}%`,
+    helper: 'Déclarations validées',
+    icon: 'check_circle',
+    color: 'positive',
+  },
+]);
 
 // Fonctions utilitaires
 function formatMontant(montant: number): string {
@@ -679,18 +742,77 @@ onMounted(() => {
   margin: 0 auto;
 }
 
-.filter-card,
-.summary-card,
-.links-card {
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s;
+.overview-stat-card {
+  min-height: 112px;
+}
 
-  &:hover {
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-  }
+.secondary-stat-card {
+  min-height: 108px;
+}
+
+.overview-stat-label {
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.overview-stat-value {
+  color: #0f172a;
+  font-size: clamp(1.05rem, 1.7vw, 1.45rem);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.overview-stat-helper {
+  margin-top: 6px;
+  color: #64748b;
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
+.compact-toolbar {
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.92));
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.admin-section-heading {
+  display: flex;
+  align-items: center;
+  color: #0f172a;
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.analytics-card,
+.analytics-empty-state {
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
+  box-shadow: 0 18px 34px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.analytics-card :deep(.q-card__section.bg-grey-1) {
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.94), rgba(241, 245, 249, 0.86));
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.analytics-card :deep(.q-list .q-item) {
+  border-radius: 14px;
+  margin: 6px 0;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.analytics-card :deep(.q-list .q-item:hover) {
+  background: rgba(15, 23, 42, 0.04);
+  transform: translateX(3px);
 }
 
 .chart-container {

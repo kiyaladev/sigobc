@@ -4,185 +4,164 @@
       title="Statistiques des Recettes"
       subtitle="Analyse et suivi des déclarations de recettes"
       icon="analytics"
-    />
+    >
+      <template #stats>
+        <div
+          v-for="(stat, index) in heroStats"
+          :key="`hero-${index}`"
+          class="col-12 col-sm-6 col-lg-3"
+        >
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">{{ stat.label }}</div>
+                <div class="overview-stat-value">{{ stat.value }}</div>
+                <div v-if="stat.helper" class="overview-stat-helper">{{ stat.helper }}</div>
+              </div>
+              <q-icon :name="stat.icon" size="30px" :color="stat.color" />
+            </q-card-section>
+          </q-card>
+        </div>
+      </template>
+    </PageHeader>
 
     <!-- Filtres de période -->
-    <q-card class="filter-card q-mb-md">
-      <q-card-section>
-        <div class="row q-col-gutter-md items-end">
-          <!-- Exercice -->
-          <div class="col-12 col-sm-6 col-md-2">
-            <q-select
-              v-model="selectedExercice"
-              :options="exerciceOptions"
-              label="Exercice"
-              outlined
-              dense
-              @update:model-value="loadStatistics"
-            />
-          </div>
-
-          <!-- Sélecteur de période -->
-          <div class="col-12 col-sm-6 col-md-2">
-            <q-select
-              v-model="periodFilter"
-              :options="periodOptions"
-              label="Période"
-              outlined
-              dense
-              emit-value
-              map-options
-              @update:model-value="onPeriodChange"
-            />
-          </div>
-
-          <!-- Date début -->
-          <div class="col-12 col-sm-6 col-md-2">
-            <q-input v-model="dateDebut" type="date" label="Date début" outlined dense clearable />
-          </div>
-
-          <!-- Date fin -->
-          <div class="col-12 col-sm-6 col-md-2">
-            <q-input v-model="dateFin" type="date" label="Date fin" outlined dense clearable />
-          </div>
-
-          <!-- Boutons d'action -->
-          <div class="col-12 col-sm-6 col-md-4 row q-gutter-sm">
-            <q-btn
-              color="grey-7"
-              icon="clear"
-              label="Réinitialiser"
-              outline
-              @click="resetFilters"
-              class="col"
-              no-caps
-            />
-            <q-btn
-              color="primary"
-              icon="refresh"
-              label="Actualiser"
-              unelevated
-              @click="loadStatistics"
-              :loading="loading"
-              class="col"
-              no-caps
-            />
-          </div>
+    <div class="compact-toolbar q-mb-md">
+      <div class="compact-toolbar-top row items-center q-col-gutter-sm">
+        <div class="col-12 col-md-auto compact-toolbar-summary">
+          <q-chip outline color="primary" icon="filter_alt" size="sm">
+            {{ activeFiltersCount }} filtre{{ activeFiltersCount > 1 ? 's' : '' }}
+          </q-chip>
         </div>
-      </q-card-section>
-    </q-card>
-
-    <!-- Cartes de statistiques principales -->
-    <div class="row q-col-gutter-md q-mb-md">
-      <div class="col-12 col-sm-6 col-md-3">
-        <StatisticsCard
-          :value="stats.totalDeclarations"
-          title="Déclarations"
-          :subtitle="`${stats.declarationsValidees} validées`"
-          icon="description"
-          icon-color="grey-7"
-          border-color="#E67E22"
-        />
-      </div>
-
-      <div class="col-12 col-sm-6 col-md-3">
-        <StatisticsCard
-          :value="stats.montantTotal"
-          title="Montant Total"
-          subtitle="Recettes encaissées"
-          icon="payments"
-          icon-color="grey-7"
-          border-color="#2E7D32"
-          format="currency"
-        />
-      </div>
-
-      <div class="col-12 col-sm-6 col-md-3">
-        <StatisticsCard
-          :value="stats.totalBordereaux"
-          title="Bordereaux"
-          :subtitle="`${stats.bordereauxFermes} fermés`"
-          icon="receipt_long"
-          icon-color="grey-7"
-          border-color="#E67E22"
-        />
-      </div>
-
-      <div class="col-12 col-sm-6 col-md-3">
-        <StatisticsCard
-          :value="stats.totalMandatsRecette"
-          title="Mandats Recette"
-          :subtitle="`${formatMontant(stats.montantMandatsRecette)}`"
-          icon="receipt"
-          icon-color="grey-7"
-          border-color="#1A1A1A"
-        />
+        <div class="col-12 col-md-auto compact-toolbar-actions">
+          <q-btn dense outline color="grey-7" icon="tune" label="Filtres" no-caps>
+            <q-menu class="compact-filter-menu" anchor="bottom right" self="top right">
+              <div class="compact-filter-panel">
+                <div class="compact-filter-panel-title">Filtres</div>
+                <div class="row q-col-gutter-sm items-end">
+                  <div class="col-12 col-sm-6 col-md-3">
+                    <q-select
+                      v-model="selectedExercice"
+                      :options="exerciceOptions"
+                      label="Exercice"
+                      outlined
+                      dense
+                      @update:model-value="loadStatistics"
+                    />
+                  </div>
+                  <div class="col-12 col-sm-6 col-md-3">
+                    <q-select
+                      v-model="periodFilter"
+                      :options="periodOptions"
+                      label="Période"
+                      outlined
+                      dense
+                      emit-value
+                      map-options
+                      @update:model-value="onPeriodChange"
+                    />
+                  </div>
+                  <div class="col-12 col-sm-6 col-md-3">
+                    <q-input
+                      v-model="dateDebut"
+                      type="date"
+                      label="Date début"
+                      outlined
+                      dense
+                      clearable
+                    />
+                  </div>
+                  <div class="col-12 col-sm-6 col-md-3">
+                    <q-input
+                      v-model="dateFin"
+                      type="date"
+                      label="Date fin"
+                      outlined
+                      dense
+                      clearable
+                    />
+                  </div>
+                  <div class="col-12 col-sm-6 col-md-3">
+                    <q-btn
+                      label="Réinitialiser"
+                      icon="clear"
+                      outline
+                      color="grey-7"
+                      @click="resetFilters"
+                      class="full-width"
+                      no-caps
+                    />
+                  </div>
+                  <div class="col-12 col-sm-6 col-md-3">
+                    <q-btn
+                      label="Actualiser"
+                      icon="refresh"
+                      color="primary"
+                      unelevated
+                      @click="loadStatistics"
+                      :loading="loading"
+                      class="full-width"
+                      no-caps
+                    />
+                  </div>
+                </div>
+              </div>
+            </q-menu>
+          </q-btn>
+          <q-btn
+            color="primary"
+            icon="refresh"
+            label="Actualiser"
+            unelevated
+            no-caps
+            :loading="loading"
+            @click="loadStatistics"
+          />
+        </div>
       </div>
     </div>
 
-    <!-- Cartes bordereaux -->
     <div class="row q-col-gutter-md q-mb-md">
-      <div class="col-12 col-sm-6 col-md-3">
-        <StatisticsCard
-          :value="stats.totalBordereaux"
-          title="Total Bordereaux"
-          :subtitle="`${stats.bordereauxOuverts} ouverts`"
-          icon="folder_open"
-          icon-color="grey-7"
-          border-color="#E67E22"
-        />
-      </div>
-      <div class="col-12 col-sm-6 col-md-3">
-        <StatisticsCard
-          :value="stats.montantTotalBordereaux"
-          title="Montant Bordereaux"
-          subtitle="Total cumulé"
-          icon="account_balance_wallet"
-          icon-color="grey-7"
-          border-color="#2E7D32"
-          format="currency"
-        />
-      </div>
-      <div class="col-12 col-sm-6 col-md-3">
-        <StatisticsCard
-          :value="stats.bordereauxFermes"
-          title="Bordereaux Fermés"
-          subtitle="Clôturés"
-          icon="lock"
-          icon-color="grey-7"
-          border-color="#757575"
-        />
-      </div>
-      <div class="col-12 col-sm-6 col-md-3">
-        <StatisticsCard
-          :value="stats.nombreDeclBordereaux"
-          title="Décl./Bordereaux"
-          subtitle="Déclarations dans bordereaux"
-          icon="list_alt"
-          icon-color="grey-7"
-          border-color="#1A1A1A"
-        />
+      <div
+        v-for="(stat, index) in secondaryStats"
+        :key="`secondary-${index}`"
+        class="col-12 col-sm-6 col-lg-3"
+      >
+        <q-card flat class="listing-stat-card overview-stat-card secondary-stat-card">
+          <q-card-section class="row items-center no-wrap">
+            <div class="col">
+              <div class="overview-stat-label">{{ stat.label }}</div>
+              <div class="overview-stat-value">{{ stat.value }}</div>
+              <div v-if="stat.helper" class="overview-stat-helper">{{ stat.helper }}</div>
+            </div>
+            <q-icon :name="stat.icon" size="28px" :color="stat.color" />
+          </q-card-section>
+        </q-card>
       </div>
     </div>
 
     <!-- Graphiques et analyses -->
-    <div class="row q-col-gutter-md">
+    <div class="row q-col-gutter-md analytics-grid">
       <q-inner-loading :showing="loading">
         <q-spinner-gears size="50px" color="primary" />
       </q-inner-loading>
 
       <!-- Message si aucune donnée -->
-      <div v-if="!loading && stats.totalDeclarations === 0" class="col-12 text-center q-pa-xl">
-        <q-icon name="bar_chart" size="64px" color="grey-5" />
-        <div class="text-h6 text-grey-6 q-mt-md">Aucune donnée disponible</div>
-        <div class="text-caption text-grey-5">
-          Créez des déclarations de recettes pour voir les statistiques
-        </div>
+      <div v-if="!loading && stats.totalDeclarations === 0" class="col-12">
+        <q-card class="analytics-empty-state">
+          <q-card-section class="text-center q-pa-xl">
+            <q-icon name="bar_chart" size="64px" color="grey-5" />
+            <div class="text-h6 text-grey-6 q-mt-md">Aucune donnée disponible</div>
+            <div class="text-caption text-grey-5">
+              Créez des déclarations de recettes pour voir les statistiques
+            </div>
+          </q-card-section>
+        </q-card>
       </div>
 
       <!-- Résumé des Bordereaux -->
       <div v-if="!loading && stats.totalDeclarations > 0" class="col-12 col-md-6">
-        <q-card class="activity-card">
+        <q-card class="analytics-card activity-card">
           <q-card-section class="bg-grey-1">
             <div class="text-h6 text-grey-8">Résumé des Bordereaux</div>
           </q-card-section>
@@ -270,6 +249,7 @@
       <!-- Répartition par taxe -->
       <div v-if="!loading && stats.totalDeclarations > 0" class="col-12 col-md-6">
         <ChartCard
+          class="analytics-card analytics-chart-card"
           title="Top 5 Taxes par Montant"
           :chart-config="taxeChartConfig"
           header-class="text-grey-8"
@@ -279,6 +259,7 @@
       <!-- Évolution mensuelle -->
       <div v-if="!loading && stats.totalDeclarations > 0" class="col-12">
         <ChartCard
+          class="analytics-card analytics-chart-card"
           title="Évolution Mensuelle des Recettes"
           :chart-config="evolutionChartConfig"
           header-class="text-grey-8"
@@ -288,7 +269,7 @@
 
       <!-- Tableau détaillé par taxe -->
       <div v-if="!loading && stats.totalDeclarations > 0" class="col-12">
-        <q-card class="details-card">
+        <q-card class="analytics-card details-card">
           <q-card-section class="bg-grey-1">
             <div class="text-h6 text-grey-8">Détails par Taxe</div>
           </q-card-section>
@@ -335,7 +316,7 @@
 
       <!-- Statistiques d'activité -->
       <div v-if="!loading && stats.totalDeclarations > 0" class="col-12 col-md-6">
-        <q-card class="activity-card">
+        <q-card class="analytics-card activity-card">
           <q-card-section class="bg-grey-1">
             <div class="text-h6 text-grey-8">Résumé de l'Activité</div>
           </q-card-section>
@@ -407,7 +388,7 @@
 
       <!-- Top 5 taxes -->
       <div v-if="!loading && stats.totalDeclarations > 0" class="col-12 col-md-6">
-        <q-card class="top-card">
+        <q-card class="analytics-card top-card">
           <q-card-section class="bg-grey-1">
             <div class="text-h6 text-grey-8">Top 5 Taxes</div>
           </q-card-section>
@@ -447,7 +428,6 @@ import { ref, computed, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { type ChartConfiguration, type TooltipItem, type ChartTypeRegistry } from 'chart.js';
 import PageHeader from 'src/components/PageHeader.vue';
-import StatisticsCard from 'src/components/StatisticsCard.vue';
 import ChartCard from 'src/components/ChartCard.vue';
 import { db } from 'src/database/db';
 import type { Declaration, Taxe, BordereauRecette, MandatRecette } from 'src/database/db';
@@ -461,6 +441,12 @@ const selectedExercice = ref(currentYear); // Année en cours par défaut
 const periodFilter = ref('annee');
 const dateDebut = ref('');
 const dateFin = ref('');
+
+const activeFiltersCount = computed(() => {
+  return [selectedExercice.value, periodFilter.value, dateDebut.value, dateFin.value].filter(
+    (value) => value !== null && value !== '',
+  ).length;
+});
 
 // Options d'exercice
 const exerciceOptions = ref<number[]>([currentYear - 2, currentYear - 1, currentYear]);
@@ -542,6 +528,68 @@ const stats = computed(() => {
     montantMandatsRecette,
   };
 });
+
+const heroStats = computed(() => [
+  {
+    label: 'Déclarations',
+    value: stats.value.totalDeclarations,
+    helper: `${stats.value.declarationsValidees} validées`,
+    icon: 'dataset',
+    color: 'primary',
+  },
+  {
+    label: 'Montant encaissé',
+    value: formatMontant(stats.value.montantTotal),
+    helper: `${formatMontant(stats.value.montantMandatsRecette)} via mandats`,
+    icon: 'payments',
+    color: 'secondary',
+  },
+  {
+    label: 'Bordereaux',
+    value: stats.value.totalBordereaux,
+    helper: `${stats.value.bordereauxFermes} fermés`,
+    icon: 'receipt_long',
+    color: 'teal',
+  },
+  {
+    label: 'Mandats recette',
+    value: stats.value.totalMandatsRecette,
+    helper: formatMontant(stats.value.montantMandatsRecette),
+    icon: 'monitoring',
+    color: 'positive',
+  },
+]);
+
+const secondaryStats = computed(() => [
+  {
+    label: 'Déclarations validées',
+    value: stats.value.declarationsValidees,
+    helper: 'Sur la période filtrée',
+    icon: 'description',
+    color: 'primary',
+  },
+  {
+    label: 'Total bordereaux',
+    value: stats.value.totalBordereaux,
+    helper: `${stats.value.bordereauxOuverts} ouverts`,
+    icon: 'folder_open',
+    color: 'secondary',
+  },
+  {
+    label: 'Montant bordereaux',
+    value: formatMontant(stats.value.montantTotalBordereaux),
+    helper: 'Total cumulé',
+    icon: 'account_balance_wallet',
+    color: 'teal',
+  },
+  {
+    label: 'Décl. / bordereau',
+    value: stats.value.nombreDeclBordereaux,
+    helper: 'Déclarations dans les bordereaux',
+    icon: 'list_alt',
+    color: 'warning',
+  },
+]);
 
 // Top taxes
 const topTaxes = computed(() => {
@@ -873,24 +921,117 @@ onMounted(async () => {
 </script>
 
 <style scoped lang="scss">
-.statistiques-page {
+.statistiques-page,
+.dashboard-page {
   max-width: 1400px;
   margin: 0 auto;
 }
 
-.filter-card,
-.details-card,
-.activity-card,
-.top-card {
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s;
+.overview-stat-card {
+  min-height: 112px;
+}
 
-  &:hover {
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-  }
+.secondary-stat-card {
+  min-height: 108px;
+}
+
+.overview-stat-label {
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.overview-stat-value {
+  color: #0f172a;
+  font-size: clamp(1.05rem, 1.7vw, 1.45rem);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.overview-stat-helper {
+  margin-top: 6px;
+  color: #64748b;
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
+.analytics-grid {
+  position: relative;
+}
+
+.analytics-card,
+.analytics-empty-state {
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
+  box-shadow: 0 18px 34px rgba(15, 23, 42, 0.08);
+}
+
+.analytics-card {
+  overflow: hidden;
+}
+
+.analytics-card :deep(.q-card__section.bg-grey-1) {
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.94), rgba(241, 245, 249, 0.86));
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.analytics-card :deep(.q-card__section.bg-grey-1 .text-h6),
+.analytics-chart-card :deep(.q-card__section:first-child .text-h6),
+.analytics-card :deep(.text-h6) {
+  color: #0f172a !important;
+  font-size: 1.08rem;
+  font-weight: 800;
+}
+
+.analytics-card :deep(.q-card__section + .q-card__section) {
+  padding-top: 18px;
+}
+
+.analytics-card :deep(.q-list .q-item) {
+  border-radius: 14px;
+  margin: 6px 0;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.analytics-card :deep(.q-list .q-item:hover) {
+  background: rgba(15, 23, 42, 0.04);
+  transform: translateX(3px);
+}
+
+.analytics-card :deep(.q-table) {
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.analytics-card :deep(.q-table thead tr) {
+  background: linear-gradient(180deg, #f8fafc 0%, #eef4f8 100%);
+}
+
+.analytics-card :deep(.q-table tbody tr:nth-child(even)) {
+  background: rgba(248, 250, 252, 0.72);
+}
+
+.analytics-card :deep(.q-table tbody tr:hover) {
+  background: rgba(197, 168, 77, 0.08);
+}
+
+.analytics-card :deep(.q-linear-progress) {
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.analytics-chart-card :deep(.q-card__section:first-child) {
+  padding-bottom: 0;
+}
+
+.analytics-empty-state {
+  overflow: hidden;
 }
 
 .chart-container {
@@ -901,5 +1042,49 @@ onMounted(async () => {
 .chart-container-large {
   position: relative;
   height: 400px;
+}
+
+.compact-toolbar {
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.92));
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.compact-toolbar-top {
+  gap: 10px 0;
+}
+
+.compact-toolbar-summary {
+  display: flex;
+  align-items: center;
+}
+
+.compact-toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.compact-toolbar-actions :deep(.q-btn) {
+  min-height: 36px;
+  border-radius: 12px;
+}
+
+.compact-filter-panel {
+  width: min(920px, 92vw);
+  padding: 14px;
+}
+
+.compact-filter-panel-title {
+  margin-bottom: 10px;
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 </style>

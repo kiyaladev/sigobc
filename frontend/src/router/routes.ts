@@ -93,6 +93,11 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/app3/ProjetsPage.vue'),
         name: 'app3-projets',
       },
+      {
+        path: 'app3/fournisseurs',
+        component: () => import('pages/app3/FournisseursPage.vue'),
+        name: 'app3-fournisseurs',
+      },
       // Routes App6 - Gestion des Recettes
       {
         path: 'app6/dashboard',

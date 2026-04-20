@@ -1,8 +1,8 @@
 <template>
   <q-card class="page-header-card" :class="{ 'with-actions': hasActions }">
-    <q-card-section class="q-pa-lg">
-      <div class="row items-center justify-between">
-        <div class="col">
+    <q-card-section class="page-header-content q-pa-lg">
+      <div class="page-header-top row items-start justify-between q-col-gutter-lg">
+        <div class="col page-header-copy">
           <div class="breadcrumbs q-mb-sm" v-if="breadcrumbs && breadcrumbs.length > 0">
             <q-breadcrumbs active-color="primary">
               <q-breadcrumbs-el
@@ -16,22 +16,23 @@
           </div>
 
           <h1 class="page-title" :class="{ 'gradient-text': gradient }">
-            <q-icon v-if="icon" :name="icon" size="32px" class="q-mr-sm" />
-            {{ title }}
+            <span v-if="icon" class="page-title-icon">
+              <q-icon :name="icon" size="30px" />
+            </span>
+            <span>{{ title }}</span>
           </h1>
 
-          <p v-if="subtitle" class="page-subtitle text-grey-6">
+          <p v-if="subtitle" class="page-subtitle text-grey-7">
             {{ subtitle }}
           </p>
         </div>
 
-        <div class="col-auto" v-if="hasActions">
+        <div class="col-auto page-actions" v-if="hasActions">
           <slot name="actions"></slot>
         </div>
       </div>
 
-      <!-- Statistiques supplémentaires -->
-      <div v-if="hasStats" class="row q-col-gutter-md q-mt-md">
+      <div v-if="hasStats" class="page-header-stats row q-col-gutter-md q-mt-lg">
         <slot name="stats"></slot>
       </div>
     </q-card-section>
@@ -66,103 +67,144 @@ const hasStats = computed(() => !!slots.stats);
 
 <style scoped lang="scss">
 .page-header-card {
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  position: relative;
   margin-bottom: 24px;
-  animation: slideDown 0.5s ease-out;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(249, 250, 251, 1) 100%);
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1px solid rgba(27, 94, 59, 0.1);
+  background:
+    radial-gradient(circle at top right, rgba(197, 168, 77, 0.18), transparent 32%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.96) 100%);
+  box-shadow: 0 22px 48px rgba(15, 23, 42, 0.08);
 
-  &.with-actions {
-    .page-title {
-      margin-bottom: 0;
-    }
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    border-radius: 999px;
+    pointer-events: none;
+    filter: blur(6px);
+  }
+
+  &::before {
+    top: -80px;
+    right: -40px;
+    width: 220px;
+    height: 220px;
+    background: radial-gradient(circle, rgba(197, 168, 77, 0.18), transparent 70%);
+  }
+
+  &::after {
+    left: -60px;
+    bottom: -80px;
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(circle, rgba(27, 94, 59, 0.12), transparent 70%);
   }
 }
 
-.breadcrumbs {
-  animation: fadeIn 0.5s ease-out;
+.page-header-content {
+  position: relative;
+  z-index: 1;
+}
+
+.page-header-top {
+  gap: 20px 0;
+}
+
+.page-header-copy {
+  min-width: 0;
+}
+
+.breadcrumbs :deep(.q-breadcrumbs__el),
+.breadcrumbs :deep(.q-breadcrumbs__el .q-icon) {
+  color: #64748b;
 }
 
 .page-title {
-  font-size: 2rem;
-  font-weight: 700;
-  margin: 0;
-  line-height: 1.2;
   display: flex;
   align-items: center;
-  animation: slideInRight 0.5s ease-out;
+  gap: 14px;
+  margin: 0;
+  font-size: clamp(1.75rem, 3vw, 2.35rem);
+  font-weight: 800;
+  line-height: 1.1;
+  color: #0f172a;
+}
 
-  .q-icon {
-    animation: scaleIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
+.page-title-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(27, 94, 59, 0.12), rgba(197, 168, 77, 0.18));
+  color: var(--q-primary);
+  box-shadow: inset 0 0 0 1px rgba(27, 94, 59, 0.1);
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #e67e22 0%, #2e7d32 100%);
+  background: linear-gradient(135deg, #1b5e3b 0%, #c5a84d 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .page-subtitle {
+  max-width: 760px;
+  margin: 12px 0 0;
   font-size: 1rem;
-  margin: 8px 0 0 0;
-  animation: fadeIn 0.6s ease-out;
+  line-height: 1.6;
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.page-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
-@keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+.page-actions :deep(.q-btn) {
+  min-height: 42px;
 }
 
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+.page-actions :deep(.q-field),
+.page-actions :deep(.q-select) {
+  min-width: 120px;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
+.page-actions :deep(.q-field__control) {
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.page-header-stats {
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 900px) {
+  .page-title-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 15px;
   }
 }
 
 @media (max-width: 768px) {
-  .page-title {
-    font-size: 1.5rem;
-
-    .q-icon {
-      font-size: 24px;
-    }
+  .page-header-card {
+    border-radius: 20px;
   }
 
-  .page-subtitle {
-    font-size: 0.875rem;
+  .page-title {
+    gap: 10px;
+  }
+
+  .page-actions {
+    width: 100%;
+    justify-content: flex-start;
   }
 }
 </style>

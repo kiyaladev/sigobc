@@ -1,112 +1,141 @@
 <template>
-  <q-card class="q-mb-md">
-    <q-card-section>
-      <div class="row q-col-gutter-md">
-        <!-- Recherche -->
-        <div v-if="showSearch" :class="searchColClass">
-          <q-input v-model="searchModel" filled :placeholder="searchPlaceholder" dense clearable>
-            <template v-slot:prepend>
-              <q-icon name="search" />
-            </template>
-          </q-input>
-        </div>
+  <q-expansion-item
+    class="listing-filter-card q-mb-md compact-filter-card fade-in"
+    icon="tune"
+    label="Filtres"
+    expand-separator
+    dense
+    default-opened
+    switch-toggle-side
+    header-class="listing-filter-header"
+  >
+    <q-card flat>
+      <q-card-section class="q-pt-sm">
+        <div class="listing-filter-grid row q-col-gutter-sm">
+          <slot v-if="hasLegacyFilters" name="filters"></slot>
 
-        <!-- Statut -->
-        <div v-if="showStatut" :class="filterColClass">
-          <q-select
-            v-model="statutModel"
-            filled
-            dense
-            :options="statutOptions"
-            label="Statut"
-            clearable
-          />
-        </div>
+          <!-- Recherche -->
+          <div v-if="!hasLegacyFilters && showSearch" :class="searchColClass">
+            <q-input
+              v-model="searchModel"
+              outlined
+              :placeholder="searchPlaceholder"
+              dense
+              clearable
+            >
+              <template v-slot:prepend>
+                <q-icon name="search" />
+              </template>
+            </q-input>
+          </div>
 
-        <!-- Exercice -->
-        <div v-if="showExercice" :class="filterColClass">
-          <q-input
-            v-model.number="exerciceModel"
-            filled
-            dense
-            type="number"
-            label="Exercice"
-            clearable
-          />
-        </div>
+          <!-- Statut -->
+          <div v-if="!hasLegacyFilters && showStatut" :class="filterColClass">
+            <q-select
+              v-model="statutModel"
+              outlined
+              dense
+              :options="statutOptions"
+              label="Statut"
+              clearable
+            />
+          </div>
 
-        <!-- Taxe -->
-        <div v-if="showTaxe" :class="filterColClass">
-          <q-select
-            v-model="taxeModel"
-            filled
-            dense
-            :options="taxeOptions"
-            option-value="value"
-            option-label="label"
-            emit-value
-            map-options
-            label="Taxe"
-            clearable
-          />
-        </div>
+          <!-- Exercice -->
+          <div v-if="!hasLegacyFilters && showExercice" :class="filterColClass">
+            <q-input
+              v-model.number="exerciceModel"
+              outlined
+              dense
+              type="number"
+              label="Exercice"
+              clearable
+            />
+          </div>
 
-        <!-- Date début -->
-        <div v-if="showDateRange" :class="filterColClass">
-          <q-input v-model="dateDebutModel" filled dense type="date" label="Date début" clearable />
-        </div>
+          <!-- Taxe -->
+          <div v-if="!hasLegacyFilters && showTaxe" :class="filterColClass">
+            <q-select
+              v-model="taxeModel"
+              outlined
+              dense
+              :options="taxeOptions"
+              option-value="value"
+              option-label="label"
+              emit-value
+              map-options
+              label="Taxe"
+              clearable
+            />
+          </div>
 
-        <!-- Date fin -->
-        <div v-if="showDateRange" :class="filterColClass">
-          <q-input v-model="dateFinModel" filled dense type="date" label="Date fin" clearable />
-        </div>
+          <!-- Date début -->
+          <div v-if="!hasLegacyFilters && showDateRange" :class="filterColClass">
+            <q-input
+              v-model="dateDebutModel"
+              outlined
+              dense
+              type="date"
+              label="Date début"
+              clearable
+            />
+          </div>
 
-        <!-- Sélecteur de période -->
-        <div v-if="showPeriod" :class="filterColClass">
-          <q-select
-            v-model="periodModel"
-            filled
-            dense
-            :options="periodOptions"
-            label="Période"
-            @update:model-value="$emit('period-change')"
-          />
-        </div>
+          <!-- Date fin -->
+          <div v-if="!hasLegacyFilters && showDateRange" :class="filterColClass">
+            <q-input v-model="dateFinModel" outlined dense type="date" label="Date fin" clearable />
+          </div>
 
-        <!-- Slot pour filtres personnalisés -->
-        <slot name="custom-filters"></slot>
+          <!-- Sélecteur de période -->
+          <div v-if="!hasLegacyFilters && showPeriod" :class="filterColClass">
+            <q-select
+              v-model="periodModel"
+              outlined
+              dense
+              :options="periodOptions"
+              label="Période"
+              @update:model-value="$emit('period-change')"
+            />
+          </div>
 
-        <!-- Bouton Réinitialiser -->
-        <div :class="filterColClass">
-          <q-btn
-            flat
-            color="primary"
-            icon="clear"
-            label="Réinitialiser"
-            @click="$emit('reset')"
-            dense
-          />
-        </div>
+          <!-- Slot pour filtres personnalisés -->
+          <slot v-if="!hasLegacyFilters" name="custom-filters"></slot>
 
-        <!-- Bouton Actualiser (optionnel) -->
-        <div v-if="showRefresh" :class="filterColClass">
-          <q-btn
-            color="primary"
-            icon="refresh"
-            label="Actualiser"
-            @click="$emit('refresh')"
-            :loading="loading"
-            no-caps
-            class="full-width"
-          />
+          <!-- Bouton Réinitialiser -->
+          <div v-if="hasResetListener" class="col-12 col-sm-auto">
+            <q-btn
+              outline
+              color="grey-7"
+              icon="restart_alt"
+              label="Réinitialiser"
+              @click="$emit('reset')"
+              no-caps
+              dense
+              class="listing-reset-btn full-width"
+            />
+          </div>
+
+          <!-- Bouton Actualiser (optionnel) -->
+          <div v-if="!hasLegacyFilters && showRefresh" :class="filterColClass">
+            <q-btn
+              color="primary"
+              icon="refresh"
+              label="Actualiser"
+              @click="$emit('refresh')"
+              :loading="loading"
+              no-caps
+              dense
+              class="full-width"
+            />
+          </div>
         </div>
-      </div>
-    </q-card-section>
-  </q-card>
+      </q-card-section>
+    </q-card>
+  </q-expansion-item>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, getCurrentInstance, useSlots } from 'vue';
 
 interface Props {
   // Search
@@ -166,6 +195,9 @@ const props = withDefaults(defineProps<Props>(), {
   filterColClass: 'col-12 col-sm-4 col-md-3',
 });
 
+const slots = useSlots();
+const instance = getCurrentInstance();
+
 const emit = defineEmits([
   'update:search',
   'update:statut',
@@ -179,6 +211,9 @@ const emit = defineEmits([
   'refresh',
   'period-change',
 ]);
+
+const hasLegacyFilters = computed(() => !!slots.filters);
+const hasResetListener = computed(() => typeof instance?.vnode.props?.onReset === 'function');
 
 const searchModel = computed({
   get: () => props.search,
@@ -215,3 +250,80 @@ const periodModel = computed({
   set: (value) => emit('update:period', value || ''),
 });
 </script>
+
+<style scoped lang="scss">
+.compact-filter-card {
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.listing-filter-header {
+  min-height: 42px;
+  padding: 0 14px;
+}
+
+:deep(.listing-filter-header .q-item__section--main) {
+  font-size: 0.84rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+:deep(.compact-filter-card .q-expansion-item__content .q-card) {
+  background: transparent;
+}
+
+:deep(.compact-filter-card .q-card__section) {
+  padding-top: 10px;
+  padding-bottom: 12px;
+}
+
+:deep(.compact-filter-card .q-field--dense .q-field__control) {
+  min-height: 38px;
+  height: 38px;
+}
+
+:deep(.compact-filter-card .q-field--dense .q-field__marginal) {
+  height: 38px;
+}
+
+:deep(.compact-filter-card .q-btn) {
+  min-height: 38px;
+}
+
+.listing-filter-header {
+  min-height: 46px;
+  padding: 0 14px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(248, 250, 252, 0.32));
+}
+
+:deep(.listing-filter-header .q-item__section--main) {
+  font-size: 0.84rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+:deep(.compact-filter-card .q-expansion-item__toggle-icon) {
+  color: #64748b;
+}
+
+:deep(.compact-filter-card .q-card__section) {
+  padding-top: 12px;
+  padding-bottom: 14px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+</style>

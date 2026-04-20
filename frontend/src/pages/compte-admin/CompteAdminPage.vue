@@ -1,12 +1,12 @@
 <template>
-  <q-page padding>
+  <q-page class="compte-admin-page q-pa-md">
     <PageHeader
       title="Compte Administratif"
       subtitle="Synthèse annuelle de l'exécution budgétaire"
       icon="assignment"
     >
       <template #actions>
-        <div class="row items-center q-gutter-sm">
+        <div class="row items-center q-gutter-sm compte-admin-actions">
           <q-select
             v-model="data.exercice.value"
             :options="exerciceOptions"
@@ -26,27 +26,28 @@
           />
         </div>
       </template>
+      <template #stats>
+        <div v-for="(stat, i) in statsCards" :key="stat.label" class="col-12 col-sm-6 col-lg-3">
+          <q-card
+            flat
+            class="listing-stat-card overview-stat-card"
+            :style="{ animationDelay: `${i * 0.1}s` }"
+          >
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">{{ stat.label }}</div>
+                <div class="overview-stat-value">{{ formatMontant(stat.value) }}</div>
+                <div v-if="stat.helper" class="overview-stat-helper">{{ stat.helper }}</div>
+              </div>
+              <q-icon :name="stat.icon" :color="stat.color" size="30px" />
+            </q-card-section>
+          </q-card>
+        </div>
+      </template>
     </PageHeader>
 
-    <!-- Stats cards -->
-    <div class="row q-col-gutter-md q-mb-md">
-      <div class="col-12 col-md-3" v-for="(stat, i) in statsCards" :key="stat.label">
-        <q-card class="stat-card" :style="{ animationDelay: `${i * 0.1}s` }">
-          <q-card-section>
-            <div class="row items-center no-wrap">
-              <q-icon :name="stat.icon" :color="stat.color" size="32px" class="q-mr-md" />
-              <div>
-                <div class="text-caption text-grey-7">{{ stat.label }}</div>
-                <div class="text-h6 text-weight-bold">{{ formatMontant(stat.value) }}</div>
-              </div>
-            </div>
-          </q-card-section>
-        </q-card>
-      </div>
-    </div>
-
     <!-- Tabs -->
-    <q-card>
+    <q-card class="main-card">
       <q-tabs
         v-model="currentTab"
         dense
@@ -67,6 +68,7 @@
         <q-tab name="invest-dep-vent" label="INVEST 2" />
         <q-tab name="resultat" label="RESULTAT" />
         <q-tab name="mod-pat" label="MOD. PAT" />
+        <q-tab name="recap-global" label="RECAP. GLOBAL" />
       </q-tabs>
 
       <q-separator />
@@ -102,6 +104,9 @@
         <q-tab-panel name="mod-pat">
           <ModPatTab :data="data" />
         </q-tab-panel>
+        <q-tab-panel name="recap-global">
+          <RecapGlobalTab :data="data" />
+        </q-tab-panel>
       </q-tab-panels>
     </q-card>
   </q-page>
@@ -122,6 +127,7 @@ import InvestDepEngTab from './tabs/InvestDepEngTab.vue';
 import InvestDepVentTab from './tabs/InvestDepVentTab.vue';
 import ResultatTab from './tabs/ResultatTab.vue';
 import ModPatTab from './tabs/ModPatTab.vue';
+import RecapGlobalTab from './tabs/RecapGlobalTab.vue';
 
 const data = useCompteAdmin();
 const currentTab = ref('recap-fonct');
@@ -134,26 +140,30 @@ const exerciceOptions = Array.from({ length: 10 }, (_, i) => ({
 
 const statsCards = computed(() => [
   {
-    label: 'Recettes Fonct.',
+    label: 'Recettes fonct.',
     value: data.totalRecettesFonct.value,
+    helper: 'Recettes de fonctionnement',
     icon: 'trending_up',
     color: 'positive',
   },
   {
-    label: 'Dépenses Fonct.',
+    label: 'Dépenses fonct.',
     value: data.totalDepensesFonct.value,
+    helper: 'Dépenses de fonctionnement',
     icon: 'trending_down',
     color: 'negative',
   },
   {
-    label: 'Résultat Fonct.',
+    label: 'Résultat fonct.',
     value: data.resultatFonctionnement.value,
+    helper: data.resultatFonctionnement.value >= 0 ? 'Excédent' : 'Déficit',
     icon: 'account_balance',
     color: data.resultatFonctionnement.value >= 0 ? 'positive' : 'negative',
   },
   {
-    label: 'Résultat Global',
+    label: 'Résultat global',
     value: data.resultatGlobal.value,
+    helper: `Exercice ${data.exercice.value}`,
     icon: 'summarize',
     color: data.resultatGlobal.value >= 0 ? 'teal' : 'negative',
   },
@@ -166,6 +176,7 @@ function formatMontant(value: number): string {
 }
 
 const tabPrintFileMap: Record<string, string> = {
+  'recap-global': 'compte-admin/recap-global.html',
   'recap-fonct': 'compte-admin/recap-fonct.html',
   'rec-fonct': 'compte-admin/rec-fonct.html',
   'dep-eng': 'compte-admin/dep-eng.html',
@@ -195,9 +206,61 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.stat-card {
-  border-radius: 12px;
+.compte-admin-page {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.compte-admin-actions {
+  align-items: center;
+}
+
+.main-card {
+  border-radius: 24px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
+  box-shadow: 0 18px 34px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.overview-stat-card {
+  min-height: 112px;
   animation: slideUp 0.5s ease-out both;
+}
+
+.overview-stat-label {
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.overview-stat-value {
+  color: #0f172a;
+  font-size: clamp(1.05rem, 1.7vw, 1.45rem);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.overview-stat-helper {
+  margin-top: 6px;
+  color: #64748b;
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
+.main-card :deep(.q-tabs) {
+  padding: 8px 12px 0;
+}
+
+.main-card :deep(.q-tab) {
+  border-radius: 12px 12px 0 0;
+}
+
+.main-card :deep(.q-tab-panels) {
+  background: transparent;
 }
 
 @keyframes slideUp {

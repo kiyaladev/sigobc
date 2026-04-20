@@ -442,6 +442,21 @@
           <q-item
             clickable
             v-ripple
+            to="/app3/fournisseurs"
+            class="nav-item q-mb-xs"
+            active-class="nav-item-active"
+          >
+            <q-item-section avatar>
+              <q-icon name="storefront" color="deep-purple" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Fournisseurs</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item
+            clickable
+            v-ripple
             to="/app7/salaires"
             class="nav-item q-mb-xs"
             active-class="nav-item-active"
@@ -554,6 +569,9 @@
               <q-item-section>
                 <q-item-label>Utilisateurs</q-item-label>
               </q-item-section>
+              <q-item-section side>
+                <q-badge class="admin-nav-badge" color="primary" text-color="white">Admin</q-badge>
+              </q-item-section>
             </q-item>
 
             <q-item
@@ -568,6 +586,9 @@
               </q-item-section>
               <q-item-section>
                 <q-item-label>Statistiques Globales</q-item-label>
+              </q-item-section>
+              <q-item-section side>
+                <q-badge class="admin-nav-badge" color="teal" text-color="white">Vue</q-badge>
               </q-item-section>
             </q-item>
 
@@ -584,6 +605,9 @@
               <q-item-section>
                 <q-item-label>Seeders (Test)</q-item-label>
               </q-item-section>
+              <q-item-section side>
+                <q-badge class="admin-nav-badge" color="orange" text-color="white">DB</q-badge>
+              </q-item-section>
             </q-item>
 
             <q-item
@@ -599,6 +623,9 @@
               <q-item-section>
                 <q-item-label>Sauvegarde</q-item-label>
               </q-item-section>
+              <q-item-section side>
+                <q-badge class="admin-nav-badge" color="positive" text-color="white">Safe</q-badge>
+              </q-item-section>
             </q-item>
 
             <q-item
@@ -613,6 +640,11 @@
               </q-item-section>
               <q-item-section>
                 <q-item-label>Paramétrage</q-item-label>
+              </q-item-section>
+              <q-item-section side>
+                <q-badge class="admin-nav-badge" color="secondary" text-color="white"
+                  >Config</q-badge
+                >
               </q-item-section>
             </q-item>
           </q-expansion-item>
@@ -722,206 +754,186 @@ function onLogout() {
 </script>
 
 <style scoped lang="scss">
-// Header moderne
 .modern-header {
-  background: #ffffff;
-  backdrop-filter: blur(6px);
-  border-bottom: 1px solid #e5e7eb;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
 }
 
-.toolbar-title {
-  animation: slideInRight 0.5s ease-out;
+:deep(.modern-header .q-toolbar) {
+  min-height: 72px;
+  padding-left: 16px;
+  padding-right: 16px;
 }
 
-.logo-icon {
-  animation: scaleIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.menu-btn {
-  transition: transform 0.3s ease;
-
-  &:hover {
-    transform: rotate(90deg);
-  }
-}
-
+.menu-btn,
 .user-menu-btn {
-  transition: all 0.3s ease;
-
-  &:hover {
-    transform: scale(1.1);
-  }
+  border-radius: 14px;
 }
 
-// Drawer moderne
+.menu-btn:hover {
+  transform: rotate(90deg);
+}
+
 .modern-drawer {
-  background: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%);
-  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.05);
+  background:
+    radial-gradient(circle at top left, rgba(197, 168, 77, 0.14), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
+  border-right: 1px solid rgba(148, 163, 184, 0.14);
+  box-shadow: 12px 0 32px rgba(15, 23, 42, 0.05);
 }
 
 .drawer-header {
-  background: #ffffff;
-  border-bottom: 3px solid $primary;
+  background: transparent;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
 }
 
 .logo-container {
-  background: rgba(255, 255, 255, 0.95);
-  padding: 8px;
-  border-radius: 12px;
-  backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 72px;
+  height: 72px;
+  padding: 10px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.92));
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  box-shadow: 0 14px 24px rgba(15, 23, 42, 0.08);
 }
 
 .logo-sidebar {
-  width: 56px;
-  height: 56px;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
 }
 
-// Navigation items
 .nav-item {
-  border-radius: 12px;
-  margin: 4px 8px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  min-height: 46px;
+  margin: 5px 8px;
+  border-radius: 14px;
+  transition: all 0.22s ease;
   overflow: hidden;
 
   &::before {
     content: '';
     position: absolute;
     left: 0;
-    top: 0;
-    height: 100%;
-    width: 4px;
-    background: $primary;
+    top: 8px;
+    bottom: 8px;
+    width: 3px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, $primary 0%, $secondary 100%);
     transform: scaleY(0);
-    transition: transform 0.3s ease;
+    transition: transform 0.22s ease;
   }
 
   &:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+    background: rgba(15, 23, 42, 0.05);
     transform: translateX(4px);
+
     &::before {
       transform: scaleY(1);
     }
   }
 
   .q-icon {
-    transition: all 0.3s ease;
+    transition: transform 0.22s ease;
   }
 
   &:hover .q-icon {
-    transform: scale(1.1);
-    color: $primary;
+    transform: scale(1.08);
   }
 }
 
 .nav-item-active {
-  background-color: rgba(0, 0, 0, 0.04);
-  font-weight: 600;
+  background: linear-gradient(90deg, rgba(27, 94, 59, 0.12), rgba(197, 168, 77, 0.12));
+  box-shadow: inset 0 0 0 1px rgba(27, 94, 59, 0.1);
+  font-weight: 700;
 
   &::before {
     transform: scaleY(1);
   }
 
+  .q-item-label,
   .q-icon {
-    color: $primary;
-  }
-
-  .q-item-label {
     color: $primary;
   }
 }
 
-// Accordéons du sidebar
 .accordion-section {
-  border-radius: 12px;
+  border-radius: 16px;
   overflow: hidden;
 
   :deep(.q-expansion-item__content) {
-    padding-left: 8px;
+    padding-left: 6px;
   }
 }
 
 .accordion-header {
-  border-radius: 12px;
-  padding: 8px 12px;
-  transition: background-color 0.2s ease;
+  border-radius: 14px;
+  padding: 10px 12px;
 
   &:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+    background: rgba(15, 23, 42, 0.04);
   }
 }
+
+.admin-nav-badge {
+  min-width: 52px;
+  justify-content: center;
+  border-radius: 999px;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 768px) {
+  .admin-nav-badge {
+    min-width: 44px;
+    font-size: 0.62rem;
+  }
+}
+
 .modern-menu {
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  box-shadow: 0 24px 44px rgba(15, 23, 42, 0.14);
   overflow: hidden;
 }
 
 .user-info-item {
-  background: linear-gradient(135deg, rgba(13, 117, 86, 0.1) 0%, rgba(201, 169, 97, 0.1) 100%);
-  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(27, 94, 59, 0.1), rgba(197, 168, 77, 0.12));
+  border-radius: 12px;
 }
 
 .menu-item {
-  border-radius: 8px;
+  border-radius: 10px;
   margin: 2px 0;
-  transition: all 0.2s ease;
 
   &:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+    background: rgba(15, 23, 42, 0.05);
     transform: translateX(4px);
   }
 }
 
 .logout-item:hover {
-  background-color: rgba(244, 63, 94, 0.08);
+  background: rgba(239, 68, 68, 0.1);
 }
 
-// Page container
 .modern-page-container {
-  background: linear-gradient(135deg, #f5f7fa 0%, #e8edf2 100%);
   min-height: 100vh;
-  padding: 24px;
-}
-
-// Animations
-@keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.8;
-  }
+  padding: 28px;
+  background:
+    radial-gradient(circle at top right, rgba(197, 168, 77, 0.15), transparent 24%),
+    radial-gradient(circle at bottom left, rgba(27, 94, 59, 0.08), transparent 18%),
+    linear-gradient(180deg, #f6f9fc 0%, #eaf0f6 100%);
 }
 
 .animated {
-  animation-duration: 0.4s;
+  animation-duration: 0.3s;
   animation-fill-mode: both;
 }
 
@@ -936,7 +948,7 @@ function onLogout() {
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -950,20 +962,23 @@ function onLogout() {
   }
   to {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(-8px);
   }
 }
 
-// Responsive
 @media (max-width: 1024px) {
   .modern-page-container {
-    padding: 16px;
+    padding: 18px;
   }
 }
 
 @media (max-width: 600px) {
   .modern-page-container {
     padding: 12px;
+  }
+
+  :deep(.modern-header .q-toolbar) {
+    min-height: 64px;
   }
 
   .demo-mode-active {

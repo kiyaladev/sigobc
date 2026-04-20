@@ -8,6 +8,52 @@
       <template #actions>
         <q-btn color="primary" icon="add" label="Nouvelle Déclaration" @click="openDialog()" />
       </template>
+      <template #stats>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">Déclarations visibles</div>
+                <div class="overview-stat-value">{{ filteredDeclarations.length }}</div>
+              </div>
+              <q-icon name="dataset" size="30px" color="primary" />
+            </q-card-section>
+          </q-card>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">Montant total</div>
+                <div class="overview-stat-value">{{ formatMontant(totalMontantDeclarations) }}</div>
+              </div>
+              <q-icon name="payments" size="30px" color="secondary" />
+            </q-card-section>
+          </q-card>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">Validées</div>
+                <div class="overview-stat-value">{{ declarationsValideesCount }}</div>
+              </div>
+              <q-icon name="task_alt" size="30px" color="positive" />
+            </q-card-section>
+          </q-card>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">Brouillons</div>
+                <div class="overview-stat-value">{{ declarationsBrouillonCount }}</div>
+              </div>
+              <q-icon name="edit_note" size="30px" color="warning" />
+            </q-card-section>
+          </q-card>
+        </div>
+      </template>
     </PageHeader>
 
     <!-- Recherche et filtres -->
@@ -29,7 +75,7 @@
     >
       <template v-slot:custom-filters>
         <div class="col-12 col-sm-4 col-md-3">
-          <q-input v-model="filterBordereau" filled dense label="N° Bordereau" clearable />
+          <q-input v-model="filterBordereau" outlined dense label="N° Bordereau" clearable />
         </div>
       </template>
     </FilterBar>
@@ -77,7 +123,7 @@
 
     <!-- Dialog de création/modification -->
     <q-dialog v-model="dialogVisible" persistent>
-      <q-card style="min-width: 700px; max-width: 70vw">
+      <q-card class="dialog-card" style="width: min(700px, 96vw); max-width: 96vw">
         <q-card-section class="bg-primary text-white row items-center">
           <div class="text-h6">{{ isEditing ? 'Modifier' : 'Nouvelle' }} Déclaration</div>
           <q-space />
@@ -325,7 +371,6 @@ const bordereauSelectOptions = computed(() => {
 const filteredDeclarations = computed(() => {
   let result = declarations.value;
 
-  // Masquer les déclarations des exercices verrouillés
   if (lockedYears.value.length > 0) {
     result = result.filter((d) => !lockedYears.value.includes(d.exercice));
   }
@@ -374,6 +419,22 @@ const filteredDeclarations = computed(() => {
 
   return result;
 });
+
+const totalMontantDeclarations = computed(() =>
+  filteredDeclarations.value.reduce(
+    (sum, declaration) => sum + (declaration.montantRecette || declaration.montant || 0),
+    0,
+  ),
+);
+
+const declarationsValideesCount = computed(
+  () => filteredDeclarations.value.filter((declaration) => declaration.statut === 'validee').length,
+);
+
+const declarationsBrouillonCount = computed(
+  () =>
+    filteredDeclarations.value.filter((declaration) => declaration.statut === 'brouillon').length,
+);
 
 function resetFilters() {
   search.value = '';
@@ -679,5 +740,25 @@ onMounted(() => {
 }
 .q-field {
   margin-bottom: 1px;
+}
+
+.overview-stat-card {
+  min-height: 112px;
+}
+
+.overview-stat-label {
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.overview-stat-value {
+  color: #0f172a;
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  font-weight: 800;
+  line-height: 1.2;
 }
 </style>

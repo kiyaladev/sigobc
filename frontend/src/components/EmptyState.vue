@@ -1,11 +1,13 @@
 <template>
   <div class="empty-state" :class="{ compact: compact }">
     <div class="empty-state-content fade-in">
-      <q-icon :name="icon" :size="iconSize" :color="iconColor" class="empty-icon q-mb-md" />
-      <div class="text-h6 text-weight-medium q-mb-sm" :class="`text-${titleColor}`">
+      <div class="empty-icon-shell q-mb-md">
+        <q-icon :name="icon" :size="iconSize" :color="iconColor" class="empty-icon" />
+      </div>
+      <div class="empty-title" :class="`text-${titleColor}`">
         {{ title }}
       </div>
-      <div class="text-body2 text-grey-6 q-mb-md" v-if="description">
+      <div class="empty-description" v-if="description">
         {{ description }}
       </div>
       <slot name="action">
@@ -39,8 +41,8 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   icon: 'inbox',
-  iconColor: 'grey-4',
-  titleColor: 'grey-7',
+  iconColor: 'primary',
+  titleColor: 'grey-8',
   compact: false,
 });
 
@@ -48,7 +50,7 @@ defineEmits<{
   action: [];
 }>();
 
-const iconSize = computed(() => (props.compact ? '48px' : '72px'));
+const iconSize = computed(() => (props.compact ? '36px' : '54px'));
 </script>
 
 <style scoped lang="scss">
@@ -61,48 +63,70 @@ const iconSize = computed(() => (props.compact ? '48px' : '72px'));
 
   &.compact {
     min-height: 200px;
-    padding: 32px 16px;
+    padding: 28px 16px;
   }
 }
 
 .empty-state-content {
+  max-width: 460px;
+  padding: 28px 24px;
+  border: 1px dashed rgba(148, 163, 184, 0.3);
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(248, 250, 252, 0.92));
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.05);
   text-align: center;
-  max-width: 400px;
+}
+
+.empty-icon-shell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 84px;
+  height: 84px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(27, 94, 59, 0.1), rgba(197, 168, 77, 0.14));
 }
 
 .empty-icon {
-  opacity: 0.4;
   animation: float 3s ease-in-out infinite;
 }
 
-.empty-action-btn {
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(255, 102, 0, 0.3);
-  }
+.empty-title {
+  margin-bottom: 10px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1.3;
 }
+
+.empty-description {
+  margin-bottom: 18px;
+  color: #64748b;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.empty-action-btn {
+  min-height: 42px;
+}
+
 @keyframes float {
   0%,
   100% {
     transform: translateY(0px);
   }
   50% {
-    transform: translateY(-10px);
+    transform: translateY(-6px);
   }
 }
 
 .fade-in {
-  animation: fadeIn 0.6s ease-out;
+  animation: fadeIn 0.4s ease-out;
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;

@@ -19,7 +19,7 @@
     <FilterBar class="q-mb-md">
       <template #filters>
         <div class="col-12 col-sm-6 col-md-3">
-          <q-input v-model="filters.search" filled dense placeholder="Rechercher...">
+          <q-input v-model="filters.search" outlined dense placeholder="Rechercher...">
             <template v-slot:prepend>
               <q-icon name="search" />
             </template>
@@ -28,7 +28,7 @@
         <div class="col-12 col-sm-6 col-md-3">
           <q-select
             v-model="filters.actif"
-            filled
+            outlined
             dense
             label="Statut"
             :options="statutOptions"
@@ -77,7 +77,7 @@
 
     <!-- Dialog d'ajout/modification -->
     <q-dialog v-model="dialogVisible" persistent>
-      <q-card style="min-width: 500px">
+      <q-card class="dialog-card" style="width: min(500px, 96vw); max-width: 96vw">
         <q-card-section class="accent-left">
           <div class="text-h6">{{ isEditing ? 'Modifier' : 'Nouveau' }} Compte Fonctionnel</div>
         </q-card-section>

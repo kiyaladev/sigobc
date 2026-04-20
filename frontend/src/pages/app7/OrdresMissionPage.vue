@@ -4,67 +4,85 @@
       title="Ordres de Mission"
       subtitle="Gestion des missions du personnel"
       icon="flight_takeoff"
-    />
-
-    <div class="row q-col-gutter-md q-mb-md">
-      <!-- Cartes de statistiques -->
-      <div class="col-12 col-md-4" v-for="(stat, index) in statsCards" :key="index">
-        <q-card
-          class="stat-card hover-lift"
-          :class="`stat-card-${index}`"
-          :style="{
-            animationDelay: `${index * 0.1}s`,
-            borderLeft: `4px solid var(--q-${stat.color})`,
-          }"
-        >
-          <q-card-section class="stat-card-content">
-            <div class="row items-center no-wrap">
+    >
+      <template #stats>
+        <div class="col-12 col-sm-6 col-lg-4" v-for="(stat, index) in statsCards" :key="index">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
               <div class="col">
-                <div class="stat-value text-grey-8">{{ stat.value }}</div>
-                <div class="stat-label text-grey-6">{{ stat.label }}</div>
+                <div class="overview-stat-label">{{ stat.label }}</div>
+                <div class="overview-stat-value">{{ stat.value }}</div>
+                <div class="overview-stat-helper">{{ stat.helper }}</div>
               </div>
-              <div class="col-auto">
-                <div class="stat-icon-wrapper" :class="`bg-${stat.color}-1`">
-                  <q-icon :name="stat.icon" class="stat-icon" :color="stat.color" />
-                </div>
-              </div>
-            </div>
-
-            <!-- Indicateur de progression -->
-            <q-linear-progress
-              :value="stat.progress || 1"
-              :color="stat.color"
-              class="stat-progress q-mt-md"
-              :class="{ 'pulse-animation': stat.progress < 1 }"
-            />
-          </q-card-section>
-        </q-card>
-      </div>
-    </div>
+              <q-icon :name="stat.icon" size="30px" :color="stat.color" />
+            </q-card-section>
+          </q-card>
+        </div>
+      </template>
+    </PageHeader>
 
     <q-card class="main-card">
       <q-card-section>
-        <div class="row q-col-gutter-sm items-center q-mb-md">
-          <div class="col-12 col-md-3">
-            <q-input v-model="filter" placeholder="Rechercher..." outlined dense clearable>
-              <template v-slot:prepend><q-icon name="search" /></template>
-            </q-input>
-          </div>
-          <div class="col-12 col-md-auto">
-            <q-select
-              v-model="filterStatut"
-              :options="statutOptions"
-              label="Statut"
-              outlined
-              dense
-              emit-value
-              map-options
-              clearable
-              style="min-width: 160px"
-            />
-          </div>
-          <div class="col-12 col-md-auto">
-            <q-btn color="primary" icon="add" label="Nouvel ordre" unelevated @click="openAdd" />
+        <div class="compact-toolbar q-mb-md">
+          <div class="compact-toolbar-top row items-center q-col-gutter-sm">
+            <div class="col-12 col-md-5">
+              <q-input
+                v-model="filter"
+                placeholder="Rechercher..."
+                outlined
+                dense
+                clearable
+                class="compact-search"
+              >
+                <template v-slot:prepend><q-icon name="search" /></template>
+              </q-input>
+            </div>
+            <div class="col-12 col-md-auto compact-toolbar-summary">
+              <q-chip outline color="primary" icon="filter_alt" size="sm">
+                {{ activeFiltersCount }} filtre{{ activeFiltersCount > 1 ? 's' : '' }}
+              </q-chip>
+            </div>
+            <div class="col-12 col-md-auto compact-toolbar-actions">
+              <q-btn dense outline color="grey-7" icon="tune" label="Filtres" no-caps>
+                <q-menu class="compact-filter-menu" anchor="bottom right" self="top right">
+                  <div class="compact-filter-panel">
+                    <div class="compact-filter-panel-title">Filtres avancés</div>
+                    <div class="row q-col-gutter-sm">
+                      <div class="col-12 col-sm-6 col-md-4">
+                        <q-select
+                          v-model="filterStatut"
+                          :options="statutOptions"
+                          label="Statut"
+                          outlined
+                          dense
+                          emit-value
+                          map-options
+                          clearable
+                        />
+                      </div>
+                      <div class="col-12 col-sm-6 col-md-4">
+                        <q-btn
+                          label="Réinitialiser"
+                          icon="refresh"
+                          outline
+                          color="grey-7"
+                          @click="resetFilters"
+                          class="full-width"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </q-menu>
+              </q-btn>
+              <q-btn
+                color="primary"
+                icon="add"
+                label="Nouvel ordre"
+                unelevated
+                no-caps
+                @click="openAdd"
+              />
+            </div>
           </div>
         </div>
 
@@ -98,8 +116,12 @@
               <q-td></q-td>
               <q-td></q-td>
               <q-td></q-td>
-              <q-td class="text-center text-weight-bold text-italic">{{ reportValues.nombreJours }}</q-td>
-              <q-td class="text-right text-weight-bold text-italic">{{ formatMontant(reportValues.montantTotal) }}</q-td>
+              <q-td class="text-center text-weight-bold text-italic">{{
+                reportValues.nombreJours
+              }}</q-td>
+              <q-td class="text-right text-weight-bold text-italic">{{
+                formatMontant(reportValues.montantTotal)
+              }}</q-td>
               <q-td></q-td>
               <q-td></q-td>
             </q-tr>
@@ -112,7 +134,9 @@
               <q-td></q-td>
               <q-td></q-td>
               <q-td class="text-center text-weight-bold">{{ totalPageValues.nombreJours }}</q-td>
-              <q-td class="text-right text-weight-bold">{{ formatMontant(totalPageValues.montantTotal) }}</q-td>
+              <q-td class="text-right text-weight-bold">{{
+                formatMontant(totalPageValues.montantTotal)
+              }}</q-td>
               <q-td></q-td>
               <q-td></q-td>
             </q-tr>
@@ -123,7 +147,7 @@
 
     <!-- Dialog -->
     <q-dialog v-model="showDialog" persistent>
-      <q-card style="min-width: 750px">
+      <q-card class="dialog-card" style="width: min(750px, 96vw); max-width: 96vw">
         <q-card-section class="row items-center q-pb-none">
           <div class="text-h6">{{ editingId ? 'Modifier' : 'Nouvel' }} ordre de mission</div>
           <q-space />
@@ -216,16 +240,27 @@
             </div>
             <div class="row q-col-gutter-sm q-mt-sm">
               <div class="col-12 col-md-4">
-                <q-toggle v-model="form.hebergementAssure" label="Hébergement assuré" @update:model-value="calcTotal" />
+                <q-toggle
+                  v-model="form.hebergementAssure"
+                  label="Hébergement assuré"
+                  @update:model-value="calcTotal"
+                />
               </div>
               <div class="col-12 col-md-4">
-                <q-toggle v-model="form.nourritureAssuree" label="Nourriture assurée" @update:model-value="calcTotal" />
+                <q-toggle
+                  v-model="form.nourritureAssuree"
+                  label="Nourriture assurée"
+                  @update:model-value="calcTotal"
+                />
               </div>
               <div class="col-12 col-md-4">
                 <q-input v-model="form.moyenTransport" label="Moyen de transport" outlined dense />
               </div>
             </div>
-            <div class="row q-col-gutter-sm" v-if="!form.hebergementAssure || !form.nourritureAssuree">
+            <div
+              class="row q-col-gutter-sm"
+              v-if="!form.hebergementAssure || !form.nourritureAssuree"
+            >
               <div class="col-12 col-md-4" v-if="!form.hebergementAssure">
                 <q-input
                   v-model.number="form.fraisHebergement"
@@ -386,8 +421,8 @@ function calcJours() {
 }
 
 function calcTotal() {
-  const hebergement = form.value.hebergementAssure ? 0 : (form.value.fraisHebergement || 0);
-  const nourriture = form.value.nourritureAssuree ? 0 : (form.value.fraisNourriture || 0);
+  const hebergement = form.value.hebergementAssure ? 0 : form.value.fraisHebergement || 0;
+  const nourriture = form.value.nourritureAssuree ? 0 : form.value.fraisNourriture || 0;
   form.value.montantTotal =
     (form.value.indemniteJournaliere || 0) * (form.value.nombreJours || 1) +
     (form.value.fraisTransport || 0) +
@@ -440,6 +475,16 @@ const columns = [
   { name: 'actions', label: 'Actions', field: 'id', align: 'center' as const },
 ];
 
+const activeFiltersCount = computed(() => {
+  return [filter.value, filterStatut.value].filter((value) => value !== null && value !== '')
+    .length;
+});
+
+function resetFilters() {
+  filter.value = '';
+  filterStatut.value = null;
+}
+
 const filteredMissions = computed(() => {
   let r = missions.value;
   if (filterStatut.value) r = r.filter((m) => m.statut === filterStatut.value);
@@ -491,23 +536,27 @@ const statsCards = computed(() => {
   return [
     {
       value: total,
-      label: 'Total Missions',
+      label: 'Ordres de mission',
+      helper: 'Documents enregistrés',
       icon: 'flight_takeoff',
       color: 'primary',
       progress: total > 0 ? 1 : 0,
     },
     {
       value: valides,
-      label: 'Missions Validées',
+      label: 'Missions validées',
+      helper: total > 0 ? `${Math.round((valides / total) * 100)}% du total` : 'Aucune validation',
       icon: 'verified',
       color: 'positive',
       progress: total > 0 ? valides / total : 0,
     },
     {
       value: brouillons,
-      label: 'En Brouillon',
+      label: 'Brouillons',
+      helper:
+        total > 0 ? `${Math.round((brouillons / total) * 100)}% en attente` : 'Aucun brouillon',
       icon: 'pending',
-      color: 'grey',
+      color: 'grey-7',
       progress: total > 0 ? brouillons / total : 0,
     },
   ];
@@ -571,8 +620,12 @@ async function saveMission() {
     nombreJours: form.value.nombreJours,
     indemniteJournaliere: form.value.indemniteJournaliere,
     fraisTransport: form.value.fraisTransport || undefined,
-    fraisHebergement: form.value.hebergementAssure ? undefined : (form.value.fraisHebergement || undefined),
-    fraisNourriture: form.value.nourritureAssuree ? undefined : (form.value.fraisNourriture || undefined),
+    fraisHebergement: form.value.hebergementAssure
+      ? undefined
+      : form.value.fraisHebergement || undefined,
+    fraisNourriture: form.value.nourritureAssuree
+      ? undefined
+      : form.value.fraisNourriture || undefined,
     montantTotal: form.value.montantTotal,
     statut: form.value.statut,
     observations: form.value.observations || undefined,
@@ -663,56 +716,36 @@ onMounted(() => {
   animation-delay: 0.4s;
 }
 
-// Cartes de statistiques
-.stat-card {
-  height: 100%;
-  border-radius: 16px;
-  overflow: hidden;
-  animation: slideInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-
-  &:hover {
-    .stat-icon {
-      transform: scale(1.1) rotate(5deg);
-    }
-  }
+.overview-stat-card {
+  min-height: 112px;
 }
 
-.stat-card-content {
-  position: relative;
-  overflow: hidden;
-  background: white;
-}
-
-.stat-value {
-  font-size: 1.5rem;
+.overview-stat-label {
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 0.78rem;
   font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.overview-stat-value {
+  color: #0f172a;
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  font-weight: 800;
   line-height: 1.2;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.stat-label {
-  font-size: 0.875rem;
-  opacity: 0.95;
-  margin-top: 4px;
+.overview-stat-helper {
+  margin-top: 6px;
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 600;
 }
 
-.stat-icon-wrapper {
-  border-radius: 12px;
-  padding: 12px;
-}
-
-.stat-icon {
-  font-size: 48px;
-  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.stat-progress {
-  border-radius: 4px;
-  height: 4px;
-}
-
-.pulse-animation {
-  animation: pulse 2s ease-in-out infinite;
+:deep(.q-dialog .q-card) {
+  border-radius: 22px;
+  box-shadow: 0 24px 56px rgba(15, 23, 42, 0.18);
 }
 
 // Report & Total rows
@@ -761,5 +794,52 @@ onMounted(() => {
   50% {
     opacity: 0.8;
   }
+}
+.compact-toolbar {
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.92));
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.compact-toolbar-top {
+  gap: 10px 0;
+}
+
+.compact-search :deep(.q-field__control) {
+  min-height: 38px;
+}
+
+.compact-toolbar-summary {
+  display: flex;
+  align-items: center;
+}
+
+.compact-toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.compact-toolbar-actions :deep(.q-btn) {
+  min-height: 36px;
+  border-radius: 12px;
+}
+
+.compact-filter-panel {
+  width: min(760px, 88vw);
+  padding: 14px;
+}
+
+.compact-filter-panel-title {
+  margin-bottom: 10px;
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 </style>

@@ -1,20 +1,29 @@
 <template>
   <q-dialog v-model="show" persistent>
-    <q-card style="min-width: 500px">
+    <q-card class="dialog-card" style="width: min(500px, 96vw); max-width: 96vw">
       <q-card-section class="row items-center q-pb-none">
-        <div class="text-h6">{{ isActivation ? 'Activation de licence' : 'Information de licence' }}</div>
+        <div>
+          <div class="text-h6">
+            {{ isActivation ? 'Activation de licence' : 'Information de licence' }}
+          </div>
+          <div class="text-caption text-grey-7 q-mt-xs">
+            Sécurisez votre installation ou démarrez une période d'essai.
+          </div>
+        </div>
         <q-space />
-        <q-btn
-          v-if="!isActivation"
-          icon="close"
-          flat
-          round
-          dense
-          @click="$emit('close')"
-        />
+        <q-btn v-if="!isActivation" icon="close" flat round dense @click="$emit('close')" />
       </q-card-section>
 
       <q-card-section v-if="!licenseInfo">
+        <div class="license-intro-card q-mb-md">
+          <q-chip dense outline color="primary" icon="verified_user">Activation sécurisée</q-chip>
+          <q-chip dense outline color="secondary" icon="schedule">Essai 7 jours</q-chip>
+          <div class="license-intro-copy q-mt-sm">
+            Choisissez entre une licence définitive ou une version d'essai pour activer
+            l'application.
+          </div>
+        </div>
+
         <q-tabs
           v-model="tab"
           dense
@@ -48,12 +57,19 @@
                 :error-message="error"
               />
 
-              <div class="text-caption text-grey-7">
-                <div>ID de machine : <strong>{{ machineId }}</strong></div>
-                <div class="text-caption">
-                  Envoyez cet ID au fournisseur pour obtenir votre clé de licence
+              <q-banner class="license-machine-banner" rounded>
+                <template v-slot:avatar>
+                  <q-icon name="memory" color="primary" />
+                </template>
+                <div>
+                  <div>
+                    ID de machine : <strong>{{ machineId }}</strong>
+                  </div>
+                  <div class="text-caption">
+                    Envoyez cet ID au fournisseur pour obtenir votre clé de licence
+                  </div>
                 </div>
-              </div>
+              </q-banner>
 
               <div class="row q-gutter-sm">
                 <q-btn
@@ -78,24 +94,11 @@
           <!-- Version d'essai -->
           <q-tab-panel name="trial">
             <div class="q-gutter-md">
-              <div class="text-subtitle2">
-                Activez une version d'essai de 7 jours
-              </div>
+              <div class="text-subtitle2">Activez une version d'essai de 7 jours</div>
 
-              <q-input
-                v-model="trialCompany"
-                label="Nom de l'entreprise"
-                outlined
-                required
-              />
+              <q-input v-model="trialCompany" label="Nom de l'entreprise" outlined required />
 
-              <q-input
-                v-model="trialEmail"
-                label="Email"
-                type="email"
-                outlined
-                required
-              />
+              <q-input v-model="trialEmail" label="Email" type="email" outlined required />
 
               <div class="text-caption text-grey-7">
                 La version d'essai vous permet de tester l'application pendant 7 jours
@@ -123,10 +126,7 @@
               <q-item-section>
                 <q-item-label>Type de licence</q-item-label>
                 <q-item-label caption>
-                  <q-chip
-                    :color="getLicenseTypeColor(licenseInfo.licenseType)"
-                    text-color="white"
-                  >
+                  <q-chip :color="getLicenseTypeColor(licenseInfo.licenseType)" text-color="white">
                     {{ getLicenseTypeLabel(licenseInfo.licenseType) }}
                   </q-chip>
                 </q-item-label>
@@ -168,17 +168,8 @@
           </q-list>
 
           <div v-if="!isActivation" class="row justify-end q-gutter-sm">
-            <q-btn
-              label="Désactiver"
-              color="negative"
-              outline
-              @click="deactivateLicense"
-            />
-            <q-btn
-              label="Fermer"
-              color="primary"
-              @click="$emit('close')"
-            />
+            <q-btn label="Désactiver" color="negative" outline @click="deactivateLicense" />
+            <q-btn label="Fermer" color="primary" @click="$emit('close')" />
           </div>
         </div>
       </q-card-section>
@@ -277,7 +268,7 @@ async function activateLicense() {
         }, 1000);
       }
     } else {
-      error.value = result.error || 'Erreur lors de l\'activation';
+      error.value = result.error || "Erreur lors de l'activation";
       $q.notify({
         message: error.value,
         color: 'negative',
@@ -286,7 +277,7 @@ async function activateLicense() {
       });
     }
   } catch {
-    error.value = 'Erreur lors de l\'activation de la licence';
+    error.value = "Erreur lors de l'activation de la licence";
     $q.notify({
       message: error.value,
       color: 'negative',
@@ -307,14 +298,14 @@ async function activateTrialLicense() {
   try {
     const trialKey = await window.licenseAPI.generateTrialLicense(
       trialCompany.value,
-      trialEmail.value
+      trialEmail.value,
     );
 
     const result = await window.licenseAPI.activateLicense(trialKey);
 
     if (result.success) {
       $q.notify({
-        message: 'Version d\'essai activée avec succès ! (7 jours)',
+        message: "Version d'essai activée avec succès ! (7 jours)",
         color: 'positive',
         icon: 'check_circle',
         position: 'top',
@@ -329,7 +320,7 @@ async function activateTrialLicense() {
         }, 1000);
       }
     } else {
-      error.value = result.error || 'Erreur lors de l\'activation';
+      error.value = result.error || "Erreur lors de l'activation";
       $q.notify({
         message: error.value,
         color: 'negative',
@@ -338,7 +329,7 @@ async function activateTrialLicense() {
       });
     }
   } catch {
-    error.value = 'Erreur lors de l\'activation de la version d\'essai';
+    error.value = "Erreur lors de l'activation de la version d'essai";
     $q.notify({
       message: error.value,
       color: 'negative',
@@ -398,7 +389,7 @@ function formatDate(dateStr: string) {
 
 function getLicenseTypeLabel(type: string) {
   const labels: Record<string, string> = {
-    trial: 'Version d\'essai',
+    trial: "Version d'essai",
     standard: 'Standard',
     premium: 'Premium',
     enterprise: 'Enterprise',
@@ -417,3 +408,21 @@ function getLicenseTypeColor(type: string) {
 }
 </script>
 
+<style scoped lang="scss">
+.license-intro-card {
+  padding: 14px 16px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(248, 250, 252, 0.9));
+}
+
+.license-intro-copy {
+  color: #64748b;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.license-machine-banner {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(248, 250, 252, 0.92));
+}
+</style>

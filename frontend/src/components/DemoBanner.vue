@@ -3,6 +3,9 @@
     <div class="demo-banner-content">
       <q-icon :name="bannerIcon" size="20px" class="q-mr-sm" />
       <span class="demo-text">
+        <q-chip dense color="white" text-color="primary" icon="schedule" class="demo-chip"
+          >Essai</q-chip
+        >
         <strong>Période d'essai</strong>
         <span class="demo-separator">|</span>
         <span class="demo-time">
@@ -37,7 +40,7 @@
 
   <!-- Dialog d'activation -->
   <q-dialog v-model="showActivationDialog">
-    <q-card style="min-width: 400px">
+    <q-card class="dialog-card" style="width: min(400px, 96vw); max-width: 96vw">
       <q-card-section class="bg-primary text-white">
         <div class="text-h6">
           <q-icon name="key" class="q-mr-sm" />
@@ -126,8 +129,8 @@ function activateLicense() {
   right: 0;
   z-index: 9999;
   color: white;
-  padding: 8px 16px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  padding: 10px 16px;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.16);
 }
 
 .banner-info {
@@ -158,6 +161,11 @@ function activateLicense() {
   align-items: center;
   max-width: 1400px;
   margin: 0 auto;
+  gap: 10px;
+}
+
+.demo-chip {
+  font-weight: 800;
 }
 
 .demo-text {

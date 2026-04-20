@@ -4,55 +4,40 @@
       title="Statistiques du Personnel"
       subtitle="Analyse des données RH"
       icon="bar_chart"
-    />
-
-    <div class="row q-col-gutter-sm q-mb-md">
-      <div class="col-12 col-md-2">
-        <q-input v-model.number="filterAnnee" label="Année" outlined dense type="number" />
-      </div>
-    </div>
-
-    <!-- Cartes récapitulatives -->
-    <div class="row q-col-gutter-md q-mb-md">
-      <!-- Cartes de statistiques -->
-      <div class="col-12 col-sm-6 col-md-3" v-for="(stat, index) in statsCards" :key="index">
-        <q-card
-          class="stat-card hover-lift"
-          :class="`stat-card-${index}`"
-          :style="{
-            animationDelay: `${index * 0.1}s`,
-            borderLeft: `4px solid var(--q-${stat.color})`,
-          }"
-        >
-          <q-card-section class="stat-card-content">
-            <div class="row items-center no-wrap">
+    >
+      <template #stats>
+        <div v-for="(stat, index) in statsCards" :key="index" class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
               <div class="col">
-                <div class="stat-value text-grey-8">{{ stat.value }}</div>
-                <div class="stat-label text-grey-6">{{ stat.label }}</div>
+                <div class="overview-stat-label">{{ stat.label }}</div>
+                <div class="overview-stat-value">{{ stat.value }}</div>
+                <div v-if="stat.helper" class="overview-stat-helper">{{ stat.helper }}</div>
               </div>
-              <div class="col-auto">
-                <div class="stat-icon-wrapper" :class="`bg-${stat.color}-1`">
-                  <q-icon :name="stat.icon" class="stat-icon" :color="stat.color" />
-                </div>
-              </div>
-            </div>
+              <q-icon :name="stat.icon" size="30px" :color="stat.color" />
+            </q-card-section>
+          </q-card>
+        </div>
+      </template>
+    </PageHeader>
 
-            <!-- Indicateur de progression -->
-            <q-linear-progress
-              :value="stat.progress || 1"
-              :color="stat.color"
-              class="stat-progress q-mt-md"
-              :class="{ 'pulse-animation': stat.progress < 1 }"
-            />
-          </q-card-section>
-        </q-card>
+    <div class="compact-toolbar q-mb-md">
+      <div class="compact-toolbar-top row items-center q-col-gutter-sm">
+        <div class="col-12 col-md-3">
+          <q-input v-model.number="filterAnnee" label="Année" outlined dense type="number" />
+        </div>
+        <div class="col-12 col-md-auto compact-toolbar-summary">
+          <q-chip outline color="primary" icon="filter_alt" size="sm">
+            Exercice {{ filterAnnee }}
+          </q-chip>
+        </div>
       </div>
     </div>
 
-    <div class="row q-col-gutter-md">
+    <div class="row q-col-gutter-md analytics-grid">
       <!-- Effectif par service -->
       <div class="col-12 col-md-6">
-        <q-card class="main-card">
+        <q-card class="analytics-card main-card">
           <q-card-section>
             <div class="text-h6 q-mb-md">
               <q-icon name="corporate_fare" class="q-mr-sm" color="primary" />
@@ -78,7 +63,7 @@
 
       <!-- Masse salariale mensuelle -->
       <div class="col-12 col-md-6">
-        <q-card class="main-card">
+        <q-card class="analytics-card main-card">
           <q-card-section>
             <div class="text-h6 q-mb-md">
               <q-icon name="payments" class="q-mr-sm" color="teal" />
@@ -104,7 +89,7 @@
 
       <!-- Congés par type -->
       <div class="col-12 col-md-6">
-        <q-card class="main-card">
+        <q-card class="analytics-card main-card">
           <q-card-section>
             <div class="text-h6 q-mb-md">
               <q-icon name="beach_access" class="q-mr-sm" color="orange" />
@@ -134,7 +119,7 @@
 
       <!-- Missions -->
       <div class="col-12 col-md-6">
-        <q-card class="main-card">
+        <q-card class="analytics-card main-card">
           <q-card-section>
             <div class="text-h6 q-mb-md">
               <q-icon name="flight_takeoff" class="q-mr-sm" color="indigo" />
@@ -211,36 +196,41 @@ const stats = ref({
 });
 
 // Cartes de statistiques avec animations
-const statsCards = computed(() => [
-  {
-    label: 'Agents actifs',
-    value: stats.value.totalActifs,
-    color: 'primary',
-    icon: 'people',
-    progress: 1,
-  },
-  {
-    label: 'Agents inactifs',
-    value: stats.value.totalInactifs,
-    color: 'grey',
-    icon: 'person_off',
-    progress: 0.5,
-  },
-  {
-    label: 'Masse salariale',
-    value: formatMontant(stats.value.masseSalarialeBrute),
-    color: 'teal',
-    icon: 'payments',
-    progress: 0.9,
-  },
-  {
-    label: 'Missions',
-    value: stats.value.totalMissions,
-    color: 'indigo',
-    icon: 'flight_takeoff',
-    progress: 0.8,
-  },
-]);
+const statsCards = computed(() => {
+  const missionsValidees =
+    stats.value.missionsParStatut.find((mission) => mission.statut === 'valide')?.count || 0;
+
+  return [
+    {
+      label: 'Agents actifs',
+      value: stats.value.totalActifs,
+      helper: `Inactifs : ${stats.value.totalInactifs}`,
+      color: 'primary',
+      icon: 'people',
+    },
+    {
+      label: 'Masse salariale',
+      value: formatMontant(stats.value.masseSalarialeBrute),
+      helper: `Paies ${filterAnnee.value}`,
+      color: 'teal',
+      icon: 'payments',
+    },
+    {
+      label: 'Missions',
+      value: stats.value.totalMissions,
+      helper: `Validées : ${missionsValidees}`,
+      color: 'indigo',
+      icon: 'flight_takeoff',
+    },
+    {
+      label: 'Services couverts',
+      value: stats.value.parService.length,
+      helper: `${stats.value.congesParType.length} type(s) de congés`,
+      color: 'secondary',
+      icon: 'corporate_fare',
+    },
+  ];
+});
 
 function formatMontant(v: number): string {
   return new Intl.NumberFormat('fr-FR', {
@@ -346,101 +336,170 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-// Page principale
+.statistiques-page,
 .dashboard-page {
   max-width: 1400px;
   margin: 0 auto;
 }
 
-.main-card {
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  animation: fadeIn 0.6s ease-out both;
-  animation-delay: 0.4s;
+.overview-stat-card {
+  min-height: 112px;
 }
 
-// Cartes de statistiques
-.stat-card {
-  height: 100%;
-  border-radius: 16px;
-  overflow: hidden;
-  animation: slideInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-
-  &:hover {
-    .stat-icon {
-      transform: scale(1.1) rotate(5deg);
-    }
-  }
+.secondary-stat-card {
+  min-height: 108px;
 }
 
-.stat-card-content {
-  position: relative;
-  overflow: hidden;
-  background: white;
+.overview-stat-label {
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
-.stat-value {
-  font-size: 1.5rem;
-  font-weight: 700;
+.overview-stat-value {
+  color: #0f172a;
+  font-size: clamp(1.05rem, 1.7vw, 1.45rem);
+  font-weight: 800;
   line-height: 1.2;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.stat-label {
-  font-size: 0.875rem;
-  opacity: 0.95;
-  margin-top: 4px;
+.overview-stat-helper {
+  margin-top: 6px;
+  color: #64748b;
+  font-size: 0.76rem;
+  line-height: 1.35;
 }
 
-.stat-icon-wrapper {
+.analytics-grid {
+  position: relative;
+}
+
+.analytics-card,
+.analytics-empty-state {
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
+  box-shadow: 0 18px 34px rgba(15, 23, 42, 0.08);
+}
+
+.analytics-card {
+  overflow: hidden;
+}
+
+.analytics-card :deep(.q-card__section.bg-grey-1) {
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.94), rgba(241, 245, 249, 0.86));
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.analytics-card :deep(.q-card__section.bg-grey-1 .text-h6),
+.analytics-chart-card :deep(.q-card__section:first-child .text-h6),
+.analytics-card :deep(.text-h6) {
+  color: #0f172a !important;
+  font-size: 1.08rem;
+  font-weight: 800;
+}
+
+.analytics-card :deep(.q-card__section + .q-card__section) {
+  padding-top: 18px;
+}
+
+.analytics-card :deep(.q-list .q-item) {
+  border-radius: 14px;
+  margin: 6px 0;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.analytics-card :deep(.q-list .q-item:hover) {
+  background: rgba(15, 23, 42, 0.04);
+  transform: translateX(3px);
+}
+
+.analytics-card :deep(.q-table) {
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.analytics-card :deep(.q-table thead tr) {
+  background: linear-gradient(180deg, #f8fafc 0%, #eef4f8 100%);
+}
+
+.analytics-card :deep(.q-table tbody tr:nth-child(even)) {
+  background: rgba(248, 250, 252, 0.72);
+}
+
+.analytics-card :deep(.q-table tbody tr:hover) {
+  background: rgba(197, 168, 77, 0.08);
+}
+
+.analytics-card :deep(.q-linear-progress) {
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.analytics-chart-card :deep(.q-card__section:first-child) {
+  padding-bottom: 0;
+}
+
+.analytics-empty-state {
+  overflow: hidden;
+}
+
+.chart-container {
+  position: relative;
+  height: 300px;
+}
+
+.chart-container-large {
+  position: relative;
+  height: 400px;
+}
+
+.compact-toolbar {
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.92));
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.compact-toolbar-top {
+  gap: 10px 0;
+}
+
+.compact-toolbar-summary {
+  display: flex;
+  align-items: center;
+}
+
+.compact-toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.compact-toolbar-actions :deep(.q-btn) {
+  min-height: 36px;
   border-radius: 12px;
-  padding: 12px;
 }
 
-.stat-icon {
-  font-size: 48px;
-  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+.compact-filter-panel {
+  width: min(920px, 92vw);
+  padding: 14px;
 }
 
-.stat-progress {
-  border-radius: 4px;
-  height: 4px;
-}
-
-.pulse-animation {
-  animation: pulse 2s ease-in-out infinite;
-}
-
-// Animations
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.8;
-  }
+.compact-filter-panel-title {
+  margin-bottom: 10px;
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 </style>

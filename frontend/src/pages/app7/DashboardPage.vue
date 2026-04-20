@@ -1,132 +1,169 @@
 <template>
   <q-page class="dashboard-page q-pa-md">
-    <PageHeader
-      title="Gestion des Employés"
-      subtitle="Tableau de bord du personnel"
-      icon="people"
-    />
+    <PageHeader title="Gestion des Employés" subtitle="Tableau de bord du personnel" icon="people" />
 
-    <!-- Statistiques principales -->
-    <div class="row q-col-gutter-md q-mb-md">
-      <div class="col-12 col-sm-6 col-md-3" v-for="(stat, index) in statsCards" :key="index">
-        <q-card
-          class="stat-card hover-lift"
-          :class="`stat-card-${index}`"
-          :style="{
-            animationDelay: `${index * 0.1}s`,
-            borderLeft: `4px solid var(--q-${stat.color})`,
-          }"
-        >
-          <q-card-section class="stat-card-content">
-            <div class="row items-center no-wrap">
-              <div class="col">
-                <div class="stat-value text-grey-8">{{ stat.value }}</div>
-                <div class="stat-label text-grey-6">{{ stat.label }}</div>
-              </div>
-              <div class="col-auto">
-                <div class="stat-icon-wrapper" :class="`bg-${stat.color}-1`">
-                  <q-icon :name="stat.icon" class="stat-icon" :color="stat.color" />
-                </div>
-              </div>
+    <div class="row q-col-gutter-md">
+      <!-- KPI -->
+      <div class="col-12 col-sm-6 col-lg-3" v-for="(stat, index) in statsCards" :key="index">
+        <q-card flat class="listing-stat-card overview-stat-card">
+          <q-card-section class="row items-center no-wrap">
+            <div class="col">
+              <div class="overview-stat-label">{{ stat.label }}</div>
+              <div class="overview-stat-value">{{ stat.value }}</div>
+              <div v-if="stat.helper" class="overview-stat-helper">{{ stat.helper }}</div>
             </div>
-
-            <!-- Indicateur de progression -->
-            <q-linear-progress
-              :value="stat.progress || 1"
-              :color="stat.color"
-              class="stat-progress q-mt-md"
-              :class="{ 'pulse-animation': stat.progress < 1 }"
-            />
+            <q-icon :name="stat.icon" size="30px" :color="stat.color" />
           </q-card-section>
         </q-card>
       </div>
-    </div>
 
-    <div class="row q-col-gutter-md">
-      <!-- Répartition par service -->
-      <div class="col-12 col-md-6">
-        <q-card class="main-card">
+      <!-- Accès rapide -->
+      <div class="col-12 fade-in" style="animation-delay: 0.4s">
+        <q-card class="quick-access-card">
           <q-card-section>
-            <div class="text-h6 q-mb-md">
-              <q-icon name="corporate_fare" class="q-mr-sm" color="primary" />
-              Répartition par service
+            <div class="section-header q-mb-md">
+              <div class="flex items-center">
+                <q-icon name="bolt" color="primary" size="24px" class="q-mr-sm" />
+                <span class="text-h6 text-weight-bold">Accès Rapide</span>
+              </div>
+              <div class="section-decoration"></div>
             </div>
-            <q-list separator>
-              <q-item v-for="s in stats.parService" :key="s.service">
+
+            <div class="row q-col-gutter-md">
+              <div class="col-6 col-sm-4 col-md" v-for="(action, index) in quickActions" :key="action.route">
+                <q-btn
+                  unelevated
+                  :color="action.color"
+                  class="full-width quick-action-btn"
+                  stack
+                  :style="{ animationDelay: `${index * 0.05}s` }"
+                  @click="$router.push(action.route)"
+                >
+                  <q-icon :name="action.icon" size="32px" class="q-mb-sm" />
+                  <div class="text-caption text-weight-medium">{{ action.label }}</div>
+                </q-btn>
+              </div>
+            </div>
+          </q-card-section>
+        </q-card>
+      </div>
+
+      <!-- Répartition par service -->
+      <div class="col-12 col-md-6 fade-in" style="animation-delay: 0.5s">
+        <q-card class="activity-card">
+          <q-card-section>
+            <div class="section-header q-mb-md">
+              <div class="flex items-center">
+                <q-icon name="corporate_fare" color="primary" size="24px" class="q-mr-sm" />
+                <span class="text-h6 text-weight-bold">Répartition par service</span>
+              </div>
+              <div class="section-decoration"></div>
+            </div>
+
+            <q-list separator class="activity-list">
+              <q-item
+                v-for="(service, index) in stats.parService"
+                :key="service.service"
+                class="activity-item"
+                :style="{ animationDelay: `${index * 0.08}s` }"
+              >
+                <q-item-section avatar>
+                  <q-avatar color="primary" text-color="white" class="pulse-soft">
+                    <q-icon name="groups" />
+                  </q-avatar>
+                </q-item-section>
                 <q-item-section>
-                  <q-item-label>{{ s.service }}</q-item-label>
+                  <q-item-label class="text-weight-medium">{{ service.service }}</q-item-label>
+                  <q-item-label caption class="text-grey-6">
+                    {{ service.count }} agent{{ service.count > 1 ? 's' : '' }}
+                  </q-item-label>
                   <q-linear-progress
-                    :value="s.count / (stats.totalEmployes || 1)"
+                    :value="service.count / (stats.totalEmployes || 1)"
                     color="primary"
-                    class="q-mt-xs"
+                    track-color="grey-3"
+                    rounded
+                    class="q-mt-sm"
                   />
                 </q-item-section>
                 <q-item-section side>
-                  <q-chip color="primary" text-color="white" size="sm">{{ s.count }}</q-chip>
+                  <q-chip color="primary" text-color="white" size="sm" class="status-chip">
+                    {{ Math.round((service.count / (stats.totalEmployes || 1)) * 100) }}%
+                  </q-chip>
                 </q-item-section>
               </q-item>
-              <q-item v-if="!stats.parService.length">
-                <q-item-section class="text-grey text-center"
-                  >Aucun agent enregistré</q-item-section
-                >
+
+              <q-item v-if="!stats.parService.length" class="empty-state">
+                <q-item-section class="text-center">
+                  <q-icon name="inbox" size="48px" color="grey-4" class="q-mb-sm" />
+                  <div class="text-grey-5 q-mb-sm">Aucun agent enregistré</div>
+                </q-item-section>
               </q-item>
             </q-list>
           </q-card-section>
+          <q-card-actions align="right" class="q-px-md q-pb-md">
+            <q-btn
+              flat
+              color="primary"
+              label="Voir tout"
+              icon-right="arrow_forward"
+              @click="$router.push('/app7/employes')"
+              class="view-all-btn"
+            />
+          </q-card-actions>
         </q-card>
       </div>
 
-      <!-- Fiches de paie du mois courant -->
-      <div class="col-12 col-md-6">
-        <q-card class="main-card">
+      <!-- Paie du mois -->
+      <div class="col-12 col-md-6 fade-in" style="animation-delay: 0.6s">
+        <q-card class="activity-card">
           <q-card-section>
-            <div class="text-h6 q-mb-md">
-              <q-icon name="receipt_long" class="q-mr-sm" color="teal" />
-              Paie – {{ nomMoisCourant }} {{ anneeCourante }}
-            </div>
-            <div class="row q-col-gutter-sm q-mb-md">
-              <div class="col-6">
-                <div class="text-caption text-grey">Bulletins générés</div>
-                <div class="text-h5 text-weight-bold text-teal">{{ stats.paie.nbFiches }}</div>
+            <div class="section-header q-mb-md">
+              <div class="flex items-center">
+                <q-icon name="receipt_long" color="teal" size="24px" class="q-mr-sm" />
+                <span class="text-h6 text-weight-bold">Paie – {{ nomMoisCourant }} {{ anneeCourante }}</span>
               </div>
-              <div class="col-6">
-                <div class="text-caption text-grey">Bulletins payés</div>
-                <div class="text-h5 text-weight-bold text-positive">{{ stats.paie.nbPayes }}</div>
+              <div class="section-decoration"></div>
+            </div>
+
+            <div class="row q-col-gutter-md q-mb-md">
+              <div class="col-12 col-sm-6">
+                <q-card flat class="mini-stat-card">
+                  <q-card-section>
+                    <div class="overview-stat-label">Bulletins générés</div>
+                    <div class="overview-stat-value text-teal">{{ stats.paie.nbFiches }}</div>
+                  </q-card-section>
+                </q-card>
+              </div>
+              <div class="col-12 col-sm-6">
+                <q-card flat class="mini-stat-card">
+                  <q-card-section>
+                    <div class="overview-stat-label">Bulletins payés</div>
+                    <div class="overview-stat-value text-positive">{{ stats.paie.nbPayes }}</div>
+                  </q-card-section>
+                </q-card>
               </div>
               <div class="col-12">
-                <div class="text-caption text-grey">Total net à payer</div>
-                <div class="text-h6 text-weight-bold">{{ formatMontant(stats.paie.totalNet) }}</div>
+                <q-card flat class="mini-stat-card">
+                  <q-card-section>
+                    <div class="overview-stat-label">Total net à payer</div>
+                    <div class="overview-stat-value">{{ formatMontant(stats.paie.totalNet) }}</div>
+                    <div class="overview-stat-helper">
+                      Taux de paiement : {{ tauxPaie }} %
+                    </div>
+                  </q-card-section>
+                </q-card>
               </div>
             </div>
+          </q-card-section>
+          <q-card-actions align="right" class="q-px-md q-pb-md">
             <q-btn
+              unelevated
+              color="teal"
               label="Gérer la paie"
               icon="payments"
-              color="teal"
-              unelevated
-              to="/app7/salaires"
+              @click="$router.push('/app7/salaires')"
             />
-          </q-card-section>
-        </q-card>
-      </div>
-
-      <!-- Liens rapides -->
-      <div class="col-12">
-        <q-card class="main-card">
-          <q-card-section>
-            <div class="text-h6 q-mb-md">Accès rapides</div>
-            <div class="row q-col-gutter-sm">
-              <div class="col-6 col-sm-4 col-md" v-for="link in quickLinks" :key="link.to">
-                <q-btn
-                  :to="link.to"
-                  :icon="link.icon"
-                  :label="link.label"
-                  :color="link.color"
-                  unelevated
-                  stack
-                  class="full-width q-py-md"
-                />
-              </div>
-            </div>
-          </q-card-section>
+          </q-card-actions>
         </q-card>
       </div>
     </div>
@@ -167,45 +204,45 @@ const stats = ref({
   paie: { nbFiches: 0, nbPayes: 0, totalNet: 0 },
 });
 
-// Cartes de statistiques avec animations
-const statsCards = computed(() => [
+const statsCards = computed<{ value: number | string; label: string; icon: string; color: string; helper?: string }[]>(() => [
   {
     value: stats.value.totalEmployes,
     label: 'Agents actifs',
     icon: 'people',
     color: 'primary',
-    progress: 1,
   },
   {
     value: formatMontant(stats.value.masseSalariale),
     label: 'Masse salariale',
     icon: 'payments',
-    color: 'teal',
-    progress: 0.9,
+    color: 'secondary',
   },
   {
     value: stats.value.congesEnAttente,
     label: 'Congés en attente',
     icon: 'beach_access',
-    color: 'orange',
-    progress: stats.value.congesEnAttente > 0 ? 0.5 : 1,
+    color: 'teal',
   },
   {
     value: stats.value.missionsMois,
     label: 'Missions ce mois',
     icon: 'flight_takeoff',
-    color: 'indigo',
-    progress: 0.8,
+    color: 'positive',
   },
 ]);
 
-const quickLinks = [
-  { to: '/app7/employes', icon: 'people', label: 'Agents', color: 'primary' },
-  { to: '/app7/salaires', icon: 'payments', label: 'Salaires', color: 'teal' },
-  { to: '/app7/conges', icon: 'beach_access', label: 'Congés', color: 'orange' },
-  { to: '/app7/missions', icon: 'flight_takeoff', label: 'Missions', color: 'indigo' },
-  { to: '/app7/statistiques', icon: 'bar_chart', label: 'Stats', color: 'purple' },
+const quickActions = [
+  { route: '/app7/employes', icon: 'people', label: 'Agents', color: 'primary' },
+  { route: '/app7/salaires', icon: 'payments', label: 'Salaires', color: 'teal' },
+  { route: '/app7/conges', icon: 'beach_access', label: 'Congés', color: 'orange' },
+  { route: '/app7/missions', icon: 'flight_takeoff', label: 'Missions', color: 'indigo' },
+  { route: '/app7/statistiques', icon: 'bar_chart', label: 'Stats', color: 'purple' },
 ];
+
+const tauxPaie = computed(() => {
+  if (!stats.value.paie.nbFiches) return 0;
+  return ((stats.value.paie.nbPayes / stats.value.paie.nbFiches) * 100).toFixed(1);
+});
 
 function formatMontant(montant: number): string {
   return new Intl.NumberFormat('fr-FR', {
@@ -238,7 +275,6 @@ async function loadStats() {
     0,
   );
 
-  // Répartition par service
   const serviceMap = new Map<string, number>();
   employes.forEach((e) => {
     serviceMap.set(e.service, (serviceMap.get(e.service) || 0) + 1);
@@ -269,72 +305,121 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-// Page principale
 .dashboard-page {
   max-width: 1400px;
   margin: 0 auto;
 }
 
-.main-card {
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  animation: fadeIn 0.6s ease-out both;
-  animation-delay: 0.4s;
+.overview-stat-card {
+  min-height: 112px;
 }
 
-// Cartes de statistiques
-.stat-card {
-  height: 100%;
+.overview-stat-label {
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.overview-stat-value {
+  color: #0f172a;
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.overview-stat-helper {
+  margin-top: 6px;
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.quick-access-card {
   border-radius: 16px;
-  overflow: hidden;
-  animation: slideInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.quick-action-btn {
+  border-radius: 12px;
+  padding: 20px 12px;
+  min-height: 100px;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: fadeInUp 0.5s ease-out both;
 
   &:hover {
-    .stat-icon {
-      transform: scale(1.1) rotate(5deg);
-    }
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
   }
 }
 
-.stat-card-content {
+.activity-card {
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.activity-list {
+  min-height: 300px;
+}
+
+.activity-item {
+  border-radius: 8px;
+  margin: 8px 0;
+  transition: all 0.3s ease;
+  animation: fadeInLeft 0.5s ease-out both;
+
+  &:hover {
+    background-color: rgba(25, 118, 210, 0.05);
+    transform: translateX(8px);
+  }
+}
+
+.mini-stat-card {
+  border-radius: 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.pulse-soft {
+  animation: pulseSoft 3s ease-in-out infinite;
+}
+
+.status-chip {
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.empty-state {
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.view-all-btn {
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateX(4px);
+  }
+}
+
+.section-header {
   position: relative;
-  overflow: hidden;
-  background: white;
+
+  .section-decoration {
+    height: 3px;
+    background: linear-gradient(90deg, #1976d2 0%, transparent 100%);
+    border-radius: 2px;
+    margin-top: 8px;
+  }
 }
 
-.stat-value {
-  font-size: 1.5rem;
-  font-weight: 700;
-  line-height: 1.2;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.stat-label {
-  font-size: 0.875rem;
-  opacity: 0.95;
-  margin-top: 4px;
-}
-
-.stat-icon-wrapper {
-  border-radius: 12px;
-  padding: 12px;
-}
-
-.stat-icon {
-  font-size: 48px;
-  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.stat-progress {
-  border-radius: 4px;
-  height: 4px;
-}
-
-.pulse-animation {
-  animation: pulse 2s ease-in-out infinite;
-}
-
-// Animations
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -346,10 +431,10 @@ onMounted(() => {
   }
 }
 
-@keyframes slideInUp {
+@keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -357,13 +442,37 @@ onMounted(() => {
   }
 }
 
-@keyframes pulse {
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulseSoft {
   0%,
   100% {
-    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(25, 118, 210, 0.35);
   }
   50% {
-    opacity: 0.8;
+    transform: scale(1.05);
+    box-shadow: 0 0 0 8px rgba(25, 118, 210, 0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease-out both;
+}
+
+@media (max-width: 600px) {
+  .quick-action-btn {
+    min-height: 80px;
+    padding: 16px 8px;
   }
 }
 </style>

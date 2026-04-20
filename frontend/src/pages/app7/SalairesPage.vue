@@ -8,91 +8,112 @@
 
     <q-card class="main-card q-mb-md">
       <q-card-section>
-        <div class="row q-col-gutter-sm items-center q-mb-md">
-          <div class="col-12 col-md-1">
-            <q-select
-              v-model="filterMois"
-              :options="moisOptions"
-              label="Mois"
-              outlined
-              dense
-              emit-value
-              map-options
-              clearable
-            />
-          </div>
-          <div class="col-12 col-md-1">
-            <q-input v-model.number="filterAnnee" label="Année" outlined dense type="number" />
-          </div>
-          <div class="col-12 col-md-1">
-            <q-select
-              v-model="filterStatut"
-              :options="statutOptions"
-              label="Statut"
-              outlined
-              dense
-              emit-value
-              map-options
-              clearable
-            />
-          </div>
-          <div class="col-12 col-md-2">
-            <q-input v-model="filterSearch" label="Rechercher un agent" outlined dense clearable>
-              <template v-slot:prepend>
-                <q-icon name="search" />
-              </template>
-            </q-input>
-          </div>
-          <div class="col-12 col-md-6 q-gutter-sm row">
-            <q-btn
-              icon="bolt"
-              label="Générer bulletins"
-              color="primary"
-              unelevated
-              @click="openGenerateDialog"
-            />
-            <q-btn icon="add" label="Nouveau bulletin" color="teal" unelevated @click="openAdd" />
-            <q-btn
-              icon="print"
-              label="Imprimer"
-              color="deep-purple"
-              unelevated
-              @click="showPrintDialog = true"
-            />
+        <div class="compact-toolbar q-mb-md">
+          <div class="compact-toolbar-top row items-center q-col-gutter-sm">
+            <div class="col-12 col-md-4">
+              <q-input
+                v-model="filterSearch"
+                label="Rechercher un agent"
+                outlined
+                dense
+                clearable
+                class="compact-search"
+              >
+                <template v-slot:prepend>
+                  <q-icon name="search" />
+                </template>
+              </q-input>
+            </div>
+            <div class="col-12 col-md-auto compact-toolbar-summary">
+              <q-chip outline color="primary" icon="filter_alt" size="sm">
+                {{ activeFiltersCount }} filtre{{ activeFiltersCount > 1 ? 's' : '' }}
+              </q-chip>
+            </div>
+            <div class="col-12 col-md-auto compact-toolbar-actions">
+              <q-btn dense outline color="grey-7" icon="tune" label="Filtres" no-caps>
+                <q-menu class="compact-filter-menu" anchor="bottom right" self="top right">
+                  <div class="compact-filter-panel">
+                    <div class="compact-filter-panel-title">Filtres avancés</div>
+                    <div class="row q-col-gutter-sm">
+                      <div class="col-12 col-sm-6 col-md-4">
+                        <q-select
+                          v-model="filterMois"
+                          :options="moisOptions"
+                          label="Mois"
+                          outlined
+                          dense
+                          emit-value
+                          map-options
+                          clearable
+                        />
+                      </div>
+                      <div class="col-12 col-sm-6 col-md-4">
+                        <q-input
+                          v-model.number="filterAnnee"
+                          label="Année"
+                          outlined
+                          dense
+                          type="number"
+                        />
+                      </div>
+                      <div class="col-12 col-sm-6 col-md-4">
+                        <q-select
+                          v-model="filterStatut"
+                          :options="statutOptions"
+                          label="Statut"
+                          outlined
+                          dense
+                          emit-value
+                          map-options
+                          clearable
+                        />
+                      </div>
+                      <div class="col-12 col-sm-6 col-md-4">
+                        <q-btn
+                          label="Réinitialiser"
+                          icon="refresh"
+                          outline
+                          color="grey-7"
+                          @click="resetFilters"
+                          class="full-width"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </q-menu>
+              </q-btn>
+              <q-btn
+                icon="bolt"
+                label="Générer"
+                color="primary"
+                unelevated
+                no-caps
+                @click="openGenerateDialog"
+              />
+              <q-btn icon="add" label="Nouveau" color="teal" unelevated no-caps @click="openAdd" />
+              <q-btn
+                icon="print"
+                label="Imprimer"
+                color="deep-purple"
+                unelevated
+                no-caps
+                @click="showPrintDialog = true"
+              />
+            </div>
           </div>
         </div>
 
         <!-- Résumé du mois -->
-        <div class="row q-col-gutter-md q-mb-md">
-          <div class="col-12 col-sm-6 col-md-3" v-for="(stat, index) in statsCards" :key="index">
-            <q-card
-              class="stat-card hover-lift"
-              :class="`stat-card-${index}`"
-              :style="{
-                animationDelay: `${index * 0.1}s`,
-                borderLeft: `4px solid var(--q-${stat.color})`,
-              }"
-            >
-              <q-card-section class="stat-card-content">
-                <div class="row items-center no-wrap">
-                  <div class="col">
-                    <div class="stat-value text-grey-8">{{ stat.value }}</div>
-                    <div class="stat-label text-grey-6">{{ stat.label }}</div>
-                  </div>
-                  <div class="col-auto">
-                    <div class="stat-icon-wrapper" :class="`bg-${stat.color}-1`">
-                      <q-icon :name="stat.icon" class="stat-icon" :color="stat.color" />
-                    </div>
-                  </div>
+        <div class="listing-stats-row row q-col-gutter-md q-mb-md">
+          <div class="col-12 col-sm-6 col-lg-3" v-for="(stat, index) in statsCards" :key="index">
+            <q-card flat class="listing-stat-card overview-stat-card">
+              <q-card-section class="row items-center no-wrap">
+                <div class="col">
+                  <div class="overview-stat-label">{{ stat.label }}</div>
+                  <div class="overview-stat-value">{{ stat.value }}</div>
+                  <div class="overview-stat-helper">{{ stat.helper }}</div>
                 </div>
-
-                <!-- Indicateur de progression -->
-                <q-linear-progress
-                  :value="stat.progress || 1"
-                  :color="stat.color"
-                  class="stat-progress q-mt-md"
-                  :class="{ 'pulse-animation': stat.progress < 1 }"
-                />
+                <q-icon :name="stat.icon" size="30px" :color="stat.color" />
               </q-card-section>
             </q-card>
           </div>
@@ -156,8 +177,12 @@
               <q-td></q-td>
               <q-td></q-td>
               <q-td></q-td>
-              <q-td class="text-right text-weight-bold text-italic">{{ formatMontant(reportValues.montantBrut) }}</q-td>
-              <q-td class="text-right text-weight-bold text-italic">{{ formatMontant(reportValues.montantNet) }}</q-td>
+              <q-td class="text-right text-weight-bold text-italic">{{
+                formatMontant(reportValues.montantBrut)
+              }}</q-td>
+              <q-td class="text-right text-weight-bold text-italic">{{
+                formatMontant(reportValues.montantNet)
+              }}</q-td>
               <q-td></q-td>
               <q-td></q-td>
             </q-tr>
@@ -169,8 +194,12 @@
               <q-td></q-td>
               <q-td></q-td>
               <q-td></q-td>
-              <q-td class="text-right text-weight-bold">{{ formatMontant(totalPageValues.montantBrut) }}</q-td>
-              <q-td class="text-right text-weight-bold">{{ formatMontant(totalPageValues.montantNet) }}</q-td>
+              <q-td class="text-right text-weight-bold">{{
+                formatMontant(totalPageValues.montantBrut)
+              }}</q-td>
+              <q-td class="text-right text-weight-bold">{{
+                formatMontant(totalPageValues.montantNet)
+              }}</q-td>
               <q-td></q-td>
               <q-td></q-td>
             </q-tr>
@@ -181,7 +210,7 @@
 
     <!-- Dialog Impression Documents Officiels -->
     <q-dialog v-model="showPrintDialog" persistent>
-      <q-card style="min-width: 460px">
+      <q-card class="dialog-card" style="width: min(460px, 96vw); max-width: 96vw">
         <q-card-section class="row items-center q-pb-none">
           <q-icon name="print" color="deep-purple" size="sm" class="q-mr-sm" />
           <div class="text-h6">Imprimer un document officiel</div>
@@ -260,7 +289,7 @@
 
     <!-- Dialog Ajout/Modification bulletin -->
     <q-dialog v-model="showDialog" persistent>
-      <q-card style="min-width: 700px">
+      <q-card class="dialog-card" style="width: min(700px, 96vw); max-width: 96vw">
         <q-card-section class="row items-center q-pb-none">
           <div class="text-h6">{{ editingId ? 'Modifier' : 'Nouveau' }} bulletin de paie</div>
           <q-space />
@@ -444,7 +473,7 @@
 
     <!-- Dialog génération en masse -->
     <q-dialog v-model="showGenerateDialog" persistent>
-      <q-card style="min-width: 500px">
+      <q-card class="dialog-card" style="width: min(500px, 96vw); max-width: 96vw">
         <q-card-section class="row items-center q-pb-none">
           <q-icon name="bolt" color="primary" size="sm" class="q-mr-sm" />
           <div class="text-h6">Générer les bulletins du mois</div>
@@ -553,6 +582,23 @@ const filterMois = ref<number | null>(null);
 const filterAnnee = ref(now.getFullYear());
 const filterStatut = ref<string | null>(null);
 const filterSearch = ref('');
+
+const activeFiltersCount = computed(() => {
+  return [
+    filterMois.value !== null ? String(filterMois.value) : '',
+    filterAnnee.value ? String(filterAnnee.value) : '',
+    filterStatut.value,
+    filterSearch.value,
+  ].filter((value) => value !== null && value !== '').length;
+});
+
+function resetFilters() {
+  filterMois.value = null;
+  filterAnnee.value = now.getFullYear();
+  filterStatut.value = null;
+  filterSearch.value = '';
+}
+
 const genMois = ref(now.getMonth() + 1);
 const genAnnee = ref(now.getFullYear());
 const genService = ref<string | null>(null);
@@ -714,12 +760,8 @@ function recalculate() {
     form.value.montantBrut = brut;
 
     if (parametresPaie.value) {
-      form.value.cotisationCNPS = Math.round(
-        brut * (parametresPaie.value.tauxCnpsEmploye / 100),
-      );
-      form.value.impotSurSalaire = Math.round(
-        brut * (parametresPaie.value.tauxIts / 100),
-      );
+      form.value.cotisationCNPS = Math.round(brut * (parametresPaie.value.tauxCnpsEmploye / 100));
+      form.value.impotSurSalaire = Math.round(brut * (parametresPaie.value.tauxIts / 100));
     }
 
     form.value.montantNet =
@@ -791,28 +833,35 @@ const statsCards = computed(() => {
   return [
     {
       value: total,
-      label: 'Total bulletins',
+      label: 'Bulletins visibles',
+      helper: 'Résultat des filtres en cours',
       icon: 'receipt_long',
       color: 'primary',
       progress: total > 0 ? 1 : 0,
     },
     {
       value: valides,
-      label: 'Bulletins Validés',
+      label: 'Bulletins validés',
+      helper:
+        total > 0
+          ? `${Math.round((valides / total) * 100)}% validés / payés`
+          : 'Aucun bulletin validé',
       icon: 'check_circle',
       color: 'positive',
       progress: total > 0 ? valides / total : 0,
     },
     {
       value: formatMontant(totalBrut.value),
-      label: 'Total Brut',
+      label: 'Montant brut',
+      helper: 'Total brut cumulé',
       icon: 'account_balance',
       color: 'blue',
       progress: 0.8,
     },
     {
       value: formatMontant(totalNet.value),
-      label: 'Total Net à payer',
+      label: 'Net à payer',
+      helper: 'Montant net cumulé',
       icon: 'payments',
       color: 'teal',
       progress: 0.9,
@@ -959,7 +1008,8 @@ async function generateBulletins() {
           calcCnps = Math.round(brut * (parametresPaie.value.tauxCnpsEmploye / 100));
           calcIts = Math.round(brut * (parametresPaie.value.tauxIts / 100));
         }
-        netPay = brut - calcCnps - calcIts + (e.indemniteTransport || 0) + (e.autresIndemnites || 0);
+        netPay =
+          brut - calcCnps - calcIts + (e.indemniteTransport || 0) + (e.autresIndemnites || 0);
       }
 
       return {
@@ -1110,56 +1160,36 @@ onMounted(() => {
   animation-delay: 0.4s;
 }
 
-// Cartes de statistiques
-.stat-card {
-  height: 100%;
-  border-radius: 16px;
-  overflow: hidden;
-  animation: slideInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-
-  &:hover {
-    .stat-icon {
-      transform: scale(1.1) rotate(5deg);
-    }
-  }
+.overview-stat-card {
+  min-height: 112px;
 }
 
-.stat-card-content {
-  position: relative;
-  overflow: hidden;
-  background: white;
-}
-
-.stat-value {
-  font-size: 1.5rem;
+.overview-stat-label {
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 0.78rem;
   font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.overview-stat-value {
+  color: #0f172a;
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  font-weight: 800;
   line-height: 1.2;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.stat-label {
-  font-size: 0.875rem;
-  opacity: 0.95;
-  margin-top: 4px;
+.overview-stat-helper {
+  margin-top: 6px;
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 600;
 }
 
-.stat-icon-wrapper {
-  border-radius: 12px;
-  padding: 12px;
-}
-
-.stat-icon {
-  font-size: 48px;
-  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.stat-progress {
-  border-radius: 4px;
-  height: 4px;
-}
-
-.pulse-animation {
-  animation: pulse 2s ease-in-out infinite;
+:deep(.q-dialog .q-card) {
+  border-radius: 22px;
+  box-shadow: 0 24px 56px rgba(15, 23, 42, 0.18);
 }
 
 // Report & Total rows
@@ -1208,5 +1238,52 @@ onMounted(() => {
   50% {
     opacity: 0.8;
   }
+}
+.compact-toolbar {
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.92));
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.compact-toolbar-top {
+  gap: 10px 0;
+}
+
+.compact-search :deep(.q-field__control) {
+  min-height: 38px;
+}
+
+.compact-toolbar-summary {
+  display: flex;
+  align-items: center;
+}
+
+.compact-toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.compact-toolbar-actions :deep(.q-btn) {
+  min-height: 36px;
+  border-radius: 12px;
+}
+
+.compact-filter-panel {
+  width: min(760px, 88vw);
+  padding: 14px;
+}
+
+.compact-filter-panel-title {
+  margin-bottom: 10px;
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 </style>

@@ -19,83 +19,104 @@
 
     <q-card class="main-card">
       <q-card-section>
-        <!-- Filtres -->
-        <div class="row q-col-gutter-sm q-mb-md">
-          <div class="col-12 col-md-2">
-            <q-select
-              v-model="filterExercice"
-              :options="exerciceFilterOptions"
-              label="Exercice"
-              outlined
-              dense
-              emit-value
-              map-options
-              clearable
-            />
-          </div>
-          <div class="col-12 col-md-2">
-            <q-select
-              v-model="filterCompte"
-              :options="compteFilterOptions"
-              label="Compte"
-              outlined
-              dense
-              emit-value
-              map-options
-              clearable
-            />
-          </div>
-          <div class="col-12 col-md-2">
-            <q-select
-              v-model="filterStatut"
-              :options="statutFilterOptions"
-              label="Statut"
-              outlined
-              dense
-              emit-value
-              map-options
-              clearable
-            />
-          </div>
-          <div class="col-12 col-md-2">
-            <q-input
-              v-model="filterDateDebut"
-              label="Date début"
-              outlined
-              dense
-              type="date"
-              clearable
-            />
-          </div>
-          <div class="col-12 col-md-2">
-            <q-input
-              v-model="filterDateFin"
-              label="Date fin"
-              outlined
-              dense
-              type="date"
-              clearable
-            />
-          </div>
-          <div class="col-12 col-md-2">
-            <q-btn
-              label="Réinitialiser"
-              icon="refresh"
-              flat
-              color="grey-7"
-              @click="resetFilters"
-              class="full-width"
-            />
-          </div>
-        </div>
-
-        <div class="row items-center justify-between q-mb-md">
-          <div class="col-12 col-md-6">
-            <q-input v-model="filter" placeholder="Rechercher un mandat..." outlined dense>
-              <template v-slot:prepend>
-                <q-icon name="search" />
-              </template>
-            </q-input>
+        <div class="compact-toolbar q-mb-md">
+          <div class="compact-toolbar-top row items-center q-col-gutter-sm">
+            <div class="col-12 col-md-5">
+              <q-input
+                v-model="filter"
+                placeholder="Rechercher un mandat..."
+                outlined
+                dense
+                clearable
+                class="compact-search"
+              >
+                <template v-slot:prepend>
+                  <q-icon name="search" />
+                </template>
+              </q-input>
+            </div>
+            <div class="col-12 col-md-auto compact-toolbar-summary">
+              <q-chip outline color="primary" icon="filter_alt" size="sm">
+                {{ activeFiltersCount }} filtre{{ activeFiltersCount > 1 ? 's' : '' }}
+              </q-chip>
+            </div>
+            <div class="col-12 col-md-auto compact-toolbar-actions">
+              <q-btn dense outline color="grey-7" icon="tune" label="Filtres" no-caps>
+                <q-menu class="compact-filter-menu" anchor="bottom right" self="top right">
+                  <div class="compact-filter-panel">
+                    <div class="compact-filter-panel-title">Filtres avancés</div>
+                    <div class="row q-col-gutter-sm">
+                      <div class="col-12 col-sm-6 col-md-4">
+                        <q-select
+                          v-model="filterExercice"
+                          :options="exerciceFilterOptions"
+                          label="Exercice"
+                          outlined
+                          dense
+                          emit-value
+                          map-options
+                          clearable
+                        />
+                      </div>
+                      <div class="col-12 col-sm-6 col-md-4">
+                        <q-select
+                          v-model="filterCompte"
+                          :options="compteFilterOptions"
+                          label="Compte"
+                          outlined
+                          dense
+                          emit-value
+                          map-options
+                          clearable
+                        />
+                      </div>
+                      <div class="col-12 col-sm-6 col-md-4">
+                        <q-select
+                          v-model="filterStatut"
+                          :options="statutFilterOptions"
+                          label="Statut"
+                          outlined
+                          dense
+                          emit-value
+                          map-options
+                          clearable
+                        />
+                      </div>
+                      <div class="col-12 col-sm-6 col-md-4">
+                        <q-input
+                          v-model="filterDateDebut"
+                          label="Date début"
+                          outlined
+                          dense
+                          type="date"
+                          clearable
+                        />
+                      </div>
+                      <div class="col-12 col-sm-6 col-md-4">
+                        <q-input
+                          v-model="filterDateFin"
+                          label="Date fin"
+                          outlined
+                          dense
+                          type="date"
+                          clearable
+                        />
+                      </div>
+                      <div class="col-12 col-sm-6 col-md-4">
+                        <q-btn
+                          label="Réinitialiser"
+                          icon="refresh"
+                          outline
+                          color="grey-7"
+                          @click="resetFilters"
+                          class="full-width"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </q-menu>
+              </q-btn>
+            </div>
           </div>
         </div>
 
@@ -149,7 +170,7 @@
 
     <!-- Dialog d'ajout/modification -->
     <q-dialog v-model="showAddDialog" persistent>
-      <q-card style="min-width: 700px">
+      <q-card class="dialog-card" style="width: min(700px, 96vw); max-width: 96vw">
         <q-card-section class="row items-center q-pb-none">
           <div class="text-h6">{{ editingId ? 'Modifier le mandat' : 'Nouveau mandat' }}</div>
           <q-space />
@@ -492,6 +513,16 @@ const statutFilterOptions = [
   { label: 'Brouillon', value: 'brouillon' },
 ];
 
+const activeFiltersCount = computed(() => {
+  return [
+    filterExercice.value,
+    filterCompte.value,
+    filterStatut.value,
+    filterDateDebut.value,
+    filterDateFin.value,
+  ].filter((value) => value !== null && value !== '').length;
+});
+
 const filteredMandats = computed(() => {
   let result = mandats.value;
 
@@ -795,26 +826,24 @@ const isDev = import.meta.env.VITE_ENV === 'development';
 
 async function createFakeMandat() {
   try {
-    const yr = new Date().getFullYear();
-    if (isYearLocked(yr)) {
-      $q.notify({ type: 'warning', message: 'Exercice verrouillé' });
-      return;
-    }
-    const nextNum = await getNextMandatNumber(yr);
+    const currentYear = new Date().getFullYear();
     const taxe = taxes.value[Math.floor(Math.random() * taxes.value.length)];
     if (!taxe) {
       $q.notify({ type: 'warning', message: 'Aucune taxe disponible' });
       return;
     }
+
+    const nextNum = await getNextMandatNumber(currentYear);
     const now = new Date();
-    const montant = Math.floor(Math.random() * 3000000) + 50000;
+    const montant = Math.floor(Math.random() * 5000000) + 100000;
+
     await db.mandatsRecette.add({
-      exercice: yr,
       numeroMandat: nextNum,
       dateMandat: now,
+      exercice: currentYear,
       taxeId: taxe.id!,
       partieVersante: `Contribuable Test ${nextNum}`,
-      objet: `Recette test ${nextNum}`,
+      objet: `Objet test mandat recette ${nextNum}`,
       montant,
       modePaiement: 'virement',
       statut: 'paye',
@@ -823,6 +852,7 @@ async function createFakeMandat() {
       createdAt: now,
       updatedAt: now,
     } as MandatRecette);
+
     $q.notify({ type: 'positive', message: `Mandat recette fake #${nextNum} créé` });
     await loadData();
   } catch (error) {
@@ -838,9 +868,59 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .mandats-recette-page {
-  .main-card {
-    border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  }
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.main-card {
+  border-radius: 24px;
+}
+
+.compact-toolbar {
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.92));
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.compact-toolbar-top {
+  gap: 10px 0;
+}
+
+.compact-search :deep(.q-field__control) {
+  min-height: 38px;
+}
+
+.compact-toolbar-summary {
+  display: flex;
+  align-items: center;
+}
+
+.compact-toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.compact-toolbar-actions :deep(.q-btn) {
+  min-height: 36px;
+  border-radius: 12px;
+}
+
+.compact-filter-panel {
+  width: min(760px, 88vw);
+  padding: 14px;
+}
+
+.compact-filter-panel-title {
+  margin-bottom: 10px;
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 </style>

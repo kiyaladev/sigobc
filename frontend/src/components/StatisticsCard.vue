@@ -1,18 +1,12 @@
 <template>
-  <q-card class="stat-card" :style="{ borderLeft: `4px solid ${borderColor}` }">
-    <q-card-section>
-      <div class="row items-center">
-        <div class="col">
-          <div class="text-h4 text-grey-8">{{ displayValue }}</div>
-          <div class="text-subtitle2 text-grey-6">{{ title }}</div>
-          <div v-if="subtitle" class="text-caption text-grey-5 q-mt-xs">
-            {{ subtitle }}
-          </div>
-        </div>
-        <div class="col-auto">
-          <q-icon :name="icon" size="56px" :color="iconColor" style="opacity: 0.2" />
-        </div>
+  <q-card flat class="listing-stat-card overview-stat-card statistics-card">
+    <q-card-section class="row items-center no-wrap">
+      <div class="col">
+        <div class="overview-stat-label">{{ title }}</div>
+        <div class="overview-stat-value">{{ displayValue }}</div>
+        <div v-if="subtitle" class="overview-stat-helper">{{ subtitle }}</div>
       </div>
+      <q-icon :name="icon" size="30px" :color="iconColor" />
     </q-card-section>
   </q-card>
 </template>
@@ -64,14 +58,31 @@ const displayValue = computed(() => {
 </script>
 
 <style scoped lang="scss">
-.stat-card {
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s;
+.statistics-card {
+  min-height: 112px;
+  border-left: 4px solid v-bind(borderColor);
+}
 
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-  }
+.overview-stat-label {
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.overview-stat-value {
+  color: #0f172a;
+  font-size: clamp(1.05rem, 1.7vw, 1.45rem);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.overview-stat-helper {
+  margin-top: 6px;
+  color: #64748b;
+  font-size: 0.76rem;
+  line-height: 1.35;
 }
 </style>

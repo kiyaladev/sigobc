@@ -1,15 +1,62 @@
 <template>
   <q-page class="projets-page q-pa-md">
-    <PageHeader
-      title="Projets"
-      subtitle="Gestion des projets d'investissement"
-      icon="engineering"
-    />
+    <PageHeader title="Projets" subtitle="Gestion des projets d'investissement" icon="engineering">
+      <template #stats>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">Projets visibles</div>
+                <div class="overview-stat-value">{{ filteredProjets.length }}</div>
+              </div>
+              <q-icon name="dataset" size="30px" color="primary" />
+            </q-card-section>
+          </q-card>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">Budget total</div>
+                <div class="overview-stat-value">{{ formatMontant(totalBudgetProjets) }}</div>
+              </div>
+              <q-icon name="payments" size="30px" color="secondary" />
+            </q-card-section>
+          </q-card>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">Réalisé</div>
+                <div class="overview-stat-value">{{ formatMontant(totalRealiseProjets) }}</div>
+                <div class="overview-stat-helper">
+                  Reste : {{ formatMontant(totalResteProjets) }}
+                </div>
+              </div>
+              <q-icon name="task_alt" size="30px" color="positive" />
+            </q-card-section>
+          </q-card>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">Taux global</div>
+                <div class="overview-stat-value">{{ tauxRealisationProjets.toFixed(1) }} %</div>
+                <div class="overview-stat-helper">En cours : {{ projetsEnCoursCount }}</div>
+              </div>
+              <q-icon name="monitoring" size="30px" color="teal" />
+            </q-card-section>
+          </q-card>
+        </div>
+      </template>
+    </PageHeader>
 
     <q-card class="main-card">
       <q-card-section>
         <!-- Filtres -->
-        <div class="row q-col-gutter-sm q-mb-md">
+        <div class="listing-filter-row row q-col-gutter-sm q-mb-md">
           <div class="col-12 col-md-3">
             <q-select
               v-model="filterAnnee"
@@ -50,7 +97,7 @@
             <q-btn
               label="Réinitialiser"
               icon="refresh"
-              flat
+              outline
               color="grey-7"
               @click="resetFilters"
               class="full-width"
@@ -58,8 +105,8 @@
           </div>
         </div>
 
-        <div class="row items-center justify-between q-mb-md">
-          <div class="col-12 col-md-6">
+        <div class="listing-toolbar row items-center justify-between q-mb-md">
+          <div class="col-12 col-md-6 listing-search">
             <q-input
               v-model="filter"
               placeholder="Rechercher un projet..."
@@ -72,7 +119,7 @@
               </template>
             </q-input>
           </div>
-          <div class="col-12 col-md-auto q-mt-sm q-mt-md-none q-gutter-x-sm">
+          <div class="col-12 col-md-auto q-mt-sm q-mt-md-none listing-actions">
             <q-btn
               color="primary"
               icon="add"
@@ -174,7 +221,7 @@
 
     <!-- Dialog d'ajout/modification -->
     <q-dialog v-model="showAddDialog" persistent>
-      <q-card style="min-width: 900px">
+      <q-card class="dialog-card" style="width: min(900px, 96vw); max-width: 96vw">
         <q-card-section class="row items-center q-pb-none">
           <div class="text-h6">{{ editingId ? 'Modifier le projet' : 'Nouveau projet' }}</div>
           <q-space />
@@ -493,20 +540,52 @@ const filteredProjets = computed(() => {
   }
   if (filter.value) {
     const needle = filter.value.toLowerCase();
-    result = result.filter(
-      (p) =>
-        p.libelle.toLowerCase().includes(needle) ||
-        (p.patrimoine || '').toLowerCase().includes(needle) ||
-        (p.observations || '').toLowerCase().includes(needle),
+    result = result.filter((p) =>
+      [
+        p.libelle,
+        p.refPT,
+        p.numeroOrdre,
+        p.patrimoine,
+        p.observations,
+        getCompteFonctionnel(p.sousChapitreId),
+      ]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(needle)),
     );
   }
   return result;
 });
 
+const totalBudgetProjets = computed(() =>
+  filteredProjets.value.reduce((sum, projet) => sum + (projet.montant || 0), 0),
+);
+
+const totalRealiseProjets = computed(() =>
+  filteredProjets.value.reduce((sum, projet) => sum + (projet.realise || 0), 0),
+);
+
+const totalResteProjets = computed(() => totalBudgetProjets.value - totalRealiseProjets.value);
+
+const tauxRealisationProjets = computed(() =>
+  totalBudgetProjets.value > 0 ? (totalRealiseProjets.value / totalBudgetProjets.value) * 100 : 0,
+);
+
+const projetsEnCoursCount = computed(
+  () => filteredProjets.value.filter((projet) => projet.statut === 'en_cours').length,
+);
+
 function getCompteFonctionnel(sousChapitreId?: number): string {
   if (!sousChapitreId) return '-';
   const sc = sousChapitres.value.find((s) => s.id === sousChapitreId);
   return sc ? `${sc.code} - ${sc.libelle}` : '-';
+}
+
+function formatMontant(montant: number): string {
+  return new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: 'XOF',
+    minimumFractionDigits: 0,
+  }).format(montant || 0);
 }
 
 function getTypeBienLabel(type: string): string {
@@ -765,6 +844,29 @@ onMounted(loadData);
   margin: 0 auto;
 }
 .main-card {
-  border-radius: 12px;
+  border-radius: 24px;
+}
+.overview-stat-card {
+  min-height: 112px;
+}
+.overview-stat-label {
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.overview-stat-value {
+  color: #0f172a;
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  font-weight: 800;
+  line-height: 1.2;
+}
+.overview-stat-helper {
+  margin-top: 6px;
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 600;
 }
 </style>

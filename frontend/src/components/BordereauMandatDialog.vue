@@ -4,7 +4,7 @@
     @update:model-value="$emit('update:modelValue', $event)"
     persistent
   >
-    <q-card style="min-width: 600px">
+    <q-card class="dialog-card" style="width: min(600px, 96vw); max-width: 96vw">
       <q-card-section class="accent-left">
         <div class="text-h6">{{ isEditing ? 'Modifier' : 'Nouveau' }} Bordereau de Mandats</div>
       </q-card-section>

@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Compte Administratif - Recapitulatif Global</title>
+    <script src="../dexie.min.js"></script>
+    <style>
+      @page { size: A4 landscape; margin: 10mm; }
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 10px;
+        margin: 0;
+        padding: 10px;
+      }
+      .page-section {
+        page-break-before: always;
+      }
+      .page-section:first-child {
+        page-break-before: auto;
+      }
+      .print-button {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 10px 20px;
+        background: #009688;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        z-index: 1000;
+      }
+      .print-button:hover { background: #00796b; }
+      .loading {
+        text-align: center;
+        padding: 50px;
+        font-size: 16px;
+        color: #666;
+      }
+      .progress-bar {
+        width: 300px;
+        height: 6px;
+        background: #e0e0e0;
+        border-radius: 3px;
+        margin: 15px auto;
+        overflow: hidden;
+      }
+      .progress-fill {
+        height: 100%;
+        background: #009688;
+        border-radius: 3px;
+        transition: width 0.3s;
+      }
+      /* Iframe rendering area - offscreen but full-size for correct layout */
+      .render-area {
+        position: fixed;
+        left: -10000px;
+        top: 0;
+        width: 1100px;
+        height: 800px;
+        overflow: hidden;
+      }
+      @media print {
+        .no-print { display: none !important; }
+        .render-area { display: none !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <button class="print-button no-print" onclick="window.print()">Imprimer tout</button>
+    <div id="content">
+      <div class="loading">
+        Chargement du compte administratif complet...
+        <div class="progress-bar"><div class="progress-fill" id="progress" style="width: 0%"></div></div>
+        <div id="status-text">Initialisation...</div>
+      </div>
+    </div>
+    <div id="render-area" class="render-area no-print"></div>
+
+    <script>
+      var exercice = new Date().getFullYear();
+
+      var pageFiles = [
+        { file: 'recap-fonct.html', label: 'Recapitulatif Fonctionnement' },
+        { file: 'rec-fonct.html', label: 'Recettes Fonctionnement' },
+        { file: 'dep-eng.html', label: 'Depenses Engagees' },
+        { file: 'dep-fonc.html', label: 'Depenses Ventilees' },
+        { file: 'recap-inv.html', label: 'Recapitulatif Investissement' },
+        { file: 'rec-inv.html', label: 'Recettes Investissement' },
+        { file: 'invest-dep-eng.html', label: 'Depenses Investissement Engagees' },
+        { file: 'invest-dep-vent.html', label: 'Depenses Investissement Ventilees' },
+        { file: 'resultat.html', label: 'Resultat' },
+        { file: 'mod-pat.html', label: 'Modifications du Patrimoine' }
+      ];
+
+      // Get exercice from various sources
+      async function resolveExercice() {
+        // 1. URL params
+        var params = new URLSearchParams(window.location.search);
+        if (params.get('exercice')) {
+          exercice = parseInt(params.get('exercice'));
+          return;
+        }
+
+        // 2. IndexedDB printData (for Electron)
+        try {
+          var db;
+          try {
+            db = new Dexie('TresorOfflineDB');
+            await db.open();
+          } catch (_e) {
+            db = new Dexie('TresorDatabase');
+            await db.open();
+          }
+          var pd = await db.table('printData').toArray();
+          var latest = pd
+            .filter(function (p) { return p.type === 'FILL_COMPTE_ADMIN_DATA'; })
+            .sort(function (a, b) { return b.createdAt - a.createdAt; })[0];
+          if (latest && latest.data && latest.data.exercice) {
+            exercice = latest.data.exercice;
+          }
+        } catch (e) {}
+      }
+
+      // Listen for postMessage from parent
+      window.addEventListener('message', function (e) {
+        if (e.data && e.data.type === 'FILL_COMPTE_ADMIN_DATA') {
+          if (e.data.exercice) exercice = e.data.exercice;
+          startLoading();
+        }
+      });
+
+      document.addEventListener('DOMContentLoaded', function () {
+        resolveExercice().then(function () {
+          setTimeout(startLoading, 300);
+        });
+      });
+
+      function updateProgress(current, total, label) {
+        var pct = Math.round((current / total) * 100);
+        var progressEl = document.getElementById('progress');
+        var statusEl = document.getElementById('status-text');
+        if (progressEl) progressEl.style.width = pct + '%';
+        if (statusEl) statusEl.textContent = label + ' (' + current + '/' + total + ')';
+      }
+
+      function startLoading() {
+        var renderArea = document.getElementById('render-area');
+        renderArea.innerHTML = '';
+
+        var basePath = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+        var totalPages = pageFiles.length;
+        var loadedIframes = [];
+        var loadedCount = 0;
+
+        pageFiles.forEach(function (page, index) {
+          var iframe = document.createElement('iframe');
+          iframe.style.width = '1100px';
+          iframe.style.height = '800px';
+          iframe.style.border = 'none';
+
+          var url = basePath + page.file + '?exercice=' + exercice;
+          iframe.src = url;
+
+          iframe.onload = function () {
+            loadedCount++;
+            updateProgress(loadedCount, totalPages, 'Chargement des pages');
+
+            if (loadedCount === totalPages) {
+              // Now wait for each page to render its data
+              updateProgress(totalPages, totalPages, 'Rendu des donnees');
+              waitForAllRendered(loadedIframes, function () {
+                assembleDocument(loadedIframes);
+              });
+            }
+          };
+
+          iframe.onerror = function () {
+            loadedCount++;
+            if (loadedCount === totalPages) {
+              waitForAllRendered(loadedIframes, function () {
+                assembleDocument(loadedIframes);
+              });
+            }
+          };
+
+          loadedIframes[index] = iframe;
+          renderArea.appendChild(iframe);
+        });
+      }
+
+      // Wait until iframes have rendered content (loading div is replaced)
+      function waitForAllRendered(iframes, callback) {
+        var maxWait = 8000; // 8 seconds max
+        var checkInterval = 500;
+        var elapsed = 0;
+
+        function check() {
+          elapsed += checkInterval;
+          var allReady = true;
+          var readyCount = 0;
+
+          iframes.forEach(function (iframe) {
+            try {
+              var doc = iframe.contentDocument || iframe.contentWindow.document;
+              var loadingEl = doc.querySelector('.loading');
+              var contentEl = doc.getElementById('content') || doc.querySelector('.container');
+
+              // Page is ready if: no loading div visible OR content has tables/data
+              if (contentEl) {
+                var hasTables = contentEl.querySelectorAll('table').length > 0;
+                var hasData = contentEl.innerHTML.length > 500;
+                if (hasTables || hasData) {
+                  readyCount++;
+                } else if (!loadingEl || loadingEl.style.display === 'none') {
+                  readyCount++;
+                } else {
+                  allReady = false;
+                }
+              } else {
+                readyCount++; // Can't access, count as done
+              }
+            } catch (e) {
+              readyCount++; // Cross-origin, count as done
+            }
+          });
+
+          updateProgress(readyCount, iframes.length, 'Rendu des donnees');
+
+          if (allReady || elapsed >= maxWait) {
+            callback();
+          } else {
+            setTimeout(check, checkInterval);
+          }
+        }
+
+        setTimeout(check, checkInterval);
+      }
+
+      function assembleDocument(iframes) {
+        var content = document.getElementById('content');
+        content.innerHTML = '';
+
+        iframes.forEach(function (iframe, index) {
+          // Create scoped section
+          var section = document.createElement('div');
+          if (index > 0) section.className = 'page-section';
+
+          try {
+            var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+
+            // 1. Extract and scope CSS styles
+            var scopeClass = 'pg-' + index;
+            var styles = iframeDoc.querySelectorAll('style');
+            var scopedCss = '';
+            styles.forEach(function (style) {
+              var css = style.textContent;
+              // Remove @page rules (we have our own)
+              css = css.replace(/@page\s*\{[^}]*\}/g, '');
+              // Remove @media print rules (we have our own)
+              css = css.replace(/@media\s+print\s*\{[^}]*\}/g, '');
+              // Scope each rule with our section class
+              scopedCss += scopeCSS(css, '.' + scopeClass);
+            });
+
+            if (scopedCss) {
+              var styleEl = document.createElement('style');
+              styleEl.textContent = scopedCss;
+              document.head.appendChild(styleEl);
+            }
+
+            // 2. Extract rendered content
+            var iframeContent = iframeDoc.getElementById('content')
+              || iframeDoc.querySelector('.container')
+              || iframeDoc.body;
+
+            var cloned = iframeContent.cloneNode(true);
+
+            // Remove unwanted elements
+            var toRemove = cloned.querySelectorAll('.print-button, .no-print, .loading, button');
+            toRemove.forEach(function (el) { el.remove(); });
+
+            // Apply scope class
+            section.classList.add(scopeClass);
+            section.innerHTML = cloned.innerHTML;
+
+          } catch (e) {
+            section.innerHTML = '<div style="padding:20px; text-align:center; color:#999; font-size:14px; border:1px dashed #ccc; margin:20px 0;">'
+              + 'Page ' + (index + 1) + ' - ' + pageFiles[index].label
+              + '<br><small>Erreur de chargement</small></div>';
+          }
+
+          content.appendChild(section);
+        });
+
+        // Clean up render area
+        document.getElementById('render-area').innerHTML = '';
+        document.title = 'Compte Administratif - Recapitulatif Global - ' + exercice;
+      }
+
+      /**
+       * Scope CSS rules by prepending a parent selector.
+       * Handles simple selectors, grouped selectors, and nested @media.
+       */
+      function scopeCSS(css, parentSelector) {
+        // Remove comments
+        css = css.replace(/\/\*[\s\S]*?\*\//g, '');
+
+        var result = '';
+        var i = 0;
+        var len = css.length;
+
+        while (i < len) {
+          // Skip whitespace
+          while (i < len && /\s/.test(css[i])) { result += css[i]; i++; }
+          if (i >= len) break;
+
+          // Check for @media or other at-rules
+          if (css[i] === '@') {
+            var atRule = '';
+            while (i < len && css[i] !== '{') {
+              atRule += css[i];
+              i++;
+            }
+            if (i < len) {
+              // Find matching closing brace
+              var braceCount = 1;
+              var innerContent = '';
+              i++; // skip opening {
+              while (i < len && braceCount > 0) {
+                if (css[i] === '{') braceCount++;
+                if (css[i] === '}') braceCount--;
+                if (braceCount > 0) innerContent += css[i];
+                i++;
+              }
+              // Skip @page and @media print
+              if (atRule.trim().startsWith('@page') || atRule.trim().indexOf('@media') !== -1 && atRule.indexOf('print') !== -1) {
+                continue;
+              }
+              // Recurse into @media
+              if (atRule.trim().startsWith('@media')) {
+                result += atRule + '{' + scopeCSS(innerContent, parentSelector) + '}';
+              }
+              continue;
+            }
+          }
+
+          // Read selector
+          var selector = '';
+          while (i < len && css[i] !== '{') {
+            selector += css[i];
+            i++;
+          }
+          if (i >= len) break;
+
+          // Read declaration block
+          var braceCount = 1;
+          var declarations = '';
+          i++; // skip {
+          while (i < len && braceCount > 0) {
+            if (css[i] === '{') braceCount++;
+            if (css[i] === '}') braceCount--;
+            if (braceCount > 0) declarations += css[i];
+            i++;
+          }
+
+          selector = selector.trim();
+          if (!selector) continue;
+
+          // Scope each selector in the group
+          var scopedSelectors = selector.split(',').map(function (sel) {
+            sel = sel.trim();
+            if (!sel) return '';
+            // Don't scope body/html selectors - replace them with our parent
+            if (sel === 'body' || sel === 'html') {
+              return parentSelector;
+            }
+            if (sel.startsWith('body ') || sel.startsWith('html ')) {
+              return parentSelector + ' ' + sel.substring(sel.indexOf(' ') + 1);
+            }
+            return parentSelector + ' ' + sel;
+          }).filter(function (s) { return s; }).join(', ');
+
+          if (scopedSelectors) {
+            result += scopedSelectors + ' {' + declarations + '}\n';
+          }
+        }
+
+        return result;
+      }
+    </script>
+  </body>
+</html>

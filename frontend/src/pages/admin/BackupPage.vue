@@ -1,8 +1,8 @@
 <template>
-  <q-page class="q-pa-md">
+  <q-page class="backup-page q-pa-md">
     <!-- Password Gate -->
-    <div v-if="!isUnlocked" class="flex flex-center" style="min-height: 60vh">
-      <q-card style="max-width: 420px; width: 100%" class="q-pa-lg">
+    <div v-if="!isUnlocked" class="admin-password-shell">
+      <q-card class="admin-password-card q-pa-lg">
         <q-card-section class="text-center">
           <q-icon name="lock" size="48px" color="warning" class="q-mb-md" />
           <div class="text-h6 q-mb-sm">Accès protégé</div>
@@ -40,12 +40,27 @@
         title="Sauvegarde & Restauration"
         subtitle="Exportation et importation des données"
         icon="backup"
-      />
+      >
+        <template #stats>
+          <div v-for="(stat, index) in heroStats" :key="index" class="col-12 col-sm-6 col-lg-3">
+            <q-card flat class="listing-stat-card overview-stat-card">
+              <q-card-section class="row items-center no-wrap">
+                <div class="col">
+                  <div class="overview-stat-label">{{ stat.label }}</div>
+                  <div class="overview-stat-value">{{ stat.value }}</div>
+                  <div v-if="stat.helper" class="overview-stat-helper">{{ stat.helper }}</div>
+                </div>
+                <q-icon :name="stat.icon" size="30px" :color="stat.color" />
+              </q-card-section>
+            </q-card>
+          </div>
+        </template>
+      </PageHeader>
 
       <div class="row q-col-gutter-md">
         <!-- Sauvegarde complète -->
         <div class="col-12 col-md-6">
-          <q-card>
+          <q-card class="admin-card">
             <q-card-section class="accent-left">
               <div class="row items-center">
                 <q-icon name="save" size="md" class="q-mr-md" />
@@ -91,7 +106,7 @@
 
         <!-- Restauration complète -->
         <div class="col-12 col-md-6">
-          <q-card>
+          <q-card class="admin-card">
             <q-card-section class="accent-left">
               <div class="row items-center">
                 <q-icon name="upload" size="md" class="q-mr-md" />
@@ -103,7 +118,7 @@
             </q-card-section>
 
             <q-card-section>
-              <q-banner class="bg-warning text-white q-mb-md" rounded>
+              <q-banner class="admin-warning-banner q-mb-md" rounded>
                 <template v-slot:avatar>
                   <q-icon name="warning" />
                 </template>
@@ -139,7 +154,7 @@
 
         <!-- Export / Import par module -->
         <div class="col-12">
-          <q-card>
+          <q-card class="admin-card">
             <q-card-section>
               <div class="text-h6">📦 Export / Import par module</div>
               <div class="text-caption text-grey-7">
@@ -150,7 +165,7 @@
             <q-card-section>
               <div class="row q-col-gutter-md">
                 <div class="col-12 col-sm-6 col-md-3" v-for="mod in modules" :key="mod.key">
-                  <q-card flat bordered>
+                  <q-card flat class="listing-stat-card admin-module-card">
                     <q-card-section>
                       <div class="text-subtitle1 text-weight-medium q-mb-xs">
                         {{ mod.icon }} {{ mod.label }}
@@ -205,7 +220,7 @@
 
         <!-- Historique des sauvegardes -->
         <div class="col-12">
-          <q-card>
+          <q-card class="admin-card">
             <q-card-section>
               <div class="text-h6">📋 Dernières opérations</div>
             </q-card-section>
@@ -252,7 +267,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
+import { computed, ref, reactive, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { db } from 'src/database/db';
 import PageHeader from 'src/components/PageHeader.vue';
@@ -371,6 +386,41 @@ for (const mod of modules) {
 function getModuleRecordCount(mod: ModuleDef): number {
   return mod.tables.reduce((sum, t) => sum + (stats[t.table] ?? 0), 0);
 }
+
+const totalRecords = computed(() =>
+  allTableNames.reduce((sum, name) => sum + (stats[name] ?? 0), 0),
+);
+const successfulOperations = computed(() => history.value.filter((item) => item.success).length);
+const heroStats = computed(() => [
+  {
+    label: 'Enregistrements',
+    value: totalRecords.value,
+    helper: `${modules.length} modules couverts`,
+    icon: 'dataset',
+    color: 'primary',
+  },
+  {
+    label: 'Modules',
+    value: modules.length,
+    helper: 'Export / import granulaire',
+    icon: 'inventory_2',
+    color: 'secondary',
+  },
+  {
+    label: 'Historique',
+    value: history.value.length,
+    helper: `${successfulOperations.value} opération(s) réussie(s)`,
+    icon: 'history',
+    color: 'teal',
+  },
+  {
+    label: 'Dernière action',
+    value: history.value[0]?.type === 'import' ? 'Import' : history.value[0] ? 'Export' : 'Aucune',
+    helper: history.value[0]?.action || 'Pas encore d’opération enregistrée',
+    icon: 'sync_alt',
+    color: 'positive',
+  },
+]);
 
 // ========== History ==========
 
@@ -756,7 +806,73 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.q-card {
+.backup-page {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.overview-stat-card {
+  min-height: 112px;
+}
+
+.overview-stat-label {
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.overview-stat-value {
+  color: #0f172a;
+  font-size: clamp(1.05rem, 1.7vw, 1.45rem);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.overview-stat-helper {
+  margin-top: 6px;
+  color: #64748b;
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
+.admin-password-shell {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-password-card {
+  width: min(440px, 100%);
+  border-radius: 28px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
+  box-shadow: 0 24px 44px rgba(15, 23, 42, 0.08);
+}
+
+.admin-card {
   height: 100%;
+  border-radius: 24px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
+  box-shadow: 0 18px 34px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.admin-warning-banner {
+  background: linear-gradient(135deg, rgba(197, 168, 77, 0.94), rgba(185, 146, 38, 0.92));
+  color: white;
+}
+
+.admin-module-card {
+  min-height: 100%;
+}
+
+.admin-card :deep(.q-list .q-item),
+.admin-module-card :deep(.q-item) {
+  border-radius: 14px;
 }
 </style>

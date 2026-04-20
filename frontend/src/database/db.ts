@@ -403,6 +403,25 @@ export interface EtatFinancierMensuelRecette {
   updatedAt: Date;
 }
 
+// ========== Interface Fournisseur ==========
+
+export interface Fournisseur {
+  id?: number;
+  nom: string;
+  sigle?: string;
+  compteContribuable: string;
+  registreCommerce?: string;
+  compteBancaire?: string;
+  telephone?: string;
+  email?: string;
+  siege?: string;
+  mairieId: number;
+  actif: boolean;
+  observations?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // ========== Interfaces pour App7 - Gestion des Employés ==========
 
 export interface Employe {
@@ -594,6 +613,7 @@ export const db = {
   ordresMission: new Collection<OrdreMission>('ordresMission'),
   parametresPaie: new Collection<ParametresPaie>('parametresPaie'),
   servicesApp7: new Collection<ServiceApp7>('servicesApp7'),
+  fournisseurs: new Collection<Fournisseur>('fournisseurs'),
 
   /** Shim pour db.transaction('rw', tables, callback) — pas de vrai ACID. */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

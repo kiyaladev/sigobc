@@ -1,112 +1,176 @@
 <template>
   <q-page class="mandats-page q-pa-md">
-    <PageHeader title="Mandats de Dépenses" subtitle="Gestion des mandats" icon="receipt" />
+    <PageHeader title="Mandats de Dépenses" subtitle="Gestion des mandats" icon="receipt">
+      <template #stats>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">Mandats visibles</div>
+                <div class="overview-stat-value">{{ filteredMandats.length }}</div>
+              </div>
+              <q-icon name="dataset" size="30px" color="primary" />
+            </q-card-section>
+          </q-card>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">Montant total</div>
+                <div class="overview-stat-value">{{ formatMontant(totalMontantMandats) }}</div>
+              </div>
+              <q-icon name="payments" size="30px" color="secondary" />
+            </q-card-section>
+          </q-card>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">Mandatés</div>
+                <div class="overview-stat-value">{{ mandatsPayesCount }}</div>
+                <div class="overview-stat-helper">{{ formatMontant(totalMontantPaye) }}</div>
+              </div>
+              <q-icon name="task_alt" size="30px" color="positive" />
+            </q-card-section>
+          </q-card>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">Brouillons</div>
+                <div class="overview-stat-value">{{ mandatsBrouillonCount }}</div>
+                <div class="overview-stat-helper">Annulés : {{ mandatsAnnulesCount }}</div>
+              </div>
+              <q-icon name="edit_note" size="30px" color="warning" />
+            </q-card-section>
+          </q-card>
+        </div>
+      </template>
+    </PageHeader>
 
     <q-card class="main-card">
       <q-card-section>
-        <!-- Filtres -->
-        <div class="row q-col-gutter-sm q-mb-md">
-          <div class="col-12 col-md-2">
-            <q-select
-              v-model="filterExercice"
-              :options="exerciceFilterOptions"
-              label="Exercice"
-              outlined
-              dense
-              emit-value
-              map-options
-              clearable
-            />
-          </div>
-          <div class="col-12 col-md-2">
-            <q-select
-              v-model="filterChapitreId"
-              :options="chapitreOptions"
-              label="Chapitre"
-              outlined
-              dense
-              emit-value
-              map-options
-              clearable
-            />
-          </div>
-          <div class="col-12 col-md-2">
-            <q-select
-              v-model="filterSousChapitreId"
-              :options="filteredSousChapitreOptions"
-              label="Sous-chapitre"
-              outlined
-              dense
-              emit-value
-              map-options
-              clearable
-              use-input
-              input-debounce="0"
-              @filter="filterSousChapitre"
-            />
-          </div>
-          <div class="col-12 col-md-2">
-            <q-input
-              v-model="filterDateDebut"
-              label="Date début"
-              outlined
-              dense
-              type="date"
-              clearable
-            />
-          </div>
-          <div class="col-12 col-md-2">
-            <q-input
-              v-model="filterDateFin"
-              label="Date fin"
-              outlined
-              dense
-              type="date"
-              clearable
-            />
-          </div>
-          <div class="col-12 col-md-2">
-            <q-btn
-              label="Réinitialiser"
-              icon="refresh"
-              flat
-              color="grey-7"
-              @click="resetFilters"
-              class="full-width"
-            />
-          </div>
-        </div>
-
-        <div class="row items-center justify-between q-mb-md">
-          <div class="col-12 col-md-6">
-            <q-input
-              v-model="filter"
-              placeholder="Rechercher un mandat..."
-              outlined
-              dense
-              clearable
-            >
-              <template v-slot:prepend>
-                <q-icon name="search" />
-              </template>
-            </q-input>
-          </div>
-          <div class="col-12 col-md-auto q-mt-sm q-mt-md-none q-gutter-x-sm">
-            <q-btn
-              color="primary"
-              icon="add"
-              label="Nouveau Mandat"
-              unelevated
-              @click="openAddDialog"
-            />
-            <q-btn
-              v-if="isDev"
-              color="orange"
-              icon="science"
-              label="Fake Mandat"
-              unelevated
-              @click="createFakeMandat"
-            />
+        <div class="compact-toolbar q-mb-md">
+          <div class="compact-toolbar-top row items-center q-col-gutter-sm">
+            <div class="col-12 col-md-5">
+              <q-input
+                v-model="filter"
+                placeholder="Rechercher un mandat..."
+                outlined
+                dense
+                clearable
+                class="compact-search"
+              >
+                <template v-slot:prepend>
+                  <q-icon name="search" />
+                </template>
+              </q-input>
+            </div>
+            <div class="col-12 col-md-auto compact-toolbar-summary">
+              <q-chip outline color="primary" icon="filter_alt" size="sm">
+                {{ activeFiltersCount }} filtre{{ activeFiltersCount > 1 ? 's' : '' }}
+              </q-chip>
+            </div>
+            <div class="col-12 col-md-auto compact-toolbar-actions">
+              <q-btn dense outline color="grey-7" icon="tune" label="Filtres" no-caps>
+                <q-menu class="compact-filter-menu" anchor="bottom right" self="top right">
+                  <div class="compact-filter-panel">
+                    <div class="compact-filter-panel-title">Filtres avancés</div>
+                    <div class="row q-col-gutter-sm">
+                      <div class="col-12 col-sm-6 col-md-4">
+                        <q-select
+                          v-model="filterExercice"
+                          :options="exerciceFilterOptions"
+                          label="Exercice"
+                          outlined
+                          dense
+                          emit-value
+                          map-options
+                          clearable
+                        />
+                      </div>
+                      <div class="col-12 col-sm-6 col-md-4">
+                        <q-select
+                          v-model="filterChapitreId"
+                          :options="chapitreOptions"
+                          label="Chapitre"
+                          outlined
+                          dense
+                          emit-value
+                          map-options
+                          clearable
+                        />
+                      </div>
+                      <div class="col-12 col-sm-6 col-md-4">
+                        <q-select
+                          v-model="filterSousChapitreId"
+                          :options="filteredSousChapitreOptions"
+                          label="Sous-chapitre"
+                          outlined
+                          dense
+                          emit-value
+                          map-options
+                          clearable
+                          use-input
+                          input-debounce="0"
+                          @filter="filterSousChapitre"
+                        />
+                      </div>
+                      <div class="col-12 col-sm-6 col-md-4">
+                        <q-input
+                          v-model="filterDateDebut"
+                          label="Date début"
+                          outlined
+                          dense
+                          type="date"
+                          clearable
+                        />
+                      </div>
+                      <div class="col-12 col-sm-6 col-md-4">
+                        <q-input
+                          v-model="filterDateFin"
+                          label="Date fin"
+                          outlined
+                          dense
+                          type="date"
+                          clearable
+                        />
+                      </div>
+                      <div class="col-12 col-sm-6 col-md-4">
+                        <q-btn
+                          label="Réinitialiser"
+                          icon="refresh"
+                          outline
+                          color="grey-7"
+                          @click="resetFilters"
+                          class="full-width"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </q-menu>
+              </q-btn>
+              <q-btn
+                color="primary"
+                icon="add"
+                label="Nouveau"
+                unelevated
+                no-caps
+                @click="openAddDialog"
+              />
+              <q-btn
+                v-if="isDev"
+                color="orange"
+                icon="science"
+                label="Fake"
+                unelevated
+                no-caps
+                @click="createFakeMandat"
+              />
+            </div>
           </div>
         </div>
 
@@ -152,7 +216,7 @@
 
     <!-- Dialog d'ajout/modification -->
     <q-dialog v-model="showAddDialog" persistent>
-      <q-card style="min-width: 900px">
+      <q-card class="dialog-card" style="width: min(900px, 96vw); max-width: 96vw">
         <q-card-section class="row items-center q-pb-none">
           <div class="text-h6">{{ editingId ? 'Modifier le mandat' : 'Nouveau mandat' }}</div>
           <q-space />
@@ -305,13 +369,50 @@
             <div class="text-subtitle2 text-grey-8 q-mb-xs">Bénéficiaire et paiement</div>
             <div class="row q-col-gutter-sm">
               <div class="col-12 col-md-6">
-                <q-input
+                <q-select
                   v-model="formData.beneficiaire"
+                  :options="filteredBeneficiaireOptions"
                   label="Bénéficiaire *"
                   outlined
                   dense
-                  :rules="[(val) => !!val || 'Bénéficiaire requis']"
-                />
+                  emit-value
+                  map-options
+                  use-input
+                  input-debounce="0"
+                  :rules="[(val: string) => !!val || 'Bénéficiaire requis']"
+                  @filter="filterBeneficiaire"
+                  @update:model-value="
+                    (val: string) => {
+                      const opt = beneficiaireOptions.find((o) => o.value === val);
+                      onBeneficiaireSelected(opt || null);
+                    }
+                  "
+                  new-value-mode="add"
+                >
+                  <template v-slot:prepend>
+                    <q-icon name="person" />
+                  </template>
+                  <template v-slot:option="scope">
+                    <q-item v-bind="scope.itemProps">
+                      <q-item-section avatar>
+                        <q-icon
+                          :name="scope.opt.type === 'agent' ? 'badge' : 'storefront'"
+                          :color="scope.opt.type === 'agent' ? 'deep-purple' : 'primary'"
+                        />
+                      </q-item-section>
+                      <q-item-section>
+                        <q-item-label>{{ scope.opt.label }}</q-item-label>
+                      </q-item-section>
+                    </q-item>
+                  </template>
+                  <template v-slot:no-option>
+                    <q-item>
+                      <q-item-section class="text-grey">
+                        Tapez pour rechercher ou saisir un nom libre
+                      </q-item-section>
+                    </q-item>
+                  </template>
+                </q-select>
               </div>
               <div class="col-12 col-md-6">
                 <q-input
@@ -372,6 +473,40 @@
                 />
               </div>
             </div>
+
+            <!-- Budget disponible info -->
+            <q-banner
+              v-if="budgetInfo && formData.statut === 'paye'"
+              :class="
+                formData.montant > budgetInfo.disponible
+                  ? 'bg-red-1 text-red-8'
+                  : 'bg-teal-1 text-teal-8'
+              "
+              rounded
+              dense
+              class="q-mt-xs"
+            >
+              <template v-slot:avatar>
+                <q-icon :name="formData.montant > budgetInfo.disponible ? 'warning' : 'info'" />
+              </template>
+              <div class="text-caption text-weight-medium">
+                Budget {{ budgetInfo.sousChapitreLabel }} / {{ budgetInfo.chapitreLabel }}
+              </div>
+              <div class="row q-gutter-md text-caption">
+                <span
+                  >Prevision : <strong>{{ formatMontant(budgetInfo.totalPrevu) }}</strong></span
+                >
+                <span
+                  >Mandate : <strong>{{ formatMontant(budgetInfo.totalMandated) }}</strong></span
+                >
+                <span
+                  >Disponible : <strong>{{ formatMontant(budgetInfo.disponible) }}</strong></span
+                >
+              </div>
+              <div v-if="formData.montant > budgetInfo.disponible" class="text-weight-bold q-mt-xs">
+                Depassement de {{ formatMontant(formData.montant - budgetInfo.disponible) }}
+              </div>
+            </q-banner>
 
             <div class="row q-col-gutter-sm">
               <div class="col-12 col-md-4">
@@ -497,6 +632,9 @@ import {
   type Mairie,
   type Exercice,
   type Projet,
+  type Prevision,
+  type Fournisseur,
+  type Employe,
 } from 'src/database/db';
 import PageHeader from 'src/components/PageHeader.vue';
 import DataTable from 'src/components/DataTable.vue';
@@ -522,6 +660,9 @@ const bordereauMandats = ref<BordereauMandat[]>([]);
 const mairies = ref<Mairie[]>([]);
 const exercices = ref<Exercice[]>([]);
 const projets = ref<Projet[]>([]);
+const previsions = ref<Prevision[]>([]);
+const fournisseurs = ref<Fournisseur[]>([]);
+const employes = ref<Employe[]>([]);
 
 const lockedYears = computed(() =>
   exercices.value.filter((e) => e.statut === 'verrouille').map((e) => e.annee),
@@ -600,6 +741,62 @@ const projetOptions = computed(() =>
 );
 
 const filteredProjetOptions = ref(projetOptions.value);
+
+// Options beneficiaire (agents + fournisseurs combines)
+interface BeneficiaireOption {
+  label: string;
+  value: string;
+  type: 'agent' | 'fournisseur';
+  rib?: string;
+}
+
+const beneficiaireOptions = computed<BeneficiaireOption[]>(() => {
+  const options: BeneficiaireOption[] = [];
+  for (const e of employes.value) {
+    options.push({
+      label: `[Agent] ${e.nom} ${e.prenom} - ${e.matricule}`,
+      value: `${e.nom} ${e.prenom}`,
+      type: 'agent',
+      rib: e.rib || '',
+    });
+  }
+  for (const f of fournisseurs.value) {
+    options.push({
+      label: `[Fournisseur] ${f.nom}${f.sigle ? ' (' + f.sigle + ')' : ''} - CC: ${f.compteContribuable}`,
+      value: f.nom,
+      type: 'fournisseur',
+      rib: f.compteBancaire || '',
+    });
+  }
+  return options;
+});
+
+const filteredBeneficiaireOptions = ref<BeneficiaireOption[]>([]);
+
+watch(beneficiaireOptions, (newOptions) => {
+  filteredBeneficiaireOptions.value = newOptions;
+});
+
+function filterBeneficiaire(val: string, update: (callback: () => void) => void) {
+  if (val === '') {
+    update(() => {
+      filteredBeneficiaireOptions.value = beneficiaireOptions.value;
+    });
+    return;
+  }
+  update(() => {
+    const needle = val.toLowerCase();
+    filteredBeneficiaireOptions.value = beneficiaireOptions.value.filter(
+      (v) => v.label.toLowerCase().indexOf(needle) > -1,
+    );
+  });
+}
+
+function onBeneficiaireSelected(opt: BeneficiaireOption | null) {
+  if (opt && opt.rib) {
+    formData.value.rib = opt.rib;
+  }
+}
 
 const filteredChapitreOptions = ref(chapitreOptions.value);
 const filteredSousChapitreOptions = ref(sousChapitreOptions.value);
@@ -688,6 +885,61 @@ function filterProjet(val: string, update: (callback: () => void) => void) {
   });
 }
 
+// Budget info: show available prevision for current chapitre+sous-chapitre selection
+const budgetInfo = computed(() => {
+  const ex = formData.value.exercice;
+  const chId = formData.value.chapitreId;
+  const scId = formData.value.sousChapitreId;
+  if (!ex || !chId || !scId) return null;
+
+  // Sum previsions for this exercice + chapitre + sous-chapitre
+  const matchingPrevisions = previsions.value.filter(
+    (p) => p.exercice === ex && p.chapitreId === chId && p.sousChapitreId === scId,
+  );
+  const totalPrevu = matchingPrevisions.reduce((s, p) => s + p.montantPrevu, 0);
+  if (totalPrevu === 0) return null;
+
+  // Sum already mandated (paye) for same combination, excluding current mandat if editing
+  const totalMandated = mandats.value
+    .filter(
+      (m) =>
+        m.exercice === ex &&
+        m.chapitreId === chId &&
+        m.sousChapitreId === scId &&
+        m.statut === 'paye' &&
+        m.id !== editingId.value,
+    )
+    .reduce((s, m) => s + m.montant, 0);
+
+  const disponible = totalPrevu - totalMandated;
+  const ch = chapitres.value.find((c) => c.id === chId);
+  const sc = sousChapitres.value.find((s) => s.id === scId);
+
+  return {
+    totalPrevu,
+    totalMandated,
+    disponible,
+    chapitreLabel: ch ? `${ch.code} - ${ch.libelle}` : '',
+    sousChapitreLabel: sc ? `${sc.code} - ${sc.libelle}` : '',
+  };
+});
+
+function checkBudgetAvailability(): string | null {
+  const info = budgetInfo.value;
+  if (!info) return null;
+  const montant = formData.value.montant || 0;
+  if (montant > info.disponible) {
+    return (
+      `Le montant du mandat (${formatMontant(montant)}) depasse le budget disponible.\n\n` +
+      `  Prevision : ${formatMontant(info.totalPrevu)}\n` +
+      `  Deja mandate : ${formatMontant(info.totalMandated)}\n` +
+      `  Disponible : ${formatMontant(info.disponible)}\n` +
+      `  Depassement : ${formatMontant(montant - info.disponible)}`
+    );
+  }
+  return null;
+}
+
 const columns = [
   /*{
     name: 'numeroOrdre',
@@ -763,55 +1015,85 @@ const columns = [
   },
 ];
 
+const activeFiltersCount = computed(() => {
+  return [
+    filterExercice.value,
+    filterChapitreId.value,
+    filterSousChapitreId.value,
+    filterDateDebut.value,
+    filterDateFin.value,
+  ].filter((value) => value !== null && value !== '').length;
+});
+
 const filteredMandats = computed(() => {
   let result = mandats.value;
 
-  // Masquer les mandats des exercices verrouillés
   if (lockedYears.value.length > 0) {
     result = result.filter((m) => !lockedYears.value.includes(m.exercice));
   }
 
-  // Filtre par exercice
   if (filterExercice.value) {
     result = result.filter((m) => m.exercice === filterExercice.value);
   }
 
-  // Filtre par chapitre
   if (filterChapitreId.value) {
     result = result.filter((m) => m.chapitreId === filterChapitreId.value);
   }
 
-  // Filtre par sous-chapitre
   if (filterSousChapitreId.value) {
     result = result.filter((m) => m.sousChapitreId === filterSousChapitreId.value);
   }
 
-  // Filtre par date début
   if (filterDateDebut.value) {
     const dateDebut = new Date(filterDateDebut.value);
     result = result.filter((m) => new Date(m.dateMandat) >= dateDebut);
   }
 
-  // Filtre par date fin
   if (filterDateFin.value) {
     const dateFin = new Date(filterDateFin.value);
-    dateFin.setHours(23, 59, 59, 999); // Inclure toute la journée
+    dateFin.setHours(23, 59, 59, 999);
     result = result.filter((m) => new Date(m.dateMandat) <= dateFin);
   }
 
-  // Filtre par texte
   if (filter.value) {
     const searchTerm = filter.value.toLowerCase();
-    result = result.filter(
-      (m) =>
+    result = result.filter((m) => {
+      const bordereauNumero = getBordereauNumero(m.bordereauMandatId).toLowerCase();
+      const compte = getCompte(m).toLowerCase();
+      return (
         m.numeroMandat.toLowerCase().includes(searchTerm) ||
         m.beneficiaire.toLowerCase().includes(searchTerm) ||
-        m.objet.toLowerCase().includes(searchTerm),
-    );
+        m.objet.toLowerCase().includes(searchTerm) ||
+        bordereauNumero.includes(searchTerm) ||
+        compte.includes(searchTerm)
+      );
+    });
   }
 
   return result;
 });
+
+const totalMontantMandats = computed(() =>
+  filteredMandats.value.reduce((sum, mandat) => sum + (mandat.montant || 0), 0),
+);
+
+const totalMontantPaye = computed(() =>
+  filteredMandats.value
+    .filter((mandat) => mandat.statut === 'paye')
+    .reduce((sum, mandat) => sum + (mandat.montant || 0), 0),
+);
+
+const mandatsPayesCount = computed(
+  () => filteredMandats.value.filter((mandat) => mandat.statut === 'paye').length,
+);
+
+const mandatsBrouillonCount = computed(
+  () => filteredMandats.value.filter((mandat) => mandat.statut === 'brouillon').length,
+);
+
+const mandatsAnnulesCount = computed(
+  () => filteredMandats.value.filter((mandat) => mandat.statut === 'annule').length,
+);
 
 function resetFilters() {
   filterExercice.value = null;
@@ -901,6 +1183,9 @@ async function loadData() {
       mairies.value,
       exercices.value,
       projets.value,
+      previsions.value,
+      fournisseurs.value,
+      employes.value,
     ] = await Promise.all([
       db.mandats.toArray(),
       db.chapitres.filter((c) => c.actif).toArray(),
@@ -909,6 +1194,9 @@ async function loadData() {
       db.mairies.toArray(),
       db.exercices.toArray(),
       db.projets.toArray(),
+      db.previsions.toArray(),
+      db.fournisseurs.filter((f) => f.actif).toArray(),
+      db.employes.filter((e) => e.actif).toArray(),
     ]);
   } catch (error) {
     console.error('Erreur lors du chargement:', error);
@@ -1010,6 +1298,22 @@ async function saveMandat() {
       });
       return;
     }
+
+    // Verifier le budget disponible si le mandat est payé
+    if (formData.value.statut === 'paye') {
+      const budgetError = checkBudgetAvailability();
+      if (budgetError) {
+        $q.notify({
+          type: 'negative',
+          message: 'Depassement de budget !',
+          caption: budgetError,
+          timeout: 8000,
+          multiLine: true,
+        });
+        return;
+      }
+    }
+
     const now = new Date();
     const mairieId = 1;
     const personnelId = 1;
@@ -1236,8 +1540,83 @@ onMounted(() => {
 }
 
 .main-card {
-  border-radius: 16px;
+  border-radius: 24px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.overview-stat-card {
+  min-height: 112px;
+}
+
+.overview-stat-label {
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.overview-stat-value {
+  color: #0f172a;
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.overview-stat-helper {
+  margin-top: 6px;
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.compact-toolbar {
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.92));
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.compact-toolbar-top {
+  gap: 10px 0;
+}
+
+.compact-search :deep(.q-field__control) {
+  min-height: 38px;
+}
+
+.compact-toolbar-summary {
+  display: flex;
+  align-items: center;
+}
+
+.compact-toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.compact-toolbar-actions :deep(.q-btn) {
+  min-height: 36px;
+  border-radius: 12px;
+}
+
+.compact-filter-panel {
+  width: min(760px, 88vw);
+  padding: 14px;
+}
+
+.compact-filter-panel-title {
+  margin-bottom: 10px;
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .import-preview-table {
