@@ -5,15 +5,53 @@
       subtitle="Gestion des mandats de recettes"
       icon="receipt"
     >
-      <template #actions>
-        <q-btn color="primary" icon="add" label="Nouveau Mandat" @click="openDialog()" />
-        <q-btn
-          v-if="isDev"
-          color="orange"
-          icon="science"
-          label="Fake Mandat"
-          @click="createFakeMandat"
-        />
+      <template #stats>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">Mandats visibles</div>
+                <div class="overview-stat-value">{{ filteredMandats.length }}</div>
+              </div>
+              <q-icon name="dataset" size="30px" color="primary" />
+            </q-card-section>
+          </q-card>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">Montant total</div>
+                <div class="overview-stat-value">{{ formatMontant(totalMontantMandats) }}</div>
+              </div>
+              <q-icon name="payments" size="30px" color="secondary" />
+            </q-card-section>
+          </q-card>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">Mandatés</div>
+                <div class="overview-stat-value">{{ mandatsPayesCount }}</div>
+                <div class="overview-stat-helper">{{ formatMontant(totalMontantPaye) }}</div>
+              </div>
+              <q-icon name="task_alt" size="30px" color="positive" />
+            </q-card-section>
+          </q-card>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">Brouillons</div>
+                <div class="overview-stat-value">{{ mandatsBrouillonCount }}</div>
+                <div class="overview-stat-helper">Annulés : {{ mandatsAnnulesCount }}</div>
+              </div>
+              <q-icon name="edit_note" size="30px" color="warning" />
+            </q-card-section>
+          </q-card>
+        </div>
       </template>
     </PageHeader>
 
@@ -116,17 +154,43 @@
                   </div>
                 </q-menu>
               </q-btn>
+              <q-btn
+                color="primary"
+                icon="add"
+                label="Nouveau"
+                unelevated
+                no-caps
+                @click="openDialog()"
+              />
+              <q-btn dense flat round color="grey-7" icon="more_horiz">
+                <q-menu anchor="bottom right" self="top right">
+                  <q-list dense style="min-width: 220px">
+                    <q-item clickable v-close-popup @click="exportRows">
+                      <q-item-section avatar>
+                        <q-icon name="download" color="primary" />
+                      </q-item-section>
+                      <q-item-section>Exporter CSV</q-item-section>
+                    </q-item>
+                    <q-item v-if="isDev" clickable v-close-popup @click="createFakeMandat">
+                      <q-item-section avatar>
+                        <q-icon name="science" color="orange" />
+                      </q-item-section>
+                      <q-item-section>Générer des données fake</q-item-section>
+                    </q-item>
+                  </q-list>
+                </q-menu>
+              </q-btn>
             </div>
           </div>
         </div>
 
         <DataTable
+          ref="dataTableRef"
           :rows="filteredMandats"
           :columns="columns"
           :loading="loading"
           show-print
           show-download
-          show-export-csv
           export-filename="mandats-recette"
           @edit="openDialog"
           @delete="confirmDelete"
@@ -370,6 +434,7 @@ import PageHeader from 'src/components/PageHeader.vue';
 import { openPrintWindow } from 'src/utils/printUrl';
 
 const $q = useQuasar();
+const dataTableRef = ref<{ exportCsv: () => void } | null>(null);
 
 const mandats = ref<MandatRecette[]>([]);
 const taxes = ref<Taxe[]>([]);
@@ -567,6 +632,28 @@ const filteredMandats = computed(() => {
   return result;
 });
 
+const totalMontantMandats = computed(() =>
+  filteredMandats.value.reduce((sum, mandat) => sum + (mandat.montant || 0), 0),
+);
+
+const mandatsPayesCount = computed(
+  () => filteredMandats.value.filter((mandat) => mandat.statut === 'paye').length,
+);
+
+const totalMontantPaye = computed(() =>
+  filteredMandats.value
+    .filter((mandat) => mandat.statut === 'paye')
+    .reduce((sum, mandat) => sum + (mandat.montant || 0), 0),
+);
+
+const mandatsBrouillonCount = computed(
+  () => filteredMandats.value.filter((mandat) => mandat.statut === 'brouillon').length,
+);
+
+const mandatsAnnulesCount = computed(
+  () => filteredMandats.value.filter((mandat) => mandat.statut === 'annule').length,
+);
+
 function resetFilters() {
   filter.value = '';
   filterExercice.value = null;
@@ -574,6 +661,10 @@ function resetFilters() {
   filterStatut.value = null;
   filterDateDebut.value = '';
   filterDateFin.value = '';
+}
+
+function exportRows() {
+  dataTableRef.value?.exportCsv();
 }
 
 function filterTaxe(val: string, update: (callback: () => void) => void) {
@@ -874,6 +965,33 @@ onMounted(() => {
 
 .main-card {
   border-radius: 24px;
+}
+
+.overview-stat-card {
+  min-height: 112px;
+}
+
+.overview-stat-label {
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.overview-stat-value {
+  color: #0f172a;
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.overview-stat-helper {
+  margin-top: 6px;
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 600;
 }
 
 .compact-toolbar {

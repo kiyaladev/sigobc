@@ -161,25 +161,34 @@
                 no-caps
                 @click="openAddDialog"
               />
-              <q-btn
-                v-if="isDev"
-                color="orange"
-                icon="science"
-                label="Fake"
-                unelevated
-                no-caps
-                @click="createFakeMandat"
-              />
+              <q-btn dense flat round color="grey-7" icon="more_horiz">
+                <q-menu anchor="bottom right" self="top right">
+                  <q-list dense style="min-width: 220px">
+                    <q-item clickable v-close-popup @click="exportRows">
+                      <q-item-section avatar>
+                        <q-icon name="download" color="primary" />
+                      </q-item-section>
+                      <q-item-section>Exporter CSV</q-item-section>
+                    </q-item>
+                    <q-item v-if="isDev" clickable v-close-popup @click="createFakeMandat">
+                      <q-item-section avatar>
+                        <q-icon name="science" color="orange" />
+                      </q-item-section>
+                      <q-item-section>Générer des données fake</q-item-section>
+                    </q-item>
+                  </q-list>
+                </q-menu>
+              </q-btn>
             </div>
           </div>
         </div>
 
         <DataTable
+          ref="dataTableRef"
           :rows="filteredMandats"
           :columns="columns"
           :loading="loading"
           show-print
-          show-export-csv
           export-filename="mandats"
           @print="printMandat"
           @edit="editMandat"
@@ -642,6 +651,7 @@ import { openPrintWindow } from 'src/utils/printUrl';
 
 const $q = useQuasar();
 const loading = ref(false);
+const dataTableRef = ref<{ exportCsv: () => void } | null>(null);
 const filter = ref('');
 const showAddDialog = ref(false);
 const editingId = ref<number | null>(null);
@@ -1102,6 +1112,10 @@ function resetFilters() {
   filterDateDebut.value = '';
   filterDateFin.value = '';
   filter.value = '';
+}
+
+function exportRows() {
+  dataTableRef.value?.exportCsv();
 }
 
 function formatMontant(montant: number): string {

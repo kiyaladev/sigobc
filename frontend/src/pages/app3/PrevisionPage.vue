@@ -139,33 +139,6 @@
                 </q-menu>
               </q-btn>
               <q-btn
-                dense
-                outline
-                color="accent"
-                icon="description"
-                label="Fonctionnel"
-                no-caps
-                @click="openEtatFinancierMensuel('fonctionnel')"
-              />
-              <q-btn
-                dense
-                outline
-                color="teal"
-                icon="business_center"
-                label="Investissement"
-                no-caps
-                @click="openEtatFinancierMensuel('investissement')"
-              />
-              <q-btn
-                dense
-                outline
-                color="secondary"
-                icon="print"
-                label="CT02"
-                no-caps
-                @click="showCT02Dialog = true"
-              />
-              <q-btn
                 color="primary"
                 icon="add"
                 label="Nouvelle"
@@ -173,24 +146,51 @@
                 no-caps
                 @click="showAddDialog = true"
               />
-              <q-btn
-                v-if="isDev"
-                color="orange"
-                icon="science"
-                label="Fake"
-                unelevated
-                no-caps
-                @click="createFakePrevision"
-              />
+              <q-btn dense flat round color="grey-7" icon="more_horiz">
+                <q-menu anchor="bottom right" self="top right">
+                  <q-list dense style="min-width: 220px">
+                    <q-item clickable v-close-popup @click="exportRows">
+                      <q-item-section avatar>
+                        <q-icon name="download" color="primary" />
+                      </q-item-section>
+                      <q-item-section>Exporter CSV</q-item-section>
+                    </q-item>
+                    <q-item clickable v-close-popup @click="openEtatFinancierMensuel('fonctionnel')">
+                      <q-item-section avatar>
+                        <q-icon name="description" color="accent" />
+                      </q-item-section>
+                      <q-item-section>État fonctionnel</q-item-section>
+                    </q-item>
+                    <q-item clickable v-close-popup @click="openEtatFinancierMensuel('investissement')">
+                      <q-item-section avatar>
+                        <q-icon name="business_center" color="teal" />
+                      </q-item-section>
+                      <q-item-section>État investissement</q-item-section>
+                    </q-item>
+                    <q-item clickable v-close-popup @click="showCT02Dialog = true">
+                      <q-item-section avatar>
+                        <q-icon name="print" color="secondary" />
+                      </q-item-section>
+                      <q-item-section>CT02</q-item-section>
+                    </q-item>
+                    <q-item v-if="isDev" clickable v-close-popup @click="createFakePrevision">
+                      <q-item-section avatar>
+                        <q-icon name="science" color="orange" />
+                      </q-item-section>
+                      <q-item-section>Générer des données fake</q-item-section>
+                    </q-item>
+                  </q-list>
+                </q-menu>
+              </q-btn>
             </div>
           </div>
         </div>
 
         <DataTable
+          ref="dataTableRef"
           :rows="filteredPrevisions"
           :columns="columns"
           :loading="loading"
-          show-export-csv
           export-filename="previsions"
           @edit="editPrevision"
           @delete="deletePrevision"
@@ -426,6 +426,7 @@ const $q = useQuasar();
 const loading = ref(false);
 const loadingCT02 = ref(false);
 const loadingEtatFinancier = ref(false);
+const dataTableRef = ref<{ exportCsv: () => void } | null>(null);
 const filter = ref('');
 const showAddDialog = ref(false);
 const showCT02Dialog = ref(false);
@@ -684,6 +685,10 @@ function resetFilters() {
   filterChapitreId.value = null;
   filterSousChapitreId.value = null;
   filter.value = '';
+}
+
+function exportRows() {
+  dataTableRef.value?.exportCsv();
 }
 
 function formatMontant(montant: number): string {

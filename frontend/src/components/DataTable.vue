@@ -146,6 +146,10 @@ defineEmits<{
 function handleExportCsv() {
   exportToCsv(props.rows, props.columns, props.exportFilename);
 }
+
+defineExpose({
+  exportCsv: handleExportCsv,
+});
 </script>
 
 <style scoped lang="scss">

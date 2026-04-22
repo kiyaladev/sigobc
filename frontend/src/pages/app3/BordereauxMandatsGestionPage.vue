@@ -613,15 +613,24 @@ function printBordereau(bordereau: BordereauMandat) {
     persistent: true,
   }).onOk((selected: string) => {
     if (selected === 'emission') {
-      openPrintWindow('bordereau_mandat.html', { bordereauId: bordereau.id! });
+      openPrintWindow('bordereau_mandat.html', {
+        Numbordereau: bordereau.numero,
+        Annee: bordereau.exercice,
+      });
     } else if (selected === 'rejet') {
-      openPrintWindow('bordereau_mandat_rejet.html', { bordereauId: bordereau.id! });
+      openPrintWindow('bordereau_mandat_rejet.html', {
+        Numbordereau: bordereau.numero,
+        Annee: bordereau.exercice,
+      });
     }
   });
 }
 
 function downloadBordereauPDF(bordereau: BordereauMandat) {
-  openPrintWindow('bordereau_mandat.html', { bordereauId: bordereau.id! });
+  openPrintWindow('bordereau_mandat.html', {
+    Numbordereau: bordereau.numero,
+    Annee: bordereau.exercice,
+  });
 }
 
 const isDev = import.meta.env.VITE_ENV === 'development';

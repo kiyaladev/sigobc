@@ -48,8 +48,10 @@ async function createWindow() {
    */
   mainWindow = new BrowserWindow({
     icon: path.resolve(currentDir, 'icons/icon.png'), // tray icon
-    width: 1000,
-    height: 600,
+    width: 1400,
+    height: 900,
+    minWidth: 1024,
+    minHeight: 700,
     useContentSize: true,
     webPreferences: {
       contextIsolation: true,
@@ -108,6 +110,11 @@ async function createWindow() {
     mainWindow = undefined;
   });
 }
+
+// Désactiver l'accélération GPU : évite les pages figées (scroll KO mais clavier OK)
+// sur certains PC avec pilotes GPU anciens, RDP, ou DPI Windows élevé.
+app.disableHardwareAcceleration();
+app.commandLine.appendSwitch('disable-gpu-compositing');
 
 void app.whenReady().then(() => {
   setupLicenseHandlers();

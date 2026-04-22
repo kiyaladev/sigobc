@@ -271,9 +271,15 @@
       .editable-date:hover { background: #e8f0fe; }
       .editable-date:focus { outline: 2px solid #1976d2; background: #fff; border-bottom: none; }
 
+      /* Editable total cells */
+      .editable-total { cursor: text; outline: 1px dashed #bbb; outline-offset: -2px; }
+      .editable-total:hover { background: #e8f0fe !important; }
+      .editable-total:focus { outline: 2px solid #1976d2; background: #fff !important; }
+
       /* MEDIA QUERIES IMPRESSION */
       @media print {
         .editable-date { border-bottom: none; }
+        .editable-total { outline: none !important; }
         body {
           background: none;
           padding: 0;
@@ -530,6 +536,8 @@
               </td>
               <td
                 id="total-bordereau"
+                class="editable-total"
+                contenteditable="true"
                 style="
                   text-align: right;
                   font-weight: bold;
@@ -586,7 +594,8 @@
               </td>
               <td
                 id="total-precedent"
-                class="text-center"
+                class="text-center editable-total"
+                contenteditable="true"
                 style="
                   font-weight: bold;
                   text-align: right;
@@ -627,7 +636,8 @@
               </td>
               <td
                 id="total-general"
-                class="text-center"
+                class="text-center editable-total"
+                contenteditable="true"
                 style="
                   font-weight: bold;
                   text-align: right;
@@ -993,8 +1003,9 @@
           }
         }
 
-        // Update totals
-        const totalPrecedent = currentBordereau.totalPrecedent || 0;
+        // Total précédent = somme des bordereaux antérieurs (même exercice, numéro < courant)
+        // Pour le 1er bordereau de l'année (numero=1), précédent = 0.
+        const totalPrecedent = computedTotalPrecedent;
         const totalGeneral = totalPrecedent + totalBordereau;
 
         document.getElementById('total-bordereau').textContent =
@@ -1006,6 +1017,39 @@
           numberToWords(totalBordereau) + ' francs CFA';
       }
 
+      /**
+       * Parse un nombre formaté en français (espaces / NBSP) en nombre JS.
+       */
+      function parseFrenchNumber(str) {
+        if (!str) return 0;
+        const cleaned = String(str).replace(/[^\d,.-]/g, '').replace(/\s/g, '').replace(',', '.');
+        const n = parseFloat(cleaned);
+        return isNaN(n) ? 0 : n;
+      }
+
+      /**
+       * Recalcule "Total Général" et "Arrêté à la somme de" à partir des valeurs
+       * saisies (contenteditable) dans "Total Présent" et "Total Précédent".
+       */
+      function recomputeGeneralFromEdits() {
+        const tb = parseFrenchNumber(document.getElementById('total-bordereau').textContent);
+        const tp = parseFrenchNumber(document.getElementById('total-precedent').textContent);
+        const tg = tb + tp;
+        document.getElementById('total-general').textContent = tg.toLocaleString('fr-FR');
+        document.getElementById('total-en-lettres').textContent =
+          numberToWords(tb) + ' francs CFA';
+      }
+
+      /**
+       * Reformate une cellule éditable après édition pour conserver le format FR.
+       */
+      function reformatEditableTotal(el) {
+        const n = parseFrenchNumber(el.textContent);
+        el.textContent = n.toLocaleString('fr-FR');
+      }
+
+      let computedTotalPrecedent = 0;
+
       document.addEventListener('DOMContentLoaded', async () => {
         try {
           db = new Dexie('TresorOfflineDB');
@@ -1016,19 +1060,37 @@
         }
 
         const params = new URLSearchParams(window.location.search);
-        const bordereauId = parseInt(params.get('bordereauId'), 10);
+        const numBordereau = parseInt(params.get('Numbordereau'), 10);
+        const annee = parseInt(params.get('Annee'), 10);
+        const bordereauIdParam = parseInt(params.get('bordereauId'), 10); // rétro-compatible
         const shouldPrint = params.get('print') === 'true';
 
-        if (!bordereauId) {
-          document.body.innerHTML = 'ID de bordereau manquant.';
+        if (!bordereauIdParam && (!numBordereau || !annee)) {
+          document.body.innerHTML =
+            'Paramètres manquants. Attendu: ?Numbordereau=X&Annee=YYYY';
           return;
         }
 
         try {
-          const bordereau = await db.table('bordereauMandats').get(bordereauId);
-          if (!bordereau) {
-            document.body.innerHTML = `Bordereau avec ID ${bordereauId} non trouvé.`;
-            return;
+          let bordereau;
+          if (numBordereau && annee) {
+            // Lookup par (numero, exercice)
+            const matches = await db.table('bordereauMandats')
+              .where('exercice')
+              .equals(annee)
+              .toArray();
+            bordereau = matches.find((b) => b.numero === numBordereau);
+            if (!bordereau) {
+              document.body.innerHTML =
+                `Bordereau N°${numBordereau} pour l'année ${annee} non trouvé.`;
+              return;
+            }
+          } else {
+            bordereau = await db.table('bordereauMandats').get(bordereauIdParam);
+            if (!bordereau) {
+              document.body.innerHTML = `Bordereau avec ID ${bordereauIdParam} non trouvé.`;
+              return;
+            }
           }
           currentBordereau = bordereau;
 
@@ -1036,10 +1098,21 @@
           const mairie = await db.table('mairies').toCollection().first();
           currentMairie = mairie;
 
+          // Calcul du TOTAL DU PRÉCÉDENT BORDEREAU :
+          // somme des montantTotal des bordereaux du MÊME exercice dont le numero < courant.
+          // → Pour le 1er bordereau de l'année (numero=1), cela donne 0.
+          const bordereauxMemeExercice = await db.table('bordereauMandats')
+            .where('exercice')
+            .equals(bordereau.exercice)
+            .toArray();
+          computedTotalPrecedent = bordereauxMemeExercice
+            .filter((b) => (b.numero || 0) < (bordereau.numero || 0))
+            .reduce((sum, b) => sum + (b.montantTotal || 0), 0);
+
           // Récupérer tous les mandats du bordereau
           allMandatsData = await db.table('mandats')
             .where('bordereauMandatId')
-            .equals(bordereauId)
+            .equals(bordereau.id)
             .toArray();
 
           const chapitres = await db.table('chapitres').toArray();
@@ -1059,6 +1132,19 @@
 
           // Afficher tous les mandats initialement
           renderMandats(allMandatsData);
+
+          // Recalcul du Total Général quand les totaux éditables sont modifiés
+          const tbCell = document.getElementById('total-bordereau');
+          const tpCell = document.getElementById('total-precedent');
+          const tgCell = document.getElementById('total-general');
+          [tbCell, tpCell].forEach((cell) => {
+            cell.addEventListener('input', recomputeGeneralFromEdits);
+            cell.addEventListener('blur', () => {
+              reformatEditableTotal(cell);
+              recomputeGeneralFromEdits();
+            });
+          });
+          tgCell.addEventListener('blur', () => reformatEditableTotal(tgCell));
 
           // Signature date
           const emissionDate = bordereau.dateEmission

@@ -134,24 +134,6 @@
                 </q-menu>
               </q-btn>
               <q-btn
-                dense
-                outline
-                color="green"
-                icon="description"
-                label="Fonctionnelle"
-                no-caps
-                @click="openEtatMensuel('fonctionnel')"
-              />
-              <q-btn
-                dense
-                outline
-                color="grey"
-                icon="business_center"
-                label="Investissement"
-                no-caps
-                @click="openEtatMensuel('investissement')"
-              />
-              <q-btn
                 color="primary"
                 icon="add"
                 label="Nouvelle"
@@ -159,20 +141,42 @@
                 no-caps
                 @click="showAddDialog = true"
               />
-              <q-btn
-                v-if="isDev"
-                color="orange"
-                icon="science"
-                label="Fake"
-                unelevated
-                no-caps
-                @click="createFakePrevision"
-              />
+              <q-btn dense flat round color="grey-7" icon="more_horiz">
+                <q-menu anchor="bottom right" self="top right">
+                  <q-list dense style="min-width: 220px">
+                    <q-item clickable v-close-popup @click="exportRows">
+                      <q-item-section avatar>
+                        <q-icon name="download" color="primary" />
+                      </q-item-section>
+                      <q-item-section>Exporter CSV</q-item-section>
+                    </q-item>
+                    <q-item clickable v-close-popup @click="openEtatMensuel('fonctionnel')">
+                      <q-item-section avatar>
+                        <q-icon name="description" color="green" />
+                      </q-item-section>
+                      <q-item-section>État fonctionnel</q-item-section>
+                    </q-item>
+                    <q-item clickable v-close-popup @click="openEtatMensuel('investissement')">
+                      <q-item-section avatar>
+                        <q-icon name="business_center" color="grey" />
+                      </q-item-section>
+                      <q-item-section>État investissement</q-item-section>
+                    </q-item>
+                    <q-item v-if="isDev" clickable v-close-popup @click="createFakePrevision">
+                      <q-item-section avatar>
+                        <q-icon name="science" color="orange" />
+                      </q-item-section>
+                      <q-item-section>Générer des données fake</q-item-section>
+                    </q-item>
+                  </q-list>
+                </q-menu>
+              </q-btn>
             </div>
           </div>
         </div>
 
         <DataTable
+          ref="dataTableRef"
           :rows="filteredPrevisions"
           :columns="columns"
           :loading="loading"
@@ -180,7 +184,6 @@
           :pagination="{ rowsPerPage: 15 }"
           bordered
           class="prevision-table"
-          show-export-csv
           export-filename="previsions-recettes"
           @edit="editPrevision"
           @delete="deletePrevision"
@@ -361,6 +364,7 @@ import { openPrintWindowWithMessage } from 'src/utils/printUrl';
 const $q = useQuasar();
 const loading = ref(false);
 const loadingEtatMensuel = ref(false);
+const dataTableRef = ref<{ exportCsv: () => void } | null>(null);
 const filter = ref('');
 const showAddDialog = ref(false);
 const showEtatMensuelDialog = ref(false);
@@ -569,6 +573,10 @@ function resetFilters() {
   filterTaxeId.value = null;
   filterStatut.value = null;
   filter.value = '';
+}
+
+function exportRows() {
+  dataTableRef.value?.exportCsv();
 }
 
 function formatMontant(montant: number): string {
@@ -956,6 +964,54 @@ onMounted(() => {
   color: #64748b;
   font-size: 0.82rem;
   font-weight: 600;
+}
+
+.compact-toolbar {
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.92));
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.compact-toolbar-top {
+  gap: 10px 0;
+}
+
+.compact-search :deep(.q-field__control) {
+  min-height: 38px;
+}
+
+.compact-toolbar-summary {
+  display: flex;
+  align-items: center;
+}
+
+.compact-toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.compact-toolbar-actions :deep(.q-btn) {
+  min-height: 36px;
+  border-radius: 12px;
+}
+
+.compact-filter-panel {
+  width: min(760px, 88vw);
+  padding: 14px;
+}
+
+.compact-filter-panel-title {
+  margin-bottom: 10px;
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 @media print {

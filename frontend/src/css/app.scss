@@ -457,6 +457,30 @@ body {
   background: linear-gradient(135deg, rgba(27, 94, 59, 0.08), rgba(197, 168, 77, 0.12));
 }
 
+.q-dialog .q-card.dialog-card {
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.q-dialog .q-card.dialog-card > .q-card__section.q-card__section--vert:first-child {
+  flex: 0 0 auto;
+}
+
+.q-dialog .q-card.dialog-card > .q-card__section.q-card__section--vert.q-pt-md,
+.q-dialog .q-card.dialog-card > .q-card__section.q-card__section--vert:not(:first-child) {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+@media (max-height: 640px) {
+  .q-dialog .q-card.dialog-card {
+    max-height: 94vh;
+  }
+}
+
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
