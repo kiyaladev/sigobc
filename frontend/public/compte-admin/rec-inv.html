@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Compte Administratif - Recettes Investissement</title>
     <script src="../dexie.min.js"></script>
+    <script src="../constanteInfo.js"></script>
     <style>
       @page {
         size: A4 landscape;
@@ -89,7 +90,7 @@
 
         const exercice = new Date().getFullYear();
 
-        const [taxes, allPrevisionsRecettes, allDeclarations, allMandatsRecette, mairieRaw] =
+        const [taxes, allPrevisionsRecettes, allDeclarations, allMandatsRecette] =
           await Promise.all([
             db.table('taxes').toArray(),
             db.table('previsionsRecettes').toArray(),
@@ -98,9 +99,8 @@
               .table('mandatsRecette')
               .toArray()
               .catch(() => []),
-            db.table('mairies').toCollection().first(),
           ]);
-        const mairie = mairieRaw || {};
+        const mairie = MAIRIE_INFO;
         const previsionsRecettes = allPrevisionsRecettes.filter((r) => r.exercice === exercice);
         const declarations = allDeclarations.filter((d) => d.exercice === exercice);
         const mandatsRecette = allMandatsRecette.filter((m) => m.exercice === exercice);
@@ -142,7 +142,7 @@
 
       function render(data) {
         const { investTaxes, prevMap, emissionMap, recouvrementMap, exercice, mairie } = data;
-        const communeNom = (mairie.nom || 'VAVOUA').replace(/^mairie de /i, '').toUpperCase();
+        const communeNom = (mairie.nom || MAIRIE_INFO.nom).replace(/^mairie de /i, '').toUpperCase();
 
         // Organize hierarchy
         const sections = {};

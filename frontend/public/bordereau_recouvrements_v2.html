@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Bordereau des Recouvrements</title>
     <script src="dexie.min.js"></script>
+    <script src="constanteInfo.js"></script>
     <style>
       @page {
         size: A4 landscape;
@@ -595,8 +596,8 @@
             return;
           }
 
-          // Récupérer la mairie
-          const mairie = await db.table('mairies').toCollection().first();
+          // Utiliser la mairie statique
+          const mairie = MAIRIE_INFO;
 
           // Récupérer les déclarations liées à ce bordereau
           const declarations = await db.table('declarations')

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Bordereau des Recouvrements</title>
     <script src="dexie.min.js"></script>
+    <script src="constanteInfo.js"></script>
     <script src="vue.global.js"></script>
     <style>
       @page {
@@ -458,24 +459,14 @@
                 return;
               }
 
-              // Charger la mairie associée
-              if (this.bordereau.mairieId) {
-                this.mairie = await db.table('mairies').get(this.bordereau.mairieId);
-              }
+              // Utiliser la mairie statique
+              this.mairie = MAIRIE_INFO;
 
               // Charger les déclarations du bordereau
               this.declarations = await db.table('declarations')
                 .where('bordereauId')
                 .equals(parseInt(bordereauId))
                 .toArray();
-
-              // Si pas de mairie depuis le bordereau, prendre celle de la première déclaration
-              if (!this.mairie && this.declarations.length > 0) {
-                const firstDecl = this.declarations[0];
-                if (firstDecl.mairieId) {
-                  this.mairie = await db.table('mairies').get(firstDecl.mairieId);
-                }
-              }
 
               // Charger toutes les taxes pour affichage
               this.taxes = await db.table('taxes').toArray();

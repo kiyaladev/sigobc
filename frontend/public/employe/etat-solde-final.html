@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>État de Solde - Commune de Vavoua</title>
     <script src="../tailwindcss.js"></script>
+    <script src="../constanteInfo.js"></script>
     <style>
       /* Fonts: use system serif fallbacks for offline support */
 
@@ -165,10 +166,10 @@
     <div class="page px-12 py-8">
       <!-- En-tête -->
       <div class="flex justify-between items-start mb-6">
-        <div class="text-[13px] leading-snug">
-          <p class="font-bold uppercase">Département de Vavoua</p>
-          <p class="font-bold uppercase">Commune de Vavoua</p>
-          <p class="font-bold uppercase">Code : 433</p>
+        <div class="text-[13px] leading-snug" id="left-header">
+          <p class="font-bold uppercase" id="dept-label"></p>
+          <p class="font-bold uppercase" id="commune-label"></p>
+          <p class="font-bold uppercase" id="code-label"></p>
         </div>
         <div class="text-right text-[13px] leading-snug">
           <p class="font-bold uppercase tracking-wide">République de Côte d'Ivoire</p>
@@ -409,7 +410,7 @@
       <div class="mt-6 flex justify-end">
         <div class="text-center">
           <p class="text-[13px] font-bold">
-            VAVOUA, le <span class="editable-date" contenteditable="true">13 / 01 / 2026</span>
+            <span id="ville-sig"></span>, le <span class="editable-date" contenteditable="true">13 / 01 / 2026</span>
           </p>
           <p class="text-[13px] font-bold mt-0.5">P/ LE MAIRE & P.D.;</p>
 
@@ -436,5 +437,11 @@
         Scanné avec CamScanner
       </div>
     </div>
+    <script>
+      document.getElementById('dept-label').textContent = 'Département de ' + MAIRIE_INFO.departement;
+      document.getElementById('commune-label').textContent = 'Commune de ' + MAIRIE_INFO.ville;
+      document.getElementById('code-label').textContent = 'Code : ' + MAIRIE_INFO.code;
+      document.getElementById('ville-sig').textContent = MAIRIE_INFO.ville.toUpperCase();
+    </script>
   </body>
 </html>

@@ -20,6 +20,7 @@
 
         // Écrire les tags script de manière synchrone
         document.write('<script src="' + basePath + 'dexie.min.js"><\/script>');
+        document.write('<script src="' + basePath + 'constanteInfo.js"><\/script>');
         document.write('<script src="' + basePath + 'vue.global.js"><\/script>');
       })();
     </script>
@@ -817,9 +818,7 @@
               }
 
               // Charger la mairie
-              if (this.mandat.mairieId) {
-                this.mairie = await db.table('mairies').get(this.mandat.mairieId);
-              }
+              this.mairie = MAIRIE_INFO;
 
               // Charger la taxe
               if (this.mandat.taxeId) {

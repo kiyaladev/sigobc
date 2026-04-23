@@ -12,6 +12,7 @@
     <script src="../dayjs.min.js"></script>
     <script src="../dayjs-locale-fr.js"></script>
 
+    <script src="../constanteInfo.js"></script>
     <script src="../tailwindcss.js"></script>
     <style>
       /* Fonts: use system serif fallbacks for offline support */
@@ -192,7 +193,7 @@
             <p class="text-[10px] tracking-[3px] text-gray-400">
               .................................
             </p>
-            <p class="font-semibold uppercase mt-0.5">Commune de Vavoua</p>
+            <p class="font-semibold uppercase mt-0.5">Commune de {{ mairie.ville }}</p>
             <p class="text-[10px] tracking-[3px] text-gray-400">
               .................................
             </p>
@@ -231,7 +232,7 @@
 
           <!-- Corps -->
           <div class="space-y-2 text-[15px]">
-            <p class="font-bold uppercase">Le Maire de la Commune de Vavoua</p>
+            <p class="font-bold uppercase">Le Maire de la Commune de {{ mairie.ville }}</p>
 
             <!-- Ligne DONNE ORDRE A -->
             <div class="flex items-baseline gap-2">
@@ -329,7 +330,7 @@
           <div class="mt-10 flex justify-end">
             <div class="text-center">
               <p class="font-bold text-[15px]">
-                Vavoua, le <span class="editable-date" contenteditable="true">{{ todayStr }}</span>
+                {{ mairie.ville }}, le <span class="editable-date" contenteditable="true">{{ todayStr }}</span>
               </p>
               <p class="font-bold text-[15px] mt-1">P/Le Maire &amp; P.D</p>
             </div>
@@ -455,7 +456,7 @@
             loadData();
           });
 
-          return { data, loading, error, agentNom, todayStr, formatDate, formatAmount };
+          return { data, loading, error, agentNom, todayStr, formatDate, formatAmount, mairie: MAIRIE_INFO };
         },
       }).mount('#app');
     </script>

@@ -466,6 +466,7 @@
       <div class="footer-note">Pour acquit de la somme indiquée ci-dessus :</div>
     </div>
     <script src="dexie.min.js"></script>
+    <script src="constanteInfo.js"></script>
     <script>
       // Dexie sera initialisé dans loadDeclaration()
       let db;
@@ -591,7 +592,7 @@
             return;
           }
 
-          const mairie = await db.table('mairies').toCollection().first();
+          const mairie = MAIRIE_INFO;
           const taxe = await db.table('taxes').get(declaration.taxeId);
 
           let numeroBordereau = '';
@@ -620,8 +621,8 @@
             dateEmission: declaration.dateEncaissement
               ? new Date(declaration.dateEncaissement).toLocaleDateString('fr-FR')
               : new Date().toLocaleDateString('fr-FR'),
-            mairieVille: mairie ? mairie.ville : '',
-            mairieCode: mairie ? mairie.code : '',
+            mairieVille: mairie.ville,
+            mairieCode: mairie.code,
           };
 
           remplirFormulaire(data);

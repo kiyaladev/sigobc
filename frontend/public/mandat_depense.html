@@ -507,6 +507,7 @@
       <div class="ct-code">CT 21</div>
     </div>
     <script src="dexie.min.js"></script>
+    <script src="constanteInfo.js"></script>
     <script>
       // Fonction pour convertir un nombre en lettres en français
       function numberToWords(num) {
@@ -648,8 +649,8 @@
           }
 
           // Récupérer les données associées
-          const [mairie, chapitre, sousChapitre, bordereau] = await Promise.all([
-            db.table('mairies').toCollection().first(),
+          const mairie = MAIRIE_INFO;
+          const [chapitre, sousChapitre, bordereau] = await Promise.all([
             mandat.chapitreId ? db.table('chapitres').get(mandat.chapitreId) : null,
             mandat.sousChapitreId ? db.table('sousChapitres').get(mandat.sousChapitreId) : null,
             mandat.bordereauMandatId ? db.table('bordereauMandats').get(mandat.bordereauMandatId) : null,
@@ -685,12 +686,12 @@
             dateDeliberation: mandat.dateDeliberation
               ? new Date(mandat.dateDeliberation).toLocaleDateString('fr-FR')
               : '',
-            mairieDepartement: mairie?.ville || '',
-            mairieCommune: mairie?.ville || '',
-            mairieCode: mairie?.code || '',
-            mairieVille: mairie?.ville || '',
-            mairieNom: mairie?.nom || '',
-            mairieTresorerie: mairie?.ville || '',
+            mairieDepartement: mairie.ville,
+            mairieCommune: mairie.ville,
+            mairieCode: mairie.code,
+            mairieVille: mairie.ville,
+            mairieNom: mairie.nom,
+            mairieTresorerie: mairie.ville,
           };
 
           remplirFormulaire(data);

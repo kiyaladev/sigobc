@@ -6,6 +6,8 @@
     <title>État Mensuel d'Exécution des Dépenses</title>
     <!-- Charger Dexie pour accéder à IndexedDB -->
     <script src="../dexie.min.js"></script>
+    <!-- Informations statiques de la mairie -->
+    <script src="../constanteInfo.js"></script>
     <style>
       @page {
         size: A4 landscape;
@@ -410,6 +412,8 @@
       function processEtatData(messageData) {
         if (messageData && messageData.type === 'FILL_ETAT_FINANCIER_DATA') {
           currentData = messageData.data;
+          // Utiliser les informations statiques de la mairie
+          currentData.mairie = MAIRIE_INFO;
 
           // Initialiser le numéro de page par défaut à 1 si l'input est vide
           const input = document.getElementById('inputNumero');

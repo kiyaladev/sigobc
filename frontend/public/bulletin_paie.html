@@ -299,6 +299,7 @@
     </div>
 
     <script src="dexie.min.js"></script>
+    <script src="constanteInfo.js"></script>
     <script>
       const MOIS_LABELS = [
         'Janvier',
@@ -432,7 +433,7 @@
           }
 
           const emp = await db.table('employes').get(fiche.employeId);
-          const mairie = await db.table('mairies').toCollection().first();
+          const mairie = MAIRIE_INFO;
 
           const moisLabel = MOIS_LABELS[(fiche.mois || 1) - 1] || '';
           const totalRetenues =
@@ -443,8 +444,8 @@
             (fiche.indemniteLogement || 0) +
             (fiche.indemniteTransport || 0) +
             (fiche.autresIndemnites || 0);
-          const mairieVille = mairie ? mairie.ville.toUpperCase() : 'VAVOUA';
-          const mairieCode = mairie ? mairie.code : '';
+          const mairieVille = mairie.ville.toUpperCase();
+          const mairieCode = mairie.code;
           const dateAujourdhui = new Date().toLocaleDateString('fr-FR', {
             day: 'numeric',
             month: 'long',
@@ -484,7 +485,7 @@
                 </div>
                 <div class="info-row">
                   <span class="info-label">Localité</span>
-                  <span class="info-value">${mairie ? mairie.ville : 'VAVOUA'}</span>
+                  <span class="info-value">${mairie.ville}</span>
                 </div>
               </div>
               <div class="info-box">
@@ -627,7 +628,7 @@
             </div>
 
             <div style="text-align:right;font-size:9px;color:#999;margin-top:10px;border-top:1px dashed #ccc;padding-top:5px">
-              Édité le <span class="editable-date" contenteditable="true">${dateAujourdhui}</span> — SIGOBC Mairie de ${mairie ? mairie.ville : 'Vavoua'}
+              Édité le <span class="editable-date" contenteditable="true">${dateAujourdhui}</span> — SIGOBC Mairie de ${mairie.ville}
             </div>
           `;
 

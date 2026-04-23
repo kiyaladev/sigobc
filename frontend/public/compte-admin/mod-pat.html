@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Compte Administratif - Modifications du Patrimoine</title>
     <script src="../dexie.min.js"></script>
+    <script src="../constanteInfo.js"></script>
     <style>
       @page {
         size: A4 landscape;
@@ -125,7 +126,7 @@
           var params = new URLSearchParams(window.location.search);
           if (params.get('exercice')) exercice = parseInt(params.get('exercice'));
 
-          var mairie = (await db.table('mairies').toCollection().first()) || {};
+          var mairie = MAIRIE_INFO;
           var sousChapitres = await db.table('sousChapitres').toArray();
           var allProjets = await db.table('projets').toArray();
           var projets = allProjets.filter(function (p) {
@@ -160,7 +161,7 @@
             return p.typeBien === 'mobilier' || p.typeBien === 'incorporel';
           });
 
-          var communeNom = (mairie.nom || 'VAVOUA').replace(/^mairie de /i, '').toUpperCase();
+          var communeNom = (mairie.nom || MAIRIE_INFO.nom).replace(/^mairie de /i, '').toUpperCase();
           var content = '';
 
           // Title
@@ -291,7 +292,7 @@
           content += '<div style="text-align:center"><strong>LE TRESORIER PRINCIPAL</strong></div>';
           content +=
             '<div style="text-align:center">Fait a ' +
-            (mairie.ville || 'VAVOUA').toUpperCase() +
+            (mairie.ville || MAIRIE_INFO.ville).toUpperCase() +
             ' le, ' +
             dateStr +
             '<br><strong>LE MAIRE</strong></div>';

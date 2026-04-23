@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>État des Décomptes - Mairie de Vavoua</title>
     <script src="../tailwindcss.js"></script>
+    <script src="../constanteInfo.js"></script>
     <style>
       /* Fonts: use system serif fallbacks for offline support */
 
@@ -143,11 +144,11 @@
       <!-- Headers -->
       <div class="flex justify-between items-start text-sm">
         <!-- Left Header -->
-        <div class="leading-tight font-bold text-center">
-          <p>DÉPARTEMENT DE VAVOUA</p>
+        <div class="leading-tight font-bold text-center" id="left-header">
+          <p id="dept-label"></p>
           <div class="w-10 h-[1px] bg-black mx-auto my-1"></div>
-          <p>COMMUNE DE VAVOUA</p>
-          <p>Code: 433</p>
+          <p id="commune-label"></p>
+          <p id="code-label"></p>
         </div>
 
         <!-- Right Header -->
@@ -298,7 +299,7 @@
             <div class="stamp-round-inner">
               <span class="mt-2">REPUBLIQUE DE<br />CÔTE D'IVOIRE</span>
               <span class="text-3xl my-1 opacity-80">🐘</span>
-              <span class="mb-2">* MAIRIE DE VAVOUA *</span>
+              <span class="mb-2" id="stamp-mairie-label">* MAIRIE *</span>
             </div>
           </div>
         </div>
@@ -310,7 +311,7 @@
 
         <!-- Right Zone -->
         <div class="text-center relative">
-          <p>À Vavoua, le <span class="editable-date" contenteditable="true">13/01/2026</span></p>
+          <p>À <span id="ville-sig"></span>, le <span class="editable-date" contenteditable="true">13/01/2026</span></p>
           <p class="font-bold mt-2">P/Le Maire & P.D.</p>
 
           <div class="mt-6 relative inline-block">
@@ -332,5 +333,12 @@
         Scanné avec CamScanner
       </div>
     </div>
+    <script>
+      document.getElementById('dept-label').textContent = 'DÉPARTEMENT DE ' + MAIRIE_INFO.departement.toUpperCase();
+      document.getElementById('commune-label').textContent = 'COMMUNE DE ' + MAIRIE_INFO.ville.toUpperCase();
+      document.getElementById('code-label').textContent = 'Code: ' + MAIRIE_INFO.code;
+      document.getElementById('stamp-mairie-label').textContent = '* MAIRIE DE ' + MAIRIE_INFO.ville.toUpperCase() + ' *';
+      document.getElementById('ville-sig').textContent = MAIRIE_INFO.ville;
+    </script>
   </body>
 </html>

@@ -746,6 +746,7 @@
       </div>
       <div class="ct-code">CT 50</div>
     </div>
+    <script src="constanteInfo.js"></script>
     <script src="dexie.min.js"></script>
     <script>
       /**
@@ -947,8 +948,8 @@
             return;
           }
 
-          // Récupérer la première mairie de la base de données
-          const mairie = await db.table('mairies').toCollection().first();
+          // Utiliser la constante statique MAIRIE_INFO
+          const mairie = MAIRIE_INFO;
           const mandats = await db.table('mandatsRecette')
             .filter((m) => m.bordereauMandatRecetteId === bordereauId)
             .toArray();
@@ -960,11 +961,9 @@
           // On va utiliser 'taxeId' pour trouver la 'nature de la recette' (libelle de la taxe) et le code.
 
           // Populate header avec la ville et le code de la mairie
-          if (mairie) {
-            document.getElementById('mairie-nom').textContent =
-              `COMMUNE DE ${mairie.ville.toUpperCase()}`;
-            document.getElementById('mairie-code').textContent = `CODE : ${mairie.code}`;
-          }
+          document.getElementById('mairie-nom').textContent =
+            `COMMUNE DE ${mairie.ville.toUpperCase()}`;
+          document.getElementById('mairie-code').textContent = `CODE : ${mairie.code}`;
           document.getElementById('bordereau-exercice').textContent = bordereau.exercice;
           document.getElementById('bordereau-numero').textContent = bordereau.numero;
           document.getElementById('bordereau-annee-folio').textContent = bordereau.exercice;
@@ -1044,7 +1043,7 @@
             ? new Date(bordereau.dateEmission)
             : new Date();
           document.getElementById('signature-date').innerHTML =
-            `A ${mairie ? mairie.ville : 'VAVOUA'}, le <span class="editable-date" contenteditable="true">${emissionDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>`;
+            `A ${mairie.ville}, le <span class="editable-date" contenteditable="true">${emissionDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>`;
 
           if (shouldPrint) {
             setTimeout(() => window.print(), 500);

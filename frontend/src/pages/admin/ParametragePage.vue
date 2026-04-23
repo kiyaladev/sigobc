@@ -157,7 +157,7 @@
             </div>
           </div>
 
-          <div v-if="mairie" class="row q-col-gutter-md">
+          <div class="row q-col-gutter-md">
             <div class="col-12 col-md-6">
               <q-item>
                 <q-item-section avatar>
@@ -271,10 +271,6 @@
                 </q-item-section>
               </q-item>
             </div>
-          </div>
-          <div v-else class="text-center text-grey-5 q-pa-lg">
-            <q-icon name="info" size="32px" class="q-mb-sm" />
-            <div>Aucune mairie configurée. Veuillez initialiser la base de données.</div>
           </div>
         </q-card-section>
       </q-card>
@@ -440,11 +436,11 @@ import { useQuasar, date } from 'quasar';
 import {
   db,
   type Exercice,
-  type Mairie,
   type ParametresPaie,
   DEFAULT_MAIRIE_ID,
 } from 'src/database/db';
 import PageHeader from 'src/components/PageHeader.vue';
+import { MAIRIE_INFO } from 'src/constanteInfo';
 
 const $q = useQuasar();
 
@@ -470,7 +466,7 @@ if (sessionStorage.getItem('parametrage_unlocked') === 'true') {
 }
 
 const exercices = ref<Exercice[]>([]);
-const mairie = ref<Mairie | null>(null);
+const mairie = MAIRIE_INFO;
 const parametresPaie = ref<ParametresPaie | null>(null);
 const loading = ref(false);
 const savingPaie = ref(false);
@@ -516,15 +512,15 @@ const heroStats = computed(() => [
   },
   {
     label: 'Mairie',
-    value: mairie.value?.code || '--',
-    helper: mairie.value?.nom || 'Aucune mairie configurée',
+    value: mairie.code,
+    helper: mairie.nom,
     icon: 'location_city',
     color: 'secondary',
   },
   {
     label: 'Maire',
-    value: mairie.value?.maire ? 'OK' : '--',
-    helper: mairie.value?.maire || 'Information non renseignée',
+    value: 'OK',
+    helper: mairie.maire,
     icon: 'person',
     color: 'teal',
   },
@@ -550,40 +546,6 @@ async function loadData() {
   loading.value = true;
   try {
     exercices.value = await db.exercices.orderBy('annee').reverse().toArray();
-    let m = await db.mairies.get(DEFAULT_MAIRIE_ID);
-    if (!m) m = await db.mairies.toCollection().first();
-    if (!m) {
-      // Créer la mairie par défaut si elle n'existe pas
-      const now = new Date();
-      await db.mairies.add({
-        nom: 'Mairie de Vavoua',
-        code: '433',
-        adresse: 'Avenue Principale',
-        ville: 'Vavoua',
-        departement: 'Vavoua',
-        region: 'Haut-Sassandra',
-        codePostal: '00225',
-        telephone: '+225 23 54 00 00',
-        email: 'contact@mairie-vavoua.ci',
-        maire: 'KALOU BONAVENTURE',
-        createdAt: now,
-        updatedAt: now,
-      });
-      m = await db.mairies.toCollection().first();
-    } else if (!m.maire || !m.departement || !m.region) {
-      // Compléter les champs manquants sur une mairie existante
-      const mId = m.id!;
-      await db.mairies.update(mId, {
-        maire: m.maire || 'KALOU BONAVENTURE',
-        departement: m.departement || 'Vavoua',
-        region: m.region || 'Haut-Sassandra',
-        adresse: m.adresse || 'Avenue Principale',
-        email: m.email || 'contact@mairie-vavoua.ci',
-        updatedAt: new Date(),
-      });
-      m = await db.mairies.get(mId);
-    }
-    mairie.value = m || null;
 
     const params = await db.parametresPaie.toCollection().first();
     parametresPaie.value = params || null;

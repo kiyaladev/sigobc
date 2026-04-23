@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Compte Administratif - Recettes Fonctionnement</title>
     <script src="../dexie.min.js"></script>
+    <script src="../constanteInfo.js"></script>
     <style>
       @page {
         size: A4 landscape;
@@ -170,7 +171,7 @@
         var content = document.getElementById('content');
         content.innerHTML = '';
 
-        var communeNom = (mairie.nom || 'VAVOUA').replace(/^mairie de /i, '').toUpperCase();
+        var communeNom = (mairie.nom || MAIRIE_INFO.nom).replace(/^mairie de /i, '').toUpperCase();
 
         content.innerHTML = '<table style="border: none; margin-bottom: 5px;">'
           + '<tr><td style="width: 30%; font-weight: bold; text-align: center; border: 1px solid #000;">COMMUNE DE ' + communeNom + '</td>'
@@ -315,7 +316,7 @@
           var params = new URLSearchParams(window.location.search);
           if (params.get('exercice')) exercice = parseInt(params.get('exercice'));
 
-          var mairie = (await db.table('mairies').toCollection().first()) || {};
+          var mairie = MAIRIE_INFO;
           var allTaxes = await db.table('taxes').toArray();
           var allPrevRec = await db.table('previsionsRecettes').toArray();
           var previsionsRecettes = allPrevRec.filter(function (p) { return p.exercice === exercice; });

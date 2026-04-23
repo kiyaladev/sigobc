@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Compte Administratif - Récapitulatif Investissement</title>
     <script src="../dexie.min.js"></script>
+    <script src="../constanteInfo.js"></script>
     <style>
       @page {
         size: A4 landscape;
@@ -91,7 +92,7 @@
       function renderPage(data) {
         const exercice = data.exercice || new Date().getFullYear();
         const mairie = data.mairie || {};
-        const mairieNom = mairie.nom ? mairie.nom.replace(/^mairie de /i, '').toUpperCase() : 'VAVOUA';
+        const mairieNom = (mairie.nom || MAIRIE_INFO.nom).replace(/^mairie de /i, '').toUpperCase();
 
         // Build recettes rows
         let totalRecPrev = 0, totalRecReal = 0;
@@ -258,8 +259,7 @@
           var exercice = parseInt(params.get('exercice')) || new Date().getFullYear();
           var mairieId = parseInt(params.get('mairieId')) || 1;
 
-          var mairie = await db.table('mairies').get(mairieId);
-          mairie = mairie || {};
+          var mairie = MAIRIE_INFO;
           var allTaxes = await db.table('taxes').toArray();
           var allPrevisionsRecettes = await db.table('previsionsRecettes').toArray();
           allPrevisionsRecettes = allPrevisionsRecettes.filter(function(r) { return r.exercice === exercice; });

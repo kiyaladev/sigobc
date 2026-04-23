@@ -120,6 +120,7 @@
     </div>
 
     <script src="dexie.min.js"></script>
+    <script src="constanteInfo.js"></script>
     <script>
       const MOIS_LABELS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
       const ROWS_PER_PAGE = 10;
@@ -184,14 +185,15 @@
         const shouldPrint = params.get('print')==='true';
 
         try {
-          const [mairie, employes, toutesLesFiches] = await Promise.all([
-            db.table('mairies').toCollection().first(), db.table('employes').toArray(), db.table('fichesPaie').toArray(),
+          const mairie = MAIRIE_INFO;
+          const [employes, toutesLesFiches] = await Promise.all([
+            db.table('employes').toArray(), db.table('fichesPaie').toArray(),
           ]);
 
           const fiches = toutesLesFiches.filter(f=>f.mois===mois&&f.annee===annee);
           const empMap = new Map(employes.map(e=>[e.id,e]));
-          const maisVille = mairie ? mairie.ville.toUpperCase() : 'VAVOUA';
-          const maisCode = mairie ? mairie.code : '';
+          const maisVille = mairie.ville.toUpperCase();
+          const maisCode = mairie.code;
           const moisLabel = MOIS_LABELS[mois-1]||'';
           const dateAujourdhui = new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
 
@@ -262,7 +264,7 @@
                   <div class="sig-block"><div class="sig-title">Le Comptable Municipal</div><div class="sig-line">Nom, Signature & Cachet</div></div>
                   <div class="sig-block"><div class="sig-title">Le Maire</div><div class="sig-line">Nom, Signature & Cachet officiel</div></div>
                 </div>
-                <div class="footer-doc">Édité le <span class="editable-date" contenteditable="true">${dateAujourdhui}</span> — SIGOBC Mairie de ${mairie?mairie.ville:'Vavoua'} — Document officiel</div>
+                <div class="footer-doc">Édité le <span class="editable-date" contenteditable="true">${dateAujourdhui}</span> — SIGOBC Mairie de ${mairie.ville} — Document officiel</div>
               ` : ''}
               <div class="page-number">Page ${idx+1}/${totalPages}</div>
             </div>`;

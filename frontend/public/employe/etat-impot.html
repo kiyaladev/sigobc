@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>État de Paiement ITS - Vavoua</title>
     <script src="../tailwindcss.js"></script>
+    <script src="../constanteInfo.js"></script>
     <script src="../dexie.min.js"></script>
     <style>
       body {
@@ -213,7 +214,7 @@
       }
       function buildHeader(moisLabel, annee, chapitre, compte) {
         return `<div class="flex justify-between items-start mb-4 text-[13px] font-bold">
-            <div class="text-left leading-snug"><p>DEPARTEMENT DE VAVOUA</p><p>COMMUNE DE VAVOUA</p><p>CODE: 433</p></div>
+            <div class="text-left leading-snug"><p>DEPARTEMENT DE ${MAIRIE_INFO.departement.toUpperCase()}</p><p>COMMUNE DE ${MAIRIE_INFO.ville.toUpperCase()}</p><p>CODE: ${MAIRIE_INFO.code}</p></div>
             <div class="text-center leading-snug"><p>REPUBLIQUE DE COTE D'IVOIRE</p><p class="font-normal italic text-sm mt-1">Union – Discipline – Travail</p><div class="w-16 h-[1.5px] bg-black mx-auto mt-1"></div></div>
           </div>
           <h1 class="text-center font-bold text-xl mb-4">ETAT DE PAIEMENT DE L'IMPOT SUR SALAIRE (ITS)</h1>
@@ -327,7 +328,7 @@
               <tbody>${reportRow}${dataRows}${totalRow}</tbody>
             </table>
             <div class="mt-6 text-[13px]"><p>Arrêté le présent état à la somme de: <span class="font-bold">${numberToWords(cIts)}</span></p></div>
-            <div class="flex justify-end mt-8 text-[13px]"><div class="text-center mr-8"><p>VAVOUA, le <span class="editable-date" contenteditable="true">${new Date().toLocaleDateString('fr-FR')}</span></p><p class="font-bold mt-2">P/Le Maire & P.D</p></div></div>
+            <div class="flex justify-end mt-8 text-[13px]"><div class="text-center mr-8"><p>${MAIRIE_INFO.ville.toUpperCase()}, le <span class="editable-date" contenteditable="true">${new Date().toLocaleDateString('fr-FR')}</span></p><p class="font-bold mt-2">P/Le Maire & P.D</p></div></div>
             <div class="page-number">Page ${idx + 1}/${totalPages}</div>
           </div>`;
         });

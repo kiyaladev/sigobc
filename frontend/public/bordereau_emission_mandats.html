@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Bordereau d'Émission des Mandats</title>
     <script src="dexie.min.js"></script>
+    <script src="constanteInfo.js"></script>
     <script src="vue.global.js"></script>
     <style>
       @page {
@@ -625,13 +626,8 @@
                 return;
               }
 
-              // Charger la mairie
-              if (this.bordereauData.mairieId) {
-                this.mairie = await db.table('mairies').get(this.bordereauData.mairieId);
-              } else if (this.mandats.length > 0) {
-                const premierMandat = this.mandats[0];
-                this.mairie = await db.table('mairies').get(premierMandat.mairieId);
-              }
+              // Utiliser la mairie statique
+              this.mairie = MAIRIE_INFO;
 
               // Charger tous les chapitres
               this.chapitres = await db.table('chapitres').toArray();

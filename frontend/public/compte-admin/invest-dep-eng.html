@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Compte Administratif - Depenses Investissement Engagees</title>
     <script src="../dexie.min.js"></script>
+    <script src="../constanteInfo.js"></script>
     <style>
       @page {
         size: A4 landscape;
@@ -100,13 +101,12 @@
         var params = new URLSearchParams(window.location.search);
         if (params.get('exercice')) exercice = parseInt(params.get('exercice'));
 
-        const [sousChapitres, allPrevisions, allMandats, mairieRaw] = await Promise.all([
+        const [sousChapitres, allPrevisions, allMandats] = await Promise.all([
           db.table('sousChapitres').toArray(),
           db.table('previsions').toArray(),
           db.table('mandats').toArray(),
-          db.table('mairies').toCollection().first()
         ]);
-        const mairie = mairieRaw || {};
+        const mairie = MAIRIE_INFO;
         const previsions = allPrevisions.filter(p => p.exercice === exercice);
         const mandats = allMandats.filter(m => m.exercice === exercice);
 
@@ -220,7 +220,7 @@
           <td class="col-center">-</td>
         </tr>`;
 
-        const nomMairie = (mairie && mairie.nom ? mairie.nom : 'VAVOUA').replace(/^mairie de /i, '').toUpperCase();
+        const nomMairie = (mairie.nom || MAIRIE_INFO.nom).replace(/^mairie de /i, '').toUpperCase();
 
         const contentHtml = `
           <table style="table-layout:fixed">

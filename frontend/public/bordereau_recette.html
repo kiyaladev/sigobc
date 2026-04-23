@@ -555,6 +555,7 @@
         </div>
       </div>
     </div>
+    <script src="constanteInfo.js"></script>
     <script src="dexie.min.js"></script>
     <script>
       /**
@@ -715,8 +716,8 @@
             return;
           }
 
-          // Récupérer la première mairie de la base de données
-          const mairie = await db.table('mairies').toCollection().first();
+          // Utiliser la constante statique MAIRIE_INFO
+          const mairie = MAIRIE_INFO;
 
           // Chercher les déclarations par bordereauRecetteId OU bordereauId
           let declarations = await db.table('declarations')
@@ -727,11 +728,9 @@
           const taxesMap = new Map(taxes.map((t) => [t.id, t]));
 
           // Populate header
-          if (mairie) {
-            document.getElementById('mairie-nom').textContent =
-              `COMMUNE DE ${mairie.ville.toUpperCase()}`;
-            document.getElementById('mairie-code').textContent = `CODE : ${mairie.code}`;
-          }
+          document.getElementById('mairie-nom').textContent =
+            `COMMUNE DE ${mairie.ville.toUpperCase()}`;
+          document.getElementById('mairie-code').textContent = `CODE : ${mairie.code}`;
           document.getElementById('bordereau-exercice').textContent = bordereau.annee;
           document.getElementById('bordereau-numero').textContent = bordereau.numero;
           document.getElementById('bordereau-annee-folio').textContent = bordereau.annee;
@@ -797,7 +796,7 @@
             ? new Date(bordereau.dateTransmission)
             : new Date();
           document.getElementById('signature-date').innerHTML =
-            `A ${mairie ? mairie.ville : 'VAVOUA'}, le <span class="editable-date" contenteditable="true">${emissionDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>`;
+            `A ${mairie.ville}, le <span class="editable-date" contenteditable="true">${emissionDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>`;
 
           if (shouldPrint) {
             setTimeout(() => window.print(), 500);

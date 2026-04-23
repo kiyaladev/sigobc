@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Compte Administratif - Récapitulatif Fonctionnement</title>
     <script src="../dexie.min.js"></script>
+    <script src="../constanteInfo.js"></script>
     <style>
       @page {
         size: A4 landscape;
@@ -163,7 +164,7 @@
             if (latest && latest.data && latest.data.exercice) exercice = latest.data.exercice;
           } catch (e) {}
 
-          var mairie = (await db.table('mairies').toCollection().first()) || {};
+          var mairie = MAIRIE_INFO;
           var allMandats = await db.table('mandats').toArray();
           var mandats = allMandats.filter(function (m) {
             return m.exercice === exercice && m.statut === 'paye';
@@ -297,7 +298,7 @@
               + '</tr>';
           }).join('');
 
-          var communeNom = (mairie.nom || 'VAVOUA').replace(/^mairie de /i, '').toUpperCase();
+          var communeNom = (mairie.nom || MAIRIE_INFO.nom).replace(/^mairie de /i, '').toUpperCase();
 
           var contentHtml = '<table style="width:100%; border-collapse:collapse; table-layout:fixed">'
             + '<colgroup>'

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Compte Administratif - Depenses Investissement Ventilees</title>
     <script src="../dexie.min.js"></script>
+    <script src="../constanteInfo.js"></script>
     <style>
       @page {
         size: A4 landscape;
@@ -358,7 +359,7 @@
           var params = new URLSearchParams(window.location.search);
           if (params.get('exercice')) exercice = parseInt(params.get('exercice'));
 
-          var mairie = (await db.table('mairies').toCollection().first()) || {};
+          var mairie = MAIRIE_INFO;
           var allSousChapitres = await db.table('sousChapitres').toArray();
           var allPrevisions = await db.table('previsions').toArray();
           var previsions = allPrevisions.filter(function (p) {
@@ -442,6 +443,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Compte Administratif - Depenses Investissement Ventilees</title>
     <script src="../dexie.min.js"></script>
+    <script src="../constanteInfo.js"></script>
     <style>
       @page {
         size: A4 landscape;
@@ -813,7 +815,7 @@
           var params = new URLSearchParams(window.location.search);
           if (params.get('exercice')) exercice = parseInt(params.get('exercice'));
 
-          var mairie = (await db.table('mairies').toCollection().first()) || {};
+          var mairie = MAIRIE_INFO;
           var allSousChapitres = await db.table('sousChapitres').toArray();
           var allChapitres = await db.table('chapitres').toArray();
           var allPrevisions = await db.table('previsions').toArray();
@@ -913,6 +915,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Compte Administratif - Depenses Investissement Ventilees</title>
     <script src="../dexie.min.js"></script>
+    <script src="../constanteInfo.js"></script>
     <style>
       @page {
         size: A4 landscape;
@@ -1347,7 +1350,7 @@
           var params = new URLSearchParams(window.location.search);
           if (params.get('exercice')) exercice = parseInt(params.get('exercice'));
 
-          var mairie = (await db.table('mairies').toCollection().first()) || {};
+          var mairie = MAIRIE_INFO;
           var allSousChapitres = await db.table('sousChapitres').toArray();
           var allChapitres = await db.table('chapitres').toArray();
           var allPrevisions = await db.table('previsions').toArray();

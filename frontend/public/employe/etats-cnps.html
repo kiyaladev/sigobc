@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>État de Paiement CNPS - Vavoua</title>
     <script src="../tailwindcss.js"></script>
+    <script src="../constanteInfo.js"></script>
     <script src="../dexie.min.js"></script>
     <style>
       body {
@@ -214,7 +215,7 @@
       }
       function buildHeader(moisLabel, annee, chapitre, compte) {
         return `<div class="flex justify-between items-start mb-4 text-sm font-bold">
-            <div class="text-left leading-snug"><p>DEPARTEMENT DE VAVOUA</p><p>COMMUNE DE VAVOUA</p><p>CODE: 433</p></div>
+            <div class="text-left leading-snug"><p>DEPARTEMENT DE ${MAIRIE_INFO.departement.toUpperCase()}</p><p>COMMUNE DE ${MAIRIE_INFO.ville.toUpperCase()}</p><p>CODE: ${MAIRIE_INFO.code}</p></div>
             <div class="text-center leading-snug"><p>REPUBLIQUE DE COTE D'IVOIRE</p><p class="font-normal italic text-xs mt-1">Union – Discipline – Travail</p><div class="w-12 h-[1px] bg-black mx-auto mt-1"></div></div>
           </div>
           <h1 class="text-center font-bold text-lg mb-4">ETAT DE PAIEMENT DE LA CNPS (PART EMPLOYES)</h1>
@@ -323,7 +324,7 @@
             ${buildHeader(moisLabel, annee, chapitreParam, compteParam)}
             <table class="data-table">${buildTableHead(tauxCnps)}<tbody>${reportRow}${dataRows}${totalRow}</tbody></table>
             <div class="mt-6 text-sm"><p>Arrêté le présent état à la somme de: <span class="font-bold">${numberToWords(cCnps)}</span></p></div>
-            <div class="flex justify-end mt-8 text-sm"><div class="text-center mr-8"><p>VAVOUA, le <span class="editable-date" contenteditable="true">${new Date().toLocaleDateString('fr-FR')}</span></p><p class="font-bold mt-2">P/LE MAIRE & P.D</p></div></div>
+            <div class="flex justify-end mt-8 text-sm"><div class="text-center mr-8"><p>${MAIRIE_INFO.ville.toUpperCase()}, le <span class="editable-date" contenteditable="true">${new Date().toLocaleDateString('fr-FR')}</span></p><p class="font-bold mt-2">P/LE MAIRE & P.D</p></div></div>
             <div class="page-number">Page ${idx + 1}/${totalPages}</div>
           </div>`;
         });

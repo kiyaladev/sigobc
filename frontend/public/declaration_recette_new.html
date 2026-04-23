@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Déclaration de Recettes - A4</title>
     <script src="dexie.min.js"></script>
+    <script src="constanteInfo.js"></script>
     <style>
       /* Configuration générale pour l'impression A4 */
       /* Fonts: use system sans-serif fallbacks for offline support */
@@ -748,7 +749,7 @@
           }
 
           // Récupérer la mairie et la taxe
-          const mairie = await db.table('mairies').toCollection().first();
+          const mairie = MAIRIE_INFO;
           const taxe = declaration.taxeId ? await db.table('taxes').get(declaration.taxeId) : null;
 
           // Formater la date

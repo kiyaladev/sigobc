@@ -122,6 +122,7 @@
     </div>
 
     <script src="dexie.min.js"></script>
+    <script src="constanteInfo.js"></script>
     <script>
       const MOIS_LABELS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
       const ROWS_PER_PAGE = 10;
@@ -195,8 +196,9 @@
         const shouldPrint = params.get('print')==='true';
 
         try {
-          const [mairie, employes, toutesLesFiches] = await Promise.all([
-            db.table('mairies').toCollection().first(), db.table('employes').toArray(), db.table('fichesPaie').toArray(),
+          const mairie = MAIRIE_INFO;
+          const [employes, toutesLesFiches] = await Promise.all([
+            db.table('employes').toArray(), db.table('fichesPaie').toArray(),
           ]);
 
           const fiches = toutesLesFiches.filter(f=>f.mois===mois&&f.annee===annee);

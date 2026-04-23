@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Prévision Budgétaire</title>
     <script src="dexie.min.js"></script>
+    <script src="constanteInfo.js"></script>
     <script src="vue.global.js"></script>
     <style>
       @page {
@@ -520,10 +521,8 @@
                 return;
               }
 
-              // Charger la mairie associée
-              if (this.prevision.mairieId) {
-                this.mairie = await db.table('mairies').get(this.prevision.mairieId);
-              }
+              // Utiliser les informations statiques de la mairie
+              this.mairie = MAIRIE_INFO;
 
               // Charger le chapitre associé
               if (this.prevision.chapitreId) {

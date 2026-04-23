@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Compte Administratif - Resultat</title>
     <script src="../dexie.min.js"></script>
+    <script src="../constanteInfo.js"></script>
     <style>
       @page {
         size: A4 landscape;
@@ -165,16 +166,14 @@
           allMandats,
           allDeclarations,
           allPrevisions,
-          mairieRaw,
         ] = await Promise.all([
           db.table('sousChapitres').toArray(),
           db.table('taxes').toArray(),
           db.table('mandats').toArray(),
           db.table('declarations').toArray(),
           db.table('previsions').toArray(),
-          db.table('mairies').toCollection().first(),
         ]);
-        const mairie = mairieRaw || {};
+        const mairie = MAIRIE_INFO;
         const mandatsN = allMandats.filter(m => m.exercice === exercice);
         const mandatsN1 = allMandats.filter(m => m.exercice === exercicePrev);
         const declarationsN = allDeclarations.filter(d => d.exercice === exercice);
@@ -249,7 +248,7 @@
 
       function render(data) {
         const { resultsN, resultsN1, exercice, exercicePrev, mairie } = data;
-        const mairieNom = mairie ? mairie.nom || 'Mairie de Vavoua' : 'Mairie de Vavoua';
+        const mairieNom = (mairie && mairie.nom) ? mairie.nom : MAIRIE_INFO.nom;
 
         const resFoncN = resultsN.recFonc - resultsN.depFonc;
         const resInvN = resultsN.recInv - resultsN.depInv;
@@ -388,7 +387,7 @@
           '<div class="signature-box"><br><strong>LE TRESORIER PRINCIPAL</strong><br><br><br><br><br><br><strong>MOBIE BOKA WILFREED</strong></div>';
         content +=
           '<div class="signature-box">Fait à ' +
-          (mairie.ville || 'VAVOUA').toUpperCase() +
+          (mairie.ville || MAIRIE_INFO.ville).toUpperCase() +
           ' le, ' +
           dateStr +
           '<br><strong>LE MAIRE</strong><br><br><br><br><br><br><strong>KALOU BONAVENTURE</strong></div>';
@@ -480,7 +479,7 @@
           '<div class="signature-box"><br><strong>LE TRESORIER PRINCIPAL</strong><br><br><br><br><br><br><strong>MOBIE BOKA WILFREED</strong></div>';
         content +=
           '<div class="signature-box">Fait à ' +
-          (mairie.ville || 'VAVOUA').toUpperCase() +
+          (mairie.ville || MAIRIE_INFO.ville).toUpperCase() +
           ' le, ' +
           dateStr +
           '<br><strong>LE MAIRE</strong><br><br><br><br><br><br><strong>KALOU BONAVENTURE</strong></div>';
