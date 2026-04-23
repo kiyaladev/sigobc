@@ -280,6 +280,7 @@ import {
 import DataTable from 'src/components/DataTable.vue';
 import PageHeader from 'src/components/PageHeader.vue';
 import { openPrintWindow, sendMessageToWindow } from 'src/utils/printUrl';
+import { MAIRIE_INFO } from 'src/constanteInfo';
 
 const $q = useQuasar();
 
@@ -669,9 +670,9 @@ async function downloadBordereauPDF(bordereau: BordereauRecette) {
       void sendMessageToWindow(printWindow, {
         type: 'FILL_AND_PRINT',
         data: {
-          mairie: mairie?.nom || 'Mairie de Vavoua',
-          codeCommune: mairie?.code || '433',
-          ville: mairie?.ville || 'Vavoua',
+          mairie: mairie?.nom || MAIRIE_INFO.nom,
+          codeCommune: mairie?.code || MAIRIE_INFO.code,
+          ville: mairie?.ville || MAIRIE_INFO.ville,
           numeroBordereau: formatNumeroBordereau(bordereau.numero, bordereau.annee),
           annee: bordereau.annee,
           nombreDeclarations: bordereau.nombreDeclarations,

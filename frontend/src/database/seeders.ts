@@ -1,4 +1,5 @@
 import { db, DEFAULT_MAIRIE_ID } from './db';
+import { MAIRIE_INFO } from 'src/constanteInfo';
 import type {
   SousChapitre,
   Prevision,
@@ -267,16 +268,16 @@ export async function seedDefaultData() {
 
   // 1. Mairie
   const mairieId = await db.mairies.add({
-    nom: 'Mairie de Vavoua',
-    code: '433',
-    adresse: 'Avenue Principale',
-    ville: 'Vavoua',
-    departement: 'Vavoua',
-    region: 'Haut-Sassandra',
-    codePostal: '00225',
-    telephone: '+225 23 54 00 00',
-    email: 'contact@mairie-vavoua.ci',
-    maire: 'KALOU BONAVENTURE',
+    nom: MAIRIE_INFO.nom,
+    code: MAIRIE_INFO.code,
+    adresse: MAIRIE_INFO.adresse,
+    ville: MAIRIE_INFO.ville,
+    departement: MAIRIE_INFO.departement,
+    region: MAIRIE_INFO.region,
+    codePostal: MAIRIE_INFO.codePostal,
+    telephone: MAIRIE_INFO.telephone,
+    email: MAIRIE_INFO.email,
+    maire: MAIRIE_INFO.maire,
     createdAt: now,
     updatedAt: now,
   });
@@ -3213,12 +3214,12 @@ export async function ensureCorrectMairieInfo() {
       console.log('🔄 Correction des données de la mairie détectée (Bodokro -> Vavoua)...');
 
       await db.mairies.update(mairie.id, {
-        nom: 'Mairie de Vavoua',
-        code: '433',
-        ville: 'Vavoua',
-        departement: 'Vavoua',
-        region: 'Haut-Sassandra',
-        email: 'contact@mairie-vavoua.ci',
+        nom: MAIRIE_INFO.nom,
+        code: MAIRIE_INFO.code,
+        ville: MAIRIE_INFO.ville,
+        departement: MAIRIE_INFO.departement,
+        region: MAIRIE_INFO.region,
+        email: MAIRIE_INFO.email,
         updatedAt: new Date(),
       });
 

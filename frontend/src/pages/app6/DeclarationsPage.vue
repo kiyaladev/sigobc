@@ -252,6 +252,7 @@ import FilterBar from 'src/components/FilterBar.vue';
 import DataTable from 'src/components/DataTable.vue';
 import PageHeader from 'src/components/PageHeader.vue';
 import { openPrintWindow, sendMessageToWindow } from 'src/utils/printUrl';
+import { MAIRIE_INFO } from 'src/constanteInfo';
 
 const $q = useQuasar();
 
@@ -535,7 +536,7 @@ function openDialog(declaration?: Declaration) {
       exercice: currentYear,
       taxeId: taxes.value[0]?.id || 0,
       nomPartieVersante: '',
-      adresse: mairies.value[0]?.ville || 'Vavoua',
+      adresse: mairies.value[0]?.ville || MAIRIE_INFO.ville,
       montantRecette: 0,
       numeroEncaissement: '',
       statut: 'validee',
@@ -658,7 +659,7 @@ function printDeclaration(declaration: Declaration) {
           : '',
         natureRecette: taxe?.libelle || '',
         montantRecette: declaration.montantRecette || declaration.montant || 0,
-        ville: mairie?.ville || 'Vavoua',
+        ville: mairie?.ville || MAIRIE_INFO.ville,
         observations: declaration.observations || '',
       },
     });
@@ -692,7 +693,7 @@ function downloadDeclarationPDF(declaration: Declaration) {
           : '',
         natureRecette: taxe?.libelle || '',
         montantRecette: declaration.montantRecette || declaration.montant || 0,
-        ville: mairie?.ville || 'Vavoua',
+        ville: mairie?.ville || MAIRIE_INFO.ville,
         observations: declaration.observations || '',
       },
     });

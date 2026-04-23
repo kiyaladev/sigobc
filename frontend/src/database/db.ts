@@ -1,4 +1,5 @@
 import { Collection } from './collection';
+import { MAIRIE_INFO } from 'src/constanteInfo';
 
 // Constante pour l'ID de la mairie par défaut (Mairie de Vavoua)
 export const DEFAULT_MAIRIE_ID = 1;
@@ -648,13 +649,13 @@ export async function initializeDatabase() {
 
     // Créer la Mairie de Vavoua (mairie unique de l'application)
     const mairieId = await db.mairies.add({
-      nom: 'Mairie de Vavoua',
-      code: '433',
-      adresse: 'Avenue Principale',
-      ville: 'Vavoua',
-      codePostal: '00225',
-      telephone: '+225 XX XX XX XX',
-      email: 'contact@mairie-vavoua.ci',
+      nom: MAIRIE_INFO.nom,
+      code: MAIRIE_INFO.code,
+      adresse: MAIRIE_INFO.adresse,
+      ville: MAIRIE_INFO.ville,
+      codePostal: MAIRIE_INFO.codePostal,
+      telephone: MAIRIE_INFO.telephone,
+      email: MAIRIE_INFO.email,
       createdAt: now,
       updatedAt: now,
     });
