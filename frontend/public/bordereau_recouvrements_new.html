@@ -445,5 +445,22 @@
 
       <div class="ct-number">CT 53</div>
     </div>
+
+    <script src="constanteInfo.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        if (typeof MAIRIE_INFO !== 'undefined') {
+          document.querySelectorAll('[data-field="ville"]').forEach(function (el) {
+            el.textContent = MAIRIE_INFO.ville;
+          });
+          document.querySelectorAll('[data-field="mairie"]').forEach(function (el) {
+            el.textContent = MAIRIE_INFO.ville;
+          });
+          document.querySelectorAll('[data-field="codeCommune"]').forEach(function (el) {
+            el.textContent = MAIRIE_INFO.code;
+          });
+        }
+      });
+    </script>
   </body>
 </html>

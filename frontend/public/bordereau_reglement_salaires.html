@@ -203,7 +203,7 @@
 
           const fiches = toutesLesFiches.filter(f=>f.mois===mois&&f.annee===annee);
           const empMap = new Map(employes.map(e=>[e.id,e]));
-          const maisVille = mairie ? mairie.ville.toUpperCase() : 'VAVOUA';
+          const maisVille = mairie.ville.toUpperCase();
           const maisCode = mairie ? mairie.code : '';
           const moisLabel = MOIS_LABELS[mois-1]||'';
           const dateAujourdhui = new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
@@ -270,7 +270,7 @@
                   <div class="sig-block"><div class="sig-title">Visé par le Comptable Municipal</div><div class="sig-line">Nom, signature & cachet</div></div>
                   <div class="sig-block"><div class="sig-title">Approuvé par le Maire</div><div class="sig-line">Nom, signature & cachet officiel</div></div>
                 </div>
-                <div class="footer-doc">Édité le <span class="editable-date" contenteditable="true">${dateAujourdhui}</span> — SIGOBC Mairie de ${mairie?mairie.ville:'Vavoua'} — Document officiel / confidentiel</div>
+                <div class="footer-doc">Édité le <span class="editable-date" contenteditable="true">${dateAujourdhui}</span> — SIGOBC Mairie de ${mairie.ville} — Document officiel / confidentiel</div>
               ` : ''}
               <div class="page-number">Page ${idx+1}/${totalPages}</div>
             </div>`;

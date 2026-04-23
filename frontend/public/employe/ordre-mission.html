@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ordre de Mission - Commune de Vavoua</title>
+    <title>Ordre de Mission</title>
     <!-- Vue 3 -->
     <script src="../vue.global.js"></script>
     <!-- Dexie JS -->
@@ -13,6 +13,7 @@
     <script src="../dayjs-locale-fr.js"></script>
 
     <script src="../constanteInfo.js"></script>
+    <script>document.title = 'Ordre de Mission - Commune de ' + MAIRIE_INFO.ville;</script>
     <script src="../tailwindcss.js"></script>
     <style>
       /* Fonts: use system serif fallbacks for offline support */
@@ -204,7 +205,7 @@
             <div class="w-[100px] h-[80px] flex items-center justify-center overflow-hidden">
               <img
                 src="../commune-de-vavoua.png"
-                alt="Logo Commune de Vavoua"
+                :alt="'Logo Commune de ' + mairie.ville"
                 class="max-w-full max-h-full object-contain"
                 onerror="this.style.display='none'"
               />

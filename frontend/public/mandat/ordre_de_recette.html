@@ -308,16 +308,16 @@
             <div class="header-cell header-left">
               <div class="country-name">REPUBLIQUE DE COTE D'IVOIRE</div>
               <div class="department">Département</div>
-              <div class="department">De {{ mairie?.ville?.toUpperCase() || 'Vavoua' }}</div>
+              <div class="department">De {{ mairie.ville.toUpperCase() }}</div>
               <div class="ville-section">
                 <div class="underline" style="font-weight: bold">
-                  VILLE De {{ mairie?.ville?.toUpperCase() || 'Vavoua' }}.
+                  VILLE De {{ mairie.ville.toUpperCase() }}.
                 </div>
                 <div class="underline" style="margin-top: 3mm">
-                  COMMUNE De {{ mairie?.ville?.toUpperCase() || 'Vavoua' }}
+                  COMMUNE De {{ mairie.ville.toUpperCase() }}
                 </div>
                 <div style="margin-top: 3mm">
-                  Code &nbsp;&nbsp;{{ mairie?.code || '433' }}...............................
+                  Code &nbsp;&nbsp;{{ mairie.code }}...............................
                 </div>
               </div>
             </div>
@@ -335,7 +335,7 @@
             <div class="header-cell header-right">
               <div class="recette-title">RECETTE MUNICIPALE</div>
               <div class="field-line">
-                De {{ mairie?.ville?.toUpperCase() || 'Vavoua' }}.................................
+                De {{ mairie.ville.toUpperCase() }}.................................
               </div>
               <div class="field-line" style="margin-top: 4mm">
                 N° d'ordre :.........<span class="handwritten">{{ mandat.numeroMandat }}</span
@@ -359,12 +359,11 @@
           <div class="content-row ordonnateur-section" :contenteditable="true">
             <div class="ordonnateur-text">
               <div class="ordonnateur-line">
-                L'ordonnateur : ....KALOU
-                BONAVENTURE.....................................................................
+                L'ordonnateur : ....{{ mairie.maire }}.....................................................................
               </div>
               <div class="ordonnateur-line" style="margin-top: 4mm">
                 Maire de la
-                Commune...Vavoua...............................................................................................
+                Commune...{{ mairie.ville }}...............................................................................................
               </div>
             </div>
           </div>
@@ -424,17 +423,17 @@
               <div class="country-name">REPUBLIQUE DE COTE D'IVOIRE</div>
               <div class="department">Département</div>
               <div class="department">
-                De {{ mairie?.ville?.toUpperCase() || 'Vavoua' }}.................................
+                De {{ mairie.ville.toUpperCase() }}.................................
               </div>
               <div class="ville-section">
                 <div>
-                  VILLE De {{ mairie?.ville?.toUpperCase() || 'Vavoua' }}.....................
+                  VILLE De {{ mairie.ville.toUpperCase() }}.....................
                 </div>
                 <div style="margin-top: 3mm">
-                  COMMUNE De {{ mairie?.ville?.toUpperCase() || 'Vavoua' }}..........
+                  COMMUNE De {{ mairie.ville.toUpperCase() }}..........
                 </div>
                 <div style="margin-top: 3mm">
-                  Code {{ mairie?.code || '433' }}.................................
+                  Code {{ mairie.code }}.................................
                 </div>
               </div>
             </div>
@@ -452,7 +451,7 @@
             <div class="header-cell header-right">
               <div class="recette-title">RECETTE MUNICIPALE</div>
               <div class="field-line">
-                De {{ mairie?.ville?.toUpperCase() || 'Vavoua' }}.................................
+                De {{ mairie.ville.toUpperCase() }}.................................
               </div>
               <div class="field-line" style="margin-top: 4mm">
                 N° d'ordre :.........<span class="handwritten">{{ mandat.numeroMandat }}</span
@@ -475,12 +474,11 @@
           <div class="content-row ordonnateur-section" :contenteditable="true">
             <div class="ordonnateur-text">
               <div class="ordonnateur-line">
-                L'ordonnateur : ....KALOU
-                BONAVENTURE.....................................................................
+                L'ordonnateur : ....{{ mairie.maire }}.....................................................................
               </div>
               <div class="ordonnateur-line" style="margin-top: 4mm">
                 Maire de la
-                Commune...Vavoua...............................................................................................
+                Commune...{{ mairie.ville }}...............................................................................................
               </div>
             </div>
           </div>
@@ -534,16 +532,16 @@
             <div class="header-cell header-left">
               <div class="country-name">REPUBLIQUE DE COTE D'IVOIRE</div>
               <div class="department">Département</div>
-              <div class="department">De {{ mairie?.ville?.toUpperCase() || 'Vavoua' }}</div>
+              <div class="department">De {{ mairie.ville.toUpperCase() }}</div>
               <div class="ville-section">
                 <div class="underline" style="font-weight: bold">
-                  VILLE De {{ mairie?.ville?.toUpperCase() || 'Vavoua' }}.
+                  VILLE De {{ mairie.ville.toUpperCase() }}.
                 </div>
                 <div class="underline" style="margin-top: 3mm">
-                  COMMUNE De {{ mairie?.ville?.toUpperCase() || 'Vavoua' }}
+                  COMMUNE De {{ mairie.ville.toUpperCase() }}
                 </div>
                 <div style="margin-top: 3mm">
-                  Code &nbsp;&nbsp;{{ mairie?.code || '433' }}...............................
+                  Code &nbsp;&nbsp;{{ mairie.code }}...............................
                 </div>
               </div>
             </div>
@@ -561,7 +559,7 @@
             <div class="header-cell header-right">
               <div class="recette-title">RECETTE MUNICIPALE</div>
               <div class="field-line">
-                De {{ mairie?.ville?.toUpperCase() || 'Vavoua' }}.................................
+                De {{ mairie.ville.toUpperCase() }}.................................
               </div>
               <div class="field-line" style="margin-top: 4mm">
                 N° d'ordre :.........<span class="handwritten">{{ mandat.numeroMandat }}</span
@@ -585,12 +583,11 @@
           <div class="content-row ordonnateur-section" :contenteditable="true">
             <div class="ordonnateur-text">
               <div class="ordonnateur-line">
-                L'ordonnateur : ....KALOU
-                BONAVENTURE.....................................................................
+                L'ordonnateur : ....{{ mairie.maire }}.....................................................................
               </div>
               <div class="ordonnateur-line" style="margin-top: 4mm">
                 Maire de la
-                Commune...Vavoua...............................................................................................
+                Commune...{{ mairie.ville }}...............................................................................................
               </div>
             </div>
           </div>

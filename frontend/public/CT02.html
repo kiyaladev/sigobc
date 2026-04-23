@@ -211,11 +211,11 @@
       <!-- EN-TÊTE -->
       <header class="header">
         <div class="header-left">
-          <strong>RECETTE MUNICIPALE<br />DE VAVOUA</strong>
+          <strong id="recette-ville">RECETTE MUNICIPALE<br />DE VAVOUA</strong>
         </div>
 
         <div class="header-center">
-          <div class="main-title">COMMUNE DE VAVOUA</div>
+          <div id="commune-titre" class="main-title">COMMUNE DE VAVOUA</div>
           <div style="margin-top: 10px">
             <span>Compte :</span> <strong>6000</strong><br />
             <span>Intitulé :</span> <strong>Administration</strong>
@@ -599,6 +599,15 @@
     <!-- Charger Dexie pour accéder à IndexedDB -->
     <script src="dexie.min.js"></script>
     <script src="constanteInfo.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        if (typeof MAIRIE_INFO !== 'undefined') {
+          var ville = MAIRIE_INFO.ville ? MAIRIE_INFO.ville.toUpperCase() : 'VAVOUA';
+          document.getElementById('recette-ville').innerHTML = 'RECETTE MUNICIPALE<br />DE ' + ville;
+          document.getElementById('commune-titre').textContent = 'COMMUNE DE ' + ville;
+        }
+      });
+    </script>
 
     <script>
       function formatNumber(num) {

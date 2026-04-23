@@ -567,7 +567,7 @@
           .forEach((el) => (el.textContent = montantChiffres));
         document
           .querySelectorAll('[data-field="ville"]')
-          .forEach((el) => (el.textContent = data.ville || 'Vavoua'));
+          .forEach((el) => (el.textContent = data.ville || MAIRIE_INFO.ville));
       }
 
       // Écouter les messages de la fenêtre parent

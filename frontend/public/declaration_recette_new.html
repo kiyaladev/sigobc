@@ -700,7 +700,7 @@
         elements.natureRecette.forEach((el) => (el.textContent = data.natureRecette));
         elements.montantLettres.forEach((el) => (el.textContent = montantLettres));
         elements.montantChiffres.forEach((el) => (el.textContent = montantChiffres));
-        elements.ville.forEach((el) => (el.textContent = data.ville || 'Vavoua'));
+        elements.ville.forEach((el) => (el.textContent = data.ville || MAIRIE_INFO.ville));
       }
 
       // Écouter les messages de la fenêtre parent
@@ -759,7 +759,7 @@
 
           // Préparer les données pour le remplissage
           const data = {
-            mairie: mairie?.nom || 'Mairie de Vavoua',
+            mairie: mairie.nom,
             codeCommune: mairie?.code || '433',
             exercice: declaration.exercice,
             article: taxe?.code || '',
@@ -771,7 +771,7 @@
             dateEncaissement: dateEncaissement,
             natureRecette: taxe?.libelle || '',
             montantRecette: declaration.montantRecette || declaration.montant || 0,
-            ville: mairie?.ville || 'Vavoua',
+            ville: mairie.ville,
           };
 
           remplirFormulaire(data);

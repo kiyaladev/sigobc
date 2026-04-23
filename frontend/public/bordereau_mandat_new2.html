@@ -332,7 +332,7 @@
                   style="padding: 10px; text-align-last: left"
                 >
                   <div class="text-republic bd-dashed">REPUBLIQUE DE COTE D'IVOIRE</div>
-                  <div class="text-commune">COMMUNE DE VAVOUA</div>
+                  <div id="commune-titre" class="text-commune">COMMUNE DE VAVOUA</div>
                   <div class="text-code">CODE : 433</div>
                 </div>
               </th>
@@ -669,7 +669,7 @@
             </div>
 
             <div class="signature-block">
-              <div style="font-weight: bold; font-size: 11px; margin-bottom: 5px">
+              <div id="signature-lieu-date" style="font-weight: bold; font-size: 11px; margin-bottom: 5px">
                 A VAVOUA, le 15 DÉCEMBRE 2018
               </div>
               <div style="font-style: italic; font-size: 12px; margin-bottom: 40px">
@@ -744,5 +744,15 @@
         </div>
       </div>
     </div>
+  <script src="constanteInfo.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      if (typeof MAIRIE_INFO !== 'undefined') {
+        var ville = MAIRIE_INFO.ville ? MAIRIE_INFO.ville.toUpperCase() : 'VAVOUA';
+        document.getElementById('commune-titre').textContent = 'COMMUNE DE ' + ville;
+        document.getElementById('signature-lieu-date').textContent = 'A ' + ville + ', le 15 DÉCEMBRE 2018';
+      }
+    });
+  </script>
   </body>
 </html>

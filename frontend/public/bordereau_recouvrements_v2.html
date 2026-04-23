@@ -626,8 +626,8 @@
 
           // Préparer les données pour le remplissage
           const data = {
-            mairie: mairie?.nom || 'Mairie de Vavoua',
-            ville: mairie?.ville || 'Vavoua',
+            mairie: mairie.nom,
+            ville: mairie.ville,
             codeCommune: mairie?.code || '433',
             exercice: bordereau.annee,
             numeroBordereau: `${bordereau.numero}-${bordereau.annee % 100}`,
