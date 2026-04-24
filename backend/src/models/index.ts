@@ -103,12 +103,38 @@ const PrevisionSchema = new Schema({
   montantPrevu: Number,
   montantEngage: Number,
   montantDisponible: Number,
+  typeBien: { type: String, enum: ['immobilier', 'mobilier', 'incorporel'] },
   observations: String,
   statut: { type: String, enum: ['brouillon', 'validee'] },
   personnelId: Number,
   ...ts,
 });
 export const PrevisionModel = m('Prevision', PrevisionSchema);
+
+// ─── Projet ──────────────────────────────────────────────────────────────────
+
+const ProjetSchema = new Schema({
+  id: { type: Number, required: true, unique: true },
+  numeroOrdre: String,
+  refPT: String,
+  libelle: String,
+  sousChapitreId: Number,
+  patrimoine: String,
+  montant: Number,
+  realise: Number,
+  annee: Number,
+  typeBien: { type: String, enum: ['immobilier', 'mobilier', 'incorporel'] },
+  statut: { type: String, enum: ['en_cours', 'termine', 'annule'] },
+  observations: String,
+  alienationCompteFonctionnel: String,
+  alienationComptePatrimonial: String,
+  alienationMontant: Number,
+  mairieId: Number,
+  personnelId: Number,
+  ...ts,
+});
+ProjetSchema.index({ annee: 1, sousChapitreId: 1, mairieId: 1 });
+export const ProjetModel = m('Projet', ProjetSchema);
 
 // ─── Mandat ──────────────────────────────────────────────────────────────────
 
@@ -140,6 +166,8 @@ const MandatSchema = new Schema({
   numeroDeliberation: String,
   dateDeliberation: Date,
   montantPrecompter: Number,
+  typeBien: { type: String, enum: ['immobilier', 'mobilier', 'incorporel'] },
+  projetId: Number,
   personnelId: Number,
   ...ts,
 });
@@ -490,6 +518,26 @@ const ExerciceSchema = new Schema({
 });
 export const ExerciceModel = m('Exercice', ExerciceSchema);
 
+// ─── Fournisseur ─────────────────────────────────────────────────────────────
+
+const FournisseurSchema = new Schema({
+  id: { type: Number, required: true, unique: true },
+  nom: String,
+  sigle: String,
+  compteContribuable: String,
+  registreCommerce: String,
+  compteBancaire: String,
+  telephone: String,
+  email: String,
+  siege: String,
+  mairieId: Number,
+  actif: Boolean,
+  observations: String,
+  ...ts,
+});
+FournisseurSchema.index({ compteContribuable: 1 });
+export const FournisseurModel = m('Fournisseur', FournisseurSchema);
+
 // ─── Registry (collection name → model) ─────────────────────────────────────
 
 export const MODEL_REGISTRY: Record<string, mongoose.Model<mongoose.AnyObject>> = {
@@ -517,4 +565,6 @@ export const MODEL_REGISTRY: Record<string, mongoose.Model<mongoose.AnyObject>> 
   servicesApp7: ServiceApp7Model,
   printData: PrintDataModel,
   exercices: ExerciceModel,
+  projets: ProjetModel,
+  fournisseurs: FournisseurModel,
 };

@@ -43,3 +43,7 @@ license.dat
 backend/.env
 backend/dist/
 backend/node_modules/
+
+# Build artifacts (too large for GitHub)
+SIGOBC-win32-x64.zip
+*.zip

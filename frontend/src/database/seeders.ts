@@ -19,6 +19,7 @@ import type {
 
 const now = new Date();
 const CURRENT_YEAR = now.getFullYear();
+const MAX_MANDATS_PAR_BORDEREAU = 10;
 
 // =================================================================
 //                      HELPERS
@@ -1460,12 +1461,12 @@ export async function seedTestData(options: SeedOptions = {}) {
     const previsionsCreated = await seedPrevisions(chapitreIds, utilisateurIds, sousChapitreIds);
     const previsionIds = previsionsCreated.map((p) => p.id!);
 
-    // Seeding bordereaux mandats
-    console.log(`🌱 Seeding ${bordereauMandats} test bordereau mandats...`);
+    // Les bordereaux sont créés dans `seedMandats` (≤ 10 mandats/bordereau).
     const bordereauMandatsCreated = await seedBordereauMandats(utilisateurIds, bordereauMandats);
 
-    // Seeding mandats (3 par couple chapitre/sous-chapitre)
-    console.log('🌱 Seeding mandats (3 par couple chapitre/sous-chapitre)...');
+    console.log(
+      `🌱 Seeding mandats (${MAX_MANDATS_PAR_BORDEREAU} max par bordereau, bordereaux générés à la volée)...`,
+    );
     await seedMandats(
       chapitreIds,
       sousChapitreIds,
@@ -1497,12 +1498,12 @@ export async function seedTestData(options: SeedOptions = {}) {
     console.log('🌱 Seeding déclarations de recettes...');
     await seedDeclarations(utilisateurIds, bordereauxRecetteCreated);
 
-    // Seeding bordereaux mandats de recettes
-    console.log('🌱 Seeding bordereaux mandats de recettes...');
+    // Les bordereaux de recettes sont créés dans `seedMandatsRecette` (≤ 10 mandats/bordereau).
     const bordereauMandatsRecetteCreated = await seedBordereauMandatsRecette(utilisateurIds, 10);
 
-    // Seeding mandats de recettes
-    console.log('🌱 Seeding mandats de recettes...');
+    console.log(
+      `🌱 Seeding mandats de recettes (${MAX_MANDATS_PAR_BORDEREAU} max par bordereau, bordereaux générés à la volée)...`,
+    );
     const taxeList = await db.taxes.toArray();
     const taxeIds = taxeList.map((t) => t.id!);
     await seedMandatsRecette(chapitreIds, taxeIds, utilisateurIds, bordereauMandatsRecetteCreated);
@@ -2794,42 +2795,13 @@ async function seedPrevisions(
   return created;
 }
 
-async function seedBordereauMandats(personnelIds: number[], count: number = 20) {
-  const bordereauMandats: Partial<BordereauMandat>[] = [];
-  const exercices = [CURRENT_YEAR - 2, CURRENT_YEAR - 1, CURRENT_YEAR];
-  let numeroGlobal = 1;
-
-  for (let i = 0; i < count; i++) {
-    const exercice = exercices[i % exercices.length]!;
-    const mois = Math.floor((i / count) * 12);
-    const dateEmission = new Date(exercice, mois, randomAmount(1, 28));
-
-    if (exercice === CURRENT_YEAR && dateEmission > now) {
-      dateEmission.setTime(now.getTime() - randomAmount(1, 30) * 24 * 60 * 60 * 1000);
-    }
-
-    const statuts: Array<'ouvert' | 'ferme'> = ['ouvert', 'ferme'];
-    const statut = exercice < CURRENT_YEAR ? 'ferme' : randomChoice(statuts);
-
-    bordereauMandats.push({
-      numero: numeroGlobal++,
-      exercice,
-      dateEmission,
-      mairieId: DEFAULT_MAIRIE_ID,
-      montantTotal: 0,
-      nombreMandats: 0,
-      statut,
-      personnelId: randomChoice(personnelIds),
-      createdAt: dateEmission,
-      updatedAt: now,
-    });
-  }
-
-  await db.bordereauMandats.bulkAdd(bordereauMandats as BordereauMandat[]);
-  console.log(`✅ ${count} bordereaux mandats créés`);
-
-  const created = await db.bordereauMandats.toArray();
-  return created;
+// Les bordereaux sont désormais créés dans `seedMandats` afin de respecter la
+// règle « ≤ 10 mandats par bordereau ». On garde la signature pour compat.
+async function seedBordereauMandats(
+  _personnelIds: number[],
+  _count: number = 20,
+): Promise<BordereauMandat[]> {
+  return [];
 }
 
 async function seedMandats(
@@ -2837,7 +2809,7 @@ async function seedMandats(
   sousChapitreIds: number[],
   previsionIds: number[],
   personnelIds: number[],
-  bordereauMandats: BordereauMandat[],
+  _bordereauMandats: BordereauMandat[],
 ) {
   const beneficiaires = [
     'THEODULE DIRO LAHUET',
@@ -2862,12 +2834,6 @@ async function seedMandats(
   const chapitresData = await db.chapitres.toArray();
   const sousChapitresData = await db.sousChapitres.toArray();
 
-  const mandats: Partial<Mandat>[] = [];
-  const bordereauUpdates = new Map<number, { count: number; total: number }>();
-
-  let numeroOrdre = 0;
-  const MANDATS_PAR_COUPLE = 3;
-
   const MONTH_SPECS: Array<{ label: string; start: Date; end: Date; exercice: number }> = [
     {
       label: 'janvier',
@@ -2883,7 +2849,11 @@ async function seedMandats(
     },
   ];
 
-  // Générer 3 mandats pour chaque couple chapitre/sous-chapitre, pour novembre ET décembre de l'année courante
+  // 1) Générer tous les mandats (sans bordereauMandatId).
+  const mandatSpecs: Partial<Mandat>[] = [];
+  const MANDATS_PAR_COUPLE = 3;
+  let numeroOrdre = 0;
+
   for (const monthSpec of MONTH_SPECS) {
     for (const chapitreId of chapitreIds) {
       for (const sousChapitreId of sousChapitreIds) {
@@ -2894,20 +2864,11 @@ async function seedMandats(
 
         for (let m = 0; m < MANDATS_PAR_COUPLE; m++) {
           numeroOrdre++;
-          const bordereau = randomChoice(bordereauMandats);
-          const bordereauId = bordereau.id;
-
           const exercice = monthSpec.exercice;
           const dateMandat = randomDate(monthSpec.start, monthSpec.end);
-
           const numeroMandat = String(numeroOrdre);
           const montant = randomAmount(5000, 500000);
-
-          const statuts: Array<'brouillon' | 'paye'> = ['brouillon', 'paye'];
-          const statut =
-            bordereau.statut === 'ferme' ? randomChoice(statuts) : randomChoice(statuts);
-
-          // Générer l'etatMensuelId
+          const statut = randomChoice(['brouillon', 'paye'] as Array<'brouillon' | 'paye'>);
           const etatMensuelId = generateEtatMensuelId(dateMandat, sousChapitreCode, chapitreCode);
 
           const mandat: Partial<Mandat> = {
@@ -2929,67 +2890,42 @@ async function seedMandats(
             updatedAt: now,
           };
 
-          if (bordereauId) {
-            mandat.bordereauMandatId = bordereauId;
-          }
-
           if (previsionIds.length > 0 && Math.random() > 0.2) {
             mandat.previsionId = randomChoice(previsionIds);
           }
 
-          mandats.push(mandat);
-
-          if (bordereauId) {
-            const current = bordereauUpdates.get(bordereauId) || { count: 0, total: 0 };
-            bordereauUpdates.set(bordereauId, {
-              count: current.count + 1,
-              total: current.total + montant,
-            });
-          }
+          mandatSpecs.push(mandat);
         }
       }
     }
   }
 
-  await db.mandats.bulkAdd(mandats as Mandat[]);
-
-  for (const [id, stats] of bordereauUpdates.entries()) {
-    await db.bordereauMandats.update(id, {
-      nombreMandats: stats.count,
-      montantTotal: stats.total,
-      updatedAt: now,
-    });
+  if (mandatSpecs.length === 0) {
+    console.log('✅ Aucun mandat à seeder');
+    return;
   }
 
-  console.log(
-    `✅ ${mandats.length} mandats créés (${MANDATS_PAR_COUPLE} par couple chapitre/sous-chapitre, pour ${MONTH_SPECS.length} mois: ${chapitreIds.length} chapitres x ${sousChapitreIds.length} sous-chapitres)`,
-  );
-}
+  // 2) Créer juste assez de bordereaux pour tenir la règle « ≤ 10 mandats / bordereau ».
+  const nBordereaux = Math.ceil(mandatSpecs.length / MAX_MANDATS_PAR_BORDEREAU);
+  const bordereauSpecs: Partial<BordereauMandat>[] = [];
 
-// =================================================================
-//           SEEDERS POUR MANDATS DE RECETTES (App6)
-// =================================================================
+  for (let i = 0; i < nBordereaux; i++) {
+    const start = i * MAX_MANDATS_PAR_BORDEREAU;
+    const group = mandatSpecs.slice(start, start + MAX_MANDATS_PAR_BORDEREAU);
+    const first = group[0]!;
+    const exercice = first.exercice!;
+    const dateEmission = first.dateMandat ?? now;
+    const montantTotal = group.reduce((s, m) => s + (m.montant ?? 0), 0);
+    const statut: 'ouvert' | 'ferme' =
+      exercice < CURRENT_YEAR ? 'ferme' : randomChoice(['ouvert', 'ferme'] as const);
 
-async function seedBordereauMandatsRecette(personnelIds: number[], count: number = 10) {
-  const bordereaux: Omit<BordereauMandatRecette, 'id'>[] = [];
-  const exercices = [CURRENT_YEAR - 1, CURRENT_YEAR];
-  let numeroGlobal = 1;
-
-  for (let i = 0; i < count; i++) {
-    const exercice = exercices[i % exercices.length]!;
-    const mois = Math.floor((i / count) * 12);
-    const dateEmission = new Date(exercice, mois, randomAmount(1, 28));
-
-    const statuts: ('ouvert' | 'ferme')[] = ['ouvert', 'ferme'];
-    const statut = exercice < CURRENT_YEAR ? 'ferme' : randomChoice(statuts);
-
-    bordereaux.push({
-      numero: numeroGlobal++,
+    bordereauSpecs.push({
+      numero: i + 1,
       exercice,
       dateEmission,
       mairieId: DEFAULT_MAIRIE_ID,
-      montantTotal: 0,
-      nombreMandats: 0,
+      montantTotal,
+      nombreMandats: group.length,
       statut,
       personnelId: randomChoice(personnelIds),
       createdAt: dateEmission,
@@ -2997,19 +2933,40 @@ async function seedBordereauMandatsRecette(personnelIds: number[], count: number
     });
   }
 
-  await db.bordereauMandatsRecette.bulkAdd(bordereaux);
-  console.log(`✅ ${count} bordereaux mandats recettes créés`);
-  return await db.bordereauMandatsRecette.toArray();
+  const bordereauIds = await db.bordereauMandats.bulkAdd(bordereauSpecs as BordereauMandat[]);
+
+  // 3) Assigner séquentiellement un bordereau à chaque mandat.
+  for (let i = 0; i < mandatSpecs.length; i++) {
+    const bId = bordereauIds[Math.floor(i / MAX_MANDATS_PAR_BORDEREAU)];
+    if (bId !== undefined) mandatSpecs[i]!.bordereauMandatId = bId;
+  }
+
+  await db.mandats.bulkAdd(mandatSpecs as Mandat[]);
+
+  console.log(
+    `✅ ${mandatSpecs.length} mandats créés dans ${nBordereaux} bordereaux (max ${MAX_MANDATS_PAR_BORDEREAU} mandats/bordereau)`,
+  );
+}
+
+// =================================================================
+//           SEEDERS POUR MANDATS DE RECETTES (App6)
+// =================================================================
+
+// Même logique que `seedBordereauMandats` : les bordereaux sont créés dans
+// `seedMandatsRecette` pour respecter la règle « ≤ 10 mandats par bordereau ».
+async function seedBordereauMandatsRecette(
+  _personnelIds: number[],
+  _count: number = 10,
+): Promise<BordereauMandatRecette[]> {
+  return [];
 }
 
 async function seedMandatsRecette(
   chapitreIds: number[],
   taxeIds: number[],
   personnelIds: number[],
-  bordereauxRecette: BordereauMandatRecette[],
+  _bordereauxRecette: BordereauMandatRecette[],
 ) {
-  const mandatsRecette: Omit<MandatRecette, 'id'>[] = [];
-
   const partiesVersantes = [
     'ENTREPRISE ABC SARL',
     'COMMERCE GENERAL KOUASSI',
@@ -3052,28 +3009,23 @@ async function seedMandatsRecette(
     },
   ];
 
-  const bordereauUpdates = new Map<number, { count: number; total: number }>();
-  let numeroOrdre = 1000;
+  // 1) Générer tous les mandats (sans bordereauMandatRecetteId).
+  const mandatSpecs: Omit<MandatRecette, 'id'>[] = [];
   const MANDATS_PAR_COUPLE = 2;
+  let numeroOrdre = 1000;
 
-  // Créer 2 mandats par couple chapitre/taxe pour chaque mois
   for (const monthSpec of MONTH_SPECS) {
     for (const chapitreId of chapitreIds) {
       for (const taxeId of taxeIds) {
         for (let m = 0; m < MANDATS_PAR_COUPLE; m++) {
           numeroOrdre++;
-
-          const bordereau = randomChoice(bordereauxRecette);
-          const bordereauId = bordereau.id;
           const exercice = monthSpec.exercice;
           const dateMandat = randomDate(monthSpec.start, monthSpec.end);
           const numeroMandat = String(numeroOrdre);
           const montant = randomAmount(10000, 500000);
+          const statut = randomChoice(['paye', 'paye'] as Array<'brouillon' | 'paye' | 'annule'>);
 
-          const statutsOptions: ('brouillon' | 'paye' | 'annule')[] = ['paye', 'paye'];
-          const statut = bordereau.statut === 'ferme' ? 'paye' : randomChoice(statutsOptions);
-
-          const mandat: Omit<MandatRecette, 'id'> = {
+          mandatSpecs.push({
             exercice,
             numeroMandat,
             dateMandat,
@@ -3088,38 +3040,57 @@ async function seedMandatsRecette(
             personnelId: randomChoice(personnelIds),
             createdAt: dateMandat,
             updatedAt: now,
-          };
-
-          if (bordereauId) {
-            mandat.bordereauMandatRecetteId = bordereauId;
-          }
-
-          mandatsRecette.push(mandat);
-
-          if (bordereauId) {
-            const current = bordereauUpdates.get(bordereauId) || { count: 0, total: 0 };
-            bordereauUpdates.set(bordereauId, {
-              count: current.count + 1,
-              total: current.total + montant,
-            });
-          }
+          });
         }
       }
     }
   }
 
-  await db.mandatsRecette.bulkAdd(mandatsRecette);
+  if (mandatSpecs.length === 0) {
+    console.log('✅ Aucun mandat de recette à seeder');
+    return;
+  }
 
-  for (const [id, stats] of bordereauUpdates.entries()) {
-    await db.bordereauMandatsRecette.update(id, {
-      nombreMandats: stats.count,
-      montantTotal: stats.total,
+  // 2) Créer juste assez de bordereaux pour tenir la règle « ≤ 10 mandats / bordereau ».
+  const nBordereaux = Math.ceil(mandatSpecs.length / MAX_MANDATS_PAR_BORDEREAU);
+  const bordereauSpecs: Omit<BordereauMandatRecette, 'id'>[] = [];
+
+  for (let i = 0; i < nBordereaux; i++) {
+    const start = i * MAX_MANDATS_PAR_BORDEREAU;
+    const group = mandatSpecs.slice(start, start + MAX_MANDATS_PAR_BORDEREAU);
+    const first = group[0]!;
+    const exercice = first.exercice;
+    const dateEmission = first.dateMandat;
+    const montantTotal = group.reduce((s, m) => s + (m.montant ?? 0), 0);
+    const statut: 'ouvert' | 'ferme' =
+      exercice < CURRENT_YEAR ? 'ferme' : randomChoice(['ouvert', 'ferme'] as const);
+
+    bordereauSpecs.push({
+      numero: i + 1,
+      exercice,
+      dateEmission,
+      mairieId: DEFAULT_MAIRIE_ID,
+      montantTotal,
+      nombreMandats: group.length,
+      statut,
+      personnelId: randomChoice(personnelIds),
+      createdAt: dateEmission,
       updatedAt: now,
     });
   }
 
+  const bordereauIds = await db.bordereauMandatsRecette.bulkAdd(bordereauSpecs);
+
+  // 3) Assigner séquentiellement un bordereau à chaque mandat.
+  for (let i = 0; i < mandatSpecs.length; i++) {
+    const bId = bordereauIds[Math.floor(i / MAX_MANDATS_PAR_BORDEREAU)];
+    if (bId !== undefined) mandatSpecs[i]!.bordereauMandatRecetteId = bId;
+  }
+
+  await db.mandatsRecette.bulkAdd(mandatSpecs);
+
   console.log(
-    `✅ ${mandatsRecette.length} mandats de recettes créés (${MANDATS_PAR_COUPLE} par couple chapitre/taxe)`,
+    `✅ ${mandatSpecs.length} mandats de recettes créés dans ${nBordereaux} bordereaux (max ${MAX_MANDATS_PAR_BORDEREAU} mandats/bordereau)`,
   );
 }
 // =================================================================
@@ -3209,9 +3180,9 @@ export async function ensureCorrectMairieInfo() {
     const mairie = mairies[0];
     if (!mairie) return;
 
-    // Si c'est Bodokro ou si le code n'est pas 433, on met à jour
-    if (mairie.nom.includes('Bodokro') || mairie.code !== '433') {
-      console.log('🔄 Correction des données de la mairie détectée (Bodokro -> Vavoua)...');
+    // Si le nom/code ne correspond pas à MAIRIE_INFO, on met à jour
+    if (mairie.nom !== MAIRIE_INFO.nom || mairie.code !== MAIRIE_INFO.code) {
+      console.log(`🔄 Correction des données de la mairie détectée (-> ${MAIRIE_INFO.nom})...`);
 
       await db.mairies.update(mairie.id, {
         nom: MAIRIE_INFO.nom,

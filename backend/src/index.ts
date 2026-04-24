@@ -5,6 +5,7 @@ import mongoose from 'mongoose';
 import { connect } from './db.js';
 import { MODEL_REGISTRY } from './models/index.js';
 import { makeCrudRouter } from './routes/crud.js';
+import { runSeeders } from './seed.js';
 
 dotenv.config();
 
@@ -45,6 +46,7 @@ const start = async (): Promise<void> => {
   try {
     await connect();
     console.log('MongoDB connected');
+    await runSeeders();
   } catch (error) {
     const message = error instanceof Error ? error.message : 'unknown error';
     console.warn(`MongoDB not connected at startup: ${message}`);
