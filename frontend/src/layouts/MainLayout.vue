@@ -673,7 +673,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useAuthStore } from 'src/stores/auth-store';
 import ThemeToggle from 'src/components/ThemeToggle.vue';
-import logoMairie from '/logo-mairie-vavoua.png';
+import logoMairie from '/logo-mairie-gboguhe.png';
 import { dataMode, setDataMode, type DataMode } from 'src/database/connectivity';
 
 const router = useRouter();

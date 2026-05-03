@@ -1427,13 +1427,8 @@ export async function seedDefaultData() {
 /**
  * Remplit la base de données avec une grande quantité de données de test aléatoires.
  */
-export async function seedTestData(options: SeedOptions = {}) {
+export async function seedTestData(_options: SeedOptions = {}) {
   console.log('🚀 Starting test data seeders...');
-
-  const {
-    // mandats = 200,
-    bordereauMandats = 20,
-  } = options;
 
   try {
     // D'abord, vider et réinitialiser la base
@@ -1461,19 +1456,10 @@ export async function seedTestData(options: SeedOptions = {}) {
     const previsionsCreated = await seedPrevisions(chapitreIds, utilisateurIds, sousChapitreIds);
     const previsionIds = previsionsCreated.map((p) => p.id!);
 
-    // Les bordereaux sont créés dans `seedMandats` (≤ 10 mandats/bordereau).
-    const bordereauMandatsCreated = await seedBordereauMandats(utilisateurIds, bordereauMandats);
-
     console.log(
       `🌱 Seeding mandats (${MAX_MANDATS_PAR_BORDEREAU} max par bordereau, bordereaux générés à la volée)...`,
     );
-    await seedMandats(
-      chapitreIds,
-      sousChapitreIds,
-      previsionIds,
-      utilisateurIds,
-      bordereauMandatsCreated,
-    );
+    await seedMandats(chapitreIds, sousChapitreIds, previsionIds, utilisateurIds);
 
     // Mettre à jour les prévisions avec les montants engagés réels
     console.log('🌱 Mise à jour des montants engagés dans les prévisions...');
@@ -1498,15 +1484,12 @@ export async function seedTestData(options: SeedOptions = {}) {
     console.log('🌱 Seeding déclarations de recettes...');
     await seedDeclarations(utilisateurIds, bordereauxRecetteCreated);
 
-    // Les bordereaux de recettes sont créés dans `seedMandatsRecette` (≤ 10 mandats/bordereau).
-    const bordereauMandatsRecetteCreated = await seedBordereauMandatsRecette(utilisateurIds, 10);
-
     console.log(
       `🌱 Seeding mandats de recettes (${MAX_MANDATS_PAR_BORDEREAU} max par bordereau, bordereaux générés à la volée)...`,
     );
     const taxeList = await db.taxes.toArray();
     const taxeIds = taxeList.map((t) => t.id!);
-    await seedMandatsRecette(chapitreIds, taxeIds, utilisateurIds, bordereauMandatsRecetteCreated);
+    await seedMandatsRecette(chapitreIds, taxeIds, utilisateurIds);
 
     // Seeding chapitres recettes (Nature des recettes avec Autres par défaut)
     console.log('🌱 Seeding chapitres recettes (Nature des recettes)...');
@@ -2795,21 +2778,11 @@ async function seedPrevisions(
   return created;
 }
 
-// Les bordereaux sont désormais créés dans `seedMandats` afin de respecter la
-// règle « ≤ 10 mandats par bordereau ». On garde la signature pour compat.
-async function seedBordereauMandats(
-  _personnelIds: number[],
-  _count: number = 20,
-): Promise<BordereauMandat[]> {
-  return [];
-}
-
 async function seedMandats(
   chapitreIds: number[],
   sousChapitreIds: number[],
   previsionIds: number[],
   personnelIds: number[],
-  _bordereauMandats: BordereauMandat[],
 ) {
   const beneficiaires = [
     'THEODULE DIRO LAHUET',
@@ -2952,20 +2925,10 @@ async function seedMandats(
 //           SEEDERS POUR MANDATS DE RECETTES (App6)
 // =================================================================
 
-// Même logique que `seedBordereauMandats` : les bordereaux sont créés dans
-// `seedMandatsRecette` pour respecter la règle « ≤ 10 mandats par bordereau ».
-async function seedBordereauMandatsRecette(
-  _personnelIds: number[],
-  _count: number = 10,
-): Promise<BordereauMandatRecette[]> {
-  return [];
-}
-
 async function seedMandatsRecette(
   chapitreIds: number[],
   taxeIds: number[],
   personnelIds: number[],
-  _bordereauxRecette: BordereauMandatRecette[],
 ) {
   const partiesVersantes = [
     'ENTREPRISE ABC SARL',

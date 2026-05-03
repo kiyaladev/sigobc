@@ -13,7 +13,9 @@
     <script src="../dayjs-locale-fr.js"></script>
 
     <script src="../constanteInfo.js"></script>
-    <script>document.title = 'Ordre de Mission - Commune de ' + MAIRIE_INFO.ville;</script>
+    <script>
+      document.title = 'Ordre de Mission - Commune de ' + MAIRIE_INFO.ville;
+    </script>
     <script src="../tailwindcss.js"></script>
     <style>
       /* Fonts: use system serif fallbacks for offline support */
@@ -200,18 +202,6 @@
             </p>
           </div>
 
-          <!-- Blason / Logo placeholder -->
-          <div class="mt-3 mb-1">
-            <div class="w-[100px] h-[80px] flex items-center justify-center overflow-hidden">
-              <img
-                src="../commune-de-vavoua.png"
-                :alt="'Logo Commune de ' + mairie.ville"
-                class="max-w-full max-h-full object-contain"
-                onerror="this.style.display='none'"
-              />
-            </div>
-          </div>
-
           <div class="text-[13px] leading-tight mt-2">
             <p class="font-bold uppercase tracking-wide">Secrétariat Général</p>
             <p class="text-[10px] tracking-[3px] text-gray-400">--------------</p>
@@ -331,7 +321,8 @@
           <div class="mt-10 flex justify-end">
             <div class="text-center">
               <p class="font-bold text-[15px]">
-                {{ mairie.ville }}, le <span class="editable-date" contenteditable="true">{{ todayStr }}</span>
+                {{ mairie.ville }}, le
+                <span class="editable-date" contenteditable="true">{{ todayStr }}</span>
               </p>
               <p class="font-bold text-[15px] mt-1">P/Le Maire &amp; P.D</p>
             </div>
@@ -457,7 +448,16 @@
             loadData();
           });
 
-          return { data, loading, error, agentNom, todayStr, formatDate, formatAmount, mairie: MAIRIE_INFO };
+          return {
+            data,
+            loading,
+            error,
+            agentNom,
+            todayStr,
+            formatDate,
+            formatAmount,
+            mairie: MAIRIE_INFO,
+          };
         },
       }).mount('#app');
     </script>

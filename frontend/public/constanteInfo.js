@@ -4,7 +4,7 @@ var MAIRIE_INFO = {
   nom: 'Mairie de Gboguhé',
   code: '491',
   ville: 'Gboguhé',
-  departement: 'Gboguhé',
+  departement: 'Daloa',
   region: 'Haut-Sassandra',
   maire: 'OUATTARA BAKARY',
   telephone: '+225 23 54 00 00',

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, shell } from 'electron';
+import { app, BrowserWindow, Menu, ipcMain, shell } from 'electron';
 import path from 'path';
 import os from 'os';
 import { fileURLToPath } from 'url';
@@ -53,6 +53,7 @@ async function createWindow() {
     minWidth: 1024,
     minHeight: 700,
     useContentSize: true,
+    autoHideMenuBar: true,
     webPreferences: {
       contextIsolation: true,
       // More info: https://v2.quasar.dev/quasar-cli-vite/developing-electron-apps/electron-preload-script
@@ -117,6 +118,7 @@ app.disableHardwareAcceleration();
 app.commandLine.appendSwitch('disable-gpu-compositing');
 
 void app.whenReady().then(() => {
+  Menu.setApplicationMenu(null);
   setupLicenseHandlers();
   void createWindow();
 });

@@ -40,7 +40,6 @@ export class LicenseManager {
     return crypto.createHash('sha256').update(machineString).digest('hex');
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   activateLicense(_licenseKey: string): ValidationResult {
     // TODO: Implémenter la validation de la clé de licence
     try {
@@ -86,7 +85,9 @@ export class LicenseManager {
       };
     }
 
-    const daysRemaining = Math.floor((expirationDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    const daysRemaining = Math.floor(
+      (expirationDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
+    );
 
     return {
       valid: true,
@@ -120,7 +121,7 @@ export class LicenseManager {
       const errorMessage = _error instanceof Error ? _error.message : 'Erreur inconnue';
       return {
         valid: false,
-        error: 'Erreur lors de la génération de la licence d\'essai: ' + errorMessage,
+        error: "Erreur lors de la génération de la licence d'essai: " + errorMessage,
       };
     }
   }
@@ -128,4 +129,3 @@ export class LicenseManager {
 
 // Export par défaut pour compatibilité
 export default LicenseManager;
-

@@ -307,8 +307,8 @@
           <div class="header-row">
             <div class="header-cell header-left">
               <div class="country-name">REPUBLIQUE DE COTE D'IVOIRE</div>
-              <div class="department">Département</div>
-              <div class="department">De {{ mairie.ville.toUpperCase() }}</div>
+              <div class="department">Département De Daloa</div>
+              <div class="department"></div>
               <div class="ville-section">
                 <div class="underline" style="font-weight: bold">
                   VILLE De {{ mairie.ville.toUpperCase() }}.
@@ -359,11 +359,12 @@
           <div class="content-row ordonnateur-section" :contenteditable="true">
             <div class="ordonnateur-text">
               <div class="ordonnateur-line">
-                L'ordonnateur : ....{{ mairie.maire }}.....................................................................
+                L'ordonnateur : ....{{ mairie.maire
+                }}.....................................................................
               </div>
               <div class="ordonnateur-line" style="margin-top: 4mm">
-                Maire de la
-                Commune...{{ mairie.ville }}...............................................................................................
+                Maire de la Commune...{{ mairie.ville
+                }}...............................................................................................
               </div>
             </div>
           </div>
@@ -426,9 +427,7 @@
                 De {{ mairie.ville.toUpperCase() }}.................................
               </div>
               <div class="ville-section">
-                <div>
-                  VILLE De {{ mairie.ville.toUpperCase() }}.....................
-                </div>
+                <div>VILLE De {{ mairie.ville.toUpperCase() }}.....................</div>
                 <div style="margin-top: 3mm">
                   COMMUNE De {{ mairie.ville.toUpperCase() }}..........
                 </div>
@@ -474,11 +473,12 @@
           <div class="content-row ordonnateur-section" :contenteditable="true">
             <div class="ordonnateur-text">
               <div class="ordonnateur-line">
-                L'ordonnateur : ....{{ mairie.maire }}.....................................................................
+                L'ordonnateur : ....{{ mairie.maire
+                }}.....................................................................
               </div>
               <div class="ordonnateur-line" style="margin-top: 4mm">
-                Maire de la
-                Commune...{{ mairie.ville }}...............................................................................................
+                Maire de la Commune...{{ mairie.ville
+                }}...............................................................................................
               </div>
             </div>
           </div>
@@ -583,11 +583,12 @@
           <div class="content-row ordonnateur-section" :contenteditable="true">
             <div class="ordonnateur-text">
               <div class="ordonnateur-line">
-                L'ordonnateur : ....{{ mairie.maire }}.....................................................................
+                L'ordonnateur : ....{{ mairie.maire
+                }}.....................................................................
               </div>
               <div class="ordonnateur-line" style="margin-top: 4mm">
-                Maire de la
-                Commune...{{ mairie.ville }}...............................................................................................
+                Maire de la Commune...{{ mairie.ville
+                }}...............................................................................................
               </div>
             </div>
           </div>
@@ -824,9 +825,9 @@
 
               // Charger le bordereau
               if (this.mandat.bordereauMandatRecetteId) {
-                this.bordereau = await db.table('bordereauMandatsRecette').get(
-                  this.mandat.bordereauMandatRecetteId,
-                );
+                this.bordereau = await db
+                  .table('bordereauMandatsRecette')
+                  .get(this.mandat.bordereauMandatRecetteId);
               }
 
               console.log('Mandat chargé:', this.mandat);

@@ -40,11 +40,13 @@ Use this mapping to know the current vs. former names—so you can correctly int
 
 
 
+
+
 <!-- github-copilot-toolbox:mcp-skills-awareness-begin -->
 
 ### MCP & Skills awareness (GitHub Copilot Toolbox)
 
-_Last synced: 2026-04-23T06:37:54.720Z._
+_Last synced: 2026-05-02T16:58:15.588Z._
 
 - **Full report:** `.github/copilot-toolbox-mcp-skills-awareness.md` in this workspace (auto-overwritten on each scan). Use it as ground truth for configured servers and skill folders.
 - **MCP:** For **live tools**, use **Copilot Chat → Agent** and **trust/start** the right servers in the MCP UI.
@@ -53,7 +55,7 @@ _Last synced: 2026-04-23T06:37:54.720Z._
 
 #### Workspace MCP
 
-- `c:\Users\Coumbassa Stephane\Documents\GitHub\declarapp\.vscode\mcp.json` _(workspace: declarapp)_ — _servers defined_
+- `c:\Users\Coumbassa Stephane\Documents\Kiyala\sigobc\.vscode\mcp.json` _(workspace: sigobc)_ — _servers defined_
 
 | Server id | Kind | Detail |
 |-----------|------|--------|
@@ -74,6 +76,7 @@ _None found (or no workspace open)._
 - **microsoft-foundry** — `C:\Users\Coumbassa Stephane\.agents\skills\microsoft-foundry` — Deploy, evaluate, and manage Foundry agents end-to-end: Docker build, ACR push, hosted/prompt agent create, container start, batch eval, prompt optimization, prompt optimizer workflows, agent.yaml, dataset curation from
 
 <!-- github-copilot-toolbox:mcp-skills-awareness-end -->
+
 <!-- github-copilot-memory-bank:begin -->
 # Plan / Act workflow (Cursor-style)
 

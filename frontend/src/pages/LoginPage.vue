@@ -128,7 +128,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useAuthStore } from 'src/stores/auth-store';
-import logoMairie from '/logo-mairie-vavoua.png';
+import logoMairie from '/logo-mairie-gboguhe.png';
 
 const router = useRouter();
 const $q = useQuasar();

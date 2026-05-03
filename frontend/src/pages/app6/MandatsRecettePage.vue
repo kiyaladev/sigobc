@@ -398,6 +398,46 @@
               </div>
             </div>
 
+            <!-- Budget disponible info -->
+            <q-banner
+              v-if="budgetInfo && formData.statut === 'paye'"
+              :class="
+                (formData.montant || 0) > budgetInfo.disponible
+                  ? 'bg-red-1 text-red-8'
+                  : 'bg-teal-1 text-teal-8'
+              "
+              rounded
+              dense
+              class="q-mt-xs"
+            >
+              <template v-slot:avatar>
+                <q-icon
+                  :name="(formData.montant || 0) > budgetInfo.disponible ? 'warning' : 'info'"
+                />
+              </template>
+              <div class="text-caption text-weight-medium">
+                Budget {{ budgetInfo.taxeLabel }}
+              </div>
+              <div class="row q-gutter-md text-caption">
+                <span
+                  >Prevision : <strong>{{ formatMontant(budgetInfo.totalPrevu) }}</strong></span
+                >
+                <span
+                  >Mandate : <strong>{{ formatMontant(budgetInfo.totalMandated) }}</strong></span
+                >
+                <span
+                  >Disponible : <strong>{{ formatMontant(budgetInfo.disponible) }}</strong></span
+                >
+              </div>
+              <div
+                v-if="(formData.montant || 0) > budgetInfo.disponible"
+                class="text-weight-bold q-mt-xs"
+              >
+                Depassement de
+                {{ formatMontant((formData.montant || 0) - budgetInfo.disponible) }}
+              </div>
+            </q-banner>
+
             <q-input
               v-model="formData.observations"
               label="Observations"
@@ -427,6 +467,7 @@ import {
   type Taxe,
   type BordereauMandatRecette,
   type Exercice,
+  type PrevisionRecette,
   DEFAULT_MAIRIE_ID,
 } from 'src/database/db';
 import DataTable from 'src/components/DataTable.vue';
@@ -440,6 +481,7 @@ const mandats = ref<MandatRecette[]>([]);
 const taxes = ref<Taxe[]>([]);
 const bordereaux = ref<BordereauMandatRecette[]>([]);
 const exercices = ref<Exercice[]>([]);
+const previsions = ref<PrevisionRecette[]>([]);
 const loading = ref(false);
 
 const lockedYears = computed(() =>
@@ -710,6 +752,55 @@ function formatDate(dateValue: Date | undefined): string {
   return date.formatDate(dateValue, 'DD/MM/YYYY');
 }
 
+// Budget info: show available prevision for current taxe selection
+const budgetInfo = computed(() => {
+  const ex = formData.value.exercice;
+  const taxeId = formData.value.taxeId;
+  if (!ex || !taxeId) return null;
+
+  const matchingPrevisions = previsions.value.filter(
+    (p) => p.exercice === ex && p.taxeId === taxeId,
+  );
+  const totalPrevu = matchingPrevisions.reduce((s, p) => s + p.montantPrevu, 0);
+  if (totalPrevu === 0) return null;
+
+  const totalMandated = mandats.value
+    .filter(
+      (m) =>
+        m.exercice === ex &&
+        m.taxeId === taxeId &&
+        m.statut === 'paye' &&
+        m.id !== editingId.value,
+    )
+    .reduce((s, m) => s + (m.montant || 0), 0);
+
+  const disponible = totalPrevu - totalMandated;
+  const taxe = taxes.value.find((t) => t.id === taxeId);
+
+  return {
+    totalPrevu,
+    totalMandated,
+    disponible,
+    taxeLabel: taxe ? `${taxe.code} - ${taxe.libelle}` : '',
+  };
+});
+
+function checkBudgetAvailability(): string | null {
+  const info = budgetInfo.value;
+  if (!info) return null;
+  const montant = formData.value.montant || 0;
+  if (montant > info.disponible) {
+    return (
+      `Le montant du mandat (${formatMontant(montant)}) depasse le budget disponible.\n\n` +
+      `  Prevision : ${formatMontant(info.totalPrevu)}\n` +
+      `  Deja mandate : ${formatMontant(info.totalMandated)}\n` +
+      `  Disponible : ${formatMontant(info.disponible)}\n` +
+      `  Depassement : ${formatMontant(montant - info.disponible)}`
+    );
+  }
+  return null;
+}
+
 function getStatutColor(statut: string): string {
   const colors: Record<string, string> = {
     brouillon: 'grey',
@@ -744,12 +835,14 @@ function getCompte(row: MandatRecette): string {
 async function loadData() {
   loading.value = true;
   try {
-    [mandats.value, taxes.value, bordereaux.value, exercices.value] = await Promise.all([
-      db.mandatsRecette.toArray(),
-      db.taxes.toArray(),
-      db.bordereauMandatsRecette.toArray(),
-      db.exercices.toArray(),
-    ]);
+    [mandats.value, taxes.value, bordereaux.value, exercices.value, previsions.value] =
+      await Promise.all([
+        db.mandatsRecette.toArray(),
+        db.taxes.toArray(),
+        db.bordereauMandatsRecette.toArray(),
+        db.exercices.toArray(),
+        db.previsionsRecettes.toArray(),
+      ]);
 
     // Trier par date décroissante
     mandats.value.sort((a, b) => {
@@ -840,6 +933,21 @@ async function saveMandat() {
   ) {
     $q.notify({ type: 'warning', message: 'Veuillez remplir tous les champs obligatoires' });
     return;
+  }
+
+  // Verifier le budget disponible si le mandat est mandaté
+  if (formData.value.statut === 'paye') {
+    const budgetError = checkBudgetAvailability();
+    if (budgetError) {
+      $q.notify({
+        type: 'negative',
+        message: 'Depassement de budget !',
+        caption: budgetError,
+        timeout: 8000,
+        multiLine: true,
+      });
+      return;
+    }
   }
 
   try {

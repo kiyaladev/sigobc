@@ -47,3 +47,4 @@ backend/node_modules/
 # Build artifacts (too large for GitHub)
 SIGOBC-win32-x64.zip
 *.zip
+frontend/dist/

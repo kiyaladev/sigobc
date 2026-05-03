@@ -1,6 +1,6 @@
 # GitHub Copilot Toolbox — MCP & Skills awareness
 
-_Generated: 2026-04-23T06:37:54.718Z_
+_Generated: 2026-05-02T16:58:14.946Z_
 
 ## How to use this report
 
@@ -13,9 +13,9 @@ _Generated: 2026-04-23T06:37:54.718Z_
 
 ## MCP — workspace
 
-Workspace `mcp.json` _(folder: declarapp)_
+Workspace `mcp.json` _(folder: sigobc)_
 
-- **c:\Users\Coumbassa Stephane\Documents\GitHub\declarapp\.vscode\mcp.json** — _File exists — servers defined_
+- **c:\Users\Coumbassa Stephane\Documents\Kiyala\sigobc\.vscode\mcp.json** — _File exists — servers defined_
 
 | Server id | Kind | Detail |
 |-----------|------|--------|
