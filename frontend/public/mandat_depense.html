@@ -39,7 +39,7 @@
           background-color: white;
           width: 210mm;
           min-height: 287mm;
-          padding: 3mm 5mm; /* Marges intérieures */
+          padding: 1.5mm 3mm; /* Marges intérieures */
           box-shadow: 0 0 15px rgba(0,0,0,0.1);
           display: flex;
           flex-direction: column;
@@ -192,6 +192,7 @@
       .vu-bon-section {
           padding: 6px;
           flex-grow: 1;
+          font-size: 14px;
       }
 
       /* FOOTER */
@@ -344,9 +345,7 @@
           </div>
         </div>
         <div class="header-col header-right text-center">
-          <p class="uppercase">
-            TRESORERIE <br />DE <span data-field="mairieTresorerie"></span>
-          </p>
+          <p class="uppercase">TRESORERIE <br />DE <span data-field="mairieTresorerie"></span></p>
           <!-- <p data-field="mairieNom"></p> -->
           <div class="text-left mt-2" style="font-size: 0.8em">
             <p>N° d'inscription au livre d'exécution</p>
@@ -415,12 +414,12 @@
           <div class="justification-section">
             <div>
               <p>Pièces justificatives de la dépense :</p>
-              <p class="bold italic ml-2">Voir état de solde ci-joint</p>
+              <p class="bold italic ml-2" contenteditable="true">Voir état de solde ci-joint</p>
             </div>
 
             <!-- <div><span class="dotted-line"></span></div> -->
             <div class="mt-1">
-              <p class="bold">Décision d'engagement:</p>
+              <p class="bold" contenteditable="true">Décision d'engagement:</p>
               <hr />
               <br />
               <p>
@@ -489,17 +488,25 @@
               >
             </p>
             <p class="text-sm italic mt-1">Signature et cachet de l'Ordonnateur</p>
-            <p class="bold mt-2">P/ LE MAIRE & P.D.</p>
+            <p class="bold mt-2" contenteditable="true">P/ LE MAIRE & P.D.</p>
             <br /><br /><br /><br /><br />
           </div>
 
           <div class="vu-bon-section">
-            <p class="text-center bold">Vu bon à Payer</p>
+            <p class="bold">Vu bon à Payer à virer pour la somme de (A) :</p>
             <div class="mt-2">
               <span class="dotted-line mt-2"></span>
               <span class="dotted-line mt-2"></span>
+            </div>
+            <p class="bold">Pour acquit de la somme indiquée ci-dessus (A) :</p>
+            <div class="mt-2">
               <span class="dotted-line mt-2"></span>
               <span class="dotted-line mt-2"></span>
+            </div>
+            <div class="mt-2" contenteditable="true">
+              <span contenteditable="true">
+                Gboguhé, le .....................................................................
+              </span>
             </div>
           </div>
         </div>
@@ -507,7 +514,7 @@
 
       <!-- FOOTER -->
 
-      <div class="footer-note">Pour acquit de la somme indiquée ci-dessus (A) :</div>
+      <!-- <div class="footer-note">Pour acquit de la somme indiquée ci-dessus (A) :</div> -->
       <div class="ct-code">CT 21</div>
     </div>
     <script src="dexie.min.js"></script>

@@ -1,5 +1,6 @@
 <template>
   <q-layout view="lHh Lpr lFf">
+    <DemoBanner />
     <q-header elevated class="modern-header print-hide">
       <q-toolbar class="q-py-sm">
         <q-btn
@@ -653,7 +654,35 @@
     </q-drawer>
 
     <q-page-container class="modern-page-container">
-      <router-view v-slot="{ Component }">
+      <!-- Écran de blocage si période d'essai expirée -->
+      <div v-if="demoStore.isExpired" class="expired-overlay">
+        <q-card class="expired-card text-center" flat bordered>
+          <q-card-section>
+            <q-icon name="lock" size="64px" color="negative" />
+            <h5 class="q-mt-md q-mb-sm">Période d'essai expirée</h5>
+            <p class="text-grey-7">
+              Votre période d'essai de 3 mois est terminée.<br />
+              Seul l'export de vos données reste disponible.
+            </p>
+          </q-card-section>
+          <q-card-actions align="center" class="q-pb-lg">
+            <q-btn
+              color="primary"
+              icon="download"
+              label="Exporter mes données"
+              @click="router.push({ name: 'admin-backup' })"
+            />
+            <q-btn
+              outline
+              color="primary"
+              icon="key"
+              label="Activer une licence"
+            />
+          </q-card-actions>
+        </q-card>
+      </div>
+
+      <router-view v-if="!demoStore.isExpired" v-slot="{ Component }">
         <transition
           appear
           enter-active-class="animated fadeIn"
@@ -668,11 +697,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useAuthStore } from 'src/stores/auth-store';
+import { useDemoStore } from 'src/stores/demo-store';
 import ThemeToggle from 'src/components/ThemeToggle.vue';
+import DemoBanner from 'src/components/DemoBanner.vue';
 import logoMairie from '/logo-mairie-gboguhe.png';
 import { dataMode, setDataMode, type DataMode } from 'src/database/connectivity';
 
@@ -680,6 +711,11 @@ const router = useRouter();
 const route = useRoute();
 const $q = useQuasar();
 const authStore = useAuthStore();
+const demoStore = useDemoStore();
+
+onMounted(() => {
+  demoStore.initializeDemo();
+});
 
 const leftDrawerOpen = ref(false);
 
@@ -754,6 +790,20 @@ function onLogout() {
 </script>
 
 <style scoped lang="scss">
+.expired-overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  padding: 24px;
+}
+
+.expired-card {
+  max-width: 480px;
+  width: 100%;
+  border-radius: 16px;
+}
+
 .modern-header {
   background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(18px);

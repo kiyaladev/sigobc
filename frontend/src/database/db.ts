@@ -533,6 +533,7 @@ export interface ParametresPaie {
   tauxCnpsPatronalPrestationFamiliale: number;
   tauxCnpsPatronalAccidentTravail: number;
   tauxCnpsPatronalRetraite: number;
+  abattementCN: number; // Abattement C.N. (Contribution Nationale) = ITS - abattementCN
   updatedAt: Date;
 }
 
@@ -1794,6 +1795,7 @@ export async function initializeDatabase() {
       tauxCnpsPatronalPrestationFamiliale: 5.75,
       tauxCnpsPatronalAccidentTravail: 2.0,
       tauxCnpsPatronalRetraite: 7.7,
+      abattementCN: 750,
       updatedAt: new Date(),
     });
     console.log('Paramètres de paie par défaut initialisés.');

@@ -326,6 +326,18 @@
                 suffix="%"
               />
             </div>
+            <div class="col-12 col-md-4">
+              <q-input
+                v-model.number="parametresPaie.abattementCN"
+                label="Abattement C.N. (ITS - valeur)"
+                type="number"
+                step="1"
+                outlined
+                dense
+                suffix="F CFA"
+                hint="C.N. = ITS - cette valeur"
+              />
+            </div>
             <div class="col-12 col-md-3">
               <q-input
                 v-model.number="parametresPaie.tauxCnpsEmploye"

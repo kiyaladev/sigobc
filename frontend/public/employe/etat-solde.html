@@ -6,7 +6,9 @@
     <title>État de Solde</title>
     <script src="../tailwindcss.js"></script>
     <script src="../constanteInfo.js"></script>
-    <script>document.title = 'État de Solde - Commune de ' + MAIRIE_INFO.ville;</script>
+    <script>
+      document.title = 'État de Solde - Commune de ' + MAIRIE_INFO.ville;
+    </script>
     <script src="../dexie.min.js"></script>
     <style>
       /* Fonts: use system serif fallbacks for offline support */
@@ -42,7 +44,7 @@
           0 6px 32px rgba(0, 0, 0, 0.14),
           0 1px 6px rgba(0, 0, 0, 0.08);
         margin: 20px auto;
-        padding: 8mm 10mm;
+        padding: 3mm 5mm;
         position: relative;
         page-break-after: always;
       }
@@ -60,13 +62,20 @@
         border-collapse: collapse;
         width: 100%;
       }
-      table.data-table th,
-      table.data-table td {
+      table.data-table th {
         border: 1.5px solid #222;
         padding: 3px 4px;
         text-align: center;
         font-size: 10.5px;
       }
+
+      table.data-table td {
+        border: 1.5px solid #222;
+        padding: 8px 4px;
+        text-align: center;
+        font-size: 10.5px;
+      }
+
       table.data-table th {
         background: #f5f3ef;
         font-weight: 700;
@@ -143,7 +152,7 @@
           margin: 0;
           width: 100%;
           min-height: 100vh;
-          padding: 5mm 7mm;
+          padding: 3mm 5mm;
         }
       }
     </style>
@@ -267,8 +276,8 @@
       }
       function buildTableHead(tResid, tCnps, tIts, tFns) {
         return `<thead>
-          <tr><th rowspan="2" style="width:3.5%">N°<br/>D'ORD.</th><th rowspan="2" class="text-left" style="width:14%">Nom & Prénom(S)</th><th rowspan="2" style="width:7.5%">Salaire<br/>de base</th><th rowspan="2" style="width:7%">Idem<br/>Résid.<br/>${tResid.toLocaleString('fr-FR')}%</th><th rowspan="2" style="width:7.5%">Salaire<br/>Brut</th><th rowspan="2" style="width:6.5%">CNPS<br/>${tCnps.toLocaleString('fr-FR')}%</th><th rowspan="2" style="width:7.5%">Salaire<br/>Net</th><th colspan="3">Retenues</th><th rowspan="2" style="width:7%">Total<br/>Impôts</th><th rowspan="2" style="width:7.5%">Primes de<br/>Transp.<br/>Indem.Fct</th><th rowspan="2" style="width:8%">Net<br/>A<br/>Payer</th></tr>
-          <tr><th style="width:6.5%">I.T.S<br/>${tIts.toLocaleString('fr-FR')}%</th><th style="width:5%">I.G.R</th><th style="width:5%">F.N.S<br/>${tFns.toLocaleString('fr-FR')}%</th></tr>
+          <tr><th rowspan="2" style="width:3.5%">N°<br/>D'ORD.</th><th rowspan="2" class="text-left" style="width:13%">Nom & Prénom(S)</th><th rowspan="2" style="width:7%">Salaire<br/>de base</th><th rowspan="2" style="width:6.5%">Idem<br/>Résid.<br/>${tResid.toLocaleString('fr-FR')}%</th><th rowspan="2" style="width:7%">Salaire<br/>Brut</th><th rowspan="2" style="width:6%">CNPS<br/>${tCnps.toLocaleString('fr-FR')}%</th><th rowspan="2" style="width:7%">Salaire<br/>Net</th><th colspan="3">Retenues</th><th rowspan="2" style="width:6.5%">Total<br/>Impôts</th><th rowspan="2" style="width:7%">Primes de<br/>Transp.<br/>Indem.Fct</th><th rowspan="2" style="width:7.5%">Net<br/>A<br/>Payer</th><th rowspan="2" style="width:7%">Signature</th></tr>
+          <tr><th style="width:6%">I.T.S<br/>${tIts.toLocaleString('fr-FR')}%</th><th style="width:5%">I.G.R</th><th style="width:5%">C.N.</th></tr>
         </thead>`;
       }
 
@@ -297,6 +306,7 @@
           const tCnps = paramsDb ? paramsDb.tauxCnpsEmploye : 6.3;
           const tIts = paramsDb ? paramsDb.tauxIts : 1.6;
           const tFns = paramsDb ? paramsDb.tauxFns : 1;
+          const abattementCN = paramsDb ? (paramsDb.abattementCN || 750) : 750;
 
           let fiches = await db
             .table('fichesPaie')
@@ -338,12 +348,13 @@
               const brut = base + log;
               const cnps = isSalarie ? f.cotisationCNPS || 0 : 0;
               const its = isSalarie ? f.impotSurSalaire || 0 : 0;
-              const totalImp = its;
+              const cn = isSalarie ? Math.max(0, its - abattementCN) : 0;
+              const totalImp = its + cn;
               const netImp = brut - cnps;
               const primes = transport + (f.autresIndemnites || 0);
               const net = netImp - totalImp + primes;
 
-              return { idx: i + 1, nom, base, log, brut, cnps, netImp, its, totalImp, primes, net };
+              return { idx: i + 1, nom, base, log, brut, cnps, netImp, its, cn, totalImp, primes, net };
             }),
           );
 
@@ -359,6 +370,7 @@
             cCnps = 0,
             cNetImp = 0,
             cIts = 0,
+            cCn = 0,
             cImp = 0,
             cPrimes = 0,
             cNet = 0;
@@ -372,6 +384,7 @@
               rCnps = cCnps,
               rNetImp = cNetImp,
               rIts = cIts,
+              rCn = cCn,
               rImp = cImp,
               rPrimes = cPrimes,
               rNet = cNet;
@@ -383,6 +396,7 @@
               cCnps += d.cnps;
               cNetImp += d.netImp;
               cIts += d.its;
+              cCn += d.cn;
               cImp += d.totalImp;
               cPrimes += d.primes;
               cNet += d.net;
@@ -393,14 +407,14 @@
                 ? `<tr class="report-row">
             <td colspan="2" style="text-align:left;padding-left:8px">REPORT</td>
             <td>${fmtOrEmpty(rBase)}</td><td>${fmtOrEmpty(rLog)}</td><td>${fmtOrEmpty(rBrut)}</td><td>${fmtOrEmpty(rCnps)}</td><td>${fmtOrEmpty(rNetImp)}</td>
-            <td>${fmtOrEmpty(rIts)}</td><td></td><td></td><td>${fmtOrEmpty(rImp)}</td><td>${fmtOrEmpty(rPrimes)}</td><td>${fmtOrEmpty(rNet)}</td>
+            <td>${fmtOrEmpty(rIts)}</td><td>${fmtOrEmpty(rCn)}</td><td></td><td>${fmtOrEmpty(rImp)}</td><td>${fmtOrEmpty(rPrimes)}</td><td>${fmtOrEmpty(rNet)}</td><td></td>
           </tr>`
                 : '';
 
             const dataRows = pageData
               .map(
                 (d) => `<tr>
-            <td>${d.idx}</td><td class="name-cell">${d.nom}</td><td>${fmtOrEmpty(d.base)}</td><td>${fmtOrEmpty(d.log)}</td><td>${fmtOrEmpty(d.brut)}</td><td>${fmtOrEmpty(d.cnps)}</td><td>${fmtOrEmpty(d.netImp)}</td><td>${fmtOrEmpty(d.its)}</td><td></td><td></td><td>${fmtOrEmpty(d.totalImp)}</td><td>${fmtOrEmpty(d.primes)}</td><td class="font-bold">${fmtOrEmpty(d.net)}</td>
+            <td>${d.idx}</td><td class="name-cell">${d.nom}</td><td>${fmtOrEmpty(d.base)}</td><td>${fmtOrEmpty(d.log)}</td><td>${fmtOrEmpty(d.brut)}</td><td>${fmtOrEmpty(d.cnps)}</td><td>${fmtOrEmpty(d.netImp)}</td><td>${fmtOrEmpty(d.its)}</td><td>${fmtOrEmpty(d.cn)}</td><td></td><td>${fmtOrEmpty(d.totalImp)}</td><td>${fmtOrEmpty(d.primes)}</td><td class="font-bold">${fmtOrEmpty(d.net)}</td><td></td>
           </tr>`,
               )
               .join('');
@@ -408,14 +422,14 @@
             const totalRow = `<tr class="total-row">
             <td colspan="2" style="text-align:left;padding-left:8px"><strong>${isLast ? 'TOTAUX' : 'TOTAL'} ...................</strong></td>
             <td><strong>${fmtOrEmpty(cBase)}</strong></td><td><strong>${fmtOrEmpty(cLog)}</strong></td><td><strong>${fmtOrEmpty(cBrut)}</strong></td><td><strong>${fmtOrEmpty(cCnps)}</strong></td><td><strong>${fmtOrEmpty(cNetImp)}</strong></td>
-            <td><strong>${fmtOrEmpty(cIts)}</strong></td><td></td><td></td><td><strong>${fmtOrEmpty(cImp)}</strong></td><td><strong>${fmtOrEmpty(cPrimes)}</strong></td><td><strong>${fmtOrEmpty(cNet)}</strong></td>
+            <td><strong>${fmtOrEmpty(cIts)}</strong></td><td><strong>${fmtOrEmpty(cCn)}</strong></td><td></td><td><strong>${fmtOrEmpty(cImp)}</strong></td><td><strong>${fmtOrEmpty(cPrimes)}</strong></td><td><strong>${fmtOrEmpty(cNet)}</strong></td><td></td>
           </tr>`;
 
             html += `<div class="print-page">
             ${buildHeader(premierJour, dernierJour, annee, chapitreParam, compteParam)}
             <table class="data-table">${buildTableHead(tResid, tCnps, tIts, tFns)}<tbody>${reportRow}${dataRows}${totalRow}</tbody></table>
             <div class="mt-3" style="font-size:11px"><p><span>Arrêté le présent état à la somme de :</span> <span class="font-bold uppercase ml-2">${numberToWords(cNet)}</span></p></div>
-            <div class="mt-3 flex justify-end"><div class="text-center"><p style="font-size:11px" class="font-bold">${MAIRIE_INFO.ville.toUpperCase()}, le <span class="editable-date" contenteditable="true">${new Date().toLocaleDateString('fr-FR')}</span></p><p style="font-size:11px" class="font-bold mt-0.5">P/ LE MAIRE & P.D.;</p></div></div>
+            <div class="mt-3 flex justify-end"><div class="text-center"><p style="font-size:11px" class="font-bold">${MAIRIE_INFO.ville.toUpperCase()}, le <span class="editable-date" contenteditable="true">${new Date().toLocaleDateString('fr-FR')}</span></p><p style="font-size:11px" class="font-bold mt-0.5" contenteditable="true">P/ LE MAIRE & P.D.;</p></div></div>
             <div class="page-number">Page ${idx + 1}/${totalPages}</div>
           </div>`;
           });

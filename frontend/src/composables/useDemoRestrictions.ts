@@ -88,16 +88,8 @@ export function useDemoRestrictions() {
    * @returns Nombre max d'enregistrements exportables
    */
   function getExportLimit(): number {
-    if (!demoStore.isActive) return Infinity;
-
-    $q.notify({
-      type: 'info',
-      message: demoStore.getRestrictionMessage('export'),
-      icon: 'science',
-      timeout: 3000,
-    });
-
-    return 5;
+    // Export toujours illimité (même après expiration de l'essai)
+    return Infinity;
   }
 
   /**

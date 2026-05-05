@@ -14,8 +14,8 @@ export const DEMO_CONFIG = {
     previsions: 200,
     utilisateurs: 3, // Seulement le compte démo
   },
-  // Délai d'expiration de la démo (en millisecondes) - 30 jours
-  trialDuration: 30 * 24 * 60 * 60 * 1000,
+  // Délai d'expiration de la démo (en millisecondes) - 3 mois (90 jours)
+  trialDuration: 90 * 24 * 60 * 60 * 1000,
   // Message affiché pour les restrictions
   restrictionMessages: {
     create: 'Mode démo : création limitée. Maximum {max} enregistrements autorisés.',
@@ -24,7 +24,7 @@ export const DEMO_CONFIG = {
     export: 'Exportation des données.',
     admin: 'Mode démo : fonctionnalités administrateur désactivées.',
     backup: 'Mode démo : sauvegarde/restauration non disponible.',
-    expired: "Période d'essai expirée. Seul l'export des données est disponible.",
+    expired: "Période d'essai de 3 mois expirée. Seul l'export des données est disponible.",
   },
 };
 
@@ -90,8 +90,8 @@ export const useDemoStore = defineStore('demo', () => {
       console.log("⏰ Période d'essai expirée");
     }
 
-    isDemoMode.value = false;
-    console.log(`✅ Licence active - mode production`);
+    isDemoMode.value = true;
+    console.log(`🎮 Version d'essai active - ${trialDaysRemaining.value} jours restants`);
   }
 
   function checkTrialStatus(): { expired: boolean; daysRemaining: number } {

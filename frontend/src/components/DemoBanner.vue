@@ -1,5 +1,5 @@
 <template>
-  <div v-if="demoStore.isActive && !demoStore.isExpired" class="demo-banner" :class="bannerClass">
+  <div v-if="demoStore.isActive && !demoStore.isExpired && !dismissed" class="demo-banner" :class="bannerClass">
     <div class="demo-banner-content">
       <q-icon :name="bannerIcon" size="20px" class="q-mr-sm" />
       <span class="demo-text">
@@ -27,12 +27,24 @@
         @click="showActivationDialog = true"
         class="demo-exit-btn"
       />
+      <q-btn
+        flat
+        dense
+        round
+        size="sm"
+        color="white"
+        icon="close"
+        @click="dismissed = true"
+        class="q-ml-sm"
+      >
+        <q-tooltip>Fermer</q-tooltip>
+      </q-btn>
     </div>
 
     <!-- Tooltip d'informations -->
     <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 8]">
       <div class="text-center">
-        <div class="text-weight-bold q-mb-xs">Période d'essai de 30 jours</div>
+        <div class="text-weight-bold q-mb-xs">Période d'essai de 3 mois</div>
         <p class="q-ma-none">Après expiration, seul l'export des données sera disponible.</p>
       </div>
     </q-tooltip>
@@ -80,6 +92,7 @@ const demoStore = useDemoStore();
 const showActivationDialog = ref(false);
 const licenseKey = ref('');
 const activating = ref(false);
+const dismissed = ref(false);
 
 const bannerClass = computed(() => {
   if (demoStore.trialDaysRemaining <= 3) {
