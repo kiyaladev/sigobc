@@ -1,6 +1,6 @@
 # GitHub Copilot Toolbox — MCP & Skills awareness
 
-_Generated: 2026-05-02T16:58:14.946Z_
+_Generated: 2026-05-04T23:42:26.248Z_
 
 ## How to use this report
 
@@ -35,8 +35,11 @@ _None found (or no workspace open)._
 
 ### User-scoped
 
+- **skill-creator** — `C:\Users\Coumbassa Stephane\.claude\skills\skill-creator`
+  - Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, update or optimize an existing skill, run evals to test a skill, benchmark skill p
+
 - **microsoft-foundry** — `C:\Users\Coumbassa Stephane\.agents\skills\microsoft-foundry`
-  - Deploy, evaluate, and manage Foundry agents end-to-end: Docker build, ACR push, hosted/prompt agent create, container start, batch eval, prompt optimization, prompt optimizer workflows, agent.yaml, dataset curation from 
+  - Deploy, evaluate, and manage Foundry agents end-to-end: Docker build, ACR push, hosted/prompt agent create, container start, batch eval, continuous eval, prompt optimizer workflows, agent.yaml, dataset curation from trac
 
 ---
 

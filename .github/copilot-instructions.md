@@ -42,11 +42,13 @@ Use this mapping to know the current vs. former names—so you can correctly int
 
 
 
+
+
 <!-- github-copilot-toolbox:mcp-skills-awareness-begin -->
 
 ### MCP & Skills awareness (GitHub Copilot Toolbox)
 
-_Last synced: 2026-05-02T16:58:15.588Z._
+_Last synced: 2026-05-04T23:42:26.414Z._
 
 - **Full report:** `.github/copilot-toolbox-mcp-skills-awareness.md` in this workspace (auto-overwritten on each scan). Use it as ground truth for configured servers and skill folders.
 - **MCP:** For **live tools**, use **Copilot Chat → Agent** and **trust/start** the right servers in the MCP UI.
@@ -73,7 +75,9 @@ _None found (or no workspace open)._
 
 #### User skills
 
-- **microsoft-foundry** — `C:\Users\Coumbassa Stephane\.agents\skills\microsoft-foundry` — Deploy, evaluate, and manage Foundry agents end-to-end: Docker build, ACR push, hosted/prompt agent create, container start, batch eval, prompt optimization, prompt optimizer workflows, agent.yaml, dataset curation from
+- **skill-creator** — `C:\Users\Coumbassa Stephane\.claude\skills\skill-creator` — Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, update or optimize an existing skill, run evals to test a skill, benchmark skill p
+
+- **microsoft-foundry** — `C:\Users\Coumbassa Stephane\.agents\skills\microsoft-foundry` — Deploy, evaluate, and manage Foundry agents end-to-end: Docker build, ACR push, hosted/prompt agent create, container start, batch eval, continuous eval, prompt optimizer workflows, agent.yaml, dataset curation from trac
 
 <!-- github-copilot-toolbox:mcp-skills-awareness-end -->
 
