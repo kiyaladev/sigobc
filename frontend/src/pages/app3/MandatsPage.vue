@@ -351,7 +351,7 @@
             </div>
 
             <div v-if="isInvestissement" class="row q-col-gutter-sm q-mt-xs">
-              <div class="col-12 col-md-6">
+              <div class="col-12">
                 <q-select
                   v-model="formData.projetId"
                   :options="filteredProjetOptions"
@@ -364,6 +364,7 @@
                   use-input
                   input-debounce="0"
                   @filter="filterProjet"
+                  @update:model-value="onProjetSelected"
                 >
                   <template v-slot:prepend>
                     <q-icon name="engineering" color="primary" />
@@ -745,7 +746,7 @@ const projetOptions = computed(() =>
   projets.value
     .filter((p) => p.statut !== 'annule')
     .map((p) => ({
-      label: `${p.libelle} (${p.annee})`,
+      label: `${p.libelle} - ${p.numeroOrdre || ''} - ${p.refPT || ''}`,
       value: p.id,
     })),
 );
@@ -834,6 +835,15 @@ watch(isInvestissement, (newValue) => {
     formData.value.projetId = null;
   }
 });
+
+function onProjetSelected(projetId: number | null) {
+  if (projetId) {
+    const projet = projets.value.find((p) => p.id === projetId);
+    if (projet) {
+      formData.value.objet = projet.libelle;
+    }
+  }
+}
 
 function filterChapitre(val: string, update: (callback: () => void) => void) {
   if (val === '') {
