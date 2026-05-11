@@ -14,8 +14,8 @@ export const DEMO_CONFIG = {
     previsions: 200,
     utilisateurs: 3, // Seulement le compte démo
   },
-  // Délai d'expiration de la démo (en millisecondes) - 3 mois (90 jours)
-  trialDuration: 90 * 24 * 60 * 60 * 1000,
+  // Délai d'expiration de la démo (en millisecondes) - 4 mois (120 jours)
+  trialDuration: 120 * 24 * 60 * 60 * 1000,
   // Message affiché pour les restrictions
   restrictionMessages: {
     create: 'Mode démo : création limitée. Maximum {max} enregistrements autorisés.',
@@ -24,13 +24,14 @@ export const DEMO_CONFIG = {
     export: 'Exportation des données.',
     admin: 'Mode démo : fonctionnalités administrateur désactivées.',
     backup: 'Mode démo : sauvegarde/restauration non disponible.',
-    expired: "Période d'essai de 3 mois expirée. Seul l'export des données est disponible.",
+    expired: "Période d'essai de 4 mois expirée. Seul l'export des données est disponible.",
   },
 };
 
 // Clé pour stocker la date de première utilisation
 const FIRST_USE_KEY = 'tresor_app_first_use';
 const TRIAL_EXPIRED_KEY = 'tresor_app_trial_expired';
+const TRIAL_BONUS_KEY = 'tresor_app_trial_bonus';
 
 export const useDemoStore = defineStore('demo', () => {
   // State
@@ -38,6 +39,7 @@ export const useDemoStore = defineStore('demo', () => {
   const firstUseDate = ref<Date | null>(null);
   const isTrialExpired = ref(false);
   const demoWarningShown = ref(false);
+  const trialBonusDays = ref(0);
   const actionsCount = ref({
     creates: 0,
     updates: 0,
@@ -50,7 +52,8 @@ export const useDemoStore = defineStore('demo', () => {
   const trialTimeRemaining = computed(() => {
     if (!firstUseDate.value) return DEMO_CONFIG.trialDuration;
     const elapsed = Date.now() - firstUseDate.value.getTime();
-    const remaining = DEMO_CONFIG.trialDuration - elapsed;
+    const bonus = trialBonusDays.value * 24 * 60 * 60 * 1000;
+    const remaining = DEMO_CONFIG.trialDuration + bonus - elapsed;
     return Math.max(0, remaining);
   });
 
@@ -73,6 +76,12 @@ export const useDemoStore = defineStore('demo', () => {
     // Vérifier si c'est la première utilisation
     const storedFirstUse = localStorage.getItem(FIRST_USE_KEY);
     const storedExpired = localStorage.getItem(TRIAL_EXPIRED_KEY);
+
+    // Charger le bonus de jours
+    const storedBonus = localStorage.getItem(TRIAL_BONUS_KEY);
+    if (storedBonus) {
+      trialBonusDays.value = parseInt(storedBonus, 10) || 0;
+    }
 
     if (storedFirstUse) {
       firstUseDate.value = new Date(storedFirstUse);
@@ -169,6 +178,15 @@ export const useDemoStore = defineStore('demo', () => {
     return message;
   }
 
+  function extendTrial(days: number) {
+    trialBonusDays.value += days;
+    localStorage.setItem(TRIAL_BONUS_KEY, String(trialBonusDays.value));
+    // Réinitialiser l'état d'expiration
+    isTrialExpired.value = false;
+    localStorage.removeItem(TRIAL_EXPIRED_KEY);
+    console.log(`🔑 Licence activée - Période prolongée de ${days} jours`);
+  }
+
   function showDemoWarning() {
     demoWarningShown.value = true;
   }
@@ -200,6 +218,7 @@ export const useDemoStore = defineStore('demo', () => {
     canAccessApp,
     recordAction,
     getRestrictionMessage,
+    extendTrial,
     showDemoWarning,
   };
 });

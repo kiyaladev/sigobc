@@ -661,7 +661,7 @@
             <q-icon name="lock" size="64px" color="negative" />
             <h5 class="q-mt-md q-mb-sm">Période d'essai expirée</h5>
             <p class="text-grey-7">
-              Votre période d'essai de 3 mois est terminée.<br />
+              Votre période d'essai de 4 mois est terminée.<br />
               Seul l'export de vos données reste disponible.
             </p>
           </q-card-section>

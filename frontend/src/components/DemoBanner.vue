@@ -1,5 +1,5 @@
 <template>
-  <div v-if="demoStore.isActive && !demoStore.isExpired && !dismissed" class="demo-banner" :class="bannerClass">
+  <div v-if="delayPassed && demoStore.isActive && !demoStore.isExpired && !dismissed" class="demo-banner" :class="bannerClass">
     <div class="demo-banner-content">
       <q-icon :name="bannerIcon" size="20px" class="q-mr-sm" />
       <span class="demo-text">
@@ -44,7 +44,7 @@
     <!-- Tooltip d'informations -->
     <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 8]">
       <div class="text-center">
-        <div class="text-weight-bold q-mb-xs">Période d'essai de 3 mois</div>
+        <div class="text-weight-bold q-mb-xs">Période d'essai de 4 mois</div>
         <p class="q-ma-none">Après expiration, seul l'export des données sera disponible.</p>
       </div>
     </q-tooltip>
@@ -82,7 +82,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { useDemoStore } from 'src/stores/demo-store';
 
@@ -93,6 +93,20 @@ const showActivationDialog = ref(false);
 const licenseKey = ref('');
 const activating = ref(false);
 const dismissed = ref(false);
+
+// Délai de 10 minutes avant d'afficher le ruban
+const delayPassed = ref(false);
+let delayTimer: ReturnType<typeof setTimeout> | null = null;
+
+onMounted(() => {
+  delayTimer = setTimeout(() => {
+    delayPassed.value = true;
+  }, 10 * 60 * 1000); // 10 minutes
+});
+
+onUnmounted(() => {
+  if (delayTimer) clearTimeout(delayTimer);
+});
 
 const bannerClass = computed(() => {
   if (demoStore.trialDaysRemaining <= 3) {
@@ -123,13 +137,25 @@ function activateLicense() {
 
   activating.value = true;
 
-  // Simuler la vérification
   setTimeout(() => {
     activating.value = false;
-    $q.notify({
-      type: 'negative',
-      message: 'Clé de licence invalide. Contactez le support.',
-    });
+
+    if (licenseKey.value.trim().toUpperCase() === 'TEEZZ-5646-5931-GTDSQ') {
+      // Clé valide : prolonger de 3 mois (90 jours)
+      demoStore.extendTrial(90);
+      licenseKey.value = '';
+      showActivationDialog.value = false;
+      $q.notify({
+        type: 'positive',
+        message: 'Licence activée ! Période d\'essai prolongée de 3 mois.',
+        icon: 'check_circle',
+      });
+    } else {
+      $q.notify({
+        type: 'negative',
+        message: 'Clé de licence invalide. Contactez le support.',
+      });
+    }
   }, 1500);
 }
 </script>
