@@ -558,6 +558,7 @@ import {
   db,
   type FichePaie,
   type Employe,
+  type Exercice,
   type ParametresPaie,
   type ServiceApp7,
 } from 'src/database/db';
@@ -573,6 +574,10 @@ const showPrintDialog = ref(false);
 const editingId = ref<number | null>(null);
 const fiches = ref<FichePaie[]>([]);
 const employes = ref<Employe[]>([]);
+const exercices = ref<Exercice[]>([]);
+const lockedYears = computed(() =>
+  exercices.value.filter((e) => e.statut === 'verrouille').map((e) => e.annee),
+);
 const parametresPaie = ref<ParametresPaie | null>(null);
 
 const now = new Date();
@@ -776,6 +781,7 @@ function recalculate() {
 
 const filteredFiches = computed(() => {
   let r = fiches.value.filter((f) => {
+    if (lockedYears.value.includes(f.annee)) return false;
     if (filterMois.value && f.mois !== filterMois.value) return false;
     if (f.annee !== filterAnnee.value) return false;
     return true;
@@ -933,15 +939,17 @@ const columns = [
 async function loadData() {
   loading.value = true;
   try {
-    const [loadedFiches, loadedEmployes, loadedParams, svcs] = await Promise.all([
+    const [loadedFiches, loadedEmployes, loadedParams, svcs, loadedExercices] = await Promise.all([
       db.fichesPaie.toArray(),
       db.employes.toArray(),
       db.parametresPaie.toCollection().first(),
       db.servicesApp7.toArray(),
+      db.exercices.toArray(),
     ]);
     fiches.value = loadedFiches;
     employes.value = loadedEmployes;
     parametresPaie.value = loadedParams ?? null;
+    exercices.value = loadedExercices;
     filteredEmployeOptions.value = employeOptions.value;
     servicesList.value = svcs;
     servicesOptions.value = svcs.map((s) => ({

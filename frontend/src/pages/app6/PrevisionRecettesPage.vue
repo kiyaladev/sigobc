@@ -354,6 +354,7 @@ import {
   type Taxe,
   type PrevisionRecette,
   type Declaration,
+  type Exercice,
   type MandatRecette,
   DEFAULT_MAIRIE_ID,
 } from 'src/database/db';
@@ -379,6 +380,10 @@ const previsions = ref<PrevisionRecette[]>([]);
 const taxes = ref<Taxe[]>([]);
 const declarations = ref<Declaration[]>([]);
 const mandatsRecette = ref<MandatRecette[]>([]);
+const exercices = ref<Exercice[]>([]);
+const lockedYears = computed(() =>
+  exercices.value.filter((e) => e.statut === 'verrouille').map((e) => e.annee),
+);
 
 const formData = ref({
   exercice: new Date().getFullYear(),
@@ -521,6 +526,10 @@ const columns = [
 
 const filteredPrevisions = computed(() => {
   let result = previsions.value;
+
+  if (lockedYears.value.length > 0) {
+    result = result.filter((p) => !lockedYears.value.includes(p.exercice));
+  }
 
   if (filterExercice.value) {
     result = result.filter((p) => p.exercice === filterExercice.value);
@@ -777,11 +786,12 @@ async function generateEtatMensuel() {
 async function loadData() {
   loading.value = true;
   try {
-    [taxes.value, previsions.value, declarations.value, mandatsRecette.value] = await Promise.all([
+    [taxes.value, previsions.value, declarations.value, mandatsRecette.value, exercices.value] = await Promise.all([
       db.taxes.filter((t) => t.actif).toArray(),
       db.previsionsRecettes.toArray(),
       db.declarations.toArray(),
       db.mandatsRecette.toArray(),
+      db.exercices.toArray(),
     ]);
   } catch (error) {
     console.error('Erreur lors du chargement:', error);

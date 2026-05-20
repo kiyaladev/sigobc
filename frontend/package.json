@@ -11,10 +11,13 @@
     "format": "prettier --write \"**/*.{js,ts,vue,scss,html,md,json}\" --ignore-path .gitignore",
     "test": "echo \"No test specified\" && exit 0",
     "dev": "quasar dev",
+    "predev": "node scripts/sync-mairie-info.cjs",
     "backend:dev": "npm --prefix backend run dev",
     "backend:build": "npm --prefix backend run build",
     "backend:start": "npm --prefix backend run start",
     "build": "quasar build",
+    "prebuild": "node scripts/sync-mairie-info.cjs",
+    "sync:mairie": "node scripts/sync-mairie-info.cjs",
     "postinstall": "quasar prepare"
   },
   "dependencies": {

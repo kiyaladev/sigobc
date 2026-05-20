@@ -60,11 +60,25 @@
         .print-btn {
           display: none !important;
         }
-        .editable-date { border-bottom: none; }
+        .editable-date {
+          border-bottom: none;
+        }
       }
-      .editable-date { cursor: pointer; border-bottom: 1px dashed #999; padding: 0 2px; min-width: 80px; display: inline-block; }
-      .editable-date:hover { background: #e8f0fe; }
-      .editable-date:focus { outline: 2px solid #1976d2; background: #fff; border-bottom: none; }
+      .editable-date {
+        cursor: pointer;
+        border-bottom: 1px dashed #999;
+        padding: 0 2px;
+        min-width: 80px;
+        display: inline-block;
+      }
+      .editable-date:hover {
+        background: #e8f0fe;
+      }
+      .editable-date:focus {
+        outline: 2px solid #1976d2;
+        background: #fff;
+        border-bottom: none;
+      }
 
       /* ===== EN-TÊTE ===== */
       .header {
@@ -370,7 +384,7 @@
             const t = Math.floor(n / 10);
             const u = n % 10;
             if (t === 7) return 'soixante-' + units[10 + u];
-            if (t === 9) return 'quatre-vingt-' + (u === 0 ? 's' : units[u]);
+            if (t === 9) return 'quatre-vingt-' + units[10 + u];
             return (
               tens[t] +
               (u === 1 && t !== 8 ? '-et-un' : u > 0 ? '-' + units[u] : t === 8 ? 's' : '')
@@ -396,7 +410,7 @@
             const k = Math.floor(n / 1000);
             const r = n % 1000;
             return (
-              (k === 1 ? 'mille' : convertLessThan1000(k) + ' mille') +
+              (k === 1 ? 'mille' : convertLessThan1000(k).replace(/s$/, '') + ' mille') +
               (r > 0 ? ' ' + convertLessThan1000(r) : '')
             );
           }

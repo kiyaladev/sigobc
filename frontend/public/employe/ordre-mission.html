@@ -203,7 +203,16 @@
           </div>
 
           <div class="text-[13px] leading-tight mt-2">
+            <img
+              v-if="mairie.logo"
+              :src="`../${mairie.logo}`"
+              :alt="`Logo ${mairie.ville}`"
+              class="mx-auto my-1"
+              style="height: 60px; object-fit: contain"
+            />
+
             <p class="font-bold uppercase tracking-wide">Secrétariat Général</p>
+
             <p class="text-[10px] tracking-[3px] text-gray-400">--------------</p>
             <p class="font-semibold uppercase">Services Administratifs</p>
           </div>

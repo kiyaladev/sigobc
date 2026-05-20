@@ -417,7 +417,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import { useQuasar } from 'quasar';
-import { db, type Prevision, type Chapitre, type SousChapitre, type Mandat } from 'src/database/db';
+import { db, type Prevision, type Chapitre, type Exercice, type SousChapitre, type Mandat } from 'src/database/db';
 import PageHeader from 'src/components/PageHeader.vue';
 import DataTable from 'src/components/DataTable.vue';
 import { openPrintWindowWithMessage } from 'src/utils/printUrl';
@@ -442,6 +442,10 @@ const previsions = ref<Prevision[]>([]);
 const chapitres = ref<Chapitre[]>([]);
 const sousChapitres = ref<SousChapitre[]>([]);
 const mandats = ref<Mandat[]>([]);
+const exercices = ref<Exercice[]>([]);
+const lockedYears = computed(() =>
+  exercices.value.filter((e) => e.statut === 'verrouille').map((e) => e.annee),
+);
 
 const formData = ref({
   exercice: new Date().getFullYear(),
@@ -620,6 +624,10 @@ const columns = [
 const filteredPrevisions = computed(() => {
   let result = previsions.value;
 
+  if (lockedYears.value.length > 0) {
+    result = result.filter((p) => !lockedYears.value.includes(p.exercice));
+  }
+
   if (filterExercice.value) {
     result = result.filter((p) => p.exercice === filterExercice.value);
   }
@@ -724,6 +732,7 @@ async function loadData() {
       .filter((s) => s.actif && !s.code.startsWith('7'))
       .toArray();
     mandats.value = await db.mandats.toArray();
+    exercices.value = await db.exercices.toArray();
   } catch (error) {
     console.error('Erreur lors du chargement:', error);
     $q.notify({

@@ -232,7 +232,7 @@
             const t = Math.floor(n / 10),
               u = n % 10;
             if (t === 7) return 'soixante-' + units[10 + u];
-            if (t === 9) return 'quatre-vingt-' + (u === 0 ? 's' : units[u]);
+            if (t === 9) return 'quatre-vingt-' + units[10 + u];
             return (
               tens[t] +
               (u === 1 && t !== 8 ? '-et-un' : u > 0 ? '-' + units[u] : t === 8 ? 's' : '')
@@ -258,7 +258,7 @@
           if (n >= 1000) {
             const k = Math.floor(n / 1000),
               r = n % 1000;
-            return (k === 1 ? 'mille' : lt1000(k) + ' mille') + (r > 0 ? ' ' + lt1000(r) : '');
+            return (k === 1 ? 'mille' : lt1000(k).replace(/s$/, '') + ' mille') + (r > 0 ? ' ' + lt1000(r) : '');
           }
           return lt1000(n);
         }
@@ -277,7 +277,7 @@
       function buildTableHead(tResid, tCnps, tIts, tFns) {
         return `<thead>
           <tr><th rowspan="2" style="width:3.5%">N°<br/>D'ORD.</th><th rowspan="2" class="text-left" style="width:13%">Nom & Prénom(S)</th><th rowspan="2" style="width:7%">Salaire<br/>de base</th><th rowspan="2" style="width:6.5%">Idem<br/>Résid.<br/>${tResid.toLocaleString('fr-FR')}%</th><th rowspan="2" style="width:7%">Salaire<br/>Brut</th><th rowspan="2" style="width:6%">CNPS<br/>${tCnps.toLocaleString('fr-FR')}%</th><th rowspan="2" style="width:7%">Salaire<br/>Net</th><th colspan="3">Retenues</th><th rowspan="2" style="width:6.5%">Total<br/>Impôts</th><th rowspan="2" style="width:7%">Primes de<br/>Transp.<br/>Indem.Fct</th><th rowspan="2" style="width:7.5%">Net<br/>A<br/>Payer</th><th rowspan="2" style="width:7%">Signature</th></tr>
-          <tr><th style="width:6%">I.T.S<br/>${tIts.toLocaleString('fr-FR')}%</th><th style="width:5%">I.G.R</th><th style="width:5%">C.N.</th></tr>
+          <tr><th style="width:6%">I.T.S<br/>${tIts.toLocaleString('fr-FR')}%</th><th style="width:5%">I.G.R</th><th style="width:5%">${MAIRIE_INFO.typeRetenue === 'CN' ? 'C.N.' : 'F.N.S'}</th></tr>
         </thead>`;
       }
 
@@ -306,7 +306,7 @@
           const tCnps = paramsDb ? paramsDb.tauxCnpsEmploye : 6.3;
           const tIts = paramsDb ? paramsDb.tauxIts : 1.6;
           const tFns = paramsDb ? paramsDb.tauxFns : 1;
-          const abattementCN = paramsDb ? (paramsDb.abattementCN || 750) : 750;
+          const abattementCN = paramsDb ? paramsDb.abattementCN || 750 : 750;
 
           let fiches = await db
             .table('fichesPaie')
@@ -349,12 +349,25 @@
               const cnps = isSalarie ? f.cotisationCNPS || 0 : 0;
               const its = isSalarie ? f.impotSurSalaire || 0 : 0;
               const cn = isSalarie ? Math.max(0, its - abattementCN) : 0;
-              const totalImp = its + cn;
+              const totalImp = MAIRIE_INFO.typeRetenue === 'CN' ? its + cn : its;
               const netImp = brut - cnps;
               const primes = transport + (f.autresIndemnites || 0);
               const net = netImp - totalImp + primes;
 
-              return { idx: i + 1, nom, base, log, brut, cnps, netImp, its, cn, totalImp, primes, net };
+              return {
+                idx: i + 1,
+                nom,
+                base,
+                log,
+                brut,
+                cnps,
+                netImp,
+                its,
+                cn,
+                totalImp,
+                primes,
+                net,
+              };
             }),
           );
 
@@ -407,14 +420,14 @@
                 ? `<tr class="report-row">
             <td colspan="2" style="text-align:left;padding-left:8px">REPORT</td>
             <td>${fmtOrEmpty(rBase)}</td><td>${fmtOrEmpty(rLog)}</td><td>${fmtOrEmpty(rBrut)}</td><td>${fmtOrEmpty(rCnps)}</td><td>${fmtOrEmpty(rNetImp)}</td>
-            <td>${fmtOrEmpty(rIts)}</td><td>${fmtOrEmpty(rCn)}</td><td></td><td>${fmtOrEmpty(rImp)}</td><td>${fmtOrEmpty(rPrimes)}</td><td>${fmtOrEmpty(rNet)}</td><td></td>
+            <td>${fmtOrEmpty(rIts)}</td><td></td><td>${MAIRIE_INFO.typeRetenue === 'CN' ? fmtOrEmpty(rCn) : ''}</td><td>${fmtOrEmpty(rImp)}</td><td>${fmtOrEmpty(rPrimes)}</td><td>${fmtOrEmpty(rNet)}</td><td></td>
           </tr>`
                 : '';
 
             const dataRows = pageData
               .map(
                 (d) => `<tr>
-            <td>${d.idx}</td><td class="name-cell">${d.nom}</td><td>${fmtOrEmpty(d.base)}</td><td>${fmtOrEmpty(d.log)}</td><td>${fmtOrEmpty(d.brut)}</td><td>${fmtOrEmpty(d.cnps)}</td><td>${fmtOrEmpty(d.netImp)}</td><td>${fmtOrEmpty(d.its)}</td><td>${fmtOrEmpty(d.cn)}</td><td></td><td>${fmtOrEmpty(d.totalImp)}</td><td>${fmtOrEmpty(d.primes)}</td><td class="font-bold">${fmtOrEmpty(d.net)}</td><td></td>
+            <td>${d.idx}</td><td class="name-cell">${d.nom}</td><td>${fmtOrEmpty(d.base)}</td><td>${fmtOrEmpty(d.log)}</td><td>${fmtOrEmpty(d.brut)}</td><td>${fmtOrEmpty(d.cnps)}</td><td>${fmtOrEmpty(d.netImp)}</td><td>${fmtOrEmpty(d.its)}</td><td></td><td>${MAIRIE_INFO.typeRetenue === 'CN' ? fmtOrEmpty(d.cn) : ''}</td><td>${fmtOrEmpty(d.totalImp)}</td><td>${fmtOrEmpty(d.primes)}</td><td class="font-bold">${fmtOrEmpty(d.net)}</td><td></td>
           </tr>`,
               )
               .join('');
@@ -422,7 +435,7 @@
             const totalRow = `<tr class="total-row">
             <td colspan="2" style="text-align:left;padding-left:8px"><strong>${isLast ? 'TOTAUX' : 'TOTAL'} ...................</strong></td>
             <td><strong>${fmtOrEmpty(cBase)}</strong></td><td><strong>${fmtOrEmpty(cLog)}</strong></td><td><strong>${fmtOrEmpty(cBrut)}</strong></td><td><strong>${fmtOrEmpty(cCnps)}</strong></td><td><strong>${fmtOrEmpty(cNetImp)}</strong></td>
-            <td><strong>${fmtOrEmpty(cIts)}</strong></td><td><strong>${fmtOrEmpty(cCn)}</strong></td><td></td><td><strong>${fmtOrEmpty(cImp)}</strong></td><td><strong>${fmtOrEmpty(cPrimes)}</strong></td><td><strong>${fmtOrEmpty(cNet)}</strong></td><td></td>
+            <td><strong>${fmtOrEmpty(cIts)}</strong></td><td></td><td>${MAIRIE_INFO.typeRetenue === 'CN' ? `<strong>${fmtOrEmpty(cCn)}</strong>` : ''}</td><td><strong>${fmtOrEmpty(cImp)}</strong></td><td><strong>${fmtOrEmpty(cPrimes)}</strong></td><td><strong>${fmtOrEmpty(cNet)}</strong></td><td></td>
           </tr>`;
 
             html += `<div class="print-page">

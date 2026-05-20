@@ -274,6 +274,7 @@ import {
   db,
   type BordereauRecette,
   type Declaration,
+  type Exercice,
   type Taxe,
   DEFAULT_MAIRIE_ID,
 } from 'src/database/db';
@@ -286,6 +287,10 @@ const $q = useQuasar();
 
 const bordereaux = ref<BordereauRecette[]>([]);
 const taxes = ref<Taxe[]>([]);
+const exercices = ref<Exercice[]>([]);
+const lockedYears = computed(() =>
+  exercices.value.filter((e) => e.statut === 'verrouille').map((e) => e.annee),
+);
 const loading = ref(false);
 const saving = ref(false);
 const dialogVisible = ref(false);
@@ -412,6 +417,10 @@ const activeFiltersCount = computed(() => {
 const filteredBordereaux = computed(() => {
   let result = bordereaux.value;
 
+  if (lockedYears.value.length > 0) {
+    result = result.filter((b) => !lockedYears.value.includes(b.annee));
+  }
+
   if (filterStatut.value) {
     result = result.filter((b) => b.statut === filterStatut.value);
   }
@@ -526,9 +535,10 @@ function formatNumeroBordereau(numero: number, annee: number): string {
 async function loadData() {
   loading.value = true;
   try {
-    [bordereaux.value, taxes.value] = await Promise.all([
+    [bordereaux.value, taxes.value, exercices.value] = await Promise.all([
       db.bordereauxRecette.toArray(),
       db.taxes.toArray(),
+      db.exercices.toArray(),
     ]);
 
     // Trier par année puis par numéro décroissant

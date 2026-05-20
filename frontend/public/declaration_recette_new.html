@@ -639,7 +639,7 @@
           if (n < 1000) return convertirCentaines(n);
           const m = Math.floor(n / 1000);
           const reste = n % 1000;
-          let result = m === 1 ? 'mille' : convertirCentaines(m) + ' mille';
+          let result = m === 1 ? 'mille' : convertirCentaines(m).replace(/s$/, '') + ' mille';
           if (reste > 0) result += ' ' + convertirCentaines(reste);
           return result;
         }

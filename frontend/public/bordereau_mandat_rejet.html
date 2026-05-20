@@ -906,7 +906,7 @@
             if (thousands === 1) {
               result = 'mille';
             } else {
-              result = convertLessThanThousand(thousands) + '-mille';
+              result = convertLessThanThousand(thousands).replace(/s$/, '') + '-mille';
             }
 
             if (remainder > 0) {

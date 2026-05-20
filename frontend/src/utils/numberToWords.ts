@@ -140,7 +140,12 @@ export function numberToWords(num: number): string {
       if (thousands === 1) {
         result = 'mille';
       } else {
-        result = convertLessThanThousand(thousands) + '-mille';
+        // "vingt" et "cent" sont invariables devant "mille" (adjectif numéral)
+        let prefix = convertLessThanThousand(thousands);
+        if (prefix.endsWith('vingts') || prefix.endsWith('cents')) {
+          prefix = prefix.slice(0, -1);
+        }
+        result = prefix + '-mille';
       }
 
       if (remainder > 0) {

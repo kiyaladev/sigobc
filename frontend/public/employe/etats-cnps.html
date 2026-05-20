@@ -6,7 +6,9 @@
     <title>État de Paiement CNPS</title>
     <script src="../tailwindcss.js"></script>
     <script src="../constanteInfo.js"></script>
-    <script>document.title = 'État de Paiement CNPS - ' + MAIRIE_INFO.ville;</script>
+    <script>
+      document.title = 'État de Paiement CNPS - ' + MAIRIE_INFO.ville;
+    </script>
     <script src="../dexie.min.js"></script>
     <style>
       body {
@@ -185,7 +187,7 @@
             const a = Math.floor(n / 10),
               b = n % 10;
             if (a === 7) return 'soixante-' + u[10 + b];
-            if (a === 9) return 'quatre-vingt-' + (b === 0 ? 's' : u[b]);
+            if (a === 9) return 'quatre-vingt-' + u[10 + b];
             return t[a] + (b === 1 && a !== 8 ? '-et-un' : b > 0 ? '-' + u[b] : a === 8 ? 's' : '');
           }
           const h = Math.floor(n / 100),
@@ -208,7 +210,7 @@
           if (n >= 1000) {
             const k = Math.floor(n / 1000),
               r = n % 1000;
-            return (k === 1 ? 'mille' : lt1000(k) + ' mille') + (r > 0 ? ' ' + lt1000(r) : '');
+            return (k === 1 ? 'mille' : lt1000(k).replace(/s$/, '') + ' mille') + (r > 0 ? ' ' + lt1000(r) : '');
           }
           return lt1000(n);
         }
@@ -252,7 +254,8 @@
         const paramsDb = await db.table('parametresPaie').toCollection().first();
         const tauxCnps = paramsDb ? paramsDb.tauxCnpsEmploye : 6.3;
 
-        let fiches = await db.table('fichesPaie')
+        let fiches = await db
+          .table('fichesPaie')
           .filter((f) => f.mois === mois && f.annee === annee && f.statut !== 'brouillon')
           .toArray();
         const sf = p.get('service'),
@@ -295,12 +298,18 @@
         for (let i = 0; i < data.length; i += ROWS_PER_PAGE)
           pages.push(data.slice(i, i + ROWS_PER_PAGE));
         const totalPages = pages.length;
-        let cBase = 0, cLog = 0, cBrut = 0, cCnps = 0;
+        let cBase = 0,
+          cLog = 0,
+          cBrut = 0,
+          cCnps = 0;
         let html = '';
 
         pages.forEach((pageData, idx) => {
           const isLast = idx === totalPages - 1;
-          const rBase = cBase, rLog = cLog, rBrut = cBrut, rCnps = cCnps;
+          const rBase = cBase,
+            rLog = cLog,
+            rBrut = cBrut,
+            rCnps = cCnps;
 
           pageData.forEach((d) => {
             cBase += d.base;

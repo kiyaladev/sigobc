@@ -405,9 +405,7 @@
                 const d = Math.floor(n / 10);
                 const u = n % 10;
                 if (d === 7 || d === 9) {
-                  return (
-                    dizaines[d] + (u === 0 ? (d === 9 ? 's' : '') : '-' + dizainesSpeciales[u])
-                  );
+                  return dizaines[d] + '-' + dizainesSpeciales[u];
                 }
                 return (
                   dizaines[d] +
@@ -426,7 +424,7 @@
                 const m = Math.floor(n / 1000);
                 const r = n % 1000;
                 return (
-                  (m === 1 ? 'mille' : convertirMoinsDeMillions(m) + ' mille') +
+                  (m === 1 ? 'mille' : convertirMoinsDeMillions(m).replace(/s$/, '') + ' mille') +
                   (r === 0 ? '' : ' ' + convertirMoinsDeMillions(r))
                 );
               }

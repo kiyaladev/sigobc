@@ -320,8 +320,8 @@
       <div class="header-grid">
         <div class="header-col header-left">
           <p>République de Côte d'Ivoire</p>
-          <!-- <p>Département de <span data-field="mairieVille"></span></p> -->
-          <p>Département de Daloa</p>
+          <p>Département de <span data-field="mairieDepartement"></span></p>
+          <!-- <p>Département de Daloa</p> -->
           <p>Commune de <span data-field="mairieVille"></span></p>
           <p class="bold mt-2">Ville de <span data-field="mairieVille"></span></p>
           <p class="bold mt-4">
@@ -345,7 +345,9 @@
           </div>
         </div>
         <div class="header-col header-right text-center">
-          <p class="uppercase">TRESORERIE <br />DE <span data-field="mairieTresorerie"></span></p>
+          <p class="uppercase">
+            TRÉSORERIE PRINCIPALE<br />DE <span data-field="mairieTresorerie"></span>
+          </p>
           <!-- <p data-field="mairieNom"></p> -->
           <div class="text-left mt-2" style="font-size: 0.8em">
             <p>N° d'inscription au livre d'exécution</p>
@@ -583,7 +585,10 @@
           if (n < 1000000) {
             const thousands = Math.floor(n / 1000);
             const rest = n % 1000;
-            let result = thousands === 1 ? 'MILLE' : convertLessThanThousand(thousands) + ' MILLE';
+            let result =
+              thousands === 1
+                ? 'MILLE'
+                : convertLessThanThousand(thousands).replace(/S$/, '') + ' MILLE';
             if (rest > 0) result += ' ' + convertLessThanThousand(rest);
             return result;
           }

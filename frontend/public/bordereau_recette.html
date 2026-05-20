@@ -678,7 +678,7 @@
           if (n >= 1000) {
             const thousands = Math.floor(n / 1000);
             const remainder = n % 1000;
-            let result = thousands === 1 ? 'mille' : convertLessThanThousand(thousands) + '-mille';
+            let result = thousands === 1 ? 'mille' : convertLessThanThousand(thousands).replace(/s$/, '') + '-mille';
             if (remainder > 0) result += '-' + convertLessThanThousand(remainder);
             return result;
           }

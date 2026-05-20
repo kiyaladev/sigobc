@@ -265,7 +265,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useQuasar, date } from 'quasar';
-import { db, type BordereauMandat, type Mairie, type Mandat } from 'src/database/db';
+import { db, type BordereauMandat, type Exercice, type Mairie, type Mandat } from 'src/database/db';
 import { useAuthStore } from 'src/stores/auth-store';
 import { openPrintWindow } from 'src/utils/printUrl';
 import DataTable from 'src/components/DataTable.vue';
@@ -277,6 +277,10 @@ const authStore = useAuthStore();
 
 const bordereaux = ref<BordereauMandat[]>([]);
 const mairies = ref<Mairie[]>([]);
+const exercices = ref<Exercice[]>([]);
+const lockedYears = computed(() =>
+  exercices.value.filter((e) => e.statut === 'verrouille').map((e) => e.annee),
+);
 const loading = ref(false);
 const nextNumeroBordereau = ref<number>(1);
 const saving = ref(false);
@@ -385,6 +389,10 @@ const activeFiltersCount = computed(() => {
 
 const filteredBordereaux = computed(() => {
   let result = bordereaux.value;
+
+  if (lockedYears.value.length > 0) {
+    result = result.filter((b) => !lockedYears.value.includes(b.exercice));
+  }
 
   if (filterStatut.value) {
     result = result.filter((b) => b.statut === filterStatut.value);
@@ -529,9 +537,10 @@ function formatNumeroBordereau(numero: number, exercice: number): string {
 async function loadData() {
   loading.value = true;
   try {
-    [bordereaux.value, mairies.value] = await Promise.all([
+    [bordereaux.value, mairies.value, exercices.value] = await Promise.all([
       db.bordereauMandats.toArray(),
       db.mairies.toArray(),
+      db.exercices.toArray(),
     ]);
   } catch (error) {
     console.error('Erreur:', error);

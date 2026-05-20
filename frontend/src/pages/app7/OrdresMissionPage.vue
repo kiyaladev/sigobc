@@ -347,7 +347,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useQuasar, date } from 'quasar';
-import { db, type OrdreMission, type Employe, type PrintData } from 'src/database/db';
+import { db, type OrdreMission, type Employe, type Exercice, type PrintData } from 'src/database/db';
 import { openPrintWindow } from 'src/utils/printUrl';
 import PageHeader from 'src/components/PageHeader.vue';
 import DataTable from 'src/components/DataTable.vue';
@@ -362,6 +362,10 @@ const filterStatut = ref<string | null>(null);
 const tablePagination = ref<any>({ page: 1, rowsPerPage: 10 });
 const missions = ref<OrdreMission[]>([]);
 const employes = ref<Employe[]>([]);
+const exercices = ref<Exercice[]>([]);
+const lockedYears = computed(() =>
+  exercices.value.filter((e) => e.statut === 'verrouille').map((e) => e.annee),
+);
 const filteredEmpOptions = ref<{ label: string; value: number }[]>([]);
 
 const statutOptions = [
@@ -487,6 +491,9 @@ function resetFilters() {
 
 const filteredMissions = computed(() => {
   let r = missions.value;
+  if (lockedYears.value.length > 0) {
+    r = r.filter((m) => !lockedYears.value.includes(m.exercice));
+  }
   if (filterStatut.value) r = r.filter((m) => m.statut === filterStatut.value);
   if (filter.value) {
     const s = filter.value.toLowerCase();
@@ -565,9 +572,10 @@ const statsCards = computed(() => {
 async function loadData() {
   loading.value = true;
   try {
-    [missions.value, employes.value] = await Promise.all([
+    [missions.value, employes.value, exercices.value] = await Promise.all([
       db.ordresMission.toArray(),
       db.employes.toArray(),
+      db.exercices.toArray(),
     ]);
     filteredEmpOptions.value = employeOptions.value;
   } finally {

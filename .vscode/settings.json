@@ -8,7 +8,7 @@
   "typescript.tsdk": "node_modules/typescript/lib",
   "claudeCodeChat.permissions.yoloMode": true,
   "copilot-toolbox.intelligence.autoScanMcpSkillsOnWorkspaceOpen": true,
-  "copilot-toolbox.thinkingMachineMode.enabled": true,
+  "copilot-toolbox.thinkingMachineMode.enabled": false,
   "copilot-toolbox.thinkingMachineMode.runAwarenessScan": true,
   "copilot-toolbox.thinkingMachineMode.mergeAwarenessIntoCopilotInstructions": true,
   "copilot-toolbox.thinkingMachineMode.showConfirmationModal": true,

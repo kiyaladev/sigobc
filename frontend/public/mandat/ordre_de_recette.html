@@ -307,7 +307,7 @@
           <div class="header-row">
             <div class="header-cell header-left">
               <div class="country-name">REPUBLIQUE DE COTE D'IVOIRE</div>
-              <div class="department">Département De Daloa</div>
+              <div class="department">Département De {{ mairie.departement }}</div>
               <div class="department"></div>
               <div class="ville-section">
                 <div class="underline" style="font-weight: bold">
@@ -761,9 +761,7 @@
                 const d = Math.floor(n / 10);
                 const u = n % 10;
                 if (d === 7 || d === 9) {
-                  return (
-                    dizaines[d] + (u === 0 ? (d === 9 ? 's' : '') : '-' + dizainesSpeciales[u])
-                  );
+                  return dizaines[d] + '-' + dizainesSpeciales[u];
                 }
                 return (
                   dizaines[d] +
@@ -782,7 +780,7 @@
                 const m = Math.floor(n / 1000);
                 const r = n % 1000;
                 return (
-                  (m === 1 ? 'mille' : convertirMoinsDeMillions(m) + ' mille') +
+                  (m === 1 ? 'mille' : convertirMoinsDeMillions(m).replace(/s$/, '') + ' mille') +
                   (r === 0 ? '' : ' ' + convertirMoinsDeMillions(r))
                 );
               }
@@ -830,10 +828,10 @@
                   .get(this.mandat.bordereauMandatRecetteId);
               }
 
-              console.log('Mandat chargé:', this.mandat);
-              console.log('Mairie:', this.mairie);
-              console.log('Taxe:', this.taxe);
-              console.log('Bordereau:', this.bordereau);
+              // console.log('Mandat chargé:', this.mandat);
+              // console.log('Mairie:', this.mairie);
+              // console.log('Taxe:', this.taxe);
+              // console.log('Bordereau:', this.bordereau);
             } catch (err) {
               console.error('Erreur lors du chargement:', err);
               this.error = 'Erreur lors du chargement du mandat';

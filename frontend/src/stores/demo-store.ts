@@ -62,7 +62,8 @@ export const useDemoStore = defineStore('demo', () => {
   });
 
   const isExpired = computed(() => {
-    return trialTimeRemaining.value <= 0;
+    // Demande de licence désactivée : l'application reste toujours active.
+    return false;
   });
 
   const demoStats = computed(() => ({
@@ -99,8 +100,8 @@ export const useDemoStore = defineStore('demo', () => {
       console.log("⏰ Période d'essai expirée");
     }
 
-    isDemoMode.value = true;
-    console.log(`🎮 Version d'essai active - ${trialDaysRemaining.value} jours restants`);
+    // Mode démo / demande de licence désactivés
+    isDemoMode.value = false;
   }
 
   function checkTrialStatus(): { expired: boolean; daysRemaining: number } {

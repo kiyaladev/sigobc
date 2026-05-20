@@ -6,7 +6,9 @@
     <title>État des Décomptes</title>
     <script src="../tailwindcss.js"></script>
     <script src="../constanteInfo.js"></script>
-    <script>document.title = 'État des Décomptes - Mairie de ' + MAIRIE_INFO.ville;</script>
+    <script>
+      document.title = 'État des Décomptes - Mairie de ' + MAIRIE_INFO.ville;
+    </script>
     <script src="../dexie.min.js"></script>
     <style>
       body {
@@ -194,7 +196,7 @@
             const t = Math.floor(n / 10),
               u = n % 10;
             if (t === 7) return 'soixante-' + units[10 + u];
-            if (t === 9) return 'quatre-vingt-' + (u === 0 ? 's' : units[u]);
+            if (t === 9) return 'quatre-vingt-' + units[10 + u];
             return (
               tens[t] +
               (u === 1 && t !== 8 ? '-et-un' : u > 0 ? '-' + units[u] : t === 8 ? 's' : '')
@@ -220,7 +222,7 @@
           if (n >= 1000) {
             const k = Math.floor(n / 1000),
               r = n % 1000;
-            return (k === 1 ? 'mille' : lt1000(k) + ' mille') + (r > 0 ? ' ' + lt1000(r) : '');
+            return (k === 1 ? 'mille' : lt1000(k).replace(/s$/, '') + ' mille') + (r > 0 ? ' ' + lt1000(r) : '');
           }
           return lt1000(n);
         }
@@ -266,7 +268,8 @@
         const compteParam = p.get('compte') || '';
         const chapitreParam = p.get('chapitre') || '';
 
-        let fiches = await db.table('fichesPaie')
+        let fiches = await db
+          .table('fichesPaie')
           .filter((f) => f.mois === mois && f.annee === annee && f.statut !== 'brouillon')
           .toArray();
         const sf = p.get('service'),
@@ -316,12 +319,20 @@
         for (let i = 0; i < data.length; i += ROWS_PER_PAGE)
           pages.push(data.slice(i, i + ROWS_PER_PAGE));
         const totalPages = pages.length;
-        let cBrut = 0, cPf = 0, cAt = 0, cRg = 0, cTotal = 0;
+        let cBrut = 0,
+          cPf = 0,
+          cAt = 0,
+          cRg = 0,
+          cTotal = 0;
         let html = '';
 
         pages.forEach((pageData, idx) => {
           const isLast = idx === totalPages - 1;
-          const rBrut = cBrut, rPf = cPf, rAt = cAt, rRg = cRg, rTotal = cTotal;
+          const rBrut = cBrut,
+            rPf = cPf,
+            rAt = cAt,
+            rRg = cRg,
+            rTotal = cTotal;
 
           pageData.forEach((d) => {
             cBrut += d.brut;

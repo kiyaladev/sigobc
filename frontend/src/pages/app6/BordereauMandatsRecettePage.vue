@@ -314,6 +314,7 @@ import { useQuasar, date } from 'quasar';
 import {
   db,
   type BordereauMandatRecette,
+  type Exercice,
   type MandatRecette,
   DEFAULT_MAIRIE_ID,
 } from 'src/database/db';
@@ -324,6 +325,10 @@ import { openPrintWindow } from 'src/utils/printUrl';
 const $q = useQuasar();
 
 const bordereaux = ref<BordereauMandatRecette[]>([]);
+const exercices = ref<Exercice[]>([]);
+const lockedYears = computed(() =>
+  exercices.value.filter((e) => e.statut === 'verrouille').map((e) => e.annee),
+);
 const loading = ref(false);
 const saving = ref(false);
 const dialogVisible = ref(false);
@@ -428,6 +433,10 @@ const activeFiltersCount = computed(() => {
 
 const filteredBordereaux = computed(() => {
   let result = bordereaux.value;
+
+  if (lockedYears.value.length > 0) {
+    result = result.filter((b) => !lockedYears.value.includes(b.exercice));
+  }
 
   if (filterStatut.value) {
     result = result.filter((b) => b.statut === filterStatut.value);
@@ -557,7 +566,10 @@ function formatNumeroBordereau(numero: number, exercice: number): string {
 async function loadData() {
   loading.value = true;
   try {
-    bordereaux.value = await db.bordereauMandatsRecette.toArray();
+    [bordereaux.value, exercices.value] = await Promise.all([
+      db.bordereauMandatsRecette.toArray(),
+      db.exercices.toArray(),
+    ]);
 
     // Trier par exercice puis par numéro décroissant
     bordereaux.value.sort((a, b) => {
