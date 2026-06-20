@@ -1,6 +1,7 @@
 import { db, DEFAULT_MAIRIE_ID } from './db';
 import { MAIRIE_INFO } from 'src/constanteInfo';
 import type {
+  Taxe,
   SousChapitre,
   Prevision,
   Projet,
@@ -739,7 +740,7 @@ export async function seedDefaultData() {
 
   // 5. Taxes par défaut pour App6 - Recettes (Nomenclature complète)
   console.log('🌱 Seeding taxes (App6 - Recettes)...');
-  await db.taxes.bulkAdd([
+  const taxesSeed: Omit<Taxe, 'id'>[] = [
     // ========== SECTION 70 - RECETTES FISCALES ==========
     {
       code: '70',
@@ -1415,7 +1416,9 @@ export async function seedDefaultData() {
       createdAt: now,
       updatedAt: now,
     },
-  ]);
+  ];
+  // Idempotence : ne semer les taxes que si la table est vide (évite les doublons)
+  if ((await db.taxes.count()) === 0) await db.taxes.bulkAdd(taxesSeed);
 
   console.log('✅ Default data seeded successfully.');
 }
@@ -3086,8 +3089,8 @@ async function seedMandatsRecette(
     const exercice = first.exercice;
     const dateEmission = first.dateMandat;
     const montantTotal = group.reduce((s, m) => s + (m.montant ?? 0), 0);
-    const statut: 'ouvert' | 'ferme' =
-      exercice < CURRENT_YEAR ? 'ferme' : randomChoice(['ouvert', 'ferme'] as const);
+    // L'exercice en cours reste "ouvert" (saisie en cours) ; les exercices passés sont "fermés".
+    const statut: 'ouvert' | 'ferme' = exercice < CURRENT_YEAR ? 'ferme' : 'ouvert';
 
     bordereauSpecs.push({
       numero: i + 1,
@@ -3101,6 +3104,11 @@ async function seedMandatsRecette(
       createdAt: dateEmission,
       updatedAt: now,
     });
+  }
+
+  // Filet de sécurité : toujours au moins un bordereau "ouvert" pour permettre la saisie de mandats.
+  if (bordereauSpecs.length > 0 && !bordereauSpecs.some((b) => b.statut === 'ouvert')) {
+    bordereauSpecs[bordereauSpecs.length - 1]!.statut = 'ouvert';
   }
 
   const bordereauIds = await db.bordereauMandatsRecette.bulkAdd(bordereauSpecs);

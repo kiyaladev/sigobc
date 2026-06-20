@@ -631,7 +631,23 @@ async function generateEtatMensuel() {
       if (type === 'fonctionnel') {
         if (!code.startsWith('7')) return false;
         const codeNum = parseInt(code, 10);
-        return !isNaN(codeNum) && codeNum >= 7000;
+        if (isNaN(codeNum)) return false;
+        // Comptes de détail (4 chiffres et +)
+        if (codeNum >= 7000) return true;
+        // Inclure aussi les chapitres "feuilles" (3 chiffres sans sous-compte),
+        // utilisés directement comme comptes d'imputation (ex. 742). Les vrais
+        // en-têtes de section/chapitre (qui ont des sous-comptes) restent exclus.
+        if (code.length === 3) {
+          const hasChild = allTaxes.some(
+            (o) =>
+              o.code &&
+              o.code !== code &&
+              o.code.startsWith(code) &&
+              o.code.length > code.length,
+          );
+          return !hasChild;
+        }
+        return false;
       } else {
         // Codes 02, 04, 06 (investissement)
         return code.startsWith('0');
@@ -807,6 +823,21 @@ async function loadData() {
 async function savePrevision() {
   try {
     const now = new Date();
+
+    // Règle métier : une seule prévision par compte (taxe) et par exercice.
+    const duplicate = previsions.value.find(
+      (p) =>
+        p.exercice === formData.value.exercice &&
+        p.taxeId === formData.value.taxeId &&
+        p.id !== editingId.value,
+    );
+    if (duplicate) {
+      $q.notify({
+        type: 'negative',
+        message: `Une prévision existe déjà pour ce compte sur l'exercice ${formData.value.exercice}. Modifiez-la plutôt que d'en créer une seconde.`,
+      });
+      return;
+    }
 
     if (editingId.value) {
       // Modification

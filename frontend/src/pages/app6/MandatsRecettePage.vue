@@ -303,16 +303,13 @@
               <div class="col-4">
                 <q-select
                   v-model="formData.bordereauMandatRecetteId"
-                  :options="filteredBordereauOptions"
+                  :options="bordereauOptions"
                   label="Bordereau de Mandat"
                   outlined
                   dense
                   emit-value
                   map-options
-                  use-input
-                  input-debounce="0"
                   clearable
-                  @filter="filterBordereau"
                 >
                   <template v-slot:prepend>
                     <q-icon name="description" />
@@ -590,7 +587,8 @@ const taxeOptions = computed(() =>
 
 const bordereauOptions = computed(() =>
   bordereaux.value
-    .filter((b) => b.statut === 'ouvert')
+    // Tolérant à la casse / aux espaces pour ne manquer aucun bordereau ouvert
+    .filter((b) => String(b.statut ?? '').trim().toLowerCase() === 'ouvert')
     .map((b) => ({
       label: `Bordereau ${b.numero}-${b.exercice % 100} (${b.nombreMandats || 0} mandats)`,
       value: b.id!,
@@ -598,14 +596,9 @@ const bordereauOptions = computed(() =>
 );
 
 const filteredTaxeOptions = ref(taxeOptions.value);
-const filteredBordereauOptions = ref(bordereauOptions.value);
 
 watch(taxeOptions, (newOptions) => {
   filteredTaxeOptions.value = newOptions;
-});
-
-watch(bordereauOptions, (newOptions) => {
-  filteredBordereauOptions.value = newOptions;
 });
 
 const statutOptions = [
@@ -719,21 +712,6 @@ function filterTaxe(val: string, update: (callback: () => void) => void) {
   update(() => {
     const needle = val.toLowerCase();
     filteredTaxeOptions.value = taxeOptions.value.filter(
-      (v) => v.label.toLowerCase().indexOf(needle) > -1,
-    );
-  });
-}
-
-function filterBordereau(val: string, update: (callback: () => void) => void) {
-  if (val === '') {
-    update(() => {
-      filteredBordereauOptions.value = bordereauOptions.value;
-    });
-    return;
-  }
-  update(() => {
-    const needle = val.toLowerCase();
-    filteredBordereauOptions.value = bordereauOptions.value.filter(
       (v) => v.label.toLowerCase().indexOf(needle) > -1,
     );
   });

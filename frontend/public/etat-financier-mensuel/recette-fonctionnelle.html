@@ -535,10 +535,12 @@
 
         for (const ligne of data.lignes) {
           const code = (ligne.code || '').trim();
-          if (!code || code.length < 4) continue;
+          // length >= 3 : autoriser les chapitres-comptes feuilles (ex. 742) ;
+          // le filtrage des en-têtes est déjà fait en amont (compte feuille).
+          if (!code || code.length < 3) continue;
 
           const codeNum = parseInt(code, 10);
-          if (isNaN(codeNum) || codeNum < 7000) continue;
+          if (isNaN(codeNum) || codeNum < 700) continue;
 
           // Déterminer la section (premiers 2 chiffres)
           const sectionCode = code.substring(0, 2);

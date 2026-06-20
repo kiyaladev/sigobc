@@ -675,7 +675,7 @@ export async function initializeDatabase() {
     });
 
     // Créer les taxes par défaut pour App6 - Recettes (Nomenclature complète)
-    await db.taxes.bulkAdd([
+    const taxesSeed: Omit<Taxe, 'id'>[] = [
       // ========== SECTION 70 - RECETTES FISCALES ==========
       {
         code: '70',
@@ -1351,7 +1351,9 @@ export async function initializeDatabase() {
         createdAt: now,
         updatedAt: now,
       },
-    ]);
+    ];
+    // Idempotence : ne semer les taxes que si la table est vide (évite les doublons)
+    if ((await db.taxes.count()) === 0) await db.taxes.bulkAdd(taxesSeed);
 
     // Créer quelques rubriques et chapitres par défaut pour App3
     await db.chapitres.bulkAdd([
