@@ -1,0 +1,7 @@
+[
+  {
+    "type": "PRINT_ORDRE_MISSION",
+    "data": "{\"numero\":\"07\",\"employeId\":139,\"exercice\":2025,\"objet\":\"Transmission des états de virement de paiement des mandats au près des société de téléphone mobil \",\"destination\":\"Abidjan\",\"dateDebut\":\"2025-03-18T00:00:00.000Z\",\"dateFin\":\"2025-03-22T00:00:00.000Z\",\"nombreJours\":5,\"indemniteJournaliere\":0,\"montantTotal\":0,\"statut\":\"valide\",\"hebergementAssure\":true,\"nourritureAssuree\":true,\"moyenTransport\":\"\",\"mairieId\":1,\"personnelId\":1,\"updatedAt\":\"2026-03-08T15:30:15.441Z\",\"createdAt\":\"2026-03-08T15:30:15.441Z\",\"id\":7,\"agentNom\":\"SEKA \",\"agentPrenom\":\"ATTIA VALERO\",\"agentSexe\":\"M\",\"agentMatricule\":\"111\",\"agentPoste\":\"Chef de service financiers\",\"agentService\":\"SERVICE FINANCIER\"}",
+    "createdAt": "2026-03-08T15:30:17.528000"
+  }
+]

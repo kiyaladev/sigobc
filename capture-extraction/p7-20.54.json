@@ -1,0 +1,11 @@
+{"fichier":"CamScanner 06-07-2026 20.54.pdf","commune":"VAVOUA","code":"433","note":"Lu directement (page unique nette). Chaine des totaux: precedent 282478329 = general du folio '122' de 20.47 (480000), et general 282918329 = precedent du folio 123 de 20.47 => le folio '122' de 20.47 est en realite le folio 121; CE folio-ci est le vrai 122.","folios":[
+{"numero":122,"exercice":2026,"dateEmission":"2026-06-04","totalPresent":440000,"totalPrecedent":282478329,"totalGeneral":282918329,"arreteEnLettres":"QUATRE-CENT-QUARANTE-MILLE FRANCS CFA","sommeLignes":440000,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":771,"nature":"SALAIRE AGENT CONTRACTUEL","creancier":"KORE YOH ROMARIC","imputationFonctionnelle":"6131","chapitre":"1","somme":60000},
+{"numeroOrdre":772,"nature":"SALAIRE AGENT CONTRACTUEL","creancier":"BOHI BLI CLEMENT","imputationFonctionnelle":"6131","chapitre":"1","somme":60000},
+{"numeroOrdre":773,"nature":"SALAIRE AGENT CONTRACTUEL","creancier":"AMINATA KOSSE GORO","imputationFonctionnelle":"6131","chapitre":"1","somme":60000},
+{"numeroOrdre":774,"nature":"SALAIRE AGENT CONTRACTUEL","creancier":"AFFOUE ROSELINE DIBI","imputationFonctionnelle":"6131","chapitre":"1","somme":60000},
+{"numeroOrdre":775,"nature":"SALAIRE AGENT CONTRACTUEL","creancier":"BIMI KALOU GEOFFROY","imputationFonctionnelle":"6131","chapitre":"1","somme":50000},
+{"numeroOrdre":776,"nature":"SALAIRE AGENT CONTRACTUEL","creancier":"TOH ANDERSON","imputationFonctionnelle":"6131","chapitre":"1","somme":50000},
+{"numeroOrdre":777,"nature":"SALAIRE AGENT CONTRACTUEL","creancier":"KALOU TRA FULGENCE","imputationFonctionnelle":"6131","chapitre":"1","somme":50000},
+{"numeroOrdre":778,"nature":"SALAIRE AGENT CONTRACTUEL","creancier":"ISSIAKA TIENDREBEOGO","imputationFonctionnelle":"6131","chapitre":"1","somme":50000}]}
+]}

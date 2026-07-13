@@ -1,0 +1,146 @@
+{"fichier":"CamScanner 06-07-2026 19.48.pdf","commune":"VAVOUA","code":"433","folios":[
+{"numero":13,"exercice":2026,"dateEmission":"2026-02-13","totalPresent":825597,"totalPrecedent":7026460,"totalGeneral":7852057,"sommeLignes":825597,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":73,"nature":"INDEMNITE DE FONCTION","creancier":"KALOU BONAVENTURE, MAIRE","imputationFonctionnelle":"60013","chapitre":"1","somme":409417},
+{"numeroOrdre":74,"nature":"INDEMNITE DE FONCTION","creancier":"VALON BI SERI EMMANUEL, 1er Adjoint","imputationFonctionnelle":"60013","chapitre":"1","somme":68236},
+{"numeroOrdre":75,"nature":"INDEMNITE DE FONCTION","creancier":"BOHI NAZIE CAROLE, 2è Adjointe","imputationFonctionnelle":"60013","chapitre":"1","somme":68236},
+{"numeroOrdre":76,"nature":"INDEMNITE DE FONCTION","creancier":"SAMI BI THIERRY, 3è Adjoint","imputationFonctionnelle":"60013","chapitre":"1","somme":68236},
+{"numeroOrdre":77,"nature":"INDEMNITE DE FONCTION","creancier":"QUATTARA KADIDJATOU EPSE, 4è Adjoint","imputationFonctionnelle":"60013","chapitre":"1","somme":68236},
+{"numeroOrdre":78,"nature":"INDEMNITE DE FONCTION","creancier":"COULIBALY LANCINA, 5è Adjoint","imputationFonctionnelle":"60013","chapitre":"1","somme":68236},
+{"numeroOrdre":79,"nature":"INDEMNITE DE FONCTION","creancier":"RECEVEUR MUNICIPAL","imputationFonctionnelle":"6020","chapitre":"1","somme":75000}]},
+{"numero":14,"exercice":2026,"dateEmission":"2026-02-13","totalPresent":130135,"totalPrecedent":7852057,"totalGeneral":7982192,"sommeLignes":130135,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":80,"nature":"SALAIRE $ INDEMNITE","creancier":"KOUAKOU YAO JEAN MARC","imputationFonctionnelle":"6020","chapitre":"1","somme":130135}]},
+{"numero":15,"exercice":2026,"dateEmission":"2026-02-13","totalPresent":1217156,"totalPrecedent":7982192,"totalGeneral":9199348,"sommeLignes":1217156,"totalMatch":true,"warnings":["Case FOLIO N° imprimee illisible/erronee (14); numero reel 15 confirme par chaine des totaux"],"mandats":[
+{"numeroOrdre":81,"nature":"SALAIRE $ INDEMNITE","creancier":"KADJOGBE GISELE BACTHO","imputationFonctionnelle":"6000","chapitre":"1","somme":144135},
+{"numeroOrdre":82,"nature":"SALAIRE $ INDEMNITE","creancier":"OTEME ROGER CHARLES","imputationFonctionnelle":"6000","chapitre":"1","somme":75000},
+{"numeroOrdre":83,"nature":"SALAIRE $ INDEMNITE","creancier":"OTEME ROGER CHARLES","imputationFonctionnelle":"6000","chapitre":"1","somme":50000},
+{"numeroOrdre":84,"nature":"SALAIRE $ INDEMNITE","creancier":"YOFOUA N, A, D CASSANDRA","imputationFonctionnelle":"60012","chapitre":"1","somme":165209},
+{"numeroOrdre":85,"nature":"SALAIRE $ INDEMNITE","creancier":"SANOGO OUSMANE","imputationFonctionnelle":"60012","chapitre":"1","somme":109039},
+{"numeroOrdre":86,"nature":"SALAIRE $ INDEMNITE","creancier":"KALOU BONFILS","imputationFonctionnelle":"60012","chapitre":"1","somme":136498},
+{"numeroOrdre":87,"nature":"SALAIRE $ INDEMNITE","creancier":"DANIEL TRA BI","imputationFonctionnelle":"6002","chapitre":"1","somme":133577},
+{"numeroOrdre":88,"nature":"SALAIRE $ INDEMNITE","creancier":"KOUASSI N'GUESSAN FRANCOISE","imputationFonctionnelle":"6002","chapitre":"1","somme":136544},
+{"numeroOrdre":89,"nature":"SALAIRE $ INDEMNITE","creancier":"MONTOKA GBAHO BERNADETTE","imputationFonctionnelle":"6002","chapitre":"1","somme":133577},
+{"numeroOrdre":90,"nature":"SALAIRE $ INDEMNITE","creancier":"NOGOBALA BAKAYOKO","imputationFonctionnelle":"6002","chapitre":"1","somme":133577}]},
+{"numero":16,"exercice":2026,"dateEmission":"2026-02-13","totalPresent":1232366,"totalPrecedent":9199348,"totalGeneral":10431714,"sommeLignes":1232366,"totalMatch":true,"warnings":["Case FOLIO N° imprimee (15) != numero reel 16"],"mandats":[
+{"numeroOrdre":91,"nature":"SALAIRE $ INDEMNITE","creancier":"YAO KOFFI GERMAIN","imputationFonctionnelle":"6002","chapitre":"1","somme":133577},
+{"numeroOrdre":92,"nature":"SALAIRE $ INDEMNITE","creancier":"KONE KOROTOUM","imputationFonctionnelle":"6002","chapitre":"1","somme":116273},
+{"numeroOrdre":93,"nature":"SALAIRE $ INDEMNITE","creancier":"KALOU DIAGONE","imputationFonctionnelle":"6002","chapitre":"1","somme":125083},
+{"numeroOrdre":94,"nature":"SALAIRE $ INDEMNITE","creancier":"SERAPHIN BALLO BI","imputationFonctionnelle":"6010","chapitre":"1","somme":118622},
+{"numeroOrdre":95,"nature":"SALAIRE $ INDEMNITE","creancier":"BOUELI BI BOHIE HERVE","imputationFonctionnelle":"6010","chapitre":"1","somme":133577},
+{"numeroOrdre":96,"nature":"SALAIRE $ INDEMNITE","creancier":"SERY CIA BRICE","imputationFonctionnelle":"6010","chapitre":"1","somme":133577},
+{"numeroOrdre":97,"nature":"SALAIRE $ INDEMNITE","creancier":"BOHI KALOU MICHEL","imputationFonctionnelle":"6010","chapitre":"1","somme":133577},
+{"numeroOrdre":98,"nature":"SALAIRE $ INDEMNITE","creancier":"FOUA KALOU PLACIDE","imputationFonctionnelle":"6010","chapitre":"1","somme":119491},
+{"numeroOrdre":99,"nature":"SALAIRE $ INDEMNITE","creancier":"GUIYA BLESSON NOEL","imputationFonctionnelle":"6010","chapitre":"1","somme":109548},
+{"numeroOrdre":100,"nature":"SALAIRE $ INDEMNITE","creancier":"SOULEYMANE COULIBALY","imputationFonctionnelle":"6010","chapitre":"1","somme":109041}]},
+{"numero":17,"exercice":2026,"dateEmission":"2026-02-13","totalPresent":1199042,"totalPrecedent":10431714,"totalGeneral":11630756,"sommeLignes":1199042,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":101,"nature":"SALAIRE $ INDEMNITE","creancier":"KONSEIGA GEORGES URBAIN","imputationFonctionnelle":"6010","chapitre":"1","somme":133577},
+{"numeroOrdre":102,"nature":"SALAIRE $ INDEMNITE","creancier":"TOURE MORY","imputationFonctionnelle":"6010","chapitre":"1","somme":133577},
+{"numeroOrdre":103,"nature":"SALAIRE $ INDEMNITE","creancier":"SIDIBE DRAMANE","imputationFonctionnelle":"6010","chapitre":"1","somme":110460},
+{"numeroOrdre":104,"nature":"SALAIRE $ INDEMNITE","creancier":"VANIE BI NATTI MAURICE","imputationFonctionnelle":"6010","chapitre":"1","somme":133577},
+{"numeroOrdre":105,"nature":"SALAIRE $ INDEMNITE","creancier":"TOH TAPE EDMOND","imputationFonctionnelle":"6010","chapitre":"1","somme":133577},
+{"numeroOrdre":106,"nature":"SALAIRE $ INDEMNITE","creancier":"SILUE GUEBESSONGUI LAURENT","imputationFonctionnelle":"6010","chapitre":"1","somme":108478},
+{"numeroOrdre":107,"nature":"SALAIRE $ INDEMNITE","creancier":"KORE TAPE VICTOR","imputationFonctionnelle":"6010","chapitre":"1","somme":113058},
+{"numeroOrdre":108,"nature":"SALAIRE $ INDEMNITE","creancier":"FOFANA ABOU","imputationFonctionnelle":"6010","chapitre":"1","somme":106498},
+{"numeroOrdre":109,"nature":"SALAIRE $ INDEMNITE","creancier":"GBAHA HERMANN BERTRAND","imputationFonctionnelle":"6010","chapitre":"1","somme":102536},
+{"numeroOrdre":110,"nature":"SALAIRE $ INDEMNITE","creancier":"SALI BI FEAN PATRICE","imputationFonctionnelle":"6010","chapitre":"1","somme":123704}]},
+{"numero":18,"exercice":2026,"dateEmission":"2026-02-13","totalPresent":861964,"totalPrecedent":11630756,"totalGeneral":12492720,"sommeLignes":861964,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":111,"nature":"SALAIRE $ INDEMNITE","creancier":"BAHI GORE MAGLOIRE","imputationFonctionnelle":"6031","chapitre":"1","somme":133577},
+{"numeroOrdre":112,"nature":"SALAIRE $ INDEMNITE","creancier":"DIGBEU ZAH DIDIER","imputationFonctionnelle":"6031","chapitre":"1","somme":133577},
+{"numeroOrdre":113,"nature":"SALAIRE $ INDEMNITE","creancier":"GOGONE ZOUZOUA","imputationFonctionnelle":"6031","chapitre":"1","somme":133577},
+{"numeroOrdre":114,"nature":"SALAIRE $ INDEMNITE","creancier":"KANE BOIKE","imputationFonctionnelle":"6031","chapitre":"1","somme":118622},
+{"numeroOrdre":115,"nature":"SALAIRE $ INDEMNITE","creancier":"ZOMA TOUALY PAUL","imputationFonctionnelle":"6031","chapitre":"1","somme":133577},
+{"numeroOrdre":116,"nature":"SALAIRE $ INDEMNITE","creancier":"GUIE TUI ALAIN","imputationFonctionnelle":"6031","chapitre":"1","somme":106498},
+{"numeroOrdre":117,"nature":"SALAIRE $ INDEMNITE","creancier":"ZAPKA HERVE","imputationFonctionnelle":"6031","chapitre":"1","somme":102536}]},
+{"numero":19,"exercice":2026,"dateEmission":"2026-02-13","totalPresent":582667,"totalPrecedent":12492720,"totalGeneral":13075387,"sommeLignes":582667,"totalMatch":true,"warnings":["Case FOLIO imprimee (18) != reel 19"],"mandats":[
+{"numeroOrdre":118,"nature":"SALAIRE $ INDEMNITE","creancier":"BAKARY KONE","imputationFonctionnelle":"6100","chapitre":"1","somme":107510},
+{"numeroOrdre":119,"nature":"SALAIRE $ INDEMNITE","creancier":"CINALY DOSSO","imputationFonctionnelle":"6100","chapitre":"1","somme":113984},
+{"numeroOrdre":120,"nature":"SALAIRE $ INDEMNITE","creancier":"GBESSI BAHI ERNEST","imputationFonctionnelle":"6100","chapitre":"1","somme":122450},
+{"numeroOrdre":121,"nature":"SALAIRE $ INDEMNITE","creancier":"SERY ZAGBAI RENE","imputationFonctionnelle":"6100","chapitre":"1","somme":122450},
+{"numeroOrdre":122,"nature":"SALAIRE $ INDEMNITE","creancier":"TIAN BI UE BRICE","imputationFonctionnelle":"6100","chapitre":"1","somme":116273}]},
+{"numero":20,"exercice":2026,"dateEmission":"2026-02-13","totalPresent":71170,"totalPrecedent":13075387,"totalGeneral":13146557,"sommeLignes":71170,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":123,"nature":"Cotis,ITS-Fevrier 2026","creancier":"TRESORIER PRINCIPAL - VAVOUA","imputationFonctionnelle":"6000","chapitre":"1","somme":1861},
+{"numeroOrdre":124,"nature":"Cotis,ITS-Fevrier 2026","creancier":"TRESORIER PRINCIPAL - VAVOUA","imputationFonctionnelle":"60012","chapitre":"1","somme":5120},
+{"numeroOrdre":125,"nature":"Cotis,ITS-Fevrier 2026","creancier":"TRESORIER PRINCIPAL - VAVOUA","imputationFonctionnelle":"6002","chapitre":"1","somme":12823},
+{"numeroOrdre":126,"nature":"Cotis,ITS-Fevrier 2026","creancier":"TRESORIER PRINCIPAL - VAVOUA","imputationFonctionnelle":"6010","chapitre":"1","somme":29226},
+{"numeroOrdre":127,"nature":"Cotis,ITS-Fevrier 2026","creancier":"TRESORIER PRINCIPAL - VAVOUA","imputationFonctionnelle":"6020","chapitre":"1","somme":1861},
+{"numeroOrdre":128,"nature":"Cotis,ITS-Fevrier 2026","creancier":"TRESORIER PRINCIPAL - VAVOUA","imputationFonctionnelle":"6031","chapitre":"1","somme":12068},
+{"numeroOrdre":129,"nature":"Cotis,ITS-Fevrier 2026","creancier":"TRESORIER PRINCIPAL - VAVOUA","imputationFonctionnelle":"6100","chapitre":"1","somme":8211}]},
+{"numero":21,"exercice":2026,"dateEmission":"2026-02-13","totalPresent":566178,"totalPrecedent":13146557,"totalGeneral":13712735,"sommeLignes":566178,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":130,"nature":"Cotis,CNPS-Fevrier 2026","creancier":"DIRECTION REGIONALE - Daloa","imputationFonctionnelle":"6000","chapitre":"2","somme":14382},
+{"numeroOrdre":131,"nature":"Cotis,CNPS-Fevrier 2026","creancier":"DIRECTION REGIONALE - Daloa","imputationFonctionnelle":"60012","chapitre":"2","somme":40917},
+{"numeroOrdre":132,"nature":"Cotis,CNPS-Fevrier 2026","creancier":"DIRECTION REGIONALE - Daloa","imputationFonctionnelle":"6002","chapitre":"2","somme":99791},
+{"numeroOrdre":133,"nature":"Cotis,CNPS-Fevrier 2026","creancier":"DIRECTION REGIONALE - Daloa","imputationFonctionnelle":"6010","chapitre":"2","somme":232902},
+{"numeroOrdre":134,"nature":"Cotis,CNPS-Fevrier 2026","creancier":"DIRECTION REGIONALE - Daloa","imputationFonctionnelle":"6020","chapitre":"2","somme":14382},
+{"numeroOrdre":135,"nature":"Cotis,CNPS-Fevrier 2026","creancier":"DIRECTION REGIONALE - Daloa","imputationFonctionnelle":"6031","chapitre":"2","somme":97162},
+{"numeroOrdre":136,"nature":"Cotis,CNPS-Fevrier 2026","creancier":"DIRECTION REGIONALE - Daloa","imputationFonctionnelle":"6100","chapitre":"2","somme":66642}]},
+{"numero":22,"exercice":2026,"dateEmission":"2026-02-13","totalPresent":280185,"totalPrecedent":13712735,"totalGeneral":13992920,"sommeLignes":280185,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":137,"nature":"Cotis,CNPS-Fevrier 2026","creancier":"DIRECTION REGIONALE - Daloa","imputationFonctionnelle":"6000","chapitre":"1","somme":7328},
+{"numeroOrdre":138,"nature":"Cotis,CNPS-Fevrier 2026","creancier":"DIRECTION REGIONALE - Daloa","imputationFonctionnelle":"60012","chapitre":"1","somme":20162},
+{"numeroOrdre":139,"nature":"Cotis,CNPS-Fevrier 2026","creancier":"DIRECTION REGIONALE - Daloa","imputationFonctionnelle":"6002","chapitre":"1","somme":50495},
+{"numeroOrdre":140,"nature":"Cotis,CNPS-Fevrier 2026","creancier":"DIRECTION REGIONALE - Daloa","imputationFonctionnelle":"6010","chapitre":"1","somme":115099},
+{"numeroOrdre":141,"nature":"Cotis,CNPS-Fevrier 2026","creancier":"DIRECTION REGIONALE - Daloa","imputationFonctionnelle":"6020","chapitre":"1","somme":7328},
+{"numeroOrdre":142,"nature":"Cotis,CNPS-Fevrier 2026","creancier":"DIRECTION REGIONALE - Daloa","imputationFonctionnelle":"6031","chapitre":"1","somme":47441},
+{"numeroOrdre":143,"nature":"Cotis,CNPS-Fevrier 2026","creancier":"DIRECTION REGIONALE - Daloa","imputationFonctionnelle":"6100","chapitre":"1","somme":32332}]},
+{"numero":23,"exercice":2026,"dateEmission":"2026-02-13","totalPresent":60000,"totalPrecedent":13992920,"totalGeneral":14052920,"sommeLignes":60000,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":144,"nature":"Salaire Agent Contractuel","creancier":"AMINATA KOSSE GORO","imputationFonctionnelle":"6006","chapitre":"1","somme":60000}]},
+{"numero":24,"exercice":2026,"dateEmission":"2026-01-31","totalPresent":6300000,"totalPrecedent":14052920,"totalGeneral":20352920,"sommeLignes":6300000,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":145,"nature":"Achat de carnets de tickets","creancier":"IMPRIMERIE NATIONALE","imputationFonctionnelle":"6406","chapitre":"5","somme":2100000},
+{"numeroOrdre":146,"nature":"Achat de tickets de marche","creancier":"IMPRIMERIE NATIONALE","imputationFonctionnelle":"6406","chapitre":"5","somme":2800000},
+{"numeroOrdre":147,"nature":"Achat de tickets de stationnement","creancier":"IMPRIMERIE NATIONALE","imputationFonctionnelle":"6406","chapitre":"5","somme":1400000}]},
+{"numero":25,"exercice":2026,"dateEmission":"2026-02-11","totalPresent":112257,"totalPrecedent":20352920,"totalGeneral":20465177,"sommeLignes":112257,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":148,"nature":"REGLEMENT FACTURE","creancier":"SODECI","imputationFonctionnelle":"6000","chapitre":"6","somme":112257}]},
+{"numero":26,"exercice":2026,"dateEmission":"2026-01-31","totalPresent":4986895,"totalPrecedent":20465177,"totalGeneral":25452072,"sommeLignes":4986895,"totalMatch":true,"warnings":["Ligne 152 creancier 'E.A.C.T' partiellement manuscrit"],"mandats":[
+{"numeroOrdre":149,"nature":"ACHAT DE FOURNITURES","creancier":"ETABLISSEMENT GLOBAL VISION","imputationFonctionnelle":"60012","chapitre":"5","somme":998000},
+{"numeroOrdre":150,"nature":"ACHAT DE MATERIELS ET DE FOURNITURES","creancier":"ETABLISSEMENT GLOBAL VISION","imputationFonctionnelle":"60012","chapitre":"5","somme":999500},
+{"numeroOrdre":151,"nature":"ACHAT DE REGISTRES","creancier":"ETABLISSEMENT GLOBAL VISION","imputationFonctionnelle":"60012","chapitre":"5","somme":749845},
+{"numeroOrdre":152,"nature":"ACHAT DE CARNETS DE PATENTE","creancier":"E.A.C.T","imputationFonctionnelle":"60012","chapitre":"5","somme":240000},
+{"numeroOrdre":153,"nature":"ACHAT DE PRODUITS D'ENTRETIEN","creancier":"PEPS","imputationFonctionnelle":"6010","chapitre":"5","somme":999650},
+{"numeroOrdre":154,"nature":"ACHAT DE MATERIELS INFORMATIQUES","creancier":"PEPS","imputationFonctionnelle":"6010","chapitre":"5","somme":999900}]},
+{"numero":27,"exercice":2026,"dateEmission":"2026-02-16","totalPresent":791035,"totalPrecedent":25452072,"totalGeneral":26243107,"sommeLignes":791035,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":155,"nature":"REGLEMENT FACTURE","creancier":"CIE","imputationFonctionnelle":"6000","chapitre":"6","somme":546775},
+{"numeroOrdre":156,"nature":"REGLEMENT FACTURE","creancier":"CIE","imputationFonctionnelle":"6000","chapitre":"6","somme":244260}]},
+{"numero":28,"exercice":2026,"dateEmission":"2026-01-26","totalPresent":5000000,"totalPrecedent":26243107,"totalGeneral":31243107,"sommeLignes":5000000,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":157,"nature":"Achat de Materiels de Bureaux","creancier":"Groupement des Ouvriers en Batiment","imputationFonctionnelle":"60011","chapitre":"5","somme":1021300},
+{"numeroOrdre":158,"nature":"Achat de Fournitures de Bureaux","creancier":"Groupement des Ouvriers en Batiment","imputationFonctionnelle":"60011","chapitre":"5","somme":3978700}]},
+{"numero":29,"exercice":2026,"dateEmission":"2026-01-31","totalPresent":1980000,"totalPrecedent":31243107,"totalGeneral":33223107,"sommeLignes":1980000,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":159,"nature":"ACHAT DE MACARONS","creancier":"E.A.C.T","imputationFonctionnelle":"6006","chapitre":"5","somme":1980000}]},
+{"numero":30,"exercice":2026,"dateEmission":"2026-01-31","totalPresent":8842500,"totalPrecedent":33223107,"totalGeneral":42065607,"sommeLignes":8842500,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":160,"nature":"Achat de consommables informatiques","creancier":"ETABLISSEMENT GLOBAL VISION","imputationFonctionnelle":"6010","chapitre":"5","somme":8842500}]},
+{"numero":31,"exercice":2026,"dateEmission":"2026-01-31","totalPresent":1157950,"totalPrecedent":42065607,"totalGeneral":43223557,"sommeLignes":1157950,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":161,"nature":"Achat de Fournitures et Materiels de Bureau","creancier":"PEPS","imputationFonctionnelle":"6010","chapitre":"5","somme":1157950}]},
+{"numero":32,"exercice":2026,"dateEmission":"2026-01-17","totalPresent":3820000,"totalPrecedent":43223557,"totalGeneral":47043557,"sommeLignes":3820000,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":162,"nature":"ACHAT DE MATERIELS","creancier":"Assoumou Mounou Boniface","imputationFonctionnelle":"6020","chapitre":"5","somme":980000},
+{"numeroOrdre":163,"nature":"ACHAT DE CONSOMMABLES","creancier":"Assoumou Mounou Boniface","imputationFonctionnelle":"6020","chapitre":"5","somme":960000},
+{"numeroOrdre":164,"nature":"ACHAT DE FOURNITURES","creancier":"Assoumou Mounou Boniface","imputationFonctionnelle":"6020","chapitre":"5","somme":980000},
+{"numeroOrdre":165,"nature":"ACHAT DE PRODUITS","creancier":"Assoumou Mounou Boniface","imputationFonctionnelle":"6020","chapitre":"5","somme":900000}]},
+{"numero":33,"exercice":2026,"dateEmission":"2026-01-17","totalPresent":980000,"totalPrecedent":47043557,"totalGeneral":48023557,"sommeLignes":980000,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":166,"nature":"ACHAT DE MATERIELS","creancier":"Assoumou Mounou Boniface","imputationFonctionnelle":"6020","chapitre":"5","somme":980000}]},
+{"numero":34,"exercice":2026,"dateEmission":"2026-01-14","totalPresent":4000000,"totalPrecedent":48023557,"totalGeneral":52023557,"sommeLignes":4000000,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":167,"nature":"ACHAT DE CONSOMMABLES INFORMATIQUES","creancier":"EKYMAS","imputationFonctionnelle":"6100","chapitre":"5","somme":735000},
+{"numeroOrdre":168,"nature":"ACHAT DE MATERIELS ET PRODUITS","creancier":"EKYMAS","imputationFonctionnelle":"6100","chapitre":"5","somme":833450},
+{"numeroOrdre":169,"nature":"ACHAT DE FOURNITURES DE BUREAU","creancier":"EKYMAS","imputationFonctionnelle":"6100","chapitre":"5","somme":933000},
+{"numeroOrdre":170,"nature":"ACHAT DE MATERIEL INFORMATIQUE","creancier":"EKYMAS","imputationFonctionnelle":"6100","chapitre":"5","somme":512300},
+{"numeroOrdre":171,"nature":"ACHAT DE MATERIEL TECHNIQUE","creancier":"EKYMAS","imputationFonctionnelle":"6100","chapitre":"5","somme":986250}]},
+{"numero":35,"exercice":2026,"dateEmission":"2026-01-14","totalPresent":3000000,"totalPrecedent":52023557,"totalGeneral":55023557,"sommeLignes":3000000,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":172,"nature":"ACHAT DE FOURNITURES DE BUREAU","creancier":"EKYMAS","imputationFonctionnelle":"6250","chapitre":"5","somme":933000},
+{"numeroOrdre":173,"nature":"ACHAT DE CONSOMMABLES INFORMATIQUES","creancier":"EKYMAS","imputationFonctionnelle":"6250","chapitre":"5","somme":735000},
+{"numeroOrdre":174,"nature":"ACHAT DE MATERIELS INFORMATIQUES","creancier":"EKYMAS","imputationFonctionnelle":"6250","chapitre":"5","somme":495300},
+{"numeroOrdre":175,"nature":"ACHAT DE MATERIELS ET PRODUITS","creancier":"EKYMAS","imputationFonctionnelle":"6250","chapitre":"5","somme":836700}]},
+{"numero":36,"exercice":2026,"dateEmission":"2026-01-31","totalPresent":3000000,"totalPrecedent":55023557,"totalGeneral":58023557,"sommeLignes":3000000,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":176,"nature":"Curage des caniveaux, Enlevement d'ordures et entretien de marche de Vavoua","creancier":"ETABLISSEMENT GLOBAL VISION","imputationFonctionnelle":"6344","chapitre":"7","somme":3000000}]},
+{"numero":37,"exercice":2026,"dateEmission":"2026-01-17","totalPresent":2700000,"totalPrecedent":58023557,"totalGeneral":60723557,"sommeLignes":2700000,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":177,"nature":"ENTRETIEN ET MAINTENANCE","creancier":"Assoumou Mounou Boniface","imputationFonctionnelle":"6020","chapitre":"7","somme":950000},
+{"numeroOrdre":178,"nature":"ENTRETIEN ET REPARATION","creancier":"Assoumou Mounou Boniface","imputationFonctionnelle":"6020","chapitre":"7","somme":800000},
+{"numeroOrdre":179,"nature":"ENTRETIEN ET REPARATION","creancier":"Assoumou Mounou Boniface","imputationFonctionnelle":"6020","chapitre":"7","somme":950000}]},
+{"numero":38,"exercice":2026,"dateEmission":"2026-01-26","totalPresent":9000000,"totalPrecedent":60723557,"totalGeneral":69723557,"sommeLignes":9000000,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":180,"nature":"ACHAT DE MATERIELS","creancier":"DIN'S","imputationFonctionnelle":"6141","chapitre":"5","somme":1000000},
+{"numeroOrdre":181,"nature":"ACHAT DE MATERIELS","creancier":"DIN'S","imputationFonctionnelle":"6205","chapitre":"5","somme":3000000},
+{"numeroOrdre":182,"nature":"DEPENSES D'ASSAINISSEMENT","creancier":"DIN'S","imputationFonctionnelle":"6131","chapitre":"5","somme":5000000}]},
+{"numero":39,"exercice":2026,"dateEmission":"2026-01-26","totalPresent":8000000,"totalPrecedent":69723557,"totalGeneral":77723557,"sommeLignes":8000000,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":183,"nature":"ACHAT DE MATERIELS","creancier":"DIN'S","imputationFonctionnelle":"6223","chapitre":"5","somme":4000000},
+{"numeroOrdre":184,"nature":"AIDE AUX PERSONNES AGEES","creancier":"DIN'S","imputationFonctionnelle":"6224","chapitre":"5","somme":3000000},
+{"numeroOrdre":185,"nature":"DEPENSES DES ACTIVITES","creancier":"DIN'S","imputationFonctionnelle":"6344","chapitre":"5","somme":1000000}]},
+{"numero":40,"exercice":2026,"dateEmission":"2026-01-31","totalPresent":29000000,"totalPrecedent":77723557,"totalGeneral":106723557,"sommeLignes":29000000,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":186,"nature":"Travaux d'amenagement et traitement des points critiques et stationnement des taxis a l'interieur de Vavoua","creancier":"ETABLISSEMENT GLOBAL VISION","imputationFonctionnelle":"6151","chapitre":"7","somme":29000000}]},
+{"numero":41,"exercice":2026,"dateEmission":"2026-02-20","totalPresent":641000,"totalPrecedent":106723557,"totalGeneral":107364557,"sommeLignes":641000,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":187,"nature":"COTISATION ANNUELLE","creancier":"UVICOCI","imputationFonctionnelle":"6415","chapitre":"6","somme":641000}]}
+]}

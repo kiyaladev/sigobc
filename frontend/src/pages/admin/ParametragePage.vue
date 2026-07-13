@@ -1,41 +1,6 @@
 <template>
   <q-page class="parametrage-page q-pa-md">
-    <!-- Password Gate -->
-    <div v-if="!isUnlocked" class="admin-password-shell">
-      <q-card class="admin-password-card q-pa-lg">
-        <q-card-section class="text-center">
-          <q-icon name="lock" size="48px" color="warning" class="q-mb-md" />
-          <div class="text-h6 q-mb-sm">Accès protégé</div>
-          <div class="text-caption text-grey-7 q-mb-lg">
-            Veuillez entrer le mot de passe administrateur pour accéder à cette page.
-          </div>
-          <q-form @submit="checkPassword">
-            <q-input
-              v-model="adminPassword"
-              type="password"
-              label="Mot de passe administrateur"
-              outlined
-              dense
-              :error="passwordError"
-              error-message="Mot de passe incorrect"
-              @keyup.enter="checkPassword"
-              class="q-mb-md"
-            />
-            <q-btn
-              type="submit"
-              label="Déverrouiller"
-              color="primary"
-              unelevated
-              class="full-width"
-              icon="lock_open"
-            />
-          </q-form>
-        </q-card-section>
-      </q-card>
-    </div>
-
-    <!-- Actual content -->
-    <template v-if="isUnlocked">
+    <template>
       <PageHeader
         title="Paramétrage"
         subtitle="Configuration générale de l'application"
@@ -455,27 +420,6 @@ import PageHeader from 'src/components/PageHeader.vue';
 import { MAIRIE_INFO } from 'src/constanteInfo';
 
 const $q = useQuasar();
-
-// Password protection
-const ADMIN_PAGE_PASSWORD = 'Sigobc@2026!';
-const isUnlocked = ref(false);
-const adminPassword = ref('');
-const passwordError = ref(false);
-
-function checkPassword() {
-  if (adminPassword.value === ADMIN_PAGE_PASSWORD) {
-    isUnlocked.value = true;
-    passwordError.value = false;
-    sessionStorage.setItem('parametrage_unlocked', 'true');
-  } else {
-    passwordError.value = true;
-  }
-}
-
-// Check if already unlocked in this session
-if (sessionStorage.getItem('parametrage_unlocked') === 'true') {
-  isUnlocked.value = true;
-}
 
 const exercices = ref<Exercice[]>([]);
 const mairie = MAIRIE_INFO;

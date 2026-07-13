@@ -1,23 +1,16 @@
 import type { RouteRecordRaw } from 'vue-router';
 
 const routes: RouteRecordRaw[] = [
-  // Route de connexion avec LoginLayout
+  // L'application démarre directement sur l'espace principal.
   {
     path: '/login',
-    component: () => import('layouts/LoginLayout.vue'),
-    children: [
-      {
-        path: '',
-        component: () => import('pages/LoginPage.vue'),
-      },
-    ],
+    redirect: '/',
   },
 
   // Routes principales avec layout
   {
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
-    meta: { requiresAuth: true },
     children: [
       // Routes App3 - Gestion des Dépenses
       {
@@ -28,13 +21,11 @@ const routes: RouteRecordRaw[] = [
         path: 'utilisateurs',
         component: () => import('pages/UtilisateursPage.vue'),
         name: 'utilisateurs',
-        meta: { requiresAdmin: true },
       },
       {
         path: 'admin/seeders',
         component: () => import('pages/admin/AdminSeedersPage.vue'),
         name: 'admin-seeders',
-        meta: { requiresAdmin: true },
       },
       {
         path: 'admin/backup',
@@ -46,7 +37,6 @@ const routes: RouteRecordRaw[] = [
         path: 'admin/parametrage',
         component: () => import('pages/admin/ParametragePage.vue'),
         name: 'admin-parametrage',
-        meta: { requiresAdmin: true },
       },
       {
         path: 'statistiques',

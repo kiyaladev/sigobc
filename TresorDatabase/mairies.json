@@ -1,0 +1,13 @@
+[
+  {
+    "nom": "Mairie de Vavoua",
+    "code": "433",
+    "adresse": "Avenue Principale",
+    "ville": "Vavoua",
+    "codePostal": "00225",
+    "telephone": "+225 XX XX XX XX",
+    "email": "contact@mairie-vavoua.ci",
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  }
+]

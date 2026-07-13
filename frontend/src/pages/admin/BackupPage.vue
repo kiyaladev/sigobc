@@ -1,268 +1,231 @@
 <template>
   <q-page class="backup-page q-pa-md">
-    <!-- Password Gate -->
-    <div v-if="!isUnlocked" class="admin-password-shell">
-      <q-card class="admin-password-card q-pa-lg">
-        <q-card-section class="text-center">
-          <q-icon name="lock" size="48px" color="warning" class="q-mb-md" />
-          <div class="text-h6 q-mb-sm">Accès protégé</div>
-          <div class="text-caption text-grey-7 q-mb-lg">
-            Veuillez entrer le mot de passe administrateur pour accéder à cette page.
-          </div>
-          <q-form @submit="checkPassword">
-            <q-input
-              v-model="adminPassword"
-              type="password"
-              label="Mot de passe administrateur"
-              outlined
-              dense
-              :error="passwordError"
-              error-message="Mot de passe incorrect"
-              @keyup.enter="checkPassword"
-              class="q-mb-md"
-            />
+    <PageHeader
+      title="Sauvegarde & Restauration"
+      subtitle="Exportation et importation des données"
+      icon="backup"
+    >
+      <template #stats>
+        <div v-for="(stat, index) in heroStats" :key="index" class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">{{ stat.label }}</div>
+                <div class="overview-stat-value">{{ stat.value }}</div>
+                <div v-if="stat.helper" class="overview-stat-helper">{{ stat.helper }}</div>
+              </div>
+              <q-icon :name="stat.icon" size="30px" :color="stat.color" />
+            </q-card-section>
+          </q-card>
+        </div>
+      </template>
+    </PageHeader>
+
+    <div class="row q-col-gutter-md">
+      <!-- Sauvegarde complète -->
+      <div class="col-12 col-md-6">
+        <q-card class="admin-card">
+          <q-card-section class="accent-left">
+            <div class="row items-center">
+              <q-icon name="save" size="md" class="q-mr-md" />
+              <div>
+                <div class="text-h6">Sauvegarder toute la base</div>
+                <div class="text-caption">Créer une copie complète de toutes vos données</div>
+              </div>
+            </div>
+          </q-card-section>
+
+          <q-card-section class="accent-left">
+            <div class="text-body2 q-mb-md">
+              La sauvegarde exportera toutes les données de l'application dans un fichier JSON.
+            </div>
+
+            <q-list bordered separator class="q-mb-md">
+              <q-item v-for="mod in modules" :key="mod.key">
+                <q-item-section avatar>
+                  <q-icon name="check_circle" :color="mod.color" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>{{ mod.icon }} {{ mod.label }}</q-item-label>
+                  <q-item-label caption
+                    >{{ getModuleRecordCount(mod) }} enregistrement(s)</q-item-label
+                  >
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-card-section>
+
+          <q-card-actions align="right">
             <q-btn
-              type="submit"
-              label="Déverrouiller"
-              color="primary"
+              label="Télécharger la sauvegarde complète"
+              color="positive"
+              icon="download"
+              @click="exportAll"
+              :loading="exportLoading"
               unelevated
-              class="full-width"
-              icon="lock_open"
             />
-          </q-form>
-        </q-card-section>
-      </q-card>
-    </div>
-
-    <!-- Actual content -->
-    <template v-if="isUnlocked">
-      <PageHeader
-        title="Sauvegarde & Restauration"
-        subtitle="Exportation et importation des données"
-        icon="backup"
-      >
-        <template #stats>
-          <div v-for="(stat, index) in heroStats" :key="index" class="col-12 col-sm-6 col-lg-3">
-            <q-card flat class="listing-stat-card overview-stat-card">
-              <q-card-section class="row items-center no-wrap">
-                <div class="col">
-                  <div class="overview-stat-label">{{ stat.label }}</div>
-                  <div class="overview-stat-value">{{ stat.value }}</div>
-                  <div v-if="stat.helper" class="overview-stat-helper">{{ stat.helper }}</div>
-                </div>
-                <q-icon :name="stat.icon" size="30px" :color="stat.color" />
-              </q-card-section>
-            </q-card>
-          </div>
-        </template>
-      </PageHeader>
-
-      <div class="row q-col-gutter-md">
-        <!-- Sauvegarde complète -->
-        <div class="col-12 col-md-6">
-          <q-card class="admin-card">
-            <q-card-section class="accent-left">
-              <div class="row items-center">
-                <q-icon name="save" size="md" class="q-mr-md" />
-                <div>
-                  <div class="text-h6">Sauvegarder toute la base</div>
-                  <div class="text-caption">Créer une copie complète de toutes vos données</div>
-                </div>
-              </div>
-            </q-card-section>
-
-            <q-card-section class="accent-left">
-              <div class="text-body2 q-mb-md">
-                La sauvegarde exportera toutes les données de l'application dans un fichier JSON.
-              </div>
-
-              <q-list bordered separator class="q-mb-md">
-                <q-item v-for="mod in modules" :key="mod.key">
-                  <q-item-section avatar>
-                    <q-icon name="check_circle" :color="mod.color" />
-                  </q-item-section>
-                  <q-item-section>
-                    <q-item-label>{{ mod.icon }} {{ mod.label }}</q-item-label>
-                    <q-item-label caption
-                      >{{ getModuleRecordCount(mod) }} enregistrement(s)</q-item-label
-                    >
-                  </q-item-section>
-                </q-item>
-              </q-list>
-            </q-card-section>
-
-            <q-card-actions align="right">
-              <q-btn
-                label="Télécharger la sauvegarde complète"
-                color="positive"
-                icon="download"
-                @click="exportAll"
-                :loading="exportLoading"
-                unelevated
-              />
-            </q-card-actions>
-          </q-card>
-        </div>
-
-        <!-- Restauration complète -->
-        <div class="col-12 col-md-6">
-          <q-card class="admin-card">
-            <q-card-section class="accent-left">
-              <div class="row items-center">
-                <q-icon name="upload" size="md" class="q-mr-md" />
-                <div>
-                  <div class="text-h6">Restaurer la base de données</div>
-                  <div class="text-caption">Importer une sauvegarde complète</div>
-                </div>
-              </div>
-            </q-card-section>
-
-            <q-card-section>
-              <q-banner class="admin-warning-banner q-mb-md" rounded>
-                <template v-slot:avatar>
-                  <q-icon name="warning" />
-                </template>
-                <strong>Attention :</strong> La restauration complète remplacera toutes vos données
-                actuelles !
-              </q-banner>
-
-              <div class="text-body2 q-mb-md">
-                Importez un fichier de sauvegarde complète pour restaurer vos données.
-              </div>
-
-              <div class="text-subtitle2 q-mb-sm">Instructions :</div>
-              <ol class="q-pl-md text-body2">
-                <li class="q-mb-xs">Cliquez sur "Choisir un fichier"</li>
-                <li class="q-mb-xs">Sélectionnez votre fichier de sauvegarde (.json)</li>
-                <li class="q-mb-xs">Confirmez la restauration</li>
-                <li>Attendez que l'importation se termine</li>
-              </ol>
-            </q-card-section>
-
-            <q-card-actions align="right">
-              <q-btn
-                label="Choisir un fichier"
-                color="info"
-                icon="folder_open"
-                @click="importAll"
-                :loading="importLoading"
-                unelevated
-              />
-            </q-card-actions>
-          </q-card>
-        </div>
-
-        <!-- Export / Import par module -->
-        <div class="col-12">
-          <q-card class="admin-card">
-            <q-card-section>
-              <div class="text-h6">📦 Export / Import par module</div>
-              <div class="text-caption text-grey-7">
-                Téléchargez ou importez les données d'un module spécifique sans toucher aux autres.
-              </div>
-            </q-card-section>
-
-            <q-card-section>
-              <div class="row q-col-gutter-md">
-                <div class="col-12 col-sm-6 col-md-3" v-for="mod in modules" :key="mod.key">
-                  <q-card flat class="listing-stat-card admin-module-card">
-                    <q-card-section>
-                      <div class="text-subtitle1 text-weight-medium q-mb-xs">
-                        {{ mod.icon }} {{ mod.label }}
-                      </div>
-                      <q-list dense class="text-caption text-grey-7 q-mb-sm">
-                        <q-item
-                          v-for="t in mod.tables"
-                          :key="t.table"
-                          dense
-                          class="q-pa-none"
-                          style="min-height: 24px"
-                        >
-                          <q-item-section>{{ t.label }}</q-item-section>
-                          <q-item-section side>
-                            <span class="text-primary text-weight-medium">{{
-                              stats[t.table] ?? 0
-                            }}</span>
-                          </q-item-section>
-                        </q-item>
-                      </q-list>
-                    </q-card-section>
-                    <q-separator />
-                    <q-card-actions>
-                      <q-btn
-                        flat
-                        dense
-                        icon="download"
-                        label="Exporter"
-                        color="positive"
-                        :loading="moduleLoading[mod.key]?.export"
-                        @click="exportModule(mod)"
-                        class="col"
-                      />
-                      <q-separator vertical />
-                      <q-btn
-                        flat
-                        dense
-                        icon="upload"
-                        label="Importer"
-                        color="info"
-                        :loading="moduleLoading[mod.key]?.import"
-                        @click="importModule(mod)"
-                        class="col"
-                      />
-                    </q-card-actions>
-                  </q-card>
-                </div>
-              </div>
-            </q-card-section>
-          </q-card>
-        </div>
-
-        <!-- Historique des sauvegardes -->
-        <div class="col-12">
-          <q-card class="admin-card">
-            <q-card-section>
-              <div class="text-h6">📋 Dernières opérations</div>
-            </q-card-section>
-
-            <q-card-section v-if="history.length === 0">
-              <div class="text-center text-grey-7 q-pa-md">
-                <q-icon name="info" size="lg" class="q-mb-sm" />
-                <div>Aucune opération enregistrée</div>
-              </div>
-            </q-card-section>
-
-            <q-card-section v-else>
-              <q-list separator>
-                <q-item v-for="(item, index) in history" :key="index">
-                  <q-item-section avatar>
-                    <q-icon
-                      :name="item.type === 'export' ? 'download' : 'upload'"
-                      :color="item.type === 'export' ? 'positive' : 'info'"
-                    />
-                  </q-item-section>
-
-                  <q-item-section>
-                    <q-item-label>{{ item.action }}</q-item-label>
-                    <q-item-label caption>{{ item.date }}</q-item-label>
-                  </q-item-section>
-
-                  <q-item-section side>
-                    <q-chip
-                      :color="item.success ? 'positive' : 'negative'"
-                      text-color="white"
-                      size="sm"
-                    >
-                      {{ item.success ? 'Succès' : 'Échec' }}
-                    </q-chip>
-                  </q-item-section>
-                </q-item>
-              </q-list>
-            </q-card-section>
-          </q-card>
-        </div>
+          </q-card-actions>
+        </q-card>
       </div>
-    </template>
+
+      <!-- Restauration complète -->
+      <div class="col-12 col-md-6">
+        <q-card class="admin-card">
+          <q-card-section class="accent-left">
+            <div class="row items-center">
+              <q-icon name="upload" size="md" class="q-mr-md" />
+              <div>
+                <div class="text-h6">Restaurer la base de données</div>
+                <div class="text-caption">Importer une sauvegarde complète</div>
+              </div>
+            </div>
+          </q-card-section>
+
+          <q-card-section>
+            <q-banner class="admin-warning-banner q-mb-md" rounded>
+              <template v-slot:avatar>
+                <q-icon name="warning" />
+              </template>
+              <strong>Attention :</strong> La restauration complète remplacera toutes vos données
+              actuelles !
+            </q-banner>
+
+            <div class="text-body2 q-mb-md">
+              Importez un fichier de sauvegarde complète pour restaurer vos données.
+            </div>
+
+            <div class="text-subtitle2 q-mb-sm">Instructions :</div>
+            <ol class="q-pl-md text-body2">
+              <li class="q-mb-xs">Cliquez sur "Choisir un fichier"</li>
+              <li class="q-mb-xs">Sélectionnez votre fichier de sauvegarde (.json)</li>
+              <li class="q-mb-xs">Confirmez la restauration</li>
+              <li>Attendez que l'importation se termine</li>
+            </ol>
+          </q-card-section>
+
+          <q-card-actions align="right">
+            <q-btn
+              label="Choisir un fichier"
+              color="info"
+              icon="folder_open"
+              @click="importAll"
+              :loading="importLoading"
+              unelevated
+            />
+          </q-card-actions>
+        </q-card>
+      </div>
+
+      <!-- Export / Import par module -->
+      <div class="col-12">
+        <q-card class="admin-card">
+          <q-card-section>
+            <div class="text-h6">📦 Export / Import par module</div>
+            <div class="text-caption text-grey-7">
+              Téléchargez ou importez les données d'un module spécifique sans toucher aux autres.
+            </div>
+          </q-card-section>
+
+          <q-card-section>
+            <div class="row q-col-gutter-md">
+              <div class="col-12 col-sm-6 col-md-3" v-for="mod in modules" :key="mod.key">
+                <q-card flat class="listing-stat-card admin-module-card">
+                  <q-card-section>
+                    <div class="text-subtitle1 text-weight-medium q-mb-xs">
+                      {{ mod.icon }} {{ mod.label }}
+                    </div>
+                    <q-list dense class="text-caption text-grey-7 q-mb-sm">
+                      <q-item
+                        v-for="t in mod.tables"
+                        :key="t.table"
+                        dense
+                        class="q-pa-none"
+                        style="min-height: 24px"
+                      >
+                        <q-item-section>{{ t.label }}</q-item-section>
+                        <q-item-section side>
+                          <span class="text-primary text-weight-medium">{{
+                            stats[t.table] ?? 0
+                          }}</span>
+                        </q-item-section>
+                      </q-item>
+                    </q-list>
+                  </q-card-section>
+                  <q-separator />
+                  <q-card-actions>
+                    <q-btn
+                      flat
+                      dense
+                      icon="download"
+                      label="Exporter"
+                      color="positive"
+                      :loading="moduleLoading[mod.key]?.export"
+                      @click="exportModule(mod)"
+                      class="col"
+                    />
+                    <q-separator vertical />
+                    <q-btn
+                      flat
+                      dense
+                      icon="upload"
+                      label="Importer"
+                      color="info"
+                      :loading="moduleLoading[mod.key]?.import"
+                      @click="importModule(mod)"
+                      class="col"
+                    />
+                  </q-card-actions>
+                </q-card>
+              </div>
+            </div>
+          </q-card-section>
+        </q-card>
+      </div>
+
+      <!-- Historique des sauvegardes -->
+      <div class="col-12">
+        <q-card class="admin-card">
+          <q-card-section>
+            <div class="text-h6">📋 Dernières opérations</div>
+          </q-card-section>
+
+          <q-card-section v-if="history.length === 0">
+            <div class="text-center text-grey-7 q-pa-md">
+              <q-icon name="info" size="lg" class="q-mb-sm" />
+              <div>Aucune opération enregistrée</div>
+            </div>
+          </q-card-section>
+
+          <q-card-section v-else>
+            <q-list separator>
+              <q-item v-for="(item, index) in history" :key="index">
+                <q-item-section avatar>
+                  <q-icon
+                    :name="item.type === 'export' ? 'download' : 'upload'"
+                    :color="item.type === 'export' ? 'positive' : 'info'"
+                  />
+                </q-item-section>
+
+                <q-item-section>
+                  <q-item-label>{{ item.action }}</q-item-label>
+                  <q-item-label caption>{{ item.date }}</q-item-label>
+                </q-item-section>
+
+                <q-item-section side>
+                  <q-chip
+                    :color="item.success ? 'positive' : 'negative'"
+                    text-color="white"
+                    size="sm"
+                  >
+                    {{ item.success ? 'Succès' : 'Échec' }}
+                  </q-chip>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-card-section>
+        </q-card>
+      </div>
+    </div>
   </q-page>
 </template>
 
@@ -273,27 +236,6 @@ import { db } from 'src/database/db';
 import PageHeader from 'src/components/PageHeader.vue';
 
 const $q = useQuasar();
-
-// Password protection
-const ADMIN_PAGE_PASSWORD = 'Sigobc@2026!';
-const isUnlocked = ref(false);
-const adminPassword = ref('');
-const passwordError = ref(false);
-
-function checkPassword() {
-  if (adminPassword.value === ADMIN_PAGE_PASSWORD) {
-    isUnlocked.value = true;
-    passwordError.value = false;
-    sessionStorage.setItem('backup_unlocked', 'true');
-  } else {
-    passwordError.value = true;
-  }
-}
-
-// Check if already unlocked in this session
-if (sessionStorage.getItem('backup_unlocked') === 'true') {
-  isUnlocked.value = true;
-}
 
 const exportLoading = ref(false);
 const importLoading = ref(false);

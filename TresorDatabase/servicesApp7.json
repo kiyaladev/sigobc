@@ -1,0 +1,92 @@
+[
+  {
+    "nom": "SERVICE FINANCIER",
+    "compte": "6010",
+    "chapitre": "601",
+    "actif": true,
+    "mairieId": 1,
+    "createdAt": "2026-03-03T09:25:45.082000",
+    "updatedAt": "2026-03-03T09:25:45.082000"
+  },
+  {
+    "nom": "SERVICE ADMINISTRATIF",
+    "compte": "6000",
+    "chapitre": "600",
+    "actif": true,
+    "mairieId": 1,
+    "createdAt": "2026-03-03T09:26:15.450000",
+    "updatedAt": "2026-03-03T09:26:15.450000"
+  },
+  {
+    "nom": "MAIRE ET ADJOINTS",
+    "compte": "60013",
+    "chapitre": "600",
+    "actif": true,
+    "mairieId": 1,
+    "createdAt": "2026-03-07T11:23:59.297000",
+    "updatedAt": "2026-03-07T11:23:59.297000"
+  },
+  {
+    "nom": "ADM TRESOR",
+    "compte": "6020",
+    "chapitre": "602",
+    "actif": true,
+    "mairieId": 1,
+    "createdAt": "2026-03-07T11:39:09.711000",
+    "updatedAt": "2026-03-07T11:39:09.711000"
+  },
+  {
+    "nom": "CABINET DU MAIRE",
+    "compte": "60012",
+    "chapitre": "600",
+    "actif": true,
+    "mairieId": 1,
+    "createdAt": "2026-03-07T12:10:06.736000",
+    "updatedAt": "2026-03-07T12:10:06.736000"
+  },
+  {
+    "nom": "ADM ETAT CIVIL",
+    "compte": "6002",
+    "chapitre": "600",
+    "actif": true,
+    "mairieId": 1,
+    "createdAt": "2026-03-07T12:37:19.543000",
+    "updatedAt": "2026-03-07T12:37:19.543000"
+  },
+  {
+    "nom": "GARDES MUNICIPAUX",
+    "compte": "6031",
+    "chapitre": "603",
+    "actif": true,
+    "mairieId": 1,
+    "createdAt": "2026-03-07T13:52:09.205000",
+    "updatedAt": "2026-03-07T13:52:09.205000"
+  },
+  {
+    "nom": "SERVICE TECHNIQUE",
+    "compte": "6100",
+    "chapitre": "610",
+    "actif": true,
+    "mairieId": 1,
+    "createdAt": "2026-03-07T13:53:43.592000",
+    "updatedAt": "2026-03-07T13:53:43.592000"
+  },
+  {
+    "nom": "AGENTS CONTRACTUELS",
+    "compte": "6006",
+    "chapitre": "600",
+    "actif": true,
+    "mairieId": 1,
+    "createdAt": "2026-03-08T06:54:08.842000",
+    "updatedAt": "2026-03-08T06:54:08.842000"
+  },
+  {
+    "nom": "AGENTS JOURNALIERS",
+    "compte": "6131",
+    "chapitre": "613",
+    "actif": true,
+    "mairieId": 1,
+    "createdAt": "2026-03-08T07:47:00.162000",
+    "updatedAt": "2026-03-08T07:47:00.162000"
+  }
+]

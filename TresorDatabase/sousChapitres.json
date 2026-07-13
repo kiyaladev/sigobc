@@ -1,0 +1,1993 @@
+[
+  {
+    "code": "60",
+    "libelle": "SECTION 60- DÉPENSES DES SERVICES GÉNÉRAUX",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "id": 620
+  },
+  {
+    "code": "600",
+    "libelle": "CHAP. ADMINISTRATION GÉNÉRALE",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 620,
+    "id": 621
+  },
+  {
+    "code": "6000",
+    "libelle": "ADMINISTRATION",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 621,
+    "id": 622
+  },
+  {
+    "code": "6001",
+    "libelle": "AUTORITÉS MUNICIPALES",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 621,
+    "id": 623
+  },
+  {
+    "code": "60010",
+    "libelle": "FONCTIONNEMENT CONSEILS ET COMMISSIONS",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 623,
+    "id": 624
+  },
+  {
+    "code": "60011",
+    "libelle": "FONCTIONNEMENT DE LA MUNICIPALITÉ",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 623,
+    "id": 625
+  },
+  {
+    "code": "60012",
+    "libelle": "FONCTIONNEMENT CABINET DU MAIRE",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 623,
+    "id": 626
+  },
+  {
+    "code": "60013",
+    "libelle": "INDEMNITÉ DE FONCTION ET DE REPRÉSENTATION",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 623,
+    "id": 627
+  },
+  {
+    "code": "60015",
+    "libelle": "FRAIS DE MISSIONS EN DEHORS DU TERRITOIRE NATIONAL (COMMUNE)",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 623,
+    "id": 628
+  },
+  {
+    "code": "60016",
+    "libelle": "AUTRES DÉPENSES AU TITRE DES AUTORITÉS MUNICIPALES",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 623,
+    "id": 629
+  },
+  {
+    "code": "6002",
+    "libelle": "ÉTAT CIVIL ET POPULATION",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 621,
+    "id": 630
+  },
+  {
+    "code": "6006",
+    "libelle": "AUTRES DÉPENSES D'ADMINISTRATION GÉNÉRALE",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 621,
+    "id": 631
+  },
+  {
+    "code": "601",
+    "libelle": "CHAP. 601- ADMINISTRATION FINANCIÈRE ET DOM.",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 620,
+    "id": 632
+  },
+  {
+    "code": "6010",
+    "libelle": "ADMINISTRATION",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 632,
+    "id": 633
+  },
+  {
+    "code": "6016",
+    "libelle": "AUTRES DÉPENSES RELATIVES AU DOMAINE COMMUNAL",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 632,
+    "id": 634
+  },
+  {
+    "code": "602",
+    "libelle": "CHAP. 602-RECETTE MUNICIPALE",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 620,
+    "id": 635
+  },
+  {
+    "code": "6020",
+    "libelle": "ADMINISTRATION",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 635,
+    "id": 636
+  },
+  {
+    "code": "6021",
+    "libelle": "FRAIS DE RECOUVREMENT ET POURSUITES",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 635,
+    "id": 637
+  },
+  {
+    "code": "603",
+    "libelle": "CHAP.603-POLICE ET ORDRE PUBLIC-FOURRIÈRE",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 620,
+    "id": 638
+  },
+  {
+    "code": "6031",
+    "libelle": "GARDES MUNICIPAUX",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 638,
+    "id": 639
+  },
+  {
+    "code": "6033",
+    "libelle": "PROGRAMMES SPÉCIAUX ET OPÉRATIONS DIVERSES",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 638,
+    "id": 640
+  },
+  {
+    "code": "61",
+    "libelle": "SECTION 61- DÉPENSES DES SERVICES DE COLLECTIVITÉ",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "id": 641
+  },
+  {
+    "code": "610",
+    "libelle": "CHAP. 610-VOIRIES ET RÉSEAUX",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 641,
+    "id": 642
+  },
+  {
+    "code": "6100",
+    "libelle": "ADMINISTRATION",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 642,
+    "id": 643
+  },
+  {
+    "code": "6101",
+    "libelle": "VOIRIES - ROUTES - CHEMINS",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 642,
+    "id": 644
+  },
+  {
+    "code": "613",
+    "libelle": "CHAP. 613-HYGIÈNE ET SALUBRITÉ PUBLIQUES - HYDRAULIQUE - ADDUCTION D'EAU",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 641,
+    "id": 645
+  },
+  {
+    "code": "6133",
+    "libelle": "NETTOIEMENT VOIRIE-ENLÈVEMENT ORDURES",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 645,
+    "id": 646
+  },
+  {
+    "code": "6136",
+    "libelle": "Autres dépenses d'hygiène et de salubrité",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 645,
+    "id": 647
+  },
+  {
+    "code": "614",
+    "libelle": "CHAP. 614- PROTECTION CIVILE - LUTTE CONTRE L'INCENDIE",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 641,
+    "id": 648
+  },
+  {
+    "code": "6141",
+    "libelle": "PROTECTION CIVILE",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 648,
+    "id": 649
+  },
+  {
+    "code": "6142",
+    "libelle": "LUTTE CONTRE INCENDIE",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 648,
+    "id": 650
+  },
+  {
+    "code": "615",
+    "libelle": "CHAP. 615- CIMETIÈRES - SERVICES FUNÉRAIRES",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 641,
+    "id": 651
+  },
+  {
+    "code": "6151",
+    "libelle": "CIMETIÈRE-INHUMATIONS-EXHUMATIONS",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 651,
+    "id": 652
+  },
+  {
+    "code": "6152",
+    "libelle": "CREUSEMENT DE FOSSES",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 651,
+    "id": 653
+  },
+  {
+    "code": "62",
+    "libelle": "SECTION 62- DÉPENSES DES SERVICES SOCIAUX CULTURELS ET DE PROMOTION HUMAINE",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "id": 654
+  },
+  {
+    "code": "620",
+    "libelle": "CHAP. 620- ÉDUCATION",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 654,
+    "id": 655
+  },
+  {
+    "code": "6201",
+    "libelle": "Crèche, jardin d'enfants et ecoles primaire",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 655,
+    "id": 656
+  },
+  {
+    "code": "6206",
+    "libelle": "AUTRES DÉPENSES D'ÉDUCATION",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 655,
+    "id": 657
+  },
+  {
+    "code": "621",
+    "libelle": "CHAP. 621 : SANTÉ PUBLIQUE",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 654,
+    "id": 658
+  },
+  {
+    "code": "6214",
+    "libelle": "Evacuation sanitaire - service ambulance",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 658,
+    "id": 659
+  },
+  {
+    "code": "622",
+    "libelle": "CHAP. 622- ASSISTANCE SOCIALE",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 654,
+    "id": 660
+  },
+  {
+    "code": "6223",
+    "libelle": "HANDICAPÉS",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 660,
+    "id": 661
+  },
+  {
+    "code": "6224",
+    "libelle": "AIDE FAMILIALE, SOCIALE ET PERSONNES A.",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 660,
+    "id": 662
+  },
+  {
+    "code": "6225",
+    "libelle": "AIDES AUX INDIGENTS",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 660,
+    "id": 663
+  },
+  {
+    "code": "6226",
+    "libelle": "AUTRES DÉPENSES D'ASSISTANCE SOCIALE",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 660,
+    "id": 664
+  },
+  {
+    "code": "624",
+    "libelle": "CHAP. 624- SPORTS ET LOISIRS",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 654,
+    "id": 665
+  },
+  {
+    "code": "6242",
+    "libelle": "MANIFESTATIONS SPORTIVES",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 665,
+    "id": 666
+  },
+  {
+    "code": "625",
+    "libelle": "CHAP.625- ACTIVITÉS CULTURELLES",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 654,
+    "id": 667
+  },
+  {
+    "code": "6250",
+    "libelle": "ADMINISTRATION",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 667,
+    "id": 668
+  },
+  {
+    "code": "6256",
+    "libelle": "AUTRES DÉPENSES DES ACTIVITÉS CULTURELLES",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 667,
+    "id": 669
+  },
+  {
+    "code": "626",
+    "libelle": "CHAP.626- AUTRES DÉPENSES DES SERVICE SOCIAUX .CULTURELS ET DE PROMOTION HUMAINE",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 654,
+    "id": 670
+  },
+  {
+    "code": "63",
+    "libelle": "SECTION 63- DÉPENSES DES SERVICES ÉCONOMIQUES",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "id": 671
+  },
+  {
+    "code": "630",
+    "libelle": "CHAP. 630- AGRICULTURE ET ÉLEVAGE",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 671,
+    "id": 672
+  },
+  {
+    "code": "633",
+    "libelle": "CHAP.633-TRANSPORT-COMMUNICATIONS",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 671,
+    "id": 673
+  },
+  {
+    "code": "634",
+    "libelle": "CHAP. 634- INDUSTRIE ET COMMERCE",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 671,
+    "id": 674
+  },
+  {
+    "code": "6341",
+    "libelle": "ABATTOIRS-CONSERVATION ET TRANSPORTS DE VIANDE",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 674,
+    "id": 675
+  },
+  {
+    "code": "64",
+    "libelle": "SECTION 64 - DÉPENSES DIVERSES",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "id": 676
+  },
+  {
+    "code": "640",
+    "libelle": "CHAP. 640- DETTES",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 676,
+    "id": 677
+  },
+  {
+    "code": "6406",
+    "libelle": "AUTRES DETTES DE LA COMMUNE",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 677,
+    "id": 678
+  },
+  {
+    "code": "641",
+    "libelle": "CHAP. 641-CONTRIBUTIONS FONDS DE CONCOURS ET TRANSFERTS",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 676,
+    "id": 679
+  },
+  {
+    "code": "6415",
+    "libelle": "CONFÉRENCES INTERNATIONALES, ASSOCIATION DES VILLES ET COMMUNES",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 679,
+    "id": 680
+  },
+  {
+    "code": "642",
+    "libelle": "CHAP. 642- ASSURANCE DE LA COMMUNE",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 676,
+    "id": 681
+  },
+  {
+    "code": "6420",
+    "libelle": "RESPONSABILITÉ CIVILE",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 681,
+    "id": 682
+  },
+  {
+    "code": "6422",
+    "libelle": "ASSURANCE DES VÉHICULES",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 681,
+    "id": 683
+  },
+  {
+    "code": "6426",
+    "libelle": "AUTRES ASSURANCES (ÉLUS)",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 681,
+    "id": 684
+  },
+  {
+    "code": "643",
+    "libelle": "CHAP.643- CÉRÉMONIES PUBLIQUES - FÊTES ET RÉCEPTIONS OFFICIELLES",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 676,
+    "id": 685
+  },
+  {
+    "code": "6430",
+    "libelle": "CÉRÉMONIES PUBLIQUES",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 685,
+    "id": 686
+  },
+  {
+    "code": "6431",
+    "libelle": "FÊTES ET RÉCEPTIONS OFFICIELLES",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 685,
+    "id": 687
+  },
+  {
+    "code": "644",
+    "libelle": "CHAP.644-VERSEMENT AUX FONDS DE RÉSERVE",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 676,
+    "id": 688
+  },
+  {
+    "code": "6440",
+    "libelle": "FONDS DE RÉSERVES ORDINAIRE",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 688,
+    "id": 689
+  },
+  {
+    "code": "6441",
+    "libelle": "FONDS D'INVESTISSEMENT",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 688,
+    "id": 690
+  },
+  {
+    "code": "645",
+    "libelle": "CHAP.645- DÉPENSES ACCIDENTELLES",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 676,
+    "id": 691
+  },
+  {
+    "code": "6451",
+    "libelle": "INDEMNITÉS -FRAIS ET DOMMAGE ET INTÉRÊTS",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 691,
+    "id": 692
+  },
+  {
+    "code": "90",
+    "libelle": "SECTION 90 - ÉQUIPEMENT DES SERVICES GÉNÉRAUX",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "id": 693
+  },
+  {
+    "code": "900",
+    "libelle": "CHAP.900-ADMINISTRATION GÉNÉRALE",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 693,
+    "id": 694
+  },
+  {
+    "code": "903",
+    "libelle": "CHAP.903-POLICE ET ORDRE PUBLIC FOURRIÈRE",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 693,
+    "id": 695
+  },
+  {
+    "code": "9030",
+    "libelle": "Police et ordre publique - fourrière SOUS TOTAL CHAP. 903",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 695,
+    "id": 696
+  },
+  {
+    "code": "91",
+    "libelle": "SECTION 91-ÉQUIPEMENT DES SCES DE COLLECTIVITÉ",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "id": 697
+  },
+  {
+    "code": "910",
+    "libelle": "CHAP.910-VOIRIES ET RÉSEAUX",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 697,
+    "id": 698
+  },
+  {
+    "code": "9101",
+    "libelle": "VOIRIES",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 698,
+    "id": 699
+  },
+  {
+    "code": "9102",
+    "libelle": "Réseaux d'assainissement & Drainage",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 698,
+    "id": 700
+  },
+  {
+    "code": "9103",
+    "libelle": "Électricité - éclairage public",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 698,
+    "id": 701
+  },
+  {
+    "code": "913",
+    "libelle": "CHAP. 913- HYGIÈNE & SALUBRITÉ PUBLIQ. HYDRAULIQUE- ADDUCTION D'EAU Articles",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 697,
+    "id": 702
+  },
+  {
+    "code": "9134",
+    "libelle": "Hydraulique - pompages puits lavoirs",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 702,
+    "id": 703
+  },
+  {
+    "code": "9136",
+    "libelle": "Autres dépenses d'équipement au tritre",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 702,
+    "id": 704
+  },
+  {
+    "code": "92",
+    "libelle": "SECTION 92-ÉQUIPEMENT DES SERVICES SOCIAUX, CULTURELS ET DE LA PROMOTION HUMAINE",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "id": 705
+  },
+  {
+    "code": "921",
+    "libelle": "CHAP. 921- SANTÉ PUBLIQUE Articles",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 705,
+    "id": 706
+  },
+  {
+    "code": "9212",
+    "libelle": "Hôpitaux & Dispensaires",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 706,
+    "id": 707
+  },
+  {
+    "code": "93",
+    "libelle": "SECTION 93- ÉQUIPEMENT DES SERVICES ÉCONOMIQUES",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "id": 708
+  },
+  {
+    "code": "934",
+    "libelle": "CHAP. 934- INDUSTRIES & COMMERCES Articles",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 708,
+    "id": 709
+  },
+  {
+    "code": "9341",
+    "libelle": "Abattoir- Conservation de viande & Transp.",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 709,
+    "id": 710
+  },
+  {
+    "code": "9344",
+    "libelle": "Marchés",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 709,
+    "id": 711
+  },
+  {
+    "code": "70",
+    "libelle": "SECTION 70- RECETTES FISCALES",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "id": 712
+  },
+  {
+    "code": "700",
+    "libelle": "CHAP.700-IMPOTS DONT LE PRODUIT EST ATTRIBUE AUX COMMUNES",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 712,
+    "id": 713
+  },
+  {
+    "code": "7000",
+    "libelle": "Contribution foncière des propriétés bâties",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 713,
+    "id": 714
+  },
+  {
+    "code": "7001",
+    "libelle": "Contribution foncière des propriétés non bâties",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 713,
+    "id": 715
+  },
+  {
+    "code": "7004",
+    "libelle": "Contribution des patentes",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 713,
+    "id": 716
+  },
+  {
+    "code": "7005",
+    "libelle": "Contribution des licences",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 713,
+    "id": 717
+  },
+  {
+    "code": "702",
+    "libelle": "CHAP. 702- TAXES COMMUNALES PERCUES PAR VOIE DE ROLE",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 712,
+    "id": 718
+  },
+  {
+    "code": "70261",
+    "libelle": "Impôt synthétique",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 718,
+    "id": 719
+  },
+  {
+    "code": "70262",
+    "libelle": "Taxes forfaitaires des petits commerçants et artisans",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 718,
+    "id": 720
+  },
+  {
+    "code": "7027",
+    "libelle": "Taxe sur les locaux loués en garnis",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 718,
+    "id": 721
+  },
+  {
+    "code": "703",
+    "libelle": "CHAP. 703- TAXES COMMUNALES PERCUES SUR TITRE DE RECETTES PROPRES AUX COMMUNES",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 712,
+    "id": 722
+  },
+  {
+    "code": "7030",
+    "libelle": "Taxes sur les pompes distributrices de carburant",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 722,
+    "id": 723
+  },
+  {
+    "code": "7031",
+    "libelle": "Taxes sur les charrettes",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 722,
+    "id": 724
+  },
+  {
+    "code": "7036",
+    "libelle": "Taxes sur les spectacles et galas",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 722,
+    "id": 725
+  },
+  {
+    "code": "7038",
+    "libelle": "Taxes sur les établissements de nuit",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 722,
+    "id": 726
+  },
+  {
+    "code": "704",
+    "libelle": "CHAP. 704- TAXES COMMUNALES PERCUES SUR TITRE DE RECETTES PAR LES COMMUNES",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 712,
+    "id": 727
+  },
+  {
+    "code": "7041",
+    "libelle": "Taxes sur les taxis",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 727,
+    "id": 728
+  },
+  {
+    "code": "7042",
+    "libelle": "Taxes sur la publicité",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 727,
+    "id": 729
+  },
+  {
+    "code": "71",
+    "libelle": "SECTION 71-RECETTES DES PRESTATIONS ET SERVICES",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "id": 730
+  },
+  {
+    "code": "710",
+    "libelle": "CHAP. 710- RECETTES DES SERVICES GENERAUX",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 730,
+    "id": 731
+  },
+  {
+    "code": "7100",
+    "libelle": "Administration générale",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 731,
+    "id": 732
+  },
+  {
+    "code": "71000",
+    "libelle": "Légalisation de signatures et certifications",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 732,
+    "id": 733
+  },
+  {
+    "code": "71001",
+    "libelle": "Délivrance de livrets de famille et autres documents",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 732,
+    "id": 734
+  },
+  {
+    "code": "71006",
+    "libelle": "Autres recettes de prestations et services de l'administration générale",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 732,
+    "id": 735
+  },
+  {
+    "code": "7101",
+    "libelle": "Administration financière et domaniale",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 731,
+    "id": 736
+  },
+  {
+    "code": "71010",
+    "libelle": "Taxe sur les délivrances des permis d'habiter",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 736,
+    "id": 737
+  },
+  {
+    "code": "71016",
+    "libelle": "Autres recettes de prestations et services de l'administration financière et domaniale",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 736,
+    "id": 738
+  },
+  {
+    "code": "71030",
+    "libelle": "Taxe de séquestre",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 731,
+    "id": 739
+  },
+  {
+    "code": "71031",
+    "libelle": "Produits de ventes effectuées au titre de la fourrière",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 731,
+    "id": 740
+  },
+  {
+    "code": "711",
+    "libelle": "CHAP. 711- RECETTES DES SERVICES DE COLLECTIVITE",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 730,
+    "id": 741
+  },
+  {
+    "code": "7112",
+    "libelle": "Urbanisme et environnement",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 741,
+    "id": 742
+  },
+  {
+    "code": "71120",
+    "libelle": "Taxes ou redevance de bornage",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 742,
+    "id": 743
+  },
+  {
+    "code": "71126",
+    "libelle": "Autres recettes de prestations et services au titre de l'urbanisme et de l'environnement",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 742,
+    "id": 744
+  },
+  {
+    "code": "7113",
+    "libelle": "Hygiène et salubrité publiques - hydraulique - adduction d'eau",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 741,
+    "id": 745
+  },
+  {
+    "code": "7130",
+    "libelle": "Taxe d'enlèvement des ordures ménagères et redevances",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 745,
+    "id": 746
+  },
+  {
+    "code": "71150",
+    "libelle": "Cimetières - services funéraires, taxes, redevances, autres recettes",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 741,
+    "id": 747
+  },
+  {
+    "code": "71152",
+    "libelle": "Morgue - Dépôts de cercueils",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 741,
+    "id": 748
+  },
+  {
+    "code": "71154",
+    "libelle": "Autres recettes de prestations et services funéraires",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 741,
+    "id": 749
+  },
+  {
+    "code": "712",
+    "libelle": "CHAP. 712- RECETTES DES SERVICES SOCIAUX, CULTURELS ET DE LA PROMOTION HUMAINE",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 730,
+    "id": 750
+  },
+  {
+    "code": "7125",
+    "libelle": "Activités culturelles - Taxes, Redevances, Autres recettes",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 750,
+    "id": 751
+  },
+  {
+    "code": "71250",
+    "libelle": "Administration des activités culturelles",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 751,
+    "id": 752
+  },
+  {
+    "code": "71256",
+    "libelle": "Autres recettes de prestations et services au titre des services sociaux, culturels et de la promotion humaine",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 751,
+    "id": 753
+  },
+  {
+    "code": "713",
+    "libelle": "CHAP. 713- RECETTES DES SERVICES ECONOMIQUES",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 730,
+    "id": 754
+  },
+  {
+    "code": "7133",
+    "libelle": "Transports - communications, taxes, redevances, autres recettes",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 754,
+    "id": 755
+  },
+  {
+    "code": "71330",
+    "libelle": "Administration des transports et communications",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 755,
+    "id": 756
+  },
+  {
+    "code": "71331",
+    "libelle": "Transports par routes - gare routière - stations de taxis",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 755,
+    "id": 757
+  },
+  {
+    "code": "7134",
+    "libelle": "Industrie et commerce - taxes - redevances, autres recettes",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 754,
+    "id": 758
+  },
+  {
+    "code": "71341",
+    "libelle": "Abattoirs, conservation et transport de viande",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 758,
+    "id": 759
+  },
+  {
+    "code": "71344",
+    "libelle": "Marchés",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 758,
+    "id": 760
+  },
+  {
+    "code": "71345",
+    "libelle": "Foires et expositions",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "parentId": 758,
+    "id": 761
+  },
+  {
+    "code": "6131",
+    "libelle": "Opérations d'assainissement ",
+    "description": "",
+    "actif": true,
+    "parentId": 645,
+    "mairieId": 1,
+    "createdAt": "2026-02-22T16:48:27.052Z",
+    "updatedAt": "2026-02-22T16:48:27.052Z",
+    "id": 762
+  },
+  {
+    "code": "6246",
+    "libelle": "Autres dépenses au titre des sports et loisirs",
+    "description": "",
+    "actif": true,
+    "mairieId": 1,
+    "createdAt": "2026-02-22T17:04:29.779Z",
+    "updatedAt": "2026-02-22T17:04:29.779Z",
+    "id": 763,
+    "parentId": 665
+  },
+  {
+    "code": "6216",
+    "libelle": "Autres dépenses de santé publique ",
+    "description": "",
+    "actif": true,
+    "parentId": 658,
+    "mairieId": 1,
+    "createdAt": "2026-02-22T17:14:44.484Z",
+    "updatedAt": "2026-02-22T17:14:44.484Z",
+    "id": 764
+  },
+  {
+    "code": "6336",
+    "libelle": "Autres dépenses de transports et communication",
+    "description": "",
+    "actif": true,
+    "parentId": 673,
+    "mairieId": 1,
+    "createdAt": "2026-02-22T17:21:03.391Z",
+    "updatedAt": "2026-02-22T17:21:03.391Z",
+    "id": 765
+  },
+  {
+    "code": "6344",
+    "libelle": "Marchés ",
+    "description": "",
+    "actif": true,
+    "parentId": 674,
+    "mairieId": 1,
+    "createdAt": "2026-02-22T17:25:57.920Z",
+    "updatedAt": "2026-02-22T17:25:57.920Z",
+    "id": 766
+  },
+  {
+    "code": "6345",
+    "libelle": "Foires et expositions",
+    "description": "",
+    "actif": true,
+    "parentId": 674,
+    "mairieId": 1,
+    "createdAt": "2026-02-22T17:27:08.671Z",
+    "updatedAt": "2026-02-22T17:27:08.671Z",
+    "id": 767
+  },
+  {
+    "code": "6416",
+    "libelle": "Autres contributions et transferts",
+    "description": "",
+    "actif": true,
+    "parentId": 679,
+    "mairieId": 1,
+    "createdAt": "2026-02-22T17:33:40.973Z",
+    "updatedAt": "2026-02-22T17:33:40.973Z",
+    "id": 768
+  },
+  {
+    "code": "6423",
+    "libelle": "Assurance des Elus",
+    "description": "",
+    "actif": true,
+    "parentId": 681,
+    "mairieId": 1,
+    "createdAt": "2026-02-22T17:38:31.658Z",
+    "updatedAt": "2026-02-22T17:38:31.658Z",
+    "id": 769
+  },
+  {
+    "code": "6011",
+    "libelle": "Propriétés communales ",
+    "description": "",
+    "actif": true,
+    "parentId": 632,
+    "mairieId": 1,
+    "createdAt": "2026-02-22T17:47:04.170Z",
+    "updatedAt": "2026-02-22T17:47:04.170Z",
+    "id": 770
+  },
+  {
+    "code": "9100",
+    "libelle": "Administration",
+    "description": "",
+    "actif": true,
+    "parentId": 698,
+    "mairieId": 1,
+    "createdAt": "2026-02-22T23:06:54.682Z",
+    "updatedAt": "2026-02-22T23:06:54.682Z",
+    "id": 771
+  },
+  {
+    "code": "9124",
+    "libelle": "Plantations - Espaces verts - Parcs publics",
+    "description": "",
+    "actif": true,
+    "parentId": 773,
+    "mairieId": 1,
+    "createdAt": "2026-02-22T23:14:22.747Z",
+    "updatedAt": "2026-02-22T23:14:22.747Z",
+    "id": 772
+  },
+  {
+    "code": "912",
+    "libelle": "Chapitre 912 URBANISME ET ENVIRONEMENT",
+    "description": "",
+    "actif": true,
+    "parentId": 697,
+    "mairieId": 1,
+    "createdAt": "2026-02-22T23:13:43.754Z",
+    "updatedAt": "2026-02-22T23:13:43.754Z",
+    "id": 773
+  },
+  {
+    "code": "9131",
+    "libelle": "Assainissement",
+    "description": "",
+    "actif": true,
+    "parentId": 702,
+    "mairieId": 1,
+    "createdAt": "2026-02-22T23:17:56.144Z",
+    "updatedAt": "2026-02-22T23:17:56.144Z",
+    "id": 774
+  },
+  {
+    "code": "9201",
+    "libelle": "Crèches, jardins d'enfants et écoles primaires ",
+    "description": "",
+    "actif": true,
+    "parentId": 776,
+    "mairieId": 1,
+    "createdAt": "2026-02-22T23:27:14.411Z",
+    "updatedAt": "2026-02-22T23:27:14.411Z",
+    "id": 775
+  },
+  {
+    "code": "920",
+    "libelle": "CHAPITRE 920 EDUCATION",
+    "description": "",
+    "actif": true,
+    "parentId": 705,
+    "mairieId": 1,
+    "createdAt": "2026-02-22T23:26:33.415Z",
+    "updatedAt": "2026-02-22T23:26:33.415Z",
+    "id": 776
+  },
+  {
+    "code": "923",
+    "libelle": "CHAPITRE LOGEMENT ET HABITAT ",
+    "description": "",
+    "actif": true,
+    "parentId": 705,
+    "mairieId": 1,
+    "createdAt": "2026-02-22T23:32:58.175Z",
+    "updatedAt": "2026-02-22T23:32:58.175Z",
+    "id": 777
+  },
+  {
+    "code": "9232",
+    "libelle": "Logements sociaux",
+    "description": "",
+    "actif": true,
+    "parentId": 777,
+    "mairieId": 1,
+    "createdAt": "2026-02-22T23:35:05.757Z",
+    "updatedAt": "2026-02-22T23:35:05.757Z",
+    "id": 778
+  },
+  {
+    "code": "9343",
+    "libelle": "Commerce",
+    "description": "",
+    "actif": true,
+    "parentId": 709,
+    "mairieId": 1,
+    "createdAt": "2026-02-22T23:38:26.023Z",
+    "updatedAt": "2026-02-22T23:38:26.023Z",
+    "id": 779
+  },
+  {
+    "code": "94",
+    "libelle": "SECTION 94 TRANFERT ET OPERATIONS FINANCIERES",
+    "description": "",
+    "actif": true,
+    "mairieId": 1,
+    "createdAt": "2026-02-22T23:42:03.796Z",
+    "updatedAt": "2026-02-22T23:42:03.796Z",
+    "id": 780
+  },
+  {
+    "code": "942",
+    "libelle": "CHAPITRE 942 ACHAT DE TERRAINS ET IMMEUBLES",
+    "description": "",
+    "actif": true,
+    "parentId": 780,
+    "mairieId": 1,
+    "createdAt": "2026-02-22T23:43:20.182Z",
+    "updatedAt": "2026-02-22T23:43:20.182Z",
+    "id": 781
+  },
+  {
+    "code": "942",
+    "libelle": "Achat de terrains et immeuble",
+    "description": "",
+    "actif": true,
+    "parentId": 781,
+    "mairieId": 1,
+    "createdAt": "2026-02-22T23:44:12.149Z",
+    "updatedAt": "2026-02-22T23:44:12.149Z",
+    "id": 782
+  },
+  {
+    "code": "6000",
+    "libelle": "ADMINISTRATION",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "60010",
+    "libelle": "FONCTIONNEMENT DU CONSEIL ET DES COMMISSIONS",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "60011",
+    "libelle": "FONCTIONNEMENT DE LA MUNICIPALITÉ",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "60012",
+    "libelle": "FONCTIONNEMENT CABINET DU MAIRE",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "60013",
+    "libelle": "INDEMNITÉS DE FONCTION ET DE REPRÉSENTATION",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "60015",
+    "libelle": "FRAIS DE MISSIONS EN DEHORS DU TERRITOIRE NATIONALE",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "60016",
+    "libelle": "AUTRES DÉPENSES AU TITRE DES AUTORITÉS MUNICIPALES",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6002",
+    "libelle": "ETAT CIVIL ET POPULATION",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6006",
+    "libelle": "AUTRES DÉPENSES D'ADMINISTRATION GÉNÉRALE",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6010",
+    "libelle": "ADMINISTRATION",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6016",
+    "libelle": "AUTRES DÉPENSES RELATIVES AU DOMAINE COMMUNAL",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6020",
+    "libelle": "ADMINISTRATION",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6021",
+    "libelle": "FRAIS DE RECOUVREMENTS ET DE POURSUITES",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6031",
+    "libelle": "GARDES MUNICIPAUX",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6100",
+    "libelle": "ADMINISTRATION",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6101",
+    "libelle": "VOIRIES-ROUTES-CHEMINS",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6131",
+    "libelle": "OPÉRATIONS D'ASSAINISSEMENT",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6133",
+    "libelle": "NETTOIEMENT DE LA VOIRIE- ENLÈVEMENT DES ORDURES",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6136",
+    "libelle": "AUTRES DÉPENSES D'HYGIÈNES ET SALUBRITÉ PUBLIQUE-HYDRAULIQUE",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6141",
+    "libelle": "PROTECTION CIVILE",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6151",
+    "libelle": "CIMETIÈRES-INHUMATION-EXHUMATIONS-CREUSEMENTS DE FOSSES",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6206",
+    "libelle": "AUTRES DÉPENSES D'ÉDUCATION",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6214",
+    "libelle": "EVACUATIONS SANITAIRES-SERVICE AMBULANCE",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6216",
+    "libelle": "AUTRES DÉPENSES DE SANTÉ PUBLIQUE",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6223",
+    "libelle": "HANDICAPÉS",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6224",
+    "libelle": "AIDE FAMILIALE ,SOCIALE ET PERSONNES AGÉES",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6225",
+    "libelle": "AIDE AUX INDIGENTS",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6246",
+    "libelle": "AUTRES DÉPENSES AU TITRE DES SPORTS ET LOISIRS",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6250",
+    "libelle": "ADMINISTRATION",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6256",
+    "libelle": "AUTRES DÉPENSES AU TITRE DES ACTIVITÉS CULTURELLES",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "626",
+    "libelle": "AUTRES DEPENSES DES SERVICES SOCIAUX ,CULTURELS ET DE PROMOTION HUMAINE",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6336",
+    "libelle": "AUTRES DÉPENSES DE TRANSPORT ET COMMUNICATIONS",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6341",
+    "libelle": "ABATTOIRS-CONSERVATION ET TRANSPORTS DE VIANDE",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6344",
+    "libelle": "MARCHÉS",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6406",
+    "libelle": "AUTRES DETTES DE LA COMMUNE (OU DE LA VILLE )",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6415",
+    "libelle": "CONFÉRENCES INTERCOMMUNALES -ASSOCIATION DES VILLES ET COMMUNES",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6416",
+    "libelle": "AUTRES CONTRIBUTIONS ET TRANSFERTS",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6420",
+    "libelle": "RESPONSABILITÉ CIVILE",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6422",
+    "libelle": "ASSURANCES DES VÉHICULES",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6426",
+    "libelle": "AUTRES ASSURANCES",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6430",
+    "libelle": "CÉRÉMONIES PUBLIQUES",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6431",
+    "libelle": "FÊTES ET RÉCEPTIONS OFFICIELLES",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6441",
+    "libelle": "FONDS D'INVESTISSEMENT",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6456",
+    "libelle": "AUTRES REMBOURSEMENTS DIVERS",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  }
+]

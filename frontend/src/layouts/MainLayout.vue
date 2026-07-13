@@ -1,6 +1,5 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <DemoBanner />
     <q-header elevated class="modern-header print-hide">
       <q-toolbar class="q-py-sm">
         <q-btn
@@ -95,16 +94,6 @@
                 </q-item-section>
               </q-item>
 
-              <q-separator class="q-my-sm" />
-
-              <q-item clickable v-close-popup @click="onLogout" class="menu-item logout-item">
-                <q-item-section avatar>
-                  <q-icon name="logout" color="negative" />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label class="text-negative">Déconnexion</q-item-label>
-                </q-item-section>
-              </q-item>
             </q-list>
           </q-menu>
         </q-btn>
@@ -672,12 +661,6 @@
               label="Exporter mes données"
               @click="router.push({ name: 'admin-backup' })"
             />
-            <q-btn
-              outline
-              color="primary"
-              icon="key"
-              label="Activer une licence"
-            />
           </q-card-actions>
         </q-card>
       </div>
@@ -699,17 +682,14 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { useQuasar } from 'quasar';
 import { useAuthStore } from 'src/stores/auth-store';
 import { useDemoStore } from 'src/stores/demo-store';
 import ThemeToggle from 'src/components/ThemeToggle.vue';
-import DemoBanner from 'src/components/DemoBanner.vue';
 import logoMairie from '/logo-mairie-gboguhe.png';
 import { dataMode, setDataMode, type DataMode } from 'src/database/connectivity';
 
 const router = useRouter();
 const route = useRoute();
-const $q = useQuasar();
 const authStore = useAuthStore();
 const demoStore = useDemoStore();
 
@@ -760,32 +740,6 @@ const isAdminActive = computed(
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
-}
-
-function onLogout() {
-  $q.dialog({
-    title: 'Déconnexion',
-    message: 'Voulez-vous vraiment vous déconnecter ?',
-    cancel: {
-      label: 'Annuler',
-      flat: true,
-    },
-    ok: {
-      label: 'Déconnexion',
-      color: 'negative',
-    },
-    persistent: true,
-  }).onOk(() => {
-    void (async () => {
-      authStore.logout();
-      $q.notify({
-        type: 'info',
-        message: 'Vous êtes déconnecté',
-        icon: 'logout',
-      });
-      await router.push('/login');
-    })();
-  });
 }
 </script>
 

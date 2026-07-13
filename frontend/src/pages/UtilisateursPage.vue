@@ -118,9 +118,6 @@
             <q-btn flat round dense icon="edit" color="grey-7" @click="openDialog(props.row)">
               <q-tooltip>Modifier</q-tooltip>
             </q-btn>
-            <q-btn flat round dense icon="vpn_key" color="grey-7" @click="resetPassword(props.row)">
-              <q-tooltip>Réinitialiser mot de passe</q-tooltip>
-            </q-btn>
             <q-btn
               flat
               round
@@ -156,21 +153,6 @@
                   lazy-rules
                   :rules="[(val) => !!val || 'Le nom d\'utilisateur est requis']"
                   :disable="isEditing"
-                />
-              </div>
-
-              <div class="col-12 col-sm-6" v-if="!isEditing">
-                <q-input
-                  v-model="form.password"
-                  outlined
-                  dense
-                  type="password"
-                  label="Mot de passe *"
-                  lazy-rules
-                  :rules="[
-                    (val) => !!val || 'Le mot de passe est requis',
-                    (val) => val.length >= 6 || 'Au moins 6 caractères',
-                  ]"
                 />
               </div>
 
@@ -460,7 +442,7 @@ async function onSubmit() {
     } else {
       const payload: Omit<Utilisateur, 'id'> = {
         username: form.value.username!,
-        password: form.value.password!,
+        password: '',
         nom: form.value.nom!,
         prenom: form.value.prenom!,
         email: form.value.email!,
@@ -486,46 +468,6 @@ async function onSubmit() {
   } finally {
     saving.value = false;
   }
-}
-
-function resetPassword(utilisateur: Utilisateur) {
-  $q.dialog({
-    title: 'Réinitialiser le mot de passe',
-    message: `Entrez le nouveau mot de passe pour "${utilisateur.username}" :`,
-    prompt: {
-      model: '',
-      type: 'password',
-    },
-    cancel: true,
-    persistent: true,
-  }).onOk((newPassword: string) => {
-    void (async () => {
-      if (newPassword.length < 6) {
-        $q.notify({
-          type: 'negative',
-          message: 'Le mot de passe doit contenir au moins 6 caractères',
-        });
-        return;
-      }
-
-      try {
-        await db.utilisateurs.update(utilisateur.id, {
-          password: newPassword,
-          updatedAt: new Date(),
-        });
-        $q.notify({
-          type: 'positive',
-          message: 'Mot de passe réinitialisé avec succès',
-        });
-      } catch (error) {
-        console.error('Erreur:', error);
-        $q.notify({
-          type: 'negative',
-          message: 'Erreur lors de la réinitialisation',
-        });
-      }
-    })();
-  });
 }
 
 function confirmDelete(utilisateur: Utilisateur) {

@@ -1,0 +1,13 @@
+[
+  {
+    "mairieId": 7,
+    "tauxCnpsEmploye": 6.3,
+    "tauxIts": 1.6,
+    "tauxFns": 1,
+    "tauxIndemniteResidence": 15,
+    "tauxCnpsPatronalPrestationFamiliale": 5.75,
+    "tauxCnpsPatronalAccidentTravail": 2,
+    "tauxCnpsPatronalRetraite": 7.7,
+    "updatedAt": "2026-03-03T09:44:45.464000"
+  }
+]

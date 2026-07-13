@@ -34,29 +34,11 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     history: createHistory(process.env.VUE_ROUTER_BASE),
   });
 
-  // Guard d'authentification
   Router.beforeEach(async (to, from, next) => {
     const authStore = useAuthStore();
+    await authStore.checkAuth();
 
-    // Vérifier l'authentification si pas déjà fait
-    if (!authStore.isAuthenticated) {
-      await authStore.checkAuth();
-    }
-
-    // Si la route nécessite une authentification
-    if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-      next('/login');
-      return;
-    }
-
-    // Si la route nécessite des droits admin
-    if (to.meta.requiresAdmin && !authStore.isAdmin) {
-      next('/');
-      return;
-    }
-
-    // Si l'utilisateur est déjà connecté et va sur /login, rediriger vers /
-    if (to.path === '/login' && authStore.isAuthenticated) {
+    if (to.path === '/login') {
       next('/');
       return;
     }

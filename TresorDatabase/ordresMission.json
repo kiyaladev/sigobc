@@ -1,0 +1,26 @@
+[
+  {
+    "numero": "07",
+    "employeId": 139,
+    "exercice": 2025,
+    "objet": "Transmission des états de virement de paiement des mandats au près des société de téléphone mobil ",
+    "destination": "Abidjan",
+    "dateDebut": "2025-03-18T00:00:00",
+    "dateFin": "2025-03-22T00:00:00",
+    "nombreJours": 5,
+    "indemniteJournaliere": 0,
+    "fraisTransport": "<Undefined>",
+    "fraisHebergement": "<Undefined>",
+    "fraisNourriture": "<Undefined>",
+    "montantTotal": 0,
+    "statut": "valide",
+    "observations": "<Undefined>",
+    "hebergementAssure": true,
+    "nourritureAssuree": true,
+    "moyenTransport": "",
+    "mairieId": 1,
+    "personnelId": 1,
+    "updatedAt": "2026-03-08T15:30:15.441000",
+    "createdAt": "2026-03-08T15:30:15.441000"
+  }
+]

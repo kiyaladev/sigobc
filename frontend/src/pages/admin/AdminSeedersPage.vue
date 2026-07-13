@@ -1,231 +1,194 @@
 <template>
   <q-page class="admin-seeders-page q-pa-md">
-    <!-- Password Gate -->
-    <div v-if="!isUnlocked" class="admin-password-shell">
-      <q-card class="admin-password-card q-pa-lg">
-        <q-card-section class="text-center">
-          <q-icon name="lock" size="48px" color="warning" class="q-mb-md" />
-          <div class="text-h6 q-mb-sm">Accès protégé</div>
-          <div class="text-caption text-grey-7 q-mb-lg">
-            Veuillez entrer le mot de passe administrateur pour accéder à cette page.
-          </div>
-          <q-form @submit="checkPassword">
-            <q-input
-              v-model="adminPassword"
-              type="password"
-              label="Mot de passe administrateur"
-              outlined
-              dense
-              :error="passwordError"
-              error-message="Mot de passe incorrect"
-              @keyup.enter="checkPassword"
-              class="q-mb-md"
-            />
-            <q-btn
-              type="submit"
-              label="Déverrouiller"
-              color="primary"
-              unelevated
-              class="full-width"
-              icon="lock_open"
-            />
-          </q-form>
-        </q-card-section>
-      </q-card>
-    </div>
-
-    <!-- Actual content -->
-    <template v-if="isUnlocked">
-      <PageHeader
-        title="Gestion de la Base de Données"
-        subtitle="Initialisation et génération de données de test"
-        icon="database"
-      >
-        <template #stats>
-          <div v-for="(stat, index) in heroStats" :key="index" class="col-12 col-sm-6 col-lg-3">
-            <q-card flat class="listing-stat-card overview-stat-card">
-              <q-card-section class="row items-center no-wrap">
-                <div class="col">
-                  <div class="overview-stat-label">{{ stat.label }}</div>
-                  <div class="overview-stat-value">{{ stat.value }}</div>
-                  <div v-if="stat.helper" class="overview-stat-helper">{{ stat.helper }}</div>
-                </div>
-                <q-icon :name="stat.icon" size="30px" :color="stat.color" />
-              </q-card-section>
-            </q-card>
-          </div>
-        </template>
-      </PageHeader>
-
-      <q-banner class="admin-warning-banner q-mb-md" rounded>
-        <template v-slot:avatar>
-          <q-icon name="warning" />
-        </template>
-        <strong>Attention :</strong> Les actions sur cette page peuvent supprimer définitivement les
-        données.
-      </q-banner>
-
-      <div class="row q-col-gutter-md">
-        <!-- Actions Principales -->
-        <div class="col-12 col-md-6">
-          <q-card class="admin-card">
-            <q-card-section>
-              <div class="text-h6">🚀 Actions Rapides</div>
-            </q-card-section>
-            <q-list separator>
-              <q-item>
-                <q-item-section>
-                  <q-item-label>Initialiser la base de données</q-item-label>
-                  <q-item-label caption
-                    >Vide la DB et la remplit avec les données par défaut (chapitres,
-                    sous-chapitres, admin, etc.).</q-item-label
-                  >
-                </q-item-section>
-                <q-item-section side>
-                  <q-btn
-                    label="Initialiser"
-                    color="primary"
-                    icon="rocket_launch"
-                    @click="runSeedDefault"
-                    :loading="loading.default"
-                  />
-                </q-item-section>
-              </q-item>
-
-              <q-item>
-                <q-item-section>
-                  <q-item-label>Supprimer toutes les données</q-item-label>
-                  <q-item-label caption
-                    >Vide complètement la base de données. Action irréversible.</q-item-label
-                  >
-                </q-item-section>
-                <q-item-section side>
-                  <q-btn
-                    label="Supprimer"
-                    color="negative"
-                    icon="delete_forever"
-                    @click="runClear"
-                    :loading="loading.clear"
-                  />
-                </q-item-section>
-              </q-item>
-
-              <q-item>
-                <q-item-section>
-                  <q-item-label>Seeder projets de référence</q-item-label>
-                  <q-item-label caption
-                    >Ajoute les projets de test issus du compte administratif sans vider la
-                    base.</q-item-label
-                  >
-                </q-item-section>
-                <q-item-section side>
-                  <q-btn
-                    label="Seeder projets"
-                    color="secondary"
-                    icon="engineering"
-                    @click="runSeedProjects"
-                    :loading="loading.projects"
-                  />
-                </q-item-section>
-              </q-item>
-            </q-list>
-          </q-card>
-        </div>
-
-        <!-- Seeder de Test -->
-        <div class="col-12 col-md-6">
-          <q-card class="admin-card">
-            <q-card-section>
-              <div class="text-h6">🧪 Générer des Données de Test</div>
-              <div class="text-caption">
-                Remplit la base avec un grand volume de données aléatoires pour les tests.
+    <PageHeader
+      title="Gestion de la Base de Données"
+      subtitle="Initialisation et génération de données de test"
+      icon="database"
+    >
+      <template #stats>
+        <div v-for="(stat, index) in heroStats" :key="index" class="col-12 col-sm-6 col-lg-3">
+          <q-card flat class="listing-stat-card overview-stat-card">
+            <q-card-section class="row items-center no-wrap">
+              <div class="col">
+                <div class="overview-stat-label">{{ stat.label }}</div>
+                <div class="overview-stat-value">{{ stat.value }}</div>
+                <div v-if="stat.helper" class="overview-stat-helper">{{ stat.helper }}</div>
               </div>
+              <q-icon :name="stat.icon" size="30px" :color="stat.color" />
             </q-card-section>
-
-            <q-card-section>
-              <q-expansion-item icon="settings" label="Personnaliser les quantités" class="q-mb-md">
-                <div class="q-gutter-md q-pt-md">
-                  <q-input
-                    v-model.number="testDataOptions.mandats"
-                    type="number"
-                    label="Mandats"
-                    filled
-                    dense
-                  />
-                  <q-input
-                    v-model.number="testDataOptions.bordereauMandats"
-                    type="number"
-                    label="Bordereaux de Mandats"
-                    filled
-                    dense
-                  />
-                  <q-separator />
-                  <div class="text-subtitle2">Génération des données</div>
-                  <div class="text-caption">
-                    Les données seront générées pour l'exercice 2025 ainsi que des historiques pour
-                    2023-2024.
-                  </div>
-                </div>
-              </q-expansion-item>
-            </q-card-section>
-
-            <q-card-actions align="right">
-              <q-btn
-                label="Générer Données de Test"
-                color="secondary"
-                icon="science"
-                @click="runSeedTest"
-                :loading="loading.test"
-              />
-            </q-card-actions>
           </q-card>
         </div>
+      </template>
+    </PageHeader>
 
-        <!-- Statistiques -->
-        <div class="col-12">
-          <q-card class="admin-card">
-            <q-card-section>
-              <div class="text-h6">📊 Données Actuelles</div>
-            </q-card-section>
-            <q-card-section>
-              <div class="row q-col-gutter-md">
-                <div class="col-6 col-sm-4 col-md-2" v-for="stat in stats" :key="stat.label">
-                  <q-card flat class="listing-stat-card admin-mini-stat">
-                    <q-card-section class="text-center">
-                      <div class="text-h4 text-primary">{{ stat.count }}</div>
-                      <div class="text-caption text-grey-7">{{ stat.label }}</div>
-                    </q-card-section>
-                  </q-card>
-                </div>
-              </div>
-            </q-card-section>
-            <q-card-actions align="right">
-              <q-btn flat label="Actualiser" icon="refresh" color="primary" @click="loadStats" />
-            </q-card-actions>
-          </q-card>
-        </div>
+    <q-banner class="admin-warning-banner q-mb-md" rounded>
+      <template v-slot:avatar>
+        <q-icon name="warning" />
+      </template>
+      <strong>Attention :</strong> Les actions sur cette page peuvent supprimer définitivement les
+      données.
+    </q-banner>
 
-        <!-- Logs -->
-        <div class="col-12" v-if="logs.length > 0">
-          <q-card class="admin-card">
-            <q-card-section>
-              <div class="text-h6">📝 Logs d'exécution</div>
-            </q-card-section>
-            <q-card-section style="max-height: 300px; overflow-y: auto">
-              <div
-                v-for="(log, index) in logs"
-                :key="index"
-                class="text-caption q-mb-xs"
-                v-html="log"
-              ></div>
-            </q-card-section>
-            <q-card-actions align="right">
-              <q-btn flat label="Effacer" icon="clear" color="grey" @click="logs = []" />
-            </q-card-actions>
-          </q-card>
-        </div>
+    <div class="row q-col-gutter-md">
+      <!-- Actions Principales -->
+      <div class="col-12 col-md-6">
+        <q-card class="admin-card">
+          <q-card-section>
+            <div class="text-h6">🚀 Actions Rapides</div>
+          </q-card-section>
+          <q-list separator>
+            <q-item>
+              <q-item-section>
+                <q-item-label>Initialiser la base de données</q-item-label>
+                <q-item-label caption
+                  >Vide la DB et la remplit avec les données par défaut (chapitres, sous-chapitres,
+                  admin, etc.).</q-item-label
+                >
+              </q-item-section>
+              <q-item-section side>
+                <q-btn
+                  label="Initialiser"
+                  color="primary"
+                  icon="rocket_launch"
+                  @click="runSeedDefault"
+                  :loading="loading.default"
+                />
+              </q-item-section>
+            </q-item>
+
+            <q-item>
+              <q-item-section>
+                <q-item-label>Supprimer toutes les données</q-item-label>
+                <q-item-label caption
+                  >Vide complètement la base de données. Action irréversible.</q-item-label
+                >
+              </q-item-section>
+              <q-item-section side>
+                <q-btn
+                  label="Supprimer"
+                  color="negative"
+                  icon="delete_forever"
+                  @click="runClear"
+                  :loading="loading.clear"
+                />
+              </q-item-section>
+            </q-item>
+
+            <q-item>
+              <q-item-section>
+                <q-item-label>Seeder projets de référence</q-item-label>
+                <q-item-label caption
+                  >Ajoute les projets de test issus du compte administratif sans vider la
+                  base.</q-item-label
+                >
+              </q-item-section>
+              <q-item-section side>
+                <q-btn
+                  label="Seeder projets"
+                  color="secondary"
+                  icon="engineering"
+                  @click="runSeedProjects"
+                  :loading="loading.projects"
+                />
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-card>
       </div>
-    </template>
+
+      <!-- Seeder de Test -->
+      <div class="col-12 col-md-6">
+        <q-card class="admin-card">
+          <q-card-section>
+            <div class="text-h6">🧪 Générer des Données de Test</div>
+            <div class="text-caption">
+              Remplit la base avec un grand volume de données aléatoires pour les tests.
+            </div>
+          </q-card-section>
+
+          <q-card-section>
+            <q-expansion-item icon="settings" label="Personnaliser les quantités" class="q-mb-md">
+              <div class="q-gutter-md q-pt-md">
+                <q-input
+                  v-model.number="testDataOptions.mandats"
+                  type="number"
+                  label="Mandats"
+                  filled
+                  dense
+                />
+                <q-input
+                  v-model.number="testDataOptions.bordereauMandats"
+                  type="number"
+                  label="Bordereaux de Mandats"
+                  filled
+                  dense
+                />
+                <q-separator />
+                <div class="text-subtitle2">Génération des données</div>
+                <div class="text-caption">
+                  Les données seront générées pour l'exercice 2025 ainsi que des historiques pour
+                  2023-2024.
+                </div>
+              </div>
+            </q-expansion-item>
+          </q-card-section>
+
+          <q-card-actions align="right">
+            <q-btn
+              label="Générer Données de Test"
+              color="secondary"
+              icon="science"
+              @click="runSeedTest"
+              :loading="loading.test"
+            />
+          </q-card-actions>
+        </q-card>
+      </div>
+
+      <!-- Statistiques -->
+      <div class="col-12">
+        <q-card class="admin-card">
+          <q-card-section>
+            <div class="text-h6">📊 Données Actuelles</div>
+          </q-card-section>
+          <q-card-section>
+            <div class="row q-col-gutter-md">
+              <div class="col-6 col-sm-4 col-md-2" v-for="stat in stats" :key="stat.label">
+                <q-card flat class="listing-stat-card admin-mini-stat">
+                  <q-card-section class="text-center">
+                    <div class="text-h4 text-primary">{{ stat.count }}</div>
+                    <div class="text-caption text-grey-7">{{ stat.label }}</div>
+                  </q-card-section>
+                </q-card>
+              </div>
+            </div>
+          </q-card-section>
+          <q-card-actions align="right">
+            <q-btn flat label="Actualiser" icon="refresh" color="primary" @click="loadStats" />
+          </q-card-actions>
+        </q-card>
+      </div>
+
+      <!-- Logs -->
+      <div class="col-12" v-if="logs.length > 0">
+        <q-card class="admin-card">
+          <q-card-section>
+            <div class="text-h6">📝 Logs d'exécution</div>
+          </q-card-section>
+          <q-card-section style="max-height: 300px; overflow-y: auto">
+            <div
+              v-for="(log, index) in logs"
+              :key="index"
+              class="text-caption q-mb-xs"
+              v-html="log"
+            ></div>
+          </q-card-section>
+          <q-card-actions align="right">
+            <q-btn flat label="Effacer" icon="clear" color="grey" @click="logs = []" />
+          </q-card-actions>
+        </q-card>
+      </div>
+    </div>
   </q-page>
 </template>
 
@@ -243,27 +206,6 @@ import {
 } from 'src/database/seeders';
 
 const $q = useQuasar();
-
-// Password protection
-const ADMIN_PAGE_PASSWORD = 'Sigobc@2026!';
-const isUnlocked = ref(false);
-const adminPassword = ref('');
-const passwordError = ref(false);
-
-function checkPassword() {
-  if (adminPassword.value === ADMIN_PAGE_PASSWORD) {
-    isUnlocked.value = true;
-    passwordError.value = false;
-    sessionStorage.setItem('seeders_unlocked', 'true');
-  } else {
-    passwordError.value = true;
-  }
-}
-
-// Check if already unlocked in this session
-if (sessionStorage.getItem('seeders_unlocked') === 'true') {
-  isUnlocked.value = true;
-}
 
 const loading = ref({
   default: false,

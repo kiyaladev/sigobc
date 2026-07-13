@@ -1,0 +1,76 @@
+[
+  {
+    "username": "admin",
+    "password": "Sigobc@2026!",
+    "nom": "Administrateur",
+    "prenom": "Complet",
+    "email": "admin@sigobc.sn",
+    "role": "admin",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "id": 19
+  },
+  {
+    "username": "agent",
+    "password": "password",
+    "nom": "Agent",
+    "prenom": "Recouvrement",
+    "email": "agent@sigobc.sn",
+    "role": "agent",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "id": 20
+  },
+  {
+    "username": "comptable",
+    "password": "password",
+    "nom": "Comptable",
+    "prenom": "Public",
+    "email": "comptable@sigobc.sn",
+    "role": "comptable",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "id": 21
+  },
+  {
+    "username": "demo",
+    "password": "demo",
+    "nom": "Utilisateur",
+    "prenom": "Démo",
+    "email": "demo@sigobc.gov",
+    "role": "operateur",
+    "actif": true,
+    "createdAt": "2026-02-22T18:08:39.434Z",
+    "updatedAt": "2026-02-22T18:08:39.434Z",
+    "id": 22
+  },
+  {
+    "username": "jean marc",
+    "password": "JEAN@2026!",
+    "nom": "KOUAKOU",
+    "prenom": "YAO JEAN MARC",
+    "email": "kouakouyajeanmarc6@gmail.com",
+    "role": "admin",
+    "actif": true,
+    "createdAt": "2026-02-24T01:47:52.133Z",
+    "updatedAt": "2026-02-24T01:47:52.133Z",
+    "id": 26
+  },
+  {
+    "username": "admin",
+    "password": "Sigobc@2026!",
+    "nom": "Administrateur",
+    "prenom": "Système",
+    "email": "admin@tresor.sn",
+    "role": "admin",
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  }
+]

@@ -1,0 +1,138 @@
+[
+  {
+    "code": "1",
+    "libelle": "SALAIRE ET INDEM.",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "id": 41
+  },
+  {
+    "code": "2",
+    "libelle": "CHARGES SOCIALES",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "id": 42
+  },
+  {
+    "code": "3",
+    "libelle": "TRANSP. & FRAIS DE MISS.",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "id": 43
+  },
+  {
+    "code": "4",
+    "libelle": "CARBUR. & LUBRIF.",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "id": 44
+  },
+  {
+    "code": "5",
+    "libelle": "MATÉRIEL ET FOURNIT.",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "id": 45
+  },
+  {
+    "code": "6",
+    "libelle": "ABONN. EAU, ÉLEC, TÉLÉPH.",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "id": 46
+  },
+  {
+    "code": "7",
+    "libelle": "TRAVAUX & SCES A L'ENTREP.",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "id": 47
+  },
+  {
+    "code": "8",
+    "libelle": "INTERVEN ET TRANSF.",
+    "mairieId": 6,
+    "actif": true,
+    "createdAt": "2026-02-22T14:46:55.038Z",
+    "updatedAt": "2026-02-22T14:46:55.038Z",
+    "id": 48
+  },
+  {
+    "code": "1",
+    "libelle": "SALAIRE ET INDEM.",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "2",
+    "libelle": "CHARGES SOCIALES",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "3",
+    "libelle": "TRANSP. & FRAIS DE MISS.",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "4",
+    "libelle": "CARBUR. ET LUBRIF.",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "5",
+    "libelle": "MATERIEL ET FOURNIT.",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "6",
+    "libelle": "ABONN. EAU, ELEC, TELEPH.",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "7",
+    "libelle": "TRAVAUX & SCES A L'ENTREP.",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  },
+  {
+    "code": "8",
+    "libelle": "INTERVEN ET TRANSF.",
+    "mairieId": 7,
+    "actif": true,
+    "createdAt": "2026-03-03T09:44:45.339000",
+    "updatedAt": "2026-03-03T09:44:45.339000"
+  }
+]
