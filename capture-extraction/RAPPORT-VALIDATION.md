@@ -51,6 +51,14 @@ La base applicative (instantané de sauvegarde) contient déjà **199 mandats et
 - **Codes non résolus** (mandats inclus, `chapitreId`/`sousChapitreId`=null, code brut mis en `patrimonial`/observations) : chapitres `2211`/`2219` (investissement, folios 76/77) et sous-chapitre `6812` (folio 102).
 - **IDs à re-baser** : `START_BORDEREAU_ID`/`START_MANDAT_ID` dans `generate-import.js` supposent que la base vive s'arrête au folio 44 / mandat id 13616 / numeroMandat 199. Si la base réelle est plus avancée, ajuster ces constantes et relancer `node generate-import.js`.
 
+## MISE À JOUR 2026-07-16 — 12 folios re-scannés récupérés
+Le PDF `CamScanner 14-07-2026 15.42.pdf` re-scanne en meilleure qualité les 12 folios auparavant exclus (66, 85, 86, 91, 92, 93, 98, 109, 110, 111, 115, 120). Tous **vérifiés et équilibrés** (Σ lignes = total, cases CONTRÔLE manuscrites concordantes) — extraction dans `p8-14.07-recuperes.json`, fusionnée par `build-reel.js`.
+- 2 reconstructions documentées : folio 91 (ligne 6010 = 29 506, ambiguïté OCR 29506/29750 tranchée par le total + analogue avril) ; folio 120 (11 lignes reconstituées via case CONTRÔLE 6006=410000 / 6131=150000 + analogue folio 96).
+- Fix numérotation : folio 101 « Transport » (N° 627–633 en collision avec folio 99) → renuméroté **637–643** (place libre entre folios 100 et 102). → **plus aucun doublon de numeroMandat**.
+- **Seul folio 4 reste exclu** (jamais re-scanné, ligne 28 illisible).
+
+Fichier `sigobc-module-depenses-REEL.json` régénéré : **116 bordereaux / 726 mandats / 263 803 486 FCFA**. Contrôles : 0 écart montant, 0 doublon de folio, **0 doublon de numeroMandat**, 0 sous-chapitre orphelin. → **importable en une fois, sans doublon**.
+
 ## FICHIER FINAL À IMPORTER (base vive réelle)
 `sigobc-module-depenses-REEL.json` — construit sur l'export **réel** du 2026-07-13 14:18 (et non l'instantané périmé). Format « module Dépenses » attendu par `#/admin/backup`.
 

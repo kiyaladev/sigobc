@@ -11,6 +11,17 @@ for (const f of folios) {
   if (f.numero === 122 && f.totalPresent === 480000 && /20\.47/.test(f.source)) f.numero = 121;
 }
 
+// --- Fusion des 12 folios re-scannes (PDF 14-07) : remplacent les versions degradees ---
+const recuperes = JSON.parse(fs.readFileSync(path.join(DIR, 'p8-14.07-recuperes.json'), 'utf8')).folios
+  .map(f => ({ ...f, source: 'CamScanner 14-07-2026 15.42.pdf' }));
+const numsRecuperes = new Set(recuperes.map(f => f.numero));
+folios.splice(0, folios.length, ...folios.filter(f => !numsRecuperes.has(f.numero)), ...recuperes);
+
+// --- Fix numerotation folio 101 (Transport) : N° 627-633 chevauchent le folio 99.
+//     Entre folio 100 (636) et folio 102 (644), le folio 101 doit porter 637-643. ---
+const f101 = folios.find(f => f.numero === 101 && /20\.38/.test(f.source || ''));
+if (f101) f101.mandats.forEach((m, i) => { m.numeroOrdre = 637 + i; });
+
 // --- Reference vive ---
 const chapitres = live.chapitres || [];
 const sousChapitres = [...(live.sousChapitres || [])];

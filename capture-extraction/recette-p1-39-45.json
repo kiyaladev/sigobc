@@ -1,0 +1,53 @@
+{"fichier":"Recette-CamScanner 14-07-2026 16.48.pdf","type":"BORDEREAU DES RECOUVREMENTS AVANT EMISSION DES ORDRES (CT53)","commune":"VAVOUA","code":"433","exercice":2026,"bordereaux":[
+{"numero":39,"dateEncaissement":"2026-06-02","totalPresent":1127000,"totalGeneralPrecedent":272058154,"totalGeneralPresent":273185154,"sommeLignes":1127000,"totalMatch":true,"warnings":[],"lignes":[
+{"numeroDecompte":265,"nature":"Marchés","nom":"REGISSEUR","taxeCode":"71344","montant":272000},
+{"numeroDecompte":266,"nature":"Légalisation, signature, certification","nom":"REGISSEUR","taxeCode":"71000","montant":100000},
+{"numeroDecompte":267,"nature":"délivrance de livrets de famille et autres documents","nom":"REGISSEUR","taxeCode":"71001","montant":150000},
+{"numeroDecompte":268,"nature":"taxe forfaitaire des petits commerçants et artisans","nom":"REGISSEUR","taxeCode":"70262","montant":355000},
+{"numeroDecompte":269,"nature":"Baux à loyer","nom":"REGISSEUR","taxeCode":"72000","montant":250000}]},
+{"numero":40,"dateEncaissement":"2026-06-04","totalPresent":110000,"totalGeneralPrecedent":273185154,"totalGeneralPresent":273295154,"sommeLignes":110000,"totalMatch":true,"warnings":[],"lignes":[
+{"numeroDecompte":270,"nature":"Baux à loyer","nom":"REGISSEUR","taxeCode":"72000","montant":110000}]},
+{"numero":41,"dateEncaissement":"2026-06-09","totalPresent":2483500,"totalGeneralPrecedent":273295154,"totalGeneralPresent":275778654,"sommeLignes":2483500,"totalMatch":true,"warnings":[],"lignes":[
+{"numeroDecompte":271,"nature":"Transport par route- gares routières- station des taxis","nom":"REGISSEUR","taxeCode":"71331","montant":31000},
+{"numeroDecompte":272,"nature":"Marchés","nom":"REGISSEUR","taxeCode":"71344","montant":761500},
+{"numeroDecompte":273,"nature":"Légalisation, signature, certification","nom":"REGISSEUR","taxeCode":"71000","montant":100000},
+{"numeroDecompte":274,"nature":"délivrance de livrets de famille et autres documents","nom":"REGISSEUR","taxeCode":"71001","montant":152000},
+{"numeroDecompte":275,"nature":"taxe forfaitaire des petits commerçants et artisans","nom":"REGISSEUR","taxeCode":"70262","montant":1299000},
+{"numeroDecompte":276,"nature":"Taxe sur les taxis","nom":"REGISSEUR","taxeCode":"7041","montant":50000},
+{"numeroDecompte":277,"nature":"Baux à loyer","nom":"REGISSEUR","taxeCode":"72000","montant":90000}]},
+{"numero":42,"dateEncaissement":"2026-06-12","totalPresent":737900,"totalGeneralPrecedent":275778654,"totalGeneralPresent":276516554,"sommeLignes":727900,"totalMatch":false,"warnings":["Sigma lignes lu 727900 != total present 737900 (ecart 10000) ; une ligne mal lue (candidat: 280 ou 284)"],"lignes":[
+{"numeroDecompte":278,"nature":"Légalisation, signature, certification","nom":"REGISSEUR","taxeCode":"71000","montant":100000},
+{"numeroDecompte":279,"nature":"délivrance de livrets de famille et autres documents","nom":"REGISSEUR","taxeCode":"71001","montant":18000},
+{"numeroDecompte":280,"nature":"taxe forfaitaire des petits commerçants et artisans","nom":"REGISSEUR","taxeCode":"70262","montant":87000},
+{"numeroDecompte":281,"nature":"Taxe sur les taxis","nom":"REGISSEUR","taxeCode":"7041","montant":11000},
+{"numeroDecompte":282,"nature":"Baux à loyer","nom":"REGISSEUR","taxeCode":"72000","montant":35000},
+{"numeroDecompte":283,"nature":"Transport par route- gares routières- station des taxis","nom":"REGISSEUR","taxeCode":"71331","montant":99500},
+{"numeroDecompte":284,"nature":"Marchés","nom":"REGISSEUR","taxeCode":"71344","montant":298400},
+{"numeroDecompte":285,"nature":"taxe forfaitaire des petits commerçants et artisans","nom":"REGISSEUR","taxeCode":"70262","montant":46000},
+{"numeroDecompte":286,"nature":"Taxe sur les taxis","nom":"REGISSEUR","taxeCode":"7041","montant":32000},
+{"numeroDecompte":287,"nature":"Taxe du séquestre","nom":"REGISSEUR","taxeCode":"71030","montant":1000}]},
+{"numero":43,"dateEncaissement":"2026-06-16","totalPresent":2006500,"totalGeneralPrecedent":276516554,"totalGeneralPresent":278523054,"sommeLignes":2006500,"totalMatch":true,"warnings":["Numeros de decompte 288 et 289 absents (saut de sequence 287->290)"],"lignes":[
+{"numeroDecompte":290,"nature":"Légalisation, signature, certification","nom":"REGISSEUR","taxeCode":"71000","montant":200000},
+{"numeroDecompte":291,"nature":"délivrance de livrets de famille et autres documents","nom":"REGISSEUR","taxeCode":"71001","montant":18000},
+{"numeroDecompte":292,"nature":"taxe forfaitaire des petits commerçants et artisans","nom":"REGISSEUR","taxeCode":"70262","montant":748000},
+{"numeroDecompte":293,"nature":"Taxe sur les taxis","nom":"REGISSEUR","taxeCode":"7041","montant":100000},
+{"numeroDecompte":294,"nature":"Baux à loyer","nom":"REGISSEUR","taxeCode":"72000","montant":240000},
+{"numeroDecompte":295,"nature":"Transport par route- gares routières- station des taxis","nom":"REGISSEUR","taxeCode":"71331","montant":36000},
+{"numeroDecompte":296,"nature":"Marchés","nom":"REGISSEUR","taxeCode":"71344","montant":595500},
+{"numeroDecompte":297,"nature":"Transport par route- gares routières- station des taxis","nom":"REGISSEUR","taxeCode":"71331","montant":52000},
+{"numeroDecompte":298,"nature":"taxe forfaitaire des petits commerçants et artisans","nom":"REGISSEUR","taxeCode":"70262","montant":17000}]},
+{"numero":44,"dateEncaissement":"2026-06-29","totalPresent":146000,"totalGeneralPrecedent":278523054,"totalGeneralPresent":278669054,"sommeLignes":146000,"totalMatch":true,"warnings":[],"lignes":[
+{"numeroDecompte":299,"nature":"taxe forfaitaire des petits commerçants et artisans","nom":"REGISSEUR","taxeCode":"70262","montant":36000},
+{"numeroDecompte":300,"nature":"Baux à loyer","nom":"REGISSEUR","taxeCode":"72000","montant":110000}]},
+{"numero":45,"dateEncaissement":"2026-06-30","totalPresent":3972000,"totalGeneralPrecedent":278669054,"totalGeneralPresent":282641054,"sommeLignes":3852000,"totalMatch":false,"warnings":["Sigma lignes lu 3852000 != total present 3972000 (ecart 120000) ; une ligne mal lue (candidat: 305 ou 302)"],"lignes":[
+{"numeroDecompte":301,"nature":"Transport par route- gares routières- station des taxis","nom":"REGISSEUR","taxeCode":"71331","montant":111000},
+{"numeroDecompte":302,"nature":"Marchés","nom":"REGISSEUR","taxeCode":"71344","montant":1370500},
+{"numeroDecompte":303,"nature":"Légalisation, signature, certification","nom":"REGISSEUR","taxeCode":"71000","montant":216000},
+{"numeroDecompte":304,"nature":"délivrance de livrets de famille et autres documents","nom":"REGISSEUR","taxeCode":"71001","montant":91000},
+{"numeroDecompte":305,"nature":"taxe forfaitaire des petits commerçants et artisans","nom":"REGISSEUR","taxeCode":"70262","montant":1311000},
+{"numeroDecompte":306,"nature":"Taxe sur les taxis","nom":"REGISSEUR","taxeCode":"7041","montant":255000},
+{"numeroDecompte":307,"nature":"Baux à loyer","nom":"REGISSEUR","taxeCode":"72000","montant":445000},
+{"numeroDecompte":308,"nature":"Inhumations et exhumations, creusements de fosses","nom":"REGISSEUR","taxeCode":"71150","montant":7500},
+{"numeroDecompte":309,"nature":"taxe forfaitaire des petits commerçants et artisans","nom":"REGISSEUR","taxeCode":"70262","montant":10000},
+{"numeroDecompte":310,"nature":"Taxe sur les taxis","nom":"REGISSEUR","taxeCode":"7041","montant":35000}]}
+]}
