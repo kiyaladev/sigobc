@@ -1,0 +1,95 @@
+[
+  {
+    "commune": "VAVOUA (433)",
+    "aVerifier": [
+      {
+        "numero": 2,
+        "totalPresent": 910700,
+        "sommeDeclarations": 746700,
+        "ecart": 164000
+      },
+      {
+        "numero": 5,
+        "totalPresent": 874700,
+        "sommeDeclarations": 774700,
+        "ecart": 100000
+      },
+      {
+        "numero": 10,
+        "totalPresent": 2043000,
+        "sommeDeclarations": 2026000,
+        "ecart": 17000
+      },
+      {
+        "numero": 12,
+        "totalPresent": 1840000,
+        "sommeDeclarations": 1558000,
+        "ecart": 282000
+      },
+      {
+        "numero": 14,
+        "totalPresent": 1318500,
+        "sommeDeclarations": 1253500,
+        "ecart": 65000
+      },
+      {
+        "numero": 15,
+        "totalPresent": 2339000,
+        "sommeDeclarations": 1273000,
+        "ecart": 1066000
+      },
+      {
+        "numero": 18,
+        "totalPresent": 1170250,
+        "sommeDeclarations": 1140250,
+        "ecart": 30000
+      },
+      {
+        "numero": 21,
+        "totalPresent": 3397000,
+        "sommeDeclarations": 3273000,
+        "ecart": 124000
+      },
+      {
+        "numero": 22,
+        "totalPresent": 43633140,
+        "sommeDeclarations": 3273000,
+        "ecart": 40360140
+      },
+      {
+        "numero": 27,
+        "totalPresent": 2724000,
+        "sommeDeclarations": 1272000,
+        "ecart": 1452000
+      },
+      {
+        "numero": 32,
+        "totalPresent": 68744644,
+        "sommeDeclarations": 1776000,
+        "ecart": 66968644
+      },
+      {
+        "numero": 37,
+        "totalPresent": 4038600,
+        "sommeDeclarations": 3982600,
+        "ecart": 56000
+      },
+      {
+        "numero": 42,
+        "totalPresent": 737900,
+        "sommeDeclarations": 727900,
+        "ecart": 10000
+      },
+      {
+        "numero": 45,
+        "totalPresent": 3972000,
+        "sommeDeclarations": 3852000,
+        "ecart": 120000
+      }
+    ]
+  },
+  {
+    "commune": "GBOGUHE (491)",
+    "aVerifier": []
+  }
+]

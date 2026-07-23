@@ -227,8 +227,10 @@ const BordereauRecetteSchema = new Schema({
   statut: { type: String, enum: ['ouvert', 'ferme'] },
   observations: String,
   personnelId: Number,
+  sourceDocumentHash: String,
   ...ts,
 });
+BordereauRecetteSchema.index({ mairieId: 1, annee: 1, numero: 1 }, { unique: true });
 export const BordereauRecetteModel = m('BordereauRecette', BordereauRecetteSchema);
 
 // ─── Declaration ─────────────────────────────────────────────────────────────
@@ -255,8 +257,11 @@ const DeclarationSchema = new Schema({
   statut: { type: String, enum: ['brouillon', 'validee', 'annulee'] },
   observations: String,
   personnelId: Number,
+  sourceDocumentHash: String,
+  sourceImportKey: String,
   ...ts,
 });
+DeclarationSchema.index({ sourceImportKey: 1 }, { unique: true, sparse: true });
 export const DeclarationModel = m('Declaration', DeclarationSchema);
 
 // ─── PrevisionRecette ────────────────────────────────────────────────────────

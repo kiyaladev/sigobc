@@ -147,6 +147,13 @@ export class OfflineDb extends Dexie {
     this.version(3).stores({
       fournisseurs: '++id, nom, compteContribuable, mairieId, actif',
     });
+
+    // Version 4: clés techniques idempotentes pour les imports de recettes.
+    this.version(4).stores({
+      declarations:
+        '++id, numeroPiece, mairieId, taxeId, statut, exercice, bordereauId, sourceImportKey, sourceDocumentHash',
+      bordereauxRecette: '++id, numero, annee, mairieId, statut, sourceDocumentHash',
+    });
   }
 }
 

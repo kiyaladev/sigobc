@@ -1,6 +1,5 @@
 <template>
   <q-page class="parametrage-page q-pa-md">
-    <template>
       <PageHeader
         title="Paramétrage"
         subtitle="Configuration générale de l'application"
@@ -403,7 +402,6 @@
           </q-card-section>
         </q-card>
       </q-dialog>
-    </template>
   </q-page>
 </template>
 

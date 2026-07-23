@@ -6,6 +6,20 @@
       icon="receipt_long"
     >
       <template #actions>
+        <q-btn
+          color="secondary"
+          icon="upload_file"
+          label="Importer un PDF"
+          :loading="importingPdf"
+          @click="pdfFileInput?.pickFiles()"
+        />
+        <q-file
+          ref="pdfFileInput"
+          v-model="pdfFile"
+          accept="application/pdf,.pdf"
+          class="hidden"
+          @update:model-value="onPdfSelected"
+        />
         <q-btn color="primary" icon="add" label="Nouveau Bordereau" @click="openDialog()" />
         <q-btn
           v-if="isDev"
@@ -282,6 +296,7 @@ import DataTable from 'src/components/DataTable.vue';
 import PageHeader from 'src/components/PageHeader.vue';
 import { openPrintWindow, sendMessageToWindow } from 'src/utils/printUrl';
 import { MAIRIE_INFO } from 'src/constanteInfo';
+import { importRecettePdf } from 'src/services/recettePdfImport';
 
 const $q = useQuasar();
 
@@ -305,6 +320,44 @@ const bordereauDeclarations = ref<Declaration[]>([]);
 const loadingDeclarations = ref(false);
 const selectedBordereau = ref<BordereauRecette | null>(null);
 const formDateStr = ref('');
+const pdfFileInput = ref<{ pickFiles: () => void } | null>(null);
+const pdfFile = ref<File | null>(null);
+const importingPdf = ref(false);
+
+async function onPdfSelected(file: File | null) {
+  if (!file || importingPdf.value) return;
+  importingPdf.value = true;
+  try {
+    const result = await importRecettePdf(file);
+    await loadData();
+    const details = `${result.bordereauxCrees} bordereau(x) et ${result.declarationsCreees} déclaration(s) créé(s)`;
+    const duplicates = result.doublonsIgnores
+      ? ` ; ${result.doublonsIgnores} doublon(s) ignoré(s)`
+      : '';
+    $q.notify({
+      type: result.bordereauxCrees ? 'positive' : 'info',
+      message: `${details}${duplicates}.`,
+      timeout: 7000,
+    });
+    if (result.avertissements.length) {
+      $q.dialog({
+        title: 'Import terminé avec écarts source',
+        message: result.avertissements.join('\n'),
+        ok: true,
+      });
+    }
+  } catch (error) {
+    console.error("Erreur d'import PDF:", error);
+    $q.notify({
+      type: 'negative',
+      message: error instanceof Error ? error.message : "Échec de l'import PDF.",
+      timeout: 8000,
+    });
+  } finally {
+    importingPdf.value = false;
+    pdfFile.value = null;
+  }
+}
 
 const currentYear = new Date().getFullYear();
 const exerciceOptions = [2023, 2024, 2025, 2026];

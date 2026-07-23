@@ -1,0 +1,281 @@
+{"fichier":"DEPENSE-CamScanner 13-07-2026 13.00-gboguhe.pdf","commune":"GBOGUHE","code":"491","exercice":2026,"folios":[
+{"numero":23,"exercice":2026,"dateEmission":"2026-03-05","totalPresent":25688,"totalPrecedent":9463596,"totalGeneral":9489284,"sommeLignes":25688,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":117,"nature":"IMPOTS SUR SALAIRES","creancier":"DGI","imputationFonctionnelle":"6000","chapitre":"1","somme":2937},
+{"numeroOrdre":118,"nature":"IMPOTS SUR SALAIRES","creancier":"DGI","imputationFonctionnelle":"60012","chapitre":"1","somme":3760},
+{"numeroOrdre":119,"nature":"IMPOTS SUR SALAIRES","creancier":"DGI","imputationFonctionnelle":"6002","chapitre":"1","somme":3022},
+{"numeroOrdre":120,"nature":"IMPOTS SUR SALAIRES","creancier":"DGI","imputationFonctionnelle":"6010","chapitre":"1","somme":10158},
+{"numeroOrdre":121,"nature":"IMPOTS SUR SALAIRES","creancier":"DGI","imputationFonctionnelle":"6031","chapitre":"1","somme":2955},
+{"numeroOrdre":122,"nature":"IMPOTS SUR SALAIRES","creancier":"DGI","imputationFonctionnelle":"6100","chapitre":"1","somme":2856}]},
+{"numero":24,"exercice":2026,"dateEmission":"2026-03-05","totalPresent":567786,"totalPrecedent":9489284,"totalGeneral":10057070,"sommeLignes":567786,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":123,"nature":"COTISAT PATRONALE","creancier":"C.N.P.S","imputationFonctionnelle":"6000","chapitre":"2","somme":52926},
+{"numeroOrdre":124,"nature":"COTISAT PATRONALE","creancier":"C.N.P.S","imputationFonctionnelle":"60012","chapitre":"2","somme":60850},
+{"numeroOrdre":125,"nature":"COTISAT PATRONALE","creancier":"C.N.P.S","imputationFonctionnelle":"6002","chapitre":"2","somme":78396},
+{"numeroOrdre":126,"nature":"COTISAT PATRONALE","creancier":"C.N.P.S","imputationFonctionnelle":"6010","chapitre":"2","somme":221056},
+{"numeroOrdre":127,"nature":"COTISAT PATRONALE","creancier":"C.N.P.S","imputationFonctionnelle":"6031","chapitre":"2","somme":77760},
+{"numeroOrdre":128,"nature":"COTISAT PATRONALE","creancier":"C.N.P.S","imputationFonctionnelle":"6100","chapitre":"2","somme":76798}]},
+{"numero":25,"exercice":2026,"dateEmission":"2026-03-05","totalPresent":116205,"totalPrecedent":10057070,"totalGeneral":10173275,"sommeLignes":116205,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":129,"nature":"salaire de mars 2026","creancier":"KOUASSI KOUASSI S","imputationFonctionnelle":"6010","chapitre":"1","somme":116205}]},
+{"numero":26,"exercice":2026,"dateEmission":"2026-03-05","totalPresent":240000,"totalPrecedent":10173275,"totalGeneral":10413275,"sommeLignes":240000,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":130,"nature":"RAPPEL DES SALAIRES","creancier":"CISSE MEHOUA","imputationFonctionnelle":"6100","chapitre":"1","somme":120000},
+{"numeroOrdre":131,"nature":"RAPPEL DES SALAIRES","creancier":"TAGRO NADRO ANNICK","imputationFonctionnelle":"6100","chapitre":"1","somme":120000}]},
+{"numero":27,"exercice":2026,"dateEmission":"2026-03-05","totalPresent":120000,"totalPrecedent":10413275,"totalGeneral":10533275,"sommeLignes":120000,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":132,"nature":"SALAIRE DE MARS 2026","creancier":"CISSE MEHOUA","imputationFonctionnelle":"6100","chapitre":"1","somme":60000},
+{"numeroOrdre":133,"nature":"SALAIRE DE MARS 2026","creancier":"TAGRO NADRO ANNICK","imputationFonctionnelle":"6100","chapitre":"1","somme":60000}]},
+{"numero":28,"exercice":2026,"dateEmission":"2026-04-07","totalPresent":1185583,"totalPrecedent":10533275,"totalGeneral":11718858,"sommeLignes":1185583,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":134,"nature":"indem. p/defaut veh.","creancier":"KOUAKOU ASSIEDOU J.J","imputationFonctionnelle":"6000","chapitre":"1","somme":80000},
+{"numeroOrdre":135,"nature":"salaire d'avril 2026","creancier":"KOUAKOU AYA E.","imputationFonctionnelle":"60012","chapitre":"1","somme":214327},
+{"numeroOrdre":136,"nature":"indemnite de fonction","creancier":"OUATTARA BAKARY","imputationFonctionnelle":"60013","chapitre":"1","somme":331124},
+{"numeroOrdre":137,"nature":"indemnite de fonction","creancier":"GOSSE HENRI SERGE E.","imputationFonctionnelle":"60013","chapitre":"1","somme":55187},
+{"numeroOrdre":138,"nature":"indemnite de fonction","creancier":"DIGBEU GBAHI H.","imputationFonctionnelle":"60013","chapitre":"1","somme":55187},
+{"numeroOrdre":139,"nature":"indemnite de fonction","creancier":"KAMA KOUAME AIME","imputationFonctionnelle":"60013","chapitre":"1","somme":55187},
+{"numeroOrdre":140,"nature":"indemnite de fonction","creancier":"GBO YODE PIERRE","imputationFonctionnelle":"60013","chapitre":"1","somme":55187},
+{"numeroOrdre":141,"nature":"salaire d'avril 2026","creancier":"NEME GUSTAVE LAURD","imputationFonctionnelle":"6002","chapitre":"1","somme":108477},
+{"numeroOrdre":142,"nature":"salaire d'avril 2026","creancier":"GUE KOUITY","imputationFonctionnelle":"6010","chapitre":"1","somme":106514},
+{"numeroOrdre":143,"nature":"salaire d'avril 2026","creancier":"YVON WILFRIED T.","imputationFonctionnelle":"6010","chapitre":"1","somme":124393}]},
+{"numero":29,"exercice":2026,"dateEmission":"2026-04-07","totalPresent":877812,"totalPrecedent":11718858,"totalGeneral":12596670,"sommeLignes":877812,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":144,"nature":"salaire d'avril 2026","creancier":"SIBO GNAMPA O.","imputationFonctionnelle":"6010","chapitre":"1","somme":137717},
+{"numeroOrdre":145,"nature":"indemnite de fonction","creancier":"MOBIE BOKA WILFRIED","imputationFonctionnelle":"6020","chapitre":"1","somme":75000},
+{"numeroOrdre":146,"nature":"salaire d'avril 2026","creancier":"KIPRE GOGOUA J.","imputationFonctionnelle":"6031","chapitre":"1","somme":108477},
+{"numeroOrdre":147,"nature":"salaire d'avril 2026","creancier":"YOH AGUY ROLAND D","imputationFonctionnelle":"6031","chapitre":"1","somme":106514},
+{"numeroOrdre":148,"nature":"salaire d'avril 2026","creancier":"DIGBEU JEAN CLAUDE","imputationFonctionnelle":"6100","chapitre":"1","somme":106345},
+{"numeroOrdre":149,"nature":"salaire d'avril 2026","creancier":"DRUID KIPRE FLORENT","imputationFonctionnelle":"6100","chapitre":"1","somme":103759},
+{"numeroOrdre":150,"nature":"salaire d'avril 2026","creancier":"YOLOU BOUAZO A","imputationFonctionnelle":"6100","chapitre":"1","somme":60000},
+{"numeroOrdre":151,"nature":"salaire d'avril 2026","creancier":"DEPIE GOKOU ISAAC","imputationFonctionnelle":"6100","chapitre":"1","somme":60000},
+{"numeroOrdre":152,"nature":"salaire d'avril 2026","creancier":"KOUASSI N'GORAN P","imputationFonctionnelle":"6100","chapitre":"1","somme":60000},
+{"numeroOrdre":153,"nature":"salaire d'avril 2026","creancier":"DEGNAN DEGOUEKOU","imputationFonctionnelle":"6100","chapitre":"1","somme":60000}]},
+{"numero":30,"exercice":2026,"dateEmission":"2026-04-07","totalPresent":805065,"totalPrecedent":12596670,"totalGeneral":13401735,"sommeLignes":805065,"totalMatch":true,"warnings":["N° 159 deduit"],"mandats":[
+{"numeroOrdre":154,"nature":"salaire d'avril 2026","creancier":"KORE IRENE JOSIANE","imputationFonctionnelle":"6000","chapitre":"1","somme":173016},
+{"numeroOrdre":155,"nature":"salaire d'avril 2026","creancier":"KONAN AYA AGNES","imputationFonctionnelle":"6002","chapitre":"1","somme":109033},
+{"numeroOrdre":156,"nature":"salaire d'avril 2026","creancier":"GBLA TAPE MARTIN","imputationFonctionnelle":"6010","chapitre":"1","somme":163016},
+{"numeroOrdre":157,"nature":"salaire d'avril 2026","creancier":"GUINA DOGORE ISA","imputationFonctionnelle":"6100","chapitre":"1","somme":60000},
+{"numeroOrdre":158,"nature":"salaire d'avril 2026","creancier":"KOUASSI BADJE CONS","imputationFonctionnelle":"6100","chapitre":"1","somme":60000},
+{"numeroOrdre":159,"nature":"salaire d'avril 2026","creancier":"LAGO DALEBA GUY EL","imputationFonctionnelle":"6100","chapitre":"1","somme":60000},
+{"numeroOrdre":160,"nature":"salaire d'avril 2026","creancier":"COULIBALY NANORO","imputationFonctionnelle":"6100","chapitre":"1","somme":60000},
+{"numeroOrdre":161,"nature":"salaire d'avril 2026","creancier":"CISSE MEHOUA","imputationFonctionnelle":"6100","chapitre":"1","somme":60000},
+{"numeroOrdre":162,"nature":"salaire d'avril 2026","creancier":"TAGRO NADRO ANNICK","imputationFonctionnelle":"6100","chapitre":"1","somme":60000}]},
+{"numero":31,"exercice":2026,"dateEmission":"2026-04-07","totalPresent":116205,"totalPrecedent":13401735,"totalGeneral":13517940,"sommeLignes":116205,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":163,"nature":"salaire d'avril 2026","creancier":"KOUASSI KOUASSI SER","imputationFonctionnelle":"6010","chapitre":"1","somme":116205}]},
+{"numero":32,"exercice":2026,"dateEmission":"2026-04-07","totalPresent":93025,"totalPrecedent":13517940,"totalGeneral":13610965,"sommeLignes":93025,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":164,"nature":"CHARGES SALARIALES","creancier":"C.N.P.S","imputationFonctionnelle":"6000","chapitre":"1","somme":9679},
+{"numeroOrdre":165,"nature":"CHARGES SALARIALES","creancier":"C.N.P.S","imputationFonctionnelle":"60012","chapitre":"1","somme":11839},
+{"numeroOrdre":166,"nature":"CHARGES SALARIALES","creancier":"C.N.P.S","imputationFonctionnelle":"6002","chapitre":"1","somme":11869},
+{"numeroOrdre":167,"nature":"CHARGES SALARIALES","creancier":"C.N.P.S","imputationFonctionnelle":"6010","chapitre":"1","somme":36509},
+{"numeroOrdre":168,"nature":"CHARGES SALARIALES","creancier":"C.N.P.S","imputationFonctionnelle":"6031","chapitre":"1","somme":11695},
+{"numeroOrdre":169,"nature":"CHARGES SALARIALES","creancier":"C.N.P.S","imputationFonctionnelle":"6100","chapitre":"1","somme":11434}]},
+{"numero":33,"exercice":2026,"dateEmission":"2026-04-07","totalPresent":25688,"totalPrecedent":13610965,"totalGeneral":13636653,"sommeLignes":25688,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":170,"nature":"IMPOTS SUR SALAIRES","creancier":"DGI","imputationFonctionnelle":"6000","chapitre":"1","somme":2937},
+{"numeroOrdre":171,"nature":"IMPOTS SUR SALAIRES","creancier":"DGI","imputationFonctionnelle":"60012","chapitre":"1","somme":3760},
+{"numeroOrdre":172,"nature":"IMPOTS SUR SALAIRES","creancier":"DGI","imputationFonctionnelle":"6002","chapitre":"1","somme":3022},
+{"numeroOrdre":173,"nature":"IMPOTS SUR SALAIRES","creancier":"DGI","imputationFonctionnelle":"6010","chapitre":"1","somme":10158},
+{"numeroOrdre":174,"nature":"IMPOTS SUR SALAIRES","creancier":"DGI","imputationFonctionnelle":"6031","chapitre":"1","somme":2955},
+{"numeroOrdre":175,"nature":"IMPOTS SUR SALAIRES","creancier":"DGI","imputationFonctionnelle":"6100","chapitre":"1","somme":2856}]},
+{"numero":34,"exercice":2026,"dateEmission":"2026-04-16","totalPresent":400570,"totalPrecedent":13636653,"totalGeneral":14037223,"sommeLignes":400570,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":176,"nature":"CONSOMMATION D'ELECTRICITE DE LA MAIRIE","creancier":"CIE","imputationFonctionnelle":"6000","chapitre":"6","somme":334485},
+{"numeroOrdre":177,"nature":"CONSOMMATION D'ELECTRICITE DE L'AUBERGE MUNICIPAL","creancier":"CIE","imputationFonctionnelle":"6000","chapitre":"6","somme":66085}]},
+{"numero":35,"exercice":2026,"dateEmission":"2026-04-16","totalPresent":270000,"totalPrecedent":14037223,"totalGeneral":14307223,"sommeLignes":270000,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":178,"nature":"MISSION N°001-2026","creancier":"TOTO YVON WILFRIED","imputationFonctionnelle":"6010","chapitre":"3","somme":30000},
+{"numeroOrdre":179,"nature":"MISSION N°002-2026","creancier":"TAHE OUELLE OSWALD","imputationFonctionnelle":"6010","chapitre":"3","somme":120000},
+{"numeroOrdre":180,"nature":"MISSION N°003-2026","creancier":"YAO ROCK GHISLAIN","imputationFonctionnelle":"6100","chapitre":"3","somme":120000}]},
+{"numero":36,"exercice":2026,"dateEmission":"2026-04-25","totalPresent":200000,"totalPrecedent":14307223,"totalGeneral":14507223,"sommeLignes":200000,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":181,"nature":"PRIME DE SESSION","creancier":"DIVERS CONSEILLERS","imputationFonctionnelle":"60010","chapitre":"1","somme":200000}]},
+{"numero":37,"exercice":2026,"dateEmission":"2026-04-27","totalPresent":499875,"totalPrecedent":14507223,"totalGeneral":15007098,"sommeLignes":499875,"totalMatch":true,"warnings":["Nature tronquee"],"mandats":[
+{"numeroOrdre":182,"nature":"ACHAT DE PRODUITS D'ENTRETIEN","creancier":"YOPAYOU KORIO GLAD","imputationFonctionnelle":"6100","chapitre":"5","somme":499875}]},
+{"numero":38,"exercice":2026,"dateEmission":"2026-04-27","totalPresent":3000000,"totalPrecedent":15007098,"totalGeneral":18007098,"sommeLignes":3000000,"totalMatch":true,"warnings":["Natures tronquees"],"mandats":[
+{"numeroOrdre":183,"nature":"CONFECTION DE RIDEAUX","creancier":"YOPAYOU KORIO GLAD","imputationFonctionnelle":"6010","chapitre":"7","somme":2550000},
+{"numeroOrdre":184,"nature":"CONFECTION DE CHASUBLES","creancier":"YOPAYOU KORIO GLAD","imputationFonctionnelle":"6010","chapitre":"7","somme":450000}]},
+{"numero":39,"exercice":2026,"dateEmission":"2026-04-27","totalPresent":200000,"totalPrecedent":18007098,"totalGeneral":18207098,"sommeLignes":200000,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":185,"nature":"ACHAT DE FOURNITURES","creancier":"YOSIB PRESTATIONS","imputationFonctionnelle":"6020","chapitre":"5","somme":200000}]},
+{"numero":40,"exercice":2026,"dateEmission":"2026-04-27","totalPresent":250000,"totalPrecedent":18207098,"totalGeneral":18457098,"sommeLignes":250000,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":186,"nature":"ENTRETIEN ET REPARATION","creancier":"YOSIB PRESTATIONS","imputationFonctionnelle":"6020","chapitre":"7","somme":250000}]},
+{"numero":41,"exercice":2026,"dateEmission":"2026-04-27","totalPresent":4200000,"totalPrecedent":18457098,"totalGeneral":22657098,"sommeLignes":4200000,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":187,"nature":"ENTRETIEN ET REPARATION","creancier":"BAYO GAOUSSOU","imputationFonctionnelle":"6000","chapitre":"7","somme":1000000},
+{"numeroOrdre":188,"nature":"ENTRETIEN ET REPARATION","creancier":"BAYO GAOUSSOU","imputationFonctionnelle":"60012","chapitre":"7","somme":500000},
+{"numeroOrdre":189,"nature":"ENTRETIEN ET REPARATION","creancier":"BAYO GAOUSSOU","imputationFonctionnelle":"6002","chapitre":"7","somme":500000},
+{"numeroOrdre":190,"nature":"ENTRETIEN ET REPARATION","creancier":"BAYO GAOUSSOU","imputationFonctionnelle":"6010","chapitre":"7","somme":1100000},
+{"numeroOrdre":191,"nature":"ENTRETIEN ET REPARATION","creancier":"BAYO GAOUSSOU","imputationFonctionnelle":"6100","chapitre":"7","somme":500000},
+{"numeroOrdre":192,"nature":"ENTRETIEN ET REPARATION","creancier":"BAYO GAOUSSOU","imputationFonctionnelle":"6250","chapitre":"7","somme":600000}]},
+{"numero":42,"exercice":2026,"dateEmission":"2026-04-27","totalPresent":4050000,"totalPrecedent":22657098,"totalGeneral":26707098,"sommeLignes":4050000,"totalMatch":true,"warnings":["N° 193-198 deduits"],"mandats":[
+{"numeroOrdre":193,"nature":"ENTRETIEN ET REPARATION","creancier":"BAYO GAOUSSOU","imputationFonctionnelle":"6000","chapitre":"7","somme":1000000},
+{"numeroOrdre":194,"nature":"ENTRETIEN ET REPARATION","creancier":"BAYO GAOUSSOU","imputationFonctionnelle":"60012","chapitre":"7","somme":500000},
+{"numeroOrdre":195,"nature":"ENTRETIEN ET REPARATION","creancier":"BAYO GAOUSSOU","imputationFonctionnelle":"6002","chapitre":"7","somme":500000},
+{"numeroOrdre":196,"nature":"ENTRETIEN ET REPARATION","creancier":"BAYO GAOUSSOU","imputationFonctionnelle":"6010","chapitre":"7","somme":1050000},
+{"numeroOrdre":197,"nature":"ENTRETIEN ET REPARATION","creancier":"BAYO GAOUSSOU","imputationFonctionnelle":"6100","chapitre":"7","somme":500000},
+{"numeroOrdre":198,"nature":"ENTRETIEN ET REPARATION","creancier":"BAYO GAOUSSOU","imputationFonctionnelle":"6250","chapitre":"7","somme":500000}]},
+{"numero":43,"exercice":2026,"dateEmission":"2026-04-27","totalPresent":2950000,"totalPrecedent":26707098,"totalGeneral":29657098,"sommeLignes":2950000,"totalMatch":true,"warnings":["Creancier tronque"],"mandats":[
+{"numeroOrdre":199,"nature":"ENTRETIEN ET REPARATION","creancier":"NOUR PRESTATION ET TRAVAUX","imputationFonctionnelle":"6000","chapitre":"7","somme":100000},
+{"numeroOrdre":200,"nature":"ENTRETIEN ET REPARATION","creancier":"NOUR PRESTATION ET TRAVAUX","imputationFonctionnelle":"6010","chapitre":"7","somme":400000},
+{"numeroOrdre":201,"nature":"ENTRETIEN ET REPARATION","creancier":"NOUR PRESTATION ET TRAVAUX","imputationFonctionnelle":"6031","chapitre":"7","somme":100000},
+{"numeroOrdre":202,"nature":"ENTRETIEN ET REPARATION","creancier":"NOUR PRESTATION ET TRAVAUX","imputationFonctionnelle":"6100","chapitre":"7","somme":2350000}]},
+{"numero":44,"exercice":2026,"dateEmission":"2026-04-27","totalPresent":1450000,"totalPrecedent":29657098,"totalGeneral":31107098,"sommeLignes":1450000,"totalMatch":true,"warnings":["Creancier tronque"],"mandats":[
+{"numeroOrdre":203,"nature":"ACHAT DE FOURNITURES","creancier":"NOUR PRESTATIONS ET TRAVAUX","imputationFonctionnelle":"6000","chapitre":"5","somme":100000},
+{"numeroOrdre":204,"nature":"ACHAT DE FOURNITURES","creancier":"NOUR PRESTATIONS ET TRAVAUX","imputationFonctionnelle":"6010","chapitre":"5","somme":100000},
+{"numeroOrdre":205,"nature":"ACHAT DE FOURNITURES","creancier":"NOUR PRESTATIONS ET TRAVAUX","imputationFonctionnelle":"6031","chapitre":"5","somme":50000},
+{"numeroOrdre":206,"nature":"ACHAT DE FOURNITURES","creancier":"NOUR PRESTATIONS ET TRAVAUX","imputationFonctionnelle":"6100","chapitre":"5","somme":1200000}]},
+{"numero":45,"exercice":2026,"dateEmission":"2026-04-27","totalPresent":7658000,"totalPrecedent":31107098,"totalGeneral":38765098,"sommeLignes":7658000,"totalMatch":true,"warnings":["Natures/creanciers tronques"],"mandats":[
+{"numeroOrdre":207,"nature":"ACHAT DE FOURNITURE DE BUREAU","creancier":"ETABLISSEMENT KORO SERVICES","imputationFonctionnelle":"6000","chapitre":"5","somme":1000000},
+{"numeroOrdre":208,"nature":"ACHAT DE FOURNITURE DE BUREAU","creancier":"AFRIKSOLUTIONS","imputationFonctionnelle":"60011","chapitre":"5","somme":904000},
+{"numeroOrdre":209,"nature":"ACHAT DE FOURNITURE DE BUREAU","creancier":"AFRIKSOLUTIONS","imputationFonctionnelle":"60012","chapitre":"5","somme":904000},
+{"numeroOrdre":210,"nature":"ACHAT DE FOURNITURE DE BUREAU","creancier":"ETABLISSEMENT KORO SERVICES","imputationFonctionnelle":"6002","chapitre":"5","somme":2551000},
+{"numeroOrdre":211,"nature":"ACHAT DE FOURNITURE DE BUREAU","creancier":"ETABLISSEMENT KORO SERVICES","imputationFonctionnelle":"6010","chapitre":"5","somme":950000},
+{"numeroOrdre":212,"nature":"ACHAT DE FOURNITURE DE BUREAU","creancier":"AFRIKSOLUTIONS","imputationFonctionnelle":"6100","chapitre":"5","somme":595500},
+{"numeroOrdre":213,"nature":"ACHAT DE FOURNITURE DE BUREAU","creancier":"AFRIKSOLUTIONS","imputationFonctionnelle":"6250","chapitre":"5","somme":753500}]},
+{"numero":46,"exercice":2026,"dateEmission":"2026-04-27","totalPresent":2237000,"totalPrecedent":38765098,"totalGeneral":41002098,"sommeLignes":2237000,"totalMatch":true,"warnings":["Natures/creanciers tronques"],"mandats":[
+{"numeroOrdre":214,"nature":"ACHAT DE CONSOMMABLES","creancier":"ETABLISSEMENT KORO SERVICES","imputationFonctionnelle":"6000","chapitre":"5","somme":500000},
+{"numeroOrdre":215,"nature":"ACHAT DE CONSOMMABLES","creancier":"AFRIKSOLUTIONS","imputationFonctionnelle":"60011","chapitre":"5","somme":96000},
+{"numeroOrdre":216,"nature":"ACHAT DE CONSOMMABLES","creancier":"AFRIKSOLUTIONS","imputationFonctionnelle":"60012","chapitre":"5","somme":96000},
+{"numeroOrdre":217,"nature":"ACHAT DE CONSOMMABLES","creancier":"ETABLISSEMENT KORO SERVICES","imputationFonctionnelle":"6002","chapitre":"5","somme":495000},
+{"numeroOrdre":218,"nature":"ACHAT DE CONSOMMABLES","creancier":"ETABLISSEMENT KORO SERVICES","imputationFonctionnelle":"6010","chapitre":"5","somme":550000},
+{"numeroOrdre":219,"nature":"ACHAT DE CONSOMMABLES","creancier":"AFRIKSOLUTIONS","imputationFonctionnelle":"6100","chapitre":"5","somme":404000},
+{"numeroOrdre":220,"nature":"ACHAT DE CONSOMMABLES","creancier":"AFRIKSOLUTIONS","imputationFonctionnelle":"6250","chapitre":"5","somme":96000}]},
+{"numero":47,"exercice":2026,"dateEmission":"2026-04-27","totalPresent":1500000,"totalPrecedent":41002098,"totalGeneral":42502098,"sommeLignes":1500000,"totalMatch":true,"warnings":["Nature tronquee"],"mandats":[
+{"numeroOrdre":221,"nature":"NETTOYAGE DES ESPACES","creancier":"GNABA DEGNY","imputationFonctionnelle":"6100","chapitre":"7","somme":1500000}]},
+{"numero":48,"exercice":2026,"dateEmission":"2026-04-27","totalPresent":5550000,"totalPrecedent":42502098,"totalGeneral":48052098,"sommeLignes":5550000,"totalMatch":true,"warnings":["Nature tronquee"],"mandats":[
+{"numeroOrdre":222,"nature":"ACHAT DE RECHARGES","creancier":"ORANGE-CI","imputationFonctionnelle":"6000","chapitre":"6","somme":500000},
+{"numeroOrdre":223,"nature":"ACHAT DE RECHARGES","creancier":"ORANGE-CI","imputationFonctionnelle":"6000","chapitre":"6","somme":500000},
+{"numeroOrdre":224,"nature":"ACHAT DE RECHARGES","creancier":"ORANGE-CI","imputationFonctionnelle":"6000","chapitre":"6","somme":500000},
+{"numeroOrdre":225,"nature":"ACHAT DE RECHARGES","creancier":"ORANGE-CI","imputationFonctionnelle":"60011","chapitre":"6","somme":1200000},
+{"numeroOrdre":226,"nature":"ACHAT DE RECHARGES","creancier":"ORANGE-CI","imputationFonctionnelle":"60012","chapitre":"6","somme":1000000},
+{"numeroOrdre":227,"nature":"ACHAT DE RECHARGES","creancier":"ORANGE-CI","imputationFonctionnelle":"6002","chapitre":"6","somme":50000},
+{"numeroOrdre":228,"nature":"ACHAT DE RECHARGES","creancier":"ORANGE-CI","imputationFonctionnelle":"6010","chapitre":"6","somme":700000},
+{"numeroOrdre":229,"nature":"ACHAT DE RECHARGES","creancier":"ORANGE-CI","imputationFonctionnelle":"6020","chapitre":"6","somme":400000},
+{"numeroOrdre":230,"nature":"ACHAT DE RECHARGES","creancier":"ORANGE-CI","imputationFonctionnelle":"6100","chapitre":"6","somme":500000},
+{"numeroOrdre":231,"nature":"ACHAT DE RECHARGES","creancier":"ORANGE-CI","imputationFonctionnelle":"6250","chapitre":"6","somme":200000}]},
+{"numero":49,"exercice":2026,"dateEmission":"2026-04-27","totalPresent":5500000,"totalPrecedent":48052098,"totalGeneral":53552098,"sommeLignes":5500000,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":232,"nature":"ACHAT DE VIVRES","creancier":"GNABA DEGNY","imputationFonctionnelle":"6223","chapitre":"5","somme":1850000},
+{"numeroOrdre":233,"nature":"ACHAT DE VIVRES","creancier":"GNABA DEGNY","imputationFonctionnelle":"6224","chapitre":"5","somme":1850000},
+{"numeroOrdre":234,"nature":"ACHAT DE VIVRES","creancier":"GNABA DEGNY","imputationFonctionnelle":"6225","chapitre":"5","somme":1800000}]},
+{"numero":50,"exercice":2026,"dateEmission":"2026-04-27","totalPresent":200000,"totalPrecedent":53552098,"totalGeneral":53752098,"sommeLignes":200000,"totalMatch":true,"warnings":["Creancier tronque"],"mandats":[
+{"numeroOrdre":235,"nature":"ACHATS DE FOURNITURES","creancier":"ASSOUMOU MOUNOU BONIFACE","imputationFonctionnelle":"6020","chapitre":"5","somme":200000}]},
+{"numero":51,"exercice":2026,"dateEmission":"2026-04-27","totalPresent":250000,"totalPrecedent":53752098,"totalGeneral":54002098,"sommeLignes":250000,"totalMatch":true,"warnings":["Creancier tronque"],"mandats":[
+{"numeroOrdre":236,"nature":"ENTRETIEN ET REPARATION","creancier":"ASSOUMOU MOUNOU BONIFACE","imputationFonctionnelle":"6020","chapitre":"7","somme":250000}]},
+{"numero":52,"exercice":2026,"dateEmission":"2026-04-27","totalPresent":500000,"totalPrecedent":54002098,"totalGeneral":54502098,"sommeLignes":500000,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":237,"nature":"MISSION N°005-2026","creancier":"KOUAKOU ASSIEDOU J.J","imputationFonctionnelle":"6000","chapitre":"3","somme":200000},
+{"numeroOrdre":238,"nature":"MISSION N°004-2026","creancier":"TAHE OUELLE OSWALD","imputationFonctionnelle":"6010","chapitre":"3","somme":150000},
+{"numeroOrdre":239,"nature":"MISSION N°006-2026","creancier":"YAO ROCK GHISLAIN","imputationFonctionnelle":"6100","chapitre":"3","somme":150000}]},
+{"numero":53,"exercice":2026,"dateEmission":"2026-05-05","totalPresent":1185583,"totalPrecedent":54502098,"totalGeneral":55687681,"sommeLignes":1185583,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":240,"nature":"indem. p/defaut veh.","creancier":"KOUAKOU ASSIEDOU J.J","imputationFonctionnelle":"6000","chapitre":"1","somme":80000},
+{"numeroOrdre":241,"nature":"salaire de mai 2026","creancier":"KOUAKOU AYA E.","imputationFonctionnelle":"60012","chapitre":"1","somme":214327},
+{"numeroOrdre":242,"nature":"indemnite de fonction","creancier":"OUATTARA BAKARY","imputationFonctionnelle":"60013","chapitre":"1","somme":331124},
+{"numeroOrdre":243,"nature":"indemnite de fonction","creancier":"GOSSE HENRI SERGE E.","imputationFonctionnelle":"60013","chapitre":"1","somme":55187},
+{"numeroOrdre":244,"nature":"indemnite de fonction","creancier":"DIGBEU GBAHI H.","imputationFonctionnelle":"60013","chapitre":"1","somme":55187},
+{"numeroOrdre":245,"nature":"indemnite de fonction","creancier":"KAMA KOUAME AIME","imputationFonctionnelle":"60013","chapitre":"1","somme":55187},
+{"numeroOrdre":246,"nature":"indemnite de fonction","creancier":"GBO YODE PIERRE","imputationFonctionnelle":"60013","chapitre":"1","somme":55187},
+{"numeroOrdre":247,"nature":"salaire de mai 2026","creancier":"NEME GUSTAVE LAURD","imputationFonctionnelle":"6002","chapitre":"1","somme":108477},
+{"numeroOrdre":248,"nature":"salaire de mai 2026","creancier":"GUE KOUITY","imputationFonctionnelle":"6010","chapitre":"1","somme":106514},
+{"numeroOrdre":249,"nature":"salaire de mai 2026","creancier":"YVON WILFRIED T.","imputationFonctionnelle":"6010","chapitre":"1","somme":124393}]},
+{"numero":54,"exercice":2026,"dateEmission":"2026-05-05","totalPresent":878906,"totalPrecedent":55687681,"totalGeneral":56566587,"sommeLignes":878906,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":250,"nature":"salaire de mai 2026","creancier":"SIBO GNAMPA O.","imputationFonctionnelle":"6010","chapitre":"1","somme":137717},
+{"numeroOrdre":251,"nature":"indemnite de fonction","creancier":"MOBIE BOKA WILFRIED","imputationFonctionnelle":"6020","chapitre":"1","somme":75000},
+{"numeroOrdre":252,"nature":"salaire de mai 2026","creancier":"KIPRE GOGOUA J.","imputationFonctionnelle":"6031","chapitre":"1","somme":108477},
+{"numeroOrdre":253,"nature":"salaire de mai 2026","creancier":"YOH AGUY ROLAND D","imputationFonctionnelle":"6031","chapitre":"1","somme":106514},
+{"numeroOrdre":254,"nature":"salaire de mai 2026","creancier":"DRUID KIPRE FLORENT","imputationFonctionnelle":"6100","chapitre":"1","somme":103759},
+{"numeroOrdre":255,"nature":"salaire de mai 2026","creancier":"DIGBEU JEAN CLAUDE","imputationFonctionnelle":"6100","chapitre":"1","somme":107439},
+{"numeroOrdre":256,"nature":"salaire de mai 2026","creancier":"YOLOU BOUAZO A","imputationFonctionnelle":"6100","chapitre":"1","somme":60000},
+{"numeroOrdre":257,"nature":"salaire de mai 2026","creancier":"DEPIE GOKOU ISAAC","imputationFonctionnelle":"6100","chapitre":"1","somme":60000},
+{"numeroOrdre":258,"nature":"salaire de mai 2026","creancier":"KOUASSI N'GORAN P","imputationFonctionnelle":"6100","chapitre":"1","somme":60000},
+{"numeroOrdre":259,"nature":"salaire de mai 2026","creancier":"DEGNAN DEGOUEKOU","imputationFonctionnelle":"6100","chapitre":"1","somme":60000}]},
+{"numero":55,"exercice":2026,"dateEmission":"2026-05-05","totalPresent":805065,"totalPrecedent":56566587,"totalGeneral":57371652,"sommeLignes":805065,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":260,"nature":"salaire de mai 2026","creancier":"KORE IRENE JOSIANE","imputationFonctionnelle":"6000","chapitre":"1","somme":173016},
+{"numeroOrdre":261,"nature":"salaire de mai 2026","creancier":"KONAN AYA AGNES","imputationFonctionnelle":"6002","chapitre":"1","somme":109033},
+{"numeroOrdre":262,"nature":"salaire de mai 2026","creancier":"GBLA TAPE MARTIN","imputationFonctionnelle":"6010","chapitre":"1","somme":163016},
+{"numeroOrdre":263,"nature":"salaire de mai 2026","creancier":"GUINA DOGORE ISA","imputationFonctionnelle":"6100","chapitre":"1","somme":60000},
+{"numeroOrdre":264,"nature":"salaire de mai 2026","creancier":"KOUASSI BADJE CONS","imputationFonctionnelle":"6100","chapitre":"1","somme":60000},
+{"numeroOrdre":265,"nature":"salaire de mai 2026","creancier":"LAGO DALEBA GUY EL","imputationFonctionnelle":"6100","chapitre":"1","somme":60000},
+{"numeroOrdre":266,"nature":"salaire de mai 2026","creancier":"COULIBALY NANORO","imputationFonctionnelle":"6100","chapitre":"1","somme":60000},
+{"numeroOrdre":267,"nature":"salaire de mai 2026","creancier":"CISSE MEHOUA","imputationFonctionnelle":"6100","chapitre":"1","somme":60000},
+{"numeroOrdre":268,"nature":"salaire de mai 2026","creancier":"TAGRO NADRO ANNICK","imputationFonctionnelle":"6100","chapitre":"1","somme":60000}]},
+{"numero":56,"exercice":2026,"dateEmission":"2026-05-05","totalPresent":116205,"totalPrecedent":57371652,"totalGeneral":57487857,"sommeLignes":116205,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":269,"nature":"salaire de mai 2026","creancier":"KOUASSI KOUASSI SER","imputationFonctionnelle":"6010","chapitre":"1","somme":116205}]},
+{"numero":57,"exercice":2026,"dateEmission":"2026-05-05","totalPresent":93025,"totalPrecedent":57487857,"totalGeneral":57580882,"sommeLignes":93025,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":270,"nature":"CHARGES SALARIALES","creancier":"C.N.P.S","imputationFonctionnelle":"6000","chapitre":"1","somme":9679},
+{"numeroOrdre":271,"nature":"CHARGES SALARIALES","creancier":"C.N.P.S","imputationFonctionnelle":"60012","chapitre":"1","somme":11839},
+{"numeroOrdre":272,"nature":"CHARGES SALARIALES","creancier":"C.N.P.S","imputationFonctionnelle":"6002","chapitre":"1","somme":11869},
+{"numeroOrdre":273,"nature":"CHARGES SALARIALES","creancier":"C.N.P.S","imputationFonctionnelle":"6010","chapitre":"1","somme":36509},
+{"numeroOrdre":274,"nature":"CHARGES SALARIALES","creancier":"C.N.P.S","imputationFonctionnelle":"6031","chapitre":"1","somme":11695},
+{"numeroOrdre":275,"nature":"CHARGES SALARIALES","creancier":"C.N.P.S","imputationFonctionnelle":"6100","chapitre":"1","somme":11434}]},
+{"numero":58,"exercice":2026,"dateEmission":"2026-05-05","totalPresent":25688,"totalPrecedent":57580882,"totalGeneral":57606570,"sommeLignes":25688,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":276,"nature":"IMPOTS SUR SALAIRES","creancier":"DGI","imputationFonctionnelle":"6000","chapitre":"1","somme":2937},
+{"numeroOrdre":277,"nature":"IMPOTS SUR SALAIRES","creancier":"DGI","imputationFonctionnelle":"60012","chapitre":"1","somme":3760},
+{"numeroOrdre":278,"nature":"IMPOTS SUR SALAIRES","creancier":"DGI","imputationFonctionnelle":"6002","chapitre":"1","somme":3022},
+{"numeroOrdre":279,"nature":"IMPOTS SUR SALAIRES","creancier":"DGI","imputationFonctionnelle":"6010","chapitre":"1","somme":10158},
+{"numeroOrdre":280,"nature":"IMPOTS SUR SALAIRES","creancier":"DGI","imputationFonctionnelle":"6031","chapitre":"1","somme":2955},
+{"numeroOrdre":281,"nature":"IMPOTS SUR SALAIRES","creancier":"DGI","imputationFonctionnelle":"6100","chapitre":"1","somme":2856}]},
+{"numero":59,"exercice":2026,"dateEmission":"2026-05-19","totalPresent":15000000,"totalPrecedent":57606570,"totalGeneral":72606570,"sommeLignes":15000000,"totalMatch":true,"warnings":["Investissement: Fonctionnelle=900, Patrimoniale=2231; chapitre null"],"mandats":[
+{"numeroOrdre":282,"nature":"TRAVAUX DE REHABILITATION","creancier":"GROUPE DES LEADERS","imputationFonctionnelle":"900","chapitre":null,"somme":15000000}]},
+{"numero":60,"exercice":2026,"dateEmission":"2026-05-19","totalPresent":18945000,"totalPrecedent":72606570,"totalGeneral":91551570,"sommeLignes":18945000,"totalMatch":true,"warnings":["Investissement: Fonctionnelle=9236, Patrimoniale=2219; chapitre null"],"mandats":[
+{"numeroOrdre":283,"nature":"CONSTRUCTION DE LA CANTINE","creancier":"ENTREPRISE KARNAN BATIMENT","imputationFonctionnelle":"9236","chapitre":null,"somme":18945000}]},
+{"numero":61,"exercice":2026,"dateEmission":"2026-05-19","totalPresent":1480000,"totalPrecedent":91551570,"totalGeneral":93031570,"sommeLignes":1480000,"totalMatch":true,"warnings":["Investissement: Fonctionnelle=900, Patrimoniale=2262; chapitre null"],"mandats":[
+{"numeroOrdre":284,"nature":"ACQUISITION D'UN ORDINATEUR","creancier":"CHEICKNA CONSTRUCTION","imputationFonctionnelle":"900","chapitre":null,"somme":1480000}]},
+{"numero":62,"exercice":2026,"dateEmission":"2026-05-19","totalPresent":27328000,"totalPrecedent":93031570,"totalGeneral":120359570,"sommeLignes":27328000,"totalMatch":true,"warnings":["Investissement: Fonctionnelle=9100, Patrimoniale=2211; chapitre null"],"mandats":[
+{"numeroOrdre":285,"nature":"TRAVAUX DE REHABILITATION","creancier":"CHEICKNA CONSTRUCTION","imputationFonctionnelle":"9100","chapitre":null,"somme":27328000}]},
+{"numero":63,"exercice":2026,"dateEmission":"2026-05-28","totalPresent":29795520,"totalPrecedent":120359570,"totalGeneral":150155090,"sommeLignes":29795520,"totalMatch":true,"warnings":["Investissement: Fonctionnelle=900, Patrimoniale=2219; chapitre null"],"mandats":[
+{"numeroOrdre":286,"nature":"TRAVAUX DE CONSTRUCTION","creancier":"AMETODOU KOUASSI","imputationFonctionnelle":"900","chapitre":null,"somme":29795520}]},
+{"numero":64,"exercice":2026,"dateEmission":"2026-06-05","totalPresent":1188337,"totalPrecedent":150155090,"totalGeneral":151343427,"sommeLignes":1188337,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":287,"nature":"indem. p/defaut veh.","creancier":"KOUAKOU ASSIEDOU J.J","imputationFonctionnelle":"6000","chapitre":"1","somme":80000},
+{"numeroOrdre":288,"nature":"salaire juin 2026","creancier":"KOUAKOU AYA E.","imputationFonctionnelle":"60012","chapitre":"1","somme":215833},
+{"numeroOrdre":289,"nature":"indemnite de fonction","creancier":"OUATTARA BAKARY","imputationFonctionnelle":"60013","chapitre":"1","somme":331124},
+{"numeroOrdre":290,"nature":"indemnite de fonction","creancier":"GOSSE HENRI SERGE E.","imputationFonctionnelle":"60013","chapitre":"1","somme":55187},
+{"numeroOrdre":291,"nature":"indemnite de fonction","creancier":"DIGBEU GBAHI H.","imputationFonctionnelle":"60013","chapitre":"1","somme":55187},
+{"numeroOrdre":292,"nature":"indemnite de fonction","creancier":"KAMA KOUAME AIME","imputationFonctionnelle":"60013","chapitre":"1","somme":55187},
+{"numeroOrdre":293,"nature":"indemnite de fonction","creancier":"GBO YODE PIERRE","imputationFonctionnelle":"60013","chapitre":"1","somme":55187},
+{"numeroOrdre":294,"nature":"salaire juin 2026","creancier":"NEME GUSTAVE LAURD","imputationFonctionnelle":"6002","chapitre":"1","somme":108854},
+{"numeroOrdre":295,"nature":"salaire juin 2026","creancier":"GUE KOUITY","imputationFonctionnelle":"6010","chapitre":"1","somme":106865},
+{"numeroOrdre":296,"nature":"salaire juin 2026","creancier":"YVON WILFRIED T.","imputationFonctionnelle":"6010","chapitre":"1","somme":124913}]},
+{"numero":65,"exercice":2026,"dateEmission":"2026-06-05","totalPresent":881072,"totalPrecedent":151343427,"totalGeneral":152224499,"sommeLignes":881072,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":297,"nature":"salaire juin 2026","creancier":"SIBO GNAMPA O.","imputationFonctionnelle":"6010","chapitre":"1","somme":138478},
+{"numeroOrdre":298,"nature":"indemnite de fonction","creancier":"DAGROU DIEGA PHILIPE","imputationFonctionnelle":"6020","chapitre":"1","somme":75000},
+{"numeroOrdre":299,"nature":"salaire juin 2026","creancier":"KIPRE GOGOUA J.","imputationFonctionnelle":"6031","chapitre":"1","somme":108854},
+{"numeroOrdre":300,"nature":"salaire juin 2026","creancier":"YOH AGUY ROLAND D","imputationFonctionnelle":"6031","chapitre":"1","somme":106865},
+{"numeroOrdre":301,"nature":"salaire juin 2026","creancier":"DIGBEU JEAN CLAUDE","imputationFonctionnelle":"6100","chapitre":"1","somme":107802},
+{"numeroOrdre":302,"nature":"salaire juin 2026","creancier":"DRUID KIPRE FLORENT","imputationFonctionnelle":"6100","chapitre":"1","somme":104073},
+{"numeroOrdre":303,"nature":"salaire juin 2026","creancier":"YOLOU BOUAZO A","imputationFonctionnelle":"6100","chapitre":"1","somme":60000},
+{"numeroOrdre":304,"nature":"salaire juin 2026","creancier":"DEPIE GOKOU ISAAC","imputationFonctionnelle":"6100","chapitre":"1","somme":60000},
+{"numeroOrdre":305,"nature":"salaire juin 2026","creancier":"KOUASSI N'GORAN P","imputationFonctionnelle":"6100","chapitre":"1","somme":60000},
+{"numeroOrdre":306,"nature":"salaire juin 2026","creancier":"DEGNAN DEGOUEKO","imputationFonctionnelle":"6100","chapitre":"1","somme":60000}]},
+{"numero":66,"exercice":2026,"dateEmission":"2026-06-05","totalPresent":807635,"totalPrecedent":152224499,"totalGeneral":153032134,"sommeLignes":807635,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":307,"nature":"salaire juin 2026","creancier":"KORE IRENE JOSIANE","imputationFonctionnelle":"6000","chapitre":"1","somme":174109},
+{"numeroOrdre":308,"nature":"salaire juin 2026","creancier":"KONAN AYA AGNES","imputationFonctionnelle":"6002","chapitre":"1","somme":109417},
+{"numeroOrdre":309,"nature":"salaire juin 2026","creancier":"GBLA TAPE MARTIN","imputationFonctionnelle":"6010","chapitre":"1","somme":164109},
+{"numeroOrdre":310,"nature":"salaire juin 2026","creancier":"GUINA DOGORE ISA","imputationFonctionnelle":"6100","chapitre":"1","somme":60000},
+{"numeroOrdre":311,"nature":"salaire juin 2026","creancier":"KOUASSI BADJE CONS","imputationFonctionnelle":"6100","chapitre":"1","somme":60000},
+{"numeroOrdre":312,"nature":"salaire juin 2026","creancier":"LAGO DALEBA GUY E","imputationFonctionnelle":"6100","chapitre":"1","somme":60000},
+{"numeroOrdre":313,"nature":"salaire juin 2026","creancier":"COULIBALY NANORO","imputationFonctionnelle":"6100","chapitre":"1","somme":60000},
+{"numeroOrdre":314,"nature":"salaire juin 2026","creancier":"CISSE MEHOUA","imputationFonctionnelle":"6100","chapitre":"1","somme":60000},
+{"numeroOrdre":315,"nature":"salaire juin 2026","creancier":"TAGRO NADRO ANNICK","imputationFonctionnelle":"6100","chapitre":"1","somme":60000}]},
+{"numero":67,"exercice":2026,"dateEmission":"2026-06-05","totalPresent":93026,"totalPrecedent":153032134,"totalGeneral":153125160,"sommeLignes":93026,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":316,"nature":"CHARGES SALARIALES","creancier":"C.N.P.S","imputationFonctionnelle":"6000","chapitre":"1","somme":9679},
+{"numeroOrdre":317,"nature":"CHARGES SALARIALES","creancier":"C.N.P.S","imputationFonctionnelle":"60012","chapitre":"1","somme":11839},
+{"numeroOrdre":318,"nature":"CHARGES SALARIALES","creancier":"C.N.P.S","imputationFonctionnelle":"6002","chapitre":"1","somme":11869},
+{"numeroOrdre":319,"nature":"CHARGES SALARIALES","creancier":"C.N.P.S","imputationFonctionnelle":"6010","chapitre":"1","somme":36510},
+{"numeroOrdre":320,"nature":"CHARGES SALARIALES","creancier":"C.N.P.S","imputationFonctionnelle":"6031","chapitre":"1","somme":11695},
+{"numeroOrdre":321,"nature":"CHARGES SALARIALES","creancier":"C.N.P.S","imputationFonctionnelle":"6100","chapitre":"1","somme":11434}]},
+{"numero":68,"exercice":2026,"dateEmission":"2026-06-05","totalPresent":17720,"totalPrecedent":153125160,"totalGeneral":153142880,"sommeLignes":17720,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":322,"nature":"IMPOTS SUR SALAIRES","creancier":"DGI","imputationFonctionnelle":"6000","chapitre":"1","somme":1844},
+{"numeroOrdre":323,"nature":"IMPOTS SUR SALAIRES","creancier":"DGI","imputationFonctionnelle":"60012","chapitre":"1","somme":2255},
+{"numeroOrdre":324,"nature":"IMPOTS SUR SALAIRES","creancier":"DGI","imputationFonctionnelle":"6002","chapitre":"1","somme":2261},
+{"numeroOrdre":325,"nature":"IMPOTS SUR SALAIRES","creancier":"DGI","imputationFonctionnelle":"6010","chapitre":"1","somme":6954},
+{"numeroOrdre":326,"nature":"IMPOTS SUR SALAIRES","creancier":"DGI","imputationFonctionnelle":"6031","chapitre":"1","somme":2228},
+{"numeroOrdre":327,"nature":"IMPOTS SUR SALAIRES","creancier":"DGI","imputationFonctionnelle":"6100","chapitre":"1","somme":2178}]},
+{"numero":69,"exercice":2026,"dateEmission":"2026-06-05","totalPresent":116683,"totalPrecedent":153142880,"totalGeneral":153259563,"sommeLignes":116683,"totalMatch":true,"warnings":["Nature indique avril sur folio de juin"],"mandats":[
+{"numeroOrdre":328,"nature":"salaire juin 2026","creancier":"KOUASSI KOUASSI SER","imputationFonctionnelle":"6010","chapitre":"1","somme":116683}]},
+{"numero":70,"exercice":2026,"dateEmission":"2026-06-18","totalPresent":500000,"totalPrecedent":153259563,"totalGeneral":153759563,"sommeLignes":500000,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":329,"nature":"MISSION N°009-2026","creancier":"KOUAKOU ASSIEDOU","imputationFonctionnelle":"6000","chapitre":"3","somme":200000},
+{"numeroOrdre":330,"nature":"MISSION N°007-2026","creancier":"TAHE OUELLE OSWALD","imputationFonctionnelle":"6010","chapitre":"3","somme":150000},
+{"numeroOrdre":331,"nature":"MISSION N°008-2026","creancier":"YAO ROCK GHISLAIN","imputationFonctionnelle":"6100","chapitre":"3","somme":150000}]},
+{"numero":71,"exercice":2026,"dateEmission":"2026-06-05","totalPresent":567785,"totalPrecedent":153759563,"totalGeneral":154327348,"sommeLignes":567785,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":332,"nature":"COTISAT PATRONALE","creancier":"C.N.P.S","imputationFonctionnelle":"6000","chapitre":"2","somme":52926},
+{"numeroOrdre":333,"nature":"COTISAT PATRONALE","creancier":"C.N.P.S","imputationFonctionnelle":"60012","chapitre":"2","somme":60850},
+{"numeroOrdre":334,"nature":"COTISAT PATRONALE","creancier":"C.N.P.S","imputationFonctionnelle":"6002","chapitre":"2","somme":78396},
+{"numeroOrdre":335,"nature":"COTISAT PATRONALE","creancier":"C.N.P.S","imputationFonctionnelle":"6010","chapitre":"2","somme":221055},
+{"numeroOrdre":336,"nature":"COTISAT PATRONALE","creancier":"C.N.P.S","imputationFonctionnelle":"6031","chapitre":"2","somme":77760},
+{"numeroOrdre":337,"nature":"COTISAT PATRONALE","creancier":"C.N.P.S","imputationFonctionnelle":"6100","chapitre":"2","somme":76798}]},
+{"numero":72,"exercice":2026,"dateEmission":"2026-06-22","totalPresent":363500,"totalPrecedent":154327348,"totalGeneral":154690848,"sommeLignes":363500,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":338,"nature":"CONSOMMATION D'ELECTRICITE DE LA MAIRIE DE GBOGUHE","creancier":"CIE","imputationFonctionnelle":"6000","chapitre":"6","somme":271730},
+{"numeroOrdre":339,"nature":"CONSOMMATION D'ELECTRICITE DE L'AUBERGE","creancier":"CIE","imputationFonctionnelle":"6000","chapitre":"6","somme":91770}]},
+{"numero":73,"exercice":2026,"dateEmission":"2026-06-22","totalPresent":1000000,"totalPrecedent":154690848,"totalGeneral":155690848,"sommeLignes":1000000,"totalMatch":true,"warnings":[],"mandats":[
+{"numeroOrdre":340,"nature":"ACHAT DE FOURNITURES","creancier":"SJK ENTREPRISE","imputationFonctionnelle":"6020","chapitre":"5","somme":1000000}]},
+{"numero":74,"exercice":2026,"dateEmission":"2026-06-22","totalPresent":1998000,"totalPrecedent":155690848,"totalGeneral":157688848,"sommeLignes":1998000,"totalMatch":true,"warnings":["Nature/creancier tronques"],"mandats":[
+{"numeroOrdre":341,"nature":"ORGANISATION D'UNE SESSION","creancier":"YOPAYOU KORIO GLAD","imputationFonctionnelle":"6246","chapitre":"7","somme":1998000}]},
+{"numero":80,"exercice":2026,"dateEmission":"2026-06-27","totalPresent":240000,"totalPrecedent":166271313,"totalGeneral":166511313,"sommeLignes":240000,"totalMatch":true,"warnings":["Folios 75-79 absents du PDF; total precedent en rupture (coherent avec folios manquants); saut N ordre 341->349"],"mandats":[
+{"numeroOrdre":349,"nature":"PAIEMENT DE LA PRIME DE SESSION","creancier":"DIVERS CONSEILLERS","imputationFonctionnelle":"60010","chapitre":"1","somme":240000}]}
+]}

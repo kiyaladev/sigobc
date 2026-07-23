@@ -154,6 +154,8 @@ export interface Mandat {
   typeBien?: 'immobilier' | 'mobilier' | 'incorporel'; // Type de bien
   projetId?: number; // Lien vers un projet (investissement)
   personnelId: number; // Agent qui a créé le mandat
+  sourceDocumentHash?: string; // SHA-256 du PDF source (import)
+  sourceImportKey?: string; // Clé d'idempotence: hash:folio:numeroOrdre
   createdAt: Date;
   updatedAt: Date;
 }
@@ -188,6 +190,7 @@ export interface BordereauRecette {
   statut: 'ouvert' | 'ferme';
   observations?: string;
   personnelId?: number;
+  sourceDocumentHash?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -214,6 +217,8 @@ export interface Declaration {
   statut: 'brouillon' | 'validee' | 'annulee';
   observations?: string;
   personnelId?: number;
+  sourceDocumentHash?: string;
+  sourceImportKey?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }

@@ -1,0 +1,965 @@
+{
+  "fichier": "RECETTES-CamScanner 13-07-2026 13.43.pdf",
+  "type": "BORDEREAU DES RECOUVREMENTS AVANT EMISSION DES ORDRES (CT53)",
+  "commune": "GBOGUHE",
+  "code": "491",
+  "exercice": 2026,
+  "bordereaux": [
+    {
+      "numero": 1,
+      "totalPresent": 1310250,
+      "totalGeneralPrecedent": 0,
+      "totalGeneralPresent": 1310250,
+      "sommeLignes": 1310250,
+      "totalMatch": true,
+      "warnings": [],
+      "dateEncaissement": "2026-01-20",
+      "lignes": [
+        {
+          "numeroDecompte": 1,
+          "taxeCode": "70262",
+          "montant": 35000,
+          "dateEncaissement": "2026-01-07",
+          "nature": "Taxes forfaitaires des petits commerçants et artisans",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 2,
+          "taxeCode": "70262",
+          "montant": 18000,
+          "dateEncaissement": "2026-01-07",
+          "nature": "Taxes forfaitaires des petits commerçants et artisans",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 3,
+          "taxeCode": "70262",
+          "montant": 251500,
+          "dateEncaissement": "2026-01-07",
+          "nature": "Taxes forfaitaires des petits commerçants et artisans",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 4,
+          "taxeCode": "7030",
+          "montant": 240000,
+          "dateEncaissement": "2026-01-07",
+          "nature": "Taxes sur les pompes distributrices de carburants",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 5,
+          "taxeCode": "7042",
+          "montant": 75750,
+          "dateEncaissement": "2026-01-07",
+          "nature": "Taxe sur la publicité",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 6,
+          "taxeCode": "71126",
+          "montant": 45000,
+          "dateEncaissement": "2026-01-07",
+          "nature": "Autres recettes de prestations et services au titre de l'urbanisme et de l'environnement",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 7,
+          "taxeCode": "71001",
+          "montant": 205000,
+          "dateEncaissement": "2026-01-08",
+          "nature": "Délivrance de livrets de famille et autres documents",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 8,
+          "taxeCode": "70262",
+          "montant": 40000,
+          "dateEncaissement": "2026-01-20",
+          "nature": "Taxes forfaitaires des petits commerçants et artisans",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 9,
+          "taxeCode": "71001",
+          "montant": 400000,
+          "dateEncaissement": "2026-01-20",
+          "nature": "Délivrance de livrets de famille et autres documents",
+          "nom": "LE REGISSEUR DE RECETTES"
+        }
+      ]
+    },
+    {
+      "numero": 2,
+      "totalPresent": 1042700,
+      "totalGeneralPrecedent": 1310250,
+      "totalGeneralPresent": 2352950,
+      "sommeLignes": 1042700,
+      "totalMatch": true,
+      "warnings": [],
+      "dateEncaissement": "2026-01-23",
+      "lignes": [
+        {
+          "numeroDecompte": 10,
+          "taxeCode": "70262",
+          "montant": 459500,
+          "dateEncaissement": "2026-01-23",
+          "nature": "Taxes forfaitaires des petits commerçants et artisans",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 11,
+          "taxeCode": "70262",
+          "montant": 9800,
+          "dateEncaissement": "2026-01-23",
+          "nature": "Taxes forfaitaires des petits commerçants et artisans",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 12,
+          "taxeCode": "71001",
+          "montant": 400000,
+          "dateEncaissement": "2026-01-23",
+          "nature": "Délivrance de livrets de famille et autres documents",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 13,
+          "taxeCode": "71126",
+          "montant": 30000,
+          "dateEncaissement": "2026-01-23",
+          "nature": "Autres recettes de prestations et services au titre de l'urbanisme et de l'environnement",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 14,
+          "taxeCode": "71250",
+          "montant": 5000,
+          "dateEncaissement": "2026-01-23",
+          "nature": "Administration des activités culturelles",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 15,
+          "taxeCode": "71344",
+          "montant": 138400,
+          "dateEncaissement": "2026-01-23",
+          "nature": "Marchés",
+          "nom": "LE REGISSEUR DE RECETTES"
+        }
+      ]
+    },
+    {
+      "numero": 3,
+      "totalPresent": 1668200,
+      "totalGeneralPrecedent": 2352950,
+      "totalGeneralPresent": 4021150,
+      "sommeLignes": 1668200,
+      "totalMatch": true,
+      "warnings": [],
+      "dateEncaissement": "2026-02-17",
+      "lignes": [
+        {
+          "numeroDecompte": 16,
+          "taxeCode": "70262",
+          "montant": 618000,
+          "dateEncaissement": "2026-02-03",
+          "nature": "Taxes forfaitaires des petits commerçants et artisans",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 17,
+          "taxeCode": "70262",
+          "montant": 22000,
+          "dateEncaissement": "2026-02-03",
+          "nature": "Taxes forfaitaires des petits commerçants et artisans",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 18,
+          "taxeCode": "71001",
+          "montant": 218000,
+          "dateEncaissement": "2026-02-03",
+          "nature": "Délivrance de livrets de famille et autres documents",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 19,
+          "taxeCode": "71344",
+          "montant": 32000,
+          "dateEncaissement": "2026-02-03",
+          "nature": "Marchés",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 20,
+          "taxeCode": "71001",
+          "montant": 500000,
+          "dateEncaissement": "2026-02-11",
+          "nature": "Délivrance de livrets de famille et autres documents",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 21,
+          "taxeCode": "71001",
+          "montant": 240000,
+          "dateEncaissement": "2026-02-17",
+          "nature": "Délivrance de livrets de famille et autres documents",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 22,
+          "taxeCode": "71344",
+          "montant": 38200,
+          "dateEncaissement": "2026-02-17",
+          "nature": "Marchés",
+          "nom": "LE REGISSEUR DE RECETTES"
+        }
+      ]
+    },
+    {
+      "numero": 4,
+      "totalPresent": 1935600,
+      "totalGeneralPrecedent": 4021150,
+      "totalGeneralPresent": 5956750,
+      "sommeLignes": 1935600,
+      "totalMatch": true,
+      "warnings": [],
+      "dateEncaissement": "2026-03-24",
+      "lignes": [
+        {
+          "numeroDecompte": 23,
+          "taxeCode": "70262",
+          "montant": 189000,
+          "dateEncaissement": "2026-03-03",
+          "nature": "Taxes forfaitaires des petits commerçants et artisans",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 24,
+          "taxeCode": "70262",
+          "montant": 50000,
+          "dateEncaissement": "2026-03-03",
+          "nature": "Taxes forfaitaires des petits commerçants et artisans",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 25,
+          "taxeCode": "71001",
+          "montant": 125000,
+          "dateEncaissement": "2026-03-03",
+          "nature": "Délivrance de livrets de famille et autres documents",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 26,
+          "taxeCode": "71001",
+          "montant": 276500,
+          "dateEncaissement": "2026-03-03",
+          "nature": "Délivrance de livrets de famille et autres documents",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 27,
+          "taxeCode": "71344",
+          "montant": 41500,
+          "dateEncaissement": "2026-03-03",
+          "nature": "Marchés",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 28,
+          "taxeCode": "70262",
+          "montant": 275500,
+          "dateEncaissement": "2026-03-10",
+          "nature": "Taxes forfaitaires des petits commerçants et artisans",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 29,
+          "taxeCode": "70262",
+          "montant": 32600,
+          "dateEncaissement": "2026-03-10",
+          "nature": "Taxes forfaitaires des petits commerçants et artisans",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 30,
+          "taxeCode": "71001",
+          "montant": 325500,
+          "dateEncaissement": "2026-03-10",
+          "nature": "Délivrance de livrets de famille et autres documents",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 31,
+          "taxeCode": "70262",
+          "montant": 80000,
+          "dateEncaissement": "2026-03-24",
+          "nature": "Taxes forfaitaires des petits commerçants et artisans",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 32,
+          "taxeCode": "71001",
+          "montant": 240000,
+          "dateEncaissement": "2026-03-24",
+          "nature": "Délivrance de livrets de famille et autres documents",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 33,
+          "taxeCode": "71126",
+          "montant": 300000,
+          "dateEncaissement": "2026-03-24",
+          "nature": "Autres recettes de prestations et services au titre de l'urbanisme et de l'environnement",
+          "nom": "N'GORAN KOFFI APPOLINAIRE"
+        }
+      ]
+    },
+    {
+      "numero": 5,
+      "totalPresent": 387200,
+      "totalGeneralPrecedent": 5956750,
+      "totalGeneralPresent": 6343950,
+      "sommeLignes": 387200,
+      "totalMatch": true,
+      "warnings": [],
+      "dateEncaissement": "2026-03-30",
+      "lignes": [
+        {
+          "numeroDecompte": 34,
+          "taxeCode": "70262",
+          "montant": 171500,
+          "dateEncaissement": "2026-03-30",
+          "nature": "Taxes forfaitaires des petits commerçants et artisans",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 35,
+          "taxeCode": "71001",
+          "montant": 172000,
+          "dateEncaissement": "2026-03-30",
+          "nature": "Délivrance de livrets de famille et autres documents",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 36,
+          "taxeCode": "71344",
+          "montant": 43700,
+          "dateEncaissement": "2026-03-30",
+          "nature": "Marchés",
+          "nom": "LE REGISSEUR DE RECETTES"
+        }
+      ]
+    },
+    {
+      "numero": 6,
+      "totalPresent": 97077889,
+      "totalGeneralPrecedent": 6343950,
+      "totalGeneralPresent": 103421839,
+      "sommeLignes": 97077889,
+      "totalMatch": true,
+      "warnings": [],
+      "dateEncaissement": "2026-04-03",
+      "lignes": [
+        {
+          "numeroDecompte": 37,
+          "taxeCode": "0401",
+          "montant": 97077889,
+          "dateEncaissement": "2026-04-03",
+          "nature": "Subventions d'équipement de l'État",
+          "nom": "ACCT"
+        }
+      ]
+    },
+    {
+      "numero": 7,
+      "totalPresent": 18723837,
+      "totalGeneralPrecedent": 103421839,
+      "totalGeneralPresent": 122145676,
+      "sommeLignes": 18723837,
+      "totalMatch": true,
+      "warnings": [],
+      "dateEncaissement": "2026-04-07",
+      "lignes": [
+        {
+          "numeroDecompte": 38,
+          "taxeCode": "7000",
+          "montant": 13106686,
+          "dateEncaissement": "2026-04-07",
+          "nature": "Contribution foncière des propriétés bâties",
+          "nom": "ACCT"
+        },
+        {
+          "numeroDecompte": 39,
+          "taxeCode": "7004",
+          "montant": 5617151,
+          "dateEncaissement": "2026-04-07",
+          "nature": "Contribution des patentes",
+          "nom": "ACCT"
+        }
+      ]
+    },
+    {
+      "numero": 8,
+      "totalPresent": 1080400,
+      "totalGeneralPrecedent": 122145676,
+      "totalGeneralPresent": 123226076,
+      "sommeLignes": 1080400,
+      "totalMatch": true,
+      "warnings": [],
+      "dateEncaissement": "2026-04-15",
+      "lignes": [
+        {
+          "numeroDecompte": 40,
+          "taxeCode": "70262",
+          "montant": 215000,
+          "dateEncaissement": "2026-04-08",
+          "nature": "Taxes forfaitaires des petits commerçants et artisans",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 41,
+          "taxeCode": "71001",
+          "montant": 200000,
+          "dateEncaissement": "2026-04-08",
+          "nature": "Délivrance de livrets de famille et autres documents",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 42,
+          "taxeCode": "71330",
+          "montant": 50000,
+          "dateEncaissement": "2026-04-08",
+          "nature": "Administration des transports et communications",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 43,
+          "taxeCode": "71331",
+          "montant": 50000,
+          "dateEncaissement": "2026-04-08",
+          "nature": "Transports par routes - Gares routières - Stations de taxis",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 44,
+          "taxeCode": "71344",
+          "montant": 33400,
+          "dateEncaissement": "2026-04-08",
+          "nature": "Marchés",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 45,
+          "taxeCode": "7026",
+          "montant": 220000,
+          "dateEncaissement": "2026-04-15",
+          "nature": "Taxes forfaitaires des petits commerçants et artisans",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 46,
+          "taxeCode": "71001",
+          "montant": 269500,
+          "dateEncaissement": "2026-04-15",
+          "nature": "Délivrance de livrets de famille et autres documents",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 47,
+          "taxeCode": "71344",
+          "montant": 42500,
+          "dateEncaissement": "2026-04-15",
+          "nature": "Marchés",
+          "nom": "LE REGISSEUR DE RECETTES"
+        }
+      ]
+    },
+    {
+      "numero": 9,
+      "totalPresent": 575200,
+      "totalGeneralPrecedent": 123226076,
+      "totalGeneralPresent": 123801276,
+      "sommeLignes": 575200,
+      "totalMatch": true,
+      "warnings": [],
+      "dateEncaissement": "2026-04-24",
+      "lignes": [
+        {
+          "numeroDecompte": 48,
+          "taxeCode": "71126",
+          "montant": 200000,
+          "dateEncaissement": "2026-04-21",
+          "nature": "Autres recettes de prestations et services au titre de l'urbanisme et de l'environnement",
+          "nom": "N'GORAN KOFFI APPOLINAIRE"
+        },
+        {
+          "numeroDecompte": 49,
+          "taxeCode": "7026",
+          "montant": 10500,
+          "dateEncaissement": "2026-04-24",
+          "nature": "Taxes forfaitaires des petits commerçants et artisans",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 50,
+          "taxeCode": "7026",
+          "montant": 123500,
+          "dateEncaissement": "2026-04-24",
+          "nature": "Taxes forfaitaires des petits commerçants et artisans",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 51,
+          "taxeCode": "71001",
+          "montant": 200000,
+          "dateEncaissement": "2026-04-24",
+          "nature": "Délivrance de livrets de famille et autres documents",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 52,
+          "taxeCode": "71126",
+          "montant": 20000,
+          "dateEncaissement": "2026-04-24",
+          "nature": "Autres recettes de prestations et services au titre de l'urbanisme et de l'environnement",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 53,
+          "taxeCode": "71344",
+          "montant": 21200,
+          "dateEncaissement": "2026-04-24",
+          "nature": "Marchés",
+          "nom": "LE REGISSEUR DE RECETTES"
+        }
+      ]
+    },
+    {
+      "numero": 10,
+      "totalPresent": 351600,
+      "totalGeneralPrecedent": 123801276,
+      "totalGeneralPresent": 124152876,
+      "sommeLignes": 351600,
+      "totalMatch": true,
+      "warnings": [],
+      "dateEncaissement": "2026-05-06",
+      "lignes": [
+        {
+          "numeroDecompte": 54,
+          "taxeCode": "70262",
+          "montant": 15000,
+          "dateEncaissement": "2026-05-06",
+          "nature": "Taxes forfaitaires des petits commerçants et artisans",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 55,
+          "taxeCode": "71001",
+          "montant": 305000,
+          "dateEncaissement": "2026-05-06",
+          "nature": "Délivrance de livrets de famille et autres documents",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 56,
+          "taxeCode": "71344",
+          "montant": 31600,
+          "dateEncaissement": "2026-05-06",
+          "nature": "Marchés",
+          "nom": "LE REGISSEUR DE RECETTES"
+        }
+      ]
+    },
+    {
+      "numero": 11,
+      "totalPresent": 696500,
+      "totalGeneralPrecedent": 124152876,
+      "totalGeneralPresent": 124849376,
+      "sommeLignes": 696500,
+      "totalMatch": true,
+      "warnings": [],
+      "dateEncaissement": "2026-05-18",
+      "lignes": [
+        {
+          "numeroDecompte": 57,
+          "taxeCode": "70262",
+          "montant": 190000,
+          "dateEncaissement": "2026-05-18",
+          "nature": "Taxes forfaitaires des petits commerçants et artisans",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 58,
+          "taxeCode": "7031",
+          "montant": 50000,
+          "dateEncaissement": "2026-05-18",
+          "nature": "Taxe sur les charrettes",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 59,
+          "taxeCode": "7042",
+          "montant": 20000,
+          "dateEncaissement": "2026-05-18",
+          "nature": "Taxe sur la publicité",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 60,
+          "taxeCode": "71001",
+          "montant": 350000,
+          "dateEncaissement": "2026-05-18",
+          "nature": "Délivrance de livrets de famille et autres documents",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 61,
+          "taxeCode": "71016",
+          "montant": 5000,
+          "dateEncaissement": "2026-05-18",
+          "nature": "Autres recettes de prestations et services au titre de l'Administration",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 62,
+          "taxeCode": "71336",
+          "montant": 50000,
+          "dateEncaissement": "2026-05-18",
+          "nature": "Autres recettes de prestations et services au titre des transports",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 63,
+          "taxeCode": "71344",
+          "montant": 31500,
+          "dateEncaissement": "2026-05-18",
+          "nature": "Marchés",
+          "nom": "LE REGISSEUR DE RECETTES"
+        }
+      ]
+    },
+    {
+      "numero": 12,
+      "totalPresent": 147000,
+      "totalGeneralPrecedent": 124849376,
+      "totalGeneralPresent": 124996376,
+      "sommeLignes": 147000,
+      "totalMatch": true,
+      "warnings": [],
+      "dateEncaissement": "2026-05-19",
+      "lignes": [
+        {
+          "numeroDecompte": 64,
+          "taxeCode": "71001",
+          "montant": 18000,
+          "dateEncaissement": "2026-05-19",
+          "nature": "Délivrance de livrets de famille et autres documents",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 65,
+          "taxeCode": "71126",
+          "montant": 120000,
+          "dateEncaissement": "2026-05-19",
+          "nature": "Autres recettes de prestations et services au titre de l'urbanisme et de l'environnement",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 66,
+          "taxeCode": "71344",
+          "montant": 9000,
+          "dateEncaissement": "2026-05-19",
+          "nature": "Marchés",
+          "nom": "LE REGISSEUR DE RECETTES"
+        }
+      ]
+    },
+    {
+      "numero": 13,
+      "totalPresent": 57230195,
+      "totalGeneralPrecedent": 124996376,
+      "totalGeneralPresent": 182226571,
+      "sommeLignes": 57230195,
+      "totalMatch": true,
+      "warnings": [],
+      "dateEncaissement": "2026-05-26",
+      "lignes": [
+        {
+          "numeroDecompte": 67,
+          "taxeCode": "7300",
+          "montant": 28615098,
+          "dateEncaissement": "2026-05-26",
+          "nature": "Partie minimale",
+          "nom": "ACCT"
+        },
+        {
+          "numeroDecompte": 68,
+          "taxeCode": "7301",
+          "montant": 28615097,
+          "dateEncaissement": "2026-05-26",
+          "nature": "Partie complémentaire, versement général",
+          "nom": "ACCT"
+        }
+      ]
+    },
+    {
+      "numero": 14,
+      "totalPresent": 108847362,
+      "totalGeneralPrecedent": 182226571,
+      "totalGeneralPresent": 291073933,
+      "sommeLignes": 108847362,
+      "totalMatch": true,
+      "warnings": [],
+      "dateEncaissement": "2026-05-28",
+      "lignes": [
+        {
+          "numeroDecompte": 69,
+          "taxeCode": "0401",
+          "montant": 108847362,
+          "dateEncaissement": "2026-05-28",
+          "nature": "Subventions d'équipement de l'État",
+          "nom": "ACCT"
+        }
+      ]
+    },
+    {
+      "numero": 15,
+      "totalPresent": 577000,
+      "totalGeneralPrecedent": 291073933,
+      "totalGeneralPresent": 291650933,
+      "sommeLignes": 577000,
+      "totalMatch": true,
+      "warnings": [],
+      "dateEncaissement": "2026-06-05",
+      "lignes": [
+        {
+          "numeroDecompte": 70,
+          "taxeCode": "70262",
+          "montant": 60500,
+          "dateEncaissement": "2026-06-05",
+          "nature": "Taxes forfaitaires des petits commerçants et artisans",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 71,
+          "taxeCode": "70262",
+          "montant": 46800,
+          "dateEncaissement": "2026-06-05",
+          "nature": "Taxes forfaitaires des petits commerçants et artisans",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 72,
+          "taxeCode": "7031",
+          "montant": 44000,
+          "dateEncaissement": "2026-06-05",
+          "nature": "Taxe sur les charrettes",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 73,
+          "taxeCode": "7031",
+          "montant": 6000,
+          "dateEncaissement": "2026-06-05",
+          "nature": "Taxe sur les charrettes",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 74,
+          "taxeCode": "71000",
+          "montant": 32000,
+          "dateEncaissement": "2026-06-05",
+          "nature": "Légalisation de signature et certifications",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 75,
+          "taxeCode": "71001",
+          "montant": 300000,
+          "dateEncaissement": "2026-06-05",
+          "nature": "Délivrance de livrets de famille et autres documents",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 76,
+          "taxeCode": "71016",
+          "montant": 3000,
+          "dateEncaissement": "2026-06-05",
+          "nature": "Autres recettes de prestations et services au titre de l'Administration",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 77,
+          "taxeCode": "71336",
+          "montant": 44000,
+          "dateEncaissement": "2026-06-05",
+          "nature": "Autres recettes de prestations et services au titre des transports",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 78,
+          "taxeCode": "71344",
+          "montant": 25700,
+          "dateEncaissement": "2026-06-05",
+          "nature": "Marchés",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 79,
+          "taxeCode": "72000",
+          "montant": 15000,
+          "dateEncaissement": "2026-06-05",
+          "nature": "Baux à loyer",
+          "nom": "LE REGISSEUR DE RECETTES"
+        }
+      ]
+    },
+    {
+      "numero": 16,
+      "totalPresent": 945000,
+      "totalGeneralPrecedent": 291650933,
+      "totalGeneralPresent": 292595933,
+      "sommeLignes": 945000,
+      "totalMatch": true,
+      "warnings": [],
+      "dateEncaissement": "2026-06-17",
+      "lignes": [
+        {
+          "numeroDecompte": 80,
+          "taxeCode": "7042",
+          "montant": 600000,
+          "dateEncaissement": "2026-06-09",
+          "nature": "Taxe sur la publicité",
+          "nom": "MAK TRADE SERVICES"
+        },
+        {
+          "numeroDecompte": 81,
+          "taxeCode": "70262",
+          "montant": 40000,
+          "dateEncaissement": "2026-06-17",
+          "nature": "Taxes forfaitaires des petits commerçants et artisans",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 82,
+          "taxeCode": "71001",
+          "montant": 251000,
+          "dateEncaissement": "2026-06-17",
+          "nature": "Délivrance de livrets de famille et autres documents",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 83,
+          "taxeCode": "71330",
+          "montant": 17000,
+          "dateEncaissement": "2026-06-17",
+          "nature": "Administration des transports et communications",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 84,
+          "taxeCode": "71331",
+          "montant": 17000,
+          "dateEncaissement": "2026-06-17",
+          "nature": "Transports par routes - Gares routières - Stations de taxis",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 85,
+          "taxeCode": "71344",
+          "montant": 20000,
+          "dateEncaissement": "2026-06-17",
+          "nature": "Marchés",
+          "nom": "LE REGISSEUR DE RECETTES"
+        }
+      ]
+    },
+    {
+      "numero": 17,
+      "totalPresent": 609500,
+      "totalGeneralPrecedent": 292595933,
+      "totalGeneralPresent": 293205433,
+      "sommeLignes": 609500,
+      "totalMatch": true,
+      "warnings": [],
+      "dateEncaissement": "2026-06-30",
+      "lignes": [
+        {
+          "numeroDecompte": 86,
+          "taxeCode": "70262",
+          "montant": 270000,
+          "dateEncaissement": "2026-06-30",
+          "nature": "Taxes forfaitaires des petits commerçants et artisans",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 87,
+          "taxeCode": "70262",
+          "montant": 17200,
+          "dateEncaissement": "2026-06-30",
+          "nature": "Taxes forfaitaires des petits commerçants et artisans",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 88,
+          "taxeCode": "7031",
+          "montant": 7000,
+          "dateEncaissement": "2026-06-30",
+          "nature": "Taxe sur les charrettes",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 89,
+          "taxeCode": "71001",
+          "montant": 220000,
+          "dateEncaissement": "2026-06-30",
+          "nature": "Délivrance de livrets de famille et autres documents",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 90,
+          "taxeCode": "71126",
+          "montant": 21000,
+          "dateEncaissement": "2026-06-30",
+          "nature": "Autres recettes de prestations et services au titre de l'urbanisme et de l'environnement",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 91,
+          "taxeCode": "71331",
+          "montant": 15000,
+          "dateEncaissement": "2026-06-30",
+          "nature": "Transports par routes - Gares routières - Stations de taxis",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 92,
+          "taxeCode": "71344",
+          "montant": 18300,
+          "dateEncaissement": "2026-06-30",
+          "nature": "Marchés",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 93,
+          "taxeCode": "72000",
+          "montant": 15000,
+          "dateEncaissement": "2026-06-30",
+          "nature": "Baux à loyer",
+          "nom": "LE REGISSEUR DE RECETTES"
+        },
+        {
+          "numeroDecompte": 94,
+          "taxeCode": "72030",
+          "montant": 26000,
+          "dateEncaissement": "2026-06-30",
+          "nature": "Occupations sur permissions administratives",
+          "nom": "LE REGISSEUR DE RECETTES"
+        }
+      ]
+    }
+  ]
+}

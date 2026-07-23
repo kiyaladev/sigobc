@@ -536,7 +536,8 @@
         <q-separator class="q-my-xs" />
 
         <!-- ===== ADMINISTRATION ===== -->
-        <template v-if="authStore.isAdmin">
+        <!-- Branche no-auth : session locale admin toujours active -> menu toujours visible -->
+        <template v-if="authStore.isAdmin || authStore.isAuthenticated">
           <q-expansion-item
             group="sidebar"
             icon="admin_panel_settings"
@@ -695,6 +696,8 @@ const demoStore = useDemoStore();
 
 onMounted(() => {
   demoStore.initializeDemo();
+  // S'assurer que la session admin locale est chargee (role/nom + menu Administration)
+  void authStore.checkAuth();
 });
 
 const leftDrawerOpen = ref(false);
