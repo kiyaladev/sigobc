@@ -1,54 +1,60 @@
-# Retenues fiscales paramétrables (ITS / C.N. / F.N.S. / I.G.R.)
+# Retenues fiscales paramétrables (ITS / retenue communale / I.G.R.)
 
 Date : 2026-08-02
 Écran concerné : `/admin/parametrage` — section « Paramètres de Paie (Taux & Cotisations) »
 
 ## Problème
 
-Les communes n'appliquent pas les mêmes retenues sur salaire : la Contribution
-Nationale (C.N.) existe à Gboguhé, pas à Vavoua, qui applique le F.N.S. Cette
-différence est aujourd'hui codée en dur par `MAIRIE_INFO.typeRetenue`
-(`frontend/public/constanteInfo.js`), lue directement dans les gabarits
-d'impression. Elle n'est ni visible ni modifiable depuis l'application.
+Les communes n'appliquent pas la même retenue communale : Gboguhé applique la
+Contribution Nationale (C.N.), Vavoua le Fonds National de Solidarité (F.N.S.).
+C'est **une seule et même retenue sous deux libellés**, aujourd'hui codée en dur
+par `MAIRIE_INFO.typeRetenue` (`frontend/public/constanteInfo.js`) et lue
+directement dans les gabarits d'impression. Elle n'est ni visible ni modifiable
+depuis l'application.
 
 Trois défauts en découlent :
 
-1. **La C.N. n'a pas de taux propre.** Elle est dérivée de l'ITS —
+1. **La retenue communale n'a pas de taux propre.** Elle est dérivée de l'ITS —
    `cn = max(0, its - abattementCN)` (`frontend/public/employe/etat-solde.html:331`),
    avec `abattementCN = 750` par défaut. Modifier le taux ITS modifie
-   mécaniquement la C.N.
-2. **La C.N. n'est jamais enregistrée.** Elle est recalculée à chaque impression
-   de l'état de solde. Le bulletin de paie et l'état de paie l'ignorent.
+   mécaniquement la retenue.
+2. **Elle n'est jamais enregistrée.** Elle est recalculée à chaque impression de
+   l'état de solde. Le bulletin de paie et l'état de paie l'ignorent.
 3. **Le net stocké et le net imprimé divergent.**
    `SalairesPage.vue:772-778` calcule `net = brut − CNPS − ITS − autresRetenues + primes`
-   (C.N. non déduite), tandis que `etat-solde.html:332-335` calcule
-   `net = (brut − CNPS) − (ITS + C.N.) + primes` (C.N. déduite). Le montant
-   imprimé sur l'état de solde ne correspond donc pas au `montantNet` de la
-   fiche, ni au bordereau de règlement qui le reprend.
+   (retenue communale non déduite), tandis que `etat-solde.html:332-335` calcule
+   `net = (brut − CNPS) − (ITS + C.N.) + primes` (déduite). Le montant imprimé
+   sur l'état de solde ne correspond donc pas au `montantNet` de la fiche, ni au
+   bordereau de règlement qui le reprend.
 
-La F.N.S. et l'I.G.R. souffrent d'un défaut symétrique : `tauxFns` et `tauxIgr`
-sont paramétrables mais **aucun montant n'est jamais calculé**. `tauxFns` ne sert
-que d'étiquette de colonne (`etat-solde.html:288`), et la colonne I.G.R.
-s'imprime systématiquement vide.
+Cas réel observé sur `?mois=3&annee=2026` : ligne 8, ITS 1 744, C.N. 994,
+Net imprimé 128 258 contre 129 252 enregistré — 994 F d'écart, et 1 988 F sur
+l'ensemble de l'état.
+
+Côté F.N.S., défaut symétrique : `tauxFns` est paramétrable mais **aucun montant
+n'est jamais calculé** — il ne sert que d'étiquette de colonne
+(`etat-solde.html:288`). À Vavoua, la colonne s'intitule `F.N.S` et reste vide.
+La colonne I.G.R. s'imprime elle aussi systématiquement vide (`<td></td>` codé
+en dur).
 
 ## Objectif
 
-Faire des quatre retenues fiscales des entités de même nature — un taux, un
-interrupteur d'activation, un montant calculé et stocké, une déduction du net —
-et rendre leur activation pilotable depuis `/admin/parametrage` plutôt que par
-un fichier de constantes.
+Faire des trois retenues — ITS, retenue communale, I.G.R. — des entités de même
+nature : un taux, un interrupteur d'activation, un montant calculé et stocké,
+une déduction du net. Rendre leur activation pilotable depuis
+`/admin/parametrage` plutôt que par un fichier de constantes.
 
 ## Décisions
 
 | Sujet | Décision |
 |---|---|
-| Formule C.N. | `C.N. = brut × tauxCn / 100`. Taux propre, indépendant de l'ITS. |
+| Formule retenue communale | `montant = brut × taux / 100`. Taux propre, indépendant de l'ITS. |
 | `abattementCN` | Supprimé — plus de dérivation depuis l'ITS. |
-| Impact sur le net | Les quatre retenues sont déduites du net payé. |
+| C.N. et F.N.S. | **Une seule retenue**, libellé dérivé de `typeRetenue`. Un taux, un interrupteur, un montant stocké. |
+| Impact sur le net | Les trois retenues sont déduites du net payé. |
 | Granularité de l'activation | Un interrupteur par retenue fiscale. CNPS et indemnité de résidence restent toujours actifs. |
-| Périmètre | Les quatre retenues sont traitées uniformément (F.N.S. et I.G.R. deviennent réellement calculées). |
-| Colonnes des états | Fixes. Les quatre colonnes de retenues sont toujours imprimées ; une retenue inactive ou nulle laisse la cellule vide. |
-| Taux C.N. par défaut | `0` — à saisir par l'administrateur. Aucun taux fiscal inventé par le code. |
+| Colonnes des états | Trois colonnes fixes : `I.T.S`, `I.G.R`, puis `C.N.` ou `F.N.S` selon la commune. Une retenue inactive ou nulle laisse la cellule vide. |
+| Taux communal par défaut | `0` à Gboguhé (à saisir par l'administrateur), repris de `tauxFns` à Vavoua. |
 | Fiches existantes | Aucun backfill. Les nets déjà mandatés ne changent pas. |
 
 ## Modèle de données
@@ -61,10 +67,9 @@ export interface ParametresPaie {
   mairieId: number;
 
   // Retenues fiscales — taux + activation
-  itsActif: boolean;   tauxIts: number;
-  cnActif:  boolean;   tauxCn:  number;   // remplace abattementCN
-  fnsActif: boolean;   tauxFns: number;
-  igrActif: boolean;   tauxIgr: number;
+  itsActif: boolean;                 tauxIts: number;
+  retenueCommunaleActive: boolean;   tauxRetenueCommunale: number;
+  igrActif: boolean;                 tauxIgr: number;
 
   // Toujours actifs
   tauxCnpsEmploye: number;
@@ -77,15 +82,15 @@ export interface ParametresPaie {
 }
 ```
 
-`abattementCN: number` est **supprimé** de l'interface.
+Supprimés : `abattementCN` et `tauxFns`, ce dernier étant absorbé par
+`tauxRetenueCommunale`.
 
 ### `FichePaie` — `frontend/src/database/db.ts:465`
 
-Trois montants stockés, symétriques de `impotSurSalaire` :
+Deux montants stockés, symétriques de `impotSurSalaire` :
 
 ```ts
-contributionNationale: number;
-fondNationalSolidarite: number;
+retenueCommunale: number;   // C.N. à Gboguhé, F.N.S. à Vavoua
 impotGeneralRevenu: number;
 ```
 
@@ -97,36 +102,42 @@ change — c'est exactement le défaut n°3 décrit plus haut.
 
 Schémas Mongoose, pas de migration SQL.
 
-- `ParametresPaieSchema:475` — ajouter `tauxCn`, `itsActif`, `cnActif`,
-  `fnsActif`, `igrActif` ; retirer `abattementCN`.
-- `FichePaieSchema:406` — ajouter `contributionNationale`,
-  `fondNationalSolidarite`, `impotGeneralRevenu`.
+- `ParametresPaieSchema:475` — ajouter `tauxRetenueCommunale`, `itsActif`,
+  `retenueCommunaleActive`, `igrActif` ; retirer `abattementCN` et `tauxFns`.
+- `FichePaieSchema:406` — ajouter `retenueCommunale`, `impotGeneralRevenu`.
 
 ### Valeurs par défaut
 
 Au seed (`db.ts:1798`) comme au backfill des bases existantes :
 
 ```ts
-tauxCn:   0,     cnActif:  MAIRIE_INFO.typeRetenue === 'CN',
-tauxIts:  1.6,   itsActif: true,
-tauxFns:  1.0,   fnsActif: MAIRIE_INFO.typeRetenue === 'FNS',
-tauxIgr:  0,     igrActif: false,
+tauxIts: 1.6,   itsActif: true,
+tauxIgr: 0,     igrActif: false,
+
+// Gboguhé (typeRetenue 'CN') : 0, à saisir par l'administrateur.
+// Vavoua  (typeRetenue 'FNS'): reprend le tauxFns existant (1.0).
+tauxRetenueCommunale: typeRetenue === 'FNS' ? (tauxFns ?? 1) : 0,
+retenueCommunaleActive: true,
 ```
 
-`typeRetenue` reste dans `constanteInfo.js` comme **valeur de départ** par
-commune ; les interrupteurs en base font autorité ensuite. Hors ce seed, plus
-aucune lecture de `typeRetenue` ne subsiste — ni dans la logique de calcul, ni
-dans les gabarits d'impression.
-
-L'initialisation des paramètres de paie n'existe qu'à un seul endroit
-(`db.ts:1792-1812`) ; `seeders.ts` ne touche pas à cette table.
+Aucun taux fiscal n'est inventé par le code pour Gboguhé : tant que
+`tauxRetenueCommunale` vaut 0, la colonne C.N. sort vide.
 
 Le backfill des bases existantes suit le pattern déjà en place à
 `ParametragePage.vue:517-518` (`params.tauxIgr = params.tauxIgr ?? 0`).
+L'initialisation des paramètres de paie n'existe qu'à un seul endroit
+(`db.ts:1792-1812`) ; `seeders.ts` ne touche pas à cette table.
 
-Conséquence assumée du défaut `tauxCn = 0` : jusqu'à la saisie du taux par
-l'administrateur, la colonne C.N. affiche 0 au lieu de la valeur dérivée
-actuelle.
+### Rôle de `typeRetenue`
+
+`typeRetenue` reste dans `constanteInfo.js` et devient **purement un libellé** :
+
+```js
+const libelleRetenueCommunale = MAIRIE_INFO.typeRetenue === 'CN' ? 'C.N.' : 'F.N.S';
+```
+
+Il ne pilote plus aucun calcul ni aucune activation — c'est l'interrupteur en
+base qui décide si la retenue s'applique.
 
 ## Calcul
 
@@ -138,16 +149,15 @@ deux doivent produire des résultats identiques pour les mêmes entrées.
 exempt = typeEmploye ∈ { Contractuels*, Agents de l'État*, Maire et Adjoints* }
 
 si exempt :
-    CNPS = ITS = C.N. = F.N.S = I.G.R = 0
+    CNPS = ITS = retenueCommunale = I.G.R = 0
     net  = brut + transport + autresIndemnités
 
 sinon :
     CNPS  = arrondi(brut × tauxCnpsEmploye / 100)
-    ITS   = itsActif ? arrondi(brut × tauxIts / 100) : 0
-    C.N.  = cnActif  ? arrondi(brut × tauxCn  / 100) : 0
-    F.N.S = fnsActif ? arrondi(brut × tauxFns / 100) : 0
-    I.G.R = igrActif ? arrondi(brut × tauxIgr / 100) : 0
-    net   = brut − CNPS − ITS − C.N. − F.N.S − I.G.R − autresRetenues
+    ITS   = itsActif               ? arrondi(brut × tauxIts / 100)              : 0
+    RC    = retenueCommunaleActive ? arrondi(brut × tauxRetenueCommunale / 100) : 0
+    I.G.R = igrActif               ? arrondi(brut × tauxIgr / 100)              : 0
+    net   = brut − CNPS − ITS − RC − I.G.R − autresRetenues
             + transport + autresIndemnités
 ```
 
@@ -156,8 +166,8 @@ sinon :
 
 Pour éviter la duplication entre `recalculate()` et `genererBulletins()`, la
 formule est extraite dans une fonction pure exportée, prenant en entrée les
-montants bruts et les `ParametresPaie`, et retournant les cinq retenues plus le
-net. Les deux appelants la consomment.
+montants bruts et les `ParametresPaie`, et retournant les quatre retenues plus
+le net. Les deux appelants la consomment.
 
 ## Écran de paramétrage
 
@@ -166,8 +176,9 @@ neuf champs est découpée en trois sous-blocs :
 
 ```
 Retenues fiscales
-  [ON ] Taux ITS ....... 1.6 %      [ON ] Taux C.N. ...... 0 %
-  [OFF] Taux F.N.S. .... grisé      [OFF] Taux I.G.R. .... grisé
+  [ON ] Taux ITS ....... 1.6 %
+  [ON ] Taux C.N. ...... 0 %        ← libellé « Taux F.N.S. » à Vavoua
+  [OFF] Taux I.G.R. .... grisé
 
 Cotisations CNPS
   Part salariale 6.3 %    Prest. familiale 5.75 %
@@ -180,76 +191,56 @@ Autres
 - `q-toggle` en `prepend` de chaque `q-input` de retenue fiscale.
 - Champ `:disable="!xxxActif"` — grisé quand la retenue est désactivée, la
   valeur du taux est conservée en base.
-- `Taux C.N.` est placé immédiatement après `Taux ITS` pour que les deux
-  retenues se lisent ensemble.
-- Le champ « Abattement C.N. (ITS − valeur) » (lignes 305-316) disparaît.
-- La tuile de résumé « Taux ITS » (ligne 493-499) est conservée telle quelle.
+- Le libellé du champ de retenue communale est calculé :
+  `` `Taux ${MAIRIE_INFO.typeRetenue === 'CN' ? 'C.N.' : 'F.N.S.'}` ``. Une seule
+  commune n'affiche jamais les deux.
+- Le champ « Abattement C.N. (ITS − valeur) » (lignes 305-316) et le champ
+  « Taux FNS » (lignes 282-292) disparaissent au profit de ce champ unique.
+- La tuile de résumé « Taux ITS » (lignes 493-499) est conservée telle quelle.
 
 ## États et impressions
 
-### `frontend/public/employe/etat-solde.html` — colonnes fixes, cellules vides
+### `frontend/public/employe/etat-solde.html`
 
-La grille reste identique d'une commune à l'autre. Le bloc « Retenues » passe de
-**3 à 4 colonnes fixes**, dans cet ordre :
+**Déjà corrigé** — cette partie est appliquée, hors en-tête.
 
-```
-|            Retenues                | Total  |
-| I.T.S | I.G.R | C.N.  | F.N.S      | Impôts |
-```
+La grille garde ses **3 colonnes de retenues** : `I.T.S | I.G.R | C.N.-ou-F.N.S`.
+C.N. et F.N.S. partagent le même emplacement puisqu'elles ne coexistent jamais.
 
-Quatre colonnes et non trois, parce que les interrupteurs sont indépendants :
-une commune peut activer C.N. **et** F.N.S. Le slot unique actuel, qui affiche
-`C.N.` ou `F.N.S` selon `typeRetenue`, ne peut pas porter les deux.
+Appliqué :
 
-Modifications sur `buildTableHead()` (ligne 257-262) :
+- Lecture d'`abattementCN` supprimée (ex-ligne 289) ; dérivation
+  `Math.max(0, its − abattementCN)` remplacée par `f.retenueCommunale || 0`.
+- I.G.R. alimenté depuis `f.impotGeneralRevenu || 0` avec son propre cumul, au
+  lieu du `<td></td>` codé en dur.
+- `totalImp = its + retenueCommunale + igr`, sans condition sur `typeRetenue`.
+- Ternaires `MAIRIE_INFO.typeRetenue === 'CN' ? … : ''` retirés des lignes de
+  données, REPORT et TOTAL. Les cellules passent par `fmtOrEmpty()` (ligne 190),
+  qui rend déjà une chaîne vide pour une valeur nulle ou absente.
 
-- `<th colspan="3">Retenues</th>` → `colspan="4"`.
-- Ligne 260 — quatre `<th>` en dur : `I.T.S`, `I.G.R`, `C.N.`, `F.N.S`, chacun
-  avec son taux en sous-titre lorsque la retenue est active. Suppression de la
-  lecture de `MAIRIE_INFO.typeRetenue`.
-- Largeurs `width:%` réparties sur 4 colonnes au lieu de 3 ; l'appoint est pris
-  sur les colonnes `Signature` et `Nom & Prénom(S)`.
+Reste à faire :
 
-Modifications sur le rendu des lignes — données (410), REPORT (403), TOTAL (418) :
-
-- Une cellule par retenue, rendue avec `fmtOrEmpty()` (ligne 190), qui affiche
-  déjà une chaîne vide pour une valeur nulle ou absente. Une retenue inactive
-  vaut `0` en base, donc la cellule sort vide sans condition supplémentaire.
-- Les `<td></td>` codés en dur pour l'I.G.R. et les ternaires
-  `MAIRIE_INFO.typeRetenue === 'CN' ? … : ''` disparaissent.
-- Un cumul par colonne, soit quatre accumulateurs au lieu de deux.
-- `colspan` des lignes REPORT et TOTAL ajusté de 3 à 4.
-
-Modifications sur le calcul (lignes 289, 330-335) :
-
-- Ligne 289 — lecture de `abattementCN` supprimée.
-- Ligne 331 — `Math.max(0, its − abattementCN)` supprimé, remplacé par la
-  lecture directe de `f.contributionNationale`, `f.fondNationalSolidarite` et
-  `f.impotGeneralRevenu`.
-- Ligne 332 — `totalImp = ITS + C.N. + F.N.S + I.G.R` (les retenues inactives
-  valant 0, la somme est correcte sans condition).
-- Ligne 335 — `net = (brut − CNPS) − totalImp + primes`, désormais égal au
-  `montantNet` de la fiche.
-
-**Effet immédiat attendu sur `?mois=3&annee=2026`** : les fiches de mars 2026 ne
-portent aucun des nouveaux champs, donc C.N., F.N.S. et I.G.R. sortent vides,
-`Total Impôts` vaut l'ITS seul, et le `Net à Payer` remonte à la valeur
-enregistrée sur la fiche — celle que reprend le bordereau de règlement.
+- `buildTableHead()` ligne 260 — afficher le taux sous le libellé de la retenue
+  communale, comme pour l'I.T.S, et sous l'I.G.R. lorsqu'il est actif. Le choix
+  du libellé via `typeRetenue` est conservé tel quel.
 
 ### `frontend/public/bulletin_paie.html`
 
-- Bloc des retenues (lignes 568-592) — une ligne `(−) <libellé>` par retenue
-  active dont le montant est non nul, à la suite de la cotisation CNPS.
-- `totalRetenues` (ligne 430) — somme CNPS + retenues actives + autres retenues.
+- Bloc des retenues (lignes 568-592) — une ligne `(−) <libellé>` par retenue de
+  montant non nul, à la suite de la cotisation CNPS. Libellé de la retenue
+  communale : « Contribution Nationale » ou « Fonds National de Solidarité »
+  selon `typeRetenue`.
+- `totalRetenues` (ligne 430) — somme CNPS + ITS + retenue communale + I.G.R. +
+  autres retenues.
 
 ### `frontend/public/etat_paie.html`
 
 `totalRetenues` (ligne 203) et `retenues` par ligne (ligne 215) intègrent les
-quatre retenues.
+trois retenues.
 
 ### `frontend/public/employe/etat-impot.html`
 
-**Inchangé.** C'est l'état ITS ; la C.N. n'y figure pas.
+**Inchangé.** C'est l'état ITS ; la retenue communale n'y figure pas.
 
 ### `frontend/public/bordereau_reglement_salaires.html`
 
@@ -274,27 +265,28 @@ fiche la recalcule avec les règles courantes — comportement attendu et identi
 ## Autres fichiers touchés
 
 - `frontend/src/pages/app7/SalairesPage.vue` — champs de saisie des retenues
-  (lignes 382-416), tuile « Total retenues » (ligne 431), mapping
-  `openEdit` (1061-1077) et `saveFiche` (1084-1103).
-- `frontend/src/database/seeders.ts:2019-2045` — fiches de démonstration :
-  les trois nouveaux montants à `0`, `montantNet` inchangé.
+  (lignes 382-416), tuile « Total retenues » (ligne 431), mapping `openEdit`
+  (1061-1077) et `saveFiche` (1084-1103).
+- `frontend/src/database/seeders.ts:2019-2045` — fiches de démonstration : les
+  deux nouveaux montants à `0`, `montantNet` inchangé.
 
 ## Vérification
 
 1. `npx vue-tsc --noEmit` et `npm run lint` — sans erreur.
-2. Sur un mois de test, générer des bulletins puis contrôler que le
+2. Sur `/employe/etat-solde.html?mois=3&annee=2026`, vérifier que les colonnes
+   I.G.R et C.N. sortent vides, que `Total Impôts` vaut l'ITS seul (3 488 au
+   total), et que le `Net à Payer` total vaut 1 174 101 — identique au bordereau
+   de règlement du même mois.
+3. Sur un mois de test, générer des bulletins puis contrôler que le
    **NET À PAYER** du bulletin de paie, la colonne **NET** de l'état de solde et
    le montant du bordereau de règlement affichent le même montant. C'est le
    défaut n°3 : ces trois valeurs divergent aujourd'hui.
-3. Sur `/employe/etat-solde.html?mois=3&annee=2026`, vérifier que les colonnes
-   I.G.R, C.N. et F.N.S sortent vides, que `Total Impôts` vaut l'ITS seul, et que
-   le `Net à Payer` est identique au montant du bordereau de règlement du même
-   mois.
 4. Activer chaque retenue avec un taux non nul, regénérer un bulletin, et
    vérifier que la colonne correspondante se remplit sans décaler les en-têtes
-   ni les lignes REPORT et TOTAL. Les quatre colonnes restent imprimées dans
-   tous les cas.
+   ni les lignes REPORT et TOTAL. Les trois colonnes restent imprimées dans tous
+   les cas.
 5. Vérifier qu'un employé exempt (Contractuel, Agent de l'État, Maire ou
    Adjoint) ne porte aucune retenue quelle que soit la configuration.
-6. Vérifier qu'une base existante s'ouvre sans erreur, avec les interrupteurs
-   positionnés selon `typeRetenue` et les nets antérieurs inchangés.
+6. Vérifier qu'une base existante s'ouvre sans erreur, avec le taux de retenue
+   communale repris de `tauxFns` à Vavoua et à 0 à Gboguhé, et les nets
+   antérieurs inchangés.
