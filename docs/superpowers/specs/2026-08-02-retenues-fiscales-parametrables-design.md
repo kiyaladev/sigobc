@@ -47,7 +47,7 @@ un fichier de constantes.
 | Impact sur le net | Les quatre retenues sont déduites du net payé. |
 | Granularité de l'activation | Un interrupteur par retenue fiscale. CNPS et indemnité de résidence restent toujours actifs. |
 | Périmètre | Les quatre retenues sont traitées uniformément (F.N.S. et I.G.R. deviennent réellement calculées). |
-| Colonnes des états | Dynamiques — seules les retenues activées produisent une colonne. |
+| Colonnes des états | Fixes. Les quatre colonnes de retenues sont toujours imprimées ; une retenue inactive ou nulle laisse la cellule vide. |
 | Taux C.N. par défaut | `0` — à saisir par l'administrateur. Aucun taux fiscal inventé par le code. |
 | Fiches existantes | Aucun backfill. Les nets déjà mandatés ne changent pas. |
 
@@ -187,35 +187,54 @@ Autres
 
 ## États et impressions
 
-### `frontend/public/employe/etat-solde.html` — colonnes dynamiques
+### `frontend/public/employe/etat-solde.html` — colonnes fixes, cellules vides
 
-La liste des retenues actives est construite une fois depuis les paramètres :
+La grille reste identique d'une commune à l'autre. Le bloc « Retenues » passe de
+**3 à 4 colonnes fixes**, dans cet ordre :
 
-```js
-const retenues = [
-  { actif: p.itsActif, code: 'I.T.S', taux: p.tauxIts, champ: 'impotSurSalaire' },
-  { actif: p.cnActif,  code: 'C.N.',  taux: p.tauxCn,  champ: 'contributionNationale' },
-  { actif: p.fnsActif, code: 'F.N.S', taux: p.tauxFns, champ: 'fondNationalSolidarite' },
-  { actif: p.igrActif, code: 'I.G.R', taux: p.tauxIgr, champ: 'impotGeneralRevenu' },
-].filter((r) => r.actif);
+```
+|            Retenues                | Total  |
+| I.T.S | I.G.R | C.N.  | F.N.S      | Impôts |
 ```
 
-Réécritures nécessaires :
+Quatre colonnes et non trois, parce que les interrupteurs sont indépendants :
+une commune peut activer C.N. **et** F.N.S. Le slot unique actuel, qui affiche
+`C.N.` ou `F.N.S` selon `typeRetenue`, ne peut pas porter les deux.
 
-- `buildTableHead()` (ligne 257) — génère une colonne par retenue active, avec
-  son taux en sous-titre. Les trois slots fixes `I.T.S` / `I.G.R` /
-  `C.N.-ou-F.N.S` disparaissent, ainsi que la lecture de `MAIRIE_INFO.typeRetenue`
-  (ligne 260).
-- Largeurs `width:%` réparties sur le nombre de colonnes actives.
-- Construction des lignes de données (ligne 410), REPORT (403) et TOTAL (418) —
-  `colspan` et cumuls par colonne deviennent calculés.
-- `TOTAL IMP` = somme des retenues actives de la ligne.
+Modifications sur `buildTableHead()` (ligne 257-262) :
+
+- `<th colspan="3">Retenues</th>` → `colspan="4"`.
+- Ligne 260 — quatre `<th>` en dur : `I.T.S`, `I.G.R`, `C.N.`, `F.N.S`, chacun
+  avec son taux en sous-titre lorsque la retenue est active. Suppression de la
+  lecture de `MAIRIE_INFO.typeRetenue`.
+- Largeurs `width:%` réparties sur 4 colonnes au lieu de 3 ; l'appoint est pris
+  sur les colonnes `Signature` et `Nom & Prénom(S)`.
+
+Modifications sur le rendu des lignes — données (410), REPORT (403), TOTAL (418) :
+
+- Une cellule par retenue, rendue avec `fmtOrEmpty()` (ligne 190), qui affiche
+  déjà une chaîne vide pour une valeur nulle ou absente. Une retenue inactive
+  vaut `0` en base, donc la cellule sort vide sans condition supplémentaire.
+- Les `<td></td>` codés en dur pour l'I.G.R. et les ternaires
+  `MAIRIE_INFO.typeRetenue === 'CN' ? … : ''` disparaissent.
+- Un cumul par colonne, soit quatre accumulateurs au lieu de deux.
+- `colspan` des lignes REPORT et TOTAL ajusté de 3 à 4.
+
+Modifications sur le calcul (lignes 289, 330-335) :
+
+- Ligne 289 — lecture de `abattementCN` supprimée.
 - Ligne 331 — `Math.max(0, its − abattementCN)` supprimé, remplacé par la
-  lecture directe des champs stockés. Ligne 289 (`abattementCN`) supprimée.
-- `net = (brut − CNPS) − totalRetenuesActives + primes` — cohérent avec
-  `montantNet` désormais.
+  lecture directe de `f.contributionNationale`, `f.fondNationalSolidarite` et
+  `f.impotGeneralRevenu`.
+- Ligne 332 — `totalImp = ITS + C.N. + F.N.S + I.G.R` (les retenues inactives
+  valant 0, la somme est correcte sans condition).
+- Ligne 335 — `net = (brut − CNPS) − totalImp + primes`, désormais égal au
+  `montantNet` de la fiche.
 
-La colonne I.G.R. systématiquement vide disparaît.
+**Effet immédiat attendu sur `?mois=3&annee=2026`** : les fiches de mars 2026 ne
+portent aucun des nouveaux champs, donc C.N., F.N.S. et I.G.R. sortent vides,
+`Total Impôts` vaut l'ITS seul, et le `Net à Payer` remonte à la valeur
+enregistrée sur la fiche — celle que reprend le bordereau de règlement.
 
 ### `frontend/public/bulletin_paie.html`
 
@@ -243,8 +262,9 @@ Aucun backfill. Les fiches enregistrées ne reçoivent pas les nouveaux champs ;
 ils sont lus `|| 0` partout. Leur `montantNet` est inchangé, donc les mois déjà
 mandatés et les bordereaux de règlement déjà émis restent cohérents.
 
-Conséquence visible : sur un état de solde d'un mois antérieur, la colonne C.N.
-affiche 0 au lieu de la valeur dérivée `ITS − 750` qu'elle montrait avant.
+Conséquence visible et voulue : sur un état de solde d'un mois antérieur, la
+colonne C.N. sort **vide** au lieu de la valeur dérivée `ITS − 750` qu'elle
+montrait avant, et le `Net à Payer` remonte à la valeur enregistrée sur la fiche.
 
 Le formulaire d'édition d'une fiche (`SalairesPage.vue:1060`, `saveFiche()`
 ligne 1081) mappe les nouveaux champs ; rouvrir et enregistrer une ancienne
@@ -266,10 +286,15 @@ fiche la recalcule avec les règles courantes — comportement attendu et identi
    **NET À PAYER** du bulletin de paie, la colonne **NET** de l'état de solde et
    le montant du bordereau de règlement affichent le même montant. C'est le
    défaut n°3 : ces trois valeurs divergent aujourd'hui.
-3. Activer / désactiver chaque retenue et vérifier que la colonne correspondante
-   apparaît et disparaît de l'état de solde, sans colonne vide ni décalage des
-   lignes REPORT et TOTAL.
-4. Vérifier qu'un employé exempt (Contractuel, Agent de l'État, Maire ou
+3. Sur `/employe/etat-solde.html?mois=3&annee=2026`, vérifier que les colonnes
+   I.G.R, C.N. et F.N.S sortent vides, que `Total Impôts` vaut l'ITS seul, et que
+   le `Net à Payer` est identique au montant du bordereau de règlement du même
+   mois.
+4. Activer chaque retenue avec un taux non nul, regénérer un bulletin, et
+   vérifier que la colonne correspondante se remplit sans décaler les en-têtes
+   ni les lignes REPORT et TOTAL. Les quatre colonnes restent imprimées dans
+   tous les cas.
+5. Vérifier qu'un employé exempt (Contractuel, Agent de l'État, Maire ou
    Adjoint) ne porte aucune retenue quelle que soit la configuration.
-5. Vérifier qu'une base existante s'ouvre sans erreur, avec les interrupteurs
+6. Vérifier qu'une base existante s'ouvre sans erreur, avec les interrupteurs
    positionnés selon `typeRetenue` et les nets antérieurs inchangés.
