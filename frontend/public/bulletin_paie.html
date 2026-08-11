@@ -342,81 +342,58 @@
 
       // Conversion nombre en lettres (français)
       function numberToWords(num) {
-        if (num === 0) return 'zéro';
-        const units = [
-          '',
-          'un',
-          'deux',
-          'trois',
-          'quatre',
-          'cinq',
-          'six',
-          'sept',
-          'huit',
-          'neuf',
-          'dix',
-          'onze',
-          'douze',
-          'treize',
-          'quatorze',
-          'quinze',
-          'seize',
-          'dix-sept',
-          'dix-huit',
-          'dix-neuf',
-        ];
-        const tens = [
-          '',
-          '',
-          'vingt',
-          'trente',
-          'quarante',
-          'cinquante',
-          'soixante',
-          'soixante',
-          'quatre-vingt',
-          'quatre-vingt',
-        ];
-
-        function convertLessThan1000(n) {
-          if (n < 20) return units[n];
-          if (n < 100) {
-            const t = Math.floor(n / 10);
-            const u = n % 10;
-            if (t === 7) return 'soixante-' + units[10 + u];
-            if (t === 9) return 'quatre-vingt-' + units[10 + u];
-            return (
-              tens[t] +
-              (u === 1 && t !== 8 ? '-et-un' : u > 0 ? '-' + units[u] : t === 8 ? 's' : '')
-            );
+        // Conversion en toutes lettres (français). Implémentation unique et vérifiée.
+        var __n = Math.floor(Math.abs(Number(num) || 0));
+        var __neg = (Number(num) || 0) < 0;
+        var U = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf'];
+        var T = ['dix','onze','douze','treize','quatorze','quinze','seize','dix-sept','dix-huit','dix-neuf'];
+        var D = ['','','vingt','trente','quarante','cinquante','soixante','soixante','quatre-vingt','quatre-vingt'];
+        var SEP = " ";
+        function sub100(n) {
+          if (n < 10) return U[n];
+          if (n < 20) return T[n - 10];
+          var d = Math.floor(n / 10), u = n % 10;
+          if (d === 7 || d === 9) {
+            var r = n - (d === 7 ? 60 : 80); // 10..19
+            // 71 = "soixante et onze" ; 91 = "quatre-vingt-onze" (sans "et")
+            return D[d] + (d === 7 && r === 11 ? '-et-' : '-') + T[r - 10];
           }
-          const h = Math.floor(n / 100);
-          const r = n % 100;
-          const hText = (h === 1 ? 'cent' : units[h] + '-cent') + (r === 0 && h > 1 ? 's' : '');
-          return hText + (r > 0 ? '-' + convertLessThan1000(r) : '');
+          if (u === 0) return D[d] + (d === 8 ? 's' : ''); // quatre-vingts
+          if (u === 1 && d < 8) return D[d] + '-et-un';    // vingt-et-un ... soixante-et-un
+          return D[d] + '-' + U[u];
         }
-
+        function sub1000(n) {
+          if (n < 100) return sub100(n);
+          var c = Math.floor(n / 100), r = n % 100;
+          var s = (c === 1 ? 'cent' : U[c] + '-cent');
+          if (r === 0) { if (c > 1) s += 's'; } else { s += '-' + sub100(r); }
+          return s;
+        }
+        // "vingt" et "cent" sont invariables devant "mille"
+        function invariable(s) { return s.replace(/(vingt|cent)s$/, '$1'); }
         function convert(n) {
           if (n === 0) return '';
-          if (n >= 1000000) {
-            const m = Math.floor(n / 1000000);
-            const r = n % 1000000;
-            return (
-              (m === 1 ? 'un million' : convertLessThan1000(m) + ' millions') +
-              (r > 0 ? ' ' + convert(r) : '')
-            );
+          if (n >= 1e9) {
+            var qb = Math.floor(n / 1e9), rb = n % 1e9;
+            var sb = (qb === 1 ? 'un' + SEP + 'milliard' : convert(qb) + SEP + 'milliards');
+            return rb ? sb + SEP + convert(rb) : sb;
+          }
+          if (n >= 1e6) {
+            var qm = Math.floor(n / 1e6), rm = n % 1e6;
+            var sm = (qm === 1 ? 'un' + SEP + 'million' : convert(qm) + SEP + 'millions');
+            return rm ? sm + SEP + convert(rm) : sm;
           }
           if (n >= 1000) {
-            const k = Math.floor(n / 1000);
-            const r = n % 1000;
-            return (
-              (k === 1 ? 'mille' : convertLessThan1000(k).replace(/s$/, '') + ' mille') +
-              (r > 0 ? ' ' + convertLessThan1000(r) : '')
-            );
+            var qk = Math.floor(n / 1000), rk = n % 1000;
+            var sk = (qk === 1 ? 'mille' : invariable(sub1000(qk)) + SEP + 'mille');
+            return rk ? sk + SEP + sub1000(rk) : sk;
           }
-          return convertLessThan1000(n);
+          return sub1000(n);
         }
-        return convert(num);
+        var __r = (__n === 0 ? 'zéro' : convert(__n));
+        if (__neg) __r = 'moins ' + __r;
+        __r = __r + "";
+        return __r;
       }
 
       document.addEventListener('DOMContentLoaded', async () => {
@@ -620,7 +597,7 @@
             <div class="resume-box">
               <div class="label">NET À PAYER</div>
               <div class="montant">${fmt(fiche.montantNet)} <span style="font-size:14px">FCFA</span></div>
-              <div class="en-lettres">${numberToWords(fiche.montantNet || 0)} francs CFA</div>
+              <div class="en-lettres" contenteditable="true">${numberToWords(fiche.montantNet || 0)} francs CFA</div>
             </div>
 
             ${fiche.observations ? `<div style="font-size:10px;font-style:italic;margin-bottom:8px;padding:4px 8px;background:#fffde7;border-left:3px solid #f59e0b">Observations : ${fiche.observations}</div>` : ''}

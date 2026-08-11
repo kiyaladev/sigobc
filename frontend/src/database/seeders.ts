@@ -280,6 +280,7 @@ export async function seedDefaultData() {
     telephone: MAIRIE_INFO.telephone,
     email: MAIRIE_INFO.email,
     maire: MAIRIE_INFO.maire,
+    numeroEmployeurCNPS: MAIRIE_INFO.numeroEmployeurCNPS,
     createdAt: now,
     updatedAt: now,
   });

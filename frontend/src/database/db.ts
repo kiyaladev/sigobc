@@ -18,6 +18,8 @@ export interface Mairie {
   email?: string;
   maire?: string;
   logo?: string;
+  /** N° employeur CNPS, en-tête du fichier DISA (cellule B2). */
+  numeroEmployeurCNPS?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -150,6 +152,7 @@ export interface Mandat {
   avisMunicipalite?: string; // Avis de la Municipalité
   numeroDeliberation?: string; // N° Délibération
   dateDeliberation?: Date; // Date de Délibération
+  nomSignataire?: string; // Nom du signataire (imprimé au-dessus de "Vu bon à Payer")
   montantPrecompter?: number; // Montant à précompter
   typeBien?: 'immobilier' | 'mobilier' | 'incorporel'; // Type de bien
   projetId?: number; // Lien vers un projet (investissement)
@@ -448,6 +451,12 @@ export interface Employe {
   service: string;
   departement?: string;
   dateEmbauche?: Date;
+  /** Date de fin de contrat, colonne « DATE DEPART » du DISA. Vide = toujours en poste. */
+  dateDepart?: Date;
+  /** Code CNPS du type de salarié (M = mensuel), colonne « TYPE SALARIE » du DISA. */
+  typeSalarieCnps?: string;
+  /** Régimes cotisés : 1 = prestations familiales, 2 = accidents du travail, 3 = retraite. */
+  regimeCnps?: string;
   salaireBase: number;
   indemniteLogement?: number;
   indemniteTransport?: number;
@@ -539,6 +548,11 @@ export interface ParametresPaie {
   tauxCnpsPatronalAccidentTravail: number;
   tauxCnpsPatronalRetraite: number;
   abattementCN: number; // Abattement C.N. (Contribution Nationale) = ITS - abattementCN
+  tauxIgr: number; // Impôt Général sur le Revenu (%)
+  /** Plafond mensuel de l'assiette prestations familiales / accidents du travail. */
+  plafondCnpsPfAt?: number;
+  /** Plafond mensuel de l'assiette retraite. */
+  plafondCnpsRetraite?: number;
   updatedAt: Date;
 }
 
@@ -1803,6 +1817,9 @@ export async function initializeDatabase() {
       tauxCnpsPatronalAccidentTravail: 2.0,
       tauxCnpsPatronalRetraite: 7.7,
       abattementCN: 750,
+      tauxIgr: 0,
+      plafondCnpsPfAt: 70000,
+      plafondCnpsRetraite: 3375000,
       updatedAt: new Date(),
     });
     console.log('Paramètres de paie par défaut initialisés.');

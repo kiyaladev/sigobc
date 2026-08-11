@@ -12,9 +12,18 @@ const SRC_PATH = path.resolve(__dirname, '..', 'src', 'constanteInfo.js');
 const source = fs.readFileSync(PUBLIC_PATH, 'utf8');
 
 // On remplace `var MAIRIE_INFO` par `export const MAIRIE_INFO` (le bloc commenté
-// reste commenté tel quel). Si une autre déclaration existe, l'utilisateur peut
-// adapter ce script — pour l'instant un seul `var MAIRIE_INFO` actif est attendu.
-const transformed = source.replace(/\bvar\s+MAIRIE_INFO\s*=/, 'export const MAIRIE_INFO =');
+// reste commenté tel quel). L'ancre `^` en mode multiligne évite de toucher aux
+// déclarations commentées (`// var MAIRIE_INFO = {`) qui précèdent la vraie.
+const DECLARATION_RE = /^var\s+MAIRIE_INFO\s*=/m;
+
+if (!DECLARATION_RE.test(source)) {
+  console.error(
+    '[sync-mairie-info] Aucune déclaration active `var MAIRIE_INFO =` trouvée dans ' + PUBLIC_PATH,
+  );
+  process.exit(1);
+}
+
+const transformed = source.replace(DECLARATION_RE, 'export const MAIRIE_INFO =');
 
 const banner =
   '// ⚠️ Fichier généré automatiquement par scripts/sync-mairie-info.cjs.\n' +

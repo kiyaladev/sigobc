@@ -195,6 +195,19 @@
           font-size: 14px;
       }
 
+      .signataire-box {
+          /* border: 1px solid #000; */
+          min-height: 26px;
+          padding: 3px 6px;
+          margin-bottom: 4px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          position: relative;
+          top: -30px;
+          justify-content: center;
+      }
+
       /* FOOTER */
       .footer-grid {
           display: grid;
@@ -321,7 +334,6 @@
         <div class="header-col header-left">
           <p>République de Côte d'Ivoire</p>
           <p>Département de <span data-field="mairieDepartement"></span></p>
-          <!-- <p>Département de Daloa</p> -->
           <p>Commune de <span data-field="mairieVille"></span></p>
           <p class="bold mt-2">Ville de <span data-field="mairieVille"></span></p>
           <p class="bold mt-4">
@@ -447,7 +459,11 @@
               </p>
 
               <p class="mt-4">Montants à précompter ( en lettre )</p>
-              <p class="bold mt-1 small" data-field="montantPrecompterLettres"></p>
+              <p
+                class="bold mt-1 small"
+                data-field="montantPrecompterLettres"
+                contenteditable="true"
+              ></p>
             </div>
           </div>
         </div>
@@ -477,6 +493,7 @@
               class="bold uppercase mt-1"
               style="font-size: 1.1em; line-height: 1.4"
               data-field="montantLettres"
+              contenteditable="true"
             >
               CENT QUATRE VINGT ET UN MILLE TROIS SOIXANTE SIX FRANCS
             </p>
@@ -495,6 +512,10 @@
           </div>
 
           <div class="vu-bon-section">
+            <div class="signataire-box" contenteditable="true">
+              <span class="bold"></span>
+              <span class="bold uppercase" data-field="nomSignataire"></span>
+            </div>
             <p class="bold">Vu bon à Payer à virer pour la somme de (A) :</p>
             <div class="mt-2">
               <span class="dotted-line mt-2"></span>
@@ -507,7 +528,8 @@
             </div>
             <div class="mt-2" contenteditable="true">
               <span contenteditable="true">
-                Gboguhé, le .....................................................................
+                <span data-field="mairieVille"></span>, le
+                .....................................................................
               </span>
             </div>
           </div>
@@ -524,90 +546,91 @@
     <script>
       // Fonction pour convertir un nombre en lettres en français
       function numberToWords(num) {
-        if (num === 0) return 'ZÉRO';
-
-        const units = [
-          '',
-          'UN',
-          'DEUX',
-          'TROIS',
-          'QUATRE',
-          'CINQ',
-          'SIX',
-          'SEPT',
-          'HUIT',
-          'NEUF',
-          'DIX',
-          'ONZE',
-          'DOUZE',
-          'TREIZE',
-          'QUATORZE',
-          'QUINZE',
-          'SEIZE',
-          'DIX-SEPT',
-          'DIX-HUIT',
-          'DIX-NEUF',
+        // Conversion en toutes lettres (français). Implémentation unique et vérifiée.
+        var __n = Math.floor(Math.abs(Number(num) || 0));
+        var __neg = (Number(num) || 0) < 0;
+        var U = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf'];
+        var T = [
+          'dix',
+          'onze',
+          'douze',
+          'treize',
+          'quatorze',
+          'quinze',
+          'seize',
+          'dix-sept',
+          'dix-huit',
+          'dix-neuf',
         ];
-        const tens = [
+        var D = [
           '',
           '',
-          'VINGT',
-          'TRENTE',
-          'QUARANTE',
-          'CINQUANTE',
-          'SOIXANTE',
-          'SOIXANTE',
-          'QUATRE-VINGT',
-          'QUATRE-VINGT',
+          'vingt',
+          'trente',
+          'quarante',
+          'cinquante',
+          'soixante',
+          'soixante',
+          'quatre-vingt',
+          'quatre-vingt',
         ];
-
-        function convertLessThanThousand(n) {
-          if (n < 20) return units[n];
-          if (n < 100) {
-            const t = Math.floor(n / 10);
-            const u = n % 10;
-            if (t === 7 || t === 9) {
-              return tens[t] + (u === 1 && t !== 9 ? ' ET ' : '-') + units[10 + u];
-            }
-            if (u === 0) return tens[t] + (t === 8 ? 'S' : '');
-            return tens[t] + (u === 1 && t !== 8 ? ' ET ' : '-') + units[u];
+        var SEP = ' ';
+        function sub100(n) {
+          if (n < 10) return U[n];
+          if (n < 20) return T[n - 10];
+          var d = Math.floor(n / 10),
+            u = n % 10;
+          if (d === 7 || d === 9) {
+            var r = n - (d === 7 ? 60 : 80); // 10..19
+            // 71 = "soixante et onze" ; 91 = "quatre-vingt-onze" (sans "et")
+            return D[d] + (d === 7 && r === 11 ? '-et-' : '-') + T[r - 10];
           }
-          const h = Math.floor(n / 100);
-          const rest = n % 100;
-          let result = h === 1 ? 'CENT' : units[h] + ' CENT';
-          if (rest === 0 && h > 1) result += 'S';
-          else if (rest > 0) result += ' ' + convertLessThanThousand(rest);
-          return result;
+          if (u === 0) return D[d] + (d === 8 ? 's' : ''); // quatre-vingts
+          if (u === 1 && d < 8) return D[d] + '-et-un'; // vingt-et-un ... soixante-et-un
+          return D[d] + '-' + U[u];
         }
-
+        function sub1000(n) {
+          if (n < 100) return sub100(n);
+          var c = Math.floor(n / 100),
+            r = n % 100;
+          var s = c === 1 ? 'cent' : U[c] + '-cent';
+          if (r === 0) {
+            if (c > 1) s += 's';
+          } else {
+            s += '-' + sub100(r);
+          }
+          return s;
+        }
+        // "vingt" et "cent" sont invariables devant "mille"
+        function invariable(s) {
+          return s.replace(/(vingt|cent)s$/, '$1');
+        }
         function convert(n) {
-          if (n < 1000) return convertLessThanThousand(n);
-          if (n < 1000000) {
-            const thousands = Math.floor(n / 1000);
-            const rest = n % 1000;
-            let result =
-              thousands === 1
-                ? 'MILLE'
-                : convertLessThanThousand(thousands).replace(/S$/, '') + ' MILLE';
-            if (rest > 0) result += ' ' + convertLessThanThousand(rest);
-            return result;
+          if (n === 0) return '';
+          if (n >= 1e9) {
+            var qb = Math.floor(n / 1e9),
+              rb = n % 1e9;
+            var sb = qb === 1 ? 'un' + SEP + 'milliard' : convert(qb) + SEP + 'milliards';
+            return rb ? sb + SEP + convert(rb) : sb;
           }
-          if (n < 1000000000) {
-            const millions = Math.floor(n / 1000000);
-            const rest = n % 1000000;
-            let result = convertLessThanThousand(millions) + ' MILLION' + (millions > 1 ? 'S' : '');
-            if (rest > 0) result += ' ' + convert(rest);
-            return result;
+          if (n >= 1e6) {
+            var qm = Math.floor(n / 1e6),
+              rm = n % 1e6;
+            var sm = qm === 1 ? 'un' + SEP + 'million' : convert(qm) + SEP + 'millions';
+            return rm ? sm + SEP + convert(rm) : sm;
           }
-          const milliards = Math.floor(n / 1000000000);
-          const rest = n % 1000000000;
-          let result =
-            convertLessThanThousand(milliards) + ' MILLIARD' + (milliards > 1 ? 'S' : '');
-          if (rest > 0) result += ' ' + convert(rest);
-          return result;
+          if (n >= 1000) {
+            var qk = Math.floor(n / 1000),
+              rk = n % 1000;
+            var sk = qk === 1 ? 'mille' : invariable(sub1000(qk)) + SEP + 'mille';
+            return rk ? sk + SEP + sub1000(rk) : sk;
+          }
+          return sub1000(n);
         }
-
-        return convert(Math.floor(num)) + ' FRANCS';
+        var __r = __n === 0 ? 'zéro' : convert(__n);
+        if (__neg) __r = 'moins ' + __r;
+        __r = __r + ' FRANCS';
+        return __r.toUpperCase();
       }
 
       // Fonction pour formater un nombre avec espaces
@@ -701,10 +724,11 @@
             referenceMarche: mandat.referenceMarche || '',
             avisMunicipalite: mandat.avisMunicipalite || '',
             numeroDeliberation: mandat.numeroDeliberation || '',
+            nomSignataire: mandat.nomSignataire || '',
             dateDeliberation: mandat.dateDeliberation
               ? new Date(mandat.dateDeliberation).toLocaleDateString('fr-FR')
               : '',
-            mairieDepartement: mairie.ville,
+            mairieDepartement: mairie.departement,
             mairieCommune: mairie.ville,
             mairieCode: mairie.code,
             mairieVille: mairie.ville,

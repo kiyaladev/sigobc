@@ -64,6 +64,15 @@
                 </q-menu>
               </q-btn>
               <q-btn
+                dense
+                outline
+                color="teal-8"
+                icon="assignment_ind"
+                label="Rapport DISA"
+                no-caps
+                @click="openDisaDialog"
+              />
+              <q-btn
                 color="primary"
                 icon="add"
                 label="Nouvel agent"
@@ -224,6 +233,41 @@
               </div>
             </div>
 
+            <!-- Déclaration CNPS : alimente les colonnes du rapport DISA -->
+            <div class="row q-col-gutter-sm">
+              <div class="col-12 col-md-3">
+                <q-input
+                  v-model="form.dateDepart"
+                  label="Date de départ"
+                  outlined
+                  dense
+                  clearable
+                  type="date"
+                  hint="Vide si toujours en poste"
+                />
+              </div>
+              <div class="col-12 col-md-3">
+                <q-select
+                  v-model="form.typeSalarieCnps"
+                  :options="typeSalarieCnpsOptions"
+                  label="Type salarié (CNPS)"
+                  outlined
+                  dense
+                  emit-value
+                  map-options
+                />
+              </div>
+              <div class="col-12 col-md-3">
+                <q-input
+                  v-model="form.regimeCnps"
+                  label="Régime CNPS"
+                  outlined
+                  dense
+                  hint="1 = PF, 2 = AT, 3 = retraite"
+                />
+              </div>
+            </div>
+
             <q-separator class="q-my-sm" />
 
             <!-- Poste -->
@@ -345,6 +389,115 @@
         </q-card-section>
       </q-card>
     </q-dialog>
+
+    <!-- Dialog Rapport DISA (déclaration annuelle CNPS) -->
+    <q-dialog v-model="showDisaDialog">
+      <q-card class="dialog-card" style="width: min(560px, 96vw); max-width: 96vw">
+        <q-card-section class="accent-left">
+          <div class="text-h6">Rapport DISA</div>
+          <div class="text-caption text-grey-7">
+            Déclaration Individuelle des Salaires Annuels — CNPS
+          </div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          <div class="row q-col-gutter-sm">
+            <div class="col-12 col-sm-4">
+              <q-select
+                v-model.number="disaAnnee"
+                :options="disaAnneesOptions"
+                label="Année *"
+                outlined
+                dense
+                emit-value
+                map-options
+              />
+            </div>
+            <div class="col-12 col-sm-8">
+              <q-input
+                v-model="disaNumeroEmployeur"
+                label="N° employeur CNPS *"
+                outlined
+                dense
+                hint="Celui de la mairie, repris dans le nom du fichier"
+                :rules="[(v: string) => !!v || 'Obligatoire']"
+              />
+            </div>
+            <div class="col-12">
+              <q-input v-model="disaRaisonSociale" label="Raison sociale" outlined dense />
+            </div>
+          </div>
+
+          <q-toggle
+            v-model="disaInclureBrouillons"
+            label="Inclure les fiches de paie en brouillon"
+            dense
+            class="q-mt-sm"
+          />
+
+          <q-separator class="q-my-md" />
+
+          <div class="text-body2 q-mb-xs">Format du fichier Excel</div>
+          <q-option-group
+            v-model="disaFormat"
+            type="radio"
+            dense
+            :options="[
+              { label: '.xls — format de dépôt CNPS', value: 'xls' },
+              { label: '.xlsx — en-têtes et total en gris', value: 'xlsx' },
+            ]"
+          />
+          <div class="text-caption text-grey-7 q-ml-sm">
+            {{
+              disaFormat === 'xls'
+                ? 'Classeur binaire identique à celui de la CNPS. Ce format hérité ne transporte pas les couleurs.'
+                : 'Mêmes données, avec la mise en couleur. À réserver à la lecture, pas au dépôt.'
+            }}
+          </div>
+
+          <q-banner dense class="bg-grey-2 q-mt-md" v-if="disaRapport">
+            <template v-slot:avatar>
+              <q-icon name="summarize" color="teal-8" />
+            </template>
+            <div class="text-body2">
+              <strong>{{ disaRapport.lignes.length }}</strong> agent(s) ·
+              <strong>{{ disaRapport.nbFiches }}</strong> fiche(s) retenue(s)
+            </div>
+            <div class="text-caption text-grey-8">
+              Total brut déclaré : {{ formatMontant(disaRapport.totaux.salaireBrut) }}
+            </div>
+          </q-banner>
+          <q-banner dense class="bg-orange-1 q-mt-md" v-else-if="!disaLoading">
+            <template v-slot:avatar>
+              <q-icon name="warning" color="orange-8" />
+            </template>
+            Aucune fiche de paie sur cette année.
+          </q-banner>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Fermer" color="grey-7" v-close-popup />
+          <q-btn
+            outline
+            icon="picture_as_pdf"
+            label="PDF"
+            color="red-8"
+            no-caps
+            :disable="!disaPret"
+            @click="exporterDisaEnPdf"
+          />
+          <q-btn
+            unelevated
+            icon="grid_on"
+            :label="`Excel (.${disaFormat})`"
+            color="green-8"
+            no-caps
+            :disable="!disaPret"
+            @click="exporterDisaEnExcel"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
@@ -354,6 +507,15 @@ import { useQuasar, date } from 'quasar';
 import { db, type Employe, type ParametresPaie } from 'src/database/db';
 import PageHeader from 'src/components/PageHeader.vue';
 import DataTable from 'src/components/DataTable.vue';
+import { MAIRIE_INFO } from 'src/constanteInfo';
+import { openPrintWindow } from 'src/utils/printUrl';
+import {
+  construireDisa,
+  exporterDisaExcel,
+  nomFichierDisa,
+  type DisaRapport,
+  type FormatDisa,
+} from 'src/utils/disa';
 
 const $q = useQuasar();
 const loading = ref(false);
@@ -418,6 +580,15 @@ const statsCards = computed(() => {
 const servicesOptions = ref<string[]>([]);
 const typeEmployeOptions = ['Salariés', 'Contractuels', "Agents de l'État", 'Maire et Adjoints'];
 
+// Codes CNPS repris tels quels dans la colonne « TYPE SALARIE » du DISA.
+const TYPE_SALARIE_CNPS_DEFAUT = 'M';
+const REGIME_CNPS_DEFAUT = '123';
+const typeSalarieCnpsOptions = [
+  { label: 'M — Mensuel', value: 'M' },
+  { label: 'J — Journalier', value: 'J' },
+  { label: 'H — Horaire', value: 'H' },
+];
+
 const defaultForm = () => ({
   matricule: '',
   nom: '',
@@ -426,6 +597,9 @@ const defaultForm = () => ({
   typeEmploye: '' as Employe['typeEmploye'] | '',
   dateNaissance: '',
   dateEmbauche: date.formatDate(new Date(), 'YYYY-MM-DD'),
+  dateDepart: '',
+  typeSalarieCnps: TYPE_SALARIE_CNPS_DEFAUT,
+  regimeCnps: REGIME_CNPS_DEFAUT,
   poste: '',
   grade: '',
   categorie: '',
@@ -580,6 +754,9 @@ function editEmploye(row: Employe) {
     typeEmploye: row.typeEmploye,
     dateNaissance: row.dateNaissance ? date.formatDate(row.dateNaissance, 'YYYY-MM-DD') : '',
     dateEmbauche: row.dateEmbauche ? date.formatDate(row.dateEmbauche, 'YYYY-MM-DD') : '',
+    dateDepart: row.dateDepart ? date.formatDate(row.dateDepart, 'YYYY-MM-DD') : '',
+    typeSalarieCnps: row.typeSalarieCnps || TYPE_SALARIE_CNPS_DEFAUT,
+    regimeCnps: row.regimeCnps || REGIME_CNPS_DEFAUT,
     poste: row.poste,
     grade: row.grade || '',
     categorie: row.categorie || '',
@@ -607,6 +784,11 @@ async function saveEmploye() {
     typeEmploye: form.value.typeEmploye,
     ...(form.value.dateNaissance ? { dateNaissance: new Date(form.value.dateNaissance) } : {}),
     ...(form.value.dateEmbauche ? { dateEmbauche: new Date(form.value.dateEmbauche) } : {}),
+    // `dateDepart` doit pouvoir être effacée : on l'écrit toujours, à null si vide,
+    // sinon un agent réintégré garderait sa date de sortie.
+    dateDepart: form.value.dateDepart ? new Date(form.value.dateDepart) : null,
+    typeSalarieCnps: form.value.typeSalarieCnps || undefined,
+    regimeCnps: form.value.regimeCnps || undefined,
     poste: form.value.poste,
     grade: form.value.grade || undefined,
     categorie: form.value.categorie || undefined,
@@ -643,6 +825,97 @@ async function saveEmploye() {
   } catch {
     $q.notify({ type: 'negative', message: "Erreur lors de l'enregistrement" });
   }
+}
+
+// ─── Rapport DISA ────────────────────────────────────────────────────────────
+
+const showDisaDialog = ref(false);
+const disaLoading = ref(false);
+const disaAnnee = ref(new Date().getFullYear());
+const disaNumeroEmployeur = ref('');
+const disaRaisonSociale = ref('');
+const disaInclureBrouillons = ref(false);
+const disaFormat = ref<FormatDisa>('xls');
+const disaRapport = ref<DisaRapport | null>(null);
+const disaAnneesDisponibles = ref<number[]>([]);
+
+const disaAnneesOptions = computed(() => {
+  const courante = new Date().getFullYear();
+  const annees = new Set([...disaAnneesDisponibles.value, courante, disaAnnee.value]);
+  return [...annees].sort((a, b) => b - a).map((a) => ({ label: String(a), value: a }));
+});
+
+const disaPret = computed(
+  () =>
+    !!disaRapport.value &&
+    disaRapport.value.lignes.length > 0 &&
+    !!disaNumeroEmployeur.value.trim(),
+);
+
+async function openDisaDialog() {
+  disaNumeroEmployeur.value = MAIRIE_INFO.numeroEmployeurCNPS || '';
+  disaRaisonSociale.value = (MAIRIE_INFO.nom || '').toUpperCase();
+
+  const fiches = await db.fichesPaie.toArray();
+  disaAnneesDisponibles.value = [...new Set(fiches.map((f) => f.annee).filter(Boolean))];
+  // La DISA se dépose sur l'exercice écoulé : on propose la dernière année saisie.
+  const derniere = disaAnneesDisponibles.value.sort((a, b) => b - a)[0];
+  if (derniere) disaAnnee.value = derniere;
+
+  showDisaDialog.value = true;
+  await rafraichirDisa();
+}
+
+async function rafraichirDisa() {
+  disaLoading.value = true;
+  try {
+    const rapport = await construireDisa({
+      annee: disaAnnee.value,
+      numeroEmployeur: disaNumeroEmployeur.value.trim(),
+      raisonSociale: disaRaisonSociale.value,
+      inclureBrouillons: disaInclureBrouillons.value,
+    });
+    disaRapport.value = rapport.lignes.length > 0 ? rapport : null;
+  } finally {
+    disaLoading.value = false;
+  }
+}
+
+watch([disaAnnee, disaInclureBrouillons], () => {
+  if (showDisaDialog.value) void rafraichirDisa();
+});
+
+/** Recompose le rapport avec les en-têtes saisis avant tout export. */
+function rapportAJour(): DisaRapport | null {
+  if (!disaRapport.value) return null;
+  return {
+    ...disaRapport.value,
+    numeroEmployeur: disaNumeroEmployeur.value.trim(),
+    raisonSociale: disaRaisonSociale.value,
+  };
+}
+
+function exporterDisaEnExcel() {
+  const rapport = rapportAJour();
+  if (!rapport) return;
+  exporterDisaExcel(rapport, disaFormat.value);
+  $q.notify({
+    type: 'positive',
+    message: `Fichier ${nomFichierDisa(rapport, disaFormat.value)} généré`,
+  });
+}
+
+function exporterDisaEnPdf() {
+  const rapport = rapportAJour();
+  if (!rapport) return;
+  // La page recalcule elle-même depuis IndexedDB : elle reste ouvrable seule,
+  // par simple URL, comme les autres imprimés du dossier employe/.
+  openPrintWindow('employe/disa.html', {
+    annee: rapport.annee,
+    numeroEmployeur: rapport.numeroEmployeur,
+    raisonSociale: rapport.raisonSociale,
+    brouillons: disaInclureBrouillons.value ? 1 : 0,
+  });
 }
 
 function deleteEmploye(row: Employe) {

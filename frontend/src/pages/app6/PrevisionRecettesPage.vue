@@ -361,6 +361,7 @@ import {
 import PageHeader from 'src/components/PageHeader.vue';
 import DataTable from 'src/components/DataTable.vue';
 import { openPrintWindowWithMessage } from 'src/utils/printUrl';
+import { MAIRIE_INFO } from 'src/constanteInfo';
 
 const $q = useQuasar();
 const loading = ref(false);
@@ -617,9 +618,6 @@ async function generateEtatMensuel() {
     const moisSelectionne = etatMensuelFilters.value.mois;
     const type = etatMensuelFilters.value.type;
 
-    // Récupérer la mairie
-    const mairie = await db.mairies.toCollection().first();
-
     // Récupérer toutes les taxes
     const allTaxes = await db.taxes.toArray();
 
@@ -768,13 +766,13 @@ async function generateEtatMensuel() {
       annee,
       mois: moisSelectionne,
       moisNom: moisOptions.find((m) => m.value === moisSelectionne)?.label || '',
-      mairie: mairie
-        ? {
-            nom: mairie.nom,
-            code: mairie.code,
-            departement: mairie.departement,
-          }
-        : null,
+      // En-tête de l'état : lu depuis constanteInfo, source de vérité de la
+      // commune, et non depuis la table `mairies` figée au premier seed.
+      mairie: {
+        nom: MAIRIE_INFO.nom,
+        code: MAIRIE_INFO.code,
+        departement: MAIRIE_INFO.departement,
+      },
       lignes,
       totaux,
     };

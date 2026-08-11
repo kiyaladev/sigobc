@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Déclaration Individuelle des Salaires Annuels (DISA)</title>
+    <script src="../tailwindcss.js"></script>
+    <script src="../constanteInfo.js"></script>
+    <script>
+      document.title = 'DISA - ' + MAIRIE_INFO.ville;
+    </script>
+    <script src="../dexie.min.js"></script>
+    <style>
+      body {
+        font-family: 'Times New Roman', Times, serif;
+      }
+      .print-btn {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: #1976d2;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        z-index: 999;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      }
+      .print-btn:hover {
+        background: #1565c0;
+      }
+      .print-page {
+        width: 297mm;
+        min-height: 210mm;
+        background: #fff;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        margin: 20px auto;
+        padding: 1cm 1.2cm;
+        position: relative;
+        page-break-after: always;
+      }
+      .print-page:last-child {
+        page-break-after: auto;
+      }
+      .page-number {
+        position: absolute;
+        bottom: 8mm;
+        right: 10mm;
+        font-size: 9px;
+        color: #999;
+      }
+      table.data-table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      table.data-table th,
+      table.data-table td {
+        border: 1px solid #000;
+        padding: 2px 4px;
+        font-size: 10px;
+      }
+      /* Aplats neutres : gris clair sur les en-têtes, gris moyen sur le total. */
+      table.data-table th {
+        text-align: center;
+        font-weight: bold;
+        font-size: 9px;
+        line-height: 1.1;
+        background: #e9e9e9;
+      }
+      tr.total-row td {
+        background: #d9d9d9 !important;
+        font-weight: bold;
+      }
+      .entete-cnps td {
+        border: 1px solid #000;
+        padding: 3px 6px;
+        font-size: 11px;
+      }
+      .entete-cnps .libelle {
+        font-weight: bold;
+        text-align: center;
+        background: #e9e9e9;
+      }
+      .entete-cnps .valeur {
+        background: #f4f4f4;
+      }
+      .bloc-annee {
+        border: 1px solid #000;
+        background: #e9e9e9;
+        padding: 3px 10px;
+        text-align: center;
+      }
+      .editable-date {
+        cursor: pointer;
+        border-bottom: 1px dashed #999;
+        padding: 0 2px;
+        min-width: 80px;
+        display: inline-block;
+      }
+      .editable-date:hover {
+        background: #eee;
+      }
+      .editable-date:focus {
+        outline: 2px solid #1976d2;
+        background: #fff;
+        border-bottom: none;
+      }
+      .message-vide {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #888;
+        font-size: 14px;
+      }
+      @media print {
+        @page {
+          size: A4 landscape;
+          margin: 0;
+        }
+        body {
+          background: white;
+          padding: 0;
+          margin: 0;
+        }
+        .print-btn {
+          display: none !important;
+        }
+        .editable-date {
+          border-bottom: none;
+        }
+        .print-page {
+          box-shadow: none;
+          margin: 0;
+          width: 100%;
+          min-height: 100vh;
+          padding: 8mm 10mm;
+        }
+        /* Sans cette règle, Chrome supprime les aplats gris à l'impression. */
+        table.data-table th,
+        tr.total-row td,
+        .entete-cnps .libelle,
+        .entete-cnps .valeur,
+        .bloc-annee {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-gray-200">
+    <button class="print-btn" onclick="window.print()">Imprimer</button>
+    <div id="content">
+      <div class="print-page message-vide">Chargement...</div>
+    </div>
+    <script>
+      const ROWS_PER_PAGE = 22;
+
+      // Valeurs CNPS par défaut, alignées sur src/utils/disa.ts
+      const PLAFOND_PF_AT_DEFAUT = 70000;
+      const PLAFOND_RETRAITE_DEFAUT = 3375000;
+      const TYPE_SALARIE_DEFAUT = 'M';
+      const REGIME_DEFAUT = '123';
+
+      function fmt(n) {
+        return Number(n || 0).toLocaleString('fr-FR');
+      }
+
+      function fmtOrEmpty(n) {
+        return n ? fmt(n) : '';
+      }
+
+      function esc(v) {
+        return String(v === null || v === undefined ? '' : v).replace(
+          /[&<>]/g,
+          (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c],
+        );
+      }
+
+      function formaterDate(valeur) {
+        if (!valeur) return '';
+        const d = valeur instanceof Date ? valeur : new Date(valeur);
+        if (isNaN(d.getTime())) return '';
+        return (
+          String(d.getDate()).padStart(2, '0') +
+          '/' +
+          String(d.getMonth() + 1).padStart(2, '0') +
+          '/' +
+          d.getFullYear()
+        );
+      }
+
+      // D'anciennes saisies portent le littéral « <Undefined> » : on l'efface.
+      function texte(valeur) {
+        const v = String(valeur === null || valeur === undefined ? '' : valeur).trim();
+        return /^<?undefined>?$/i.test(v) ? '' : v;
+      }
+
+      function anneeDe(valeur) {
+        if (!valeur) return '';
+        const d = valeur instanceof Date ? valeur : new Date(valeur);
+        return isNaN(d.getTime()) ? '' : String(d.getFullYear());
+      }
+
+      /**
+       * Assemble les lignes du DISA à partir des fiches de paie de l'exercice.
+       * Même règle que `construireDisa()` côté application : un agent par fiche,
+       * assiettes plafonnées mois par mois.
+       */
+      function construireLignes(employes, fiches, plafondPfAt, plafondRetraite) {
+        const parEmploye = new Map();
+        for (const fiche of fiches) {
+          if (!fiche.employeId) continue;
+          let mois = parEmploye.get(fiche.employeId);
+          if (!mois) {
+            mois = new Map();
+            parEmploye.set(fiche.employeId, mois);
+          }
+          const existante = mois.get(fiche.mois);
+          if (existante) {
+            existante.montantBrut = (existante.montantBrut || 0) + (fiche.montantBrut || 0);
+          } else {
+            mois.set(fiche.mois, Object.assign({}, fiche));
+          }
+        }
+
+        const parId = new Map();
+        for (const e of employes) if (e.id) parId.set(e.id, e);
+
+        const ids = [...parEmploye.keys()].sort((a, b) => {
+          const ea = parId.get(a) || {};
+          const eb = parId.get(b) || {};
+          return `${ea.nom || ''} ${ea.prenom || ''}`.localeCompare(
+            `${eb.nom || ''} ${eb.prenom || ''}`,
+            'fr',
+          );
+        });
+
+        const lignes = [];
+        for (const id of ids) {
+          const employe = parId.get(id);
+          if (!employe) continue;
+          const moisTravailles = [...parEmploye.get(id).values()];
+
+          lignes.push({
+            numOrdre: lignes.length + 1,
+            nom: texte(employe.nom),
+            prenom: texte(employe.prenom),
+            numeroCnps: texte(employe.numeroCNPS),
+            anneeNaissance: anneeDe(employe.dateNaissance),
+            dateEmbauche: formaterDate(employe.dateEmbauche),
+            dateDepart: formaterDate(employe.dateDepart),
+            typeSalarie: texte(employe.typeSalarieCnps) || TYPE_SALARIE_DEFAUT,
+            salaireBrut: moisTravailles.reduce((s, f) => s + (f.montantBrut || 0), 0),
+            dureeActivite: moisTravailles.length,
+            montantPfAt: moisTravailles.reduce(
+              (s, f) => s + Math.min(f.montantBrut || 0, plafondPfAt),
+              0,
+            ),
+            montantRetraite: moisTravailles.reduce(
+              (s, f) => s + Math.min(f.montantBrut || 0, plafondRetraite),
+              0,
+            ),
+            regime: texte(employe.regimeCnps) || REGIME_DEFAUT,
+            observation: texte(employe.observations),
+          });
+        }
+        return lignes;
+      }
+
+      function buildEntete(data, pageNum, totalPages) {
+        return `<div class="flex justify-between items-start mb-2">
+          <table class="entete-cnps" style="border-collapse: collapse">
+            <tr>
+              <td class="libelle">CNPS</td>
+              <td class="valeur" style="min-width: 80px">${esc(data.numeroEmployeur)}</td>
+              <td class="libelle">RAISON<br />SOCIALE</td>
+              <td class="valeur" style="min-width: 180px">${esc(data.raisonSociale)}</td>
+            </tr>
+          </table>
+          <div class="text-center">
+            <div class="font-bold" style="font-size: 15px; letter-spacing: 1px">
+              DÉCLARATION INDIVIDUELLE DES SALAIRES ANNUELS
+            </div>
+            <div style="font-size: 11px">Page ${pageNum}/${totalPages}</div>
+          </div>
+          <div class="bloc-annee font-bold">
+            <div style="font-size: 12px">ANNÉE</div>
+            <div style="font-size: 18px">${esc(data.annee)}</div>
+          </div>
+        </div>`;
+      }
+
+      function buildTableHead() {
+        return `<thead>
+          <tr>
+            <th>NUM<br />ORDRE</th>
+            <th>NOM</th>
+            <th>PRENOM</th>
+            <th>NUM CNPS</th>
+            <th>ANNEE<br />NAISS.</th>
+            <th>DATE<br />EMBAUCHE</th>
+            <th>DATE<br />DEPART</th>
+            <th>TYPE<br />SALARIE</th>
+            <th>SALAIRE<br />BRUT.</th>
+            <th>DUREE<br />ACTIVITE</th>
+            <th>MONTANT<br />PF/AT.</th>
+            <th>MONTANT<br />RETRAITE</th>
+            <th>REGIME</th>
+            <th>OBSERVATION</th>
+          </tr>
+        </thead>`;
+      }
+
+      function buildRow(l) {
+        return `<tr>
+          <td class="text-center">${esc(l.numOrdre)}</td>
+          <td>${esc(l.nom)}</td>
+          <td>${esc(l.prenom)}</td>
+          <td class="text-center">${esc(l.numeroCnps)}</td>
+          <td class="text-center">${esc(l.anneeNaissance)}</td>
+          <td class="text-center">${esc(l.dateEmbauche)}</td>
+          <td class="text-center">${esc(l.dateDepart)}</td>
+          <td class="text-center">${esc(l.typeSalarie)}</td>
+          <td class="text-right">${fmtOrEmpty(l.salaireBrut)}</td>
+          <td class="text-center">${esc(l.dureeActivite)}</td>
+          <td class="text-right">${fmtOrEmpty(l.montantPfAt)}</td>
+          <td class="text-right">${fmtOrEmpty(l.montantRetraite)}</td>
+          <td class="text-center">${esc(l.regime)}</td>
+          <td>${esc(l.observation)}</td>
+        </tr>`;
+      }
+
+      function buildTotalRow(totaux) {
+        return `<tr class="total-row">
+          <td class="text-center" colspan="8"><strong>TOTAL</strong></td>
+          <td class="text-right">${fmt(totaux.salaireBrut)}</td>
+          <td></td>
+          <td class="text-right">${fmt(totaux.montantPfAt)}</td>
+          <td class="text-right">${fmt(totaux.montantRetraite)}</td>
+          <td colspan="2"></td>
+        </tr>`;
+      }
+
+      function buildSignature(data) {
+        const aujourdhui = new Date().toLocaleDateString('fr-FR');
+        return `<div class="mt-4 flex justify-between items-end" style="font-size: 12px">
+          <p class="font-bold underline" contenteditable="true">Chef des Services Financiers</p>
+          <div class="text-center">
+            <p class="font-bold">
+              ${esc((MAIRIE_INFO.ville || '').toUpperCase())}, le
+              <span class="editable-date" contenteditable="true">${aujourdhui}</span>
+            </p>
+            <p class="font-bold underline mt-1" contenteditable="true">
+              ${esc((data.raisonSociale || '').toUpperCase())}
+            </p>
+          </div>
+        </div>`;
+      }
+
+      function renderDisa(data) {
+        const lignes = data.lignes || [];
+        const content = document.getElementById('content');
+
+        if (lignes.length === 0) {
+          content.innerHTML = `<div class="print-page message-vide">
+            Aucune fiche de paie pour l'exercice ${esc(data.annee)}.
+          </div>`;
+          return;
+        }
+
+        const totalPages = Math.ceil(lignes.length / ROWS_PER_PAGE);
+        let html = '';
+
+        for (let page = 0; page < totalPages; page++) {
+          const debut = page * ROWS_PER_PAGE;
+          const tranche = lignes.slice(debut, debut + ROWS_PER_PAGE);
+          const derniere = page === totalPages - 1;
+
+          html += `<div class="print-page">
+            ${buildEntete(data, page + 1, totalPages)}
+            <table class="data-table">
+              ${buildTableHead()}
+              <tbody>
+                ${tranche.map(buildRow).join('')}
+                ${derniere ? buildTotalRow(data.totaux) : ''}
+              </tbody>
+            </table>
+            ${derniere ? buildSignature(data) : ''}
+            <div class="page-number">Page ${page + 1}/${totalPages}</div>
+          </div>`;
+        }
+
+        content.innerHTML = html;
+      }
+
+      document.addEventListener('DOMContentLoaded', async () => {
+        const params = new URLSearchParams(window.location.search);
+        const annee = parseInt(params.get('annee') || String(new Date().getFullYear()), 10);
+        const inclureBrouillons = params.get('brouillons') === '1';
+
+        try {
+          let db;
+          try {
+            db = new Dexie('TresorOfflineDB');
+            await db.open();
+          } catch (_e) {
+            db = new Dexie('TresorDatabase');
+            await db.open();
+          }
+
+          const [employes, fichesAnnee, parametres, mairie] = await Promise.all([
+            db.table('employes').toArray(),
+            db.table('fichesPaie').filter((f) => f.annee === annee).toArray(),
+            db.table('parametresPaie').toCollection().first(),
+            db.table('mairies').toCollection().first(),
+          ]);
+
+          const fiches = inclureBrouillons
+            ? fichesAnnee
+            : fichesAnnee.filter((f) => f.statut !== 'brouillon');
+
+          const lignes = construireLignes(
+            employes,
+            fiches,
+            (parametres && parametres.plafondCnpsPfAt) || PLAFOND_PF_AT_DEFAUT,
+            (parametres && parametres.plafondCnpsRetraite) || PLAFOND_RETRAITE_DEFAUT,
+          );
+
+          renderDisa({
+            annee,
+            numeroEmployeur:
+              params.get('numeroEmployeur') ||
+              (mairie && mairie.numeroEmployeurCNPS) ||
+              MAIRIE_INFO.numeroEmployeurCNPS ||
+              '',
+            raisonSociale:
+              params.get('raisonSociale') || (MAIRIE_INFO.nom || '').toUpperCase(),
+            lignes,
+            totaux: {
+              salaireBrut: lignes.reduce((s, l) => s + l.salaireBrut, 0),
+              montantPfAt: lignes.reduce((s, l) => s + l.montantPfAt, 0),
+              montantRetraite: lignes.reduce((s, l) => s + l.montantRetraite, 0),
+            },
+          });
+
+          if (params.get('print') === 'true') setTimeout(() => window.print(), 500);
+        } catch (e) {
+          console.error('[DISA] Chargement impossible :', e);
+          document.getElementById('content').innerHTML =
+            '<div class="print-page message-vide">Base de données inaccessible.</div>';
+        }
+      });
+    </script>
+  </body>
+</html>

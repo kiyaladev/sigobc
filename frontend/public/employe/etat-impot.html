@@ -145,75 +145,58 @@
         return Number(n || 0).toLocaleString('fr-FR');
       }
       function numberToWords(num) {
-        if (num === 0) return 'ZÉRO';
-        const u = [
-          '',
-          'un',
-          'deux',
-          'trois',
-          'quatre',
-          'cinq',
-          'six',
-          'sept',
-          'huit',
-          'neuf',
-          'dix',
-          'onze',
-          'douze',
-          'treize',
-          'quatorze',
-          'quinze',
-          'seize',
-          'dix-sept',
-          'dix-huit',
-          'dix-neuf',
-        ];
-        const t = [
-          '',
-          '',
-          'vingt',
-          'trente',
-          'quarante',
-          'cinquante',
-          'soixante',
-          'soixante',
-          'quatre-vingt',
-          'quatre-vingt',
-        ];
-        function lt1000(n) {
-          if (n < 20) return u[n];
-          if (n < 100) {
-            const a = Math.floor(n / 10),
-              b = n % 10;
-            if (a === 7) return 'soixante-' + u[10 + b];
-            if (a === 9) return 'quatre-vingt-' + u[10 + b];
-            return t[a] + (b === 1 && a !== 8 ? '-et-un' : b > 0 ? '-' + u[b] : a === 8 ? 's' : '');
+        // Conversion en toutes lettres (français). Implémentation unique et vérifiée.
+        var __n = Math.floor(Math.abs(Number(num) || 0));
+        var __neg = (Number(num) || 0) < 0;
+        var U = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf'];
+        var T = ['dix','onze','douze','treize','quatorze','quinze','seize','dix-sept','dix-huit','dix-neuf'];
+        var D = ['','','vingt','trente','quarante','cinquante','soixante','soixante','quatre-vingt','quatre-vingt'];
+        var SEP = " ";
+        function sub100(n) {
+          if (n < 10) return U[n];
+          if (n < 20) return T[n - 10];
+          var d = Math.floor(n / 10), u = n % 10;
+          if (d === 7 || d === 9) {
+            var r = n - (d === 7 ? 60 : 80); // 10..19
+            // 71 = "soixante et onze" ; 91 = "quatre-vingt-onze" (sans "et")
+            return D[d] + (d === 7 && r === 11 ? '-et-' : '-') + T[r - 10];
           }
-          const h = Math.floor(n / 100),
-            r = n % 100;
-          return (
-            (h === 1 ? 'cent' : u[h] + '-cent') +
-            (r === 0 && h > 1 ? 's' : '') +
-            (r > 0 ? '-' + lt1000(r) : '')
-          );
+          if (u === 0) return D[d] + (d === 8 ? 's' : ''); // quatre-vingts
+          if (u === 1 && d < 8) return D[d] + '-et-un';    // vingt-et-un ... soixante-et-un
+          return D[d] + '-' + U[u];
         }
-        function conv(n) {
-          if (!n) return '';
+        function sub1000(n) {
+          if (n < 100) return sub100(n);
+          var c = Math.floor(n / 100), r = n % 100;
+          var s = (c === 1 ? 'cent' : U[c] + '-cent');
+          if (r === 0) { if (c > 1) s += 's'; } else { s += '-' + sub100(r); }
+          return s;
+        }
+        // "vingt" et "cent" sont invariables devant "mille"
+        function invariable(s) { return s.replace(/(vingt|cent)s$/, '$1'); }
+        function convert(n) {
+          if (n === 0) return '';
+          if (n >= 1e9) {
+            var qb = Math.floor(n / 1e9), rb = n % 1e9;
+            var sb = (qb === 1 ? 'un' + SEP + 'milliard' : convert(qb) + SEP + 'milliards');
+            return rb ? sb + SEP + convert(rb) : sb;
+          }
           if (n >= 1e6) {
-            const m = Math.floor(n / 1e6),
-              r = n % 1e6;
-            return (
-              (m === 1 ? 'un million' : lt1000(m) + ' millions') + (r > 0 ? ' ' + conv(r) : '')
-            );
+            var qm = Math.floor(n / 1e6), rm = n % 1e6;
+            var sm = (qm === 1 ? 'un' + SEP + 'million' : convert(qm) + SEP + 'millions');
+            return rm ? sm + SEP + convert(rm) : sm;
           }
           if (n >= 1000) {
-            const k = Math.floor(n / 1000),
-              r = n % 1000;
-            return (k === 1 ? 'mille' : lt1000(k).replace(/s$/, '') + ' mille') + (r > 0 ? ' ' + lt1000(r) : '');
+            var qk = Math.floor(n / 1000), rk = n % 1000;
+            var sk = (qk === 1 ? 'mille' : invariable(sub1000(qk)) + SEP + 'mille');
+            return rk ? sk + SEP + sub1000(rk) : sk;
           }
-          return lt1000(n);
+          return sub1000(n);
         }
-        return conv(num).toUpperCase() + ' FRANCS CFA';
+        var __r = (__n === 0 ? 'zéro' : convert(__n));
+        if (__neg) __r = 'moins ' + __r;
+        __r = __r + " FRANCS CFA";
+        return __r.toUpperCase();
       }
       function buildHeader(moisLabel, annee, chapitre, compte) {
         return `<div class="flex justify-between items-start mb-4 text-[13px] font-bold">
@@ -337,8 +320,8 @@
               ${buildTableHead(tIts)}
               <tbody>${reportRow}${dataRows}${totalRow}</tbody>
             </table>
-            <div class="mt-6 text-[13px]"><p>Arrêté le présent état à la somme de: <span class="font-bold">${numberToWords(cIts)}</span></p></div>
-            <div class="flex justify-end mt-8 text-[13px]"><div class="text-center mr-8"><p>${MAIRIE_INFO.ville.toUpperCase()}, le <span class="editable-date" contenteditable="true">${new Date().toLocaleDateString('fr-FR')}</span></p><p class="font-bold mt-2">P/Le Maire & P.D</p></div></div>
+            <div class="mt-6 text-[13px]"><p>Arrêté le présent état à la somme de: <span class="font-bold" contenteditable="true">${numberToWords(cIts)}</span></p></div>
+            <div class="flex justify-between items-end mt-8 text-[13px]"><p class="font-bold underline" contenteditable="true">Chef des Services Financiers</p><div class="text-center mr-8"><p>${MAIRIE_INFO.ville.toUpperCase()}, le <span class="editable-date" contenteditable="true">${new Date().toLocaleDateString('fr-FR')}</span></p><p class="font-bold underline mt-2" contenteditable="true">P/Le Maire & P.D</p></div></div>
             <div class="page-number">Page ${idx + 1}/${totalPages}</div>
           </div>`;
         });

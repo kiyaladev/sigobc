@@ -288,7 +288,7 @@
 
           <div class="body-row">
             <span class="field-label">Montant de la recette :</span>
-            <span class="field-value filled money-text" data-field="montantLettres"
+            <span class="field-value filled money-text" data-field="montantLettres" contenteditable="true"
               >cent dix-neuf millions quatre-vingt-neuf mille huit cent quatre-vingt-dix-sept
               FCFA</span
             >
@@ -403,7 +403,7 @@
 
           <div class="body-row">
             <span class="field-label">Montant de la recette :</span>
-            <span class="field-value filled money-text" data-field="montantLettres"
+            <span class="field-value filled money-text" data-field="montantLettres" contenteditable="true"
               >cent dix-neuf millions quatre-vingt-neuf mille huit cent quatre-vingt-dix-sept
               FCFA</span
             >
@@ -437,81 +437,58 @@
     <script>
       // Fonction pour convertir un nombre en lettres (français)
       function nombreEnLettres(nombre) {
-        if (nombre === 0) return 'zéro';
-
-        const unites = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf'];
-        const dizaines = [
-          '',
-          '',
-          'vingt',
-          'trente',
-          'quarante',
-          'cinquante',
-          'soixante',
-          'soixante',
-          'quatre-vingt',
-          'quatre-vingt',
-        ];
-        const special = [
-          'dix',
-          'onze',
-          'douze',
-          'treize',
-          'quatorze',
-          'quinze',
-          'seize',
-          'dix-sept',
-          'dix-huit',
-          'dix-neuf',
-        ];
-
-        function convertirCentaines(n) {
-          if (n === 0) return '';
-          if (n < 10) return unites[n];
-          if (n < 20) return special[n - 10];
-          if (n < 100) {
-            const d = Math.floor(n / 10);
-            const u = n % 10;
-            let result = dizaines[d];
-            if (d === 7 || d === 9) {
-              result = dizaines[d - 1] + '-' + special[u];
-            } else if (u === 1 && d === 8) {
-              result = 'quatre-vingt-un';
-            } else if (u > 0) {
-              result += '-' + unites[u];
-            } else if (d === 8) {
-              result += 's';
-            }
-            return result;
+        // Conversion en toutes lettres (français). Implémentation unique et vérifiée.
+        var __n = Math.floor(Math.abs(Number(nombre) || 0));
+        var __neg = (Number(nombre) || 0) < 0;
+        var U = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf'];
+        var T = ['dix','onze','douze','treize','quatorze','quinze','seize','dix-sept','dix-huit','dix-neuf'];
+        var D = ['','','vingt','trente','quarante','cinquante','soixante','soixante','quatre-vingt','quatre-vingt'];
+        var SEP = " ";
+        function sub100(n) {
+          if (n < 10) return U[n];
+          if (n < 20) return T[n - 10];
+          var d = Math.floor(n / 10), u = n % 10;
+          if (d === 7 || d === 9) {
+            var r = n - (d === 7 ? 60 : 80); // 10..19
+            // 71 = "soixante et onze" ; 91 = "quatre-vingt-onze" (sans "et")
+            return D[d] + (d === 7 && r === 11 ? '-et-' : '-') + T[r - 10];
           }
-          const c = Math.floor(n / 100);
-          const reste = n % 100;
-          let result = c === 1 ? 'cent' : unites[c] + ' cent';
-          if (c > 1 && reste === 0) result += 's';
-          if (reste > 0) result += ' ' + convertirCentaines(reste);
-          return result;
+          if (u === 0) return D[d] + (d === 8 ? 's' : ''); // quatre-vingts
+          if (u === 1 && d < 8) return D[d] + '-et-un';    // vingt-et-un ... soixante-et-un
+          return D[d] + '-' + U[u];
         }
-
-        function convertirMilliers(n) {
-          if (n < 1000) return convertirCentaines(n);
-          const m = Math.floor(n / 1000);
-          const reste = n % 1000;
-          let result = m === 1 ? 'mille' : convertirCentaines(m).replace(/s$/, '') + ' mille';
-          if (reste > 0) result += ' ' + convertirCentaines(reste);
-          return result;
+        function sub1000(n) {
+          if (n < 100) return sub100(n);
+          var c = Math.floor(n / 100), r = n % 100;
+          var s = (c === 1 ? 'cent' : U[c] + '-cent');
+          if (r === 0) { if (c > 1) s += 's'; } else { s += '-' + sub100(r); }
+          return s;
         }
-
-        function convertirMillions(n) {
-          if (n < 1000000) return convertirMilliers(n);
-          const m = Math.floor(n / 1000000);
-          const reste = n % 1000000;
-          let result = convertirCentaines(m) + ' million';
-          if (m > 1) result += 's';
-          if (reste > 0) result += ' ' + convertirMilliers(reste);
-          return result;
+        // "vingt" et "cent" sont invariables devant "mille"
+        function invariable(s) { return s.replace(/(vingt|cent)s$/, '$1'); }
+        function convert(n) {
+          if (n === 0) return '';
+          if (n >= 1e9) {
+            var qb = Math.floor(n / 1e9), rb = n % 1e9;
+            var sb = (qb === 1 ? 'un' + SEP + 'milliard' : convert(qb) + SEP + 'milliards');
+            return rb ? sb + SEP + convert(rb) : sb;
+          }
+          if (n >= 1e6) {
+            var qm = Math.floor(n / 1e6), rm = n % 1e6;
+            var sm = (qm === 1 ? 'un' + SEP + 'million' : convert(qm) + SEP + 'millions');
+            return rm ? sm + SEP + convert(rm) : sm;
+          }
+          if (n >= 1000) {
+            var qk = Math.floor(n / 1000), rk = n % 1000;
+            var sk = (qk === 1 ? 'mille' : invariable(sub1000(qk)) + SEP + 'mille');
+            return rk ? sk + SEP + sub1000(rk) : sk;
+          }
+          return sub1000(n);
         }
-
-        return convertirMillions(nombre);
+        var __r = (__n === 0 ? 'zéro' : convert(__n));
+        if (__neg) __r = 'moins ' + __r;
+        __r = __r + "";
+        return __r;
       }
 
       // Fonction pour formater un nombre avec espaces

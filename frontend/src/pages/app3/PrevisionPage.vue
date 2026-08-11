@@ -421,6 +421,7 @@ import { db, type Prevision, type Chapitre, type Exercice, type SousChapitre, ty
 import PageHeader from 'src/components/PageHeader.vue';
 import DataTable from 'src/components/DataTable.vue';
 import { openPrintWindowWithMessage } from 'src/utils/printUrl';
+import { MAIRIE_INFO } from 'src/constanteInfo';
 
 const $q = useQuasar();
 const loading = ref(false);
@@ -888,9 +889,6 @@ async function generateEtatFinancierMensuel() {
     const annee = etatFinancierFilters.value.annee;
     const moisSelectionne = etatFinancierFilters.value.mois;
 
-    // Récupérer la mairie
-    const mairie = await db.mairies.toCollection().first();
-
     // Récupérer uniquement les mandats payés de l'année sélectionnée
     // (brouillon et annulé ne doivent pas impacter l'état d'exécution)
     const mandatsAnnee = await db.mandats
@@ -1087,13 +1085,13 @@ async function generateEtatFinancierMensuel() {
       annee,
       mois: moisSelectionne,
       moisNom: moisOptions.find((m) => m.value === moisSelectionne)?.label || '',
-      mairie: mairie
-        ? {
-            nom: mairie.nom,
-            code: mairie.code,
-            departement: mairie.departement,
-          }
-        : null,
+      // En-tête de l'état : lu depuis constanteInfo, source de vérité de la
+      // commune, et non depuis la table `mairies` figée au premier seed.
+      mairie: {
+        nom: MAIRIE_INFO.nom,
+        code: MAIRIE_INFO.code,
+        departement: MAIRIE_INFO.departement,
+      },
       lignes: etatFinancierDataFiltered,
       totaux: {
         prevision: etatFinancierDataFiltered.reduce((sum, l) => sum + l.prevision, 0),

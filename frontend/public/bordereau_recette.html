@@ -531,7 +531,7 @@
                 "
                 >Arrêté à la somme de :</span
               >
-              <span class="amount-text" id="total-en-lettres"></span>
+              <span class="amount-text" id="total-en-lettres" contenteditable="true"></span>
             </div>
 
             <div class="signature-block">
@@ -577,116 +577,58 @@
        * Convertit un nombre en lettres en français
        */
       function numberToWords(num) {
-        if (num === 0) return 'zéro';
-        if (num < 0) return 'moins ' + numberToWords(Math.abs(num));
-
-        const units = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf'];
-        const teens = [
-          'dix',
-          'onze',
-          'douze',
-          'treize',
-          'quatorze',
-          'quinze',
-          'seize',
-          'dix-sept',
-          'dix-huit',
-          'dix-neuf',
-        ];
-        const tens = [
-          '',
-          '',
-          'vingt',
-          'trente',
-          'quarante',
-          'cinquante',
-          'soixante',
-          'soixante',
-          'quatre-vingt',
-          'quatre-vingt',
-        ];
-
-        function convertLessThanThousand(n) {
-          if (n === 0) return '';
-          if (n < 10) return units[n] || '';
-          if (n < 20) return teens[n - 10] || '';
-
-          if (n < 100) {
-            const ten = Math.floor(n / 10);
-            const unit = n % 10;
-
-            if (ten === 7 || ten === 9) {
-              const base = tens[ten];
-              const remainder = ten === 7 ? n - 60 : n - 80;
-              if (remainder < 10) {
-                return base + '-' + units[remainder];
-              } else if (remainder < 20) {
-                return base + '-' + teens[remainder - 10];
-              }
-            }
-
-            if (unit === 0) {
-              return tens[ten] + (ten === 8 ? 's' : '');
-            }
-            if (unit === 1 && ten < 8) {
-              return tens[ten] + '-et-un';
-            }
-            return tens[ten] + '-' + units[unit];
+        // Conversion en toutes lettres (français). Implémentation unique et vérifiée.
+        var __n = Math.floor(Math.abs(Number(num) || 0));
+        var __neg = (Number(num) || 0) < 0;
+        var U = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf'];
+        var T = ['dix','onze','douze','treize','quatorze','quinze','seize','dix-sept','dix-huit','dix-neuf'];
+        var D = ['','','vingt','trente','quarante','cinquante','soixante','soixante','quatre-vingt','quatre-vingt'];
+        var SEP = "-";
+        function sub100(n) {
+          if (n < 10) return U[n];
+          if (n < 20) return T[n - 10];
+          var d = Math.floor(n / 10), u = n % 10;
+          if (d === 7 || d === 9) {
+            var r = n - (d === 7 ? 60 : 80); // 10..19
+            // 71 = "soixante et onze" ; 91 = "quatre-vingt-onze" (sans "et")
+            return D[d] + (d === 7 && r === 11 ? '-et-' : '-') + T[r - 10];
           }
-
-          const hundred = Math.floor(n / 100);
-          const remainder = n % 100;
-
-          let result = '';
-          if (hundred === 1) {
-            result = 'cent';
-          } else {
-            result = units[hundred] + '-cent';
-          }
-
-          if (remainder === 0 && hundred > 1) {
-            result += 's';
-          } else if (remainder > 0) {
-            const remainderText = convertLessThanThousand(remainder);
-            result += '-' + remainderText;
-          }
-
-          return result;
+          if (u === 0) return D[d] + (d === 8 ? 's' : ''); // quatre-vingts
+          if (u === 1 && d < 8) return D[d] + '-et-un';    // vingt-et-un ... soixante-et-un
+          return D[d] + '-' + U[u];
         }
-
+        function sub1000(n) {
+          if (n < 100) return sub100(n);
+          var c = Math.floor(n / 100), r = n % 100;
+          var s = (c === 1 ? 'cent' : U[c] + '-cent');
+          if (r === 0) { if (c > 1) s += 's'; } else { s += '-' + sub100(r); }
+          return s;
+        }
+        // "vingt" et "cent" sont invariables devant "mille"
+        function invariable(s) { return s.replace(/(vingt|cent)s$/, '$1'); }
         function convert(n) {
           if (n === 0) return '';
-
-          if (n >= 1000000000) {
-            const billions = Math.floor(n / 1000000000);
-            const remainder = n % 1000000000;
-            let result =
-              billions === 1 ? 'un-milliard' : convertLessThanThousand(billions) + '-milliards';
-            if (remainder > 0) result += '-' + convert(remainder);
-            return result;
+          if (n >= 1e9) {
+            var qb = Math.floor(n / 1e9), rb = n % 1e9;
+            var sb = (qb === 1 ? 'un' + SEP + 'milliard' : convert(qb) + SEP + 'milliards');
+            return rb ? sb + SEP + convert(rb) : sb;
           }
-
-          if (n >= 1000000) {
-            const millions = Math.floor(n / 1000000);
-            const remainder = n % 1000000;
-            let result =
-              millions === 1 ? 'un-million' : convertLessThanThousand(millions) + '-millions';
-            if (remainder > 0) result += '-' + convert(remainder);
-            return result;
+          if (n >= 1e6) {
+            var qm = Math.floor(n / 1e6), rm = n % 1e6;
+            var sm = (qm === 1 ? 'un' + SEP + 'million' : convert(qm) + SEP + 'millions');
+            return rm ? sm + SEP + convert(rm) : sm;
           }
-
           if (n >= 1000) {
-            const thousands = Math.floor(n / 1000);
-            const remainder = n % 1000;
-            let result = thousands === 1 ? 'mille' : convertLessThanThousand(thousands).replace(/s$/, '') + '-mille';
-            if (remainder > 0) result += '-' + convertLessThanThousand(remainder);
-            return result;
+            var qk = Math.floor(n / 1000), rk = n % 1000;
+            var sk = (qk === 1 ? 'mille' : invariable(sub1000(qk)) + SEP + 'mille');
+            return rk ? sk + SEP + sub1000(rk) : sk;
           }
-
-          return convertLessThanThousand(n);
+          return sub1000(n);
         }
-
-        return convert(num);
+        var __r = (__n === 0 ? 'zéro' : convert(__n));
+        if (__neg) __r = 'moins ' + __r;
+        __r = __r + "";
+        return __r;
       }
 
       let db;

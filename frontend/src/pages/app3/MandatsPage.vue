@@ -586,6 +586,18 @@
               </div>
             </div>
 
+            <div class="row q-col-gutter-sm">
+              <div class="col-12 col-md-6">
+                <q-input
+                  v-model="formData.nomSignataire"
+                  label="Nom du signataire"
+                  outlined
+                  dense
+                  hint="Imprimé au-dessus de « Vu bon à Payer » sur le mandat"
+                />
+              </div>
+            </div>
+
             <!-- Section 6: Motif d'annulation (visible uniquement si statut = annulé) -->
             <template v-if="formData.statut === 'annule'">
               <q-separator class="q-my-sm" />
@@ -706,6 +718,7 @@ const formData = ref({
   avisMunicipalite: '',
   numeroDeliberation: '',
   dateDeliberation: '',
+  nomSignataire: '',
   montantPrecompter: 0,
   typeBien: '' as '' | 'immobilier' | 'mobilier' | 'incorporel',
   projetId: null as number | null,
@@ -1257,6 +1270,7 @@ function resetForm() {
     avisMunicipalite: '',
     numeroDeliberation: '',
     dateDeliberation: '',
+    nomSignataire: '',
     montantPrecompter: 0,
     typeBien: '',
     projetId: null,
@@ -1456,6 +1470,7 @@ function editMandat(row: Mandat) {
     dateDeliberation: row.dateDeliberation
       ? date.formatDate(row.dateDeliberation, 'YYYY-MM-DD')
       : '',
+    nomSignataire: row.nomSignataire || '',
     montantPrecompter: row.montantPrecompter || 0,
     typeBien: (row.typeBien as '' | 'immobilier' | 'mobilier' | 'incorporel') || '',
     projetId: row.projetId || null,

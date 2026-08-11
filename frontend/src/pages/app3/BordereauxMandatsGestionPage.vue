@@ -273,6 +273,47 @@
         </q-card-section>
       </q-card>
     </q-dialog>
+
+    <!-- Dialog d'impression : type de bordereau + options d'affichage -->
+    <q-dialog v-model="printDialogVisible" persistent>
+      <q-card class="dialog-card" style="width: min(460px, 96vw); max-width: 96vw">
+        <q-card-section class="accent-left">
+          <div class="text-h6">Impression du Bordereau</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          <div class="text-body2 q-mb-sm">Choisissez le type de bordereau à imprimer :</div>
+          <q-option-group
+            v-model="printType"
+            type="radio"
+            :options="[
+              { label: 'Bordereau d\'Émission', value: 'emission' },
+              { label: 'Bordereau de Rejet (mandats annulés)', value: 'rejet' },
+            ]"
+          />
+
+          <q-separator class="q-my-md" />
+
+          <q-toggle
+            v-model="printControlePec"
+            :disable="printType !== 'emission'"
+            label="Calculer le contrôle des prises en charge"
+          />
+          <div class="text-caption text-grey-7 q-ml-sm">
+            {{
+              printType === 'emission'
+                ? 'Cumul des montants mandatés par compte, en bas du bordereau.'
+                : 'Disponible uniquement sur le bordereau d’émission.'
+            }}
+          </div>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Annuler" color="grey-7" v-close-popup />
+          <q-btn unelevated label="Imprimer" color="primary" @click="confirmPrintBordereau" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
@@ -659,34 +700,38 @@ function confirmDelete(bordereau: BordereauMandat) {
   });
 }
 
+const printDialogVisible = ref(false);
+const printType = ref<'emission' | 'rejet'>('emission');
+const printControlePec = ref(true);
+const bordereauToPrint = ref<BordereauMandat | null>(null);
+
 function printBordereau(bordereau: BordereauMandat) {
-  // Afficher un dialog avec les deux options d'impression (radio)
-  $q.dialog({
-    title: 'Impression du Bordereau',
-    message: 'Choisissez le type de bordereau à imprimer :',
-    options: {
-      type: 'radio',
-      model: 'emission',
-      items: [
-        { label: "Bordereau d'Émission", value: 'emission' },
-        { label: 'Bordereau de Rejet (mandats annulés)', value: 'rejet' },
-      ],
-    },
-    cancel: true,
-    persistent: true,
-  }).onOk((selected: string) => {
-    if (selected === 'emission') {
-      openPrintWindow('bordereau_mandat.html', {
-        Numbordereau: bordereau.numero,
-        Annee: bordereau.exercice,
-      });
-    } else if (selected === 'rejet') {
-      openPrintWindow('bordereau_mandat_rejet.html', {
-        Numbordereau: bordereau.numero,
-        Annee: bordereau.exercice,
-      });
-    }
-  });
+  bordereauToPrint.value = bordereau;
+  printType.value = 'emission';
+  printControlePec.value = true;
+  printDialogVisible.value = true;
+}
+
+function confirmPrintBordereau() {
+  const bordereau = bordereauToPrint.value;
+  if (!bordereau) return;
+  printDialogVisible.value = false;
+
+  if (printType.value === 'emission') {
+    openPrintWindow('bordereau_mandat.html', {
+      Numbordereau: bordereau.numero,
+      Annee: bordereau.exercice,
+      // Valeur initiale de la case dans la barre d'options du bordereau,
+      // que l'utilisateur peut encore modifier une fois le document ouvert.
+      controlePec: printControlePec.value ? 1 : 0,
+    });
+  } else {
+    // Le bordereau de rejet n'a pas de bloc de contrôle des prises en charge.
+    openPrintWindow('bordereau_mandat_rejet.html', {
+      Numbordereau: bordereau.numero,
+      Annee: bordereau.exercice,
+    });
+  }
 }
 
 function downloadBordereauPDF(bordereau: BordereauMandat) {

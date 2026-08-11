@@ -173,6 +173,19 @@
             <div class="col-12 col-md-4">
               <q-item>
                 <q-item-section avatar>
+                  <q-icon name="badge" color="teal-8" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label caption>N° employeur CNPS</q-item-label>
+                  <q-item-label class="text-weight-bold text-body1">{{
+                    mairie.numeroEmployeurCNPS || '-'
+                  }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </div>
+            <div class="col-12 col-md-4">
+              <q-item>
+                <q-item-section avatar>
                   <q-icon name="public" color="deep-purple" />
                 </q-item-section>
                 <q-item-section>
@@ -292,6 +305,18 @@
             </div>
             <div class="col-12 col-md-4">
               <q-input
+                v-model.number="parametresPaie.tauxIgr"
+                label="Taux IGR"
+                type="number"
+                step="0.01"
+                outlined
+                dense
+                suffix="%"
+                hint="Impôt Général sur le Revenu"
+              />
+            </div>
+            <div class="col-12 col-md-4">
+              <q-input
                 v-model.number="parametresPaie.abattementCN"
                 label="Abattement C.N. (ITS - valeur)"
                 type="number"
@@ -344,6 +369,32 @@
                 outlined
                 dense
                 suffix="%"
+              />
+            </div>
+            <!-- Plafonds mensuels des assiettes CNPS : servent aux états de
+                 décompte patronal et aux colonnes du rapport DISA. -->
+            <div class="col-12 col-md-3">
+              <q-input
+                v-model.number="parametresPaie.plafondCnpsPfAt"
+                label="Plafond mensuel PF / AT"
+                type="number"
+                step="1000"
+                outlined
+                dense
+                suffix="F CFA"
+                hint="Assiette prest. familiales et accidents du travail"
+              />
+            </div>
+            <div class="col-12 col-md-3">
+              <q-input
+                v-model.number="parametresPaie.plafondCnpsRetraite"
+                label="Plafond mensuel Retraite"
+                type="number"
+                step="1000"
+                outlined
+                dense
+                suffix="F CFA"
+                hint="Assiette de la cotisation retraite"
               />
             </div>
           </div>
@@ -416,6 +467,7 @@ import {
 } from 'src/database/db';
 import PageHeader from 'src/components/PageHeader.vue';
 import { MAIRIE_INFO } from 'src/constanteInfo';
+import { PLAFOND_PF_AT_DEFAUT, PLAFOND_RETRAITE_DEFAUT } from 'src/utils/disa';
 
 const $q = useQuasar();
 
@@ -502,6 +554,12 @@ async function loadData() {
     exercices.value = await db.exercices.orderBy('annee').reverse().toArray();
 
     const params = await db.parametresPaie.toCollection().first();
+    // Paramètres ajoutés après coup : valeur par défaut pour les bases existantes
+    if (params) {
+      params.tauxIgr = params.tauxIgr ?? 0;
+      params.plafondCnpsPfAt = params.plafondCnpsPfAt ?? PLAFOND_PF_AT_DEFAUT;
+      params.plafondCnpsRetraite = params.plafondCnpsRetraite ?? PLAFOND_RETRAITE_DEFAUT;
+    }
     parametresPaie.value = params || null;
   } catch (error) {
     console.error('Erreur:', error);

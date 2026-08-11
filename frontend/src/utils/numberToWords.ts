@@ -1,6 +1,6 @@
 /**
  * Convertit un nombre en lettres en français
- * @param num - Le nombre à convertir (de 0 à 999 999 999 999)
+ * @param num - Le nombre à convertir
  * @returns La représentation en lettres du nombre
  */
 export function numberToWords(num: number): string {
@@ -42,116 +42,71 @@ export function numberToWords(num: number): string {
     'quatre-vingt',
   ];
 
-  function convertLessThanThousand(n: number): string {
-    if (n === 0) return '';
+  function convertLessThanHundred(n: number): string {
     if (n < 10) return units[n] || '';
     if (n < 20) return teens[n - 10] || '';
 
-    if (n < 100) {
-      const ten = Math.floor(n / 10);
-      const unit = n % 10;
+    const ten = Math.floor(n / 10);
+    const unit = n % 10;
 
-      if (ten === 7 || ten === 9) {
-        // 70-79 et 90-99 cas particuliers
-        const base = tens[ten];
-        const remainder = ten === 7 ? n - 60 : n - 80;
-        if (remainder < 10) {
-          return base + '-' + units[remainder];
-        } else if (remainder < 20) {
-          return base + '-' + teens[remainder - 10];
-        }
-      }
-
-      if (unit === 0) {
-        return tens[ten] + (ten === 8 ? 's' : ''); // quatre-vingts
-      }
-      if (unit === 1 && ten < 8) {
-        return tens[ten] + '-et-un';
-      }
-      return tens[ten] + '-' + units[unit];
+    // 70-79 et 90-99 : la dizaine reprend soixante / quatre-vingt + 10..19
+    if (ten === 7 || ten === 9) {
+      const remainder = n - (ten === 7 ? 60 : 80); // 10..19
+      // 71 = « soixante et onze », mais 91 = « quatre-vingt-onze » (sans « et »)
+      const liaison = ten === 7 && remainder === 11 ? '-et-' : '-';
+      return tens[ten] + liaison + teens[remainder - 10];
     }
 
-    // 100-999
+    if (unit === 0) return tens[ten] + (ten === 8 ? 's' : ''); // quatre-vingts
+    if (unit === 1 && ten < 8) return tens[ten] + '-et-un'; // vingt-et-un … soixante-et-un
+    return tens[ten] + '-' + units[unit];
+  }
+
+  function convertLessThanThousand(n: number): string {
+    if (n === 0) return '';
+    if (n < 100) return convertLessThanHundred(n);
+
     const hundred = Math.floor(n / 100);
     const remainder = n % 100;
 
-    let result = '';
-    if (hundred === 1) {
-      result = 'cent';
+    let result = hundred === 1 ? 'cent' : units[hundred] + '-cent';
+    if (remainder === 0) {
+      if (hundred > 1) result += 's'; // deux-cents, trois-cents…
     } else {
-      result = units[hundred] + '-cent';
+      result += '-' + convertLessThanHundred(remainder);
     }
-
-    if (remainder === 0 && hundred > 1) {
-      result += 's'; // deux-cents, trois-cents, etc.
-    } else if (remainder > 0) {
-      const remainderText = convertLessThanThousand(remainder);
-      result += '-' + remainderText;
-    }
-
     return result;
+  }
+
+  /** « vingt » et « cent » sont invariables devant « mille » (adjectif numéral). */
+  function invariable(s: string): string {
+    return s.replace(/(vingt|cent)s$/, '$1');
   }
 
   function convert(n: number): string {
     if (n === 0) return '';
 
-    // Milliards
-    if (n >= 1000000000) {
-      const billions = Math.floor(n / 1000000000);
-      const remainder = n % 1000000000;
-      let result = '';
-
-      if (billions === 1) {
-        result = 'un-milliard';
-      } else {
-        result = convertLessThanThousand(billions) + '-milliards';
-      }
-
-      if (remainder > 0) {
-        result += '-' + convert(remainder);
-      }
-      return result;
+    if (n >= 1_000_000_000) {
+      const billions = Math.floor(n / 1_000_000_000);
+      const remainder = n % 1_000_000_000;
+      // convert() (et non convertLessThanThousand) pour supporter au-delà de 999 milliards
+      const result = billions === 1 ? 'un-milliard' : convert(billions) + '-milliards';
+      return remainder > 0 ? result + '-' + convert(remainder) : result;
     }
 
-    // Millions
-    if (n >= 1000000) {
-      const millions = Math.floor(n / 1000000);
-      const remainder = n % 1000000;
-      let result = '';
-
-      if (millions === 1) {
-        result = 'un-million';
-      } else {
-        result = convertLessThanThousand(millions) + '-millions';
-      }
-
-      if (remainder > 0) {
-        result += '-' + convert(remainder);
-      }
-      return result;
+    if (n >= 1_000_000) {
+      const millions = Math.floor(n / 1_000_000);
+      const remainder = n % 1_000_000;
+      const result = millions === 1 ? 'un-million' : convert(millions) + '-millions';
+      return remainder > 0 ? result + '-' + convert(remainder) : result;
     }
 
-    // Milliers
     if (n >= 1000) {
       const thousands = Math.floor(n / 1000);
       const remainder = n % 1000;
-      let result = '';
-
-      if (thousands === 1) {
-        result = 'mille';
-      } else {
-        // "vingt" et "cent" sont invariables devant "mille" (adjectif numéral)
-        let prefix = convertLessThanThousand(thousands);
-        if (prefix.endsWith('vingts') || prefix.endsWith('cents')) {
-          prefix = prefix.slice(0, -1);
-        }
-        result = prefix + '-mille';
-      }
-
-      if (remainder > 0) {
-        result += '-' + convertLessThanThousand(remainder);
-      }
-      return result;
+      const result =
+        thousands === 1 ? 'mille' : invariable(convertLessThanThousand(thousands)) + '-mille';
+      return remainder > 0 ? result + '-' + convertLessThanThousand(remainder) : result;
     }
 
     return convertLessThanThousand(n);

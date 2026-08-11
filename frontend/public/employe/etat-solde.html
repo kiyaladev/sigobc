@@ -191,78 +191,58 @@
         return n ? Number(n).toLocaleString('fr-FR') : '';
       }
       function numberToWords(num) {
-        if (num === 0) return 'ZÉRO';
-        const units = [
-          '',
-          'un',
-          'deux',
-          'trois',
-          'quatre',
-          'cinq',
-          'six',
-          'sept',
-          'huit',
-          'neuf',
-          'dix',
-          'onze',
-          'douze',
-          'treize',
-          'quatorze',
-          'quinze',
-          'seize',
-          'dix-sept',
-          'dix-huit',
-          'dix-neuf',
-        ];
-        const tens = [
-          '',
-          '',
-          'vingt',
-          'trente',
-          'quarante',
-          'cinquante',
-          'soixante',
-          'soixante',
-          'quatre-vingt',
-          'quatre-vingt',
-        ];
-        function lt1000(n) {
-          if (n < 20) return units[n];
-          if (n < 100) {
-            const t = Math.floor(n / 10),
-              u = n % 10;
-            if (t === 7) return 'soixante-' + units[10 + u];
-            if (t === 9) return 'quatre-vingt-' + units[10 + u];
-            return (
-              tens[t] +
-              (u === 1 && t !== 8 ? '-et-un' : u > 0 ? '-' + units[u] : t === 8 ? 's' : '')
-            );
+        // Conversion en toutes lettres (français). Implémentation unique et vérifiée.
+        var __n = Math.floor(Math.abs(Number(num) || 0));
+        var __neg = (Number(num) || 0) < 0;
+        var U = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf'];
+        var T = ['dix','onze','douze','treize','quatorze','quinze','seize','dix-sept','dix-huit','dix-neuf'];
+        var D = ['','','vingt','trente','quarante','cinquante','soixante','soixante','quatre-vingt','quatre-vingt'];
+        var SEP = " ";
+        function sub100(n) {
+          if (n < 10) return U[n];
+          if (n < 20) return T[n - 10];
+          var d = Math.floor(n / 10), u = n % 10;
+          if (d === 7 || d === 9) {
+            var r = n - (d === 7 ? 60 : 80); // 10..19
+            // 71 = "soixante et onze" ; 91 = "quatre-vingt-onze" (sans "et")
+            return D[d] + (d === 7 && r === 11 ? '-et-' : '-') + T[r - 10];
           }
-          const h = Math.floor(n / 100),
-            r = n % 100;
-          return (
-            (h === 1 ? 'cent' : units[h] + '-cent') +
-            (r === 0 && h > 1 ? 's' : '') +
-            (r > 0 ? '-' + lt1000(r) : '')
-          );
+          if (u === 0) return D[d] + (d === 8 ? 's' : ''); // quatre-vingts
+          if (u === 1 && d < 8) return D[d] + '-et-un';    // vingt-et-un ... soixante-et-un
+          return D[d] + '-' + U[u];
         }
-        function conv(n) {
-          if (!n) return '';
+        function sub1000(n) {
+          if (n < 100) return sub100(n);
+          var c = Math.floor(n / 100), r = n % 100;
+          var s = (c === 1 ? 'cent' : U[c] + '-cent');
+          if (r === 0) { if (c > 1) s += 's'; } else { s += '-' + sub100(r); }
+          return s;
+        }
+        // "vingt" et "cent" sont invariables devant "mille"
+        function invariable(s) { return s.replace(/(vingt|cent)s$/, '$1'); }
+        function convert(n) {
+          if (n === 0) return '';
+          if (n >= 1e9) {
+            var qb = Math.floor(n / 1e9), rb = n % 1e9;
+            var sb = (qb === 1 ? 'un' + SEP + 'milliard' : convert(qb) + SEP + 'milliards');
+            return rb ? sb + SEP + convert(rb) : sb;
+          }
           if (n >= 1e6) {
-            const m = Math.floor(n / 1e6),
-              r = n % 1e6;
-            return (
-              (m === 1 ? 'un million' : lt1000(m) + ' millions') + (r > 0 ? ' ' + conv(r) : '')
-            );
+            var qm = Math.floor(n / 1e6), rm = n % 1e6;
+            var sm = (qm === 1 ? 'un' + SEP + 'million' : convert(qm) + SEP + 'millions');
+            return rm ? sm + SEP + convert(rm) : sm;
           }
           if (n >= 1000) {
-            const k = Math.floor(n / 1000),
-              r = n % 1000;
-            return (k === 1 ? 'mille' : lt1000(k).replace(/s$/, '') + ' mille') + (r > 0 ? ' ' + lt1000(r) : '');
+            var qk = Math.floor(n / 1000), rk = n % 1000;
+            var sk = (qk === 1 ? 'mille' : invariable(sub1000(qk)) + SEP + 'mille');
+            return rk ? sk + SEP + sub1000(rk) : sk;
           }
-          return lt1000(n);
+          return sub1000(n);
         }
-        return conv(num).toUpperCase() + ' FRANCS CFA';
+        var __r = (__n === 0 ? 'zéro' : convert(__n));
+        if (__neg) __r = 'moins ' + __r;
+        __r = __r + " FRANCS CFA";
+        return __r.toUpperCase();
       }
 
       function buildHeader(premierJour, dernierJour, annee, chapitre, compte) {
@@ -306,7 +286,6 @@
           const tCnps = paramsDb ? paramsDb.tauxCnpsEmploye : 6.3;
           const tIts = paramsDb ? paramsDb.tauxIts : 1.6;
           const tFns = paramsDb ? paramsDb.tauxFns : 1;
-          const abattementCN = paramsDb ? paramsDb.abattementCN || 750 : 750;
 
           let fiches = await db
             .table('fichesPaie')
@@ -348,8 +327,13 @@
               const brut = base + log;
               const cnps = isSalarie ? f.cotisationCNPS || 0 : 0;
               const its = isSalarie ? f.impotSurSalaire || 0 : 0;
-              const cn = isSalarie ? Math.max(0, its - abattementCN) : 0;
-              const totalImp = MAIRIE_INFO.typeRetenue === 'CN' ? its + cn : its;
+              // Retenue communale (C.N. à Gboguhé, F.N.S. à Vavoua — même retenue,
+              // libellé selon MAIRIE_INFO.typeRetenue) et I.G.R. : montants stockés
+              // sur la fiche, jamais dérivés de l'ITS. Absents des fiches
+              // existantes → cellules vides.
+              const cn = isSalarie ? f.retenueCommunale || 0 : 0;
+              const igr = isSalarie ? f.impotGeneralRevenu || 0 : 0;
+              const totalImp = its + cn + igr;
               const netImp = brut - cnps;
               const primes = transport + (f.autresIndemnites || 0);
               const net = netImp - totalImp + primes;
@@ -363,6 +347,7 @@
                 cnps,
                 netImp,
                 its,
+                igr,
                 cn,
                 totalImp,
                 primes,
@@ -383,6 +368,7 @@
             cCnps = 0,
             cNetImp = 0,
             cIts = 0,
+            cIgr = 0,
             cCn = 0,
             cImp = 0,
             cPrimes = 0,
@@ -397,6 +383,7 @@
               rCnps = cCnps,
               rNetImp = cNetImp,
               rIts = cIts,
+              rIgr = cIgr,
               rCn = cCn,
               rImp = cImp,
               rPrimes = cPrimes,
@@ -409,6 +396,7 @@
               cCnps += d.cnps;
               cNetImp += d.netImp;
               cIts += d.its;
+              cIgr += d.igr;
               cCn += d.cn;
               cImp += d.totalImp;
               cPrimes += d.primes;
@@ -420,14 +408,14 @@
                 ? `<tr class="report-row">
             <td colspan="2" style="text-align:left;padding-left:8px">REPORT</td>
             <td>${fmtOrEmpty(rBase)}</td><td>${fmtOrEmpty(rLog)}</td><td>${fmtOrEmpty(rBrut)}</td><td>${fmtOrEmpty(rCnps)}</td><td>${fmtOrEmpty(rNetImp)}</td>
-            <td>${fmtOrEmpty(rIts)}</td><td></td><td>${MAIRIE_INFO.typeRetenue === 'CN' ? fmtOrEmpty(rCn) : ''}</td><td>${fmtOrEmpty(rImp)}</td><td>${fmtOrEmpty(rPrimes)}</td><td>${fmtOrEmpty(rNet)}</td><td></td>
+            <td>${fmtOrEmpty(rIts)}</td><td>${fmtOrEmpty(rIgr)}</td><td>${fmtOrEmpty(rCn)}</td><td>${fmtOrEmpty(rImp)}</td><td>${fmtOrEmpty(rPrimes)}</td><td>${fmtOrEmpty(rNet)}</td><td></td>
           </tr>`
                 : '';
 
             const dataRows = pageData
               .map(
                 (d) => `<tr>
-            <td>${d.idx}</td><td class="name-cell">${d.nom}</td><td>${fmtOrEmpty(d.base)}</td><td>${fmtOrEmpty(d.log)}</td><td>${fmtOrEmpty(d.brut)}</td><td>${fmtOrEmpty(d.cnps)}</td><td>${fmtOrEmpty(d.netImp)}</td><td>${fmtOrEmpty(d.its)}</td><td></td><td>${MAIRIE_INFO.typeRetenue === 'CN' ? fmtOrEmpty(d.cn) : ''}</td><td>${fmtOrEmpty(d.totalImp)}</td><td>${fmtOrEmpty(d.primes)}</td><td class="font-bold">${fmtOrEmpty(d.net)}</td><td></td>
+            <td>${d.idx}</td><td class="name-cell">${d.nom}</td><td>${fmtOrEmpty(d.base)}</td><td>${fmtOrEmpty(d.log)}</td><td>${fmtOrEmpty(d.brut)}</td><td>${fmtOrEmpty(d.cnps)}</td><td>${fmtOrEmpty(d.netImp)}</td><td>${fmtOrEmpty(d.its)}</td><td>${fmtOrEmpty(d.igr)}</td><td>${fmtOrEmpty(d.cn)}</td><td>${fmtOrEmpty(d.totalImp)}</td><td>${fmtOrEmpty(d.primes)}</td><td class="font-bold">${fmtOrEmpty(d.net)}</td><td></td>
           </tr>`,
               )
               .join('');
@@ -435,14 +423,14 @@
             const totalRow = `<tr class="total-row">
             <td colspan="2" style="text-align:left;padding-left:8px"><strong>${isLast ? 'TOTAUX' : 'TOTAL'} ...................</strong></td>
             <td><strong>${fmtOrEmpty(cBase)}</strong></td><td><strong>${fmtOrEmpty(cLog)}</strong></td><td><strong>${fmtOrEmpty(cBrut)}</strong></td><td><strong>${fmtOrEmpty(cCnps)}</strong></td><td><strong>${fmtOrEmpty(cNetImp)}</strong></td>
-            <td><strong>${fmtOrEmpty(cIts)}</strong></td><td></td><td>${MAIRIE_INFO.typeRetenue === 'CN' ? `<strong>${fmtOrEmpty(cCn)}</strong>` : ''}</td><td><strong>${fmtOrEmpty(cImp)}</strong></td><td><strong>${fmtOrEmpty(cPrimes)}</strong></td><td><strong>${fmtOrEmpty(cNet)}</strong></td><td></td>
+            <td><strong>${fmtOrEmpty(cIts)}</strong></td><td><strong>${fmtOrEmpty(cIgr)}</strong></td><td><strong>${fmtOrEmpty(cCn)}</strong></td><td><strong>${fmtOrEmpty(cImp)}</strong></td><td><strong>${fmtOrEmpty(cPrimes)}</strong></td><td><strong>${fmtOrEmpty(cNet)}</strong></td><td></td>
           </tr>`;
 
             html += `<div class="print-page">
             ${buildHeader(premierJour, dernierJour, annee, chapitreParam, compteParam)}
             <table class="data-table">${buildTableHead(tResid, tCnps, tIts, tFns)}<tbody>${reportRow}${dataRows}${totalRow}</tbody></table>
-            <div class="mt-3" style="font-size:11px"><p><span>Arrêté le présent état à la somme de :</span> <span class="font-bold uppercase ml-2">${numberToWords(cNet)}</span></p></div>
-            <div class="mt-3 flex justify-end"><div class="text-center"><p style="font-size:11px" class="font-bold">${MAIRIE_INFO.ville.toUpperCase()}, le <span class="editable-date" contenteditable="true">${new Date().toLocaleDateString('fr-FR')}</span></p><p style="font-size:11px" class="font-bold mt-0.5" contenteditable="true">P/ LE MAIRE & P.D.;</p></div></div>
+            <div class="mt-3" style="font-size:11px"><p><span>Arrêté le présent état à la somme de :</span> <span class="font-bold uppercase ml-2" contenteditable="true">${numberToWords(cNet)}</span></p></div>
+            <div class="mt-3 flex justify-between items-end"><p style="font-size:11px" class="font-bold underline" contenteditable="true">Chef des Services Financiers</p><div class="text-center"><p style="font-size:11px" class="font-bold">${MAIRIE_INFO.ville.toUpperCase()}, le <span class="editable-date" contenteditable="true">${new Date().toLocaleDateString('fr-FR')}</span></p><p style="font-size:11px" class="font-bold underline mt-0.5" contenteditable="true">P/ LE MAIRE & P.D.;</p></div></div>
             <div class="page-number">Page ${idx + 1}/${totalPages}</div>
           </div>`;
           });

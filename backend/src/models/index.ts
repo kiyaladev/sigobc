@@ -27,6 +27,7 @@ const MairieSchema = new Schema({
   email: String,
   maire: String,
   logo: String,
+  numeroEmployeurCNPS: String,
   ...ts,
 });
 MairieSchema.index({ code: 1 });
@@ -165,6 +166,7 @@ const MandatSchema = new Schema({
   avisMunicipalite: String,
   numeroDeliberation: String,
   dateDeliberation: Date,
+  nomSignataire: String,
   montantPrecompter: Number,
   typeBien: { type: String, enum: ['immobilier', 'mobilier', 'incorporel'] },
   projetId: Number,
@@ -382,6 +384,9 @@ const EmployeSchema = new Schema({
   service: String,
   departement: String,
   dateEmbauche: Date,
+  dateDepart: Date,
+  typeSalarieCnps: String,
+  regimeCnps: String,
   salaireBase: Number,
   indemniteLogement: Number,
   indemniteTransport: Number,
@@ -481,6 +486,10 @@ const ParametresPaieSchema = new Schema({
   tauxCnpsPatronalPrestationFamiliale: Number,
   tauxCnpsPatronalAccidentTravail: Number,
   tauxCnpsPatronalRetraite: Number,
+  abattementCN: Number,
+  tauxIgr: { type: Number, default: 0 },
+  plafondCnpsPfAt: { type: Number, default: 70000 },
+  plafondCnpsRetraite: { type: Number, default: 3375000 },
   updatedAt: { type: Date, default: Date.now },
 });
 export const ParametresPaieModel = m('ParametresPaie', ParametresPaieSchema);
