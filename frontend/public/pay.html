@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Paiement en ligne — Paxity</title>
+
+    <!--
+      Intégration du widget de paiement Paxity.
+      Documentation : https://paxity.io/documentation/widget
+
+      ⚠ La documentation publiée ne décrit pas le script réellement livré par
+      https://saas.paxity.io/widget/paxity-widget.iife.js. Relevé le 12/08/2026
+      sur le bundle daté du 09/06/2026 :
+
+        · La doc annonce `window.PaxityWidget.open({ amount, currency, … })`.
+          Ce global n'existe pas. Le bundle définit `window.ReactPaymentModal`,
+          un composant React de signature `({ token, isOpen })`.
+        · Les paramètres ne se passent pas en arguments : le composant décode le
+          JWT `token`, qui porte `amount`, `currency`, `country`, `ipn`,
+          `callback`, `product`, `idClient` et les identifiants marchands
+          `apiKey` / `apiToken`.
+        · React et ReactDOM sont des externes du bundle : ils doivent exister en
+          globals AVANT son chargement. La doc n'en dit rien, et React 19 est
+          exigé — avec React 18 le rendu échoue sur « React error #31 », les
+          éléments JSX des deux versions n'ayant pas la même forme.
+        · Le bundle référence `process.env` sans que le build l'ait substitué :
+          sans le shim ci-dessous il s'arrête sur
+          `ReferenceError: process is not defined` et ne définit aucun global.
+
+      `paxity-widget-compat.js` comble ces quatre écarts et expose le
+      `window.PaxityWidget.open({ … })` de la documentation. Cette page l'utilise
+      donc exactement comme la doc l'indique.
+    -->
+
+    <!-- Feuille de style du widget -->
+    <link rel="stylesheet" href="https://saas.paxity.io/widget/style.css" />
+
+    <!-- Fournit window.PaxityWidget.open(), absent du script de l'éditeur. -->
+    <script src="paxity-widget-compat.js"></script>
+
+    <style>
+      :root {
+        --fond: #f4f5f7;
+        --carte: #ffffff;
+        --texte: #1f2933;
+        --discret: #6b7280;
+        --bord: #d7dbe0;
+        --accent: #1976d2;
+        --alerte: #b23c3c;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background: var(--fond);
+        color: var(--texte);
+        font-family:
+          system-ui,
+          -apple-system,
+          'Segoe UI',
+          Roboto,
+          sans-serif;
+      }
+      .carte {
+        width: min(460px, 100%);
+        background: var(--carte);
+        border: 1px solid var(--bord);
+        border-radius: 10px;
+        padding: 28px;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
+      }
+      h1 {
+        margin: 0 0 4px;
+        font-size: 20px;
+      }
+      .sous-titre {
+        margin: 0 0 22px;
+        color: var(--discret);
+        font-size: 13px;
+      }
+      .recap {
+        border: 1px solid var(--bord);
+        border-radius: 8px;
+        padding: 14px 16px;
+        margin-bottom: 20px;
+        background: #fafbfc;
+      }
+      .recap-ligne {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        font-size: 14px;
+        padding: 3px 0;
+      }
+      .recap-ligne dt {
+        color: var(--discret);
+        margin: 0;
+      }
+      .recap-ligne dd {
+        margin: 0;
+        font-weight: 600;
+        text-align: right;
+        overflow-wrap: anywhere;
+      }
+      .montant {
+        font-size: 22px;
+        font-weight: 700;
+      }
+      button {
+        width: 100%;
+        padding: 12px 16px;
+        font-size: 15px;
+        font-weight: 600;
+        color: #fff;
+        background: var(--accent);
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      button:hover:not(:disabled) {
+        background: #1565c0;
+      }
+      button:disabled {
+        background: #9aa5b1;
+        cursor: not-allowed;
+      }
+      .message {
+        margin-top: 18px;
+        padding: 12px 14px;
+        border-radius: 8px;
+        font-size: 13px;
+        line-height: 1.5;
+        display: none;
+      }
+      .message.visible {
+        display: block;
+      }
+      .message.erreur {
+        background: #fdeded;
+        border: 1px solid #f3c2c2;
+        color: var(--alerte);
+      }
+      .message code {
+        font-family: ui-monospace, Consolas, monospace;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="carte">
+      <h1>Paiement en ligne</h1>
+      <p class="sous-titre">Réglé via Paxity — Mobile Money et carte bancaire</p>
+
+      <dl class="recap" id="recap" hidden>
+        <div class="recap-ligne">
+          <dt>Montant</dt>
+          <dd class="montant" id="recap-montant">—</dd>
+        </div>
+        <div class="recap-ligne">
+          <dt>Objet</dt>
+          <dd id="recap-objet">—</dd>
+        </div>
+        <div class="recap-ligne">
+          <dt>Pays</dt>
+          <dd id="recap-pays">—</dd>
+        </div>
+        <div class="recap-ligne">
+          <dt>Référence</dt>
+          <dd id="recap-reference">—</dd>
+        </div>
+      </dl>
+
+      <button type="button" id="bouton-payer" disabled>Chargement…</button>
+
+      <div class="message erreur" id="message"></div>
+    </main>
+
+    <!-- Le widget s'injecte ici. -->
+    <div id="paxity-widget"></div>
+
+    <script type="module">
+      const bouton = document.getElementById('bouton-payer');
+      const message = document.getElementById('message');
+      const recap = document.getElementById('recap');
+
+      /**
+       * Configuration marchande, relevée dans le tableau de bord Paxity.
+       *
+       * ⚠ Ces valeurs sont lisibles par tout visiteur de la page : le fichier
+       * est servi tel quel au navigateur. C'est le modèle imposé par le widget,
+       * qui lit `apiKey` / `apiToken` dans le jeton puis les recopie dans le
+       * localStorage. Dès que Paxity vous fournira un jeton émis côté serveur,
+       * passez-le en `?token=…` : les identifiants ne quitteront plus le
+       * backend et ce bloc pourra être vidé.
+       *
+       * Chaque clé est surchargeable par paramètre d'URL, ce qui évite de
+       * modifier le fichier pour changer un montant :
+       *   pay.html?amount=15000&currency=XOF&idClient=MDT-2026-0001
+       */
+      const CONFIG = {
+        apiKey: 'private_Ryd5UHLuKeRK22LWfXqKhnGcWLky1sgb',
+        apiToken: 'Du8Cx4EiITo2yrHNvXbjuW1op1Me7jCM',
+        // Identifiant du compte développeur Paxity. Le widget interroge
+        // /developer-accounts/<id>/… : absent, l'URL part avec un double slash
+        // et l'API répond 401, ce qui affiche « Token expiré ».
+        id: '',
+        amount: 100,
+        currency: 'XOF',
+        country: 'CI',
+        // URL appelée par Paxity pour notifier le résultat (webhook serveur).
+        ipn: '',
+        // URL de retour du payeur après paiement.
+        callback: '',
+        product: '',
+        // Référence de la transaction. Laissée vide, elle est engendrée à
+        // l'ouverture de la page (voir `referenceAuto`).
+        idClient: '',
+      };
+
+      /**
+       * Référence unique, à défaut de celle fournie par l'appelant : préfixe,
+       * date du jour et suffixe aléatoire, par ex. `SIGOBC-20260812-K4F7QA`.
+       * Lisible dans un rapprochement bancaire et sans collision en pratique.
+       */
+      function referenceAuto(prefixe = 'SIGOBC') {
+        const d = new Date();
+        const jour =
+          String(d.getFullYear()) +
+          String(d.getMonth() + 1).padStart(2, '0') +
+          String(d.getDate()).padStart(2, '0');
+        const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // sans I, O, 0, 1
+        const aleatoire = Array.from(crypto.getRandomValues(new Uint8Array(6)))
+          .map((n) => alphabet[n % alphabet.length])
+          .join('');
+        return `${prefixe}-${jour}-${aleatoire}`;
+      }
+
+      function erreur(html) {
+        message.innerHTML = html;
+        message.classList.add('visible');
+        bouton.disabled = true;
+        bouton.textContent = 'Indisponible';
+      }
+
+      /** Signale un problème sans interdire la tentative de paiement. */
+      function avertir(html) {
+        message.innerHTML = html;
+        message.classList.add('visible');
+      }
+
+      /**
+       * Décode la charge utile d'un JWT sans en vérifier la signature :
+       * uniquement pour afficher le récapitulatif quand le jeton vient de
+       * l'extérieur. La validation appartient à son émetteur et à Paxity.
+       */
+      function payloadDuToken(token) {
+        const partie = String(token).split('.')[1];
+        if (!partie) throw new Error('jeton mal formé');
+        const base64 = partie.replaceAll('-', '+').replaceAll('_', '/');
+        const texte = decodeURIComponent(
+          atob(base64)
+            .split('')
+            .map((c) => '%' + ('00' + c.codePointAt(0).toString(16)).slice(-2))
+            .join(''),
+        );
+        return JSON.parse(texte);
+      }
+
+      function formaterMontant(montant, devise) {
+        if (montant === undefined || montant === null || montant === '') return '—';
+        return Number(montant).toLocaleString('fr-FR') + ' ' + (devise || '');
+      }
+
+      const params = new URLSearchParams(window.location.search);
+
+      /** Options au format documenté par Paxity, CONFIG surchargée par l'URL. */
+      function optionsDePaiement() {
+        const val = (cle) => {
+          const p = params.get(cle);
+          return p !== null && p !== '' ? p : CONFIG[cle];
+        };
+
+        return {
+          amount: Number(val('amount')) || 0,
+          currency: val('currency'),
+          country: val('country'),
+          ipn: val('ipn'),
+          callback: val('callback'),
+          product: val('product'),
+          idClient: val('idClient') || referenceAuto(),
+          id: val('id'),
+          credentials: { apikey: val('apiKey'), apiToken: val('apiToken') },
+        };
+      }
+
+      // Un jeton fourni de l'extérieur prime : il vient d'un serveur, donc il
+      // est complet et signé. Sinon on assemble les options depuis CONFIG.
+      const tokenFourni = params.get('token') || sessionStorage.getItem('paxityToken') || '';
+      const options = tokenFourni ? { token: tokenFourni } : optionsDePaiement();
+
+      let apercu = null;
+      if (tokenFourni) {
+        try {
+          apercu = payloadDuToken(tokenFourni);
+        } catch (e) {
+          erreur('Jeton de paiement illisible : ' + e.message + '.');
+        }
+      } else {
+        apercu = { ...options, apiKey: options.credentials.apikey };
+      }
+
+      if (window.location.protocol === 'file:') {
+        // Depuis file://, l'origine vaut « null » : le préflight CORS échoue et
+        // aucun appel à Paxity n'aboutit, quels que soient les identifiants.
+        erreur(
+          'Cette page doit être servie par un serveur web. Ouverte par ' +
+            'double-clic (<code>file://</code>), le navigateur lui donne ' +
+            'l’origine <code>null</code> et bloque tous les appels à Paxity. ' +
+            'Passez par <code>http://localhost:9002/pay.html</code>.',
+        );
+      } else if (apercu) {
+        recap.hidden = false;
+        document.getElementById('recap-montant').textContent = formaterMontant(
+          apercu.amount,
+          apercu.currency,
+        );
+        document.getElementById('recap-objet').textContent = apercu.product || '—';
+        document.getElementById('recap-pays').textContent = apercu.country || '—';
+        document.getElementById('recap-reference').textContent = apercu.idClient || '—';
+
+        if (!apercu.apiKey) {
+          erreur(
+            'Aucun identifiant marchand. Renseignez <code>apiKey</code> et ' +
+              '<code>apiToken</code> dans le bloc <code>CONFIG</code>, ou ouvrez la ' +
+              'page avec <code>?token=…</code>.',
+          );
+        } else {
+          if (!apercu.id) {
+            avertir(
+              'Aucun identifiant de compte développeur (<code>id</code>). Le widget ' +
+                'appellera <code>/developer-accounts//…</code> et répondra ' +
+                '« Token expiré ». Cet identifiant n’est pas dans le tableau de bord : ' +
+                'il fait partie du jeton que Paxity doit vous fournir.',
+            );
+          }
+
+          bouton.disabled = false;
+          bouton.textContent = 'Payer';
+
+          // Appel de l'API telle que documentée par Paxity. Le global est fourni
+          // par paxity-widget-compat.js, l'éditeur ne le livrant pas.
+          bouton.addEventListener('click', () => {
+            if (!window.PaxityWidget) {
+              erreur('Le module <code>paxity-widget-compat.js</code> n’est pas chargé.');
+              return;
+            }
+
+            bouton.disabled = true;
+            bouton.textContent = 'Ouverture…';
+
+            window.PaxityWidget.open(options)
+              .then(() => {
+                bouton.textContent = 'Paiement en cours…';
+              })
+              .catch((e) => {
+                erreur(
+                  'Ouverture du widget impossible (<code>' +
+                    String(e.message).slice(0, 140) +
+                    '</code>). La page exige une connexion à ' +
+                    '<code>saas.paxity.io</code> et <code>esm.sh</code>.',
+                );
+              });
+          });
+        }
+      }
+    </script>
+  </body>
+</html>
