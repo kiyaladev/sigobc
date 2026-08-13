@@ -317,7 +317,7 @@
             ${buildHeader(moisLabel, annee, chapitreParam, compteParam)}
             <table class="data-table">${buildTableHead(tauxCnps)}<tbody>${reportRow}${dataRows}${totalRow}</tbody></table>
             <div class="mt-6 text-sm"><p>Arrêté le présent état à la somme de: <span class="font-bold" contenteditable="true">${numberToWords(cCnps)}</span></p></div>
-            <div class="flex justify-between items-end mt-8 text-sm"><p class="font-bold underline" contenteditable="true">Chef des Services Financiers</p><div class="text-center mr-8"><p>${MAIRIE_INFO.ville.toUpperCase()}, le <span class="editable-date" contenteditable="true">${new Date().toLocaleDateString('fr-FR')}</span></p><p class="font-bold underline mt-2" contenteditable="true">P/LE MAIRE & P.D</p></div></div>
+            <div class="flex justify-end items-end mt-8 text-sm"><div class="text-center mr-8"><p>${MAIRIE_INFO.ville.toUpperCase()}, le <span class="editable-date" contenteditable="true">${new Date().toLocaleDateString('fr-FR')}</span></p><p class="font-bold underline mt-2" contenteditable="true">P/LE MAIRE & P.D</p></div></div>
             <div class="page-number">Page ${idx + 1}/${totalPages}</div>
           </div>`;
         });

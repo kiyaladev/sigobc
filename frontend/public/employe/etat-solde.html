@@ -430,7 +430,7 @@
             ${buildHeader(premierJour, dernierJour, annee, chapitreParam, compteParam)}
             <table class="data-table">${buildTableHead(tResid, tCnps, tIts, tFns)}<tbody>${reportRow}${dataRows}${totalRow}</tbody></table>
             <div class="mt-3" style="font-size:11px"><p><span>Arrêté le présent état à la somme de :</span> <span class="font-bold uppercase ml-2" contenteditable="true">${numberToWords(cNet)}</span></p></div>
-            <div class="mt-3 flex justify-between items-end"><p style="font-size:11px" class="font-bold underline" contenteditable="true">Chef des Services Financiers</p><div class="text-center"><p style="font-size:11px" class="font-bold">${MAIRIE_INFO.ville.toUpperCase()}, le <span class="editable-date" contenteditable="true">${new Date().toLocaleDateString('fr-FR')}</span></p><p style="font-size:11px" class="font-bold underline mt-0.5" contenteditable="true">P/ LE MAIRE & P.D.;</p></div></div>
+            <div class="mt-3 flex justify-end items-end"><div class="text-center"><p style="font-size:11px" class="font-bold">${MAIRIE_INFO.ville.toUpperCase()}, le <span class="editable-date" contenteditable="true">${new Date().toLocaleDateString('fr-FR')}</span></p><p style="font-size:11px" class="font-bold underline mt-0.5" contenteditable="true">P/ LE MAIRE & P.D.;</p></div></div>
             <div class="page-number">Page ${idx + 1}/${totalPages}</div>
           </div>`;
           });

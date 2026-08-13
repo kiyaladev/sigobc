@@ -345,8 +345,7 @@
 
       function buildSignature(data) {
         const aujourdhui = new Date().toLocaleDateString('fr-FR');
-        return `<div class="mt-4 flex justify-between items-end" style="font-size: 12px">
-          <p class="font-bold underline" contenteditable="true">Chef des Services Financiers</p>
+        return `<div class="mt-4 flex justify-end items-end" style="font-size: 12px">
           <div class="text-center">
             <p class="font-bold">
               ${esc((MAIRIE_INFO.ville || '').toUpperCase())}, le

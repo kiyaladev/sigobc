@@ -338,7 +338,7 @@
             ${buildHeader(annee, periodeText, chapitreParam, compteParam)}
             <table class="data-table">${buildTableHead(TAUX_PF, TAUX_AT, TAUX_RG, TAUX_TOTAL)}<tbody>${reportRow}${dataRows}${totalRow}</tbody></table>
             <div class="flex justify-between items-start text-sm mt-4">
-              <div style="width:70%"><p>Arrêté le présent état à la somme de : <span class="font-bold underline uppercase" contenteditable="true">${numberToWords(cTotal)}</span></p><p class="mt-1">Payé et enregistré sous le n°07/${annee}</p><p>Pour acquis global</p><p class="font-bold underline mt-3" contenteditable="true">Chef des Services Financiers</p></div>
+              <div style="width:70%"><p>Arrêté le présent état à la somme de : <span class="font-bold underline uppercase" contenteditable="true">${numberToWords(cTotal)}</span></p><p class="mt-1">Payé et enregistré sous le n°07/${annee}</p><p>Pour acquis global</p></div>
               <div class="text-center" style="width:30%"><p class="font-bold underline">Certifié le service fait</p><p class="font-bold underline">Vu, vérifié et liquidé</p><p class="mt-2">À ${MAIRIE_INFO.ville}, le <span class="editable-date" contenteditable="true">${new Date().toLocaleDateString('fr-FR')}</span></p><p class="font-bold underline mt-1" contenteditable="true">P/Le Maire & P.D.</p></div>
             </div>
             <div class="page-number">Page ${idx + 1}/${totalPages}</div>
