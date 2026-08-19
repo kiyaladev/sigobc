@@ -171,6 +171,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/compte-admin/CompteAdminPage.vue'),
         name: 'compte-admin',
       },
+      // Documentation
+      {
+        path: 'documentation',
+        component: () => import('pages/DocumentationPage.vue'),
+        name: 'documentation',
+      },
     ],
   },
 

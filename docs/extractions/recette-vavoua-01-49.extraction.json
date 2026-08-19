@@ -1,0 +1,3373 @@
+{
+ "fichier": "Bordereaux_Recettes.pdf",
+ "commune": "VAVOUA",
+ "code": "433",
+ "exercice": 2026,
+ "sourceDocumentHash": "0B543F1516B3B6FD090F10B3FB46F98DA4D1F598BE89135F599C633F237C460B",
+ "bordereaux": [
+  {
+   "numero": 1,
+   "dateEncaissement": "2026-01-08",
+   "totalPresent": 460000,
+   "totalGeneralPrecedent": 0,
+   "totalGeneralPresent": 460000,
+   "sommeLignes": 460000,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 1,
+     "nature": "Taxe sur la publicité",
+     "nom": "REGISSEUR",
+     "taxeCode": "7042",
+     "montant": 150000,
+     "dateEncaissement": "2026-01-08"
+    },
+    {
+     "numeroDecompte": 2,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 310000,
+     "dateEncaissement": "2026-01-08"
+    }
+   ]
+  },
+  {
+   "numero": 2,
+   "dateEncaissement": "2026-01-09",
+   "totalPresent": 910700,
+   "totalGeneralPrecedent": 460000,
+   "totalGeneralPresent": 1370700,
+   "sommeLignes": 910700,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 3,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 180000,
+     "dateEncaissement": "2026-01-09"
+    },
+    {
+     "numeroDecompte": 4,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 296000,
+     "dateEncaissement": "2026-01-09"
+    },
+    {
+     "numeroDecompte": 5,
+     "nature": "Taxe sur les taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "7041",
+     "montant": 20000,
+     "dateEncaissement": "2026-01-09"
+    },
+    {
+     "numeroDecompte": 6,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 10000,
+     "dateEncaissement": "2026-01-09"
+    },
+    {
+     "numeroDecompte": 7,
+     "nature": "Inhumations et exhumations, creusements de fosses",
+     "nom": "REGISSEUR",
+     "taxeCode": "71150",
+     "montant": 7500,
+     "dateEncaissement": "2026-01-09"
+    },
+    {
+     "numeroDecompte": 8,
+     "nature": "Administration des transports et des communications",
+     "nom": "REGISSEUR",
+     "taxeCode": "71330",
+     "montant": 140000,
+     "dateEncaissement": "2026-01-09"
+    },
+    {
+     "numeroDecompte": 9,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 24000,
+     "dateEncaissement": "2026-01-09"
+    },
+    {
+     "numeroDecompte": 10,
+     "nature": "Taxe sur les taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "7041",
+     "montant": 34000,
+     "dateEncaissement": "2026-01-09"
+    },
+    {
+     "numeroDecompte": 11,
+     "nature": "Taxe du séquestre",
+     "nom": "REGISSEUR",
+     "taxeCode": "71030",
+     "montant": 7000,
+     "dateEncaissement": "2026-01-09"
+    },
+    {
+     "numeroDecompte": 12,
+     "nature": "TAXES DES ODP",
+     "nom": "REGISSEUR",
+     "taxeCode": "72030",
+     "montant": 30000,
+     "dateEncaissement": "2026-01-09"
+    },
+    {
+     "numeroDecompte": 13,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 10000,
+     "dateEncaissement": "2026-01-09"
+    },
+    {
+     "numeroDecompte": 14,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 152200,
+     "dateEncaissement": "2026-01-09"
+    }
+   ]
+  },
+  {
+   "numero": 3,
+   "dateEncaissement": "2026-01-13",
+   "totalPresent": 978500,
+   "totalGeneralPrecedent": 1370700,
+   "totalGeneralPresent": 2349200,
+   "sommeLignes": 978500,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 15,
+     "nature": "Légalisation, signature, certification",
+     "nom": "REGISSEUR",
+     "taxeCode": "71000",
+     "montant": 60000,
+     "dateEncaissement": "2026-01-13"
+    },
+    {
+     "numeroDecompte": 16,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 180000,
+     "dateEncaissement": "2026-01-13"
+    },
+    {
+     "numeroDecompte": 17,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 35000,
+     "dateEncaissement": "2026-01-13"
+    },
+    {
+     "numeroDecompte": 18,
+     "nature": "Abattoirs",
+     "nom": "REGISSEUR",
+     "taxeCode": "71341",
+     "montant": 3000,
+     "dateEncaissement": "2026-01-13"
+    },
+    {
+     "numeroDecompte": 19,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 550000,
+     "dateEncaissement": "2026-01-13"
+    },
+    {
+     "numeroDecompte": 20,
+     "nature": "Administration des transports et des communications",
+     "nom": "REGISSEUR",
+     "taxeCode": "71330",
+     "montant": 30000,
+     "dateEncaissement": "2026-01-13"
+    },
+    {
+     "numeroDecompte": 21,
+     "nature": "Abattoirs",
+     "nom": "REGISSEUR",
+     "taxeCode": "71341",
+     "montant": 16000,
+     "dateEncaissement": "2026-01-13"
+    },
+    {
+     "numeroDecompte": 22,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 55500,
+     "dateEncaissement": "2026-01-13"
+    },
+    {
+     "numeroDecompte": 23,
+     "nature": "Taxe sur les taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "7041",
+     "montant": 39000,
+     "dateEncaissement": "2026-01-13"
+    },
+    {
+     "numeroDecompte": 24,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 10000,
+     "dateEncaissement": "2026-01-13"
+    }
+   ]
+  },
+  {
+   "numero": 4,
+   "dateEncaissement": "2026-01-20",
+   "totalPresent": 1117700,
+   "totalGeneralPrecedent": 2349200,
+   "totalGeneralPresent": 3466900,
+   "sommeLignes": 1117700,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 25,
+     "nature": "Légalisation, signature, certification",
+     "nom": "REGISSEUR",
+     "taxeCode": "71000",
+     "montant": 60000,
+     "dateEncaissement": "2026-01-20"
+    },
+    {
+     "numeroDecompte": 26,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 155000,
+     "dateEncaissement": "2026-01-20"
+    },
+    {
+     "numeroDecompte": 27,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 124000,
+     "dateEncaissement": "2026-01-20"
+    },
+    {
+     "numeroDecompte": 28,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 53500,
+     "dateEncaissement": "2026-01-20"
+    },
+    {
+     "numeroDecompte": 29,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 607700,
+     "dateEncaissement": "2026-01-20"
+    },
+    {
+     "numeroDecompte": 30,
+     "nature": "Inhumations et exhumations, creusements de fosses",
+     "nom": "REGISSEUR",
+     "taxeCode": "71150",
+     "montant": 7500,
+     "dateEncaissement": "2026-01-20"
+    },
+    {
+     "numeroDecompte": 31,
+     "nature": "Administration des transports et des communications",
+     "nom": "REGISSEUR",
+     "taxeCode": "71330",
+     "montant": 110000,
+     "dateEncaissement": "2026-01-20"
+    }
+   ]
+  },
+  {
+   "numero": 5,
+   "dateEncaissement": "2026-01-26",
+   "totalPresent": 874700,
+   "totalGeneralPrecedent": 3466900,
+   "totalGeneralPresent": 4341600,
+   "sommeLignes": 874700,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 32,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 51000,
+     "dateEncaissement": "2026-01-26"
+    },
+    {
+     "numeroDecompte": 33,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 345200,
+     "dateEncaissement": "2026-01-26"
+    },
+    {
+     "numeroDecompte": 34,
+     "nature": "Légalisation, signature, certification",
+     "nom": "REGISSEUR",
+     "taxeCode": "71000",
+     "montant": 25000,
+     "dateEncaissement": "2026-01-26"
+    },
+    {
+     "numeroDecompte": 35,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 160000,
+     "dateEncaissement": "2026-01-26"
+    },
+    {
+     "numeroDecompte": 36,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 72000,
+     "dateEncaissement": "2026-01-26"
+    },
+    {
+     "numeroDecompte": 37,
+     "nature": "Taxe sur les taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "7041",
+     "montant": 61000,
+     "dateEncaissement": "2026-01-26"
+    },
+    {
+     "numeroDecompte": 38,
+     "nature": "Inhumations et exhumations, creusements de fosses",
+     "nom": "REGISSEUR",
+     "taxeCode": "71150",
+     "montant": 7500,
+     "dateEncaissement": "2026-01-26"
+    },
+    {
+     "numeroDecompte": 39,
+     "nature": "Administration des transports et des communications",
+     "nom": "REGISSEUR",
+     "taxeCode": "71330",
+     "montant": 30000,
+     "dateEncaissement": "2026-01-26"
+    },
+    {
+     "numeroDecompte": 40,
+     "nature": "Autres recettes de prestations et services au titre des activités culturelles",
+     "nom": "REGISSEUR",
+     "taxeCode": "71256",
+     "montant": 3000,
+     "dateEncaissement": "2026-01-26"
+    },
+    {
+     "numeroDecompte": 40,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 20000,
+     "dateEncaissement": "2026-01-26"
+    },
+    {
+     "numeroDecompte": 42,
+     "nature": "TAXES DES ODP",
+     "nom": "REGISSEUR",
+     "taxeCode": "72030",
+     "montant": 100000,
+     "dateEncaissement": "2026-01-26"
+    }
+   ]
+  },
+  {
+   "numero": 6,
+   "dateEncaissement": "2026-01-28",
+   "totalPresent": 352000,
+   "totalGeneralPrecedent": 4341600,
+   "totalGeneralPresent": 4693600,
+   "sommeLignes": 352000,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 43,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 49000,
+     "dateEncaissement": "2026-01-28"
+    },
+    {
+     "numeroDecompte": 44,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 27000,
+     "dateEncaissement": "2026-01-28"
+    },
+    {
+     "numeroDecompte": 45,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 18000,
+     "dateEncaissement": "2026-01-28"
+    },
+    {
+     "numeroDecompte": 46,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 233000,
+     "dateEncaissement": "2026-01-28"
+    },
+    {
+     "numeroDecompte": 47,
+     "nature": "Administration des transports et des communications",
+     "nom": "REGISSEUR",
+     "taxeCode": "71330",
+     "montant": 10000,
+     "dateEncaissement": "2026-01-28"
+    },
+    {
+     "numeroDecompte": 48,
+     "nature": "Abattoirs",
+     "nom": "REGISSEUR",
+     "taxeCode": "71341",
+     "montant": 15000,
+     "dateEncaissement": "2026-01-28"
+    }
+   ]
+  },
+  {
+   "numero": 7,
+   "dateEncaissement": "2026-01-29",
+   "totalPresent": 3000,
+   "totalGeneralPrecedent": 4693600,
+   "totalGeneralPresent": 4696600,
+   "sommeLignes": 3000,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 41,
+     "nature": "Autres recettes de prestations et services au titre des activités culturelles",
+     "nom": "REGISSEUR",
+     "taxeCode": "71256",
+     "montant": 3000,
+     "dateEncaissement": "2026-01-29"
+    }
+   ]
+  },
+  {
+   "numero": 8,
+   "dateEncaissement": "2026-02-02",
+   "totalPresent": 905400,
+   "totalGeneralPrecedent": 4696600,
+   "totalGeneralPresent": 5602000,
+   "sommeLignes": 905400,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 49,
+     "nature": "Baux à loyer",
+     "nom": "regisseur",
+     "taxeCode": "72000",
+     "montant": 110000,
+     "dateEncaissement": "2026-02-02"
+    },
+    {
+     "numeroDecompte": 50,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 32500,
+     "dateEncaissement": "2026-02-02"
+    },
+    {
+     "numeroDecompte": 51,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 478900,
+     "dateEncaissement": "2026-02-02"
+    },
+    {
+     "numeroDecompte": 52,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 66500,
+     "dateEncaissement": "2026-02-02"
+    },
+    {
+     "numeroDecompte": 53,
+     "nature": "Légalisation, signature, certification",
+     "nom": "REGISSEUR",
+     "taxeCode": "71000",
+     "montant": 19500,
+     "dateEncaissement": "2026-02-02"
+    },
+    {
+     "numeroDecompte": 54,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 90000,
+     "dateEncaissement": "2026-02-02"
+    },
+    {
+     "numeroDecompte": 55,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 87000,
+     "dateEncaissement": "2026-02-02"
+    },
+    {
+     "numeroDecompte": 56,
+     "nature": "Taxe sur les charrettes",
+     "nom": "REGISSEUR",
+     "taxeCode": "7031",
+     "montant": 21000,
+     "dateEncaissement": "2026-02-02"
+    }
+   ]
+  },
+  {
+   "numero": 9,
+   "dateEncaissement": "2026-02-04",
+   "totalPresent": 949000,
+   "totalGeneralPrecedent": 5602000,
+   "totalGeneralPresent": 6551000,
+   "sommeLignes": 949000,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 57,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 35000,
+     "dateEncaissement": "2026-02-04"
+    },
+    {
+     "numeroDecompte": 58,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 345000,
+     "dateEncaissement": "2026-02-04"
+    },
+    {
+     "numeroDecompte": 59,
+     "nature": "Légalisation, signature, certification",
+     "nom": "REGISSEUR",
+     "taxeCode": "71000",
+     "montant": 40000,
+     "dateEncaissement": "2026-02-04"
+    },
+    {
+     "numeroDecompte": 60,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 160000,
+     "dateEncaissement": "2026-02-04"
+    },
+    {
+     "numeroDecompte": 61,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 139000,
+     "dateEncaissement": "2026-02-04"
+    },
+    {
+     "numeroDecompte": 62,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 220000,
+     "dateEncaissement": "2026-02-04"
+    },
+    {
+     "numeroDecompte": 63,
+     "nature": "Administration des transports et des communications",
+     "nom": "REGISSEUR",
+     "taxeCode": "71330",
+     "montant": 10000,
+     "dateEncaissement": "2026-02-04"
+    }
+   ]
+  },
+  {
+   "numero": 10,
+   "dateEncaissement": "2026-02-10",
+   "totalPresent": 2020500,
+   "totalGeneralPrecedent": 6551000,
+   "totalGeneralPresent": 8571500,
+   "sommeLignes": 2020500,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 64,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 55000,
+     "dateEncaissement": "2026-02-10"
+    },
+    {
+     "numeroDecompte": 65,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 665500,
+     "dateEncaissement": "2026-02-10"
+    },
+    {
+     "numeroDecompte": 66,
+     "nature": "Légalisation, signature, certification",
+     "nom": "REGISSEUR",
+     "taxeCode": "71000",
+     "montant": 20000,
+     "dateEncaissement": "2026-02-10"
+    },
+    {
+     "numeroDecompte": 67,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 195000,
+     "dateEncaissement": "2026-02-10"
+    },
+    {
+     "numeroDecompte": 68,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 888000,
+     "dateEncaissement": "2026-02-10"
+    },
+    {
+     "numeroDecompte": 69,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 197000,
+     "dateEncaissement": "2026-02-10"
+    }
+   ]
+  },
+  {
+   "numero": 11,
+   "dateEncaissement": "2026-02-13",
+   "totalPresent": 2043000,
+   "totalGeneralPrecedent": 8571500,
+   "totalGeneralPresent": 10614500,
+   "sommeLignes": 2043000,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 70,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 29500,
+     "dateEncaissement": "2026-02-13"
+    },
+    {
+     "numeroDecompte": 71,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 479500,
+     "dateEncaissement": "2026-02-13"
+    },
+    {
+     "numeroDecompte": 72,
+     "nature": "Légalisation, signature, certification",
+     "nom": "REGISSEUR",
+     "taxeCode": "71000",
+     "montant": 48500,
+     "dateEncaissement": "2026-02-13"
+    },
+    {
+     "numeroDecompte": 73,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 100000,
+     "dateEncaissement": "2026-02-13"
+    },
+    {
+     "numeroDecompte": 74,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 1054000,
+     "dateEncaissement": "2026-02-13"
+    },
+    {
+     "numeroDecompte": 75,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 200000,
+     "dateEncaissement": "2026-02-13"
+    },
+    {
+     "numeroDecompte": 76,
+     "nature": "Inhumations et exhumations, creusements de fosses",
+     "nom": "REGISSEUR",
+     "taxeCode": "71150",
+     "montant": 7500,
+     "dateEncaissement": "2026-02-13"
+    },
+    {
+     "numeroDecompte": 77,
+     "nature": "Administration des transports et des communications",
+     "nom": "REGISSEUR",
+     "taxeCode": "71330",
+     "montant": 20000,
+     "dateEncaissement": "2026-02-13"
+    },
+    {
+     "numeroDecompte": 78,
+     "nature": "Abattoirs",
+     "nom": "REGISSEUR",
+     "taxeCode": "71341",
+     "montant": 19000,
+     "dateEncaissement": "2026-02-13"
+    },
+    {
+     "numeroDecompte": 79,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 68000,
+     "dateEncaissement": "2026-02-13"
+    },
+    {
+     "numeroDecompte": 80,
+     "nature": "Taxe sur les taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "7041",
+     "montant": 7000,
+     "dateEncaissement": "2026-02-13"
+    },
+    {
+     "numeroDecompte": 81,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 5000,
+     "dateEncaissement": "2026-02-13"
+    },
+    {
+     "numeroDecompte": 82,
+     "nature": "TAXES DES ODP",
+     "nom": "REGISSEUR",
+     "taxeCode": "72030",
+     "montant": 5000,
+     "dateEncaissement": "2026-02-13"
+    }
+   ]
+  },
+  {
+   "numero": 12,
+   "dateEncaissement": "2026-02-16",
+   "totalPresent": 1267000,
+   "totalGeneralPrecedent": 10614500,
+   "totalGeneralPresent": 11881500,
+   "sommeLignes": 1267000,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 80,
+     "nature": "Taxe sur les pompes distributrices de carburants",
+     "nom": "GPL SA",
+     "taxeCode": "7030",
+     "montant": 540000,
+     "dateEncaissement": "2026-02-16"
+    },
+    {
+     "numeroDecompte": 81,
+     "nature": "Taxe sur les pompes distributrices de carburants",
+     "nom": "GPL SA",
+     "taxeCode": "7030",
+     "montant": 312000,
+     "dateEncaissement": "2026-02-16"
+    },
+    {
+     "numeroDecompte": 82,
+     "nature": "Taxe sur les pompes distributrices de carburants",
+     "nom": "BAH ABDOUL",
+     "taxeCode": "7030",
+     "montant": 415000,
+     "dateEncaissement": "2026-02-16"
+    }
+   ]
+  },
+  {
+   "numero": 13,
+   "dateEncaissement": "2026-02-18",
+   "totalPresent": 1840000,
+   "totalGeneralPrecedent": 11881500,
+   "totalGeneralPresent": 13721500,
+   "sommeLignes": 1840000,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 83,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 71500,
+     "dateEncaissement": "2026-02-18"
+    },
+    {
+     "numeroDecompte": 84,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 267500,
+     "dateEncaissement": "2026-02-18"
+    },
+    {
+     "numeroDecompte": 85,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 81500,
+     "dateEncaissement": "2026-02-18"
+    },
+    {
+     "numeroDecompte": 86,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 34500,
+     "dateEncaissement": "2026-02-18"
+    },
+    {
+     "numeroDecompte": 87,
+     "nature": "Légalisation, signature, certification",
+     "nom": "REGISSEUR",
+     "taxeCode": "71000",
+     "montant": 66000,
+     "dateEncaissement": "2026-02-18"
+    },
+    {
+     "numeroDecompte": 88,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 100000,
+     "dateEncaissement": "2026-02-18"
+    },
+    {
+     "numeroDecompte": 89,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 634000,
+     "dateEncaissement": "2026-02-18"
+    },
+    {
+     "numeroDecompte": 90,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 123000,
+     "dateEncaissement": "2026-02-18"
+    },
+    {
+     "numeroDecompte": 91,
+     "nature": "Légalisation, signature, certification",
+     "nom": "REGISSEUR",
+     "taxeCode": "71000",
+     "montant": 80000,
+     "dateEncaissement": "2026-02-18"
+    },
+    {
+     "numeroDecompte": 92,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 100000,
+     "dateEncaissement": "2026-02-18"
+    },
+    {
+     "numeroDecompte": 93,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 12000,
+     "dateEncaissement": "2026-02-18"
+    },
+    {
+     "numeroDecompte": 94,
+     "nature": "Administration des activités culturelles",
+     "nom": "REGISSEUR",
+     "taxeCode": "71250",
+     "montant": 55000,
+     "dateEncaissement": "2026-02-18"
+    },
+    {
+     "numeroDecompte": 95,
+     "nature": "autres recettes de prestations et services au titre de l'urbanisme et de",
+     "nom": "REGISSEUR",
+     "taxeCode": "71126",
+     "montant": 100000,
+     "dateEncaissement": "2026-02-18"
+    },
+    {
+     "numeroDecompte": 96,
+     "nature": "TAXES DES ODP",
+     "nom": "REGISSEUR",
+     "taxeCode": "72030",
+     "montant": 115000,
+     "dateEncaissement": "2026-02-18"
+    }
+   ]
+  },
+  {
+   "numero": 14,
+   "dateEncaissement": "2026-02-20",
+   "totalPresent": 1483000,
+   "totalGeneralPrecedent": 13721500,
+   "totalGeneralPresent": 15204500,
+   "sommeLignes": 1483000,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 97,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 270000,
+     "dateEncaissement": "2026-02-20"
+    },
+    {
+     "numeroDecompte": 98,
+     "nature": "Légalisation, signature, certification",
+     "nom": "REGISSEUR",
+     "taxeCode": "71000",
+     "montant": 35000,
+     "dateEncaissement": "2026-02-20"
+    },
+    {
+     "numeroDecompte": 99,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 15000,
+     "dateEncaissement": "2026-02-20"
+    },
+    {
+     "numeroDecompte": 100,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 919000,
+     "dateEncaissement": "2026-02-20"
+    },
+    {
+     "numeroDecompte": 101,
+     "nature": "Taxe sur les taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "7041",
+     "montant": 44000,
+     "dateEncaissement": "2026-02-20"
+    },
+    {
+     "numeroDecompte": 102,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 200000,
+     "dateEncaissement": "2026-02-20"
+    }
+   ]
+  },
+  {
+   "numero": 15,
+   "dateEncaissement": "2026-02-24",
+   "totalPresent": 1318500,
+   "totalGeneralPrecedent": 15204500,
+   "totalGeneralPresent": 16523000,
+   "sommeLignes": 1318500,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 103,
+     "nature": "Légalisation, signature, certification",
+     "nom": "REGISSEUR",
+     "taxeCode": "71000",
+     "montant": 79000,
+     "dateEncaissement": "2026-02-24"
+    },
+    {
+     "numeroDecompte": 104,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 100000,
+     "dateEncaissement": "2026-02-24"
+    },
+    {
+     "numeroDecompte": 105,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 373000,
+     "dateEncaissement": "2026-02-24"
+    },
+    {
+     "numeroDecompte": 106,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 84000,
+     "dateEncaissement": "2026-02-24"
+    },
+    {
+     "numeroDecompte": 107,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 65000,
+     "dateEncaissement": "2026-02-24"
+    },
+    {
+     "numeroDecompte": 108,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 293000,
+     "dateEncaissement": "2026-02-24"
+    },
+    {
+     "numeroDecompte": 109,
+     "nature": "Location de salle",
+     "nom": "REGISSEUR",
+     "taxeCode": "71006",
+     "montant": 150000,
+     "dateEncaissement": "2026-02-24"
+    },
+    {
+     "numeroDecompte": 110,
+     "nature": "Inhumations et exhumations, creusements de fosses",
+     "nom": "REGISSEUR",
+     "taxeCode": "71150",
+     "montant": 7500,
+     "dateEncaissement": "2026-02-24"
+    },
+    {
+     "numeroDecompte": 111,
+     "nature": "Administration des transports et des communications",
+     "nom": "REGISSEUR",
+     "taxeCode": "71330",
+     "montant": 30000,
+     "dateEncaissement": "2026-02-24"
+    },
+    {
+     "numeroDecompte": 112,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 72000,
+     "dateEncaissement": "2026-02-24"
+    },
+    {
+     "numeroDecompte": 113,
+     "nature": "Autres recettes de prestation et service au titre des SSCPH(Location du foyer)",
+     "nom": "REGISSEUR",
+     "taxeCode": "7126",
+     "montant": 60000,
+     "dateEncaissement": "2026-02-24"
+    },
+    {
+     "numeroDecompte": 114,
+     "nature": "Taxe sur la publicité",
+     "nom": "REGISSEUR",
+     "taxeCode": "7042",
+     "montant": 5000,
+     "dateEncaissement": "2026-02-24"
+    }
+   ]
+  },
+  {
+   "numero": 16,
+   "dateEncaissement": "2026-02-27",
+   "totalPresent": 2339000,
+   "totalGeneralPrecedent": 16523000,
+   "totalGeneralPresent": 18862000,
+   "sommeLignes": 2339000,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 115,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 38000,
+     "dateEncaissement": "2026-02-27"
+    },
+    {
+     "numeroDecompte": 116,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 5000,
+     "dateEncaissement": "2026-02-27"
+    },
+    {
+     "numeroDecompte": 117,
+     "nature": "Taxe sur la publicité",
+     "nom": "REGISSEUR",
+     "taxeCode": "7042",
+     "montant": 5000,
+     "dateEncaissement": "2026-02-27"
+    },
+    {
+     "numeroDecompte": 118,
+     "nature": "Taxe du séquestre",
+     "nom": "REGISSEUR",
+     "taxeCode": "71030",
+     "montant": 4000,
+     "dateEncaissement": "2026-02-27"
+    },
+    {
+     "numeroDecompte": 119,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 319000,
+     "dateEncaissement": "2026-02-27"
+    },
+    {
+     "numeroDecompte": 120,
+     "nature": "TAXES DES ODP",
+     "nom": "REGISSEUR",
+     "taxeCode": "72030",
+     "montant": 280000,
+     "dateEncaissement": "2026-02-27"
+    },
+    {
+     "numeroDecompte": 121,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 58000,
+     "dateEncaissement": "2026-02-27"
+    },
+    {
+     "numeroDecompte": 122,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 464000,
+     "dateEncaissement": "2026-02-27"
+    },
+    {
+     "numeroDecompte": 123,
+     "nature": "Légalisation, signature, certification",
+     "nom": "REGISSEUR",
+     "taxeCode": "71000",
+     "montant": 30000,
+     "dateEncaissement": "2026-02-27"
+    },
+    {
+     "numeroDecompte": 124,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 70000,
+     "dateEncaissement": "2026-02-27"
+    },
+    {
+     "numeroDecompte": 125,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 881000,
+     "dateEncaissement": "2026-02-27"
+    },
+    {
+     "numeroDecompte": 126,
+     "nature": "Taxe sur les taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "7041",
+     "montant": 36000,
+     "dateEncaissement": "2026-02-27"
+    },
+    {
+     "numeroDecompte": 127,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 149000,
+     "dateEncaissement": "2026-02-27"
+    }
+   ]
+  },
+  {
+   "numero": 17,
+   "dateEncaissement": "2026-03-04",
+   "totalPresent": 1596500,
+   "totalGeneralPrecedent": 18862000,
+   "totalGeneralPresent": 20458500,
+   "sommeLignes": 1596500,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 128,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 49000,
+     "dateEncaissement": "2026-03-04"
+    },
+    {
+     "numeroDecompte": 129,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 379500,
+     "dateEncaissement": "2026-03-04"
+    },
+    {
+     "numeroDecompte": 130,
+     "nature": "Légalisation, signature, certification",
+     "nom": "REGISSEUR",
+     "taxeCode": "71000",
+     "montant": 57000,
+     "dateEncaissement": "2026-03-04"
+    },
+    {
+     "numeroDecompte": 131,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 150000,
+     "dateEncaissement": "2026-03-04"
+    },
+    {
+     "numeroDecompte": 132,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 625000,
+     "dateEncaissement": "2026-03-04"
+    },
+    {
+     "numeroDecompte": 133,
+     "nature": "Taxe sur les taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "7041",
+     "montant": 116000,
+     "dateEncaissement": "2026-03-04"
+    },
+    {
+     "numeroDecompte": 134,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 220000,
+     "dateEncaissement": "2026-03-04"
+    }
+   ]
+  },
+  {
+   "numero": 18,
+   "dateEncaissement": "2026-03-06",
+   "totalPresent": 1756000,
+   "totalGeneralPrecedent": 20458500,
+   "totalGeneralPresent": 22214500,
+   "sommeLignes": 1756000,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 135,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 39000,
+     "dateEncaissement": "2026-03-06"
+    },
+    {
+     "numeroDecompte": 136,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 365000,
+     "dateEncaissement": "2026-03-06"
+    },
+    {
+     "numeroDecompte": 137,
+     "nature": "Légalisation, signature, certification",
+     "nom": "REGISSEUR",
+     "taxeCode": "71000",
+     "montant": 10000,
+     "dateEncaissement": "2026-03-06"
+    },
+    {
+     "numeroDecompte": 138,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 27000,
+     "dateEncaissement": "2026-03-06"
+    },
+    {
+     "numeroDecompte": 139,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 882000,
+     "dateEncaissement": "2026-03-06"
+    },
+    {
+     "numeroDecompte": 140,
+     "nature": "Taxe sur les taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "7041",
+     "montant": 177000,
+     "dateEncaissement": "2026-03-06"
+    },
+    {
+     "numeroDecompte": 141,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 210000,
+     "dateEncaissement": "2026-03-06"
+    },
+    {
+     "numeroDecompte": 142,
+     "nature": "Autres recettes de prestation et service au titre des SSCPH(Location du foyer)",
+     "nom": "REGISSEUR",
+     "taxeCode": "7126",
+     "montant": 10000,
+     "dateEncaissement": "2026-03-06"
+    },
+    {
+     "numeroDecompte": 143,
+     "nature": "Taxe sur les taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "7041",
+     "montant": 36000,
+     "dateEncaissement": "2026-03-06"
+    }
+   ]
+  },
+  {
+   "numero": 19,
+   "dateEncaissement": "2026-03-11",
+   "totalPresent": 1170250,
+   "totalGeneralPrecedent": 22214500,
+   "totalGeneralPresent": 23384750,
+   "sommeLignes": 1170250,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 144,
+     "nature": "Légalisation, signature, certification",
+     "nom": "REGISSEUR",
+     "taxeCode": "71000",
+     "montant": 100000,
+     "dateEncaissement": "2026-03-11"
+    },
+    {
+     "numeroDecompte": 145,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 113000,
+     "dateEncaissement": "2026-03-11"
+    },
+    {
+     "numeroDecompte": 146,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 307000,
+     "dateEncaissement": "2026-03-11"
+    },
+    {
+     "numeroDecompte": 147,
+     "nature": "Taxe sur les taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "7041",
+     "montant": 48000,
+     "dateEncaissement": "2026-03-11"
+    },
+    {
+     "numeroDecompte": 148,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 184000,
+     "dateEncaissement": "2026-03-11"
+    },
+    {
+     "numeroDecompte": 149,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 20000,
+     "dateEncaissement": "2026-03-11"
+    },
+    {
+     "numeroDecompte": 150,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 307750,
+     "dateEncaissement": "2026-03-11"
+    },
+    {
+     "numeroDecompte": 151,
+     "nature": "Inhumations et exhumations, creusements de fosses",
+     "nom": "REGISSEUR",
+     "taxeCode": "71150",
+     "montant": 15000,
+     "dateEncaissement": "2026-03-11"
+    },
+    {
+     "numeroDecompte": 152,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 17500,
+     "dateEncaissement": "2026-03-11"
+    },
+    {
+     "numeroDecompte": 153,
+     "nature": "Taxe sur les taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "7041",
+     "montant": 28000,
+     "dateEncaissement": "2026-03-11"
+    },
+    {
+     "numeroDecompte": 154,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 30000,
+     "dateEncaissement": "2026-03-11"
+    }
+   ]
+  },
+  {
+   "numero": 20,
+   "dateEncaissement": "2026-03-13",
+   "totalPresent": 1610550,
+   "totalGeneralPrecedent": 23384750,
+   "totalGeneralPresent": 24995300,
+   "sommeLignes": 1610550,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 155,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 991000,
+     "dateEncaissement": "2026-03-13"
+    },
+    {
+     "numeroDecompte": 156,
+     "nature": "Taxe sur les taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "7041",
+     "montant": 16000,
+     "dateEncaissement": "2026-03-13"
+    },
+    {
+     "numeroDecompte": 157,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 168000,
+     "dateEncaissement": "2026-03-13"
+    },
+    {
+     "numeroDecompte": 158,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 64500,
+     "dateEncaissement": "2026-03-13"
+    },
+    {
+     "numeroDecompte": 159,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 371050,
+     "dateEncaissement": "2026-03-13"
+    }
+   ]
+  },
+  {
+   "numero": 21,
+   "dateEncaissement": "2026-03-19",
+   "totalPresent": 1294700,
+   "totalGeneralPrecedent": 24995300,
+   "totalGeneralPresent": 26290000,
+   "sommeLignes": 1294700,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 160,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 60500,
+     "dateEncaissement": "2026-03-19"
+    },
+    {
+     "numeroDecompte": 161,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 371200,
+     "dateEncaissement": "2026-03-19"
+    },
+    {
+     "numeroDecompte": 162,
+     "nature": "Légalisation, signature, certification",
+     "nom": "REGISSEUR",
+     "taxeCode": "71000",
+     "montant": 60000,
+     "dateEncaissement": "2026-03-19"
+    },
+    {
+     "numeroDecompte": 163,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 140000,
+     "dateEncaissement": "2026-03-19"
+    },
+    {
+     "numeroDecompte": 164,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 533000,
+     "dateEncaissement": "2026-03-19"
+    },
+    {
+     "numeroDecompte": 165,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 130000,
+     "dateEncaissement": "2026-03-19"
+    }
+   ]
+  },
+  {
+   "numero": 22,
+   "dateEncaissement": "2026-03-30",
+   "totalPresent": 3397000,
+   "totalGeneralPrecedent": 26290000,
+   "totalGeneralPresent": 29687000,
+   "sommeLignes": 3397000,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 166,
+     "nature": "Légalisation, signature, certification",
+     "nom": "REGISSEUR",
+     "taxeCode": "71000",
+     "montant": 100000,
+     "dateEncaissement": "2026-03-30"
+    },
+    {
+     "numeroDecompte": 167,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 200000,
+     "dateEncaissement": "2026-03-30"
+    },
+    {
+     "numeroDecompte": 168,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 1457000,
+     "dateEncaissement": "2026-03-30"
+    },
+    {
+     "numeroDecompte": 169,
+     "nature": "Taxe sur les taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "7041",
+     "montant": 13000,
+     "dateEncaissement": "2026-03-30"
+    },
+    {
+     "numeroDecompte": 170,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 438000,
+     "dateEncaissement": "2026-03-30"
+    },
+    {
+     "numeroDecompte": 171,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 121000,
+     "dateEncaissement": "2026-03-30"
+    },
+    {
+     "numeroDecompte": 172,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 855000,
+     "dateEncaissement": "2026-03-30"
+    },
+    {
+     "numeroDecompte": 173,
+     "nature": "Inhumations et exhumations, creusements de fosses",
+     "nom": "REGISSEUR",
+     "taxeCode": "71150",
+     "montant": 30000,
+     "dateEncaissement": "2026-03-30"
+    },
+    {
+     "numeroDecompte": 174,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 30000,
+     "dateEncaissement": "2026-03-30"
+    },
+    {
+     "numeroDecompte": 175,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 29000,
+     "dateEncaissement": "2026-03-30"
+    },
+    {
+     "numeroDecompte": 176,
+     "nature": "Taxe sur les taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "7041",
+     "montant": 94000,
+     "dateEncaissement": "2026-03-30"
+    },
+    {
+     "numeroDecompte": 177,
+     "nature": "Abattoirs",
+     "nom": "REGISSEUR",
+     "taxeCode": "71341",
+     "montant": 28000,
+     "dateEncaissement": "2026-03-30"
+    },
+    {
+     "numeroDecompte": 178,
+     "nature": "Taxe du séquestre",
+     "nom": "REGISSEUR",
+     "taxeCode": "71030",
+     "montant": 2000,
+     "dateEncaissement": "2026-03-30"
+    }
+   ]
+  },
+  {
+   "numero": 23,
+   "dateEncaissement": "2026-03-31",
+   "totalPresent": 40236140,
+   "totalGeneralPrecedent": 29687000,
+   "totalGeneralPresent": 69923140,
+   "sommeLignes": 40236140,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 179,
+     "nature": "Partie minimale",
+     "nom": "PGSP",
+     "taxeCode": "7300",
+     "montant": 12070842,
+     "dateEncaissement": "2026-03-31"
+    },
+    {
+     "numeroDecompte": 180,
+     "nature": "Partie complementaire-Versement general",
+     "nom": "PGSP",
+     "taxeCode": "7301",
+     "montant": 12070842,
+     "dateEncaissement": "2026-03-31"
+    },
+    {
+     "numeroDecompte": 181,
+     "nature": "Partie complementaire-Versement special",
+     "nom": "PGSP",
+     "taxeCode": "7302",
+     "montant": 16094456,
+     "dateEncaissement": "2026-03-31"
+    }
+   ]
+  },
+  {
+   "numero": 24,
+   "dateEncaissement": "2026-04-01",
+   "totalPresent": 863500,
+   "totalGeneralPrecedent": 69923140,
+   "totalGeneralPresent": 70786640,
+   "sommeLignes": 863500,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 182,
+     "nature": "Taxe sur les taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "7041",
+     "montant": 60000,
+     "dateEncaissement": "2026-04-01"
+    },
+    {
+     "numeroDecompte": 183,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 553500,
+     "dateEncaissement": "2026-04-01"
+    },
+    {
+     "numeroDecompte": 184,
+     "nature": "TAXES DES ODP",
+     "nom": "REGISSEUR",
+     "taxeCode": "72030",
+     "montant": 250000,
+     "dateEncaissement": "2026-04-01"
+    }
+   ]
+  },
+  {
+   "numero": 25,
+   "dateEncaissement": "2026-04-02",
+   "totalPresent": 110000,
+   "totalGeneralPrecedent": 70786640,
+   "totalGeneralPresent": 70896640,
+   "sommeLignes": 110000,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 185,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 110000,
+     "dateEncaissement": "2026-04-02"
+    }
+   ]
+  },
+  {
+   "numero": 26,
+   "dateEncaissement": "2026-04-07",
+   "totalPresent": 2724000,
+   "totalGeneralPrecedent": 70896640,
+   "totalGeneralPresent": 73620640,
+   "sommeLignes": 2724000,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 186,
+     "nature": "Inhumations et exhumations, creusements de fosses",
+     "nom": "REGISSEUR",
+     "taxeCode": "71150",
+     "montant": 7500,
+     "dateEncaissement": "2026-04-07"
+    },
+    {
+     "numeroDecompte": 187,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 30000,
+     "dateEncaissement": "2026-04-07"
+    },
+    {
+     "numeroDecompte": 188,
+     "nature": "Taxe sur la publicité",
+     "nom": "REGISSEUR",
+     "taxeCode": "7042",
+     "montant": 20000,
+     "dateEncaissement": "2026-04-07"
+    },
+    {
+     "numeroDecompte": 189,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 52000,
+     "dateEncaissement": "2026-04-07"
+    },
+    {
+     "numeroDecompte": 190,
+     "nature": "Taxe sur les taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "7041",
+     "montant": 18000,
+     "dateEncaissement": "2026-04-07"
+    },
+    {
+     "numeroDecompte": 191,
+     "nature": "Abattoirs",
+     "nom": "REGISSEUR",
+     "taxeCode": "71341",
+     "montant": 14000,
+     "dateEncaissement": "2026-04-07"
+    },
+    {
+     "numeroDecompte": 192,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 59000,
+     "dateEncaissement": "2026-04-07"
+    },
+    {
+     "numeroDecompte": 193,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 671500,
+     "dateEncaissement": "2026-04-07"
+    },
+    {
+     "numeroDecompte": 194,
+     "nature": "Légalisation, signature, certification",
+     "nom": "REGISSEUR",
+     "taxeCode": "71000",
+     "montant": 150000,
+     "dateEncaissement": "2026-04-07"
+    },
+    {
+     "numeroDecompte": 195,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 250000,
+     "dateEncaissement": "2026-04-07"
+    },
+    {
+     "numeroDecompte": 196,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 1327000,
+     "dateEncaissement": "2026-04-07"
+    },
+    {
+     "numeroDecompte": 197,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 125000,
+     "dateEncaissement": "2026-04-07"
+    }
+   ]
+  },
+  {
+   "numero": 27,
+   "dateEncaissement": "2026-04-10",
+   "totalPresent": 1743000,
+   "totalGeneralPrecedent": 73620640,
+   "totalGeneralPresent": 75363640,
+   "sommeLignes": 1743000,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 198,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 202000,
+     "dateEncaissement": "2026-04-10"
+    },
+    {
+     "numeroDecompte": 199,
+     "nature": "Légalisation, signature, certification",
+     "nom": "REGISSEUR",
+     "taxeCode": "71000",
+     "montant": 100000,
+     "dateEncaissement": "2026-04-10"
+    },
+    {
+     "numeroDecompte": 200,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 150500,
+     "dateEncaissement": "2026-04-10"
+    },
+    {
+     "numeroDecompte": 201,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 519000,
+     "dateEncaissement": "2026-04-10"
+    },
+    {
+     "numeroDecompte": 202,
+     "nature": "Inhumations et exhumations, creusements de fosses",
+     "nom": "REGISSEUR",
+     "taxeCode": "71150",
+     "montant": 7500,
+     "dateEncaissement": "2026-04-10"
+    },
+    {
+     "numeroDecompte": 203,
+     "nature": "Morgue - Dépots de cercueils",
+     "nom": "REGISSEUR",
+     "taxeCode": "71152",
+     "montant": 300000,
+     "dateEncaissement": "2026-04-10"
+    },
+    {
+     "numeroDecompte": 204,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 31000,
+     "dateEncaissement": "2026-04-10"
+    },
+    {
+     "numeroDecompte": 205,
+     "nature": "Taxe sur les taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "7041",
+     "montant": 428000,
+     "dateEncaissement": "2026-04-10"
+    },
+    {
+     "numeroDecompte": 206,
+     "nature": "TAXES DES ODP",
+     "nom": "REGISSEUR",
+     "taxeCode": "72030",
+     "montant": 5000,
+     "dateEncaissement": "2026-04-10"
+    }
+   ]
+  },
+  {
+   "numero": 28,
+   "dateEncaissement": "2026-04-13",
+   "totalPresent": 1302000,
+   "totalGeneralPrecedent": 75363640,
+   "totalGeneralPresent": 76665640,
+   "sommeLignes": 1302000,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 207,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 743000,
+     "dateEncaissement": "2026-04-13"
+    },
+    {
+     "numeroDecompte": 208,
+     "nature": "Taxe sur les charrettes",
+     "nom": "REGISSEUR",
+     "taxeCode": "7031",
+     "montant": 42000,
+     "dateEncaissement": "2026-04-13"
+    },
+    {
+     "numeroDecompte": 209,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 179000,
+     "dateEncaissement": "2026-04-13"
+    },
+    {
+     "numeroDecompte": 210,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 35000,
+     "dateEncaissement": "2026-04-13"
+    },
+    {
+     "numeroDecompte": 211,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 303000,
+     "dateEncaissement": "2026-04-13"
+    }
+   ]
+  },
+  {
+   "numero": 29,
+   "dateEncaissement": "2026-04-14",
+   "totalPresent": 115435770,
+   "totalGeneralPrecedent": 76665640,
+   "totalGeneralPresent": 192101410,
+   "sommeLignes": 115435770,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 212,
+     "nature": "Subventions d'équipement de l'Etat",
+     "nom": "PGSP",
+     "taxeCode": "0401",
+     "montant": 115435770,
+     "dateEncaissement": "2026-04-14"
+    }
+   ]
+  },
+  {
+   "numero": 30,
+   "dateEncaissement": "2026-04-17",
+   "totalPresent": 2060000,
+   "totalGeneralPrecedent": 192101410,
+   "totalGeneralPresent": 194161410,
+   "sommeLignes": 2060000,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 213,
+     "nature": "Légalisation, signature, certification",
+     "nom": "REGISSEUR",
+     "taxeCode": "71000",
+     "montant": 99500,
+     "dateEncaissement": "2026-04-17"
+    },
+    {
+     "numeroDecompte": 214,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 100000,
+     "dateEncaissement": "2026-04-17"
+    },
+    {
+     "numeroDecompte": 215,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 868000,
+     "dateEncaissement": "2026-04-17"
+    },
+    {
+     "numeroDecompte": 216,
+     "nature": "Taxe sur les charrettes",
+     "nom": "REGISSEUR",
+     "taxeCode": "7031",
+     "montant": 42000,
+     "dateEncaissement": "2026-04-17"
+    },
+    {
+     "numeroDecompte": 217,
+     "nature": "Taxe sur les taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "7041",
+     "montant": 19000,
+     "dateEncaissement": "2026-04-17"
+    },
+    {
+     "numeroDecompte": 218,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 128000,
+     "dateEncaissement": "2026-04-17"
+    },
+    {
+     "numeroDecompte": 219,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 115000,
+     "dateEncaissement": "2026-04-17"
+    },
+    {
+     "numeroDecompte": 220,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 688500,
+     "dateEncaissement": "2026-04-17"
+    }
+   ]
+  },
+  {
+   "numero": 31,
+   "dateEncaissement": "2026-04-24",
+   "totalPresent": 68744644,
+   "totalGeneralPrecedent": 194161410,
+   "totalGeneralPresent": 262906054,
+   "sommeLignes": 68744644,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 221,
+     "nature": "Légalisation, signature, certification",
+     "nom": "REGISSEUR",
+     "taxeCode": "71000",
+     "montant": 50000,
+     "dateEncaissement": "2026-04-24"
+    },
+    {
+     "numeroDecompte": 222,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 100000,
+     "dateEncaissement": "2026-04-24"
+    },
+    {
+     "numeroDecompte": 223,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 1357000,
+     "dateEncaissement": "2026-04-24"
+    },
+    {
+     "numeroDecompte": 224,
+     "nature": "Taxe sur les taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "7041",
+     "montant": 135000,
+     "dateEncaissement": "2026-04-24"
+    },
+    {
+     "numeroDecompte": 225,
+     "nature": "Inhumations et exhumations, creusements de fosses",
+     "nom": "REGISSEUR",
+     "taxeCode": "71150",
+     "montant": 15000,
+     "dateEncaissement": "2026-04-24"
+    },
+    {
+     "numeroDecompte": 226,
+     "nature": "Taxe sur la publicité",
+     "nom": "REGISSEUR",
+     "taxeCode": "7042",
+     "montant": 10000,
+     "dateEncaissement": "2026-04-24"
+    },
+    {
+     "numeroDecompte": 227,
+     "nature": "Taxe sur les charrettes",
+     "nom": "REGISSEUR",
+     "taxeCode": "7031",
+     "montant": 6000,
+     "dateEncaissement": "2026-04-24"
+    },
+    {
+     "numeroDecompte": 228,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 22000,
+     "dateEncaissement": "2026-04-24"
+    },
+    {
+     "numeroDecompte": 229,
+     "nature": "Taxe sur les taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "7041",
+     "montant": 76000,
+     "dateEncaissement": "2026-04-24"
+    },
+    {
+     "numeroDecompte": 230,
+     "nature": "TAXES DES ODP",
+     "nom": "REGISSEUR",
+     "taxeCode": "72030",
+     "montant": 5000,
+     "dateEncaissement": "2026-04-24"
+    },
+    {
+     "numeroDecompte": 231,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 94000,
+     "dateEncaissement": "2026-04-24"
+    },
+    {
+     "numeroDecompte": 232,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 680300,
+     "dateEncaissement": "2026-04-24"
+    },
+    {
+     "numeroDecompte": 233,
+     "nature": "Partie minimale",
+     "nom": "ACCT",
+     "taxeCode": "7300",
+     "montant": 46336041,
+     "dateEncaissement": "2026-04-24"
+    },
+    {
+     "numeroDecompte": 234,
+     "nature": "Partie complementaire-Versement general",
+     "nom": "ACCT",
+     "taxeCode": "7301",
+     "montant": 19858303,
+     "dateEncaissement": "2026-04-24"
+    }
+   ]
+  },
+  {
+   "numero": 32,
+   "dateEncaissement": "2026-05-04",
+   "totalPresent": 2026500,
+   "totalGeneralPrecedent": 262906054,
+   "totalGeneralPresent": 264932554,
+   "sommeLignes": 2026500,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 235,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 117000,
+     "dateEncaissement": "2026-05-04"
+    },
+    {
+     "numeroDecompte": 236,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 836500,
+     "dateEncaissement": "2026-05-04"
+    },
+    {
+     "numeroDecompte": 237,
+     "nature": "Légalisation, signature, certification",
+     "nom": "REGISSEUR",
+     "taxeCode": "71000",
+     "montant": 100000,
+     "dateEncaissement": "2026-05-04"
+    },
+    {
+     "numeroDecompte": 238,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 200000,
+     "dateEncaissement": "2026-05-04"
+    },
+    {
+     "numeroDecompte": 239,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 597000,
+     "dateEncaissement": "2026-05-04"
+    },
+    {
+     "numeroDecompte": 240,
+     "nature": "Taxe sur les charrettes",
+     "nom": "REGISSEUR",
+     "taxeCode": "7031",
+     "montant": 36000,
+     "dateEncaissement": "2026-05-04"
+    },
+    {
+     "numeroDecompte": 241,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 140000,
+     "dateEncaissement": "2026-05-04"
+    }
+   ]
+  },
+  {
+   "numero": 33,
+   "dateEncaissement": "2026-05-06",
+   "totalPresent": 110000,
+   "totalGeneralPrecedent": 264932554,
+   "totalGeneralPresent": 265042554,
+   "sommeLignes": 110000,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 249,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 110000,
+     "dateEncaissement": "2026-05-06"
+    }
+   ]
+  },
+  {
+   "numero": 34,
+   "dateEncaissement": "2026-05-08",
+   "totalPresent": 2345000,
+   "totalGeneralPrecedent": 265042554,
+   "totalGeneralPresent": 267387554,
+   "sommeLignes": 2345000,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 242,
+     "nature": "Légalisation, signature, certification",
+     "nom": "REGISSEUR",
+     "taxeCode": "71000",
+     "montant": 40000,
+     "dateEncaissement": "2026-05-08"
+    },
+    {
+     "numeroDecompte": 243,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 60000,
+     "dateEncaissement": "2026-05-08"
+    },
+    {
+     "numeroDecompte": 244,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 1251000,
+     "dateEncaissement": "2026-05-08"
+    },
+    {
+     "numeroDecompte": 245,
+     "nature": "Taxe sur les taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "7041",
+     "montant": 233000,
+     "dateEncaissement": "2026-05-08"
+    },
+    {
+     "numeroDecompte": 246,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 131000,
+     "dateEncaissement": "2026-05-08"
+    },
+    {
+     "numeroDecompte": 247,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 45000,
+     "dateEncaissement": "2026-05-08"
+    },
+    {
+     "numeroDecompte": 248,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 585000,
+     "dateEncaissement": "2026-05-08"
+    }
+   ]
+  },
+  {
+   "numero": 35,
+   "dateEncaissement": "2026-05-18",
+   "totalPresent": 300000,
+   "totalGeneralPrecedent": 267387554,
+   "totalGeneralPresent": 267687554,
+   "sommeLignes": 300000,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 250,
+     "nature": "Taxe sur la publicité",
+     "nom": "REGISSEUR",
+     "taxeCode": "7042",
+     "montant": 300000,
+     "dateEncaissement": "2026-05-18"
+    }
+   ]
+  },
+  {
+   "numero": 36,
+   "dateEncaissement": "2026-05-19",
+   "totalPresent": 40236140,
+   "totalGeneralPrecedent": 267687554,
+   "totalGeneralPresent": 307923694,
+   "sommeLignes": 40236140,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 317,
+     "nature": "Partie minimale",
+     "nom": "PGSP",
+     "taxeCode": "7300",
+     "montant": 12070842,
+     "dateEncaissement": "2026-05-19"
+    },
+    {
+     "numeroDecompte": 318,
+     "nature": "Partie complementaire-Versement general",
+     "nom": "PGSP",
+     "taxeCode": "7301",
+     "montant": 12070842,
+     "dateEncaissement": "2026-05-19"
+    },
+    {
+     "numeroDecompte": 319,
+     "nature": "Partie complementaire-Versement special",
+     "nom": "PGSP",
+     "taxeCode": "7302",
+     "montant": 16094456,
+     "dateEncaissement": "2026-05-19"
+    }
+   ]
+  },
+  {
+   "numero": 37,
+   "dateEncaissement": "2026-05-22",
+   "totalPresent": 4038600,
+   "totalGeneralPrecedent": 307923694,
+   "totalGeneralPresent": 311962294,
+   "sommeLignes": 4038600,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 251,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 87000,
+     "dateEncaissement": "2026-05-22"
+    },
+    {
+     "numeroDecompte": 252,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 1436600,
+     "dateEncaissement": "2026-05-22"
+    },
+    {
+     "numeroDecompte": 253,
+     "nature": "Légalisation, signature, certification",
+     "nom": "REGISSEUR",
+     "taxeCode": "71000",
+     "montant": 130000,
+     "dateEncaissement": "2026-05-22"
+    },
+    {
+     "numeroDecompte": 254,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 200000,
+     "dateEncaissement": "2026-05-22"
+    },
+    {
+     "numeroDecompte": 255,
+     "nature": "impots syntetique",
+     "nom": "REGISSEUR",
+     "taxeCode": "70261",
+     "montant": 1682000,
+     "dateEncaissement": "2026-05-22"
+    },
+    {
+     "numeroDecompte": 256,
+     "nature": "Taxe sur les taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "7041",
+     "montant": 176000,
+     "dateEncaissement": "2026-05-22"
+    },
+    {
+     "numeroDecompte": 257,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 185000,
+     "dateEncaissement": "2026-05-22"
+    },
+    {
+     "numeroDecompte": 258,
+     "nature": "Inhumations et exhumations, creusements de fosses",
+     "nom": "REGISSEUR",
+     "taxeCode": "71150",
+     "montant": 22500,
+     "dateEncaissement": "2026-05-22"
+    },
+    {
+     "numeroDecompte": 259,
+     "nature": "Administration des transports et des communications",
+     "nom": "REGISSEUR",
+     "taxeCode": "71330",
+     "montant": 5000,
+     "dateEncaissement": "2026-05-22"
+    },
+    {
+     "numeroDecompte": 260,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 58500,
+     "dateEncaissement": "2026-05-22"
+    },
+    {
+     "numeroDecompte": 261,
+     "nature": "Taxe sur les taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "7041",
+     "montant": 16000,
+     "dateEncaissement": "2026-05-22"
+    },
+    {
+     "numeroDecompte": 262,
+     "nature": "Taxe sur la publicité",
+     "nom": "REGISSEUR",
+     "taxeCode": "7042",
+     "montant": 5000,
+     "dateEncaissement": "2026-05-22"
+    },
+    {
+     "numeroDecompte": 263,
+     "nature": "Taxe du séquestre",
+     "nom": "REGISSEUR",
+     "taxeCode": "71030",
+     "montant": 5000,
+     "dateEncaissement": "2026-05-22"
+    },
+    {
+     "numeroDecompte": 264,
+     "nature": "TAXES DES ODP",
+     "nom": "REGISSEUR",
+     "taxeCode": "72030",
+     "montant": 30000,
+     "dateEncaissement": "2026-05-22"
+    }
+   ]
+  },
+  {
+   "numero": 38,
+   "dateEncaissement": "2026-05-28",
+   "totalPresent": 144294712,
+   "totalGeneralPrecedent": 311962294,
+   "totalGeneralPresent": 456257006,
+   "sommeLignes": 144294712,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 316,
+     "nature": "Subventions d'équipement de l'Etat",
+     "nom": "PGSP",
+     "taxeCode": "0401",
+     "montant": 144294712,
+     "dateEncaissement": "2026-05-28"
+    }
+   ]
+  },
+  {
+   "numero": 39,
+   "dateEncaissement": "2026-06-02",
+   "totalPresent": 1127000,
+   "totalGeneralPrecedent": 456257006,
+   "totalGeneralPresent": 457384006,
+   "sommeLignes": 1127000,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 265,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 272000,
+     "dateEncaissement": "2026-06-02"
+    },
+    {
+     "numeroDecompte": 266,
+     "nature": "Légalisation, signature, certification",
+     "nom": "REGISSEUR",
+     "taxeCode": "71000",
+     "montant": 100000,
+     "dateEncaissement": "2026-06-02"
+    },
+    {
+     "numeroDecompte": 267,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 150000,
+     "dateEncaissement": "2026-06-02"
+    },
+    {
+     "numeroDecompte": 268,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 355000,
+     "dateEncaissement": "2026-06-02"
+    },
+    {
+     "numeroDecompte": 269,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 250000,
+     "dateEncaissement": "2026-06-02"
+    }
+   ]
+  },
+  {
+   "numero": 40,
+   "dateEncaissement": "2026-06-04",
+   "totalPresent": 110000,
+   "totalGeneralPrecedent": 457384006,
+   "totalGeneralPresent": 457494006,
+   "sommeLignes": 110000,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 270,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 110000,
+     "dateEncaissement": "2026-06-04"
+    }
+   ]
+  },
+  {
+   "numero": 41,
+   "dateEncaissement": "2026-06-09",
+   "totalPresent": 2483500,
+   "totalGeneralPrecedent": 457494006,
+   "totalGeneralPresent": 459977506,
+   "sommeLignes": 2483500,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 271,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 31000,
+     "dateEncaissement": "2026-06-09"
+    },
+    {
+     "numeroDecompte": 272,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 761500,
+     "dateEncaissement": "2026-06-09"
+    },
+    {
+     "numeroDecompte": 273,
+     "nature": "Légalisation, signature, certification",
+     "nom": "REGISSEUR",
+     "taxeCode": "71000",
+     "montant": 100000,
+     "dateEncaissement": "2026-06-09"
+    },
+    {
+     "numeroDecompte": 274,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 152000,
+     "dateEncaissement": "2026-06-09"
+    },
+    {
+     "numeroDecompte": 275,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGTISSEUR",
+     "taxeCode": "70262",
+     "montant": 1299000,
+     "dateEncaissement": "2026-06-09"
+    },
+    {
+     "numeroDecompte": 276,
+     "nature": "Taxe sur les taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "7041",
+     "montant": 50000,
+     "dateEncaissement": "2026-06-09"
+    },
+    {
+     "numeroDecompte": 277,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 90000,
+     "dateEncaissement": "2026-06-09"
+    }
+   ]
+  },
+  {
+   "numero": 42,
+   "dateEncaissement": "2026-06-12",
+   "totalPresent": 737900,
+   "totalGeneralPrecedent": 459977506,
+   "totalGeneralPresent": 460715406,
+   "sommeLignes": 737900,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 278,
+     "nature": "Légalisation, signature, certification",
+     "nom": "REGISSEUR",
+     "taxeCode": "71000",
+     "montant": 100000,
+     "dateEncaissement": "2026-06-12"
+    },
+    {
+     "numeroDecompte": 279,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 18000,
+     "dateEncaissement": "2026-06-12"
+    },
+    {
+     "numeroDecompte": 280,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 87000,
+     "dateEncaissement": "2026-06-12"
+    },
+    {
+     "numeroDecompte": 281,
+     "nature": "Taxe sur les taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "7041",
+     "montant": 11000,
+     "dateEncaissement": "2026-06-12"
+    },
+    {
+     "numeroDecompte": 282,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 35000,
+     "dateEncaissement": "2026-06-12"
+    },
+    {
+     "numeroDecompte": 283,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 99500,
+     "dateEncaissement": "2026-06-12"
+    },
+    {
+     "numeroDecompte": 284,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 298400,
+     "dateEncaissement": "2026-06-12"
+    },
+    {
+     "numeroDecompte": 285,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 46000,
+     "dateEncaissement": "2026-06-12"
+    },
+    {
+     "numeroDecompte": 286,
+     "nature": "Taxe sur les taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "7041",
+     "montant": 32000,
+     "dateEncaissement": "2026-06-12"
+    },
+    {
+     "numeroDecompte": 287,
+     "nature": "Taxe du séquestre",
+     "nom": "REGISSEUR",
+     "taxeCode": "71030",
+     "montant": 1000,
+     "dateEncaissement": "2026-06-12"
+    },
+    {
+     "numeroDecompte": 288,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 5000,
+     "dateEncaissement": "2026-06-12"
+    },
+    {
+     "numeroDecompte": 289,
+     "nature": "TAXES DES ODP",
+     "nom": "REGISSEUR",
+     "taxeCode": "72030",
+     "montant": 5000,
+     "dateEncaissement": "2026-06-12"
+    }
+   ]
+  },
+  {
+   "numero": 43,
+   "dateEncaissement": "2026-06-16",
+   "totalPresent": 2006500,
+   "totalGeneralPrecedent": 460715406,
+   "totalGeneralPresent": 462721906,
+   "sommeLignes": 2006500,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 290,
+     "nature": "Légalisation, signature, certification",
+     "nom": "REGISSEUR",
+     "taxeCode": "71000",
+     "montant": 200000,
+     "dateEncaissement": "2026-06-16"
+    },
+    {
+     "numeroDecompte": 291,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 18000,
+     "dateEncaissement": "2026-06-16"
+    },
+    {
+     "numeroDecompte": 292,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 748000,
+     "dateEncaissement": "2026-06-16"
+    },
+    {
+     "numeroDecompte": 293,
+     "nature": "Taxe sur les taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "7041",
+     "montant": 100000,
+     "dateEncaissement": "2026-06-16"
+    },
+    {
+     "numeroDecompte": 294,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 240000,
+     "dateEncaissement": "2026-06-16"
+    },
+    {
+     "numeroDecompte": 295,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 36000,
+     "dateEncaissement": "2026-06-16"
+    },
+    {
+     "numeroDecompte": 296,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 595500,
+     "dateEncaissement": "2026-06-16"
+    },
+    {
+     "numeroDecompte": 297,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 52000,
+     "dateEncaissement": "2026-06-16"
+    },
+    {
+     "numeroDecompte": 298,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 17000,
+     "dateEncaissement": "2026-06-16"
+    }
+   ]
+  },
+  {
+   "numero": 44,
+   "dateEncaissement": "2026-06-28",
+   "totalPresent": 3972000,
+   "totalGeneralPrecedent": 462721906,
+   "totalGeneralPresent": 466693906,
+   "sommeLignes": 3972000,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 301,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 111000,
+     "dateEncaissement": "2026-06-28"
+    },
+    {
+     "numeroDecompte": 302,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 1370500,
+     "dateEncaissement": "2026-06-28"
+    },
+    {
+     "numeroDecompte": 303,
+     "nature": "Légalisation, signature, certification",
+     "nom": "REGISSEUR",
+     "taxeCode": "71000",
+     "montant": 216000,
+     "dateEncaissement": "2026-06-28"
+    },
+    {
+     "numeroDecompte": 304,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 91000,
+     "dateEncaissement": "2026-06-28"
+    },
+    {
+     "numeroDecompte": 305,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 1311000,
+     "dateEncaissement": "2026-06-28"
+    },
+    {
+     "numeroDecompte": 306,
+     "nature": "Taxe sur les taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "7041",
+     "montant": 255000,
+     "dateEncaissement": "2026-06-28"
+    },
+    {
+     "numeroDecompte": 307,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 445000,
+     "dateEncaissement": "2026-06-28"
+    },
+    {
+     "numeroDecompte": 308,
+     "nature": "Inhumations et exhumations, creusements de fosses",
+     "nom": "REGISSEUR",
+     "taxeCode": "71150",
+     "montant": 7500,
+     "dateEncaissement": "2026-06-28"
+    },
+    {
+     "numeroDecompte": 309,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 10000,
+     "dateEncaissement": "2026-06-28"
+    },
+    {
+     "numeroDecompte": 310,
+     "nature": "Taxe sur les taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "7041",
+     "montant": 35000,
+     "dateEncaissement": "2026-06-28"
+    },
+    {
+     "numeroDecompte": 311,
+     "nature": "Taxe sur la publicité",
+     "nom": "REGISSEUR",
+     "taxeCode": "7042",
+     "montant": 5000,
+     "dateEncaissement": "2026-06-28"
+    },
+    {
+     "numeroDecompte": 312,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 115000,
+     "dateEncaissement": "2026-06-28"
+    }
+   ]
+  },
+  {
+   "numero": 45,
+   "dateEncaissement": "2026-06-29",
+   "totalPresent": 146000,
+   "totalGeneralPrecedent": 466693906,
+   "totalGeneralPresent": 466839906,
+   "sommeLignes": 146000,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 299,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 36000,
+     "dateEncaissement": "2026-06-29"
+    },
+    {
+     "numeroDecompte": 300,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 110000,
+     "dateEncaissement": "2026-06-29"
+    }
+   ]
+  },
+  {
+   "numero": 46,
+   "dateEncaissement": "2026-06-30",
+   "totalPresent": 813000,
+   "totalGeneralPrecedent": 466839906,
+   "totalGeneralPresent": 467652906,
+   "sommeLignes": 813000,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 313,
+     "nature": "Taxe sur la publicité",
+     "nom": "REGISSEUR",
+     "taxeCode": "7042",
+     "montant": 648000,
+     "dateEncaissement": "2026-06-30"
+    },
+    {
+     "numeroDecompte": 314,
+     "nature": "Taxe sur la publicité",
+     "nom": "REGISSEUR",
+     "taxeCode": "7042",
+     "montant": 35000,
+     "dateEncaissement": "2026-06-30"
+    },
+    {
+     "numeroDecompte": 315,
+     "nature": "Taxe sur la publicité",
+     "nom": "REGISSEUR",
+     "taxeCode": "7042",
+     "montant": 130000,
+     "dateEncaissement": "2026-06-30"
+    }
+   ]
+  },
+  {
+   "numero": 47,
+   "dateEncaissement": "2026-07-14",
+   "totalPresent": 4327000,
+   "totalGeneralPrecedent": 467652906,
+   "totalGeneralPresent": 471979906,
+   "sommeLignes": 4327000,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 320,
+     "nature": "Taxe sur les taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "7041",
+     "montant": 81000,
+     "dateEncaissement": "2026-07-14"
+    },
+    {
+     "numeroDecompte": 321,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 20000,
+     "dateEncaissement": "2026-07-14"
+    },
+    {
+     "numeroDecompte": 323,
+     "nature": "Transport par route- gares routières- statin des taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "71331",
+     "montant": 102000,
+     "dateEncaissement": "2026-07-14"
+    },
+    {
+     "numeroDecompte": 324,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 1340000,
+     "dateEncaissement": "2026-07-14"
+    },
+    {
+     "numeroDecompte": 325,
+     "nature": "Légalisation, signature, certification",
+     "nom": "REGISSEUR",
+     "taxeCode": "71000",
+     "montant": 75000,
+     "dateEncaissement": "2026-07-14"
+    },
+    {
+     "numeroDecompte": 326,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 300000,
+     "dateEncaissement": "2026-07-14"
+    },
+    {
+     "numeroDecompte": 327,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 723000,
+     "dateEncaissement": "2026-07-14"
+    },
+    {
+     "numeroDecompte": 328,
+     "nature": "Taxe sur les taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "7041",
+     "montant": 200000,
+     "dateEncaissement": "2026-07-14"
+    },
+    {
+     "numeroDecompte": 329,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 775000,
+     "dateEncaissement": "2026-07-14"
+    },
+    {
+     "numeroDecompte": 331,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 350000,
+     "dateEncaissement": "2026-07-14"
+    },
+    {
+     "numeroDecompte": 332,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 361000,
+     "dateEncaissement": "2026-07-14"
+    }
+   ]
+  },
+  {
+   "numero": 48,
+   "dateEncaissement": "2026-07-21",
+   "totalPresent": 2238600,
+   "totalGeneralPrecedent": 471979906,
+   "totalGeneralPresent": 474218506,
+   "sommeLignes": 2238600,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 330,
+     "nature": "Légalisation, signature, certification",
+     "nom": "REGISSEUR",
+     "taxeCode": "71000",
+     "montant": 50000,
+     "dateEncaissement": "2026-07-21"
+    },
+    {
+     "numeroDecompte": 331,
+     "nature": "délivrance de livrets de famille et autres documents",
+     "nom": "REGISSEUR",
+     "taxeCode": "71001",
+     "montant": 350000,
+     "dateEncaissement": "2026-07-21"
+    },
+    {
+     "numeroDecompte": 332,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 361000,
+     "dateEncaissement": "2026-07-21"
+    },
+    {
+     "numeroDecompte": 333,
+     "nature": "Taxe sur les taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "7041",
+     "montant": 362000,
+     "dateEncaissement": "2026-07-21"
+    },
+    {
+     "numeroDecompte": 334,
+     "nature": "Baux à loyer",
+     "nom": "REGISSEUR",
+     "taxeCode": "72000",
+     "montant": 330000,
+     "dateEncaissement": "2026-07-21"
+    },
+    {
+     "numeroDecompte": 335,
+     "nature": "Marchés",
+     "nom": "REGISSEUR",
+     "taxeCode": "71344",
+     "montant": 689600,
+     "dateEncaissement": "2026-07-21"
+    },
+    {
+     "numeroDecompte": 335,
+     "nature": "Inhumations et exhumations, creusements de fosses",
+     "nom": "REGISSEUR",
+     "taxeCode": "71150",
+     "montant": 7500,
+     "dateEncaissement": "2026-07-21"
+    },
+    {
+     "numeroDecompte": 336,
+     "nature": "taxe forfaitaire des petits commerçants et artisans",
+     "nom": "REGISSEUR",
+     "taxeCode": "70262",
+     "montant": 27500,
+     "dateEncaissement": "2026-07-21"
+    },
+    {
+     "numeroDecompte": 337,
+     "nature": "Taxe sur les taxis",
+     "nom": "REGISSEUR",
+     "taxeCode": "7041",
+     "montant": 56000,
+     "dateEncaissement": "2026-07-21"
+    },
+    {
+     "numeroDecompte": 338,
+     "nature": "TAXES DES ODP",
+     "nom": "REGISSEUR",
+     "taxeCode": "72030",
+     "montant": 5000,
+     "dateEncaissement": "2026-07-21"
+    }
+   ]
+  },
+  {
+   "numero": 49,
+   "dateEncaissement": "2026-07-27",
+   "totalPresent": 123886141,
+   "totalGeneralPrecedent": 474218506,
+   "totalGeneralPresent": 598104647,
+   "sommeLignes": 123886141,
+   "totalMatch": true,
+   "warnings": [],
+   "lignes": [
+    {
+     "numeroDecompte": 347,
+     "nature": "contribution fonciere des proprietés baties",
+     "nom": "ACCT",
+     "taxeCode": "7000",
+     "montant": 103167861,
+     "dateEncaissement": "2026-07-27"
+    },
+    {
+     "numeroDecompte": 349,
+     "nature": "impots syntetique",
+     "nom": "ACCT",
+     "taxeCode": "70261",
+     "montant": 11645641,
+     "dateEncaissement": "2026-07-27"
+    },
+    {
+     "numeroDecompte": 350,
+     "nature": "AUTRE VERSEMENT(ristoune des patentes par anticipation vignettes autos",
+     "nom": "ACCT",
+     "taxeCode": "7406",
+     "montant": 9072639,
+     "dateEncaissement": "2026-07-27"
+    }
+   ]
+  }
+ ]
+}

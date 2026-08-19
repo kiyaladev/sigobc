@@ -19,6 +19,7 @@
 
 import axios from 'axios';
 import type { Table } from 'dexie';
+import { watch } from 'vue';
 import { api } from 'src/boot/axios';
 import { isOnline, useApi, useCache, useSyncQueue } from './connectivity';
 import { offlineDb } from './offline-db';
@@ -54,6 +55,8 @@ const ALL_COLLECTIONS = [
   'mandats',
   'bordereauMandats',
   'etatFinancierMensuel',
+  'projets',
+  'fournisseurs',
   // App6 – Recettes
   'taxes',
   'declarations',
@@ -119,7 +122,13 @@ async function checkConnectivity(): Promise<boolean> {
   }
 }
 
-/** Start polling the API every PROBE_INTERVAL_MS while we are offline. */
+/**
+ * Start polling the API every PROBE_INTERVAL_MS while we are offline.
+ *
+ * Runs in both `offline-sync` and `online` modes: in `online` mode there is no
+ * local fallback, so the app stays unusable until the server is reachable
+ * again — the probe is what unblocks it after a transient outage.
+ */
 function startConnectivityPolling(): void {
   if (_probeTimer !== null) return; // already running
   _probeTimer = setInterval(() => {
@@ -133,7 +142,9 @@ function startConnectivityPolling(): void {
           console.log('[Sync] Connectivity restored (detected by probe).');
           isOnline.value = true;
           stopConnectivityPolling();
-          syncPendingChanges().catch((e) => console.error('[Sync] Post-probe sync error:', e));
+          if (useSyncQueue.value) {
+            syncPendingChanges().catch((e) => console.error('[Sync] Post-probe sync error:', e));
+          }
         }
       })
       .catch(() => {
@@ -348,7 +359,17 @@ export function initSyncService(): void {
 
   window.addEventListener('offline', () => {
     isOnline.value = false;
-    if (useSyncQueue.value) startConnectivityPolling();
+    startConnectivityPolling();
+  });
+
+  // The Collection layer flips `isOnline` to false as soon as a request fails
+  // at the network level (server down while the WiFi link stays up). Without
+  // this watcher nothing would ever probe the API again, and the app would
+  // stay stuck offline until a full reload — especially visible in `online`
+  // mode, which has no local fallback.
+  watch(isOnline, (online) => {
+    if (online) stopConnectivityPolling();
+    else startConnectivityPolling();
   });
 
   if (navigator.onLine) {
@@ -363,6 +384,6 @@ export function initSyncService(): void {
   } else {
     isOnline.value = false;
     // App started offline — begin probing so we catch reconnection automatically.
-    if (useSyncQueue.value) startConnectivityPolling();
+    startConnectivityPolling();
   }
 }

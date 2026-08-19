@@ -13,7 +13,10 @@ const port = Number(process.env.PORT ?? 4000);
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+// Les imports en masse (déclarations et mandats extraits des PDF) postent des
+// tableaux entiers sur `/bulk` : la limite express par défaut (100 kb) les
+// rejetait en 413 dès quelques centaines de lignes.
+app.use(express.json({ limit: '25mb' }));
 
 // ─── utility routes ──────────────────────────────────────────────────────────
 

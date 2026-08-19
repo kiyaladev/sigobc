@@ -171,8 +171,11 @@ const MandatSchema = new Schema({
   typeBien: { type: String, enum: ['immobilier', 'mobilier', 'incorporel'] },
   projetId: Number,
   personnelId: Number,
+  sourceDocumentHash: String,
+  sourceImportKey: String,
   ...ts,
 });
+MandatSchema.index({ sourceImportKey: 1 }, { unique: true, sparse: true });
 export const MandatModel = m('Mandat', MandatSchema);
 
 // ─── BordereauMandat ─────────────────────────────────────────────────────────

@@ -11,10 +11,13 @@ import { ref, computed } from 'vue';
  * - `offline-sync` — Offline-first with background sync.
  *                     Reads/writes go through Dexie, API is used when
  *                     reachable, and a sync queue replays missed writes.
- *                     Default for zones with unstable connectivity.
+ *                     Recommended for zones with unstable connectivity.
  *
  * - `online`       — API only. No Dexie cache.
  *                     For offices with stable broadband.
+ *
+ * `offline` is the default: an installation that has never been pointed at a
+ * server must keep working exactly as before, without silent network calls.
  */
 export type DataMode = 'offline' | 'offline-sync' | 'online';
 

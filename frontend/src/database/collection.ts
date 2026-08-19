@@ -185,6 +185,15 @@ export class WhereClause<T> {
     }
   }
 
+  /** Delete all matching items. */
+  async delete(): Promise<void> {
+    const items = await this.toArray();
+    const ids = items
+      .map((item) => (item as { id?: number }).id)
+      .filter((id): id is number => id !== undefined);
+    if (ids.length > 0) await this.col.bulkDelete(ids);
+  }
+
   async sortBy(sortField: string): Promise<T[]> {
     return this.col.toArray({ ...this._fieldFilter, _sort: sortField });
   }
@@ -586,6 +595,10 @@ export class Collection<T> {
       } catch (e) {
         if (!isOfflineError(e)) return undefined;
         isOnline.value = false;
+        // `online` mode has no local fallback: surfacing the network error is
+        // the only honest answer — returning `undefined` would be read as
+        // "record does not exist".
+        if (!this.canCache) throw e;
       }
     }
 
@@ -626,6 +639,9 @@ export class Collection<T> {
       } catch (e) {
         if (!isOfflineError(e)) throw e;
         isOnline.value = false;
+        // See `get()` — an empty list in `online` mode would look like an
+        // empty database rather than an unreachable server.
+        if (!this.canCache) throw e;
       }
     }
 
@@ -644,6 +660,9 @@ export class Collection<T> {
       } catch (e) {
         if (!isOfflineError(e)) throw e;
         isOnline.value = false;
+        // See `get()` — a count of 0 in `online` mode would look like an
+        // empty database rather than an unreachable server.
+        if (!this.canCache) throw e;
       }
     }
 

@@ -63,7 +63,10 @@ export function makeCrudRouter(
       let q = collectionModel.find(filter).select('-__v');
       if (_sort) q = q.sort(String(_sort));
       if (_skip) q = q.skip(Number(_skip));
-      q = q.limit(_limit ? Math.min(Number(_limit), 5000) : 5000);
+      // `limit(0)` = no limit. Truncating an unbounded list would silently
+      // amputate financial totals, since the offline (Dexie) path returns
+      // everything — the two modes must agree.
+      q = q.limit(_limit ? Number(_limit) : 0);
 
       const docs = await q.lean<Record<string, unknown>[]>();
       res.json({ ok: true, data: docs.map(toPayload) });

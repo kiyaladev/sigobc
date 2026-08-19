@@ -53,7 +53,8 @@ const STORAGE_KEY = '_tresor_dataMode';
 function loadMode() {
   const stored = localStorage.getItem(STORAGE_KEY);
   if (stored === 'offline' || stored === 'offline-sync' || stored === 'online') return stored;
-  return 'offline-sync';
+  // Doit refléter connectivity.ts : le mode par défaut est `offline`.
+  return 'offline';
 }
 
 const dataMode = ref(loadMode());
@@ -101,11 +102,11 @@ function section(name) {
 
 // ── Tests ────────────────────────────────────────────────────────────────────
 
-section('Default mode is offline-sync');
-assert(dataMode.value === 'offline-sync', 'default mode = offline-sync');
-assert(useApi.value === true, 'useApi = true');
+section('Default mode is offline');
+assert(dataMode.value === 'offline', 'default mode = offline');
+assert(useApi.value === false, 'useApi = false (aucun appel réseau par défaut)');
 assert(useCache.value === true, 'useCache = true');
-assert(useSyncQueue.value === true, 'useSyncQueue = true');
+assert(useSyncQueue.value === false, 'useSyncQueue = false');
 
 // ── Mode: offline ────────────────────────────────────────────────────────────
 

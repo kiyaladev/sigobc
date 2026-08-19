@@ -680,7 +680,12 @@ async function importModule(mod: ModuleDef) {
     };
 
     if (!backup.data || !backup.appName) {
-      throw new Error('Format de fichier invalide');
+      const manquants = [!backup.appName && 'appName', !backup.data && 'data']
+        .filter(Boolean)
+        .join(' et ');
+      throw new Error(
+        `Format de fichier invalide : « ${file.name} » n'est pas une sauvegarde SIGOBC (clé ${manquants} absente). Choisissez un fichier sigobc-module-….json issu du bouton « Exporter ».`,
+      );
     }
 
     // Determine which tables we can import from this file

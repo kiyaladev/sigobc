@@ -24,6 +24,7 @@
           :icon="dataModeIcon"
           :label="dataModeLabel"
           class="q-mr-sm"
+          data-visite="mode-donnees"
         >
           <q-list dense style="min-width: 200px">
             <q-item
@@ -56,7 +57,7 @@
         </q-btn>
 
         <!-- Menu utilisateur -->
-        <q-btn flat round dense class="user-menu-btn">
+        <q-btn flat round dense class="user-menu-btn" data-visite="compte">
           <q-avatar size="36px" color="primary" text-color="white" class="hover-glow">
             <q-icon name="account_circle" size="24px" />
           </q-avatar>
@@ -122,7 +123,7 @@
         </q-item-section>
       </q-item>
 
-      <q-list padding class="q-px-sm">
+      <q-list padding class="q-px-sm" data-visite="modules">
         <!-- ===== 4. GESTION DES DÉPENSES ===== -->
         <q-expansion-item
           group="sidebar"
@@ -535,6 +536,35 @@
 
         <q-separator class="q-my-xs" />
 
+        <!-- ===== DOCUMENTATION ===== -->
+        <q-expansion-item
+          group="sidebar"
+          icon="menu_book"
+          label="Documentation"
+          :default-opened="isDocumentationActive"
+          header-class="text-grey-7 text-weight-medium accordion-header"
+          expand-icon-class="text-grey-7"
+          class="accordion-section q-mb-xs"
+          data-visite="documentation"
+        >
+          <q-item
+            clickable
+            v-ripple
+            to="/documentation"
+            class="nav-item q-mb-xs"
+            active-class="nav-item-active"
+          >
+            <q-item-section avatar>
+              <q-icon name="menu_book" color="primary" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Documentation</q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-expansion-item>
+
+        <q-separator class="q-my-xs" />
+
         <!-- ===== ADMINISTRATION ===== -->
         <!-- Branche no-auth : session locale admin toujours active -> menu toujours visible -->
         <template v-if="authStore.isAdmin || authStore.isAuthenticated">
@@ -677,6 +707,12 @@
         </transition>
       </router-view>
     </q-page-container>
+
+    <VisiteGuidee
+      v-model="visiteOuverte"
+      :etapes="ETAPES_VISITE"
+      @termine="marquerVisiteVue"
+    />
   </q-layout>
 </template>
 
@@ -686,6 +722,13 @@ import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from 'src/stores/auth-store';
 import { useDemoStore } from 'src/stores/demo-store';
 import ThemeToggle from 'src/components/ThemeToggle.vue';
+import VisiteGuidee from 'src/components/VisiteGuidee.vue';
+import {
+  ETAPES_VISITE,
+  marquerVisiteVue,
+  ouvrirVisiteSiPremiereFois,
+  visiteOuverte,
+} from 'src/composables/visiteGuidee';
 import logoMairie from '/logo-mairie-gboguhe.png';
 import { dataMode, setDataMode, type DataMode } from 'src/database/connectivity';
 
@@ -695,6 +738,9 @@ const authStore = useAuthStore();
 const demoStore = useDemoStore();
 
 onMounted(() => {
+  // La visite ne s'ouvre qu'au tout premier démarrage ; ensuite elle se
+  // relance à la demande depuis la documentation.
+  ouvrirVisiteSiPremiereFois();
   demoStore.initializeDemo();
   // S'assurer que la session admin locale est chargee (role/nom + menu Administration)
   void authStore.checkAuth();
@@ -734,6 +780,7 @@ const isApp3Active = computed(() => route.path.startsWith('/app3'));
 const isApp6Active = computed(() => route.path.startsWith('/app6'));
 const isApp7Active = computed(() => route.path.startsWith('/app7'));
 const isCompteAdminActive = computed(() => route.path.startsWith('/compte-admin'));
+const isDocumentationActive = computed(() => route.path.startsWith('/documentation'));
 const isAdminActive = computed(
   () =>
     route.path.startsWith('/admin') ||
@@ -763,6 +810,10 @@ function toggleLeftDrawer() {
 
 .modern-header {
   background: rgba(255, 255, 255, 0.88);
+  // `q-header` impose du texte blanc, hérité de son fond primaire par défaut.
+  // Cet en-tête est passé au fond clair : sans cette encre, ses commandes —
+  // dont le sélecteur de mode de données — sont blanc sur blanc.
+  color: #262626;
   backdrop-filter: blur(18px);
   border-bottom: 1px solid rgba(148, 163, 184, 0.18);
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);

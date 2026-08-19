@@ -7,7 +7,7 @@
       style="margin-left: 15px !important"
     />
 
-    <div class="row q-col-gutter-md">
+    <div class="row q-col-gutter-md" data-visite="indicateurs">
       <!-- Cartes KPI -->
       <div class="col-12 col-sm-6 col-lg-3" v-for="(stat, index) in statsCards" :key="index">
         <q-card flat class="listing-stat-card overview-stat-card">
