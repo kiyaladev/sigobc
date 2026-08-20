@@ -10,6 +10,7 @@
           color="primary"
           icon="add"
           label="Nouveau Compte Fonctionnel"
+          data-visite="depenses-nouveau-compte-fonctionnel"
           @click="openDialog()"
         />
       </template>
@@ -48,6 +49,7 @@
       row-key="id"
       show-export-csv
       export-filename="sous-chapitres"
+      data-visite-edit="depenses-modifier-compte-fonctionnel"
       @edit="openDialog"
       @delete="confirmDelete"
     >

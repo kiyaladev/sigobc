@@ -90,7 +90,15 @@
                 no-caps
                 @click="openGenerateDialog"
               />
-              <q-btn icon="add" label="Nouveau" color="teal" unelevated no-caps @click="openAdd" />
+              <q-btn
+                icon="add"
+                label="Nouveau"
+                color="teal"
+                unelevated
+                no-caps
+                data-visite="personnel-nouveau-salaire"
+                @click="openAdd"
+              />
               <q-btn
                 icon="print"
                 label="Imprimer"
@@ -151,11 +159,20 @@
                 dense
                 icon="print"
                 color="grey-7"
+                data-visite="personnel-imprimer-bulletin"
                 @click="printBulletin(props.row)"
               >
                 <q-tooltip>Imprimer bulletin</q-tooltip>
               </q-btn>
-              <q-btn flat round dense icon="edit" color="grey-7" @click="editFiche(props.row)">
+              <q-btn
+                flat
+                round
+                dense
+                icon="edit"
+                color="grey-7"
+                data-visite="personnel-modifier-salaire"
+                @click="editFiche(props.row)"
+              >
                 <q-tooltip>Modifier</q-tooltip>
               </q-btn>
               <q-btn

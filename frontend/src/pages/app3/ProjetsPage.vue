@@ -125,6 +125,7 @@
               icon="add"
               label="Nouveau Projet"
               unelevated
+              data-visite="depenses-nouveau-projet"
               @click="openAddDialog"
             />
             <q-btn
@@ -146,6 +147,7 @@
           show-export-csv
           show-custom-actions
           export-filename="projets"
+          data-visite-edit="depenses-modifier-projet"
           @edit="editProjet"
           @delete="deleteProjet"
         >

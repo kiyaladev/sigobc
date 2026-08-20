@@ -67,7 +67,14 @@
           </div>
           <div class="col-12 col-md-auto q-mt-sm q-mt-md-none listing-actions">
             <q-toggle v-model="showInactifs" label="Afficher inactifs" dense />
-            <q-btn color="primary" icon="add" label="Nouveau Service" unelevated @click="openAdd" />
+            <q-btn
+              color="primary"
+              icon="add"
+              label="Nouveau Service"
+              unelevated
+              data-visite="personnel-nouveau-service"
+              @click="openAdd"
+            />
           </div>
         </div>
 
@@ -77,6 +84,7 @@
           :loading="loading"
           show-export-csv
           export-filename="services"
+          data-visite-edit="personnel-modifier-service"
           @edit="editService"
           @delete="deleteService"
         >

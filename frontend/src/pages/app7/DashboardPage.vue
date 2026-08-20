@@ -2,7 +2,7 @@
   <q-page class="dashboard-page q-pa-md">
     <PageHeader title="Gestion des Employés" subtitle="Tableau de bord du personnel" icon="people" />
 
-    <div class="row q-col-gutter-md">
+    <div class="row q-col-gutter-md" data-visite="personnel-indicateurs">
       <!-- KPI -->
       <div class="col-12 col-sm-6 col-lg-3" v-for="(stat, index) in statsCards" :key="index">
         <q-card flat class="listing-stat-card overview-stat-card">

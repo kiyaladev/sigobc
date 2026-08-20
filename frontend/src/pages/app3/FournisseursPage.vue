@@ -28,6 +28,7 @@
               icon="add"
               label="Nouveau Fournisseur"
               unelevated
+              data-visite="personnel-nouveau-fournisseur"
               @click="openAddDialog"
             />
           </div>
@@ -39,6 +40,7 @@
           :loading="loading"
           show-export-csv
           export-filename="fournisseurs"
+          data-visite-edit="personnel-modifier-fournisseur"
           @edit="editFournisseur"
           @delete="deleteFournisseur"
         >

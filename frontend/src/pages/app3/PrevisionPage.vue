@@ -144,6 +144,7 @@
                 label="Nouvelle"
                 unelevated
                 no-caps
+                data-visite="depenses-nouvelle-prevision"
                 @click="showAddDialog = true"
               />
               <q-btn dense flat round color="grey-7" icon="more_horiz">
@@ -192,6 +193,7 @@
           :columns="columns"
           :loading="loading"
           export-filename="previsions"
+          data-visite-edit="depenses-modifier-prevision"
           @edit="editPrevision"
           @delete="deletePrevision"
         >

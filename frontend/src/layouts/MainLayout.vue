@@ -708,9 +708,10 @@
       </router-view>
     </q-page-container>
 
+    <SommaireVisite v-model="sommaireOuvert" />
     <VisiteGuidee
       v-model="visiteOuverte"
-      :etapes="ETAPES_VISITE"
+      :etapes="etapesVisiteActives"
       @termine="marquerVisiteVue"
     />
   </q-layout>
@@ -723,10 +724,12 @@ import { useAuthStore } from 'src/stores/auth-store';
 import { useDemoStore } from 'src/stores/demo-store';
 import ThemeToggle from 'src/components/ThemeToggle.vue';
 import VisiteGuidee from 'src/components/VisiteGuidee.vue';
+import SommaireVisite from 'src/components/SommaireVisite.vue';
 import {
-  ETAPES_VISITE,
+  etapesVisiteActives,
   marquerVisiteVue,
   ouvrirVisiteSiPremiereFois,
+  sommaireOuvert,
   visiteOuverte,
 } from 'src/composables/visiteGuidee';
 import logoMairie from '/logo-mairie-gboguhe.png';

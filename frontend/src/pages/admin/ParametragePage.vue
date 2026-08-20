@@ -33,6 +33,7 @@
               color="primary"
               icon="add"
               label="Nouvel Exercice"
+              data-visite="systeme-parametrage"
               @click="openExerciceDialog()"
             />
           </div>
@@ -80,6 +81,7 @@
                   dense
                   color="orange"
                   icon="lock"
+                  data-visite="systeme-verrouiller-exercice"
                   @click="confirmVerrouiller(props.row)"
                 >
                   <q-tooltip>Verrouiller cet exercice</q-tooltip>
@@ -91,6 +93,7 @@
                   dense
                   color="positive"
                   icon="lock_open"
+                  data-visite="systeme-verrouiller-exercice"
                   @click="confirmOuvrir(props.row)"
                 >
                   <q-tooltip>Rouvrir cet exercice</q-tooltip>

@@ -50,6 +50,7 @@
                   label="Initialiser"
                   color="primary"
                   icon="rocket_launch"
+                  data-visite="systeme-seeders"
                   @click="runSeedDefault"
                   :loading="loading.default"
                 />

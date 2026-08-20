@@ -1,5 +1,5 @@
 <template>
-  <q-page class="dashboard-page q-pa-md">
+  <q-page class="dashboard-page q-pa-md" data-visite="personnel-statistiques">
     <PageHeader
       title="Statistiques du Personnel"
       subtitle="Analyse des données RH"

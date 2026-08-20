@@ -160,6 +160,7 @@
                 label="Nouveau"
                 unelevated
                 no-caps
+                data-visite="recettes-nouveau-mandat"
                 @click="openDialog()"
               />
               <q-btn dense flat round color="grey-7" icon="more_horiz">
@@ -192,8 +193,10 @@
           show-print
           show-download
           export-filename="mandats-recette"
+          data-visite-edit="recettes-modifier-mandat"
           @edit="openDialog"
           @delete="confirmDelete"
+          data-visite-print="recettes-imprimer-mandat"
           @print="printMandat"
           @download="downloadMandatPDF"
         >

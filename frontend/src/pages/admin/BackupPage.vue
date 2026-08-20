@@ -60,6 +60,7 @@
               label="Télécharger la sauvegarde complète"
               color="positive"
               icon="download"
+              data-visite="systeme-backup"
               @click="exportAll"
               :loading="exportLoading"
               unelevated

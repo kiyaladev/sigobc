@@ -20,7 +20,13 @@
           class="hidden"
           @update:model-value="onPdfSelected"
         />
-        <q-btn color="primary" icon="add" label="Nouveau Bordereau" @click="openDialog()" />
+        <q-btn
+          color="primary"
+          icon="add"
+          label="Nouveau Bordereau"
+          data-visite="recettes-nouveau-bordereau"
+          @click="openDialog()"
+        />
         <q-btn
           v-if="isDev"
           color="orange"
@@ -134,6 +140,7 @@
       export-filename="bordereaux"
       @view="viewDeclarations"
       @download="downloadBordereauPDF"
+      data-visite-edit="recettes-modifier-bordereau"
       @edit="openDialog"
       @delete="confirmDelete"
     >

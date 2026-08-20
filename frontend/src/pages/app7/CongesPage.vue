@@ -80,6 +80,7 @@
                 label="Nouveau congé"
                 unelevated
                 no-caps
+                data-visite="personnel-nouveau-conge"
                 @click="openAdd"
               />
             </div>
@@ -94,6 +95,7 @@
           @update:pagination="(v: any) => (tablePagination = v)"
           show-export-csv
           export-filename="conges"
+          data-visite-edit="personnel-modifier-conge"
           @edit="editConge"
           @delete="deleteConge"
         >

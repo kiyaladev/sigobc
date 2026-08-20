@@ -21,6 +21,7 @@
             color="teal"
             icon="print"
             label="Imprimer"
+            data-visite="compte-admin-imprimer"
             @click="printCurrentTab"
             :loading="data.loading.value"
           />
@@ -50,6 +51,7 @@
     <q-card class="main-card">
       <q-tabs
         v-model="currentTab"
+        data-visite="compte-admin-onglets"
         dense
         class="text-grey"
         active-color="teal"

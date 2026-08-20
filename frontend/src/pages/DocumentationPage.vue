@@ -5,6 +5,15 @@
       subtitle="Guide complet de SIGOBC : présentation, modules, sécurité, prérequis et accompagnement"
       icon="menu_book"
     >
+      <template #actions>
+        <q-btn
+          color="primary"
+          icon="explore"
+          label="Découvrir les parcours guidés"
+          no-caps
+          @click="ouvrirSommaire()"
+        />
+      </template>
       <template #stats>
         <div class="col-12">
           <q-input
@@ -29,17 +38,37 @@
       On offre le passage de l'une à l'autre ici, là où quelqu'un qui cherche
       comment faire arrive naturellement.
     -->
-    <div class="q-mb-md">
-      <q-btn
-        flat
-        dense
-        no-caps
-        color="primary"
-        icon="explore"
-        label="Relancer la visite guidée"
-        @click="relancerVisite()"
-      />
-    </div>
+    <section class="doc-tour-section q-mb-lg">
+      <div class="doc-tour-heading">
+        <div>
+          <p class="eyebrow">Visite interactive</p>
+          <h2>Sommaire des parcours guidés</h2>
+        </div>
+        <q-badge color="primary" outline :label="`${scenarios.length} parcours`" />
+      </div>
+      <div class="doc-tour-grid">
+        <q-card v-for="scenario in scenarios" :key="scenario.id" flat bordered class="doc-tour-card">
+          <q-card-section>
+            <q-avatar color="green-1" text-color="primary" :icon="scenario.icone" />
+            <div>
+              <h3>{{ scenario.titre }}</h3>
+              <p>{{ scenario.description }}</p>
+              <span>{{ nombreEtapes(scenario.id) }} étapes · {{ scenario.duree }}</span>
+            </div>
+          </q-card-section>
+          <q-card-actions align="right">
+            <q-btn
+              flat
+              color="primary"
+              icon="play_arrow"
+              label="Lancer ce parcours"
+              no-caps
+              @click="demarrerVisite(scenario.id)"
+            />
+          </q-card-actions>
+        </q-card>
+      </div>
+    </section>
 
     <!-- Navigation rapide par catégorie -->
     <div class="doc-chips q-mb-lg">
@@ -116,6 +145,34 @@
                 </q-card-section>
               </q-card>
             </div>
+
+            <!--
+              Catalogue des productions. Le tableau défile seul en largeur :
+              c'est une pièce de référence, on ne la casse pas en cartes.
+            -->
+            <div v-if="section.productions" class="doc-productions">
+              <table class="doc-productions-table">
+                <thead>
+                  <tr>
+                    <th class="doc-prod-num">N°</th>
+                    <th>Production</th>
+                    <th>Où la produire</th>
+                    <th>Document obtenu</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(prod, i) in filteredProductions(section)" :key="prod.intitule">
+                    <td class="doc-prod-num">{{ i + 1 }}</td>
+                    <td class="doc-prod-intitule">{{ prod.intitule }}</td>
+                    <td>
+                      <div class="doc-prod-module">{{ prod.module }}</div>
+                      <div class="doc-prod-chemin">{{ prod.chemin }}</div>
+                    </td>
+                    <td class="text-grey-8">{{ prod.document }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </q-card-section>
         </q-card>
       </q-expansion-item>
@@ -126,7 +183,9 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue';
 import PageHeader from 'src/components/PageHeader.vue';
-import { relancerVisite } from 'src/composables/visiteGuidee';
+import { SCENARIOS_VISITE, demarrerVisite, nombreEtapes, ouvrirSommaire } from 'src/composables/visiteGuidee';
+
+const scenarios = SCENARIOS_VISITE;
 
 interface DocItem {
   label: string;
@@ -140,12 +199,27 @@ interface DocModule {
   benefice: string;
 }
 
+/**
+ * Une pièce que l'application produit et que l'agent signe ou transmet.
+ * Une liste réglementaire de livrables se lit en colonnes, pas en prose : on
+ * cherche « où produit-on l'état d'ITS ? » et la réponse tient sur une ligne.
+ */
+interface DocProduction {
+  intitule: string;
+  module: string;
+  /** Chemin exact dans l'application, tel qu'il apparaît dans le sommaire. */
+  chemin: string;
+  /** Ce qui sort de l'impression, décrit du point de vue de qui le reçoit. */
+  document: string;
+}
+
 interface DocSection {
   title: string;
   shortTitle: string;
   icon: string;
   items?: DocItem[];
   modules?: DocModule[];
+  productions?: DocProduction[];
 }
 
 const sections: DocSection[] = [
@@ -218,7 +292,99 @@ const sections: DocSection[] = [
     ],
   },
   {
-    title: 'Partie 3 — Ce que le logiciel change',
+    title: 'Partie 3 — Catalogue des productions',
+    shortTitle: 'Productions',
+    icon: 'print',
+    items: [
+      {
+        label: 'Ce que recense ce catalogue',
+        description:
+          "Toutes les pièces que l'application édite et que l'agent signe, transmet ou archive. Chaque ligne indique où la production se déclenche : l'écran, puis le bouton. Une pièce absente de ce tableau n'est pas produite par l'application.",
+      },
+    ],
+    productions: [
+      {
+        intitule: 'Mandat de paiement',
+        module: 'Gestion des Dépenses',
+        chemin: 'Mandats › ligne du mandat › Imprimer',
+        document: "Le mandat de dépense à signer par l'ordonnateur, avec son imputation et son bénéficiaire.",
+      },
+      {
+        intitule: 'Bordereau de transmission de mandats',
+        module: 'Gestion des Dépenses',
+        chemin: 'Bordereaux Mandats › ligne du bordereau › Imprimer',
+        document:
+          "Le bordereau d'émission récapitulant les mandats transmis au Trésor, avec son total et son report. Un bordereau de rejet existe pour les mandats retournés.",
+      },
+      {
+        intitule: "État d'exécution budgétaire — dépenses",
+        module: 'Gestion des Dépenses',
+        chemin: 'Prévisions › Imprimer',
+        document:
+          "L'état financier mensuel des dépenses — fonctionnement et investissement — avec les antécédents cumulés mois par mois. Le CT02 s'édite depuis le même écran.",
+      },
+      {
+        intitule: "Mandat d'ordre de recettes",
+        module: 'Gestion des Recettes',
+        chemin: 'Mandats Recette › ligne du mandat › Imprimer',
+        document: "L'ordre de recette à signer, avec sa nature de recette et sa partie versante.",
+      },
+      {
+        intitule: "Bordereau de transmission des ordres de recettes",
+        module: 'Gestion des Recettes',
+        chemin: 'Bordereaux Mandats Recette › ligne du bordereau › Imprimer',
+        document: "Le bordereau récapitulant les ordres de recettes transmis, avec son total.",
+      },
+      {
+        intitule: "État d'exécution budgétaire — recettes",
+        module: 'Gestion des Recettes',
+        chemin: 'Prévisions Recettes › Imprimer',
+        document:
+          "L'état financier mensuel des recettes, fonctionnelles et d'investissement, avec les antécédents cumulés.",
+      },
+      {
+        intitule: 'Bulletin de salaire',
+        module: 'Gestion des Employés',
+        chemin: 'Salaires › ligne de l’agent › Imprimer',
+        document: "Le bulletin de paie de l'agent pour le mois retenu : brut, retenues, net à payer.",
+      },
+      {
+        intitule: 'État de solde',
+        module: 'Gestion des Employés',
+        chemin: 'Salaires › Documents officiels › État de solde',
+        document: "Le détail des rémunérations du service ou de la mairie pour la période retenue.",
+      },
+      {
+        intitule: "État d'ITS",
+        module: 'Gestion des Employés',
+        chemin: 'Salaires › Documents officiels › État ITS',
+        document: "L'état de l'impôt sur traitements et salaires, à joindre à la déclaration fiscale.",
+      },
+      {
+        intitule: 'États CNPS',
+        module: 'Gestion des Employés',
+        chemin: 'Salaires › Documents officiels › États CNPS',
+        document:
+          "L'état de la part salariale CNPS. Le décompte de la part patronale s'édite depuis le même menu, et le fichier DISA depuis la fiche des employés.",
+      },
+      {
+        intitule: 'Ordre de mission',
+        module: 'Gestion des Employés',
+        chemin: 'Ordres de mission › ligne de la mission › Imprimer',
+        document:
+          "L'ordre de mission à signer, avec la destination, les dates et les indemnités calculées.",
+      },
+      {
+        intitule: 'Compte administratif',
+        module: 'Compte administratif',
+        chemin: "Compte administratif › onglet voulu › Imprimer",
+        document:
+          "La synthèse annuelle de l'exécution, onglet par onglet : récapitulatifs global, fonctionnel et d'investissement, dépenses engagées et ventilées, recettes, résultat et modifications patrimoniales.",
+      },
+    ],
+  },
+  {
+    title: 'Partie 4 — Ce que le logiciel change',
     shortTitle: 'Apport',
     icon: 'trending_up',
     items: [
@@ -260,7 +426,7 @@ const sections: DocSection[] = [
     ],
   },
   {
-    title: 'Partie 4 — Modes de données et travail hors ligne',
+    title: 'Partie 5 — Modes de données et travail hors ligne',
     shortTitle: 'Modes de données',
     icon: 'cloud_sync',
     items: [
@@ -292,7 +458,7 @@ const sections: DocSection[] = [
     ],
   },
   {
-    title: 'Partie 5 — Sécurité & Administration',
+    title: 'Partie 6 — Sécurité & Administration',
     shortTitle: 'Sécurité',
     icon: 'security',
     items: [
@@ -311,7 +477,7 @@ const sections: DocSection[] = [
     ],
   },
   {
-    title: 'Partie 6 — Pré-requis techniques',
+    title: 'Partie 7 — Pré-requis techniques',
     shortTitle: 'Prérequis',
     icon: 'dns',
     items: [
@@ -330,7 +496,7 @@ const sections: DocSection[] = [
     ],
   },
   {
-    title: 'Partie 7 — Accompagnement',
+    title: 'Partie 8 — Accompagnement',
     shortTitle: 'Accompagnement',
     icon: 'support_agent',
     items: [
@@ -382,9 +548,24 @@ function filteredModules(section: DocSection): DocModule[] {
   );
 }
 
+function filteredProductions(section: DocSection): DocProduction[] {
+  if (!section.productions) return [];
+  return section.productions.filter(
+    (prod) =>
+      matches(prod.intitule) ||
+      matches(prod.module) ||
+      matches(prod.chemin) ||
+      matches(prod.document),
+  );
+}
+
 function sectionHasMatch(section: DocSection): boolean {
   if (!search.value.trim()) return true;
-  return filteredItems(section).length > 0 || filteredModules(section).length > 0;
+  return (
+    filteredItems(section).length > 0 ||
+    filteredModules(section).length > 0 ||
+    filteredProductions(section).length > 0
+  );
 }
 
 const visibleSections = computed(() => sections.filter((section) => sectionHasMatch(section)));
@@ -415,6 +596,75 @@ function scrollToSection(title: string) {
 </script>
 
 <style scoped lang="scss">
+.doc-tour-section {
+  padding: 18px 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+}
+
+.doc-tour-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.doc-tour-heading .eyebrow {
+  margin: 0 0 2px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: $primary;
+}
+
+.doc-tour-heading h2 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.doc-tour-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.doc-tour-card {
+  border-radius: 14px;
+
+  :deep(.q-card__section) {
+    display: flex;
+    gap: 12px;
+  }
+
+  h3 {
+    margin: 0 0 4px;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    color: #475569;
+  }
+
+  span {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+  }
+}
+
 .doc-search {
   max-width: 480px;
 
@@ -497,5 +747,63 @@ function scrollToSection(title: string) {
 
 .doc-module-tag.benefice {
   color: $secondary;
+}
+
+// ── Catalogue des productions ──────────────────────────────────────────────
+// Un tableau de référence : filets fins, chiffres alignés, et un défilement
+// horizontal qui reste dans le cadre plutôt que d'élargir la page.
+.doc-productions {
+  overflow-x: auto;
+}
+
+.doc-productions-table {
+  width: 100%;
+  min-width: 620px;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+  line-height: 1.5;
+
+  th,
+  td {
+    padding: 10px 12px;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid var(--surface-border, rgba(148, 163, 184, 0.18));
+  }
+
+  th {
+    font-weight: 700;
+    color: $primary;
+    white-space: nowrap;
+    border-bottom-width: 2px;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: 0;
+  }
+}
+
+.doc-prod-num {
+  width: 1%;
+  color: var(--text-soft, #64748b);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.doc-prod-intitule {
+  font-weight: 600;
+}
+
+.doc-prod-module {
+  font-weight: 600;
+  color: $primary;
+}
+
+// Le chemin est de l'appareil : plus petit, plus clair, il se lit après
+// l'intitulé du module et non à sa place.
+.doc-prod-chemin {
+  margin-top: 2px;
+  font-size: 0.84rem;
+  color: var(--text-soft, #64748b);
 }
 </style>

@@ -139,6 +139,7 @@
                 label="Nouvelle"
                 unelevated
                 no-caps
+                data-visite="recettes-nouvelle-prevision"
                 @click="showAddDialog = true"
               />
               <q-btn dense flat round color="grey-7" icon="more_horiz">
@@ -185,6 +186,7 @@
           bordered
           class="prevision-table"
           export-filename="previsions-recettes"
+          data-visite-edit="recettes-modifier-prevision"
           @edit="editPrevision"
           @delete="deletePrevision"
         >

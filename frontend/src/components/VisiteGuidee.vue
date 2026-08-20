@@ -33,7 +33,17 @@
         :class="{ 'visite__note--centree': !cadre }"
         :style="styleNote"
       >
-        <p class="visite__folio">Renvoi {{ rang }} sur {{ total }}</p>
+        <div class="visite__entete">
+          <p class="visite__folio">Renvoi {{ rang }} sur {{ total }}</p>
+          <button
+            type="button"
+            class="visite__sommaire-bouton"
+            aria-label="Ouvrir le sommaire de la visite"
+            @click="tocOuvert = true"
+          >
+            <q-icon name="list" size="16px" /> Sommaire
+          </button>
+        </div>
         <h2 id="visite-titre" class="visite__titre">{{ etape.titre }}</h2>
         <p id="visite-corps" class="visite__corps">{{ etape.corps }}</p>
 
@@ -60,6 +70,44 @@
         </div>
       </aside>
     </div>
+
+    <q-dialog v-model="tocOuvert">
+      <q-card class="visite-toc-card">
+        <q-card-section class="visite-toc-heading">
+          <div>
+            <p class="eyebrow">Sommaire</p>
+            <h2>Étapes de ce parcours</h2>
+          </div>
+          <q-btn flat round dense icon="close" aria-label="Fermer le sommaire" v-close-popup />
+        </q-card-section>
+        <q-separator />
+        <q-list separator class="visite-toc-list">
+          <q-item
+            v-for="(item, i) in props.etapes"
+            :key="item.titre + i"
+            clickable
+            v-close-popup
+            :active="i === index"
+            active-class="bg-green-1 text-primary"
+            @click="allerDepuisSommaire(i)"
+          >
+            <q-item-section avatar>
+              <q-avatar
+                :color="i < index ? 'positive' : 'blue-grey-1'"
+                :text-color="i < index ? 'white' : 'blue-grey-9'"
+                size="32px"
+              >
+                <q-icon v-if="i < index" name="check" size="16px" />
+                <span v-else>{{ i + 1 }}</span>
+              </q-avatar>
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>{{ item.titre }}</q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-card>
+    </q-dialog>
   </Teleport>
 </template>
 
@@ -79,12 +127,17 @@
  * pour que la visite appartienne à l'application, pas à un habillage tiers.
  */
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 export interface EtapeVisite {
   /** Sélecteur CSS de l'élément commenté. Absent : la note s'affiche seule, centrée. */
   cible?: string;
+  /** Route à ouvrir avant de chercher la cible, quand elle vit sur une autre page. */
+  route?: string;
   titre: string;
   corps: string;
+  /** Parcours auxquels appartient l'étape — voir le sommaire des scénarios. */
+  scenarioIds: string[];
 }
 
 const props = defineProps<{
@@ -100,6 +153,10 @@ const emit = defineEmits<{
 const MARGE = 16; // Respiration minimale entre la note et le bord de l'écran.
 const JEU = 8; // Écart entre le cartouche et la cible.
 const LARGEUR_NOTE = 344;
+
+const router = useRouter();
+const route = useRoute();
+const tocOuvert = ref(false);
 
 const index = ref(0);
 const cadre = ref<{ top: number; left: number; width: number; height: number } | null>(null);
@@ -187,11 +244,14 @@ function dansLeChamp(r: DOMRect): boolean {
 
 async function allerA(n: number, sens: 1 | -1 = 1): Promise<void> {
   // Une étape dont la cible a disparu est franchie sans bruit plutôt que
-  // d'ouvrir une note orpheline.
+  // d'ouvrir une note orpheline. Ce repérage ne vaut que sur la page
+  // courante : une cible qui vit sur une autre page n'est révélée que par
+  // la navigation, pas par une mesure à l'aveugle avant d'y être arrivé.
   let i = n;
   while (i >= 0 && i < props.etapes.length) {
-    const sel = props.etapes[i]?.cible;
-    if (!sel || estVisible(sel)) break;
+    const etapeI = props.etapes[i];
+    const memePage = !etapeI?.route || etapeI.route === route.path;
+    if (!etapeI?.cible || !memePage || estVisible(etapeI.cible)) break;
     i += sens;
   }
   if (i < 0 || i >= props.etapes.length) {
@@ -201,6 +261,12 @@ async function allerA(n: number, sens: 1 | -1 = 1): Promise<void> {
 
   index.value = i;
   manques = 0;
+  const etape = props.etapes[i];
+  if (etape?.route && etape.route !== route.path) {
+    await router.push(etape.route);
+    // Laisser la page cible se monter avant de chercher son contenu.
+    await new Promise((r) => setTimeout(r, 180));
+  }
   await nextTick();
   const el = cible();
   el?.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'smooth' });
@@ -227,6 +293,11 @@ function avancer(): void {
 
 function reculer(): void {
   if (index.value > 0) void allerA(index.value - 1, -1);
+}
+
+function allerDepuisSommaire(i: number): void {
+  tocOuvert.value = false;
+  void allerA(i, i >= index.value ? 1 : -1);
 }
 
 function terminer(): void {
@@ -288,6 +359,7 @@ watch(
       ecouter(false);
       index.value = 0;
       cadre.value = null;
+      tocOuvert.value = false;
     }
   },
   { immediate: true },
@@ -485,13 +557,46 @@ const filet = computed(() => {
   transform: translate(-50%, -50%);
 }
 
+.visite__entete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2, 8px);
+  margin-bottom: 8px;
+}
+
 .visite__folio {
-  margin: 0 0 8px;
+  margin: 0;
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.01em;
   color: var(--text-soft, #64748b);
   font-variant-numeric: tabular-nums;
+}
+
+.visite__sommaire-bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border: 1px solid var(--surface-border, rgba(148, 163, 184, 0.35));
+  border-radius: var(--radius-pill, 980px);
+  background: transparent;
+  color: var(--text-soft, #64748b);
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    color: #262626;
+    background: rgba(15, 23, 42, 0.04);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #1b5e3b;
+    outline-offset: 2px;
+  }
 }
 
 .visite__titre {
@@ -585,5 +690,41 @@ const filet = computed(() => {
   .visite__cartouche {
     transition: none;
   }
+}
+
+// ── Le sommaire des étapes (accessible pendant la visite) ─────────────────
+
+.visite-toc-card {
+  width: min(480px, calc(100vw - 24px));
+  max-height: min(640px, calc(100vh - 30px));
+  border-radius: var(--radius-md, 14px);
+  overflow: hidden;
+}
+
+.visite-toc-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px;
+}
+
+.visite-toc-heading h2 {
+  margin: 4px 0 0;
+  font-size: 1.25rem;
+}
+
+.visite-toc-heading .eyebrow {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #1b5e3b;
+}
+
+.visite-toc-list {
+  max-height: min(520px, calc(100vh - 140px));
+  overflow-y: auto;
 }
 </style>

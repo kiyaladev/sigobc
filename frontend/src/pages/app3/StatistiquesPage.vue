@@ -1,5 +1,5 @@
 <template>
-  <q-page class="statistiques-page q-pa-md">
+  <q-page class="statistiques-page q-pa-md" data-visite="depenses-statistiques">
     <PageHeader
       title="Statistiques des Dépenses"
       subtitle="Analyse et suivi de l'exécution budgétaire"

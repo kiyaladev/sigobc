@@ -6,7 +6,13 @@
       icon="manage_accounts"
     >
       <template #actions>
-        <q-btn color="primary" icon="add" label="Nouvel Utilisateur" @click="openDialog()" />
+        <q-btn
+          color="primary"
+          icon="add"
+          label="Nouvel Utilisateur"
+          data-visite="administration-nouvel-utilisateur"
+          @click="openDialog()"
+        />
       </template>
       <template #stats>
         <div v-for="(stat, index) in headerStats" :key="index" class="col-12 col-sm-6 col-lg-3">
@@ -115,7 +121,15 @@
 
         <template v-slot:body-cell-actions="props">
           <q-td :props="props">
-            <q-btn flat round dense icon="edit" color="grey-7" @click="openDialog(props.row)">
+            <q-btn
+              flat
+              round
+              dense
+              icon="edit"
+              color="grey-7"
+              data-visite="administration-modifier-utilisateur"
+              @click="openDialog(props.row)"
+            >
               <q-tooltip>Modifier</q-tooltip>
             </q-btn>
             <q-btn

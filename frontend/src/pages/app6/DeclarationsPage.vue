@@ -6,7 +6,13 @@
       icon="description"
     >
       <template #actions>
-        <q-btn color="primary" icon="add" label="Nouvelle Déclaration" @click="openDialog()" />
+        <q-btn
+          color="primary"
+          icon="add"
+          label="Nouvelle Déclaration"
+          data-visite="recettes-nouvelle-declaration"
+          @click="openDialog()"
+        />
       </template>
       <template #stats>
         <div class="col-12 col-sm-6 col-lg-3">
@@ -89,8 +95,10 @@
       show-download
       show-export-csv
       export-filename="declarations"
+      data-visite-print="recettes-imprimer-declaration"
       @print="printDeclaration"
       @download="downloadDeclarationPDF"
+      data-visite-edit="recettes-modifier-declaration"
       @edit="openDialog"
       @delete="confirmDelete"
     >

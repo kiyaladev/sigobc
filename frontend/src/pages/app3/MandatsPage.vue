@@ -159,6 +159,7 @@
                 label="Nouveau"
                 unelevated
                 no-caps
+                data-visite="depenses-nouveau-mandat"
                 @click="openAddDialog"
               />
               <q-btn dense flat round color="grey-7" icon="more_horiz">
@@ -190,7 +191,9 @@
           :loading="loading"
           show-print
           export-filename="mandats"
+          data-visite-print="depenses-imprimer-mandat"
           @print="printMandat"
+          data-visite-edit="depenses-modifier-mandat"
           @edit="editMandat"
           @delete="deleteMandat"
         >

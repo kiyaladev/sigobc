@@ -10,6 +10,7 @@
           color="primary"
           icon="add"
           label="Nouvelle Nature de Dépense"
+          data-visite="depenses-nouvelle-nature"
           @click="openDialog()"
         />
       </template>
@@ -48,6 +49,7 @@
       row-key="id"
       show-export-csv
       export-filename="chapitres"
+      data-visite-edit="depenses-modifier-nature"
       @edit="openDialog"
       @delete="confirmDelete"
     >

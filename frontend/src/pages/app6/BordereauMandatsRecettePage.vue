@@ -6,7 +6,13 @@
       icon="receipt_long"
     >
       <template #actions>
-        <q-btn color="primary" icon="add" label="Nouveau Bordereau" @click="openDialog()" />
+        <q-btn
+          color="primary"
+          icon="add"
+          label="Nouveau Bordereau"
+          data-visite="recettes-nouveau-bordereau-ordre"
+          @click="openDialog()"
+        />
         <q-btn
           v-if="isDev"
           color="orange"
@@ -156,8 +162,10 @@
       show-export-csv
       export-filename="bordereaux-mandats-recette"
       @view="viewMandats"
+      data-visite-print="recettes-imprimer-bordereau-ordre"
       @print="printBordereau"
       @download="downloadBordereauPDF"
+      data-visite-edit="recettes-modifier-bordereau-ordre"
       @edit="openDialog"
       @delete="confirmDelete"
       title-label="Bordereau"

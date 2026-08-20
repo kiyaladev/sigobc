@@ -1,5 +1,5 @@
 <template>
-  <q-page class="statistiques-page q-pa-md">
+  <q-page class="statistiques-page q-pa-md" data-visite="recettes-statistiques">
     <PageHeader
       title="Statistiques des Recettes"
       subtitle="Analyse et suivi des déclarations de recettes"

@@ -78,6 +78,7 @@
                 label="Nouvel agent"
                 unelevated
                 no-caps
+                data-visite="personnel-nouvel-agent"
                 @click="openAdd"
               />
             </div>
@@ -92,6 +93,7 @@
           @update:pagination="(v: any) => (tablePagination = v)"
           show-export-csv
           export-filename="employes"
+          data-visite-edit="personnel-modifier-agent"
           @edit="editEmploye"
           @delete="deleteEmploye"
         >

@@ -51,6 +51,7 @@
             icon="print"
             color="grey-7"
             class="table-action-btn"
+            :data-visite="dataVisitePrint"
             @click="$emit('print', props.row)"
           >
             <q-tooltip>Imprimer</q-tooltip>
@@ -75,6 +76,7 @@
             icon="edit"
             color="primary"
             class="table-action-btn"
+            :data-visite="dataVisiteEdit"
             @click="$emit('edit', props.row)"
           >
             <q-tooltip>Modifier</q-tooltip>
@@ -118,6 +120,9 @@ interface Props {
   showCustomActions?: boolean;
   showExportCsv?: boolean;
   exportFilename?: string;
+  /** Ancres de la visite guidée, posées sur les boutons d'action correspondants. */
+  dataVisiteEdit?: string;
+  dataVisitePrint?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {

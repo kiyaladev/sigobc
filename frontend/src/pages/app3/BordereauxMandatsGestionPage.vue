@@ -20,7 +20,13 @@
           class="hidden"
           @update:model-value="onPdfSelected"
         />
-        <q-btn color="primary" icon="add" label="Nouveau Bordereau" @click="openDialog()" />
+        <q-btn
+          color="primary"
+          icon="add"
+          label="Nouveau Bordereau"
+          data-visite="depenses-nouveau-bordereau"
+          @click="openDialog()"
+        />
         <q-btn
           v-if="isDev"
           color="orange"
@@ -163,8 +169,10 @@
       show-export-csv
       export-filename="bordereaux-mandats"
       @view="viewMandats"
+      data-visite-print="depenses-imprimer-bordereau"
       @print="printBordereau"
       @download="downloadBordereauPDF"
+      data-visite-edit="depenses-modifier-bordereau"
       @edit="openDialog"
       @delete="confirmDelete"
     >

@@ -1,5 +1,5 @@
 <template>
-  <q-page class="statistiques-page q-pa-md">
+  <q-page class="statistiques-page q-pa-md" data-visite="administration-statistiques-globales">
     <PageHeader
       title="Statistiques Globales"
       subtitle="Vue d'ensemble de l'exécution budgétaire"

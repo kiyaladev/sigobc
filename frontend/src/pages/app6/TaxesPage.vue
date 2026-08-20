@@ -70,6 +70,7 @@
               icon="add"
               label="Nouvelle Taxe"
               unelevated
+              data-visite="recettes-nouvelle-taxe"
               @click="showAddDialog = true"
             />
           </div>
@@ -121,7 +122,14 @@
 
           <template v-slot:body-cell-actions="props">
             <q-td :props="props" class="q-gutter-xs">
-              <q-btn flat dense icon="edit" color="primary" @click="editTaxe(props.row)">
+              <q-btn
+                flat
+                dense
+                icon="edit"
+                color="primary"
+                data-visite="recettes-modifier-taxe"
+                @click="editTaxe(props.row)"
+              >
                 <q-tooltip>Modifier</q-tooltip>
               </q-btn>
               <q-btn flat dense icon="delete" color="negative" @click="deleteTaxe(props.row)">

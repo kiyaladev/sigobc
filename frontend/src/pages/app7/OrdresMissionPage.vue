@@ -80,6 +80,7 @@
                 label="Nouvel ordre"
                 unelevated
                 no-caps
+                data-visite="personnel-nouvel-ordre"
                 @click="openAdd"
               />
             </div>
@@ -95,7 +96,9 @@
           show-print
           show-export-csv
           export-filename="ordres-mission"
+          data-visite-print="personnel-imprimer-mission"
           @print="printMission"
+          data-visite-edit="personnel-modifier-mission"
           @edit="editMission"
           @delete="deleteMission"
         >
