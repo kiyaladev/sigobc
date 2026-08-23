@@ -222,7 +222,8 @@ export default defineConfig((ctx) => {
       // specify the debugging port to use for the Electron app when running in development mode
       inspectPort: 5858,
 
-      bundler: 'packager', // 'packager' or 'builder'
+      // 'builder' produit un installeur (.exe NSIS) ; 'packager' ne sort qu'un dossier portable.
+      bundler: 'builder',
 
       packager: {
         // https://github.com/electron-userland/electron-packager/blob/master/docs/api.md#options
@@ -238,7 +239,27 @@ export default defineConfig((ctx) => {
       builder: {
         // https://www.electron.build/configuration/configuration
 
-        appId: 'trapp',
+        appId: 'ci.vavoua.sigobc',
+        productName: 'SIGOBC',
+        copyright: 'Commune de Vavoua',
+
+        win: {
+          icon: 'src-electron/icons/icon.ico',
+          target: ['nsis'],
+          // Pas de certificat de signature de code disponible : on désactive la
+          // signature pour éviter l'EPERM de signtool.exe sur les exécutables.
+          signExecutable: false,
+        },
+
+        nsis: {
+          artifactName: 'SIGOBC-${version}-setup.exe',
+          oneClick: false,
+          allowToChangeInstallationDirectory: true,
+          perMachine: false,
+          createDesktopShortcut: true,
+          createStartMenuShortcut: true,
+          shortcutName: 'SIGOBC',
+        },
       },
     },
 

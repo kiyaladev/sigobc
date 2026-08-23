@@ -241,6 +241,19 @@
         <q-card-section class="row items-center q-pb-none">
           <div class="text-h6">{{ editingId ? 'Modifier le mandat' : 'Nouveau mandat' }}</div>
           <q-space />
+          <q-btn
+            v-if="!editingId"
+            dense
+            outline
+            no-caps
+            color="primary"
+            icon="bolt"
+            label="Pré-remplir"
+            class="q-mr-sm"
+            @click="preRemplirForm"
+          >
+            <q-tooltip>Remplir le formulaire avec des données d'exemple</q-tooltip>
+          </q-btn>
           <q-btn icon="close" flat round dense v-close-popup />
         </q-card-section>
 
@@ -263,6 +276,7 @@
                   label="Numéro Mandat *"
                   outlined
                   dense
+                  hint="Proposé automatiquement (dernier + 1), modifiable"
                   :rules="[(val) => !!val || 'Numéro requis']"
                 />
               </div>
@@ -415,9 +429,7 @@
                   :name="(formData.montant || 0) > budgetInfo.disponible ? 'warning' : 'info'"
                 />
               </template>
-              <div class="text-caption text-weight-medium">
-                Budget {{ budgetInfo.taxeLabel }}
-              </div>
+              <div class="text-caption text-weight-medium">Budget {{ budgetInfo.taxeLabel }}</div>
               <div class="row q-gutter-md text-caption">
                 <span
                   >Prevision : <strong>{{ formatMontant(budgetInfo.totalPrevu) }}</strong></span
@@ -473,6 +485,7 @@ import {
 import DataTable from 'src/components/DataTable.vue';
 import PageHeader from 'src/components/PageHeader.vue';
 import { openPrintWindow } from 'src/utils/printUrl';
+import { prochainNumero, exerciceValide } from 'src/utils/numeroSequence';
 
 const $q = useQuasar();
 const dataTableRef = ref<{ exportCsv: () => void } | null>(null);
@@ -501,6 +514,13 @@ const filterDateFin = ref('');
 
 const showAddDialog = ref(false);
 const editingId = ref<number | null>(null);
+/**
+ * Dernier numéro proposé automatiquement dans le formulaire.
+ * Sert à distinguer « l'agent a gardé la proposition » (on la recalcule à
+ * l'enregistrement, au cas où elle serait périmée) de « l'agent a saisi son
+ * propre numéro » (on respecte sa saisie).
+ */
+const numeroMandatPropose = ref('');
 const formDataDateStr = ref('');
 const formDataDateFactureStr = ref('');
 
@@ -591,7 +611,12 @@ const taxeOptions = computed(() =>
 const bordereauOptions = computed(() =>
   bordereaux.value
     // Tolérant à la casse / aux espaces pour ne manquer aucun bordereau ouvert
-    .filter((b) => String(b.statut ?? '').trim().toLowerCase() === 'ouvert')
+    .filter(
+      (b) =>
+        String(b.statut ?? '')
+          .trim()
+          .toLowerCase() === 'ouvert',
+    )
     .map((b) => ({
       label: `Bordereau ${b.numero}-${b.exercice % 100} (${b.nombreMandats || 0} mandats)`,
       value: b.id!,
@@ -748,10 +773,7 @@ const budgetInfo = computed(() => {
   const totalMandated = mandats.value
     .filter(
       (m) =>
-        m.exercice === ex &&
-        m.taxeId === taxeId &&
-        m.statut === 'paye' &&
-        m.id !== editingId.value,
+        m.exercice === ex && m.taxeId === taxeId && m.statut === 'paye' && m.id !== editingId.value,
     )
     .reduce((s, m) => s + (m.montant || 0), 0);
 
@@ -837,18 +859,22 @@ async function loadData() {
   }
 }
 
-async function getNextMandatNumber(exercice: number): Promise<string> {
-  const mandatsForYear = await db.mandatsRecette.where('exercice').equals(exercice).toArray();
+/** Zéro-remplissage historique des mandats de recette (« 0124 »). */
+const PAD_NUMERO_MANDAT = 4;
 
-  let maxNum = 0;
-  for (const m of mandatsForYear) {
-    const num = parseInt(m.numeroMandat, 10);
-    if (!isNaN(num) && num > maxNum) {
-      maxNum = num;
-    }
-  }
+/**
+ * Prochain numéro de mandat de recette de l'exercice : « dernier + 1 », sans trou.
+ * Voir src/utils/numeroSequence.ts pour la règle complète.
+ */
+async function getNextMandatNumber(exercice: number | undefined): Promise<string> {
+  const annee = exerciceValide(exercice);
+  if (annee === null) return prochainNumero([], PAD_NUMERO_MANDAT);
 
-  return String(maxNum + 1).padStart(4, '0');
+  const mandatsForYear = await db.mandatsRecette.where('exercice').equals(annee).toArray();
+  return prochainNumero(
+    mandatsForYear.map((m) => m.numeroMandat),
+    PAD_NUMERO_MANDAT,
+  );
 }
 
 async function openDialog(mandat?: MandatRecette) {
@@ -876,6 +902,7 @@ async function openDialog(mandat?: MandatRecette) {
     }
     editingId.value = null;
     const nextNum = await getNextMandatNumber(currentYear);
+    numeroMandatPropose.value = nextNum;
     formData.value = {
       exercice: currentYear,
       numeroMandat: nextNum,
@@ -895,6 +922,113 @@ async function openDialog(mandat?: MandatRecette) {
     formDataDateFactureStr.value = '';
   }
   showAddDialog.value = true;
+}
+
+const OBJETS_EXEMPLE = [
+  'Recouvrement de la taxe sur les activités commerciales',
+  'Droit de place sur le marché central',
+  'Taxe sur la publicité et les enseignes',
+  'Redevance d’occupation du domaine public',
+  'Droit de stationnement des véhicules de transport',
+  'Taxe sur les spectacles et manifestations',
+  'Produit de la location de bâtiments communaux',
+  'Droit de délivrance d’actes administratifs',
+];
+
+const PARTIES_VERSANTES_EXEMPLE = [
+  'ETS SODIAM',
+  'SARL BATIPRO',
+  'Coopérative des commerçants du marché',
+  'Entreprise KOUASSI & Fils',
+  'SOCIETE IVOIRE SERVICES',
+];
+
+const MODES_PAIEMENT_EXEMPLE: Array<'virement' | 'cheque' | 'especes' | 'autre'> = [
+  'virement',
+  'cheque',
+  'especes',
+  'autre',
+];
+
+function pickRandom<T>(items: T[]): T | undefined {
+  if (items.length === 0) return undefined;
+  return items[Math.floor(Math.random() * items.length)];
+}
+
+function randomInt(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+/**
+ * Remplit le formulaire avec un jeu de données d'exemple cohérent, tiré des
+ * données déjà saisies (taxes, bordereaux ouverts). Le numéro et la date du
+ * mandat proposés à l'ouverture sont conservés, et le montant reste dans le
+ * budget disponible dès qu'une prévision de recette existe.
+ */
+function preRemplirForm() {
+  const exercice = formData.value.exercice || currentYear;
+
+  // Taxe : privilégier celles qui disposent d'une prévision sur l'exercice.
+  const previsionsUtilisables = previsions.value.filter(
+    (p) => p.exercice === exercice && taxes.value.some((t) => t.id === p.taxeId),
+  );
+  const prevision = pickRandom(previsionsUtilisables);
+  const taxe = prevision
+    ? taxes.value.find((t) => t.id === prevision.taxeId)
+    : pickRandom(taxes.value);
+
+  if (!taxe) {
+    $q.notify({ type: 'warning', message: 'Aucune taxe disponible pour le pré-remplissage' });
+    return;
+  }
+
+  formData.value.taxeId = taxe.id!;
+
+  // Montant : dans la limite du disponible quand le budget est connu.
+  const info = budgetInfo.value;
+  if (info && info.disponible > 0) {
+    const brut = Math.round((info.disponible * (0.1 + Math.random() * 0.4)) / 1000) * 1000;
+    formData.value.montant = Math.min(Math.max(brut, 1000), info.disponible);
+  } else {
+    formData.value.montant = randomInt(1, 50) * 100000;
+  }
+
+  // Bordereau ouvert, du même exercice de préférence.
+  const bordereauxOuverts = bordereaux.value.filter(
+    (b) =>
+      String(b.statut ?? '')
+        .trim()
+        .toLowerCase() === 'ouvert',
+  );
+  const bordereau =
+    pickRandom(bordereauxOuverts.filter((b) => b.exercice === exercice)) ??
+    pickRandom(bordereauxOuverts);
+  if (bordereau?.id !== undefined) {
+    formData.value.bordereauMandatRecetteId = bordereau.id;
+  } else {
+    delete formData.value.bordereauMandatRecetteId;
+  }
+
+  formData.value.partieVersante = pickRandom(PARTIES_VERSANTES_EXEMPLE) ?? 'Partie versante test';
+  formData.value.rib = `CI001 ${randomInt(10000, 99999)} ${randomInt(100000, 999999)} ${randomInt(10, 99)}`;
+  formData.value.patrimonial = `${taxe.code}/1`;
+  formData.value.objet = pickRandom(OBJETS_EXEMPLE) ?? 'Recette communale';
+  formData.value.modePaiement = pickRandom(MODES_PAIEMENT_EXEMPLE) ?? 'virement';
+  formData.value.statut = 'paye';
+  formData.value.numeroFacture = `FA-${exercice}-${String(randomInt(1, 9999)).padStart(4, '0')}`;
+  formData.value.observations = "Mandat pré-rempli avec des données d'exemple.";
+
+  const dateMandat = formDataDateStr.value ? new Date(formDataDateStr.value) : new Date();
+  formDataDateFactureStr.value = date.formatDate(
+    date.subtractFromDate(dateMandat, { days: randomInt(3, 30) }),
+    'YYYY-MM-DD',
+  );
+
+  $q.notify({
+    type: 'info',
+    message: "Formulaire pré-rempli avec des données d'exemple",
+    timeout: 1500,
+  });
 }
 
 async function saveMandat() {
@@ -949,6 +1083,13 @@ async function saveMandat() {
     } else {
       data.createdAt = now;
       data.personnelId = 1;
+      // Si l'agent a gardé le numéro proposé, on le recalcule : celui affiché a
+      // été calculé à l'ouverture du formulaire et peut être périmé si un autre
+      // mandat a été créé entre-temps. S'il a saisi son propre numéro, on le
+      // respecte tel quel.
+      if (data.numeroMandat === numeroMandatPropose.value) {
+        data.numeroMandat = await getNextMandatNumber(formData.value.exercice);
+      }
       await db.mandatsRecette.add(data as MandatRecette);
       $q.notify({ type: 'positive', message: 'Mandat créé avec succès' });
     }
@@ -998,6 +1139,7 @@ watch(
   async (newExercice) => {
     if (newExercice && !editingId.value) {
       formData.value.numeroMandat = await getNextMandatNumber(newExercice);
+      numeroMandatPropose.value = formData.value.numeroMandat;
     }
   },
 );

@@ -109,13 +109,29 @@
             </div>
 
             <div class="row q-col-gutter-sm">
-              <div class="col-12 col-md-6">
+              <div class="col-12 col-md-3">
                 <q-input
                   v-model="formData.compteBancaire"
                   label="Numero de compte bancaire"
                   outlined
                   dense
                 />
+              </div>
+              <div class="col-12 col-md-3">
+                <q-select
+                  v-model="formData.banqueId"
+                  :options="banqueOptions"
+                  label="Banque"
+                  outlined
+                  dense
+                  emit-value
+                  map-options
+                  clearable
+                >
+                  <template v-slot:prepend>
+                    <q-icon name="account_balance" />
+                  </template>
+                </q-select>
               </div>
               <div class="col-12 col-md-6">
                 <q-input v-model="formData.telephone" label="N telephone" outlined dense />
@@ -156,7 +172,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
-import { db, type Fournisseur, DEFAULT_MAIRIE_ID } from 'src/database/db';
+import { db, type Fournisseur, type Banque, DEFAULT_MAIRIE_ID } from 'src/database/db';
 import PageHeader from 'src/components/PageHeader.vue';
 import DataTable from 'src/components/DataTable.vue';
 
@@ -166,6 +182,11 @@ const filter = ref('');
 const showDialog = ref(false);
 const editingId = ref<number | null>(null);
 const fournisseurs = ref<Fournisseur[]>([]);
+const banques = ref<Banque[]>([]);
+
+const banqueOptions = computed(() =>
+  banques.value.map((b) => ({ label: `${b.code} - ${b.nom}`, value: b.id! })),
+);
 
 const formData = ref({
   nom: '',
@@ -173,6 +194,7 @@ const formData = ref({
   compteContribuable: '',
   registreCommerce: '',
   compteBancaire: '',
+  banqueId: null as number | null,
   telephone: '',
   email: '',
   siege: '',
@@ -231,7 +253,10 @@ const filteredFournisseurs = computed(() => {
 async function loadData() {
   loading.value = true;
   try {
-    fournisseurs.value = await db.fournisseurs.toArray();
+    [fournisseurs.value, banques.value] = await Promise.all([
+      db.fournisseurs.toArray(),
+      db.banques.toArray(),
+    ]);
   } catch (error) {
     console.error('Erreur:', error);
     $q.notify({ type: 'negative', message: 'Erreur lors du chargement' });
@@ -248,6 +273,7 @@ function resetForm() {
     compteContribuable: '',
     registreCommerce: '',
     compteBancaire: '',
+    banqueId: null,
     telephone: '',
     email: '',
     siege: '',
@@ -269,6 +295,7 @@ function editFournisseur(row: Fournisseur) {
     compteContribuable: row.compteContribuable,
     registreCommerce: row.registreCommerce || '',
     compteBancaire: row.compteBancaire || '',
+    banqueId: row.banqueId || null,
     telephone: row.telephone || '',
     email: row.email || '',
     siege: row.siege || '',
@@ -281,6 +308,8 @@ function editFournisseur(row: Fournisseur) {
 async function saveFournisseur() {
   try {
     const now = new Date();
+    // `banqueId` est écrit tel quel, à null si vidé : sinon on ne pourrait plus
+    // retirer la banque d'un fournisseur qui en avait une.
     const data = {
       ...formData.value,
       mairieId: DEFAULT_MAIRIE_ID,

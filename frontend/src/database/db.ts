@@ -138,6 +138,13 @@ export interface Mandat {
   mairieId: number;
   beneficiaire: string; // Nom du bénéficiaire
   rib?: string; // RIB du bénéficiaire
+  /**
+   * Banque du bénéficiaire au moment de la saisie (optionnelle), imprimée sur
+   * le mandat. Recopiée depuis la fiche agent/fournisseur à la sélection puis
+   * figée : si le bénéficiaire change de banque plus tard, les mandats déjà
+   * enregistrés conservent celle-ci. `null` = aucune.
+   */
+  banqueId?: number | null;
   patrimonial?: string; // Imputation patrimoniale
   objet: string; // Objet de la dépense
   montant: number; // Montant du mandat
@@ -421,6 +428,8 @@ export interface Fournisseur {
   compteContribuable: string;
   registreCommerce?: string;
   compteBancaire?: string;
+  /** Banque actuelle du fournisseur — peut changer dans le temps. `null` = aucune. */
+  banqueId?: number | null;
   telephone?: string;
   email?: string;
   siege?: string;
@@ -463,6 +472,8 @@ export interface Employe {
   autresIndemnites?: number;
   numeroCNPS?: string;
   rib?: string;
+  /** Banque actuelle de l'agent — peut changer dans le temps. `null` = aucune. */
+  banqueId?: number | null;
   mairieId: number;
   actif: boolean;
   observations?: string;
@@ -591,6 +602,17 @@ export interface Exercice {
   updatedAt: Date;
 }
 
+// ========== Banques partenaires ==========
+
+export interface Banque {
+  id?: number;
+  code: string;
+  nom: string;
+  description?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // ─── Instance de base de données (remplace Dexie → Collection via API backend) ─
 
 export const db = {
@@ -635,6 +657,9 @@ export const db = {
   parametresPaie: new Collection<ParametresPaie>('parametresPaie'),
   servicesApp7: new Collection<ServiceApp7>('servicesApp7'),
   fournisseurs: new Collection<Fournisseur>('fournisseurs'),
+
+  // ── Banques partenaires ───────────────────────────────────────────
+  banques: new Collection<Banque>('banques'),
 
   /** Shim pour db.transaction('rw', tables, callback) — pas de vrai ACID. */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

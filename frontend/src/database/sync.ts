@@ -57,6 +57,7 @@ const ALL_COLLECTIONS = [
   'etatFinancierMensuel',
   'projets',
   'fournisseurs',
+  'banques',
   // App6 – Recettes
   'taxes',
   'declarations',

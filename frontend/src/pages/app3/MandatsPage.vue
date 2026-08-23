@@ -232,6 +232,19 @@
         <q-card-section class="row items-center q-pb-none">
           <div class="text-h6">{{ editingId ? 'Modifier le mandat' : 'Nouveau mandat' }}</div>
           <q-space />
+          <q-btn
+            v-if="!editingId"
+            dense
+            outline
+            no-caps
+            color="primary"
+            icon="bolt"
+            label="Pré-remplir"
+            class="q-mr-sm"
+            @click="preRemplirForm"
+          >
+            <q-tooltip>Remplir le formulaire avec des données d'exemple</q-tooltip>
+          </q-btn>
           <q-btn icon="close" flat round dense v-close-popup />
         </q-card-section>
 
@@ -257,6 +270,7 @@
                   label="Numéro Mandat *"
                   outlined
                   dense
+                  hint="Proposé automatiquement (dernier + 1), modifiable"
                   :rules="[(val) => !!val || 'Numéro requis']"
                 />
               </div>
@@ -438,6 +452,29 @@
               </div>
             </div>
 
+            <div class="row q-col-gutter-sm q-mt-xs">
+              <div class="col-12 col-md-6">
+                <q-select
+                  v-model="formData.banqueId"
+                  :options="filteredBanqueOptions"
+                  label="Banque"
+                  outlined
+                  dense
+                  emit-value
+                  map-options
+                  clearable
+                  use-input
+                  input-debounce="0"
+                  hint="Optionnel — imprimé sur le mandat"
+                  @filter="filterBanque"
+                >
+                  <template v-slot:prepend>
+                    <q-icon name="account_balance" />
+                  </template>
+                </q-select>
+              </div>
+            </div>
+
             <q-input
               v-model="formData.objet"
               label="Objet de la dépense *"
@@ -521,7 +558,7 @@
               </div>
             </q-banner>
 
-            <div class="row q-col-gutter-sm">
+            <div class="row q-col-gutter-sm q-mt-xs">
               <div class="col-12 col-md-4">
                 <q-input v-model="formData.numeroFacture" label="N° Facture" outlined dense />
               </div>
@@ -569,7 +606,7 @@
               </div>
             </div>
 
-            <div class="row q-col-gutter-sm">
+            <div class="row q-col-gutter-sm q-mt-xs">
               <div class="col-12 col-md-6">
                 <q-input
                   v-model="formData.numeroDeliberation"
@@ -589,7 +626,7 @@
               </div>
             </div>
 
-            <div class="row q-col-gutter-sm">
+            <div class="row q-col-gutter-sm q-mt-xs">
               <div class="col-12 col-md-6">
                 <q-input
                   v-model="formData.nomSignataire"
@@ -660,10 +697,12 @@ import {
   type Prevision,
   type Fournisseur,
   type Employe,
+  type Banque,
 } from 'src/database/db';
 import PageHeader from 'src/components/PageHeader.vue';
 import DataTable from 'src/components/DataTable.vue';
 import { openPrintWindow } from 'src/utils/printUrl';
+import { prochainNumero, exerciceValide } from 'src/utils/numeroSequence';
 
 const $q = useQuasar();
 const loading = ref(false);
@@ -671,6 +710,13 @@ const dataTableRef = ref<{ exportCsv: () => void } | null>(null);
 const filter = ref('');
 const showAddDialog = ref(false);
 const editingId = ref<number | null>(null);
+/**
+ * Dernier numéro proposé automatiquement dans le formulaire.
+ * Sert à distinguer « l'agent a gardé la proposition » (on la recalcule à
+ * l'enregistrement, au cas où elle serait périmée) de « l'agent a saisi son
+ * propre numéro » (on respecte sa saisie).
+ */
+const numeroMandatPropose = ref('');
 
 // Filtres
 const filterExercice = ref<number | null>(null);
@@ -689,6 +735,7 @@ const projets = ref<Projet[]>([]);
 const previsions = ref<Prevision[]>([]);
 const fournisseurs = ref<Fournisseur[]>([]);
 const employes = ref<Employe[]>([]);
+const banques = ref<Banque[]>([]);
 
 const lockedYears = computed(() =>
   exercices.value.filter((e) => e.statut === 'verrouille').map((e) => e.annee),
@@ -707,6 +754,7 @@ const formData = ref({
   bordereauMandatId: null as number | null,
   beneficiaire: '',
   rib: '',
+  banqueId: null as number | null,
   patrimonial: '',
   objet: '',
   montant: 0,
@@ -775,6 +823,8 @@ interface BeneficiaireOption {
   value: string;
   type: 'agent' | 'fournisseur';
   rib?: string;
+  /** Banque actuelle du bénéficiaire, recopiée dans le mandat à la sélection. */
+  banqueId?: number;
 }
 
 const beneficiaireOptions = computed<BeneficiaireOption[]>(() => {
@@ -785,6 +835,7 @@ const beneficiaireOptions = computed<BeneficiaireOption[]>(() => {
       value: `${e.nom} ${e.prenom}`,
       type: 'agent',
       rib: e.rib || '',
+      ...(e.banqueId ? { banqueId: e.banqueId } : {}),
     });
   }
   for (const f of fournisseurs.value) {
@@ -793,6 +844,7 @@ const beneficiaireOptions = computed<BeneficiaireOption[]>(() => {
       value: f.nom,
       type: 'fournisseur',
       rib: f.compteBancaire || '',
+      ...(f.banqueId ? { banqueId: f.banqueId } : {}),
     });
   }
   return options;
@@ -823,6 +875,37 @@ function onBeneficiaireSelected(opt: BeneficiaireOption | null) {
   if (opt && opt.rib) {
     formData.value.rib = opt.rib;
   }
+  // La banque du bénéficiaire est recopiée au moment de la saisie : le mandat
+  // garde ensuite sa propre valeur, donc un changement de banque de l'agent ou
+  // du fournisseur n'altère pas les mandats déjà enregistrés.
+  if (opt?.banqueId) {
+    formData.value.banqueId = opt.banqueId;
+  }
+}
+
+const banqueOptions = computed(() =>
+  banques.value.map((b) => ({ label: `${b.code} - ${b.nom}`, value: b.id! })),
+);
+
+const filteredBanqueOptions = ref(banqueOptions.value);
+
+watch(banqueOptions, (newOptions) => {
+  filteredBanqueOptions.value = newOptions;
+});
+
+function filterBanque(val: string, update: (callback: () => void) => void) {
+  if (val === '') {
+    update(() => {
+      filteredBanqueOptions.value = banqueOptions.value;
+    });
+    return;
+  }
+  update(() => {
+    const needle = val.toLowerCase();
+    filteredBanqueOptions.value = banqueOptions.value.filter(
+      (v) => v.label.toLowerCase().indexOf(needle) > -1,
+    );
+  });
 }
 
 const filteredChapitreOptions = ref(chapitreOptions.value);
@@ -1226,6 +1309,7 @@ async function loadData() {
       previsions.value,
       fournisseurs.value,
       employes.value,
+      banques.value,
     ] = await Promise.all([
       db.mandats.toArray(),
       db.chapitres.filter((c) => c.actif).toArray(),
@@ -1237,6 +1321,7 @@ async function loadData() {
       db.previsions.toArray(),
       db.fournisseurs.filter((f) => f.actif).toArray(),
       db.employes.filter((e) => e.actif).toArray(),
+      db.banques.toArray(),
     ]);
   } catch (error) {
     console.error('Erreur lors du chargement:', error);
@@ -1259,6 +1344,7 @@ function resetForm() {
     bordereauMandatId: null,
     beneficiaire: '',
     rib: '',
+    banqueId: null,
     patrimonial: '',
     objet: '',
     montant: 0,
@@ -1281,18 +1367,16 @@ function resetForm() {
   editingId.value = null;
 }
 
+/**
+ * Prochain numéro de mandat de l'exercice : « dernier + 1 », sans trou.
+ * Voir src/utils/numeroSequence.ts pour la règle complète.
+ */
 async function getNextMandatNumber(exercice: number): Promise<string> {
-  const mandatsForYear = await db.mandats.where('exercice').equals(exercice).toArray();
+  const annee = exerciceValide(exercice);
+  if (annee === null) return prochainNumero([]);
 
-  let maxNum = 0;
-  for (const m of mandatsForYear) {
-    const num = parseInt(m.numeroMandat, 10);
-    if (!isNaN(num) && num > maxNum) {
-      maxNum = num;
-    }
-  }
-
-  return String(maxNum + 1);
+  const mandatsForYear = await db.mandats.where('exercice').equals(annee).toArray();
+  return prochainNumero(mandatsForYear.map((m) => m.numeroMandat));
 }
 
 async function openAddDialog() {
@@ -1307,7 +1391,147 @@ async function openAddDialog() {
   // Générer automatiquement le numéro de mandat (max des mandats de l'année + 1)
   const currentYear = new Date().getFullYear();
   formData.value.numeroMandat = await getNextMandatNumber(currentYear);
+  numeroMandatPropose.value = formData.value.numeroMandat;
   showAddDialog.value = true;
+}
+
+const OBJETS_EXEMPLE = [
+  'Fourniture de matériel et mobilier de bureau',
+  'Entretien et réparation du parc automobile',
+  'Achat de carburant et lubrifiants',
+  'Prestation de nettoyage des locaux administratifs',
+  'Frais de mission et de déplacement du personnel',
+  'Travaux de réfection de la voirie communale',
+  'Acquisition de matériel informatique',
+  'Fourniture d’eau et d’électricité',
+  'Organisation de la fête de la commune',
+  'Achat de fournitures scolaires',
+];
+
+const BENEFICIAIRES_EXEMPLE = [
+  'ETS SODIAM',
+  'SARL BATIPRO',
+  'Entreprise KOUASSI & Fils',
+  'SOCIETE IVOIRE SERVICES',
+];
+
+const MODES_PAIEMENT_EXEMPLE: Array<'virement' | 'cheque' | 'especes' | 'autre'> = [
+  'virement',
+  'cheque',
+  'especes',
+  'autre',
+];
+
+const TYPES_BIEN_EXEMPLE: Array<'immobilier' | 'mobilier' | 'incorporel'> = [
+  'immobilier',
+  'mobilier',
+  'incorporel',
+];
+
+function pickRandom<T>(items: T[]): T | undefined {
+  if (items.length === 0) return undefined;
+  return items[Math.floor(Math.random() * items.length)];
+}
+
+function randomInt(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+/**
+ * Remplit le formulaire avec un jeu de données d'exemple cohérent, tiré des
+ * données déjà saisies (chapitres, bordereaux ouverts, agents/fournisseurs).
+ * Le numéro et la date du mandat proposés à l'ouverture sont conservés, et le
+ * montant reste dans le budget disponible dès qu'une prévision existe.
+ */
+function preRemplirForm() {
+  const exercice = formData.value.exercice || new Date().getFullYear();
+
+  // Chapitre / sous-chapitre : privilégier un couple qui dispose d'une
+  // prévision sur l'exercice, sinon tirage au sort.
+  const previsionsUtilisables = previsions.value.filter(
+    (p) =>
+      p.exercice === exercice &&
+      chapitres.value.some((c) => c.id === p.chapitreId) &&
+      sousChapitres.value.some((s) => s.id === p.sousChapitreId),
+  );
+  const prevision = pickRandom(previsionsUtilisables);
+  const chapitre = prevision
+    ? chapitres.value.find((c) => c.id === prevision.chapitreId)
+    : pickRandom(chapitres.value);
+  const sousChapitre = prevision
+    ? sousChapitres.value.find((s) => s.id === prevision.sousChapitreId)
+    : pickRandom(sousChapitres.value);
+
+  if (!chapitre) {
+    $q.notify({
+      type: 'warning',
+      message: 'Aucun chapitre disponible pour le pré-remplissage',
+    });
+    return;
+  }
+
+  formData.value.chapitreId = chapitre.id ?? null;
+  formData.value.sousChapitreId = sousChapitre?.id ?? null;
+
+  // Montant : dans la limite du disponible quand le budget est connu.
+  const info = budgetInfo.value;
+  if (info && info.disponible > 0) {
+    const brut = Math.round((info.disponible * (0.1 + Math.random() * 0.4)) / 1000) * 1000;
+    formData.value.montant = Math.min(Math.max(brut, 1000), info.disponible);
+  } else {
+    formData.value.montant = randomInt(1, 50) * 100000;
+  }
+
+  // Bordereau ouvert, du même exercice de préférence.
+  const bordereauxOuverts = bordereauMandats.value.filter((b) => b.statut === 'ouvert');
+  const bordereau =
+    pickRandom(bordereauxOuverts.filter((b) => b.exercice === exercice)) ??
+    pickRandom(bordereauxOuverts);
+  formData.value.bordereauMandatId = bordereau?.id ?? null;
+
+  // Bénéficiaire : agent ou fournisseur existant, sinon nom d'exemple.
+  const beneficiaire = pickRandom(beneficiaireOptions.value);
+  formData.value.beneficiaire =
+    beneficiaire?.value ?? pickRandom(BENEFICIAIRES_EXEMPLE) ?? 'Bénéficiaire test';
+  formData.value.rib =
+    beneficiaire?.rib ||
+    `CI001 ${randomInt(10000, 99999)} ${randomInt(100000, 999999)} ${randomInt(10, 99)}`;
+  formData.value.banqueId = pickRandom(banques.value)?.id ?? null;
+
+  const dateMandat = new Date(formData.value.dateMandat);
+  formData.value.objet = pickRandom(OBJETS_EXEMPLE) ?? 'Dépense de fonctionnement';
+  formData.value.patrimonial = `${chapitre.code}/1`;
+  formData.value.modePaiement = pickRandom(MODES_PAIEMENT_EXEMPLE) ?? 'virement';
+  formData.value.statut = 'paye';
+  formData.value.numeroFacture = `FA-${exercice}-${String(randomInt(1, 9999)).padStart(4, '0')}`;
+  formData.value.dateFacture = date.formatDate(
+    date.subtractFromDate(dateMandat, { days: randomInt(3, 30) }),
+    'YYYY-MM-DD',
+  );
+  formData.value.montantPrecompter = 0;
+  formData.value.referenceMarche = `MARCHE/${exercice}/${String(randomInt(1, 99)).padStart(3, '0')}`;
+  formData.value.avisMunicipalite = 'Favorable';
+  formData.value.numeroDeliberation = `DEL-${exercice}-${String(randomInt(1, 99)).padStart(3, '0')}`;
+  formData.value.dateDeliberation = date.formatDate(
+    date.subtractFromDate(dateMandat, { days: randomInt(30, 120) }),
+    'YYYY-MM-DD',
+  );
+  formData.value.nomSignataire = mairies.value[0]?.maire || 'Le Maire';
+  formData.value.observations = "Mandat pré-rempli avec des données d'exemple.";
+
+  // Volet investissement : le watcher isInvestissement nettoie ces champs
+  // lui-même quand le sous-chapitre n'est pas en 9xx.
+  if (sousChapitre?.code.startsWith('9')) {
+    formData.value.typeBien = pickRandom(TYPES_BIEN_EXEMPLE) ?? 'mobilier';
+    formData.value.projetId =
+      pickRandom(projets.value.filter((p) => p.statut !== 'annule'))?.id ?? null;
+  }
+
+  $q.notify({
+    type: 'info',
+    message: "Formulaire pré-rempli avec des données d'exemple",
+    timeout: 1500,
+  });
 }
 
 /**
@@ -1409,8 +1633,17 @@ async function saveMandat() {
       });
     } else {
       type MandatInsert = Omit<Mandat, 'id'>;
+      // Si l'agent a gardé le numéro proposé, on le recalcule : celui affiché a
+      // été calculé à l'ouverture du formulaire et peut être périmé si un autre
+      // mandat a été créé entre-temps. S'il a saisi son propre numéro, on le
+      // respecte tel quel.
+      const numeroMandat =
+        data.numeroMandat === numeroMandatPropose.value
+          ? await getNextMandatNumber(data.exercice)
+          : data.numeroMandat;
       const insertData: MandatInsert = {
         ...data,
+        numeroMandat,
         createdAt: now,
         updatedAt: now,
       } as MandatInsert;
@@ -1457,6 +1690,7 @@ function editMandat(row: Mandat) {
     bordereauMandatId: row.bordereauMandatId || null,
     beneficiaire: row.beneficiaire,
     rib: row.rib || '',
+    banqueId: row.banqueId || null,
     patrimonial: row.patrimonial || '',
     objet: row.objet,
     montant: row.montant,
@@ -1523,6 +1757,7 @@ watch(
   async (newExercice) => {
     if (newExercice && !editingId.value) {
       formData.value.numeroMandat = await getNextMandatNumber(newExercice);
+      numeroMandatPropose.value = formData.value.numeroMandat;
     }
   },
 );

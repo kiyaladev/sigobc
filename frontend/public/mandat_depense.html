@@ -395,13 +395,16 @@
           <div class="creditor-section">
             <p class="bold uppercase mb-1 text-center">CRÉANCIER</p>
             <div class="flex mt-4">
-              <span style="width: 100px">Bénéficiaire :</span>
+              <span style="min-width: 100px; white-space: nowrap; padding-right: 8px"
+                >Bénéficiaire :</span
+              >
               <div>
                 <p class="bold uppercase" data-field="beneficiaire">ZAGBAÏ DIABO</p>
                 <p class="italic" data-field="beneficiaireDetails">Agent de mairie</p>
               </div>
             </div>
             <div class="mt-2">
+              <p class="bold uppercase" data-field="banque"></p>
               <p>
                 Compte Bancaire
                 <span
@@ -689,11 +692,19 @@
 
           // Récupérer les données associées
           const mairie = MAIRIE_INFO;
-          const [chapitre, sousChapitre, bordereau] = await Promise.all([
+          const [chapitre, sousChapitre, bordereau, banque] = await Promise.all([
             mandat.chapitreId ? db.table('chapitres').get(mandat.chapitreId) : null,
             mandat.sousChapitreId ? db.table('sousChapitres').get(mandat.sousChapitreId) : null,
             mandat.bordereauMandatId
               ? db.table('bordereauMandats').get(mandat.bordereauMandatId)
+              : null,
+            // `banques` n'existe pas dans les bases antérieures à la v5 du schéma :
+            // db.table() lève une exception, d'où la vérification préalable.
+            mandat.banqueId && db.tables.some((t) => t.name === 'banques')
+              ? db
+                  .table('banques')
+                  .get(mandat.banqueId)
+                  .catch(() => null)
               : null,
           ]);
 
@@ -712,6 +723,7 @@
             periode: '',
             beneficiaire: mandat.beneficiaire || '',
             beneficiaireDetails: '',
+            banque: banque?.nom || '',
             rib: mandat.rib || '',
             montantBrut: mandat.montant,
             montantNet: mandat.montant,

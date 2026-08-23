@@ -135,6 +135,19 @@
         <q-card-section class="bg-primary text-white row items-center">
           <div class="text-h6">{{ isEditing ? 'Modifier' : 'Nouvelle' }} Déclaration</div>
           <q-space />
+          <q-btn
+            v-if="!isEditing"
+            dense
+            outline
+            no-caps
+            color="white"
+            icon="bolt"
+            label="Pré-remplir"
+            class="q-mr-sm"
+            @click="preRemplirForm"
+          >
+            <q-tooltip>Remplir le formulaire avec des données d'exemple</q-tooltip>
+          </q-btn>
           <q-btn flat round dense icon="close" v-close-popup />
         </q-card-section>
 
@@ -554,6 +567,77 @@ function openDialog(declaration?: Declaration) {
     formDateStr.value = date.formatDate(new Date(), 'YYYY-MM-DD');
   }
   dialogVisible.value = true;
+}
+
+const PARTIES_VERSANTES_EXEMPLE = [
+  'ETS SODIAM',
+  'SARL BATIPRO',
+  'Coopérative des commerçants du marché',
+  'Entreprise KOUASSI & Fils',
+  'SOCIETE IVOIRE SERVICES',
+];
+
+const RUES_EXEMPLE = [
+  'Rue du Commerce',
+  'Avenue de la Mairie',
+  'Boulevard du Marché',
+  'Quartier Résidentiel',
+];
+
+const OBSERVATIONS_EXEMPLE = "Déclaration pré-remplie avec des données d'exemple.";
+
+function pickRandom<T>(items: T[]): T | undefined {
+  if (items.length === 0) return undefined;
+  return items[Math.floor(Math.random() * items.length)];
+}
+
+function randomInt(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+/**
+ * Remplit le formulaire avec un jeu de données d'exemple cohérent, tiré des
+ * données déjà saisies (taxes, bordereaux ouverts). Le n° de pièce et
+ * l'exercice proposés à l'ouverture sont conservés.
+ */
+function preRemplirForm() {
+  const exercice = form.value.exercice || currentYear;
+
+  const taxe = pickRandom(taxes.value);
+  if (!taxe) {
+    $q.notify({ type: 'warning', message: 'Aucune taxe disponible pour le pré-remplissage' });
+    return;
+  }
+  form.value.taxeId = taxe.id!;
+
+  // Bordereau ouvert, de la même année de préférence.
+  const bordereauxOuverts = bordereaux.value.filter((b) => b.statut === 'ouvert');
+  const bordereau =
+    pickRandom(bordereauxOuverts.filter((b) => b.annee === exercice)) ??
+    pickRandom(bordereauxOuverts);
+  if (bordereau?.id !== undefined) {
+    form.value.bordereauId = bordereau.id;
+  } else {
+    delete form.value.bordereauId;
+  }
+
+  const ville = mairies.value[0]?.ville || MAIRIE_INFO.ville;
+  form.value.nomPartieVersante = pickRandom(PARTIES_VERSANTES_EXEMPLE) ?? 'Partie versante test';
+  form.value.adresse = `${randomInt(1, 250)} ${pickRandom(RUES_EXEMPLE) ?? 'Rue du Commerce'}, ${ville}`;
+  form.value.montantRecette = randomInt(1, 100) * 25000;
+  form.value.numeroEncaissement = `ENC-${exercice}-${String(randomInt(1, 9999)).padStart(4, '0')}`;
+  form.value.statut = 'validee';
+  form.value.observations = OBSERVATIONS_EXEMPLE;
+
+  if (!formDateStr.value) {
+    formDateStr.value = date.formatDate(new Date(), 'YYYY-MM-DD');
+  }
+
+  $q.notify({
+    type: 'info',
+    message: "Formulaire pré-rempli avec des données d'exemple",
+    timeout: 1500,
+  });
 }
 
 async function onSubmit() {

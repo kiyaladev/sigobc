@@ -430,6 +430,13 @@
         />
         Calculer le contrôle des prises en charge
       </label>
+      <label
+        for="totalGeneralCheckbox"
+        style="margin-left: 20px; display: flex; align-items: center; gap: 6px; cursor: pointer"
+      >
+        <input type="checkbox" id="totalGeneralCheckbox" checked onchange="toggleTotalGeneral()" />
+        Afficher le Total Général
+      </label>
     </div>
 
     <div class="page-container">
@@ -1117,6 +1124,25 @@
       }
 
       /**
+       * Affiche ou masque les montants du "Total Général" et du "Total du
+       * précédent bordereau", à l'écran comme à l'impression. On joue sur
+       * `visibility` et non `display` : les cellules gardent leur place, la
+       * mise en page du tableau reste identique. Les libellés restent visibles
+       * et les valeurs sont conservées et continuent d'être recalculées.
+       */
+      function toggleTotalGeneral() {
+        const checkbox = document.getElementById('totalGeneralCheckbox');
+        const visible = checkbox ? checkbox.checked : true;
+        ['total-general', 'total-precedent'].forEach((id) => {
+          const cell = document.getElementById(id);
+          if (!cell) return;
+          cell.style.visibility = visible ? '' : 'hidden';
+          // Inutile (et trompeur) de pouvoir éditer un montant masqué.
+          cell.setAttribute('contenteditable', visible ? 'true' : 'false');
+        });
+      }
+
+      /**
        * Reformate une cellule éditable après édition pour conserver le format FR.
        */
       function reformatEditableTotal(el) {
@@ -1138,6 +1164,15 @@
         if (controlePecCheckbox && controlePecParam !== null) {
           controlePecCheckbox.checked = controlePecParam !== '0';
         }
+
+        // Même principe pour l'affichage du "Total Général" : absent du lien =
+        // affiché, `totalGeneral=0` = masqué.
+        const totalGeneralParam = params.get('totalGeneral');
+        const totalGeneralCheckbox = document.getElementById('totalGeneralCheckbox');
+        if (totalGeneralCheckbox && totalGeneralParam !== null) {
+          totalGeneralCheckbox.checked = totalGeneralParam !== '0';
+        }
+        toggleTotalGeneral();
 
         try {
           db = new Dexie('TresorOfflineDB');

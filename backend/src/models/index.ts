@@ -153,6 +153,7 @@ const MandatSchema = new Schema({
   mairieId: Number,
   beneficiaire: String,
   rib: String,
+  banqueId: Number,
   patrimonial: String,
   objet: String,
   montant: Number,
@@ -396,6 +397,7 @@ const EmployeSchema = new Schema({
   autresIndemnites: Number,
   numeroCNPS: String,
   rib: String,
+  banqueId: Number,
   mairieId: Number,
   actif: Boolean,
   observations: String,
@@ -544,6 +546,7 @@ const FournisseurSchema = new Schema({
   compteContribuable: String,
   registreCommerce: String,
   compteBancaire: String,
+  banqueId: Number,
   telephone: String,
   email: String,
   siege: String,
@@ -554,6 +557,18 @@ const FournisseurSchema = new Schema({
 });
 FournisseurSchema.index({ compteContribuable: 1 });
 export const FournisseurModel = m('Fournisseur', FournisseurSchema);
+
+// ─── Banque ──────────────────────────────────────────────────────────────────
+
+const BanqueSchema = new Schema({
+  id: { type: Number, required: true, unique: true },
+  code: String,
+  nom: String,
+  description: String,
+  ...ts,
+});
+BanqueSchema.index({ code: 1 });
+export const BanqueModel = m('Banque', BanqueSchema);
 
 // ─── Registry (collection name → model) ─────────────────────────────────────
 
@@ -584,4 +599,5 @@ export const MODEL_REGISTRY: Record<string, mongoose.Model<mongoose.AnyObject>> 
   exercices: ExerciceModel,
   projets: ProjetModel,
   fournisseurs: FournisseurModel,
+  banques: BanqueModel,
 };

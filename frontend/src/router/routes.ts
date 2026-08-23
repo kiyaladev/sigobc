@@ -84,6 +84,11 @@ const routes: RouteRecordRaw[] = [
         name: 'app3-projets',
       },
       {
+        path: 'app3/banques',
+        component: () => import('pages/app3/BanquesPage.vue'),
+        name: 'app3-banques',
+      },
+      {
         path: 'app3/fournisseurs',
         component: () => import('pages/app3/FournisseursPage.vue'),
         name: 'app3-fournisseurs',

@@ -235,6 +235,25 @@
               </div>
             </div>
 
+            <div class="row q-col-gutter-sm">
+              <div class="col-12 col-md-3">
+                <q-select
+                  v-model="form.banqueId"
+                  :options="banqueOptions"
+                  label="Banque"
+                  outlined
+                  dense
+                  emit-value
+                  map-options
+                  clearable
+                >
+                  <template v-slot:prepend>
+                    <q-icon name="account_balance" />
+                  </template>
+                </q-select>
+              </div>
+            </div>
+
             <!-- Déclaration CNPS : alimente les colonnes du rapport DISA -->
             <div class="row q-col-gutter-sm">
               <div class="col-12 col-md-3">
@@ -506,7 +525,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import { useQuasar, date } from 'quasar';
-import { db, type Employe, type ParametresPaie } from 'src/database/db';
+import { db, type Employe, type ParametresPaie, type Banque } from 'src/database/db';
 import PageHeader from 'src/components/PageHeader.vue';
 import DataTable from 'src/components/DataTable.vue';
 import { MAIRIE_INFO } from 'src/constanteInfo';
@@ -580,6 +599,11 @@ const statsCards = computed(() => {
 });
 
 const servicesOptions = ref<string[]>([]);
+const banques = ref<Banque[]>([]);
+
+const banqueOptions = computed(() =>
+  banques.value.map((b) => ({ label: `${b.code} - ${b.nom}`, value: b.id! })),
+);
 const typeEmployeOptions = ['Salariés', 'Contractuels', "Agents de l'État", 'Maire et Adjoints'];
 
 // Codes CNPS repris tels quels dans la colonne « TYPE SALARIE » du DISA.
@@ -612,6 +636,7 @@ const defaultForm = () => ({
   autresIndemnites: 0,
   numeroCNPS: '',
   rib: '',
+  banqueId: null as number | null,
   actif: true,
   observations: '',
 });
@@ -725,14 +750,16 @@ function formatMontant(montant: number): string {
 async function loadData() {
   loading.value = true;
   try {
-    const [loadedEmployes, loadedParams, svcs] = await Promise.all([
+    const [loadedEmployes, loadedParams, svcs, loadedBanques] = await Promise.all([
       db.employes.toArray(),
       db.parametresPaie.toCollection().first(),
       db.servicesApp7.toArray(),
+      db.banques.toArray(),
     ]);
     employes.value = loadedEmployes;
     parametresPaie.value = loadedParams ?? null;
     servicesOptions.value = svcs.map((s) => s.nom);
+    banques.value = loadedBanques;
   } finally {
     loading.value = false;
   }
@@ -769,6 +796,7 @@ function editEmploye(row: Employe) {
     autresIndemnites: row.autresIndemnites || 0,
     numeroCNPS: row.numeroCNPS || '',
     rib: row.rib || '',
+    banqueId: row.banqueId || null,
     actif: row.actif,
     observations: row.observations || '',
   };
@@ -801,6 +829,9 @@ async function saveEmploye() {
     autresIndemnites: form.value.autresIndemnites,
     numeroCNPS: form.value.numeroCNPS || undefined,
     rib: form.value.rib || undefined,
+    // Écrit tel quel, à null si vidé : sinon un agent ne pourrait plus se voir
+    // retirer sa banque.
+    banqueId: form.value.banqueId,
     actif: form.value.actif,
     observations: form.value.observations || undefined,
     mairieId: 1,

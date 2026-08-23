@@ -45,6 +45,7 @@ export class OfflineDb extends Dexie {
   bordereauMandats!: Table<Record<string, unknown>, number>;
   etatFinancierMensuel!: Table<Record<string, unknown>, number>;
   fournisseurs!: Table<Record<string, unknown>, number>;
+  banques!: Table<Record<string, unknown>, number>;
 
   // ── App6 - Recettes ───────────────────────────────────────────────────────
   taxes!: Table<Record<string, unknown>, number>;
@@ -153,6 +154,11 @@ export class OfflineDb extends Dexie {
       declarations:
         '++id, numeroPiece, mairieId, taxeId, statut, exercice, bordereauId, sourceImportKey, sourceDocumentHash',
       bordereauxRecette: '++id, numero, annee, mairieId, statut, sourceDocumentHash',
+    });
+
+    // Version 5: add banques table
+    this.version(5).stores({
+      banques: '++id, code, nom',
     });
   }
 }
