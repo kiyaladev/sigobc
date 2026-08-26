@@ -268,10 +268,10 @@ async function loadStats() {
   const masseSalariale = employes.reduce(
     (sum, e) =>
       sum +
-      (e.salaireBase || 0) +
-      (e.indemniteLogement || 0) +
-      (e.indemniteTransport || 0) +
-      (e.autresIndemnites || 0),
+      (Number(e.salaireBase) || 0) +
+      (Number(e.indemniteLogement) || 0) +
+      (Number(e.indemniteTransport) || 0) +
+      (Number(e.autresIndemnites) || 0),
     0,
   );
 
@@ -283,7 +283,7 @@ async function loadStats() {
     .map(([service, count]) => ({ service, count }))
     .sort((a, b) => b.count - a.count);
 
-  const totalNet = fichesPayMonth.reduce((sum, f) => sum + f.montantNet, 0);
+  const totalNet = fichesPayMonth.reduce((sum, f) => sum + (Number(f.montantNet) || 0), 0);
 
   stats.value = {
     totalEmployes: employes.length,

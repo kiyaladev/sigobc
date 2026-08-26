@@ -260,10 +260,10 @@ async function loadStats() {
   const masseBrute = actifs.reduce(
     (s, e) =>
       s +
-      e.salaireBase +
-      (e.indemniteLogement || 0) +
-      (e.indemniteTransport || 0) +
-      (e.autresIndemnites || 0),
+      (Number(e.salaireBase) || 0) +
+      (Number(e.indemniteLogement) || 0) +
+      (Number(e.indemniteTransport) || 0) +
+      (Number(e.autresIndemnites) || 0),
     0,
   );
 
@@ -276,7 +276,9 @@ async function loadStats() {
 
   // Masse salariale mensuelle
   const moisMap = new Map<number, number>();
-  fiches.forEach((f) => moisMap.set(f.mois, (moisMap.get(f.mois) || 0) + f.montantNet));
+  fiches.forEach((f) =>
+    moisMap.set(f.mois, (moisMap.get(f.mois) || 0) + (Number(f.montantNet) || 0)),
+  );
   const maxNet = Math.max(...Array.from(moisMap.values()), 1);
   const masseSalarialeParMois = Array.from(moisMap.entries())
     .map(([mois, total]) => ({ mois, label: moisNoms[mois - 1] || '', total, pct: total / maxNet }))

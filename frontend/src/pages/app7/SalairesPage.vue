@@ -800,8 +800,17 @@ const filteredFiches = computed(() => {
   return r;
 });
 
-const totalBrut = computed(() => filteredFiches.value.reduce((s, f) => s + f.montantBrut, 0));
-const totalNet = computed(() => filteredFiches.value.reduce((s, f) => s + f.montantNet, 0));
+function toNumber(v: unknown): number {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+}
+
+const totalBrut = computed(() =>
+  filteredFiches.value.reduce((s, f) => s + toNumber(f.montantBrut), 0),
+);
+const totalNet = computed(() =>
+  filteredFiches.value.reduce((s, f) => s + toNumber(f.montantNet), 0),
+);
 
 // Report (cumul pages précédentes) et Total (cumul jusqu'à page courante)
 const reportValues = computed(() => {
@@ -810,8 +819,8 @@ const reportValues = computed(() => {
   if (page <= 1 || perPage <= 0) return { montantBrut: 0, montantNet: 0 };
   const rows = filteredFiches.value.slice(0, (page - 1) * perPage);
   return {
-    montantBrut: rows.reduce((s, f) => s + f.montantBrut, 0),
-    montantNet: rows.reduce((s, f) => s + f.montantNet, 0),
+    montantBrut: rows.reduce((s, f) => s + toNumber(f.montantBrut), 0),
+    montantNet: rows.reduce((s, f) => s + toNumber(f.montantNet), 0),
   };
 });
 
@@ -824,8 +833,8 @@ const totalPageValues = computed(() => {
       : Math.min(page * perPage, filteredFiches.value.length);
   const rows = filteredFiches.value.slice(0, endIdx);
   return {
-    montantBrut: rows.reduce((s, f) => s + f.montantBrut, 0),
-    montantNet: rows.reduce((s, f) => s + f.montantNet, 0),
+    montantBrut: rows.reduce((s, f) => s + toNumber(f.montantBrut), 0),
+    montantNet: rows.reduce((s, f) => s + toNumber(f.montantNet), 0),
   };
 });
 
