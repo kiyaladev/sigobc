@@ -645,6 +645,7 @@ import {
   type Prevision,
   type Fournisseur,
   type Employe,
+  type FichePaie,
 } from 'src/database/db';
 import PageHeader from 'src/components/PageHeader.vue';
 import DataTable from 'src/components/DataTable.vue';
@@ -674,6 +675,7 @@ const projets = ref<Projet[]>([]);
 const previsions = ref<Prevision[]>([]);
 const fournisseurs = ref<Fournisseur[]>([]);
 const employes = ref<Employe[]>([]);
+const fichesPaie = ref<FichePaie[]>([]);
 
 const lockedYears = computed(() =>
   exercices.value.filter((e) => e.statut === 'verrouille').map((e) => e.annee),
@@ -759,6 +761,8 @@ interface BeneficiaireOption {
   value: string;
   type: 'agent' | 'fournisseur';
   rib?: string;
+  /** Identifiant de l'agent, pour retrouver son Net à payer dans les bulletins de paie. */
+  employeId?: number;
 }
 
 const beneficiaireOptions = computed<BeneficiaireOption[]>(() => {
@@ -769,6 +773,7 @@ const beneficiaireOptions = computed<BeneficiaireOption[]>(() => {
       value: `${e.nom} ${e.prenom}`,
       type: 'agent',
       rib: e.rib || '',
+      employeId: e.id!,
     });
   }
   for (const f of fournisseurs.value) {
@@ -803,9 +808,37 @@ function filterBeneficiaire(val: string, update: (callback: () => void) => void)
   });
 }
 
+/**
+ * Bulletin de paie le plus pertinent pour un agent : celui du mois/exercice
+ * du mandat en cours de saisie, sinon le plus récent disponible.
+ */
+function findFichePaiePourAgent(employeId: number): FichePaie | undefined {
+  const mois = new Date(formData.value.dateMandat).getMonth() + 1;
+  const annee = formData.value.exercice;
+  const fichesAgent = fichesPaie.value
+    .filter((f) => f.employeId === employeId && f.statut !== 'brouillon')
+    .sort((a, b) => b.annee - a.annee || b.mois - a.mois);
+  return (
+    fichesAgent.find((f) => f.mois === mois && f.annee === annee) ?? fichesAgent[0] ?? undefined
+  );
+}
+
 function onBeneficiaireSelected(opt: BeneficiaireOption | null) {
   if (opt && opt.rib) {
     formData.value.rib = opt.rib;
+  }
+  // Le montant d'un mandat de salaire doit correspondre au Net à payer de
+  // l'agent (voir employe/etat-solde.html), pas au salaire de base seul.
+  if (opt?.type === 'agent' && opt.employeId) {
+    const fiche = findFichePaiePourAgent(opt.employeId);
+    if (fiche) {
+      formData.value.montant = fiche.montantNet;
+    } else {
+      $q.notify({
+        type: 'warning',
+        message: `Aucun bulletin de paie trouvé pour ${opt.label.replace('[Agent] ', '')} : montant à saisir manuellement.`,
+      });
+    }
   }
 }
 
@@ -1210,6 +1243,7 @@ async function loadData() {
       previsions.value,
       fournisseurs.value,
       employes.value,
+      fichesPaie.value,
     ] = await Promise.all([
       db.mandats.toArray(),
       db.chapitres.filter((c) => c.actif).toArray(),
@@ -1221,6 +1255,7 @@ async function loadData() {
       db.previsions.toArray(),
       db.fournisseurs.filter((f) => f.actif).toArray(),
       db.employes.filter((e) => e.actif).toArray(),
+      db.fichesPaie.toArray(),
     ]);
   } catch (error) {
     console.error('Erreur lors du chargement:', error);
